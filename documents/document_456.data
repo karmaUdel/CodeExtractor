@@ -1,0 +1,33 @@
+```
+you'd still end up with 15 lines of code, including annotations, but it would be pretty clear what they all did. And if you decided that `call.controls` should be a `Result` rather than a `Maybe`, that's only a single line to change
+as for your control-states.. I think having a `Status = Ongoing | Paused | OnHold | Hangup` (or something similar, depending on requirements) would make sense, with functions `canPause : Status -&gt; Bool` etc
+Though it might make sense for a call to be both onhold and paused, in which case that would be a fifth case
+The thing is that it might be possible to represent your possible states as a union type of possible states, and derive the available options in your view from that
+`Status = Ongoing | Paused | OnHold | Hangup | OnHoldAndPaused | SomethingElseHere | SomeOtherStateAndSomethignElse`
+seems like you want two types actually, one for when the phone is not active and then when it is active, what the sub state is
+Yeah. Alternatively, there could be a "status on this end" and "status on the other end", with the possible actions derived from that combination
+thinking out loud, maybe I want a `List Status`
+so I have `[Hold, Hangup]`
+and if they are in the List then they are active
+That feels hard to control and easy to slip impossibilities in
+`[ Paused, Paused, Paused ]` say what now?
+true
+"it's _really_, _really_, *really* paused"
+:stuck_out_tongue:
+double plus paused
+Anyway, I'm going to attempt sleeping :wave:
+:wave:
+have you worked out all the possible sets of combined states
+thanks for the help <@U3SJEDR96>
+also what does `Paused` indicate
+that the call recording is paused
+so on the UI there are 3 buttons
+a hang up button, a pause button and a hold button (to play hold music and mute users mic)
+lets pretend I have all my possible combined states
+(I can't remember them all now :P)
+The hung up status is already captured by whether the call is active or not right?
+if if you are in a call, it can be onhold, paused or both
+no, if a customer is on hold, then hang up will be false
+That's the display value though, not the model state
+`CallState = HungUp | Active CallStatus`
+(you can't hangup on a customer if they are on hold for example)

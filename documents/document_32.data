@@ -1,0 +1,20 @@
+```
+you don't need a macro, just `(fn [pred x y] (if (pred x) x y)`, then you'd just use it like `(my-fn pred x y)`
+you do need a macro, you don't always want to evaluate `y`
+if y has side effects the macro version is better
+although the original question did not mention any lazy evaluation requirements
+it wanted a replacement for if
+i read it more as "how can I avoid re-typing 'x'" rather than "how can I replace a call to 'if' while keeping the characteristics of 'if'"
+Thanks for your suggestions!
+is there a way to macroexpand a private macro?
+`(macroexpand (private-macro foo))`
+trying that gives "var #'private-macro is not public"
+I think you need to quote the to-be-expanded form.
+`(macroexpand '(private-macro foo))`
+that was slack formatting fail on my part
+I know the standard way to use macroexpand, but it fails w/ private macros
+Interesting. :thinking_face:
+Have you tried `ns-resolve`ing the private macro? Not sure whether that would work, but maybe.
+ah, looks like `tools.analyzer` will do it
+but AFAICT, it's not possible in the built-in implementation
+Wasn't aware of that limitation. Interesting.

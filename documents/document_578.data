@@ -1,0 +1,79 @@
+-------------------------------------------------------------------------------```
+You honestly think that a programming language must enforce a single design pattern? Nearly no languages do this.
+The latter is a trade off for the goodness of the compiler ofc. But it must be mentioned
+I don't think a programming must enforce one (elm does though), but choosing a "design pattern" (whatever that means) and not taking the features of your language into account seems like a mistake to me
+fwiw we (at work) decided against using the elm architecture because we needed to embed existing complex javascript components into our app
+It’s being worked on (the compilation speed). There is no technical reason why it has to be slow.
+Sure, but ultimately we are talking about a design pattern, the elm architecture, that's about all of my questions today. That model is entirely separate from the language. Because that model has been used in many front end languages, it certainly not unique to Elm, nor did Elm invent it. 
+Well, in Elm you're not going to find another way to structure apps. The language is designed around that pattern to make it as pleasant and streamlined as possible
+In PureScript land we are a bit more free to shoot our own feet. If you want to see a different approach to the strongly typed frontend I'd suggest you check out <https://github.com/slamdata/purescript-halogen>
+Very interesting, thanks for sharing. I will indeed check that out.?
+<@U1L1HMV9Q> What aspects have you found the most difficult to learn? What kind of a background did you come in with?
+I come from a OO background. I have been learning elm and elixir on the side for the past year or so.
+Elixir was much easier to come to grips with, but once you understand the fundamentals you discover that it is very deep(OTP etc). Elm is reversed. Harder to pick up the fundamentals but once you get it you should be able to pick up most projects relatively easy.
+My guess is that it's the FP stuff that was hardest, then?
+ye
+There is a lot of us out there though :smile:
+I'm just curious because I was considering writing a bit about the basics of FP. Probably with examples taken from Elm
+Is there a way i can limit a type to only take values between 0 and 1? To prevent myself for checking for `0 &lt; x &lt; 1` all over the place. Let the compiler do it. Any ideas?
+You can't really do it in Elm.
+sure you can. Just not statically enforced
+You can't even specify non-negative numbers, either, which would be my #1 want in a langauge
+this explains the pain points: <https://www.youtube.com/watch?v=ngWo5e-294o&amp;t=1925s>
+<@U2LAL86AY> You can make a `TinyNumber` data type and not export its constructor
+The problem with all these type restrictions is that normal operations would either crash or have to return `Maybe`
+<@U17MSA88M> It's clear statically-enforced was what was meant -.-
+instead you export a `tinyNumber` function
+which does the check, and then you can write all the functions on top of that `TinyNumber` data type while being certain that your invariant wasn't violated
+<@U17MSA88M> like a separate module ? For example i've seen `NonEmptyList` - which was kind of amazing - so i thought this would be possible as well - somehow .. but i don't understand exactly what you mean by `not export its constructor`
+<@U2LAL86AY> Just a second I'll look up the syntax^^ Yes the idea is to put the data type AND the functions that operate on it into their own modules. These functions are free to pattern match on the datatype and use the underlying number
+<@U2LAL86AY> Here is an example of how to do it: <https://github.com/Fresheyeball/elm-restrict-number/blob/0f0a07ba2d2b5cf6a6ab90c3b5cdc45cd1a91fad/Natural.elm>
+notice the `Maybe` on the `fromInt` function
+i'll look into it thanks :smiley:
+<http://package.elm-lang.org/packages/jschomay/elm-bounded-number/1.0.0/Number-Bounded> perhaps
+depends a bit on what you want the number for
+Hi can someone please help me understand why Html.lazy is still calling the view when there are no actual changes in model in this example <https://ellie-app.com/3KmS6BKjzHBa1/0>
+because you are changing the model by setting x to 1 (it doesn’t matter that it was 1 before)
+`{ r | .. }` creates a new record, and `lazy` uses reference equality (unlike anything else in Elm)
+if you do `if model.x == 1 then model else { model | x = 1 }` you’ll see
+norpan, yes I actually tried that before, but unfortunately our model is big and it would be complex to do that.
+do you know if there is a simpler way to achieve similar results?
+it depends on your model i think, why is it not feasible to compare with the previous value before setting it?
+so, Html.Lazy is a tricky optimization because it only compares reference equality
+it is possible, but we would need to do it on every field of the model, which is huge as I mentioned before.
+generally you’d not call it on your whole `Model` but on a part of it that’s used for a particular view function
+why would you do it on every field?
+most fields change rarely so Html.Lazy would not be needed
+ok, but in which scenarios does Html.Lazy help with optimization?
+when something changes often in your model and you have an expensive view function that does not depend on that value
+then you can avoid calling the view function by wrapping it with `lazy`
+I see.. does this mean if there is a change in the model that is not passed to the view it would still be called if I don’t use `lazy`?
+yes
+oh.. ok. didn’t know that. thanks!
+but normally you don’t get that many changes to your model, only if you use subscribe to animationframe or things like that
+its a real-time app with multiple updates every second. so it would still help to use lazy
+well, if you have performance issues then it’s one way to go for sure
+`if model.x == 1 then model else { model | x = 1 }` is this usually the way to do updates?
+shouldn’t elm do a diff in the model to know if the values actually changed?
+no, elm does a diff of the virtual dom returned by the view function instead
+diffing the model is potentially very expensive
+hm.. wouldn’t it only need to check one value? in the above case only for `x`
+in the above case yes, but in the general case no
+normally, the model _has_ changed when you call the view function
+remember that the architecture only knows about the _top_ view function, which is called with the whole model as a parameter
+I'd be grateful for any working example :slightly_smiling_face:
+I'm able to determine vertical offset of the text based on font height, but I'm struggling with determining text's width to set horizontal offset and box width properly..
+<https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/text-anchor> perhaps
+oh, you want to change the size of the box, hard
+the would depend on the font rendering, so either you can approximate it or you have to wait until it has rendered and adjust the box
+<https://github.com/jschomay/elm-bounded-number/blob/1.0.0/src/Number/Bounded.elm#L35>
+what is the advantage? or there is none?
+Just a higher level of abstraction I guess.
+You can use it for any comparable type.
+yeah but comparable means `strings` and `list of strings` - and it doesn't make sense to "bound" a list of strings - in the context of this library- or i'm missing something..
+<http://klaftertief.github.io/elm-search/?q=number+-%3E+Float>
+The only notion needed for bounding something is comparability, maybe it doesn't make sense in some contexts but there isn't a reason to unnecessarily restrict it
+But when I try to use `UserFields`, the compiler spits out "cannot find variable `UserFields`"
+how do you try to use `UserFields` can you show that particular example?
+and you can't have `WithUserFields`  and `WithUserFields ` twice in the same module i think - ups i thougth is a `type` - delete that :smile:
+Incidentally this is only true if your data model is structured the same as your UI. Rarely does a UI page equate to an exact segment of your data model. 

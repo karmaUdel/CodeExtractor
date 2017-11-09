@@ -1,0 +1,38 @@
+```
+I have two pages in a SPA, “Home” and  “Asset”, both of them have the same structure html wise. On Home I render a chart using ports (I give javascript some values and lets the lib insert itself, Elm has with other no idea that the dom is updated). If I then swap to the page with the same structure html wise, Elm is a little bit too smart and doesn’t re-render the html, but instead just change the classes of the divs which means that the chart is displayed on the Asset page. With other words, if I go from Home -&gt; Asset I get this problem. If I go to Asset from any other page I don’t have this problem and I don’t have the problem with any other page getting the chart displayed when I move from Home -&gt; other pages. My current solution is to add a wrapping div around the container where the chart is going to insert itself, this to trick Elm to re-render the html. This seemed like a better solution than using javascript to remove the chart itself when the url changes or something like that. Anyone else had this problem before and have some thoughts on a better solution? I don’t want another poor soul having to debug this issue in the future which is the type of issue that could take 8hrs to understand what is going on. In react I could have done something like “onComponentDidUnmount” to remove the chart when the Home page is swapped. Is there any Elm version of that?
+<@U5WD40ZA9> Elm doesn't like foreign things touching its DOM. So what you'd do in Elm is used `Keyed` nodes so that you can control how the DOM is/can be reused
+hmm- I deleted elm-stuff, and it rebuilt.  I'm using elm 0.18.0.  Still the same problem - IE ok, chrome no
+Does your built version work on chrome?
+Anybody here that implemented touch or gesture support for small screen in elm? Looks like the packages are either outdated or don't support simple swipe. Any recommendations?
+<@U2Q5GJNTB> I recently reverted to port and zingtouch (<https://github.com/zingchart/zingtouch>)
+which was easier to configure than hammer.js
+Thanks , I will try that
+Thank you in advance, have a great day.
+Elm is a functional language, so it’s all about functions, what inputs they take and what result they give.
+I understand that, but having read some of Richard's SPA source I found that every "page" has its model and update, this is sort of the source of my confusion.
+yes, that’s because each page is sort of independent from the other pages, is your app also based on “pages”?
+So basically each page acts like a separate app?
+yes, basically
+Ah that never crossed my mind
+Is it your case also?
+I think I willl have 2-3 parts that can be separated
+it’s tricky to give general advice because apps don’t all look the same. but starting from the model is always good advice, I think :slightly_smiling_face:
+Yeah I understand
+Thank you for the insight
+I will start with a single model and refactor when necessary
+if you look at the elm-spa-example, you can see that the model is a union type for all the pages, basically, so only one page is “active” at the same time
+(and some common state, the session)
+I totally missed that one
+Gotta read it more carefully
+Thank you very much
+This was my first question here, I didn't expect such quick answers
+So now I have no excuse to postpone coding
+:grinning: 
+We are fast as lightning. :upside_down_face:
+No, you should start coding and not think too much about the structure etc. You can always refactor later. Elm is the best refactoring experience yet
+It’s almost impossible to get the structure right from the start anyway, I never do
+I see
+Is there a way to pattern match list within some tagged type?
+Something like `RemoteData.Success x :: xs`
+Sure
+though that would match if you were matching a list of remotedatas, rather than a remotedata of a list, so you may want `Success ( x :: xs )` instead

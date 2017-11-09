@@ -1,0 +1,31 @@
+```
+Duct is a backbone, and all the web/else related logic is handled by other librairies, e.g. Compojure
+Right. It provides a template, a bunch of integrant-compatible libraries, and "modules" which are essentially pure functions that transform the Integrant configuration.
+Modules provide a way of automating gluing together libraries
+<@U0BKWMG5B> do you have an example of how a module would work?
+An example, or an explanation?
+explanation, or an explanatory example :slightly_smiling_face:
+Okay, let me find something quick…
+Actually, I wrote a blog post about this, which might be more useful: <https://www.booleanknot.com/blog/2017/05/09/advancing-duct.html>
+<@U0BKWMG5B> ah that's perfect, thank you!
+One module is `:duct.module/web`. That sets up a handler and middleware, and looks through the configuration for a web server. If it finds one, it connects the handler to the existing web server. If none exist, then it creates a new one.
+There's also: <https://www.booleanknot.com/blog/2017/05/29/building-web-services-with-duct.html>
+The explanation I find myself often using for modules are web sessions that are stored in a SQL database.
+how does it "find the web server" in the config? based on the name of popular web servers?
+or a special key?
+Keyword inheritance. The `:duct.server.http/jetty` key is derived from `:duct.server/http`.
+So to find all the web servers in a Duct config, you just run `(ig/find-derived config :duct.server/http)`
+The idea is to use `derive` a little like a dictionary definition or a thesaurus. It allows us to describe what a keyword is, to give it some meaning.
+keyword inheritance is just based on the name + namespace of the keywords? e.g. a keyword X inherits from a keyword Y if X's namespace is Y's namespace plus its name?
+No, it's its own thing. Any namespaced keyword can `derive` from any other.
+Namespaced keywords have multiple inheritance in Clojure.
+ah, I wasn't familiar with Clojure's `clojure.core/derive` function. I'll look into it before bothering you further
+Thanks!
+It's not often used, but I feel like it has some important niches
+<https://clojure.org/reference/multimethods>
+mmh, so `derive` is effectful from what I gather
+Where does it hold the relationship data between keywords? A global registry? I can't see it setting metadata on the keywords themselves
+A global registry. Derive *can* be used functionally if you supply a hierarchy, but mostly it's used globally.
+To my mind it's like vars, or specs.
+Oh, I think I get what you meant by a "grammar" then. You use keywords + derive to build a sort of ontology?
+Exactly :slightly_smiling_face:

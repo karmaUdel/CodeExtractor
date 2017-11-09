@@ -1,0 +1,29 @@
+                |&gt; Array.append array```
+<@U1ZFF0E5P>: the current implementation of Array in Core has some issues
+oh
+it’s kind of broken, the next Elm release will include a rewrite
+you can use that version now by using <http://package.elm-lang.org/packages/Skinney/elm-array-exploration/latest>
+should I still add this to an existing github issue or just ignore it
+try using `Skinney/elm-array-exploration` and see if it solves your problem
+ok that fixed it, thanks <@U153UK3FA>
+got really confused there for a bit lol
+yeah, it’s been broken for a while, it’s tripped up a few people
+just out of interest, it's the native implementation in js that has bugs?
+yep
+Yep, lots of JS in that Array module
+It’s now only 150 lines of JS rather than the 1000 lines it was.
+<@U0FP80EKB> <@U23SA861Y> what was the question?
+There was a string permutation problem that was popping the stack even though it didn't explictly use recursion, only maps
+we couldn't figure out where it was recursing so deep as to pop the stack
+<https://ellie-app.com/3FY8YRHcqvka1/1> this one
+it seemed like when the list was approaching 6k or so it was causing the issues
+and an early riser I see
+It's because your model is too big for the debugger to play nicely
+he, so it is the debugger causing issues, interesting
+The debugger uses a bunch of customized thing for the virtual-dom in order to display things usefully
+If you disable the debugger, or just compile it locally, then your file works
+<https://github.com/elm-lang/virtual-dom/blob/master/src/VirtualDom/Expando.elm#L130>
+this function does not seem to be TCO'd.
+that'll do it
+<https://github.com/elm-lang/virtual-dom/issues/98>
+<@U64A0BYHH> ^

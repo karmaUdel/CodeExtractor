@@ -1,0 +1,106 @@
+```
+I should be able to fix that, but gotta go grab lunch
+And indeed:
+`    | FilesUploaded List`
+Whoops!
+Yep
+:smile:
+It’s a tricky one to debug
+Is it worth reporting that, or is this particular instance of the bug known?
+It is known
+<https://github.com/elm-lang/elm-compiler/issues/1238>
+<@U5GSVKPJS> Actually, I think it’s worth reporting again. There’s no open issue related to it, and your example is _slightly_ different to the problem the other people have run into (though it is the same core problem)
+it's related with this? <https://stackoverflow.com/questions/44228017/specifying-parametric-type-is-not-enforced-by-the-compiler-is-this-a-bug-or-is>
+Eh, yes
+Somewhat
+I've logged that already, tho
+<https://github.com/elm-lang/elm-compiler/issues/1598>
+It’s hard to find that issue since it doesn’t contain the error message we got in this case, which means it’s hard to point people to it
+Perhaps you can add another example which gets the error that ocharles was seeing?
+I'll attempt to create SSCCE's for those errors <@U5GSVKPJS> mentioned, though if I fail at that, I might resort to just mentioning how this can lead to those errors further down the line
+Thanks <@U3SJEDR96> !
+don't know where to start untangling this!
+Hi folks, I'm gonna teach functional programming at the university and I want to use Elm for that. Any good resource you would recommend?
+I'd take a look at this: <https://github.com/rtfeldman/elm-workshop>
+<@U17MHJ12N> yikes! Might I recommend looking at each individual pair, seeing if there exists a pair that could have a single thing pulled out that they both rely on. That would break the chain.
+Not sure if that makes sense.
+It does, but this is the thing, that's what led me to having so many modules!
+Often there will be a pair in that chain that can be broken easily by identifying a small extraction, perhaps a record that is shared
+It seems to most often be the Msg type. That's why I ended up pulling those out of Update in the first place I think.
+I'm going back a step and try to go a bit more incrementally this time ...
+cool. Thanks for keeping us updated; this is an interesting procedure.
+I kind of wish I worked with you, so I could dive in together. :slightly_smiling_face:
+I wonder why a "component" would relyon the viewmodel ofa specific page, tho... As for `Msg`, passing in a configuration record with msg's to use for specific actions allows breaking things up, too
+It is really hard to provide any info on good refactoring here without seeing some of the code. I suspect there is a lot that could be stripped down into just a single file and function
+Yes I appreciate the moral support at least! I think I just need to back up a bit and go a bit more slowly to try to avoid the dreaded circular refs.
+A great thing is that you can just compile things to see if you untangled it correctly :slightly_smiling_face:
+<https://www.reddit.com/r/elm/comments/4avsh1/how_do_you_chain_tasks/>
+Hey there. I'm working at <http://getbeewell.com> and we are using Elm on Cordova for our mobile app development.
+<@U60SXAF96> sounds great! how's that working out for you?
+So far, Elm is the best part of that plan. :smile:
+=P
+we're gonna need to go mobile at some point, and I'm not sure how to do that
+so obviously, any feedback is great :smiley:
+I'm happy to discuss that with you. Our apps are very simple for the time being, and we're building out the mobile app and a web app at the same time using Cordova.
+<https://play.google.com/store/apps/details?id=com.getbeewell.beewellorthoknee&amp;hl=en>
+<https://itunes.apple.com/us/app/beewell-orthopaedic-knee/id1181056767?mt=8>
+interesting, thanks!
+The tricky/hard/interesting part is how to integrate with the sensors and the like. Right now, we're using ports to JS to really frustrating JS code.
+I'd much prefer to be able to subscribe to the sensors, but now you're going to be in the game of developing and maintaining a whole world of plugins with "Quirks" based on platforms: e.g. <https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-battery-status/index.html>
+Better example: <https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-file/index.html>
+And you won't even have the W3C standards to piggyback on, which JS does.
+yeah, we probably won't need that yet, so that's OK :smiley:
+If you don't need that, then Elm has already "gone mobile" -- webpack + Cordova + Elm is fine.
+you used a boilerplate of some kind?
+We spun  it up ourselves, but it's pretty simple.
+I'd be happy to publish it.
+(As a Cordova template, or whatever.)
+we're not going down that road yet, but we'll need it at some point, soonish
+I was gonna look into Elm Native UI or Fuse, but if you say Cordova is also a decent contender, then sure
+Feel free to ping me when the time comes. I'm happy to extract the MVP out of it.
+Fuse?
+The userspace filesystem?
+not a great choice of name from their part, eh? ^^
+<https://www.fusetools.com/>
+I believe <@U0EUHKVGB> was talking about some kind of tooling to use Elm with it, but I don't know the current state of that
+for now, it's not on Linux, so I haven't tried it
+Yeah, that's a nonstarter for us.
+"Elm Native UI"?
+<https://github.com/ohanhi/elm-native-and> <#C11N4S6QK|elm-native-ui>
+and <https://robots.thoughtbot.com/elm-native-ui-in-production>
+Elm on top of React Native was tempting, but 1) I found integrating Elm to be much harder, and 2) I didn't see an easy way to get at the sensors.
+Conceptually, it seems to be a nicer match with Elm.
+(kinda disappointed that the article about "Elm Native UI in production" is mostly about "Elm Native UI is not ready for production" =P)
+Just use cordova and use ports
+That's exactly what we're doing. :smile:
+:thinking_face: I don’t know what this means
+dealing with cordova sensons and whatnot tends to be quite hairy
+It is. But it's possible and at least moderately documented.
+One of the first projects I did with Elm in production was with Cordova :wink:
+Which is better than the alternatives that I've been looking into.
+<@U0EUHKVGB> was I wrong about you saying Fusetools had Elm tooling coming?
+:scream: I have never made such claim
+You can use Elm with fuse today
+Via workers and ports.
+You can also try out elm-fuse, which is my PoC repo to show off how pure-Elm might work with Fuse.
+(I made a prezi-like animation in it the other day)
+Here it is. All written in Elm, compiled via Fuse (which means it runs on Android + iOS at 60 FPS)
+sadly the animation looks slow on the gif because I recorded it at a low framerate
+OK, so I hadn't dreamed that "Fuse + Elm" was a thing and it was related to you somehow =P
+thanks for the gif
+Until tomorrow, I work at Fuse, so that’s why it exists :slightly_smiling_face:
+But yeah, totally easy to use Elm with Fuse.
+OK, cool! you know when Linux support is coming? =P
+It’s not on the roadmap, but some people are pretty keen to move it there. But I’ll send along the requests as extra data points.
+thanks a bunch :smiley:
++1
+<@U0EUHKVGB> You’re on an answering spree :slightly_smiling_face: I once asked a question during a Q&amp;A stream with Luke. It was about hot reloading code. And you mentioned you had hooked up Elm to Firebase to sync the app model to Firebase so it would retain the state through refreshes. Do you have this available somewhere?
+We build our iOS apps on old mac in the corner; otherwise, our development team is all adamantly Linux FOSS.
+<@U17J54S2U> I’ll see if I can find it when I get home
+But it was like 30 lines of code or something
+Maybe.Extra.unwrap (<http://package.elm-lang.org/packages/elm-community/maybe-extra/4.0.0/Maybe-Extra#unwrap>) takes a default value.  Is there a way to lazily calc the default value? Most times it may not be needed altogether, and the default value may be expensive to derive.
+<@U3L8MM10T> You will have to write your own function which takes `() -&gt; b` as an arg
+<@U3L8MM10T> `() -&gt; b` is known as a thunk
+I see.
+this is a function which will produce an value, but is unevaluated until you call it
+cool

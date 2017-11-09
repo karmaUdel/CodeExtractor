@@ -1,0 +1,12 @@
+```
+This is how it should work
+I don’t want to subscribe to Model. It contains more things. I only want to load from JS some data.
+Hi. I need a dropdown select. I've seen several examples, but I don't know which one to take. Do you think this one is a good example to base mine on?: <https://github.com/wintvelt/elm-dropdown/blob/master/examples/Single/Main.elm>
+<@U17R1GD96> you don't subscribe to model, but the `subscriptions` call that you have to `program` takes your `model` as the first argument by default, so you can decide _what_ to subscribe to based on the state of your model
+so basically, you could have `subscriptions _ = payload Payload`
+and then whenever you calll `ports.payload.send(whatever);`, your update will be called with a `Payload` message
+OK. I understand. Thanks.
+I have related question to that. I want to pass more complex JSON object from JS to Elm. The full init data for the Model. Do I need  to create some decoder for that? I did not need to create any decoder for passing simple JSON object  `{message:'HI!'}`.
+the automatic conversion can handle a decent amount of things (with a notable lack of support for union types). Also, the automatic conversion doesn't let you handle errors gracefully. As such, it _is_ generally recommended that you make your `port payload : (Json.Encode.Value -&gt; msg) -&gt; Sub msg`
+which means that, indeed, you would write a JSON decoder in Elm. For example, if you had a `payloadDecoder : Decoder Data` and a `type Msg = Payload (Result String Data)`, you could set up a subscription `subscriptions model = Json.Decode.decodeValue payloadDecoder &gt;&gt; Payload`
+So, I have a Hugo generated static website and I want to use Elm for small interactive pieces here and there in it. I have a separate prototype of these small apps boilerplated with create-elm-app. Now I want to merge it all together in a nice way, but not sure how to set up the whole assets pipeline in a reasonable way. If you have any related experience or suggestions, let’s start a thread!

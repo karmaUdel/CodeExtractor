@@ -1,0 +1,17 @@
+```
+it’s expecting a `Request a` which is the same as your `Result Error a`
+your `ServerResult : Result Error Msg` …. actually i’m confused
+you and me both
+what’s your ServerResult sig?
+`ServerResult (Result Http.Error Msg)`
+honestly I don't even know if that's what it's supposed to be?
+first time trying to do any kind of HTTP request and it's properly rustling my jimmies
+crap, gtg… soz will help later if anyone else hasn’t jumped in
+<@U5YDC1YUW> Should be `ServerResult (Result Http.Error String)`
+Compiler assumes first type is correct(`ServerResult (Result Error Msg)`), so it complains when you give it a `Request String`, even though `Request String` is actually what you want.
+hmmm true that, found the error really cryptic
+`Error extracting <https://dl.bintray.com/elmlang/elm-test/0.18.6/linux-x64.tar.gz> - Error: EACCES: permission denied, open '/usr/lib/node_modules/elm-test/bin/elm-interface-to-json'`
+Anyone has seen/resolved this? Looking at the dir mentioned I see it doesn't exist. Also looking at  `elm-test --help` output suggests that it has been installed
+Additional info: I had to run `npm install -g elm-test` using `sudo` (otherwise I was getting errors). Another observation: It seems to work when I run the tests using `sudo elm-test` but this doesn't seem desirable
+<@U1FCZNA7R> I used to do `npm i -g --prefix ~/.node_modules elm-test` along w/ `PATH="~/.node_modules/bin:$PATH"`, but now I either use NVM or if I have a `package.json` I do `npm i -S elm-test` &amp; add a `"test": "elm-test"`script to `package.json`.
+<http://blog.newired.com/2017/06/27/3rd-javascript-meetup-ostrava-19-7-2017/>

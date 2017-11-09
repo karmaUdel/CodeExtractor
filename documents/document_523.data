@@ -1,0 +1,19 @@
+```
+isn't that `Svg.Attribute` rather than `Html.Attribute`?
+ah yes that's true.:smile:
+Hmm this is the second time i found a run-time exception in the long time - errors are becoming like unicorns in elm :smile:
+yeah, so basically the difference is that `Html.Attributes.class` uses `className` under the hood, while `Svg.Attributes.class` uses `class`
+_but_ `Html.Attribute` (the type) and `Svg.Attribute` (the type) are both simple aliases for `VirtualDom.Property`
+which means you can indeed use them when they don't really make sense
+That's awesome and cool!
+thanks for explanation
+I know it doesn't really solve your issue, but it's nice to know :wink:
+(also, the html `class` can be safely used multiple times on a single node, and the classes will be appended, but there is no such thing for the svg `class` )
+(as well as the dreaded "_`Module.point.x` gives a compiler error_" thing, btw)
+Hey folks. Got a bit of an odd one. I have an `&lt;input&gt;` that is a dynamic search query filter box. The problem is, it filters content both above and below the search box. By default, you are viewing all items, and a `&lt;ul&gt;` is above the search box. But the moment you type a search query in, that `&lt;ul&gt;` might entirely disappear. This results in Elm recreating the DOM around that, which creates a _new_ `&lt;input&gt;`, and the input I was just typing in loses focus (as it's destroyed)
+What should I do to work around this?
+Key all my top-level elements?
+Hmm. Sounds like you'll need to key enough to ensure that element isn't recreated. assuming you have `ul, input, ul` as siblings, keying those should suffice (as long as the tree that `input` is in isn't destroyed)
+Keying the top level elements has worked, so I guess I'll do that
+thanks <@U3SJEDR96>
+hey there, I am writing my first bigger app and stumbled over a problem with combined / recursive union types

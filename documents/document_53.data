@@ -1,0 +1,52 @@
+```
+of an input stream? that's kind of impossible by definition
+<https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html>
+<@U4SKJCP3K> count a byte-array
+U4SKJCP3K change your name
+<@U4SKJCP3K> I guess this works (if you have memory) `(-&gt; stream slurp .getBytes alength)`
+otherwise use `<http://clojure.java.io/reader|clojure.java.io/reader>`
+aaah sorry, I got a slack bug, your guy's name was for a moment some hash haha
+3. Need to know the size of this payload
+hcarvalhoaves: Nice, I will try this. Thanks :+1:
+<@U0CAUAKCG> i think you're running into the limitation that you can only have 20 arguments to a function
+hlolli: Interesting, I will give it a shot. Thank you.
+and i 've heard someone talk about "trivial" functions through the repl are not invoked in the same way as normal functions
+<@U4SKJCP3K> are you're trying to determine the file size to send on the response?
+any hacks to bypass it? It's a bug in `overtone`, changeing the implementation where this is defined would be pain
+<@U1LCB75M2> Precisely. I'm trying to do all these steps without performing IO.
+i'm way out of my depth on that one. I think <@U0NCTKEV8> or <@U051SS2EU> would know way more than me
+<@U4SKJCP3K> you would have to hold all response in memory, use a buffered reader + this instead -&gt; <http://greenbytes.de/tech/webdav/rfc2616.html#rfc.section.3.6.1>
+hcarvalhoaves: Oh God, this looks crazy :slightly_smiling_face:
+yeah, proxy doesn't rest args like that
+doesn't support
+*facepalm*
+otherwise you have to make sure you don't OOM :wink:
+I surprised the first thing works at all
+I am sending this payload to S3 and one of the requirements is to pass in the content length alongside the payload
+I guess temp files are the simple solution to this here
+maybe proxy does sort of support that, I am not sure, depends on how you read the docstring, but I have never read it has supporting that
+here when the range is changed I bump into the same error as I posted above.
+the proxy is defined on line 100.
+I  was going to say, that is defrecord which is a different beast entirely from proxy
+I think this hack could have been done better when this was written way back.
+a macro that takes all arguments and puts them into a map or vector.
+it is also likely really old code, given that it uses proxy instead of reify there
+Yes, reify a protocol would maybe be a better solutin?
+no, I mean, those are all interfaces it is proxying so reify is likely a better choice
+ah
+`(~invoke_fn this# ~@args)`. does this have to many arguments with `(range 21)`?
+I am not familiar with the codebase, but from scratch I might prefer to pass around a map with a key that maps to a function
+the issue is, the last arity of invoke needs to call applyTo, or something like that, you should check out AFn.java
+the limit is 10 arguments because in overtone they come in pairs.
+this limit has been there for long time, nobody has taken the time to fix this
+if it is going to use proxy, it shouldn't proxy IFn, it should proxy AFn
+there are invoke arities from 0 to 21, the 21st arity takes 20 args + an array as the 21st
+I see what you mean, but I can't see how that would be implemented. It's macroexpanding to a argument pyramid of invoke.
+Or just somehow collect all the arguments as one parameter.
+ah ok, read better, last arity invokeing applyTo, I see
+you can't do it with proxy
+or anything really
+this macro `defrecord-ifn` has always some function or macro wrapped around it, there an &amp;rest sequence could be used.
+no, sorry, forget what I wrote, it's the defrecord that gets called in the end
+macros, brainfuck
+does anyone have experience with clojure.walk/postwalk? it says it walks on each form but sometimes there's strange vectors showing up where there should be maps.. not really sure how to write what I'm trying to write

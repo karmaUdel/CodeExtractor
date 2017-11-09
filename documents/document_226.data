@@ -1,0 +1,96 @@
+```
+...so that's another option. What's tricky is if you have a list of foos and you want to map an accessor over them. 
+<@U5X2ZRFDF> The common pattern for that is to define a `map` function for your type that applies functions to the unwrapped record value
+That makes total sense, considering it's a separate type, and Elm likes to keep its map functions clearly distinct.
+<@U0JFEBK6F> <@U2M4VPZ9D> thanks for the heads-up about fluxxu's elm-hot-loader and create-elm-app
+No problem <@U5X2VC483> I was at a Meetup and some ClojureScript people were talking about how cool ClojureScript is at hot code reloading. Elm is not at that level, but with the hot loader, it is close enough.
+I've managed to do so, but I would like to add the feature that when the dropdown suggestions is shown and the user presses outside of the dropdown, the dropdown closes. Any suggestions :slightly_smiling_face:?
+The classical JS solution is to make a click handler that closes it for the entire page behind the dropdown.
+<@U0CLDU8UB> but not for clicks in the input field, right? I wonder how to best do that in Elm
+oscarevert: The way I've done it: Keep track of the rect for your input/dropdown (i.e in your model), you could use something like <http://package.elm-lang.org/packages/debois/elm-dom/1.2.3/DOM#boundingClientRect>) and then set up a subscription to <http://package.elm-lang.org/packages/elm-lang/mouse/1.0.1/Mouse#clicks> to check for clicks outside your input/dropdown
+2. When I pass `Birthday` as the `EventType` to the `SetTypeFilter` message, I need to pass in an extra value for the age as well. Would there be a better way to do this?
+Yeah, this seems odd and could lead to bugs: `(\_ -&gt; SetTypeFilter (Birthday 0))`
+What do the numbers represent in the types?
+with Birthday it's the age he/she will reach, with Employment it's the work anniversary (e.g. working for 5 years at the company), with Marriage it's the wedding anniversary (e.g. being married for 10 years)
+oooh, okay
+I use these in the rendering, e.g. "2017-06-21 It's the birthday of Pete Promo, becoming 42 years old"
+Since the numbers belong to the event type, I figured using a union type.
+Hmm, this makes me feel like putting a function in the SetTypeFilter message, but that's never a good solution (and it also makes the debugger not work)...
+There's probably an easier modeling of this problem.
+I could place the numbers in a separate property on the Event, e.g. `payload: Maybe Int`? Then the EventType union type doesn't need the extra parameter.
+I have an idea that would work rather nicely, but involves understanding extensible records. Your idea works too, and it's not bad at all.
+I'll update the Ellie to the idea that I have just as a reference, in case you're interested
+really? wow, thanks! :raised_hands:
+A simple option is to have a separate union type for filters, like `BirthdayFilter` etc, and then have a filter function that does `case` on that type. More boilerplate, but type safe
+How would the filter function work then?
+Yeah, the idea that I had is actually much more cumbersome in code than I thought it would be, so let's scratch that. :slightly_smiling_face:
+I generally do it like this so I don't have to have a "catch all"
+or the arguments in the other order, maybe, for your usage of the filter
+`event` would be the `eventType` property of the event record, I guess?
+sorry if I've not understood your problem correctly
+ohanhi: Thanks anyway!
+nice, that would support multiple filters as well. Thanks a lot!
+Generally I find that making specific types pay off in simplicity and type safety, even if it leads to more code
+you're welcome!
+you could of course break it out to make a function `: Event -&gt; EventFilter` and make that `filterEvent` function more general, it's just refactoring at that point
+Sorry, I don't understand what you mean by that? :slightly_smiling_face:
+it depends on how complicated your filters should be, the previous solution allows for different kind of filtering based on the event. So it's refactoring/preference/etc
+ah, I see. That would be useful when filtering is done in multiple places, I think.
+- When using Elm Navigation, if the route and its query parameters are the same, it does not trigger the update msg that I implemented (which sends a GET request to the server asking for previous results, which works fine). It does, however, trigger upon switching routes (editing the query parameter back and forth or simply navigating to a different page) so I assume that Navigation does not attempt to perform the specified actions if the conditions are the same, even if it's a refresh request.
+What I would like to happen is that the update msg triggers upon refresh. Any suggestions?
+I forget the hoogle-search for Elm. What was the URL again?
+It's linked at the front page of elm packages: <http://klaftertief.github.io/elm-search/>
+ty
+Is there a way to get the screen (or top-level element) height and width?
+<@U57KYFW67> : <http://package.elm-lang.org/packages/elm-lang/window/1.0.1/Window>
+thanks
+wtf love this community but so much messages to watch ^^
+Are there any good books to read to start using Elm? I have the idea that coming from a class based programming background might have some side effects of going forward with Elm.
+<@U2UUNG9KK> Elm In Action is currently the best book I can recommend
+Thank you <@U1D7SLE4Q> , I will have a look into it.
+i just opened slack, and the splash screen said `model ! [] !== (model, Cmd.none)` what does it mean by that?
+<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Platform-Cmd#>!
+it's `Cmd.batch []`, but `Cmd.none` is implemented as `Cmd.batch []`
+so I'd say they _are_ the same thing
+yeah…
+<https://elmlang.slack.com/archives/C192T0Q1E/p1498138072030752>
+Hello! I have the following problem: I want to implement file upload and I did it as described in <https://www.paramander.com/blog/using-ports-to-deal-with-files-in-elm-0-17> and <https://github.com/phylor/elm-image-upload> . The problem is that this method makes me create index.html and after that when I use elm-reactor it doesn't show me errors when they happen :disappointed:
+So basically I can't easily see what the compilation errors were. Is there any standard way to work around this?
+What are Tasks in Elm? It seems the docs are... under construction?
+etandel: Not sure what you mean?
+I used them to group a bunch of Date and Time related operations, but I was more just following the types than actually knowing what I was doing.
+Class-based programming has a lot of side-effects, and functional programming is (among other things) the taming of side effects. So I was asking if the way you mentioned side effects was an intentional pun or just coincidence.
+They allow you to construct a set of instructions for the runtime to execute. Like, `Time.now` _could_ have been a `Cmd msg`, but you rarely _just_ need the current time. It's more common to need the current time to add, for example, a timestamp to an outgoing HTTP request. Perhaps the response for that request isn't really of interest to you either, and you want to make yet another request based on that response, all without hitting your update function. Tasks let you do that
+(btw, that's a great thing with ML-like type systems such as Elm's: oftentimes the code just writes itself if you pay attention to the types)
+It was really a coincidence but I see your point :slightly_smiling_face:
+Ah. So instead of just sending a command and receiving a message, it allows you to chain together a small sequence of interactions between you and the runtime.
+yep! not necessarily a small sequence, either, you can do plenty in a single task-chain :slightly_smiling_face:
+For example, you can see a lot of Task usage while dealing with  HTTP requests.
+When I got this, then do that :slightly_smiling_face:
+oh. I just realized the docs define Task.Task as a type alias of Platform.Task
+(it just says type alias Task err ok = Task err ok, which is really confusing before you see it's a cross module reference)
+It's an internal detail.
+yeah
+that makes more sense now
+I myself looked that and being confused. Ignore for now :slightly_smiling_face:
+yeah, it's a problem with the package docs that it doesn't link between packages
+Online book: <http://elmprogramming.com>
+or qualify names
+I guess I'm doing something wrong over here. But the header should be fine since I'm using Http.jsonBody.
+It goes well with the official tutorial.
+<@U59AF21LJ> Is Flask getting the content-type headers?
+Or you can check on the netwrok tab on your browser's developer tools to see if the requeest headers contain the content=type
+<@U5XHTBFS6> Chromes seems to say the type is `xhr`.
+does it say Content-type: xhr?
+or is this the request type?
+No ok I'm sorry it was listed as xhr, but the request header doesn't have `content-type`.
+I'm really not familiar with HTTP stuff so I might be overlooking something silly.
+Are you using Http.Extra?
+I'm not entirely sure what I'm looking for here.  Basically I extracted a module which performs an http request. <https://gist.github.com/nerdyworm/eb9d4eee5b1e282c8cf2602378772995> .  Now I have no idea how to actually use it from my App.elm.
+<@U41NK9BM4> No I'm using elm-lang/http
+Ah, I cannot find Http.jsonBody.
+<http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#jsonBody>
+<@U59AF21LJ> Flask parses the body based on the Content-type header. If it's not application/json, it will probablyu assume it's form-encoded and the .json property will be none
+I'm very new to Elm, so there might be a better way, but what I do is usee Http.request and pass the content type explicitly.
+<@U59AF21LJ> Got it!
+<@U5XHTBFS6> Yeah it seems to be the case, but I don't understand as the doc specifically says it adds the content-type header.

@@ -1,0 +1,14 @@
+\\\"pickerHeight\\\":0.3702000000000001}\""```
+The field it's saying is missing is present, so i'm sure the error is something else
+any ideas for what i can look at to find the problem?
+<@U3KSN5MAL> what's with all the slashes?
+<@U3KSN5MAL> the code you have on the JS side was fine, only the elm side had to change :slightly_smiling_face:
+I'm guessing you removed the `JSON.parse`?
+I'd go for: `JSON.parse` on the JS side, and passing the resulting object in through flags. On the Elm side, that means you'd take `Json.Encode.Value` as your flags type, and use `Json.Decode.decodeValue` on it to get a `Result String something`
+yeah i got that part working
+sorry should have posted
+yeah, the slashes seem to indicate you're trying to run `decodeValue` on a JS string, basically
+ah
+so pass it in as a json string instead?
+well, I'd try to pass in an actual object
+what does the JS side of things look like, and what does the flags part look like in Elm?

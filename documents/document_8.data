@@ -1,0 +1,26 @@
+```
+are you aware that clojure never optimizes tail calls?
+generally with list processing, you don't want to use recur (which acts like an optimized tail self call) but instead make a lazy-seq, which works with your current code if you wrap the else `(lazy-seq (cons h (flat t)))`
+yeah, but the loop-recur ( looks like uses go-to ) can help me with that, isn't ?
+you could use recur, but that tends to be clumsy for sequences
+yep
+especially with a function that has a tree call structure
+what you mean by tree call structure ?
+every call leads to 0 or more self-calls
+as opposed to 0 or 1, which is linear, 0 or more means you end up with a tree of calls
+and a linear series of calls is neccesary for tail call  -you can't have two tail calls
+you can force it by adding a state accumulator which makes the code more complex and moves data out of the stack and into the heap
+I see
+yeah
+correct me if I'm wrong, but all tail call function they have some kind of accumulator, isn't ?
+not always - but it's very common
+actually I think a tail call function with no accumulator would be pretty weird
+i can't see
+but I could see it for eg. something that repeatedly accesses a resource and eventually returns a result
+yeah
+clojure is not lazy by default, like haskell right, how the lazy works on clojure , `(lazy-seq (cons h (flat t)))`
+right - but many functions are lazy
+Lazy is only there when you don't want it to be &gt;.&gt;
+including concat
+&gt; LAZY SEQ HELLO
+that's only if you call str - just printing won't do that

@@ -1,0 +1,145 @@
+```
+that indeed looks correct (besides the missing `;`, but that's just me, I guess). And do you have any ports that send garbage?
+Not using ports
+Just setting up an application
+hard to remote debug. as a workaround, you could use a tool llike create-elm-app.
+*Added note.* The standard way of avoiding the Jumping Cursor bug is to use `defaultValue` instead of `value`. If you do this, then you see exactly the behavior that you see in the Ellie: after editing the text field, it becomes unresponsive to changes to its value that occur programmatically.
+In Ellie: TextArea Bug, I am using the style-elements package
+<@U3YDBDP4Z>: try `fullscreen` without anything. since its fullscreen, it doesnt need a mount node
+<@U3LUC6SNS> nothing jumps for me. how to reproduce?
+oh. thats not lorem impsum :slightly_smiling_face: still, no jumping.
+Sorry for the confusion.
+Please note that I corrected my explanation above
+It should be called *TextArea Bug* as in the Ellie
+Hi I'm having trouble with a POST request. Can somebody please have a look?
+My code is:
+        ]
+The error message is
+_
+What's wrong here???
+Shouldn't data be just the Http body?
+`<http://Http.post|Http.post>` takes three arguments. You haven't handed it a decoder to handle the server response.
+<@U48AEBJQ3>, yes I wanted to just disregard for now, but we can't do that ??
+I think you could hand it a `Json.Decode.fail "ignoring response"`, but I haven't tried it before.
+I'll add one
+Yep, that worked :slightly_smiling_face:
+The error message threw me off there
+<@U48AEBJQ3> thx
+Can I ask another more general question?
+No, this is no place for questions.
+How do I do two (or more) things in 1 function?
+even in this place of no-questions
+;-0
+e.g. in a funtion: fire off a ajax call AND separately update a List ?
+it seems functions are always limited to 1 line of code
+A function can't produce side-effects, so it can't make server requests, get random numbers, produce the current time, etc. A function can only produce outputs based on some inputs. The only part of a function that matters is the expression at the end.
+If you want, you can use a `let` expression to break up making your function into multiple steps, but it doesn't really change much.
+hmmm i've seen that, yes.
+example:
+        ({ model | captions = List.map updateVideo model.captions, debug = "hasRecorded" }, Cmd.none)
+This doesnt work, ie wont compile
+so how do I get around this????
+Your `persistVideo caption` doesn't actually make the request, it produces a data structure that you can pass out to the runtime which will execute it. Presuming that `persistVideo caption` is a `Cmd Msg`, you should use its value in place of the `Cmd.none` below.
+Either by assigning it to a name and using it, or replacing it directly.
+hmmmm…. persistVideo is:
+        <http://Http.post|Http.post> url data persistSuccess
+Then you need to use <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#send> to turn it into a `Cmd Msg` which means you need to have a `Msg` constructor that can take a `Result Http.Error String`
+ahhh, Elm makes you think….
+What are the common approaches to profiling Elm apps?
+<@U55CZT6T1> Hmmm, not sure on that. Might be a better question for <#C0CJ3SBBM|general>
+<@U48AEBJQ3>: Thanks!
+Good morning everyone! Really excited to join the chat and connect with all of you. I'm so intrigued by elm and can't wait to migrate an app I have to start using it.
+:wave:
+With all that being said is anyone free to give me some advice on making the switch? I threw together a really simple prototype application for my job (not as a web developer) and it's gotten some traction and i really want to get it production ready, so my first instinct was to look towards elm to get my front end operating as smoothly as possible.
+I've watched many talks and familiarized myself with the introduction to elm, but I still feel like I don't know where to start.
+<@U5ZR18C1L> Hi
+Elm is super compelling for writing front-ends
+but you probably won't be able to salvage much from what you already have
+so it basically have to start from the beginning
+maybe start here
+<http://elm-lang.org/examples/hello-html>
+is it a prototype app, or an app you want to migrate?
+`. I'm ok doing it in JS but want to do it in Elm obviously. Any suggestion?
+What's the JS function signature?
+Are you asking about arbitrary filtering of rows and columns? Columns by name or position or both?  Or something more narrow than that?
+)(data);`
+Oh, ok. You can build pipelines like that, but given the data is quite untyped, you're in for dealing with a bit of `Maybe.map` and `Maybe.andThen` - ing.
+Data always come as List (List String)). That's what Google Sheets api sends back
+I think my problem is to deal with all those Maybe cases
+Well, you can take it a step at a time. Your first `head` is going to be a Maybe. But you could start composing a function assuming you have the headers, and later wrap that in a `Maybe.map`.
+If you do a lot of these though, you might consider parsing the data first into `List Project` or whatever your types are, then filtering/transforming without the failure cases.
+If you are interested, I wrote a little library that lets you declaratively parse data from roughly this format into your own types.
+I'll have a go with your first suggestion
+It's sitting in a pull request here <https://github.com/periodic/elm-csv/issues/1>  but I will probably spin it off into its own package
+ok.. I'll have a look at your library. Cheers
+Hey I have a real basic type question
+in the type definition `view : Model -&gt; Html Msg` in the first example at <https://github.com/evancz/elm-architecture-tutorial/blob/master/examples/01-button.elm>
+What does it mean to have two types next to each other like that
+`Html Msg` in this case
+<@U5Z4MCVHB> Sometimes a type can have type parameters. A good example is `List`. A `List` holds values of a particular type, but it doesn't care what that type is. `List Int` means it is a list of integers. `Html Msg` refers to the types of events it can produce which call the `update` function.
+ah that makes sense
+so, roughly, it is a generic type? Like Java's `List&lt;Integer&gt;`?
+That's a good place to start, although there are some differences which you shouldn't trouble yourself with.
+yeah it's a good way for me to wrap my head around it, thanks
+Additionally, is there a larger elm example project to look at?
+I'm curious about best practices moving beyond having a simple model /  simple view example
+<https://github.com/rtfeldman/elm-spa-example>
+Thanks I appreciate it
+plenty to look at here
+But just as a bit of advice, don't try to break things up too soon. Elm makes it much easier and safer to refactor later, once you know more about how your program is evolving.
+thats sounds like good advice
+Do you tend to write tests for you elm code? or do people in the community lean towards really trusting the type system?
+It's roughly like you find anywhere. There are people who love tests and those who don't. The type system reduces the number of tests you need to write and fuzz-testing (also called 'quickcheck' or property-based testing) makes it easier to write one test which tries a good distribution of values.
+<http://package.elm-lang.org/packages/elm-community/elm-test/latest>
+Re the TextArea bug and the related Jumping Cursor bug in the context of <@U0JFXEUCT> `style-elements`, the new release (3.2) of that package fixes things.  See <https://github.com/jxxcarlson/nanoedit>  .  I will update the Ellie later today.  But the weather is too beautiful for that now.
+hi folks! it is possible to accept records from ports?
+or I should accept raw values (via tuple for example) and construct record on Elm side?
+ah, just forgot about `-&gt; msg` part
+A fairly simple record corresponding to a JS object can be automatically decoded. If you want something more, you can also accept a `Json.Decode.Value` and then manually apply a decoder to it to make whatever you want.
+The latter also has the benefit of not crashing if you pass something which doesn't decode properly.
+yeah, I think this record is pretty simple for decoding (geojson "Feature").
+btw should I manually handle `type` keys when iterop? it's a `type_` in Elm side and now I am map list of objects at js side to rename this key (to `type` as it should be)
+so it looks like this now: API using `type` key -&gt; mapping it to `type_` in elm side -&gt; passing to ports -&gt; JS mapping list to `type` key again :smile:
+not a problem at all, just curious
+Yeah, I don't know how the automatic decoder handles `type`. I wouldn't be surprised either way, but would have to see it to find out. Honestly, I prefer manual decoding/encoding so I would probably just make decoders and encoders on the Elm side and use `Json.Decode.Value`s.
+            User (Username "User1") "<mailto:user1@testmail.com|user1@testmail.com>"
+<@U2DF486HL>  your `type Username = Username String`  is an opaque type.  This means that you can import the type (in Main for instance), but not the constructor (the `Username` on the "right side" of your definition).  It's private to the `Data.User` module.
+- define a custom constructor in `Data.User`, e.g.  `username : String -&gt; Username` .  &lt;- This is your best bet in terms of 'hiding the implementation'.
+<@U0JFGGZS6> Great, thank you. Very useful you reply
+Hey there folks! Quick question: is there a nicer way to achieve this result? <https://gist.github.com/r00k/834a1b5f8b5f9e8c53551b024a2b7070>
+Specifically, I want to verify that all functions in a list return true when called with a given argument.
+<@U0MR1H1T9> And you want to keep the explicit list I take it, so that you can add to it later?
+Isn't that exactly what `List.all` does?
+Yep and yep :slightly_smiling_face:
+Just wanted to get a second set of eyes.-
+hey o/ `renderPart : (Int -&gt; Bool -&gt; NumberDisplay -&gt; String) -&gt; Int -&gt; Int -&gt; List Int -&gt; Html Msg`
+I'd like to know if I can define somehow a type for my first function argument type (which is obviously a function)
+a sort of a function signature shortcut, which would allow me to write `renderPart : Renderer -&gt; Int -&gt; Int -&gt; List Int -&gt; Html Msg`
+wow that thing works! `type alias R = Int -&gt; Bool -&gt; NumberDisplay -&gt; String`
+I had no idea
+hmm I find no doc about functions annotation alias types
+Anyone know of a good dialog package for Elm? I'd rather not use html's native alert type of dialog widget for input if I can help it.
+hello all... is it fair to assume this is a 'there are no stupid questions' type of room? i have a very very nooby question (but i couldnt find the answer in the FAQ)
+totally fair, don't be shy :smiley:
+thanks. :slightly_smiling_face: i'm finally diving deep into elm (i come from a python background with a little C++). I love it... functional programming has that feels rightness about it.
+That's not technically a question, but the answer is yes :stuck_out_tongue:
+Functional programming is the Right Way to do lots of things. But it's very different from C++, so ask away.
+i'm making a personal website, and using elm-mdl... but i'm new to serious web dev. i notice that the mdl visuals dont render when i'm working offline. i'm assuming that the library is grabbing the fancy stuff from somewhere, but is there any way i can keep whatever it's trying to access locally?
+ouch, that doesn't sound so newbish to me :smiley:
+everything compiles, and my static html objects will display (text and such), but the actual styles are ignored unless i have an active internet connection. so elm-mdl doesnt keep those on hand. but how would i get it?
+I don't know the answer but maybe you can give a try on <#C12KMAYJX|elm-mdl>
+perhaps it isn't... but i was advised to avoid writing my own css if i'm new to front  end development.
+that's maybe du to an external reference of a .css file in your `index.html` file?
+That's an odd piece of advise. I would say you want to know how the CSS works if you're new. Although maybe if you're working on an existing project, they'd rather have you use a higher level tool, since raw CSS gets to be kind of a mess
+yeah... i've done some very basic css work. i know all the keywords and I can read a html/css file and understand whats happening... but constructive all the relevant css for a site is still daunting. i've used bootstrap with python projects, but mdl seemed the most robust thing out there for elm with great documentation, and i liked the aesthetic.
+<@U0JL9RPC4> thanks. i'll ask in the mdl channel and check out what's going on in my index file.
+i've pretty much drank the  elm koolaid at this point... i tried getting into javascript but the language feels... messy. i also toyed with haskell for a bit but never got to the point of being useful. elm possess that mixture of practicality and correctness. and a magical compiler.
+This page seems to indicate that you can manually load your own material CSS files (and by consequence, some locale css files if you need to) <http://package.elm-lang.org/packages/debois/elm-mdl/latest/Material-Scheme>
+`topWithScheme` always loads the styles files externally: <https://github.com/debois/elm-mdl/blob/v8/src/Material/Scheme.elm#L42>
+ahhh... i was using topWithScheme
+integrating elm into django, csrf_token is a flag, any gotchyas? currently passing it along with POST requests as `csrfmiddlewaretoken` but still getting `{"detail":"CSRF Failed: CSRF token missing or incorrect."}`
+For instance, `let _ = Debug.log "OnLocationChange " location`
+Is that the correct way?
+that's correct
+<@U3YDBDP4Z> could you post the surrounding code? are you sure `OnLocationChange` is happening?
+But it's not the view I want, so that's what I'm trying to debug

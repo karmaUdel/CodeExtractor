@@ -1,0 +1,32 @@
+```
+Hello everyone, I have an app which stores documents (edn/json files, size from 100kb up to 1000kb) and I want to save the whole change-history (changes will be small, max 30kb maybe, but frequently) without storing the whole document for each change. Is there a free document database which supports document history with delta encoding?
+<@U1Q12R4F2> Datomic comes close to doing what you want, but it's not an exact match.
+git ?
+Maybe I should give that idea a try. The documents are hold in-memory at runtime, and only written on disk if changes were made - so using git seems to be a good solution.
+there's irmin, but I am not sure there's a binding for java, it should not be impossible to do tho
+<@U050SC7SV> <https://github.com/mirage/irmin> ?
+is it possible to do local type extension?
+i.e. extend something only in a let binding?
+?
+<@U0K0TFQLW> nope.  What are you trying to achieve?
+locally I want to encode JSON differently
+was just looking through how cheshire.generate maps encoders via a protocol JSONable
+I see. Unfortunately cheshire write methods are global =(
+yeah
+Transit and Fressian do not make that mistake
+( i know that doesn't help you immediately )
+unfortunately my third party api doesn't accept either of those
+I wonder if data.json is extensible locally
+can you convert prior to sending down to cheshire?
+we should have a new json library that does write dispatch the same way transit does
+trying to do that, but this is for serializing part of an ExceptionInfo object to an exception tracker
+not global protocols but per instance maps
+so sometimes I get things like Fns
+and I don't want to completely lose the information, but I would be satisfied by an encoder that just did `pr`
+but I don't want to just `(cheshire.generate/add-encoder Object pr)` globally
+<@U053S2W0V> don't you have some sort of 'local multimethod' gist somewhere?  for non global-dispatch tables
+<@U050ECB92> I have one of those too for testing purposes
+maybe that was <@U060FKQPN> ?
+that lets me clone a multimethod
+for local modification
+in tools.analyzer I used a combination of dyn var initialized to a wrapping default fn and multimethods to allow extensibility through multimethods

@@ -1,0 +1,12 @@
+```
+<@U0LPMPL2U> yep, that works - I had to change my `toActualValue` function to handle Maybes but after that I was able to just use your `sumMaybes`
+<@U29JSAR9S> The original `toActualValue` was `Int -&gt; Int -&gt; Int`? You should be able to go `Maybe.map &lt;&lt; toActualValue`
+I should ask more questions in this channel, getting lots of good suggestions :slightly_smiling_face:
+in this case though I tried that and I think the function is cleaner moving the Maybe.map inside the `toActualValue` function
+I would suggest against that. If you want to clean it up, make another helper function to give it a cleaner name.
+the function name for `toActualValue` is a bit rubbish though, I know :slightly_smiling_face:
+Regardless of that, you are mixing concerns by having it deal with `Maybe`. It's good practice to write the function that doesn't need to know about how to take the `Maybe` apart and then inject that information using `map` or `andThen`
+Also, I think that you can go `Bitwise.shiftLeftBy &lt;&lt; (*) 4` to raise something to the appropriate power.
+that makes sense
+instead of indexed map I'd probably use a fold there
+`foldr (\v (p,a) -&gt; (p*16,a+p*v)) (1,0) digits`

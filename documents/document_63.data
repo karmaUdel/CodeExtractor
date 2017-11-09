@@ -1,0 +1,16 @@
+```(s/def :q/o odd?)```
+so the way s/* can tell it is done matching is something fails to match
+yeah, odd? isn't total
+<https://stackoverflow.com/questions/45107883/clojure-reducers-foldcat-not-working>
+(s/and number? odd?)
+what do you mean by "total" ?
+I suspect the problem here is that `s/+` is a regex matcher, not a collection matcher...?
+<@U0CKDHF4L> <http://mathworld.wolfram.com/TotalFunction.html>
+Change `:q/b` to `(s/coll-of even?)`
+(you can specify a minimum length of 1 to require at least one element)
+that'll be the next issue, which will get him a weird failing spec
+right now the error from feeding a non-number to odd? is bubbling out and killing the checking
+Ah, I see where you're going now. I was jumping ahead.
+<@U0CKDHF4L> "total" means "defined for all inputs"
+`even?` and `odd?` are only defined for numeric inputs.
+Hence <@U0NCTKEV8>'s suggestion to use `(s/and number? odd?)`

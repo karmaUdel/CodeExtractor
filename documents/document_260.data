@@ -1,0 +1,64 @@
+```
+Is one of the loaders in my webpack.config.js file
+having trouble googling this. How do i unstringify some json?
+Hi all, I am going to need a debouncer in my app.  Currently, each character of user input sets off a whole train of actions, including sending text through a port where it it is processed as asciidoc, and also to an elixir backend to save the data. OK for small docs, but not large ones.  I've seen several debounce packages -- any recommendations?
+Something like `JSON.parse`
+ok i'll have a look thanks!
+<@U3KSN5MAL>  Here is a referennce: <https://www.w3schools.com/js/js_json_parse.asp>
+thanks!
+what's the general style for variable naming in Elm, `someLongVariable` or `some_long_variable`?
+Most code i've seen just uses the first
+so functions and variables both have the same naming convention then?
+yep
+I don't personally find it to be confusing
+Re debouncing, I've looked briefly at (1) <http://package.elm-lang.org/packages/athanclark/elm-debouncer/3.0.2/Debounce> and (2) <https://github.com/jinjor/elm-debounce> .  The latter has examples, but may not be as mature.
+<@U5YDC1YUW> the former for variables. For types and modules just uppercase the first letter.
+<@U3KSN5MAL> Not sure if you are talking about in Elm or in JS. In Elm you would use `Json.Decode`.
+was hoping to do it on the js side then send it through?
+not sure
+No, don't do it that way. It won't work well.
+as that's what i'm doing with saving
+hmm ok
+Unless the JSON is already on the JS side.
+it is
+it's saving stuff
+Ah, that's a different story.
+ye
+i have the json string loaded and need to send it through the port
+Yeah, that sounds fine to me.
+if you need to do this sort of thing often, you can define updateXxxx functions: `updateItems f model = { model | items = f model.items }`
+then   `updateItems (List.Map (updateStatus (always OnHold)))`
+(mind you, I'm transliterating from Haskell techniques....)
+Hmm i'm trying to parse the json file i saved out using stringify but trying to parse it just throws `Uncaught SyntaxError: Unexpected token o`
+the saved out file looks like this <https://pastebin.com/2buv1hU9>
+nvm got it
+But I need to separate them. I need to not use same global variable `Elm`
+Is there some possibility how to force elm-make to re-name this global variable?
+<@U2NGTHTTR> what's the reason you can't have both under the `Elm` variable?
+basically we don't have full control over first Elm app. Second is loaded later and should not have any possible impact on first one.
+can you explain a little more what you are trying to achieve? Saying you want elm-make to rename `Elm` sounds a little like you're having a problem with an attempted solution, but doesn't reveal your actual problem.
+now, as for what I _think_ might be going on, you need multiple elm apps on a single page. One options is to compile both apps into a single bundle `elm-make App1.elm App2.elm --output bundle.js`. If you go that route, you can still decide to instantiate both apps at different times, and you can use them multiple times on a single page. If you cannot possible do that; you do have the option of compiling them to separate bundles, and I _think_ it should be safe to load both in the same page. I think `Elm` will detect there is already such a variable on the page, and will merge them. As long as the modules that have a `main` don't have the same module-name, that shouldn't give any issues.
+I have a page with 2 elm apps both loaded as different .js files  it works fine
+We need to avoid _runtime merging_ because we want to avoid _same module_ conflict at any costs.
+As long as the module names you specify in the `elm-make` command aren't the same, there is no risk in runtime merging. Still, to save your users the overhead of potentially downloading the runtime etc twice on a single page, I'd opt for compile-time merging.
+Problem is that Elm application _A_ isn't under our control.
+That's way we want to make application _B_ totally separated.
+No, but there is only one module name that matters, and that's the one you use for `app = Elm.ThisModuleNameMatters.embed(...)`
+for everything else, no merging happens at runtime; they keep their own instances of all libraries and runtime
+and page already contains application _A_ which uses same module name as _B_ then merging fails
+yeah, if and only if that module is the one you passed to `elm-make`. Basically, name your module something specific and not just `App` or `Main`, but make it `DatePickerWidget` or whatever.
+There is possibility that page already contains different version of same  application _B_ ...
+define "another version"?
+just same app but earlier version
+then renaming Elm is still going to get you in trouble when you decide you need a third version :wink: I think I'd opt for 1. figuring out why you need different versions of the same app on a single page and 2. making the version part of the main module's name `module MyWidget_2_1_1` which feels horrible, but probably your best bet for handling this type of issue.. :&lt;
+Is it possible to move the common parts of two elm apps to a separate js file during compilation?
+<@U3SJEDR96> I guess that's what you're proposing 
+not possible, but _maaaaybe_ in 0.19, or at least a first step towards it. But yeah, no, not quite what I'm proposing.
+I'm just proposing to work around the naming conflict in a predictable, future-proof way
+Ok, that's what I thought 
+Now we want to _inject_ into this page another Elm application and avoid merging through common global `Elm` variable because we don't have any control above content of page.
+Well, how do you _know_ any other variable isn't already used?
+- if it doesn't, fetch your elm app and let it merge
+Thank you for your help and ideas
+Any ideas/remarks?
+150:1 GET <http://localhost:3000/150> 404 (Not found)

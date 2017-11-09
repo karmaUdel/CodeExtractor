@@ -1,0 +1,131 @@
+```
+yes, does it make sense?
+as far as I can tell, the single source of model data in the architecture is via the view function. I'm curious about the best way to handle a scenario where a distanct child html component needs some data in the model that none of its ancestors need. assuming these components are built as different functions, this would mean sending that data for a distanct child down through all its parents?
+totally :slightly_smiling_face:
+or, just passing the entire model to all the children?
+Thanks!
+logically an ancestor needs said data if some descendant needs it. no need for entire model, just what is necessary for all descendants, eh?
+that's not entirely correct. for example, re-frame (a clojurescript library) gets around this by separating subscriptions for a component from the location at which they are called/instantiated. a component independently establishes what it wants from the central model, without ancestors needing to know what a child needs.
+an ancestor might only need to know that it needs to build a particular screen, for example, without caring what widgets should be on that screen and what those individual widgets need
+So your parent doens't know even which widgets are on it?
+it could, but it doesn't need to. the point is, why string a bunch of data through many ancestral layers with all the inbetween components not needing that data, just to build some distant child? it's a problem that appeared in the first version of Om that has been fixed in more modern libraries, but it appears Elm's architecture requires this type of logic also, unless there is another technique that is not apparent
+perhaps it is typical in Elm apps to pass the whole model around to all the html view functions
+I think there is a technique. As long as each parent knows which descendants it contains, you can set a hierarchical model and command/message structure.
+what do you mean command/message structure?
+nested elm architecture
+still sounds vague to me. it seems that Elm's architecture assumes that the best way to store model data must also be the best way to organize that data for a view. and usually, this is not the case.
+i have no idea how you would get around this if parents dont know about their children, though
+in the Elm archicture, you are right, I don't see a way around this. I'm a little surprised, actually.
+i've actually come to prefer it
+the only place it bothers me are helper view functions, which need to return a single type of Html msg
+that's fine, but Elm doesn't give you the flexibility to separate model organization from view organization, it assumes they must correspond. This is a limitation that has been addressed throughout the industry in recent years
+What do you mean by separating model and view organization?
+as far as i'm concerned, elm architecture is a superior organizational form
+if your views get their data only from parent views, that means model data must correspond to the view heirarchy, unless you pass the entire model to all view functions
+Hmmm, it seems like you're looking at this from more of an OO point of view?
+not at all
+The model is just data. Views functions that take a subset of that data and return Html
+is there any way for a view to get data out of a model if that data is not passed from a parent function that builds the view?
+views take a model and return a view. the model you pass it is completely up to you. i.e. some subset of your model
+Functions in elm are pure. All data must come in as arguments.
+<@U4JT89FGB>: that is exactly my point. views only handle data passed from parents. this is very limiting: it requires all ancestors to know and handle data they don't actually use, only because a distant child requires it.
+You can also have a reusable function that takes `Model -&gt; Html Msg` that you call. The return value of that can be passed into another view that wants to use it
+Your view call stack doesn't have to correspond to your visual hierarchy
+that's not true, either. an ancestor doesn't need to know what data is there, just that it is there
+<@U4JT89FGB> i don't think you are understanding the problem I am addressing
+i mean, in theory they could know what is there - but the sub-component can control that model completely
+"view only handle data passed from parents" implies that the view function for a specific piece on your page has to be called by the view function for the containing piece.
+That's incorrect
+The view hierarchy doesn't have to correspond to the call hierarchy
+the "parent" doesn't have to call the "child" view functions in order to show them. The "parent" can instead have it passed in.
+if you have a reusable function, in order to call it from a distant child, that child must have the entire model passed to it first, so it can then call the resuable function, is that what you mean?
+So, if you are worried about passing a "child"‘s data into the "parent"‘s view function, then you don't have to
+No, pass the result of the function
+Call the function in a more flat approach, then pass the pieces to the containers
+but the result would then require the parent of that child to have the entire model in its scope, right?
+No
+i guess i need to see an example
+The only view function that "requires" the whole model is the top-level `view`
+Everything else is just functions and values
+you are saying pass the Html Msg for a distant child down through the ancestors?
+Or build up the tree from the bottom
+I think you are thinking that you call top-level, it calls all its "children components" which call their "children components" and so on
+You don't have to do it that way
+what do you mean build up from the bottom?
+If you think of the visual hierarchy, it is a tree
+So, start at the nodes (the childmost chunks) and call the functions to build those. Now, you pass those chunks into the next level up saying "here are the pieces you are going to contain"
+That's how the `Html` library works. For example, you pass child nodes into the `div` function.
+Going to that reverse order, you never have to pass any "component" any part of the model it doesn't need.
+yeah, you have to build those child nodes, then pass them to `div`
+I tend to do a combination of inside-out and outside-in building of my html
+But, I also don't mind passing my model down a tree of view functions
+Good
+i still see a problem there. let's talk about these distance child leaves. suppose they need some data X. they are the only ones that need X. let's say all these children are built by a couple of parents. the top-most level is only interested in building those couple of parents, and to do so, perhaps it only needs to have a screen position for those parents to build. now, it doesn't know those distance children need X. so what does it pass to the parents?
+where are the distant children going to get their X from?
+&gt; let's say all these children are built by a couple of parents
+I'd say it is time to get to code and less abstract "what about X and Y"
+Would be easier to go onto ellie and actually build examples of the problems you feel.
+Otherwise it is easy to go round and round
+Especially since it is easy to get on Ellie and do it. :slightly_smiling_face:
+when building from the bottom up, parents don't build their children
+(I'm heading to chicago elm code night, so have a good night, folks)
+Wish I could be there!  Sounds fun.
+but building from the bottom up still requires someone somewhere to call those functions that build those children, right? and to do so, those children-making functions need access to the data the child needs, or full model, right?
+perhaps i shall code up an example
+sure
+<@U5QJW0DDE> I see your point. Given that `Model` is passed to `view` and it isn't truly global in the traditional sense you need to pass to the called functions all the info they need to generate the markup, including the info needed by their sub functions.
+There's no magic.
+it's a bit of a problem on large SPAs. This issue has been addressed over the last 3 years by the Clojurescript folks and have arrived at a good solution in re-frame. The Elm Architecture looks a bit like the Clojurescript 2014 model of handling complex UIs, but perhaps I will be proven wrong in a few moments when I ask more about some code
+You usually end up writing a lot of simple functions which require as little data as possible.
+There is a good sample app by Richard Feldman that deal with the complexity of a SPA
+i'm guessing it is fairly idiomatic in a lot of Elm apps to pass the whole model around to view functions
+at least, in large complex UIs
+Some people do that, but it is not the only way to do so.
+In the SPA example you will see the model is separated by each single page. <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L51>
+<@U41NK9BM4> well that is part of the problem: the model is separated by the needs of the view. it shouldn't be that way
+the view and the model are separate, their organization is not necessarily the same and usually isn't
+You can model the thing as you see it fit
+i just need to fix some compiler errors here then we can talk about the real stuff
+i've written like 100 lines of Elm in my life but really want to give it a shot, convinced my company to take a serious look
+there's a js error somewhere here but <https://ellie-app.com/3JbGH7v2v7ra1/1>
+Shoud be `var app = Elm.Hello.fullscreen()`
+ok, so my question is about the call that says `child 0`
+the idea is that the parent only got what it needs, and now the child needs what it needs from the model.
+the parent does not get the whole model, so how does the child get it (I've hard-set it to 0 but it should be pulling from the model)
+Here is one way of doing it: <https://ellie-app.com/3JbNQk26qNRa1/0>
+that's not a good solution, because it requires top-level ancestors to be aware of distant children, and that really breaks down in a non-trivial app
+an ancestor should be concerned with building its direct children, not its distant descendants
+I don't find that it falls down in a non-trivial app at all. The parent is some sort of container, but it doesn't necessarily *care* what its children are. Building the elements in a flat way and then passing them down is quite scalable.
+Here's a verbose way where only parent knows about child <https://ellie-app.com/3JbShZXMxrFa1/0>
+I encourage you to try coding a real project. This concerns seems really exaggerated
+<@U41NK9BM4> this is not exaggerated; the language might be new, but the problems are battle-tested in several languages. this Elm style of UI is similar to some older libraries in clojurescript, so I've been down this path to great extent and know exactly where it is going
+I don't know… I use web UI everyday and the are all pretty simple. They tend to do those as simple as possible.
+in this example, it might be trivial, but imagine the top div needing to build children many many layers down, in the end it would be easier to just pass the entire model to all view functions, which is what folks used to do in clojurescript before re-frame came along
+imagine hundreds of children
+at all levels of the view heirarchy
+as is the norm in a serious app
+i've had more problems when i have more than one source of truth
+I'm not familiar with reframe. I would be curious to understand it.
+this isn't about more than one source of truth
+so maybe there's some preference going on, but what elm provides to me is much more maintainable and sane than otherwise
+If there are better ways of doing things, this is a community which has been very open to questioning its best practices in the past, an adequate description of the problem and a better way of doing it would certainly be given serious consideration.
+how is this not about more than one source of truth? you want your highest level model to not know some data that only children know…
+that's not about truth, that's about modularization
+it's about restricting unnecessary access, about *safer programming*
+Then, please point us to where we can learn, because I think we are at the end of where we are going to convince each other of anything here.
+take a look at my example above - see how top level doesn't know anything about child - it just knows it has to place the parent somewhere in its view
+are you familiar with the company CircleCI
+this shows how they handled state in the "old" way, which resemble's Elm's Architecture, the part starting at "Stretching Om's Seams" : <https://circleci.com/blog/why-we-use-om-and-why-were-excited-for-om-next/>
+here is an explanation of how reframe works <https://github.com/Day8/re-frame>
+<@U4JT89FGB>  your example is not separating the concerns: your parent is still getting the child data, you are essentially passing the whole model tree through to the parent so it can give it to the child. it's the same thing
+then i'm with the rest here. i'm lost. i'm not sure what you're looking for
+<@U4JT89FGB> i'm sorry you don't understand the issue, but I think some of the others have
+it's not complicated.
+it's just about separating model state from view heirachies
+If I understand correctly, you'd like to be able to pull some sort of "global" value directly from within deeply nested child functions?
+that would be one solution, yes
+or, to "subscribe" to a particular part of the model for a child
+i will post to the mailing list
+Is there any equivalent to  `$` from Haskell in Elm?
+<@U663M2MB7> `&lt;|`
+Thank you! :slightly_smiling_face:

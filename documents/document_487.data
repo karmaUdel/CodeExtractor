@@ -1,0 +1,16 @@
+    span [ property "innerHTML" &lt;| string dangerousHtml ] []```
+I ran into problems with `innerHTML`, as it didn’t seem Elm tracked changes to it. While using `Markdown.toHtml` creates actual virtual dom nodes.
+<http://package.elm-lang.org/packages/evancz/elm-markdown/3.0.2/Markdown>
+But I don’t have the source in the MarkDown format. It’s HTML.
+HTML is markdown
+hehe, right :slightly_smiling_face:
+:slightly_smiling_face:
+more or less
+I use this in several places in my app (across two products), and it works great
+And since it creates vdom nodes, elm can use it effectively for diffing and rendering
+I have `&lt;a href="foo"&gt;bar&lt;/a&gt;` inside. AFAIK, Markdown uses a different syntax`[foor](bar)`
+No, that works
+Html is a subset of markdown
+So, `Markdown.toHtml [] "&lt;a href="foo"&gt;bar&lt;/a&gt;"` will yield `&lt;a href="foo"&gt;bar&lt;/a&gt;`
+In fact, if you want to add things, such as `target` to the link, you have to use the html form, not the `[foo](bar)` form (with standard Markdown parsers, that is)
+Also, using `Markdown.toHtml` means you can pass in the sanitize option, if you want.

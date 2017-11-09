@@ -1,0 +1,156 @@
+```
+you don't need that function, you have it already. It's called `SomeCompositeType`
+when you declare a type like `type Foo = Foo Int` you create both a type called `Foo` and a function `Foo: Int -&gt; Foo`
+it's more clear if you do something like `type IntOrString = SomeInt Int | SomeString String`
+which defines the type `IntOrString` as well as the functions `SomeInt : Int -&gt; IntOrString` and `SomeString: String -&gt; IntOrString`
+how should my decoder look?
+what does the underlying json look like
+{ id, type, otherfield }, the composite type is made of id and type, wrapped in a record with otherfield
+it currently decodes into a three field record, but i'm trying to combine two of them
+in that case, yes you could use the custom type or create a lambda to capture the full construction
+lambda / regular function
+ok, i'll give that a go, thanks
+<@U23SA861Y> fyi, seems to work ok, too many other things broken to be sure atm but your reminder of the tag constructor and how the pipeline takes each field *in order* helped alot
+looks good
+So I was watching Douglas Crockford’s talk “The better parts” (<https://goo.gl/X7oe27>) and he was talking about the next great language. Obviously my first thought when he said it should be error free was, “Hey that could be Elm!”
+The problem is, Elm compiles to Javascript so it will never really replace JavaScript
+Is there any talk about creating pure Elm applications like an Elm browser or an Elm Electron-type-thing?
+^ <@U13H7FNDQ>
+<@U1D5GU32R> <https://www.destroyallsoftware.com/talks/the-birth-and-death-of-javascript>
+<@U153UK3FA> I watched that awesome video, thanks! Was that supposed to somehow answer my question?
+Are you saying that Elm will somehow run on asm.js?
+That it won’t compile to JS?
+yeah, eventually
+asm.js is still JS
+But the Metal compiler compiles C right?
+the compiler built with asm.js is a C compiler right?
+Are you saying Elm won’t have to compile at all, it will just run in C?
+Elm currently targets the web platform because it’s the most widely used platform in history which gives Elm a much larger reach
+but?
+Can it compile into anything?
+sure, you just need to write the compiler and provide wrappers for all the system libraries you want to use on your target platform
+So there is nothing inherent in the design of Elm that makes it especially suited for compilation to JS?
+Besides interop of course
+Elm inherits some of the semantics of JS for performance reasons, eg. Elm’s number type is a Float like JS
+You can in fact currently write apps for Electron in Elm because Electron runs JS and Elm compiles to JS
+Got it, thanks <@U153UK3FA>. So to summarize, anything is possible :wink:
+summary: compiling to JS doesn’t mean having the same issues as JS, JS is a good target because it’s so widely available on every platform
+Makes sense
+C as a target would be less useful because it’s not as widely available
+So there are not current efforts to run Elm uncompiled?
+You mean, with an Elm interpreter?
+yeah
+uncompiled to JS
+unJS
+compiled to what?
+you’ve got to compile to something
+Well C is the obvious choice because everything runs C
+My web browser only runs C via asm.js
+Right
+Let me restate the question, could Elm exist as it’s own language without need to compile to anyting
+like Python
+or Ruby
+Sure, you can write an Elm interpreter
+There is talk of compiling Elm to BEAM (Erlang’s VM)
+Hello everyone. I was some website a while ago which has two courses for Elm one is free and one is paid. But I can not remember now what was the website. Maybe anyone has idea what it can be?
+Awesome, found the HN convo: <https://news.ycombinator.com/item?id=11916183>
+Thanks <@U153UK3FA>
+<https://www.udemy.com/rust-programming-for-beginners/>
+Those maybe
+<@U0J8D9M2P> there are a few: <https://pragmaticstudio.com/elm>
+and I made this one, which is free, but super basic:
+<https://egghead.io/courses/start-using-elm-to-build-web-applications>
+and dailydrip has a bunch of videos
+That was some personal blog
+<@U1D5GU32R> might be interesting to you to watch some of Edwin Brady's talks about Idris - he's written the compiler with a replaceable backend in such a way that means it can target whatever language. I don't think it's be terribly difficult to do the same thing with Elm, necessarily. There's a video of him targetting PHP as an amusing proof of concept joke
+I think I’ve heard about it on Elm Town :smiley:
+I mess everything up :smiley: It was about docker. The courses is here: <https://courses.coderjourney.com/>
+Do you mean a web browser completely written in Elm? That sounds a little far-fetched, but an interesting thought experiment! It'd be great to totally re-imagine how browsers could work - such as an immutable-first design might remove a lot of the DOM issues we have with Elm. There's a lot of interesting work going on right now with Servo, the web browser written in Rust, and some of that work is making it's way into Firefox. Servo renders everything straight to the GPU which makes the virtual-dom redundant - we'd be able to render Elm Html straight to a browser without the VDOM middleman.
+omg... the debugger is brilliant!
+Hmmm interesting. I don’t know if it would be a web browser or just a way of writing apps with Elm. I would just like to see if Elm could stand on it’s own as a programming language for developing apps and I think the first step would be to be able to write Elm that didn’t need to compile to JS
+Is it correct behaviour in Elm when input field changes even though I do not provide any handling of change and put constant value in input’s value?
+i dont think i completely understand the question
+`H.input [ A.value "test" ] []`
+Sure; since the virtual-dom won't have changed either, so the node isn't re-rendered
+in React if I’ll try to type something in input with this setup it’s value won’t change
+in Elm it does
+if you keep state outside of the vdom, elm doesn't know about it
+well, I do not keep state outside, it’s just constant
+if you were to change that string, the vdom would change, meaning the dom would be updated, too
+and there is no way of updating it
+no, the dom keeps state outside; causing a mismatch between the dom and the vdom. As long as the vdom isn't changed, the dom can't be change to reflect that. I'm not sure if/how this could be done differently :thinking_face:
+`&lt;input value="test" /&gt;` in React won’t change until you provide functionality for it to change
+Let’s make it a bit better
+Yeah, react does magic to hook in really tightly with inputs, i.e. not waiting for an animation-frame to handle events and whatnot
+`&lt;input value={model.value} /&gt;`
+My point is mostly that this is _expected_ behaviour in Elm
+Doesn’t it break the idea that view is function of state?
+Why view changes even though state didn’t?
+I’d say that’s not a magic in React case, that’s reinforcement of that idea
+The view is virtual dom; and the virtual-dom hasn't changed. Keeping the virtual-dom in sync with the actual DOM requires eventhandling
+The DOM is stateful. I don't suppose you'd want to keep stuff like "is this `&lt;select&gt;` open" in your model, either?
+I do want, that’s the whole point of `view = f(state)` invariant
+it provides you explicitness and removes undesired effects
+otherwise I don’t really understand necessity of virtual dom, we would be cool living with dom mutations like we did before :slightly_smiling_face:
+I see your point, really, but with the current setup, that means a _lot_ of special casing that probably isn't really worth it
+the point of virtual dom is speed
+hehe, no
+hm, was a bit not gentle, sorry :slightly_smiling_face:
+The main value of virtual dom is speed and maintaining hidden DOM state
+that’s was said many times that virtual dom was created to keep invariant, not to achieve speed
+It's okay, I understand you are frustrated
+speed was nice side effect, not the original target
+I am not frustrated
+well, maybe in Elm it is, but it was said many times by React core contributors that this is common misconception to look at virtual dom from the speed perspective
+The virtual DOM isn't to make things faster, it's to make view =f(state) fast enough to be usable.
+yep exactly
+interested to hear what people think about the comments here: <https://news.ycombinator.com/item?id=14870642>
+so the initial idea is to make `view = f(state)`
+It's certainly about speed, you can do view=f(state) without a virtualdom
+yep, true
+But the other thing the virtual dom achieves is not blowing away hidden DOM state
+so speed is not the reason virtual dom was created, the reason was to keep invariant, and speed is the requirement
+so when we discuss what is expected and what is not I guess we need to take into account initial problem, don’t we?
+to not fall into XY problem
+Things like cursor position and open closed state of selects
+leaving to eat, but really, it's laughable :smiley: "I quit Elm because elm-format won't use 2-space tabs", well, OK then! Enjoy configuring your JS tooling!
+yeh thats just stupid
+Hm, I just realized that if the virtual-dom would blackhole all events that aren't specified manually, this could be done. I'm not sure if that's really something we wish for, though; I'd be pretty annoyed having to manage cursor-position, selection-state, clicking regular links and maintaining focus manually; but it _could_ be done :thinking_face:
+<https://news.ycombinator.com/item?id=14873451> So glad I got that off my chest. Clearly the world will be better for having heard my opinion. :slightly_smiling_face: 
+saying that's just stupid is kind of what they're doing on their part, so I'm not sure it helps. There is a point inside of this. I personally think Elm got it right but it is a harsh choice and it will alienate some people.
+well, the entire point is to not have to think about it. I don't necessarily like 4 spaces, or two vertical lines. But the important thing is: it doesn't matter. If you're going to chose your programming languages based on something as futile as this, it's your loss.
+Yes, I'm all for that also. But that does not mean it's just stupid on their part, the Elm community will be better off just explaining it calmy and not responding to trolls
+At least, that's why I liked it
+I agree and do my best to always try to address concerns. However, regardless of the community, my point is that, if as a professional, you're going to make decisions based on as irrational things as those, then it's going to be a problem
+when recruiting, this is the kind of people that I wouldn't want in my team; again, regardless of the community
+don't you think they could just be misguided and change point of view?
+of course, everybody can; this doesn't make their argument a valid one, though, which (I think =)) was the starting point of this conversation
+Yeah, sorry, I wasn't saying that the argument was good, just that there was a point in that it is a harsh choice that need to be explained, and not by calling them stupid.
+anyone knows how to do : `outline: none` using style elements? I have an input box that i want to remove border and outline on focus.
+you can use `Attribute.inlineStyle` to manually add any style property
+<@U2LAL86AY> if you remove it, consider replacing it with a different indicator for accessibility: <http://a11yproject.com/posts/never-remove-css-outlines/>
+yep that's true, i actually want to change the style - the box around it is annoying , but i will add a `bottom border ` that will change it's color and thickness on focus.
+my point was that, as a professional, deciding to pick or not to pick a language based on such futile aspects is ridiculous; regardless of the validity of the choice itself.
+for the record <@U28L0BHN1> no one called anyone stupid, I said its stupid to "quit Elm because elm-format won't use 2-space tabs"
+and I stand by that statement
+I suppose you critique the idea and not the person but a lot of people will read it that way ^^
+Does Elm Test actually work ? I’m having problems with some packages when they are in the elm-package.json file, ie debois/elm-dom and elm-lang/Svg , has anybody else experienced this ?
+<@U2FGMAQ5R> 1) Yes, Elm Test actually works. 2) No, I have not experienced that.
+You could see if anyone in <#C0CLGCMMF|testing> has run into that issue?
+I’ve added it there but no response :disappointed:
+yep :slightly_smiling_face:
+yet :slightly_smiling_face:
+Anybody get an error like this using elm-install (was elm-github-install). "error: undefined method `name' for nil:NilClass. Use --trace to view backtrace"?
+Just upgraded my system, but now I can't use elm-install anymore....
+<@U2FGMAQ5R> Yes, of course it works. That's a bad question -- lots of people use it. You have to be patient, the people on here are giving up their personal time to answer questions. You can't expect an instant answer all the time.
+apologies didn’t mean to offend
+<@U1X0EELG3> Have you tried uninstall and re-installing?
+Well, I just installed it for the first time after a clean install of a new Debian 9 box.
+Maybe something to do with versions of Ruby. I don't know ruby so its a bit of a mytery to me.
+Hmm, version 1.1.0 of elm-install released 4 days ago. I was running an older version than that before. I guess some bug might have been introduced in later version. So I can try going back to an older version and see if that works....
+Bugger, no joy with older version I tried so far.
+<@U1X0EELG3> I've just tried installing and running elm-install on my debian (9) box, and worksforme, sorry =(
+I've installed it from npm, and I've got ruby 2.3.3
+Thanks. It works for most elm-package.json that I tried, just not all.
+can you share an elm-package.json that doesn't work?
+}

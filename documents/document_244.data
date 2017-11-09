@@ -1,0 +1,34 @@
+```
+You can't have a record with a changing number of fields. You must know all the fields at compile time. With a dict, you can plop whatever you want in there.
+ok, thank you. how to go from [Dict.fromList[], ..., Dict.fromList[]] to [record, ..., record]
+Do you know all the fields at compile time?
+If you don't, then you can't.
+We might want to explore why you have a `Dict` to begin with.
+I do not know data and dims at compile time
+Where is this data coming from?
+From server
+Who's server?
+third party server
+Do they have an API or spec?
+If you are getting data from there, then they probably have some consistent data structure that they are sending you back.
+If not, then you have to use a Dict
+to array of three records - I do not know names, number of objects at compile time?
+Like I said, you _can't_
+That's not how records work. The fields are fixed at compile time.
+Otherwise, you can't provide any kind of type safety, because any dynamically added field to an object changes the type of that object.
+Hence why `Dict` is what you have to use - a Dict can store keys and values, without needing to care about the fields other than the key must be a certain type, and the value for each key must be a certain type
+Is it possible to have the `elm-stuff` directory somewhere else than the root of the project?
+Nope, it's always where your elm-package.json is
+Why?
+For example, if the project root happens to be read-only...
+What situation is that?
+When deploying?
+I've moved `node_modules` elsewhere using the `NODE_PATH` env variable
+You should compile your Elm files _before_ deploying
+docker-based development environment
+Our webpack runs in an environment where all source files and their directories are read-only
+Simple fix: put `elm-package.json` into your writable directory
+then run webpack from there.
+`source-directories : "../../some_read_only_dir"`
+Ah, that would do the trick. Running `elm-package` will be somewhat harder, but with this setup running `npm` is also hard :slightly_smiling_face:
+Thanks :thumbsup:

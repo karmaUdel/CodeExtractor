@@ -1,0 +1,37 @@
+```
+so basically, wrap it in a list, and encode that with `Json.Encode.list`
+<@U3SJEDR96> Thanks, that was exactly what I needed.
+<@U3SJEDR96> Sorry for the late reply. I actually see that as a problem, because sometimes it doesn't refresh with the value the model provides and just keeps the one the user wrote instead.
+Anyone know any recent examples of someone creating a dropdown so that when you click outside of it, it closes? Would be really helpful, thanks in advance :slightly_smiling_face:!
+I've always just put an invisible overlay over the background behind popups and handled the click there and dismiss the popup. But maybe I'm old school and there's a better way
+<@U5WD40ZA9> there was *just* a discussion about exactly this in <#C13L7S5GR|elm-dev>!
+<https://ellie-app.com/3tm2WSV9JTza1/0>
+credit where due: <https://elmlang.slack.com/archives/C13L7S5GR/p1498165749675291>
+<@U0K92QFST> I'll take a look! Thank you very much :+1:
+That's really neat :slightly_smiling_face:
+I'm curious how that's listening for the "outside" clicks, it's not super obvious to me
+oh it's looking for focus change events, neat
+Kinda neat code wise, makes it difficult to inspect the popup in dev tools though
+I always have that problem with styling popups/dropdown/etc, chrome hover/focus toggle helps some
+<@U59AF21LJ> that's a problem if the part of your model that should match the input field is modified in any way _other_ than through the input field. One reason to do it the way it's done in the guide, is to prevent the cursor from jumping if you type faster than your (`update` loop can process + a render can be queued through requestanimationframe, and your updated model is finally rendered), which takes about ~16ms at most. Especially noticeable if your cursor isn't at the end of the input :wink:
+Is there a way of putting user-defined modules in Ellie?
+publishing them first?
+I would say that mathematics is more about manipulating structures, of which the integers, the real numbers, etc., are particular examples.
+I suppose so, but the modules I have in mind are of little value outside of the example.  Seems like littering :slightly_smiling_face:
+well it looks like it can install things which the elm package manager can find
+well it's either big enough to be a package (which you maybe can publish) or its small enough to inline into a single page
+Where is `Msg` defined?
+<@U23SA861Y> can I inline a module, that is, include its text in the "Main.elm" file?
+Msg is defined wherever you defined it...
+its just code, the import prefixes might need to be rewritten but there is nothing that stops you from moving that code around. (with the exception of circular imports)
+Got it! :slightly_smiling_face:
+The only think that actually needs to be a seperate modules is ports I believe
+ports don't have to be in a separate module, but it's best as every port has the same namespace so a single module can help prevent name collisions.
+umm I thought you needed a special `port module` declaration
+You do, but you can have multiple modules with that declaration
+And other elm code can live in that module
+It can but I don't think that module can be toplevel
+I don't think your main module can be a port module
+huh, nvm that works in ellie
+stand corrected
+I made a small project that demonstrates the textarea bug.  See the README for details.  To run the project, do `git clone <https://github.com/jxxcarlson/nanoedit>`, bring up `elm-reactor`, and select `Main.elm`.  I'm very interested in finding a solution or workaround for this. :slightly_smiling_face:

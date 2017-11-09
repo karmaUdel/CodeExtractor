@@ -1,0 +1,29 @@
+set23 = [(102, 194, 165), (252, 141, 98), (141, 160, 203)]``` now
+<@U67HJ10TX> `if then else` or `case` are both fine here.
+oh i missed that part, how about just `case` matching on the actual `Party` type?
+that's the idiomatic Elm in this case, for sure
+Is there a way to make elm-format not ruining my comments? It treats every comment as standard ones from the elm architecture. I want my comments to sit on top of the functions I write, not with two new lines in between them.
+<@U663M2MB7> the philosophy to elm-format is that elm-format formats your code how it wants and you get used to reading code formatted as elm-format formats it.
+I get that, but having comments three lines above the actual function? Surely I cannot be the only one who feels that is pretty awkward?
+ah, that doesn't sound right.
+can you give an example of the code?
+Well, it does it pretty much when ever I put in a comment, but sure
+try using `{-` and `-}` to delimit your comments for functions
+or `{-|` and `-}` to create doc-comments
+`-- foo` at the top-level is interpreted as a "section" delimiter, or that's how I think of it anyway
+<https://github.com/avh4/elm-format/blob/master/Style%20Guide/Sections.md>
+<https://github.com/avh4/elm-format/blob/master/Style%20Guide/Declarations.md>
+<@U3SJEDR96> that has the same result though
+ah, indeed, it needs to be a doc-comment
+<@U153UK3FA> guess you don't need that code example after all
+But okay, so `--` is strictly for sections then.
+Opening a comment with `{-|` is good :slightly_smiling_face:
+note, also, that those comments are also used to generate documentation for packages
+I see. It stills feel kinda awkward though,  having two new lines inserted when ever you do simple `--` on a comment though. I guess I will just get used to it.
+Just use the doc-comments, i suppose you are documenting your functions, right?
+I need to use csv data.  I see elm-csv for parsing, but can someone point me to an example of getting the data from a server?
+<@U2D07QZN3> is it the basics of getting data from a server you're after, or specifically how to treat it as CSV?
+the parser expects a `String`, so `Http.getString` should do the job
+<http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#send>
+Thanks, that should to it (I'm very new at this_)
+hey, I'm trying to encode a Maybe Int to send to the back end. It's easy to decode a field that may be nullable, using something like Json.Decode.nullable or Json.Decode.oneOf, but I don't see any similar function on the encoding side. What's the best practice way of doing this?

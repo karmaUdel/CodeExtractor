@@ -1,0 +1,18 @@
+```
+<@U6FFMA51S> Yep. My understanding is that `text` is `Html msg` which contains placeholder type, so it is inferred to `Html Never`. But why `elem` is not inferred to the final type?
+<@U2ABT6UKF> <https://guide.elm-lang.org/> helped me get a good grasp on the basics. Have you tried it?
+Reason i want to do something like this, is that I have a view method that returns a "LoginMsg" and i need to translate the into a "Msg" but I see no way to access the LoginMsg returned by the view function :disappointed:. Thoughts?
+<@U4ZK5BVK6> Have you tried using `Html.map`
+never heard of it, digging into the docs now :smile:
+<http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html#map>
+<@U3FJSB596> definitely cleaner, can you see any way to make it a bit more dynamic? Aka, dropping the mandatory case statement for msg inside transformLoginMsg? My original implementation was making use of `onInput LoginMsg &lt;&lt; OnPassInput` but i doubt this is applicable here
+<@U3FJSB596> regardless, thanks a lot for pointing to Html.map, that's definitely handy for cases like this. Also if you think my approach is not "Elm enough" let me know, I am still trying to shed my procedural ways lol
+`LoginMsg` is already a function of type `Login -&gt; Msg` so no need to create another one.
+wait a second, LoginMsg is a function??? wat... lol
+Yeah
+thats so cool
+so types defined with `type Abc` are functions that construct their own type by passing their bodies to it
+`Authenticate`, `OnUserInput`, and `OnPassInput` are also functions of type `Login`, `String -&gt; Login`, and `String -&gt; Login` respectively
+huh, awesome, this actually explains a lot
+time to rewrite most of my code now that i understand this a bit better lol
+That why you are able to use them in the `onInput` function (which has a function as its first argument)

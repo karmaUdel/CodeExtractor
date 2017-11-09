@@ -1,0 +1,44 @@
+```
+something like this
+I broke it up into really small functions to make it easier to follow
+I find making tiny decoders and working from the bottom up is the easiest way to think through building decoders
+Yeah, I'd have gone for `maybe &lt;| map3 Times (index 0 int) (index 1 int) (maybe &lt;| index 2 string)` but fair enough
+Oh nice, I didn't think of just wrapping the whole thing with a `maybe` decoder :thumbsup:
+nice!
+thanks, I will take a look
+find decoding the hardest part of elm
+I think everyone does :slightly_smiling_face:
+The trick is to start by trying to decode only the smallest piece of your data structure
+you might be interested in going through these: <https://github.com/zwilias/elm-demystify-decoders>
+Then you look into how you can combine that with other parts to decode more and more complex structures
+will take a look
+and good advice <@U0LPMPL2U>
+Also, writing small decoder functions and including their type signatures helps me think through the problem
+Okay, here's a question.  Is there some reason that using sinon.js fakeTimers wouldn't work to simulate time passing with elm code?
+I'm doing acceptance testing on my app using webdriver and trying to trigger actions that are supposed to happen every 30 seconds, and sinon.js has a fake timer mechanism that mocks all the time functions (Date.now(), trigger setTimeouts, etc.) and it's working, but Elm isn't doing anything.
+(Does the elm runtime have it's own esoteric time mechanism or something?)
+when you say "isn't doing anything", can you clarify what you mean?
+What is the current recommended library for touch interactions?
+I'm guessing this is related to Elm using requestAnimationFrame for rendering, with a fallback to `setTimeout(1000/60)`
+<@U3SJEDR96> - Yeah, I mean the things that happen on a timed subscription are not happening at all (much less at an accelerated rate)
+Ooh, so it uses requestAnimationFrame to move the runtime to the next step?  Yeah, I bet that's not mocked by sinon's fake timers...
+So if that's the case, that could explain it...
+I wonder if there's a way to force elm to use setTimeout... ?
+I think `window.requestAnimationFrame = undefined` should force the fallback; though all of that (sinon and disabling rAF) should probably happen before Elm is loaded
+Yeah, that makes sense - I'll give it a shot :slightly_smiling_face:
+Huh - that didn't seem to do it either, even though window.requestAnimationFrame was undefined before the app's init function was called.
+<@U3ZNWN526> just dropping in but are you using a subscription to run it every 30 seconds?
+Yeah, I sure am.
+It does seem to be using `setInterval` under the hood <https://github.com/elm-lang/core/blob/f064b696a2b9ca93abf4c7d1e21ce9e35fbb1d0f/src/Elm/Kernel/Time.js>
+Well that's pretty odd!  That should work with sinon's fake timers just fine...
+But perhaps elm itself is getting confused by the fake timers, since once they are activated, time only moves forward in big jumps...
+Well I gave up on it for now.  I'll just leave that test "pending" :wink:
+For uninstalling a package, do I use `elm-package uninstall`, or do I manually edit _elm-package.json_ and delete appropriate line(s)? (Ditto for _tests\elm-package.json_.) -- and then delete elm-stuff (for tests too) as well as elm.js?
+<@U3L8MM10T> All the dependencies for your project (as of elm 0.18) are stored in the project's elm-stuff directory, so removing it from elm-package.json and deleting elm-stuff will get rid of it.
+or removing from `elm-package.json` and re-running `elm-package install`
+Is elm-graphql still being maintained?  In order to talk to the github graphql it needs to pass a basic auth header (note: this is in contravention of the documentation).  I could fork it and do a pull request, would it be taken up?
+<http://package.elm-lang.org/packages/jamesmacaulay/elm-graphql/1.4.0/GraphQL-Client-Http#RequestOptions> &lt;- shouldn't you be able to use those options? Or are you talking about a different `elm-graphql`?
+Different one.  Sorry, didn't specify.  it's base-dev/elm-graphql.  I had a look at James's, I am going to talk to him about it when he resurfaces.
+Ah, no experience with that one
+It seems to have made the corr3ect design decision to start with the schema and the query, but it has not been touched for a few months.
+(not being updated doesn't mean much when it does what it's supposed to do)

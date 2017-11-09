@@ -1,0 +1,32 @@
+```
+i'm currently diagnosing some garbage collection issues and am wondering if maybe i should be using the oracle jvm instead of openjdk
+i cant find any evidence that it matters but i cant say for sure
+it won't make a difference
+does anyone have any opinions on thi?
+you suspect a leak in your code?
+no, im looking into very long stop the world pauses ~20 secs
+i guess im wondering if the implementation of garbage collectors makes a difference
+ok i just wanted to hear someone say it wont make a difference because that's my instinct too
+while we're on the topic, just so i'm clear, the implementation of g1 garbage collector in openjdk is different than the implementation in oracle jvm right?
+it is not different <@U098UL4QP>
+G1 is G1
+ok thank you for clarifying that
+have you looked at heap profilers?
+the choice of GCs makes a difference with pause times, and your allocations are going to be workload dependent...
+i've found usually that there's an offending spot in my code, but it can be tricky to track sometime
+A quick temporary fix for long pause times is to a) make your max heap size _smaller_ and b) remove any JVM command line flags that somebody pasted into your deployment  (probably directly from stack overflow)
+I was almost going to mention that making the heap smaller thing, but then I realized it sounded really weird and I didn't have a cite... thanks for confirming that though
+also, I recently learned the term "jvm smoke break" for this kind of problem, which I find amusing
+lol
+the advice is totally counterintuitive.  mem leak =&gt; long GC =&gt; increase heap size =&gt; larger leak =&gt; longer pause time
+Hi! Is Clojure 1.9 stable enough to start a project on it now which will be pushed to production in a couple of months?
+<@U050ECB92> which heap profilers do you recommend?
+<@U5ZAJ15P0> looks pretty stable to me: <https://github.com/clojure/clojure/graphs/contributors?from=2017-01-01&amp;to=2017-07-01&amp;type=c>
+Is it ok to have side-effects in clojure specs? e.g. a database call. The application I am thinking of is checking that an email hasn't already been used on a "signup" API payload
+seems gross
+<@U5ZAJ15P0> only if idempotent
+and implies effectively global scoping of the database connection, which is also gross
+It's ok to validate things outside of spec too 
+<@U5ZAJ15P0> Clojure 1.9 is stable enough for production use as far as I'm concerned — my company has Clojure 1.9 Alpha 17 in heavy production usage right now.
+does anyone have recommendations on a good job scheduling library for Clojure? checked out Quartzite earlier, but had some difficulty getting it to play nicely with my loading of env vars from mount
+I've found following question on SO: <https://stackoverflow.com/questions/12044181/into-or-vec-converting-sequence-back-to-vector-in-clojure> but I don't think  the different behavior for small arrays mentioned in answer is true

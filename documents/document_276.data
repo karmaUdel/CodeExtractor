@@ -1,0 +1,42 @@
+```
+ah
+perfect
+working now!
+I mean, you can do it in Elm too, using `decodeString` rather than `decodeValue`, but there's little added value atm
+Yep
+I didn't realise that just changing the types you passed in changed how it interpreted the json
+so i thought i had to just pass in the string
+btw what the new release of my plugin looks like. Totally revamped ui
+yeah, makes sense. But basically, `decodeValue` works on a JS value, `decodeString` works on a string. Any JS value is a valid `Json.Encode.Value`, so passing in a string as a `Json.Encode.Value` means you'd have to `decodeString string flags |&gt; Result.andThen (decodeValue yourDecoder)`
+ah gotcha
+Now, to figure out how to best handle your feedback on `elm-demystify-decoders` :sweat_smile:
+lol well you now have the entire problems i had from go to wo
+yeah, which is invaluable, really
+again thanks for all the help
+Hello, I'm new to elm and currently experimenting a bit. I'm trying to create a port module to a javascript library, but the method has an optional configuration parameter. What is the best way to deal with this? Wrapping the configuration in a Maybe seems to result in a really clunky interface, while making two functions seems to require different names for each. Is there an elm  convention for this?
+if it's optional, then maybe is the way to go
+an when it's optional, I guess there is a default, so then in elm you can use `Maybe.withDefault defaultParam paramFromPort`
+<@U623QK78C> which will give you a normal value without the maybe
+is there a way for multiple case matches to take the same branch in a `case of` ?
+nope; though it's worth considering if they really are separate cases, then. Separating the contents of the branch and making that into a function often helps, too.
+How do we reconcile the will to expose as little as possible and the will to test functions, is it a good practice to expose everything from the main module to be able to do test, is there another way?
+when testing functions i'll usually have them in the same file, then i'll abstract them out and share them as i need them
+Another pattern that's occasionally used is having an `Internal` module that is not part of the exposed modules, but that contains the actual internal logic and exposes the necessary functions. The exposed modules then use those internal functions to expose a nice api
+as an example: <https://github.com/rundis/elm-bootstrap/blob/master/src/Bootstrap/Internal/Button.elm> and <https://github.com/rundis/elm-bootstrap/blob/master/src/Bootstrap/Button.elm>
+thanks
+Over the past few days I made my first Elm app: <https://ellie-app.com/3C82gcxFFjsa1/1> I welcome any feedback. In particular I'm looking for feedback regarding the chosen data model and how to make things more concise (if possible). If anyone wants to take a look, that'd be awesome!
+Can somebody elaborate on the return type `Html Msg`? I understand `Html` because you return an HTML element, but why `Msg`?
+That means that you can/will send `Msg` values from the HTML: they emit messages.
+These `Msg` will then be fed to the `update` function
+The guide explains it as well: <https://guide.elm-lang.org/architecture/>
+especially the section on buttons: <https://guide.elm-lang.org/architecture/user_input/buttons.html>
+<@U2D5SAEMN> Looks nice! If you wanted, you could make do without the initialCmd by using programWithFlags instead.
+Thanks! Do you mean calculating today in JS instead of in Elm?
+Yeah. You can pass the date in as a Unix timestamp in the flags, for example.
+Ah I see. But what would the benefit of that approach be? Only dropping the `initialCmd`?
+Yeah I'm not saying that it's a better way to do it, just pointing it out. So if some time later you happen to get in a situation where the data _has to_ be resolved from the start, flags is a way to do that.
+Got it, thanks!
+Do you have any further feedback? For example regarding the data model or making things more concise?
+Nothing major, to be honest. The filters are sort of screaming they want to be stored in a Set, but since union types are not `comparable` you would need to use an extra package so maybe it's not worth the hassle.
+Thanks <@U0CLDU8UB>! I'm glad to hear I'm on the right track :slightly_smiling_face: Why would you use a Set for the filters?
+- the order is not important

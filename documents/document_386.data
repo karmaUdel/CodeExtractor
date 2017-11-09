@@ -1,0 +1,29 @@
+```
+I'll try both, and see which looks better
+I need help. Im creating a SPA and using a butchered version of rtfeldmans SPA example. Now my pages does not load unless I click enter in the url. So the URL is updated when I click a link (a href...) but there is nothing listening for OnLocationChange. Anybody?
+In <@U0CL0AS3V> code he does not use the OnLocationChange message like in the elm tutorial. The update function is triggered though but not the SetRoute function that should be called for the page to be changed. I cannot find the code that I am missing.
+<https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L478>
+That's the line which will send a `SetRoute` msg every time the location change
+It uses <https://github.com/elm-lang/navigation>
+<@U1UGYHGCA> OK, that makes sense but I must be missing something else. I have that code but SetRoute is not run
+Should the init function run each time the location updates?
+In my case it does not, can that be a hint?
+Nope, the init function is only ran once ever
+OK
+Found it!! I was missing the SetRoute case in my UpdatePage function.
+Compilation should have failed
+Seems like I usualy find my errors my self only after I have asked for help. Thanks anyway <@U1UGYHGCA>
+Np
+I had this case at the bottom:  ( _, _ )
+yes, he seems to have a catch-all there
+Yepp
+should really be a catch all per page I think
+like the NotFound case, but for each page
+<@U4872964V> make a pull request ?
+Yeah, having catch-all is never good for compilation
+not sure how you would handle it here actually
+catch-all for the message with _ for page I think
+i'll make an issue
+<https://github.com/rtfeldman/elm-spa-example/issues/27>
+:+1:
+I thought I could do something like `Maybe.withDefault 20 (get 1 array).score`, but it looks like I'm misunderstanding `Maybe`s.

@@ -1,0 +1,48 @@
+```
+Oops, my bad. Missed that
+That should work
+Though I don't know if there is any point to removal of `(second group)`
+You may as well do this `[[hash [{file :file} second] :as group] %]`
+<@U071CG4QY> Correct. That is my initial version. But don't you think destructured version is more readable?
+<@U69HWBFB3> Nope, imo — you need to parse destructuring and for that structure it is not very easy.
+when using datomic, if I can freely choose between an SQL backed datomic or Cassandra backed datomic, which one is better?
+<@U63RTB1KR> It's because of the way transducers work. They *are* applied from right to left, but to the reducer fn.
+You can think of each wrapping the earlier transducers
+<@U63RTB1KR> <https://clojure.org/reference/transducers> checkout "defining Transformations with transducers"
+however I get the error on the final line "java.lang.ClassNotFoundException" caused by GRB.BINARY. I believe I have imported everything using the extensive import above.
+<@U46LFMYTD> Might be a static member, so it could be `GRB/BINARY`
+Or, an inner class, in which case you need to import `GRB$BINARY`, but from the upper case spelling, I'd assume the former
+bingo
+<@U0BB79MMJ> <@U3GJHS5DY>  Thx. I'll check it again.
+it was `GRB/BINARY`, thank you
+How would I convert `x.get(GRB.DoubleAttr.X)` to clojure
+cider in emacs isnt giving me much help &gt;&lt;
+can someone please help me convert `x.get(GRB.DoubleAttr.X)` to clojure code
+so turned out I needed this
+But I'm confused as to why I needed gurobi.GRB$DoubleAttr instead of GRB$DoubleAttr as I already imported gurobi.GRB in my import statement
+and when I begin to type `gurobi.GRB$Dou....` cider doesn't autocomplete it
+so this worked `(.get x gurobi.GRB$DoubleAttr/X)` but i feel like im in the dark
+cider isn't giving me any autocompletion help so its hard to find the proper structure
+cidre doesn't autocomplete `gurobi.GRB$...` at all
+<@U46LFMYTD> Yeah, nested classes are confusing to work with... You can probably directly import GRB$DoubleAttr as well, that should fix it
+<@U3JURM9B6> <@U1ALMRBLL> clojure has eager-map built in, it's called mapv, and it will perform better than that reduce example, even if you need to call seq on the result to get a list instead of vector
+what's the best and most elegant way when using `environ/env` to ensure that values that can be coerced end up being so. Right now everything it reads as strings. I'd like values like "true"/"false" and numbers to be converted to be of the right type
+Tried simply using edn/read-string, but it turned out to be not so straightforward.
+some edge-cases when the exceptions thrown, I end up with code that doesn't look elegant. Clojure has spoiled me: If code doesn't look elegant - I feel it's not worth adding it.
+I wonder if `plumatic/schema` coercers would help here…
+<https://github.com/plumatic/schema#transformations-and-coercion>
+&gt; Coercion is like validation, except a schema-dependent transformation can be applied to the input data before validation.
+<@U0G75ARHC> consider that you'll read this at startup, and IMHO startup is the perfect time in the run of an app to reject input outright and exit with an error
+so I'd say, don't try/catch, even explicitly throw AssertionErrors if the data isn't "perfect" - then whoever set up the run environment can use your clear descriptive error message to fix the input and try again
+<@U051SS2EU> I'm not using schema in this particular project. Seems to be an overkill to have to use it to solve this particular problem
+OK - but my point about asserting / throwing / bailing out still stands
+RFC, all contributors to and users of nREPL: <https://groups.google.com/forum/#!topic/clojure/6SX7q39lK90>
+<@U0G75ARHC> you can check out <https://github.com/amperity/envoy> too
+ag: Use `aero`: <https://github.com/juxt/aero>
+or does every defmethod have to have the signature `[a b]`?
+the defmethod only needs to be able to be invoked on the args given to it
+so if you have a mutlimethod that can be invoked with differing numbers of arguments, and those differing  numbers of arguments are dispatched differently, each method only needs to handle the arity it would be invoked with
+if you invoke a multimethod with N arguments, whichever method it dispatches to will be invoked with N arguments, you can't change that
+okay, that makes sense. I just didnt want to have to change my signature across a couple files that implement the defmethod *if at all possible
+<@U0G75ARHC> <@U051SS2EU> I did exactly that using the json coercer that ships with schema
+yeah- that's what I was thinking of

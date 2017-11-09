@@ -1,0 +1,15 @@
+```
+minitest (in ruby) does diffing on `assert_equal` failures and provides `make_my_diffs_pretty` to ensure that big things get printed structurally. makes finding the problems a breeze in comparison
+It does it that way specifically to find inequalities deep in a nested sexp and it is really really quick to hone in on where the problem is. `check-sexp-equal?` has to embed `#:new` and `#:old` tags to show you where the differences are but the whole sexp is printed flat
+just doing a pretty-print of the output would make it much better
+<@U5KU1HNKY> check-sexp-equal is very nice and was part of the inspiration for `expect` :)
+<@U07SJGB4H> I'm not a fan of expectations (at least from the BDD perspective). I imagine that your RHS blows up really quickly on anything non-trivial
+thanks! if you have any insight on how to improve its output I'm all ears
+there's "expectation conversion" so that you can write something like `(hash 'foo (list 1 2 (vector 'a 'b (expect-pred? number?))))` and it will convert it to an expectation that structurally matches things and reports errors in contexts
+the above example I had didn't do that because `expect!` does not yet convert its expectation argument automatically
+`(expect-equal? some-complex-data-with-hashes-and-lists-and-stuff)` will do it though
+They're more like junit/hamcrest "matchers" than anything else, but I wanted a more noun-y name
+I'm currently working on a test filtering feature for chk and rackunit. The idea is to be able to call `raco test my/module -- args to forward` and the test lib interprets `args to forward` as filters for test names, files, lines to run. I'm looking for feedback/feature requests based on the WIP documentation: <https://cfinegan.github.io/chk-docs/chk.html#(part._.Filtering_.Tests_with_.Command-line_.Arguments)>
+Please let me know what you think. Rackunit docs are coming after I figure out what features are the most popular.
+<@U5GQ7TC3H> instead of relying on command line arguments, would it be cleaner for `raco test` to define some sort of "filters" concept and pass it along to test submodules? module-level filtering could work with a config submod in the test module
+There's always `getenv` plus the ability to define an env var on the command-line ¯\_(?)_/¯

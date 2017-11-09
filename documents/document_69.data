@@ -1,0 +1,20 @@
+```
+but it's not documented that that will always work (or become reserved for some special system/core usage) so I wouldn't use it
+<https://dev.clojure.org/jira/browse/CLJ-1527>
+the point is, just because the reader only constructs certain kinds of symbols and keywords, that doesn't restrict the Symbol and Keyword data types to only construct those types of symbols and keywords
+<https://dev.clojure.org/jira/browse/CLJ-17>
+<https://dev.clojure.org/jira/browse/CLJ-2009>
+etc etc etc
+And at one point, very specifically, the Clojure/core team made `:1` (numeric keywords) illegal in the reader on the grounds that they weren't sanctioned by the docs -- and they broke a bunch of code out there in the wild so they reverted the reader change.
+I was affected by that change (one of the OSS libraries I maintain) but I would have been perfectly happy to change `:1` to `(keyword "1")` -- which they said they would _not_ break... but they still reverted the change :slightly_smiling_face:
+So we have prior art for the reader being publicly known to accept things that are not considered "correct" and not getting fixed -- and a statement that `keyword` (and, similarly, `symbol`) being able to produce "junk" output from arbitrary input :neutral_face:
+the issue isn't that the reader and the reader docs are not in 100% agreement about what is a readable keyword (that is another issue) the issue is that a valid readable keyword is not the same as a valid keyword
+for example, the keywords json libraries create for map keys never pass through the reader
+so they can be any crazy thing
+Exactly my point, yes.
+which negates the purpose of turning them in to keywords in the first place, because the only reason people turn them in to keywords is since most maps in clojure use keyword keys, they more comfortable with them
+Speed of lookup over plain strings. In theory.
+maybe
+`(identical? :abc (keyword (str "a" "bc")))` =&gt; true
+So map lookup will be faster if it can check for `identical?` before falling back to "equal".
+but do you want to be interning json coming in over the wire?

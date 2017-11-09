@@ -1,0 +1,28 @@
+            )```
+`map2 (,) (index 0 a) (index 1 b)`
+or `map3 (,,) decoder1 decoder2 decoder3` for a tuple with 3 members. or `decode (,) |&gt; ....` if you want to use the pipeline stuff
+so the code the example i posted can be greatly simplified?
+aaaaah, ok i hadn't looked at map properly
+i was still thinking of list map
+you only need `andThen` when chaining decoders that depend on the contents of the previous decoders. If you're just combining multiple decoders together into a structure (e.g. a tuple), you can use one of the maps (`map`, `map2`, etc)
+gotcha, that was just only example i could find googling it
+thanks!
+If you want to get a better feel for `map` / `map2`, I wrote an article that looks at uses with `Maybe`, `List`, `Json.Decoder`, and `Random.Generator` <https://robots.thoughtbot.com/elms-universal-pattern>
+thanks i'll give a read
+I now see why i've put off decoders for so long -_-. i find this stuff harder than 3d shader programming.
+Not sure if it's helpful, but I wrote this "set of exercises" thing that aims to guide people through learning decoders gradually - <https://blog.ilias.xyz/demystifying-decoders-d294ed35bc6e>
+that might actually be super helpful
+because i'm trying to jump in and decode some pretty large data structures
+I was just parsing the json in js automagically before sending it over
+and that worked fine when i didn't need to validate it
+<@U3KSN5MAL> As for `map`, it might help to think of it differently. People tend to think of `List.map` in a procedural way. It takes a function and a list and then applies the function to every element of the list. However, you can think of it a bit differently. List.map upgrades a function of `a -&gt; b` with certain rules to be a function of `List a -&gt; List b`. We can re-write its type definition as `List.map : (a -&gt; b) -&gt; (List a -&gt; List b)`.
+But this is getting to be quite a confusing set of messages....
+<@U48AEBJQ3>  interesting, thanks
+<@U3KSN5MAL> also, if you're still fuzzy one what a decoder _is_, this is a nice article <http://ohanhi.com/secret-spy-messages.html>
+wow soo much to read
+There also an actual (small) book, which is a great read, by <@U0JUBLV8F>
+So yeah, there's _a lot_ of material :slightly_smiling_face:
+JSON decoders are probably the thing that trip up beginners the most in Elm so a lot of people have written about them :slightly_smiling_face:
+yeah....
+i appreciate the help
+decoders make sense _now_ but yeah, not the most intuitive things. Luckily, most everything else in elm is pretty intuitive, so it's not so bad :slightly_smiling_face:

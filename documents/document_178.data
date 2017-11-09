@@ -1,0 +1,206 @@
+```
+^ <@U3KEQNP5Z> (if that's not it, please open a help request at <https://slack.com/contact> and someone on the platform support team will lend a hand)
+<https://bpaste.net/show/83008a6ec214> – why is "event" a list? is it possible there could be multiple items in this list if there are multiple events that happen within a second, or something?
+One read give ones event
+afaik
+added an integration to this channel: <https://dev4slack.slack.com/services/B3KTJP79A|outgoing-webhook>
+<@U3EFK8UES> Thank you. It returns a list... I'm not sure why else it returns a list?
+Q1. With the slackclient, so I need a new rtm connection for every team that is using my slack bot, right? eg. 30 teams, means 30 different daemons or scripts constantly monitoring for messages. <http://slackapi.github.io/python-slackclient/real_time_messaging.html#rtm-events>
+Q2. I see <http://users.info|users.info> returns timezone as "Pacific Standard Time" when I want "US/Pacific" (something arrow/datetime are more familiar with). Is there a slack mapping of sorts, so that I can do this with every timezone? Or perhaps there is something in python I'm missing here. Can anyone shed light on this? Thank you
+I can't figure out timezone string based off offset... hmm
+Q3. With events and RTM, it seems it'll pass back the same message twice if I stop/start RTM. I assume I can md5 the event or something and I'm responsible for tracking duplicates on my end and handling appropriately, correct?
+Q4. In python-slackclient in RTM I see, when my bot gets a message, there is 'reply_to': 2340 ... however, when I send a message from my bot with chat.postMessage I don't get any type of message ID. How am I supposed to track this if I never get the message ID when it's sent? Maybe I'm missing something
+@twiliobot test
+@twiliobot test
+Q4:  I'm not on my machine, can you give the exact reply_to example response? I'll try when I get to a computer 
+Q4. This is an event for a DM: {'user': 'U02Q9CJN', 'reply_to': 2340, 'ts': '1483064133.000013', 'text': 'ok', 'type': 'message', 'channel': 'D3L6V3F0'} – note the reply_to.
+Maybe <@U07CW6N3A> can clarify Q1-4 above too
+Q1 - yeah, there's no multiplexing of RTM connections. One open websocket per team you're installed on. Definitely harder to scale. Events API is an alternative, where you get inbound requests for every event and scale your servers/service like a typical inbound web service.
+Q2 - our user timezone detail is underdocumented presently. Look for the `tz_offset` field for a better way to adjust your date objects (as well as `tz` -- the "Pacific Standard Time" string you're seeing comes from `tz_label` I believe. . I'm not super familiar with Python tz parsing unfortunately
+Q1. Great, thank you
+Q3 - yes it's possible you'll get the same message multiple times -- "deliver at least once" is the general failover philosophy. `ts` values are unique per team - channel combination, so if you want to hash them use the team ID and channel ID and the TS value in conjunction with each other. with the events API in particular, you may get dupe events more often (we specifically retry deliveries if you don't respond with a HTTP 200 fast enough)
+Q2. tz is empty from what I'm seeing. I wonder if this is a bug, I partly expected US/Pacific to be there
+My second option is to use offset, but I can't account for DST with that
+Q4 - not sure about this one... it's possible that it's something "extra" the python library is doing or just a stray field in the event that we don't document the usage of
+<@U3KHRQLTX> not all users have a specified timezone, so it'll be empty when we don't collect that info from them
+the members of my team most experienced with that python lib are on holiday break at the moment unfortunately
+Q2. Bingo, I just changed my user to another timezone, then changed it back, and now I see tz': 'America/Los_Angeles', - perfect. I'll use offset first, then that. It's a start, although I don't believe offset can account for DST. I have some ideas to work around this
+some day I'll get around to documenting all the TZ behavior (like whether what we do around DSTs) -- apologies that it hasn't happened yet and you have to venture into mystery and miseries
+Q3. Great tips. I read "ts is the unique (per-channel) timestamp" from the docs. How is it "unique" ? Do you guys use ms to make it unique, but the actual seconds are accurate?
+<@U07CW6N3A> I'm grateful I'm even able to engage you here, I can work with what I got. I appreciate your time :slightly_smiling_face:
+eg. 'ts': '1483115998.000002' - the .000002 is the unique part
+exactly.
+That's cool, I've never heard of making timestamps unique in this way
+we're leaking our implementation details a little bit this way which makes it harder for things to change later... but you do have a number of benefits from the transparency of it too
+<@U07CW6N3A> Great, thank you! :slightly_smiling_face:
+<@U3KHRQLTX> the `reply_to` thing -- figured it out, that's just a concern of the RTM API -- each thing you push into the socket gets an identifier, and then the server sends you a response and refers to your push's ID as its `reply_to`. (It's not about message IDs per se): <https://api.slack.com/rtm#ping_and_pong>
+<@U07CW6N3A> ohhh, thank you! One thing I was just thinking about – if I want a conversational type bot that is engaged mostly in DM (with no slash commands), then my only option is RTM since webhooks doesn't support DMs, correct?
+<@U3KHRQLTX> I think what you really want to use is the Events API: <http://api.slack.com/events-api|api.slack.com/events-api> -- it's more webhook-like but focused on more traditional web app scaling.   you'd request the `bot` scope and subscribe to im-related bot events -- you'd only receive messages from IMs that way.
+<@U07CW6N3A>: perfect, I must have missed that one. Thank you, that's exactly what I was looking for. I also believe that the odds of getting duplicates is much less likely if I return a 200 when the events come in . One less thing to account for 
+<@U3KHRQLTX>: here's a python events api tutorial <@U1LQ4MEKE> wrote that might be helpful: <https://github.com/slackapi/Slack-Python-Onboarding-Tutorial/blob/master/README.md#pythonboarding-bot>
+<@U07CW6N3A> thank you! There is some helpful pieces in here
+I have a scenario where I need a bot to be able to relate messages, the only way other than a full blown app requiring a domain, is to use a test token 
+Also note this is for an individual team 
+does anyone have any experience building bots in ruby
+maybe check this out: <https://github.com/slackapi/Slack-Ruby-Onboarding-Tutorial/blob/master/README.md#building-an-onboarding-bot-in-ruby-using-slacks-events-api>
+<@U3EFK8UES> it's possible to use test tokens that way for a single team, but I'd still recommend going the full-blown app route to reduce the surface area of your token's capabilities
+I'm looking for a slack bit that can take a solar proposal request from my team and input the responses into a Google form. Anyone know of a bot that can do this. It seems simple but I haven't been able to figure it out. 
+Yes, please, invite users to expose their bot token client side
+<https://improvi.github.io/slack-chat/>
+:scream_cat:
+even referenced by slack
+<https://api.slack.com/community>
+:scream_cat:
+hello! does anyone know if its possible for a bot to know the user that authorized it?
+by the great law of the slack covenent, a bot may never know it's true creator?
+<@U392A23SP> the oauth process yields you the ID of the authorized user
+when you get the token
+I'm trying to get a bot to join a channel. I'm getting this back from the API: {'ok': False, 'provided': 'identify,bot:basic', 'error': 'missing_scope', 'needed': 'channels:write'} ... I do have the channels:write scope. I see "Modify your public channels" for my bot when I check it in <http://slack.com/apps/|slack.com/apps/>. I thought the order of priority might matter, but it doesn't seem to. I'm stuck here, any ideas? Thank you.
+(Using channels.join)
+have the creator of the channel invite the bot
+vs. trying to let the bot join
+<@U3FGRUSLT> Thank you, I just came to the same conclusion. Ha. If I understand correctly, it seems having creator/champion invite the bot to a channel is the only way for a bot to get in a channel.
+makes sense, bots can't be trusted :slightly_smiling_face:
+:wink:
+<@U3FGRUSLT> The next question, then, is how do I know when my bot gets into a new channel? I'm using the events API. I don't see something that shows when it joins a channel. Hmm.
+RTM?
+<https://github.com/higherdotteam/proposal/blob/master/main.go>
+i see those in `case *slack.MessageEvent:`
+<@U3FGRUSLT> I was hoping there was a way to do this with the events API. RTM has several limitations that aren't attractive.
+oh, i've always used RTM never had a problem yet
+what's unattractive?
+It's not a scalable solution, sending/receiving messages for a bot only interacting in DM makes more sense for Events API from what I've found
+From what I gather, RTM is good for a bot for 1 team. But running 30+ daemons with an open RTM socket doesn't make sense
+oic
+good point, i've never use RTM at scale
+I'd expect to see "invite to new channel" or "joined new channel" in events API under bot user, but I don't see anything relevant there.
+<@U07CW6N3A> I learned my bot can't join a channel on its own, it must be invited. I'm using the events API. How do I determine when my bot is invited to a channel? I'd expect to see this in an event for bot user that I can add, but I don't see it. Thank you
+<@U3KHRQLTX> the Event API is great, and more scalable. But the RTM is somewhat simpler to use, and you can go to hundreds/thousands of bots on the same process
+I am looking for developers to develop a slack app for my team....If anyone is interested. Check this posting on UpWork <https://www.upwork.com/jobs/~01b31785d6a73989ee>
+Hello, I want to know if it is possible to upload an file with a predetermined or preloaded initial comment at the UI(web/desktop), something like `initial_comment` argument of `files.upload` method api. When you type some text at the message box and then clicking the plus (`+`) icon to upload a local file and select a file to upload, the title is prelaoded with the text typed previously. There would be some behavior to achieve something similar with the initial comment? What I want to achieve is initialize the comment somehow without the user doing it directly. Thanks
+<@U0HBN0L9M> Thank you, I thought I might be missing something. Hundreds/thousands of bots means I need to run hundreds of thousands python processes with RTM connections, correct?
+nop
+the opposite
+hundreds of RTM connections on one process
+I mean, what do I know... Not sure about python :slightly_smiling_face:
+ask in <#C0J3CL5V1|language-python>
+In Node, 1 process, hundreds/thousands of RTM connections
+<@U0HBN0L9M> Thanks, I didn't know that existed. Another challenge with RTM is that I had to check for duplicate events
+?
+<@U0HBN0L9M> eg. events API sent one request, if my server returned 200. We're good. RTM showed me the same events if I stopped/started RTM twice
+ah, yes. You should open only one RTM connection per team
+<@U0HBN0L9M> I see. And each team gets one RTM connection, which I believe in python would require multiple processes for each team.
+Oh... that's the distinction. I get I can run 1 connection with many bots for 1 team
+<@U0HBN0L9M> Thank you for chiming in :slightly_smiling_face:
+Happy new year to all 3720 of you delightful bot heads
+Who wants to make bold predictions about bots in 2017?
+bots in 2017 will auto add stars to the word *bold* to make it *bold* ?
+<@U3KHRQLTX> my memory is rusty right now but I _think_ (despite documentation suggesting otherwise) you should get a `message` event with subtype `channel_join`) -- it's not the most intuitive conduit
+<@U07CW6N3A> I'll take what I can get. :slightly_smiling_face: Let me see if I see that – thanks for the tip
+<@U07CW6N3A> Strange, I'm seeing the event like you're saying when the bot is removed, but not when it's added. I have this set up in events API: <http://screencast.com/t/T8snvKYg5Ay> – I don't imagine it only works the first time the bot is added, eh? If I remove the bot multiple times, I see my listening system get a POST. I suppose I can try to remove the app, re-oauth, and then invite again and see if it works the first time
+slack API down? I am having issues connecting
+`rtm.connect()` is failing
+<@U3KHRQLTX> another quirk (there are so many I should better collect them) is that there's <https://api.slack.com/events/im_open> for direct messages. If you close the conversation with the bot (the x next to the dm entry in your sidebar) and then open a direct message with your bot again, I think you'll get a `im_open` (provided you subscribe to it first)
+<@U07CW6N3A> I wonder if a temp "Quirks Page" would suffice. :slightly_smiling_face: Nonetheless, I appreciate your quick response. I'll try again with that – thank you.
+<@U3KHRQLTX> I just did a quick check and confirmed <@U07CW6N3A>'s suggestions above. I believe you should see a `channel_join` subtype event when listening to `message.*`
+<@U1HK4CCRM> Hey John, I appreciate you taking the time to do that. Thank you
+you got it :+1:
+<@U1HK4CCRM> Can you confirm that the message comes across after removing the bot and having the bot rejoin again? I'm getting the event with the message "You have been removed from ..." every time, but only when I remove the bot, never when I add the bot – which seems strange. I'm wondering if it only shows up on the first invite (where I may have not captured this). I have this set for Events API <http://screencast.com/t/NFaggZfa>
+<@U1HK4CCRM> And by "add the bot" I mean invite the bot
+ah
+could it be the bot listening for that event is the one being removed/added?
+<@U1HK4CCRM> I just created a new channel, invited the bot, removed the bot, and again I only saw the "You have been removed from the group testdev" message. Yes, the bot listening for the event (added under Bot Events in Events API) is the one being added/removed. Any other thoughts and/or explanations here I may not be understanding?
+right, you won't be able to listen to your own events there.
+<@U1HK4CCRM> I see. In that case, to my understanding – there is no way for a bot itself to join a channel, it must be invited. And there is no way for a bot to know when it gets invited to a channel. Is this correct?
+Maybe I can have the bot listen for new messages in a channel, and that could indicate when a bot is in a channel? That doesn't seem very intuitive, though, as it relates to this onboarding process I'm trying to design. I'm wondering if I'm missing something? Thank you
+<@U3KHRQLTX> hard to say without knowing your use-case in detail. you may want to approach it at a team level instead and leverage DMs for new users
+<@U1HK4CCRM>: 1. Asked differently, with events API, is there any way to know when a bot is invited into a channel?
+2. You're suggest a bot DMing all users on a team? 
+3. I'm thinking through awareness for a bot. I was going to have it announce itself in a channel. If someone wants, they DM the bot to engage further. (As opposed to a mass DM, not sure if you were implying that though)
+2. never DM all users. I suggested just new users / ones you're onboarding
+<@U1HK4CCRM> 1. I'll try that. 2. Yeah, I didn't think you were implying that. Ha, I'm aware that's not cool
+<@U3KHRQLTX> why not make it easy for the personal installing the bot to add to all channels and all newly created channels in the future. We did that for MetaCert - but, that's security so they're more likely to want it across all public channels. But we built the UI to make it stupidly easy at installation. And because the service provides them with user analytics they have a reason to go back to our website/their dashboard - where they can add to new channels by selecting check boxes. Hope that helps. Happy to provide a screen shot if you like - or just goto brilliant bots on Slack and install MetaCert and see how slick the installation/config process is
+<@U1DDKQPGB>: thank you Paul. The idea was to have the bot get invited into 1 channel, announce itself, and if people want they can DM the bot. The challenge I'm having is knowing when the bot gets invited into a channel. I'm going to try the latest suggestion as soon as I get back to my dev environment 
+And I'll have to take a peak at your process, appreciate the tip!
+(And the champion is the one who would invite the bot into a channel.) At first I was going to have the bot join a channel that the champion wants the bot to be in but the bot can't join a channel
+And <@U3KHRQLTX> <http://bcrm.com|bcrm.com> tells you how many channels your bot is in for each team. And the messaging software allows you to see what channels and then message them. 
+I see, will check it. Most of the action is in DM, it being in a channel is only to announce itself and remind people it's available in DM
+<@U3KHRQLTX> I think your problem is that you're not subscribed to `message.channels`
+the `channel_join` message for joining a channel will come from that subscription, you only have `<http://message.im|message.im>`
+the message you're seeing when you leave the channel sounds like the DM that slackbot sends you when you're removed from a channel, which is why you're getting it through `<http://message.im|message.im>`
+<@U1ZMN2FD1>: thank you, really appreciate it. I'm going to test with that shortly 
+anyone notice that mpims are showing up as private groups in the iOS app?
+with what appears to be an internal name for the mpim
+<@U1ZMN2FD1> <@U1DDKQPGB> <@U1HK4CCRM> <@U07CW6N3A> I can confirm message.channels for bot events in Events API POST's to my server when my bot enters a channel. This seems to be what I was missing. Thank you all for sharing your thoughts, I really appreciate it. :slightly_smiling_face:
+Hello everyone.
+How can I use simple polling server with BotKit?
+<@U3MTH177G> I'm doing that with Python and slackclient
+I'm looking at developing BotKit with my own messaging server. Is it possible?
+don't know
+Yes but you would have to create your own adapter
+sorry
+Which just involves attaching to your API
+Ohh great, could you link me to one of them?
+<https://github.com/howdyai/botkit/blob/master/lib/Facebook.js>
+<@U3MTH177G> are you using an XMPP server or rolling your own?
+Looks good to me. I will try it out.
+Of my own
+I think there are a few people on this team who have integrated Botkit into their own messaging services
+Sure, got it. Thank you very much. I will work on it and get back to you.
+People: noticed there was no general hosting channel here, so ive created <#C3MG3JQUD|hosting>.
+Feel free to use to for hosting topics not covered in any of the existing channels!
+<@U1HK4CCRM> <@U07CW6N3A> One thought, and perhaps it's just me. When I try to get my bot to join a channel on its own, using channels.join, I get this error back: {'provided': 'identify,bot:basic', 'ok': False, 'error': 'missing_scope', 'needed': 'channels:write'} ... I believe the proper error is user_is_bot. If this was returned, I would have known to look elsewhere for a solution instead of thinking there was something wrong with a scope.
+Is it possible to limit my slack bot to only being in 1 channel? Perhaps, if it gets invited to a second channel I can have it message the user that invited saying it's already in a channel and then remove itself from the channel?
+I'm trying to dip my toe into interactive messages
+I've got a slash command that I'd like to add some interactivity to
+but Ican't seem to find how to add the callback url to it
+and I get the following error message right now:
+`Darn – that didn't work. Only Slack Apps can add interactive elements to messages.`
+added an integration to this channel: <https://dev4slack.slack.com/services/B3MGYKCAW|outgoing-webhook>
+Are you trying to use an internal token/app for this?  for whatever reason, using buttons requries using a application token, which means you have to register your app (you don't have to publish it though)… and you'll need to go through oauth to auth your team in order to get the bot token.
+interactive buttons is one of the few items that requires a “slack app” instead of an “internal app”.  Again, I have no idea why this is the case… it just is :disappointed:
+<@U3LDUPV2A> I created an app, but I can't figure out how to enable it without putting it in the directory
+you don't need to enable it… you just need to get a bot token
+unfortunately, in order to do that, you need to go through the oauth process.
+- that's my understanding and how I got it to work
+what stack are you on <@U34F4FH7U> (node? python? ruby?)?
+python
+I think I get a token
+the GET request already contains a token
+oh wait... that's for me to verify slack isn't it
+<@U3LDUPV2A> ^^
+did you go through the oauth process? with your app?
+this &gt; <https://api.slack.com/docs/slack-button>
+when you go through this process and authorize your team to use this app, the final response payload will contain a bot_token.  That's what I use in my slack app to work with interactive messages.
+nice
+I'll take a look
+I've got simple code to get this token in node, but not python.  Are you using ngrok to expose your local environment for the callbacks?
+slack requires these callbacks to be ssl, so ngrok is pretty useful for this
+<@U3LDUPV2A> I'm using lambda, so it's not an issue
+and I just happened to have some code that I wrote a couple days ago for oauth, so hopefully it will just work with some minor modifications
+thanks for the help!
+ah, perfect!
+once you get that bot token, plug it in… it should start working just like an internal app
+hey. im newbie! i just ran one of example bots of Botkit but would like create my own. However, I'm unable to sign up for Botkit Studio. It asks for Invite Code. how can I get one?
+<@U3MG3Q1FD> studio is not a requirement to build a botkit bot :slightly_smiling_face: But head over to <#C0AV5N8NA|botkit> they might be able to help you with a code there
+is a bot user unable to post in a direct message conversation/private channel without being explicitly added to it?
+DM yes, private channel no
+I was getting an invalid_channel error when attempting to post in either
+will I have to use chat:write:user if I want to be able to respond to a slash command in any context?
+invalid_channel is an entirely different cause :slightly_smiling_face:
+this is from including the channel in a file upload request
+I think to do this I have to post as the user which is not nice :disappointed:
+It is possible to make scenario with button without sending anything?
+I'm new in botkit but I think you can do it. If I'm right, you just need to receive the interactive callback, do some logic and that's all. But the user who clicked that button won't receive any feedback
+Any slack bot owner here? I can help you testing it :slightly_smiling_face:
+i don't understand the method for not send any request; because an interactive button is by definition an Action Url, no?
+The nice people in <#C0AV5N8NA|botkit> might be able to help you
+<@U3KHRQLTX> can definitely agree that it'd be a little more intuitive with that error, though looking at it from another angle, it's because a bot doesn't technically have `channels:write` as part of it's semi-compound `bot` scope... there are some methods that a bot *does* have scope for but can't actually run due to being a bot, and that error is generally reserved for that scenario instead.
+<@U07CW6N3A> Aha! Thank you, that makes sense
+<@U3KHRQLTX> another thing to note in a collected quirks section :wink:
+<@U07CW6N3A> :slightly_smiling_face:
+has anyone run into good platforms that do Sentiment Analysis?
+the microsoft one is pretty easy to use...
+you can play with a smple version online.  here.  I threw a bunch of tripadvisor reviews at it, and it did a pretty good job at returning accurate results <https://www.microsoft.com/cognitive-services/en-us/text-analytics-api>
+Kinda iffy
+I took the default of:

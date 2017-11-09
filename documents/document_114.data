@@ -1,0 +1,72 @@
+```
+<@U3JURM9B6> Not sure I'm understanding you but Clojure does not support "reader macros"...
+<@U04V70XH6> : I also thoguht it might be impossible, but then I read: <https://stackoverflow.com/questions/20677055/define-my-own-reader-macro-in-clojure>
+Tagged literals begin with `#` -- like `#inst` and `#uuid` -- but that's not "reader macros".
+Tagged literals have `#`, a namespace-qualified symbol, and a regular Clojure expression. The regular Clojure expression is read, then passed to the function associated with that symbol.
+<@U3JURM9B6> We use tagged literals in our configuration library at work so we can define values in "special" ways.
+<@U04V70XH6> : (I know nothing about tagged literals / reader macros) -- so what you're saying is that (1) what tagged literals get is after macro expansion and (2) it's basically a function call with a single argument ?
+How come `tools.deps.alpha` is using a map (which is merged with the default deps)? Doesn't that mean I can't specify the order of the deps? Which, IMO is crucial on the JVM.
+Just tried out Compojure API (2.0). <https://github.com/metosin/compojure-api>
+I had no idea it was this easy to set up an API. Is this normal?
+Paranormal
+<@U051SA920>. Do you mean the order of maven coordinates in project.clj? I wasn't aware that ordered mattered there
+it matters anywhere (boot, lein etc) I think, it's a maven property
+<@U06F82LES> No I mean the new `tools.deps.alpha` project that just got released. In maven all of the order matters, which makes projects predictable. Though there is a bug report for leiningen too: <https://github.com/technomancy/leiningen/issues/2283>
+but yes, I think <@U051SA920> is right about that
+It's going to seeminly work for projects that have &lt;=8 dependencies and then all in a sudden the depedencies will be semi random and even change if you just change the version number.
+So IMO, deps shouldn't be specified by a map.
+it's prolly worth raising the issue with <@U064X3EF3> &amp; co
+Yeah I'll wait until they wake up in the states.
+<@U051SA920>, I was aware of tools.deps but didn't know order influenced the maven algorithm
+Maybe just order apathetically?
+Whoops alphabetically
+A wonderful typo though
+sorting wouldn't help
+<https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html>
+At least it would make it predictable
+but it prevents you to have control over it
+But yeah deviating from maven here doesn't seem like a good idea
+I imagine deps could support a vector of "tuples" and map transparently, use the former if you care, the other if not (but since maps make ordering unpredictable I am not sure that even make sense to support them at all)
+Yeah I wish the new `t.d.alpha` was leaning heavily on maven and would just provide a hiccup wrapper around their XML config. That'd be neat.
+to be fair I've never been in a situation where I had to re-order maven coordinates in clojure to fix dependencies. Have you?
+Can't you accomplish the same thing through exclusions?
+imho it doesn't really matter, if the aim is to have a simple tool that kind of maps 1-1 with maven without too much indirection, that ordering issue could be considered a flaw
+but no, never had to mess with ordering myself I think
+It's seldom and only matters if you have the same files in two jars. Which you shouldn't have. But then, it's not clear how often this problems has been the issue with user reported problems who never figured it out what the issue was.
+<@U06F82LES> we have had to do this many times when using xml
+deps conflicts is quite common, ex between guava versions in transitive deps it happens to me all the time
+IMO predictability is crucial, so deps should neither be put into a set (as leiningen does currently) nor into a map.
+hi everyone,…i want ask, sqlkorma how set date and datetime mysql format timezone GMT ?
+<@U051SA920>, wait why is it a set? do you mean internally?
+<@U051SA920> my (limited) understanding is that you're meant to resolve all dependency conflicts completely, so it would actually be ok to store them as a map
+<@U051KLSJF> how would that work given that there are transitive dependencies, java dependnecies, etc.?
+do you mean a complete spec in the style of yarn.lock?
+I thought the idea was that you completely resolved all of the transitive dependencies explicitly
+more like, being explicit about exclusions to solve these kind of issues, but still
+(which is the best way to fix these in general anyway)
+<@U051KLSJF> ahh? didn't understand it that way.
+yeah I think you're closer <@U050SC7SV>
+but I thought idea is that there is no conflicts
+sort of like lein pedantic
+I see, that would make sense, and actually an improvement over raw maven definitions (arguably, since way more verbose)
+<@U051KLSJF> My issue isn't only about transitive deps, but about the non-predictable ORDER of the jar's on the classpath. (See my leiningen ticket)
+hmm, yeah
+Does the order matter for you because you have several JARs which provide the same namespaces/classes?
+alex mentioned the classpath order in the talk here in berlin
+iirc, he said that the order is useful for some things (like overriding packages a la carte) but is not a great fit for other things, like making sure the right dependencies are picked up
+so it sounded to me like tools.deps is intended to take classpath order out of the equation somehow
+hey, anyone here who can help out with a boot-clj related question?
+well... probably someone, just ask, but maybe in the <#C053K90BR|boot> channel...
+`{:a 1/2 :b 1/4 :c 1/4}`
+returns me a random element from [:a ':b :c] respecting the probabilities for each of them
+put the cnhoices in arbitrary order
+sample randomly from [0, 1]
+index into the cumulative probability
+yeah I thought about that, so I guess there is no easier way?
+wouldnt repeating each choice depending on the probability and then using `rand-nth` do the trick?
+that would work in a simple case like this one
+but in the general case I would need to find the LCD of all the fractions
+and generate a massive vector with all the repeated stuff
+right, i see
+suppose an item has probability .3957 , do you repeat it 3957 times? :slightly_smiling_face:
+fair point

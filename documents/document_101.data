@@ -1,0 +1,8 @@
+I'm having trouble adding metadata inside a macro. It's a bit weird (as usual) since it overrides `defn` in order to capture the ast after compilation, but works otherwise: ```(defmacro defn [name &amp; decls] `(def ^{:ast ~decls} ~name (fn ~decls)))```
+defmacro never sees the reader macro, it's applied before it sees the form
+you need to use with-meta or vary-meta to add metadata to the symbol you emit
+I did try that, but perhaps didn't do it correctly
+(and good call because I definitely don't want this done at runtime)
+`^{:foo :bar} baz ` translates to `(with-meta baz {:foo :bar})`
+right
+lemme give it another go and post the results if it doesn't work

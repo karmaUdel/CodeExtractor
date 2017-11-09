@@ -1,0 +1,18 @@
+```
+it still seems like poor architecture to have `(Result Error (List User) -&gt; msg)` instead of `FetchUser` simply because we don't want to depend on that type because it's in a file that causes circular dependency
+idk
+seems like it's not well thought out
+not at all
+because if I change FetchUser I'll have to change that signature everywhere
+it's all about dependency injection
+and seperation of concerns
+the user code is about generating tasks
+the Msgs are all about routing to where they need to go
+sylviecottrell: it's hard to know where to start of these kinds of data modelling questions sometimes, I can definitely relate..!
+so leave Msg type in the main part of the application?
+One place to begin is to really look at/think about what are your UI needs. What bits get shared between different views, what bits you aren't sure if they will be shared, what will be shared in some ways but not in others. That can help guide how you design your types _independently of whatever the database models look like_.  But it sounds like you may have done this already.
+<@U0LPMPL2U> <@U48AEBJQ3> Can you tell me if I'm using this correctly?  I'm a bit confused because if the String-&gt;Int fails (e.g., a missing value) then I get nothing at all.  Is this right? <https://gist.github.com/kyclark/fc42c06fb1b5e0252e5c3ac92c25b2fd>
+if you split your view and update then it should be factored out on it's own to prevent view from depending on update.
+<@U5LFUHH19> mind dropping it in ellie as opposed to a gist
+I found this talk/slide share really helpful on some of the general issues: <http://fsharpforfunandprofit.com/ddd/>
+his example domain is in the same ballpark as what you are modelling too.

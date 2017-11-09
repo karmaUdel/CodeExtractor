@@ -1,0 +1,404 @@
+```
+Oh, I may have an idea what's happening. Elm runtime uses requestAnimationFrame to batch some things to happen at once. Maybe the browser postpones the animation frame until the scrolling stops.
+i could test that theory by adding requestAnimationFrame to the page and see when it fires
+Ilias, what do you think of this theory?
+So I checked it by subscribing and logging at animationFrame
+the logging doesn't stop when I scroll
+however the scroll events only appeared after scrolling stopped
+I'm thinking that the the event-callback are queued by the native scheduler, and the browser is delaying that evaluation until scrolling stops
+the `scroll now` parts are when all the scroll events arrived after scrolling stopped
+So I'm pretty sure you can work around this by attaching the scroll listener on the JS side and sending the info through a port
+Funny thing is had it that way before and the same issue, weirdly :slightly_smiling_face:
+Hi everyone.. I have a Http.send that fetches from an api. the endpoint responds with a fileSend…. now I wonder how to handle this - I want to download this file… but as everything is an XHR request, this would never work in Elm, right?
+I did some cleanup and then opted for putting the scroll handler into Elm
+but that same issue was there before
+So basically before it was JS listens to Scroll and sends stuff to Elm. Now it's Elm listens to scroll and sends stuff to Elm.
+Both ways I had the issue.
+Oh, that's sad :confused:
+I will try some elli app to reproduce it
+according to that its not possible :disappointed: <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#Part>
+that would be awesome. and also does this happen in multiple browsers? What browser are you using?
+Yeah, that doesn't sound like something you can currently do in Elm
+wow, aion I should have checked that earlier
+turns out I have the issue in Chrome
+but not in Firefox
+that basically answers the question whether Elm has anything to do with it
+<https://ellie-app.com/3F2TDVv33bha1/0> &lt;- this works for me on chrome, on osx :confused:
+whhuuuuuut?
+And me, Chrome on Linux
+<@U3U2EA14G> i have something similar, you can pass parameters by passing an object to the elm embed function
+or if they’re in the url parameters you can extract them in elm code
+<https://ellie-app.com/3F2TDVv33bha1/1> and with ports, too
+So, the HTTP streaming thing I asked about earlier today has yet another name: <https://en.wikipedia.org/wiki/Comet_(programming)>
+I got it to work by doing the necessary XHR in JS and sending the incremental responses into Elm via a port.
+it's your decoder i guess.
+I can't run this example for some reason, all I see is a blank screen on  the right side
+tried to compile a couple of times
+but things don't show up for me
+<https://ellie-app.com/3F2TDVv33bha1/2> made it red now
+are there any errors?
+(the red part is scrollable)
+and scroll-events should show up in the dev console, both for the `Debug.log` as for the port-stuff
+yeah that worked
+so it's likely it is something else in my code
+<@U2LAL86AY> what do you think it is about the decoder?
+I try a simple succeed call
+Gotta go now, if you come to a conclusion, please do highlight me so I can read it later :slightly_smiling_face:
+ But if anyone of you knows something about this topic please let me know.
+<@U2LAL86AY> Yes - I think I have to go this painful way, too… :grin:
+<@U3SJEDR96> So I modified that elli example to also use a Decoder which hands the event to the msg but that also works in terms of smooth scroll events <https://ellie-app.com/3F3m5ycmVxya1/1>
+Also I just found out that the delayed scroll events only happen when I scroll via the touchpad but not when I actually use the scroll bar.
+I will post when I know more
+<https://ellie-app.com/3F3zszHK85Va1/1>
+<@U2LAL86AY> my experience is that implementing a PDF library is quite an undertaking, even the basics. I have worked a little with thethe iTextSharp library to run on .NET Core a few months ago
+with elm make does it compile included files or does it just build the one file you specify?
+<@U2LAL86AY> I got the impression it's a large complex spec with lots to implement, quite a time investment to do from scratch
+Yeah it will include what that module imports. Is that what you mean <@U40QW928G>?
+<@U40QW928G> everything is bundled - including imports of your own modules, as well as library imports.
+<@U2LAL86AY> <https://docraptor.comb;)>
+oh wonderful
+then i don't need webpack
+I saw webpack stuff on the elm tutorial site and said no thanks, I've dealt with it enough
+Haha yeah. I use browserify to bundle up everything in my Elm projects tho, and it works well.
+I have to bundle at all because often I have some amount of JS modules.
+From what you know - is possible to create a pdf document directly form elm? Forget for a second that is a lot to implement. I want to know if is possible at least.
+Generating a PDF at the lowest level just involves writing a binary stream (it's a binary format, not text based) and all the APIs exist in browsers to generate a binary stream and present it to the user (as jsPdf shows), however, I'm not sure if these APIs are exposed anywhere in the elm runtime as of yet
+We just do `elm make` to output to a js file and copy it over to our rails app
+Don’t use any of the js build stuff
+<https://developer.mozilla.org/en-US/docs/Web/API/Blob> <https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL> &lt;- These are the APIs you would probably use to implement PDF generation in JS, but as far as I can see they aren't exposed in Elm, so you still need to 'go native' at some point to use these browser APIs
+maybe someday elm make will be powerful enough to build elm projects with styles and static files etc
+Well, there is elm-css, so you can build with styles
+Hope this will be fixed soon enough - there are a lot of interesting use cases provided in that forum.
+And <#C4F9NBLR1|style-elements> for those who are looking for a more innovative approach!
+you misspelled “alternate” :slightly_smiling_face:
+That's what I ended up doing too. Wasn't too bad.
+A lot of bugs i encounter with webpack is just my fault - i do bad configurations - and having this in elm at least will make impossible to do bad configurations - and also providing helpful compiler messages.. Is this even possible?
+<https://github.com/fredcy/tezos-client/blob/master/tezos.js#L51>
+<@U2LAL86AY> Webpack 2/3 should give you really helpful messages if your config is not semantic.  are you using those by chance?
+<@U0FP80EKB> the rails 5 webpacker elm stuff is nice
+<@U0S6BNVNY> I’ve heard. We just updated to rails 5, so we have access to it. My only trepidation is that we’ve got our pipeline working now, so it is a bit of a lift for us to shift to something we don’t know. :slightly_smiling_face:
+play with it once, it's pretty alright. Still lots of magic. But beats the asshat pipeline by leaps and bounds already.
+:slightly_smiling_face: One day we’ll take the time
+Just did some awesome refactoring today. Anyone who says Elm doesn’t support polymorphism needs to see this codebase. :slightly_smiling_face:
+We have 3 different types of embeds with 3 different sets of content, and we are getting consumer code to almost entirely just use a single abstraction.
+Is anyone using Elm apps inside of HTML templates? This might be an anti-pattern, but I am mostly curious if it has any adverse effects on performance.
+What do you mean by HTML templates?
+i’m guessing that <@U1432C733> has some backend framework rails/asp.net mvc/laravel that’s generating static html, and the goal is to embed a small elm ~component~ app into one of those template files to be served which’ll load the elm part after the page
+If that's the case, there won't be any effects on performance compared to other methods of embedding. Unless you repeat the template, of course.
+HTML Templates are also a part of the Web Components spec. You have very different concerns there.
+hi all, do you know if an elm package for case conversion exist somewhere ?
+mainly interested in snake_case &lt;-&gt; camelCase
+the "extra" packages are typically a good start
+<http://package.elm-lang.org/packages/elm-community/string-extra/1.4.0/String-Extra>
+perfect
+you have them for most core modules, like List.Extra etc etc
+yep I know those, just forgot to look inside, didn't  match in package search
+thanks
+<@U0CLDU8UB> <@U3SJEDR96> My colleague <@U5XTFSTFV> found out what the scroll issue we talked about yesterday. After a while we found out that the issue only occurs on Chrome AND scrolling with the touchpad AND using Elm. We profiled some of it and got a performance issue from a chrome that read something like this `Vialoation: setTimeout took more than 100ms `. We then looked deeper into this file <https://github.com/elm-lang/core/blob/master/src/Native/Scheduler.js#L244> at the `work()` function and played around with the `MAX_STEPS` constant. When we set the constant to 10. The behaviour went back to smooth scrolling.
+Seems like elm delays work of too many event arrive between steps of work.
+We will try to work around the issue with requestAnimationFrame
+Cool. I wonder if speeding up domdiffing for your view would help. (i.e. using lazy and/or keyed)
+throttling handling of scroll events with requestAnimationFrame could work too, in javascript
+I've been thinking about getting a `componentDidMount` events in Elm. We're using this in our current React project to fetch the data. It works very well with `RemoteData` type, where in `componentDidMount` you can check if the data hasn't been asked from the server, then initiate the fetch.
+My original thoughts are rendering an `img` tag with a wrong url in `src` and `onerror` event to initiate the fetch.
+Is it possibly to do this in _*pure*_ :elm:  without having to rely on a _*port*_? (change color of an .SVG image) <https://stackoverflow.com/a/9873285>
+ but if that image is already there - and you want to navigate to that particular element using selectors, or ids - and switch the color somewhere nested - then i think only with ports works.
+On Thursdy together with <@U0ZESPUAX> I'll give a short talk about Elm and web components at a meetup in Den Bosch (NL): <https://www.meetup.com/Frontend-Developers-Javascript-Noord-Brabant/events/240756426/>
+<https://ellie-app.com/3FgCNqW2RWLa1/0> <@U2JFD9ALE>
+unsoundscapes: How the API would look like? Perhaps it’s too early for asking that? :slightly_smiling_face:
+which api?
+The equivalent of “componentDidMount” in Elm
+Or maybe you were thinking to use ports to “wire” those events in Elm.
+<@U3SJEDR96> many thank yous good sir :slightly_smiling_face:
+So I just need to convert my .svg file into :elm: code right? Otherwise, I can't update the color right?
+Yes
+I was wondering about hacking it in using some existing events in DOM
+So intercepting React `componentDidMount` in Elm app?
+No. I wanted to have something like `componentDidMount` but in Elm
+hi everyone, I found a problem with `Html.map` and was able to reproduce it on this link: <https://ellie-app.com/3FhDZs3q9f9a1/2>
+is anyone aware of this problem? am I doing something wrong?
+the context in which we are seeing this problem is when a user is focusing an input field, and the session times out, triggering the blur event
+this is essentially <https://github.com/elm-lang/virtual-dom/issues/35>
+but then in pure-elm
+I would definitely log that as an issue on the virtual-dom repo, and suggest working around it using `Html.keyed` so prevent those nodes from being reused without their tagger-structure being properly replaced
+<@U0UGR7JTB> <@U3SJEDR96> I get that effect in chrome, but not in safari.
+<https://ellie-app.com/3FhTzbSZDxTa1/0> for workaround
+and heh, that's interesting. Stepping through the vdom diffing/patching in both browsers would probably reveal why, but I don't really have time for that right now
+to me it seems like this is the opposite of <https://github.com/elm-lang/virtual-dom/issues/35> as here it reuses the node when it shouldn’t
+oh, you're right. #73 seems similar but involves `lazy` :thinking_face:
+it’s like the event happens while elm is rebuilding the dom
+yeah, blur seems to be triggered while the element is being removed
+because clearly Elm won’t reuse the input element that has the event handler
+true, but it recursively walks up the tree for taggers
+yeah
+it's a pretty interesting edge-case!
+a fix could be to have the tagger check that the element that emitted the event still exists
+if that information is available to it
+<https://github.com/elm-lang/virtual-dom/issues/73#issuecomment-307545057> "And here is an SSCCE of the onBlur case described above; it fails in Chrome, as Chrome fires a blur event when a focused element is removed from the DOM."
+yeah, that looks like the same bug
+or? Elm wouldn’t reuse an `input` node to make a `button` node, surely?
+or, the tagger is attached to the `div`, right
+(can confirm that `Html.map identity` fixes it, so that's an even simpler, if more brittle workaround)
+another fix would be to remove event handlers before removing the node
+but then that blur wouldn't be sent at all anymore, not sure if that would be correct behavior either? :confused:
+then again, it doesn't appear to happen (in the same order) in other browsers
+Just noticed, <https://ellie-app.com> is not pink anymore (colorblind) :smile:
+yeah, should deleting a node send a blur event? not sure :slightly_smiling_face:
+<@U2JFD9ALE> yeah, hasn't been for quite some time, actually :slightly_smiling_face:
+that does this?  Then I would just have to change the definition, not all the usages of `render`.
+but in Elm’s perspective, no events should be sent for nodes that are being removed anyway, as that would break in this way always
+<@U4872964V> true. I wonder if "element with focus is removed" is specced anywhere
+<@U3LUC6SNS> you can send a `Value`
+re the above .. yes I would have to change usages, but when I forget one, the compiler would remind me
+<@U3LUC6SNS> this should work if it's a simple record, though writing a `Document -&gt; Json.Encode.Value` function and making your port take js values like that seems even simpler
+So it should be `port render : Value -&gt; Cmd msg`?
+assuming you'd essentially have `encode { content, docType } = [ ("content", Encode.string content), ("docType", Encode.string docType) ] |&gt; Encode.object` you would just get a record-like object on the JS side
+yeah, indeed
+OK, I'll try that   Thanks!
+means you can also be picky about which parts you send over, which ones you don't, and how you want to structure them for JS :slightly_smiling_face:
+<@U3SJEDR96> I think calling unbind() on the node before removing it in the DOM sould be a great fix
+or maybe that’s just jquery :slightly_smiling_face: removeEventListener in DOM
+hopefully i’ll never have to write a jquery function ever again
+<@U3SJEDR96> <@U4872964V> thanks for the feedback, so is the workaround to put an Html.map identity around the input field?
+around the existing Html.map
+ok
+ensure they either have a different amount of taggers _or_ they are in a keyed structure so nodes can't be reused
+but around the input field should work too i suppose
+so, googling some more, gecko has had an open bug for _adding_ blur when focused element is removed... it's been open for 7 years :stuck_out_tongue:
+the "good" news is that there isn't a spec that says what _should_ actually happen. The wording is rather vague: "blur should happen when a focused area stops being a focusable area", but that can include loads of things which aren't handled consistently across implementations anyway..
+Well, if you would want to get a blur event with the previous tagger in Elm when an input field is removed, then I think that would be pretty tricky to implement
+stopping the blur event seems uncomplicated
+the patching would need to happen "inside out" essentially. So yeah, rather tricky..
+I think the problem here is actually to do with the fact that the message is being passed to the wrong scope (Page1Msg vs Page2Msg)
+<@U0UGR7JTB> yeah, that's what we mean by "taggers" :slightly_smiling_face:
+sorry, didn't get that :slightly_smiling_face:
+or you could just make a ‘p-redraw’ patch if taggers are not the same.
+then you’d avoid type errors at least
+true, but at a possibly higher cost, though it's hard to measure real-world impact
+how often do taggers change is the question. not often is my naive answer :slightly_smiling_face:
+however, somebody has gone to the trouble of implementing a ‘p-tagger’ patch type, so what do i know?
+:smile: also true. Oh well, logging this as a separate bug should be a good start, and adding our findings in a condensed format can't hurt either.
+yes
+i’ll graciously let you do that
+Should I change `encodeDocument : Document -&gt; Value` to `encodeDocument : Document -&gt; Encode.Value`?
+<@U3LUC6SNS> you don’t need to define your own `Value` it corresponds to a JSON value in javascript
+so, yes, the port should take a `Json.Encode.Value` as parameter
+then you can just read the values in javascript as .content and .docType of the object you’re getting
+Ah, ok.  I think I understand now.
+<@U4872964V> actually, wouldn't swapping these also work? <https://github.com/elm-lang/virtual-dom/blob/master/src/Native/VirtualDom.js#L633-L640>
+i.e. do the "inner" modifications before swapping the taggers
+don’t see how the patches would end up differently
+they're executed in order, so the inner node would be removed, the blur event sent with the old tagger, and then taggers would be swapped
+let me test that out, actually
+hmm, but the events wouldn’t come through until all patching is done
+testing is always good :slightly_smiling_face:
+actually, I can’t think of a reason why you’d patch taggers just because there are the same number of taggers.
+My build times have headed over 20s which makes tweaking layout/styling pretty tedious. Is there any general advice for reducing build times? I'm aware that I need to avoid complicated case statements but that's about it. Is there any way to profile a build to identify slow modules?
+<@U1R5JCM55> +1 to this question
+Hm. How about making sure that every file will emit a warning, and running elm-make with `--warn`? :thinking_face:
+not the sanest way, but it's simpler than compiling your own elm-platform :stuck_out_tongue:
+run it with `strace`?
+ilias: ha, I'll give that a go!
+I'm on OS X but it looks like DTrace will do the job
+Would unused imports have an impact on compile time?
+<@U1R5JCM55> Probably? At the very least, it would need to include them in the dependency tree.
+yeah, that was my thinking, going through the project now...
+<@U1R5JCM55> I reduced my times by creating my own private packages using <https://github.com/gdotdesign/elm-github-install>
+<@U1R5JCM55> Another potential slowdown is having a lot of modules.
+casperlotter: I am using elm-github-install already, that seems like a good suggestion. Could at least split out some util modules. Do you have a good workflow for editing packages locally? i.e. are using local dependencies in elm-github-install?
+palmerpa: there's 143 modules which doesn't seem that many but could be worth exploring. I'm trying to use larger/less modules in general now anyway (advice from evan/rtfeldman).
+Yeah, in general larger modules are better.
+I guess adding type annotations everywhere would also help?
+Not really, I moved all the code with the least churn into util packages and just added that as a dependency. Every once in a while if I have to touch a package I just bump the version and rerun the install. If you come up with a good workflow let me know :smile:
+It's taken a while, but I think I can see the golden path, larger modules make sense now :slightly_smiling_face:
++20s build times sounds bad. Is it common for people to get?
+No in my experience <@U3YDBDP4Z>
+My build times are 0-2s.
+Im not really sure what explains the difference.
+Ive heard of 40s build times before. But I dont believe thats representative.
+Depends on size of project, number of files, project structure, number of dependencies, complexity of case-statements, and a whole bunch of other factors. It's not very common to have annoyingly high build-times, but it comes up every now and then. Should be a whole lot better in 0.19, too, judging by Evan's comments at elm-europe :slightly_smiling_face:
+yeah, that's definitely the thing I'm most excited about with 0.19. The other stuff sounds great, but faster build times you notice all day long :slightly_smiling_face:
+Do I still need to use a UI framewok like Bootstrap or MDL if I use <http://package.elm-lang.org/packages/justgage/tachyons-elm/1.0.0/Tachyons>? Or is Tachyons all I need for UI?
+<@U5FU80S06> <http://tachyons.io/#features> Has a lot of stuff - it replaces Bootstrap. What is not clear to me is if the Elm version is “complete”
+<@U5FU80S06> you just use Tachyons and then you can see different patterns on how to build UI work it at the main Tachyons website. 
+The Elm version has a few issues of I've needed to resolve <@U41NK9BM4>. 
+<@U17R26VR8> <@U0CLDU8UB> That is a correct, but not quite the use case. I have a platform in Elm with a bunch of different people making sub-apps in Elm. It's not realistic to have the "parent" import all the every-changing sub apps created by different teams and each sub app has very little coupling, if any, with each other.
+So the thought was serve a picker Elm app in a template and the selected app inside a second template (or web components). Synchronization can take place with web sockets and a user interface can track the location of each sub-apps static and microservice backend.
+This sounds close my use case:
+<https://www.youtube.com/watch?v=U_5XKPe4fZM> [Elm Europe Microservices for the frontend]
+Is there a list of expected new features in Elm 0.19 somewhere?
+<https://github.com/elm-lang/projects/blob/master/roadmap.md>
+Thank you
+does anyone expect much Elm semantics changes in the near future? seems that tooling will accumulate, but we're basically looking at Elm 1.0 now - or am I overly confident?
+<@U0QS3QAS3> I don't think there are _plans_ for semantics changes, but then again, I don't think most people saw "Elm drops FRP" coming, and that happened in the previous version. So yeah, who knows, really? People come to new insights and make breakthroughs, we can only hope we get to reap the benefits of that :
+I'm reading through the elm guide and I can't seem to find a place where it flat out says types must be capitalized and type parameters are lowercase.
+It might... not?
+where does one submit a bug against the docs?
+It's completely possible it just expects people to pick it up as a convention.
+i'm not sure that i ever read it explicitly, I just saw everyone else doing it. peer pressure, y'know. :slightly_smiling_face:
+To avoid spending space/reader's time explaining it.
+Its a really subtle distinction which is made all the more worse by the `Html msg` vs `Html Msg`
+and perhaps `Model` and `model`  ?
+I suspect its was just overlooked because it was inherited from haskell.
+one way to think about it is that, in Elm, variables start with lower-case, while types start with capital. That’s why `Html msg` is lower-case and `Html Msg` is upper-case
+yes, I understand the distinction. I'm more wondering why its not in the docs
+Is it intentionally omitted or just an oversight
+That identifiers are lower-case and types are upper-case? I guess it isn’t explicitly in the documentation.
+Interesting.
+It does seem to cause a fair amount of confusion to newcomers.
+Which is not unsurprising
+the compiler enforces capitalization for type names and variable names
+right, the compiler gets it correct
+it's _sort of_ mentioned here: <https://guide.elm-lang.org/types/reading_types.html>
+So, it isn’t really the lower-case vs upper-case, it is the idea of type variables
+well it's both
+I know I've had to explain it more than once, I don't know about you guys
+I don’t think I’ve ever had to explain “lower-case are variables, upper-case are types” but I’ve seen confusion around type variables for people who aren’t used to this level of a type system
+I have seen the question `Html msg` vs `Html Msg` (more than) a couple of times. It usually involves confusion around both type variables and "why is it named `msg` if it can be anything"
+Having a concrete explanation in the docs of type variables with `Html msg` as an example could definitely be nice
+<@U4872964V> <@U0UGR7JTB> I logged that issue from earlier, btw: <https://github.com/elm-lang/virtual-dom/issues/103>
+like and example of `Html String` or something
+<@U3SJEDR96> thank you so much for that!
+<@U3SJEDR96> That is a great issue title.
+Trying to get a feel for whether or not I have an abnormal compile time, how many LOCs does your project have and what's the compile time?
+<@U1R5JCM55> are your times for recompiles, clean runs, after editing an entry-point or a leaf module, ..?
+I get 90 secs for a clean build, just main module 2s, nested modules can be up to 20s (14k LOC, 143 modules)
+(reducing number of modules is on the list)
+Having to reduce the number of modules seems like a bad thing to have to do.
+You modularize hopefully for good reasons
+:confused:
+_14k LOC of Elm is impressive_ :slightly_smiling_face:
+That's the thing, though - _good reasons_ is entirely subjective: just because something _can_ live in its own module doesn't mean it makes life easier. Overabstracting is totally a thing :smile:
+Sure but still
+I came from an ember background where you modularise heavily so I went with that for familiarity. Knowing what I know now there's definitely some modules which should be folded together anyway (I have modules for things like view/update/msg/model...).
+Hm, yeah, I'm going to assume you've done the regular things like preventing `case (t,u,p,l,e) of`, and I have nothing much to add :slightly_smiling_face:
+I think (a, b, c) is as far as I've ever been, and it's only ever when there's a very limited number of cases (maybe 4 tops)
+not sure if those would be enough to trigger the issue
+yeah, even in that case, try replacing it with a `Debug.crash "foo"` and see if that changes anything
+definitely worth a try, thanks
+But then again, that'd only matter if they're somewhere in the chain of modules that get recompiled when something changes
+now I just have to remember where they are :wink:
+(if it does change something, keep in mind that exhaustiveness checker (which suffers from that pattern) has seen performance improvements for 0.19 so changing those to nested cases might not be worth it)
+hmm, only one that has 3+ elements in the tuple
+I would estimate that 143 modules at that size taking 90 seconds to clean build is pretty good
+You probably are taking a bit of a hit from having many small files.
+But 90 seconds is pretty good
+it's the incremental builds that are killing me really, but I do find that the number of modules being rebuilt when I save a single file is in the 20-40 range
+(I've just pruned all unused imports which didn't help unfortunately)
+<@U3SJEDR96> did you try reversing the order of patching?
+Yeah, it's a little more involved than I thought it would be :sweat_smile:
+hmm, that sounds worth a shot, thanks
+<@U1R5JCM55> is not clear to me what you mean by build - do you mean `compile` - when you save the file - or you mean `npm run build` with webpack or something.
+I'm just using elm-make to get those numbers
+(I normally use webpack, but I didn't want the overhead clouding the issue)
+a ok - but if you just compile the code on save - with the live server turned off - how much does it take on average?
+without doing the elm-make thing
+I'm seeing around 25secs on average
+uh.. :smile:
+if I save a single file and do elm-make, then I see compile times in the 2secs - 60secs+ range (2 secs is for Main.elm)
+with webpack, it's obviously longer
+casperlotter suggested I split out a separate library for utils etc. going to try that next
+Then i build a bunch of update helpers - making my update branches very very lean - moved everything inside helper functions - and now the compile time is around 1 second - and with webpack no more than 4-5 - live reload. So yeah - doing that it helped in my case - but what you have - 140 some modules is much bigger. Maybe this can't be improved :grin:
+hmm, that's interesting though
+<@U2LAL86AY> when you say update helpers, what exactly does that entail? just less top level case statements in the update function?
+Instead of doing it without the helper.
+gotcha
+interesting theory, wonder if anyone can confirm?
+i'm watching Elm Europe on youtube - lots of good talks - but i can't find the evancz talk - does anyone where can i find it? :smile:
+how is it named at least
+do you remember what it's on?
+this is the channel : <https://www.youtube.com/watch?v=U_5XKPe4fZM>
+he seems to have done the keynote
+hmm, your right don't see it
+The keynotes and mgriffith's talk are still being processed
+They're up but unlisted
+and richard talk also - i've seen here in the chat people talking that was awesome... hmm
+aa
+:smile:
+I'm pretty sure you'll find a link somewhere in <#C0MU81TEC|conferences> or <#C0CJ671HU|random> tho
+<https://www.youtube.com/watch?v=2ihTgEYiKpI> Evan's keynote
+Don't have the rest handy - sorry :)
+<@U2LAL86AY>, your code likely got faster because you no longer had a giant case statement
+<@U0EUHKVGB> What’s a “giant” case statement though? Is it many branches? Or lots of code in the branches? Does it matter if you write the code inside each branch, or if you move the code into functions?
+many branches
+but also deeply nested code can have negative performance impacts. especially without type annotations, or using type shadowing
+Is haskell like that as well?
+different compilers do different things :slightly_smiling_face:
+Can you split the logic somehow?
+well you can split up `Msg` if you need to
+`type Msg = SubThing SubMsg | ...` and `type SubMsg = ...`
+then separate
+the thing that is slow is exhaustiveness checking btw (something that haskell normally doesn't do, though it should in your project :slightly_smiling_face:)
+exhaustiveness checking?
+making sure you cover all the cases
+so for lists, if you don't handle the empty case, that is a compiler error. In haskell it will compile, and when such a pattern match receives and empty list, it will error/crash
+Huh, I can see why that would potentially cause a slow down
+well, it's a tricky problem, I guess the old implementation was accidentally quadratic or something.
+basically, it causes a slowdown because the implementation is not optimal, which it will be in 0.19
+or at least closer to optimal
+someone have others good doc for learning elm in depth instead of <https://guide.elm-lang.org/interop/javascript.html> and the elm-tutorial pdf?\
+What a function without a type annotation does to the compiler ?! - performance wise i mean - (i add them because i get better errors not thinking about performance..)
+<@U5V0HVAKB> do you want to learn the js interop in much more in depth?
+<https://www.manning.com/books/elm-in-action?a_aid=elm_in_action&amp;a_bid=b15edc5c>
+hmm this is older but beeing .17 is still relevant becaus eit has the elm architecture. <https://elmseeds.thaterikperson.com/ports>
+not sure about that book - but i have this tutorial going deep on a bunch of topics
+<https://www.elm-tutorial.org/en/>
+the elm seeds site is better - beeing video is much faster and easier to get the concepts.
+scaling and performance ..
+ye ^^
+i understand the basic routing etc
+but its seems to be overkill to follow those steps for a bigger application
+hmm there are a bunch of articles on medium covering different topics but that book is much better i guess.
+ye but not complete ...
+it will be finish in earl 2018
+so long ^^
+<https://www.youtube.com/watch?v=2ihTgEYiKpI>
+thanks for all of your answers i will take a look of that
+Hi! any recomendations for syntax highlighting of source code (really only JSON) in Elm?
+I really don't like this solution <https://stackoverflow.com/questions/38149635/syntax-highlighting-with-elm> should I go with ports + highlightjs? can't find anything elm pure in packages
+Obviously no one should ever write their own native applications ever........buuuut, does anyone have any documentation on doing so?
+jonf: I made this native module : <https://github.com/Elm-Canvas/elm-canvas> Maybe it could serve as a good example. Or if you had any questions.
+I'm more looking for some design doc on say name mangling and compiler provided functions
+documentation for it doesn't exist because the API is unsafe, not intended for public consumption, and is subject to dramatic change without any warning whatsoever :wink:
+what are you trying to do?
+I like breaking things more or less. But I figured it would be possible to create a top level program that would create a custom element.
+hi
+how to embed multiple divs in elm?
+multiple elm apps? or are you just asking how to write your html? if it's the latter you can use this tool to get a feel for it: <https://mbylstra.github.io/html-to-elm/>
+thanks <@U1ZFF0E5P>
+hi all
+I'm faced with a problem that's trivial to do in JS and I cannot figure how to handle it cleanly in Elm: I've abstracted a "filter" component/data structure that I aim to use with different Types; the goal is to do simple string matching on attributes, to filter a list.
+In JS, I'd go with `myObject[filter.key] === filter.value` or something like that, but in Elm I cannot access dynamic attributes
+<@U0U6ML22H> for dynamic keys you want a `Dict`
+how do I do that without having to add to every filter an `accessor` field that specifies how to access the field on the given Type? this means I need to turn my `Filter` into a `Filter a` and, since my real-world example is much more complex, it introduces yet another layer of complexity that is simply not manageable
+<@U153UK3FA> thanks but my Types are already used in other parts of the app, it's simply the filtering component that I'm looking into right now
+unless I misunderstood your comment
+then you want a function that converts a string to the value of a field which you’ll have to write statically.
+yeah, that's the "accessor" I mentioned, which implies that my generic `Filter` needs to become a `Filter a` because the rest of the code will then use it as `Filter User` or `Filter Thing`
+but I don't want that, because it's very complex, and I'm looking for alternatives :smiley:
+it’s not complex, it’s just more code, the code itself is simple
+again, you're looking at one simple example; my actual code is more complex, with a lot of other types depending on `Filter` which would then have to be updated
+I've spend half an hour starting to do it and it'll mean I'll have to change all of my app code and it'll take a few hours
+I’m not sure what you need to `Filter a` for
+because I cannot have a generic handler for a Filter of User and a Filter of Thing if Filter needs to carry with it a `(User -&gt; String)` or a `(Thing -&gt; String)`; it needs to carry a `(a -&gt; String)`, which means it needs to be `Filter a`
+You can’t usefully write a `(a -&gt; String)` function, because you can’t use that `a` value in that function to create the `String`
+what do you mean?
+the point of the `a -&gt; String` is that you then, in your program, define what that function is for the `a` you're handling
+so if you have `Filter a = { toString : a -&gt; String }`, you can then declare a `Filter User` that is `{ toString = .name }`
+ah, alrighty
+obviously, when using it with `Thing`, which may not have a `name` or whose `name` may not be a `String`, you'd declare something else, like `{ toString = toString &lt;&lt; .id }`
+it'd be a `Filter Thing`, then
+<@U0U6ML22H> can you give more context? Code example, perhaps? Without knowing the full context, it's pretty hard to say anything but "if it needs to carry type-specific info, it needs to carry that info".. _what_ are you filtering? Is there anything those types have in common? How are you filtering them? What is the problem you're trying to solve? :slightly_smiling_face:
+<@U3SJEDR96> it's not OSS code so I cannot give snippets, but I'll try to explain better :smiley:
+I have a very simple admin-type app, with (for now) three types of items that needs to be displayed in a Table, and "filtered", either by a search string (that applies to one or more fields) or by a list of filters
+so I made a generic "Query" item, that holds both a search and a list of "selected filters"
+those "selected filters" are, for now, a record with "key" and "value"; it matches a "filter" which is a "key" and a list of possible values
+now I want to write the function to filter my things so that, in short: `(match the query with any of the searchable fields) AND (match selectedFilter1) AND (match selectedFilter2) AND ...`
+the `match selectedFilter` function needs to be generic
+each items provides a list of accessors (`.name` and the like) to match the query
+but I found myself having a hard time doing the same for filters, because it has such a huge impact on the code
+because now my `SelectedFilter` needs to carry an accessor, that it needs to inherit from the `Filter` list, and my whole code is changed for something that, in ugly JS, would require one line of dirty dynamic access
+so I was hoping maybe there was something I wasn't seeing
+okay, so you could have a `Filter { a | name : String }`.. Is that an avenue worth exploring?
+because after changing my types for half an hour, I'd be willing to accept an "undefined is not a function" =P
+I don't see how that applies, would you please elaborate?

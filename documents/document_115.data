@@ -1,0 +1,26 @@
+```
+Is there a better way to do `(symbol *ns* 'symbol)`?
+Huh, nevermind. Apparently I can do syntax quoting for the dispatch value of a multimethod. Not sure why I thought I couldn't earlier.
+<@U5JUDH2UE> Not sure if it would help, but <https://github.com/nathanmarz/specter> has some really 'navigators' to do all kinds of transformations on data structures. (Maybe not worth the effort for easy navigation, although I think it may be if you have at least 2 steps to navigate, including predicates :slightly_smiling_face: )
+<@U0E0XL064> Huh, that's cool. Definitely overkill for this though. :slightly_smiling_face:
+<@U5JUDH2UE> for associng a value if not null, with specter it's `(setval [:a some?] my-value amap)`
+<@U0E0XL064> are those basically lenses?
+for associng only if field exists, it would be `(setval (must :a) my-val amap)`
+will be way more performant than merge as well
+I didn't use specter much yet - only found about it about a month ago - but it's definitely cool. Also for small cases.
+This is discussed in my talk, but if order matters, then your system is already broken. That is, you should never have two different versions of the same class on your classpath - if you do, then something bad has already happened.
+you're right, log32n. so if you allowed delete you'd have to rebalance the tree right? honestly I haven't thought about data structure algorithmic performance since uni, but I just kind of trust that this probably isn't feasible. I'm sure the fact that the data structures are persistent makes it even more complicated
+the reason being, when we update a node, we have to update "all anvestors" until we get to the root
+since vectors are persistent =&gt; assoc has to create a new node =&gt; but then it has to create a new block for every anvestor from the thing we want to update until we get up to the root
+so then the question is: can we do delete! in O(log_32 n) time, whilemaking it easy to index -- and I don't know, but I'm leaning towards yes
+but without using syntax-quote/unquote/splicing-unquote...how would you do it as concisely as possible (without losing generality)?
+(i.e. the desired result is `[["a"] ["b" "c"] ["d" "e"] "f"]`)
+so you just want to append them?
+the middle one is unpacked
+one option is `(concat [a] b [c])` - I admit that looks weird
+<@U051SS2EU> actually, that's not nearly as bad as what I was doing
+Does suck a bit that you have to pack the elements you don't want unpacked just to...well...yeah
+<@U0561MZLJ> depending on your actual problem, you could use something like `(def prepacked [x] (if (and (coll? x) (vector? (first x)))) x [x])` `(mapcat prepacked [a b c])`
+hah...yeah, that probably won't work because some of these are multiple levels nested, and only some of the levels need to be unpacked
+my personal preference is to "say what you mean" with syntax-quote, but understandably the team is worried about maintainability...
+Hey there. How to update a key in a map to hold a empty vector?

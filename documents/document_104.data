@@ -1,0 +1,50 @@
+```
+how can manage multiple sockets on my app ( creating a global map and assoc the sockets there ? )
+a global map with a unique ID per websocket (and the id also attached to client account, if you have any such concept) is the normal way
+that's what eg. sente has under the hood
+thanks , will do that
+if you have minimal state to track, you can also just have handler functions that take a request and a websocket object, and call them from the listener you attach to the socket
+but if things get stateful at all the map is good
+that makes sense. one thing it might be useful to have a clojure-defined `abs`, `sin`, etc for is cross-target support. yeah they might be slower but at least the code would work without modification
+by cross-target I mean clj, cljs, cljn (is that the .net suffix)?
+can you pseudo-code that ? didn't get
+`(defn do-something-for-socket [connection args] (let [result (frob args)] (send-to-connection connection result))`
+assuming you get something from the request that you can send data to by some method or function (that's usually how this is set up)
+Math/foo works for clj and cljs already - not sure what the .net scenario is (since js already wanted to be like java it implemented the math functions with the same api)
+how the client of `do-something-for-socket` will grab the ws socket ?
+<@U5ZAJ15P0> if your app is backed by Datomic, I strongly recommend you use an architecture which reifies the execution context, such as Component or Integrant, which will enable you to implement a 'fork' operation on it. <http://vvvvalvalval.github.io/posts/2016-01-03-architecture-datomic-branching-reality.html>
+<@U06GS6P1N> I've been toying with Integrant since yesterday, and I was considering Component too :slightly_smiling_face:
+"forking" the execution context seems highly non-trivial though
+I'm trying to create an uberjar for yada and are getting interesting error messages like: 'namespace 'cheshire.factory' not found'
+I can compile the code fine
+anything obvious I'm missing? (this is with leiningen)
+only happens when using `{:aot :all}` though
+in clojure/jdbc, are all sql statements compiled down to STRINGS, sent to SQL, then reparsed ?
+I'm wondering if there is a way to send an AST or something, instead of directly sending the strings
+<@U628K7XGQ> total newbie here, but is your cheshire dependency in "dependencies", or under dev dependencies?
+it is brought in by yada indirectly, but also when adding it explicitly it barfs when trying to create the uberjar
+(and it is in dependencies)
+I am operating blind here, but lookign at Yada's project.clj it is under the "test" profile dependencies
+<https://github.com/juxt/yada/blob/master/project.clj#L52>
+Those dependencies won't be pulled when running uberjar
+yes, looked at that too, but the dependency tree brings it in via `yada/json`
+ah
+the weird thing is, that error is triggered when aot compiling `cheshire.core`
+`Exception in thread "main" java.lang.Exception: namespace 'cheshire.factory' not found, compiling:(cheshire/core.clj:1:1)`
+even weirder: the JAR file for cheshire in the requested version does have a `factory.clj`
+so I assume you ran `lein deps :tree` and checked that cheshire was there?
+and you checked that the right version was the first one in the output?
+yup, it's there
+(not overriden by another version without factory.clj)
+only happens when doing `{:uberjar with {:aot :all}}`
+weird. I don't know how aot works so I am afraid I can't help you further :disappointed:
+yeah, I'm feeling pretty clueless myself. But running `lein deps :tree` has interesting warnings. Looking at those now. Thank you!
+<@U628K7XGQ> make sure that the right version of cheshire appears first in the tree
+from what I have been told lein will pick the first version it finds in the list
+there's only one
+ok…
+@mention me if you find a solution please, I am curious :slightly_smiling_face:
+I will, thanks again
+<@U628K7XGQ> can you Gist me the output of `lein deps :tree` ?
+<@U5ZAJ15P0> I was able to get it working. I had to exclude cheshire manually and then re-add
+I have no idea why that fixed things

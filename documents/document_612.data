@@ -1,0 +1,135 @@
+```
+Is there something particular about it that makes you feel like it's not readable? 
+But if we need to .. should Model.elm import Message.elm Or Message.elm import Model.elm ? What is the hierarchy of files ?
+Then i should be importing Model.elm in Message.elm..  right ?
+so only break it up like that if they are getting too big
+Where big has a different definition from OO.
+but generally shared types would be imported by both
+so.. i should be creating separate file.. like AllTypes.elm.. :slightly_smiling_face: if Model.elm is big..
+Thats sort of like what I do. I usually have a folder called `Main` that contains `Model.elm` and `Message.elm`.
+Then from there, Ill either have a folder called `Types` that contains all sorts of files, or I will have files called `Types.elm` in various folders.
+Just make sure the abstraction makes sense
+If you are creating a whole boat load of derived types, you probably have a bunch of functions to go with them. In which case thats the line you cut along
+Yeah, I know I am an outlier on this. I break files into tiny pieces. I dont know how you all manage super big files tbh.
+easy when there are no side effects
+the only context you ever need to keep in your head is the length of a function
+even shorter if you don't have any let blocks
+With stateful languages the size of the context is huge, so it gets combatted by keeping structures and files small
+with functional languages the compiler ensures that the context is declared
+<http://www.bopsecrets.org/gateway/passages/chuang-tzu.htm>
+slicing code is similar
+despite the colour scheme straight out of the 90s
+<https://stackoverflow.com/questions/45253217/why-does-elm-make-takes-20-seconds-in-dev-env-even-when-just-adding-whitespace>
+I haven't found make to be slow, but I have heard that it can happen with large case statements particularly those involving pattern matching on tuples
+reposting it here.
+[1]: <https://github.com/jigargosar/elm-simple-gtd/blob/master/grep-case-expressions.elm> "grep-case-expressions-output"
+I'm reading, how big is this project total?
+that url builder case looks like it might be problematic
+in routes
+Are your functions type annotated?
+<@U6CAFUBM2> ^
+Well to be frank I had to remove some function type annotations so as to remove import statements. That helped speeding up compilation time. :slightly_smiling_face:
+before when code was taking 60+ secs I had most of my top level methods annotated.
+you shouldn't need to remove annotations to remove imports
+Ok, would you like me to show you and example? I mean, I will create a branch, and post performance metrics.
+removing imports will undoubtedly improve compilation time, but you shouldn't have to remove type annotations to do so.
+Are you suggesting I redefine type aliases rather than, import them from *.Types.elm ?
+if it's and alias you can redefine or you can use the base types
+having a .Types.elm is a bit of a code smell
+<https://gist.github.com/jigargosar/30e89aee3e860e3d30abb1dac38f29e8#file-elm-simple-gtd-elm-code-size-txt>
+thats the size of the project, around 10k lines of elm.
+I have it checked out
+The reason I split Types and Models is because Models tend to have more imports than types.
+that's how I was able to improve compile time.
+the reason it's a smell is because typically when things get big, you should be able to lop something into its own module
+Fair enough, I would really appreciate if you could identify any potential solutions, and or code smells. If you have the time for a mini code review.
+how long is it taking for you
+the compile?
+I clock in at around 30 seconds on the first build but nearly instantaneous on subsequent ones
+if you're seeing a 20+ compile time that means you are probably compiling all 120 or so modules every time
+and that can only happen if you have this sort of "master import" that all your modules inherit from and you are changing it
+also most of your files are only like 100 lines or less long?
+your imports do seem tangled
+you have files in Update/Entity importing your base Model
+hmm? yeah your imports are dancing all over the place
+I suspect the issues you are encountering are a combination of small files and twisted imports.
+What is the opinion of community on this ?
+recompute it each time
+Don't store what you can compute :slightly_smiling_face:
+put in the model why you want the buttons to change
+But yaa.. i need to check this out.. I will also recompute.. :slightly_smiling_face:
+seems to be good user experience to keep unusable buttons disabled.
+reason should be in model..
+right, if you have a state machine where only certain transitions are possible.
+put the state in the model and mask the transitions in the view
+so i can keep the logical-fns in Model.elm only.. and let the view use them.. right ?
+sure, until that logic accrues until it's own entity
+cool
+functions are functions, the compiler will help you and you need to import the model in both update and view eventually
+<@U3SJEDR96> funny how that same logic applies to build systems as well
+<@U23SA861Y> hey did you try the SO post tests?
+touch src/elm/Mat.elm &amp; touch src/elm/GroupDoc/View.elm
+<https://stackoverflow.com/questions/45253217/why-does-elm-make-takes-20-seconds-in-dev-env-even-when-just-adding-whitespace>
+will you please verify compile time for those two files?
+<@U23SA861Y> please have a quick look at the post. It shold answer most of your questions regarding, compilation times, and modules compiled.
+worse - `touch src/elm/X/Function.elm`. I mean, it makes perfect sense, but ouch.
+or, well, I guess the absolute worst one might be `X/Function/Infix.elm`
+mentally parsing those files makes _my_ head hurt, too, though
+Anyway, I think Jon called it right - there is a some weird interconnectedness going on there. Keep in mind that when you touch a module, all modules that depend on that module will be recompiled, and all modules depending on that, and so on. I do think the compiler could be a little smarter about it - it doesn't make sense that touching one file results in something that takes _more_ time than a clean compile does - but nevertheless, there are dependencies-through-imports in that codebase that give me pause
+<@U3SJEDR96> <@U23SA861Y> thanks for responding. Is it possible to do a code review and give me some specific feedback?
+actually I am not worried about package X, its a utilities package, and It is not changed frequently.
+you don't use minimaps? A few months back i changed my editor - and forgot to install minimap pacakge - my productivity droped so low - and i had this background thought in my mind all the time: `let me use smaller modules` - but after i realized that the tool is the issue- now i'm constantly using something with 800 - 1300 lines with no problem. Just my two cents - maybe you have other reasons.
+It's very hard to get a sense of what happens when it doesn't even fit on a single screen. It's just an adjacency list of a state machine with 5 states and 13 message types. I do have multiple messages that signal the same event, but to/from different states; maybe that's one fast way to decrease the size of the update function, but I don't think it'll get me far enough to make me happy. After all, it's still growing.
+Currently what i am doing is having 3 msgs.. for input,radio and button and storing temp-values in Model.. :disappointed: and on button click, finally creating object..
+Why can't this be done in a different way? If you explain some parts of your system much better i think we can help you come up with something easier to wrap our heads around. Just a thought :simple_smile:
+More importantly, you should _never_ have any state in your messages. The message for a clicked button should be just that - the button was clicked. This separation between messages and state makes the programming logic much cleaner, and avoids subtle bugs when, for instance, multiple messages affect the state before the next rerender.
+5 states, 13 messages, so 5*13 cases in the update function :slightly_smiling_face: I got an idea of how I could restructure it now, so I'll try that right away.
+this pain is worth it.. :slightly_smiling_face:
+I'm curious how small you can make that update function after some more iterations. Please let me know :simple_smile:
+Hi! I am trying to get <http://package.elm-lang.org|package.elm-lang.org> working locally to preview docs for a package. Is there any documentation for that, or has anyone undertaken this already? :slightly_smiling_face:
+I managed to compile it and start the run-server binary. But I cannot find anything about how to generate the directory structure.
+It appears that creating all-packages.json, new-packages.json and packages/name/package/version/documentation.json is not sufficient.
+I tuned in on the remarks about `Types.elm` being a code smell.  Alas, that is just what I have — a 260 line file.  (a) How concerned should I be? (b) What are the downsides of such a file? (c) If I decide to refactor, what is a good strategy?
+I summarized my effort in <https://github.com/elm-lang/package.elm-lang.org/issues/247>.
+Oops, there is a "Preview docs" on <http://package.elm-lang.org|package.elm-lang.org> that solves my use-case. :slightly_smiling_face:
+I would say - don't think too much about it from the beginning :slightly_smiling_face:
+<@U0D4VR7BP> Sounds good to me.  My compile times are fine, and with structure I know where to find things.
+How can I create a new public channel on Elm Slack?
+The Slack docs state there should be a plus button next to channels in the left side bar. I don't have it.
+Hello, is there anyone working on elm on mobile ?
+Broke it up into multiple functions; one for moving into an action, e.g. selecting a node, or moving the set of selected nodes. Then I have one function per action, e.g. for moving around a set of nodes. It ended up about 10 lines longer than before, but it feels a lot more readable now. Still a lot of boiler plate, but it's much better now.
+If you list out the assumptions and goals you have before listing out as many reasonable implementations as you can think of, you have my ideal design phase for a larger project. This still feels small enough that small interations work; about 800 lines of code atm, counting whitespace and comments.
+It's still an open question if I'll rewrite messages to be around what they do, instead of what state transition they represent, when I clean up the view
+You can't, it's disabled. Ask in <#C3FKL0A8H|admin-help> 
+I mean… to avoid passing locale to `parse` and then to `stringfy`?
+<@U6D41LX7Y> there is a gsoc project going on that investigates elm on ios
+I see. Thanks! :slightly_smiling_face:
+<@U0X1G7NVD> well, technically there is but in elm it's not that nice. we like to keep everything explicit
+if you're curious, read up on the "Reader monad"
+Ok <@U1CE9DL9H> _ a quick Google, learned something new but gonna keep it that way — as you already guessed ; ) Many many thanks!
+And the program is `programWithFlags` ,that is, `main : Program Flags Model Msg`
+<@U3LUC6SNS> I too have a Types file. I am already seeing an imminent refactor, where I migrate a large chunk of code to it's own sub folder. But having types right now works very well for me.
+Should i have 4 variables.. `aData, bData, cData, dData` ?
+Or a map with 4 keys - values.. ?
+<@U3LUC6SNS> I'm doing a single page application so all my routing is handled with just `Navigation` and `UrlParser` libraries. It works well if you don't plan on having multiple html pages and if the app is fairly small. The user is none the wiser except for seeing the little _#_ symbol in the paths
+<@U24HQ3RJ7> I'm not following. Could you show some code of what you want to end up with?
+<@U24HQ3RJ7> cant the union type just have the data as part of constructor? `type Thing = A Data | B Data ... ?
+now each quarant in view can have toggled state of collapse : `type ViewData = { qaData = QuadrantViewData, qbData = QuadrantViewData ... }`
+Does this make question clear ?
+i can also have `type ViewData = { qDatas = Map QuadrantType QuadrantViewData }`
+<@U2SR9DL7Q> please see above.. Can you explain what should i do in `ViewData` ? I would not like to change `QuadrantType`..
+Hi all. Does anybody have any recommendation for habits, tools or processes to keep elm-package.json and tests/elm-package.json in sync ? I am always painfully reminded by travis-CI that I did not add it to the tests file
+<@U6CAFUBM2> I'll see if I can find some time to give it a once over.
+Hmm I guess I should just regularly take a look at my elm-test --watch output maybe. I guess that should do the job until it is changed in the future
+thanks:slightly_smiling_face:
+<@U24HQ3RJ7> to an extent, the most valid one is whatever is most rational for how the data is used and accessed in your application. I have a slight bias to Union types over records because they usually map my apps actual state the best. so `type QuadrantType = QA ViewData | QB ViewData | ... ` so each quadrant is built with everything it needs to represent itself. Then your views can just have a `viewQuadrant -&gt; QuadrantType -&gt; Html Msg` and you can use case statements to pattern match each one.
+<@U2Q5GJNTB> running tests before committing is always a good idea :wink:
+<@U2Q5GJNTB> this will be adressed in 0.19 i hear
+yeah, I will just add it to my push hook so that I stop forgetting to look at the tests.
+<@U4872964V> cool. That would be nice.
+one way is to prevent pushes to master directly and then require all tests in github to pass before you can merge in (provided you are using github)
+`case` will return a `QuadrantViewData`.. but How do i get right variable name before it.. like `q1Quadrant or q2Quadrant`.. ?
+<@U23SA861Y> yeah that is true as well. I should get into that habit for documentation purpose and for the reason you just mentioned. The curse of side projects I guess… laziness
+meh, if it's just a side project then setting up all that stuff takes more time than it saves
+Anyone interested in helping out with this? <https://github.com/smckissock/trump-conflicts>
+(please let me know if I shouldn't be posting this kind of thing here)

@@ -1,0 +1,57 @@
+    update (UrlChange location) initialModel```
+init flags location =
+But I think I'm not using in the right way the Location param then.
+where exactly are you hitting an issue? it compiles but doesnt behave as expected?
+what is the body of your init function?
+<@U3LUC6SNS> <https://gist.github.com/zgohr/265123ae03c909f466d1a8960958b890> it's very paired back to the essentials. let me know if you have any q's!
+<@U1ZFF0E5P> yes, it compiles, but let me check because the initialModel always is taking the same page
+<@U4JT89FGB> Thanks very much.  It looks quite clear - I will see if I can integrate this into my app this week.
+I just tried to make my first port which takes 3 arguments, this gives me a compile error but if I instead remove 2 of the parameters so there is only one it seems to compile. It also works making everything to a record, what am I missing?
+You're not really missing anything; ports can only take a single parameter
+<@U3SJEDR96> So basicly the solution if I want to send more parameters is that I send a record?
+Yep. Or you encode your data using `Json.Encode` functions to create a JS object, and make your port accept a `Json.Encode.Value`
+btw, tuple should also work (and translates to an array on the JS side of things)
+you can find an overview here: <https://guide.elm-lang.org/interop/javascript.html#customs-and-border-protection>
+<@U3SJEDR96> my hero! Thank you :happypanda:
+Do you guys recommend ELM native UI for a production app?
+What a greeting ^^;;
+<@U69JKF6EN> It depends on the details, I'd say.
+A lite clone of Uber.
+Other people would know better, but it's robust enough to get the job done. But the language is not stable yet, so you might have to keep closer track of the changes to the language as it develops
+<https://robots.thoughtbot.com/elm-native-ui-in-production>
+they did it, might be interesting to read their opinion :slightly_smiling_face:
+<@U3SJEDR96> I read that post. the elm-native-ui github page says it's not production ready. That's why I asked the question here.
+I don't think anyone here is going to recommend using it in production, in the <#C192T0Q1E|beginners> channel, while the project itself states it is not ready for production :slightly_smiling_face:
+Thank You <@U3SJEDR96> , <@U57KYFW67> and everyone!
+I would probably use react native still
+but it's interesting to experiment
+I am building a sudoku resolver
+And I have a 4 functions that handle an Array Cell of 9 cells
+isValid : Array Cell -&gt; Bool
+getColumn : Int -&gt; Sudoku -&gt; Array Cell
+getSquare : Int -&gt; Sudoku -&gt; Array Cell
+getLine : Int -&gt; Sudoku -&gt; Array Cell
+How can I be more precise about the types
+And explcitely say that ArrayCell is a 9 cells array ?
+<@U5R6L5MT4>, you can create your own custom type that limits the amount of items of the array to 9. You will also have to reimplement some of the functions of the array module
+<@U5R6L5MT4> There's no good way to enforce the size of an array or list in Elm.
+`Array (Array Int)` is probably the best way to do it.
+hah, I also made a sudoku solver in Elm; it's fun.
+Solving a sudoku puzzle requires a backtracking algorithm, right?
+<https://github.com/zwilias/sudoku-solver> if you want to compare how I went about it
+The naive algos do, not sure if there is a way to do it without backtracking at all. I suppose you do be smart about it, and check for cells that can only have one possible input, and work your way through it that way.
+I remember I gave it a try once and it could solve simple puzzles only.
+It would explain my frustration whenever I try to do one :slightly_smiling_face:
+I want to use a javascript lib for rendering a graph. My thought was to create the div that the library needs to render itself within and then simple load the javascript library with data provided from elm, through a port. However, since the div changes and the content within changes elm obviously doesn't recognise this when I swap page back and forth. This results in me rendering another graph, and another graph and so on every time I swap page. What is the way to go here?
+how can I `elm-format` automatically in `vim`?
+You can use `Html.Keyed` to ensure the vdom-diffing doesn't attempt to re-use that div. That would only work if that div stays at a similar place in the tree, though
+is there such thing at all?
+<@U4RR7KX45> I use elm-format in vim. You've followed the install instructions already, I take it?
+<https://github.com/avh4/elm-format/#elm-vim-installation> there is :slightly_smiling_face:
+yes I have
+Is it not working? Or are you trying to configure it differently than the default?
+does it have to be neovim or smth similar? I'm using vim8 at the moment
+Is vim8 the "default" vim?
+yeah
+Yeah. I just use whatever ubuntu gave me
+ok thanks, I'll try to uninstall plugins and re-install them

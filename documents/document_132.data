@@ -1,0 +1,16 @@
+```
+Can I write this more concisely? `(let [x (group-by some-pred some-coll)    matches (x true)  non-matches (x false)] ...)`
+first thought is to use map destructuring where you name the key and the var name it should destructure to
+`(let [{matches true non-matches false} (group-by ..)] ..)`
+Ah, I had the map destructuring backwards. Thanks!
+I rarely see this destructuring syntax in the projects I work on. We always use `{:keys [key-a, key-b]}` (which I personally find much more readable)
+it is more readable but it's not equivalent in power
+That wouldn't work with boolean keys `true` and `false` I think.
+yeah, it likely wouldn't. I'm just mentioning this for the generic case. Imo this line above is already too hard to grasp when skimming through code.
+yeah it wouldn't, :keys syntax only works with keyword keys. {binding key} lets you use any type of key
+Note that there's also :syms and :strs. Still wouldn't work in this case, though
+I agree that it would be a bit crazy to use {binding key} over {:keys} if you have a map with keywords, it's just less readable. but sometimes (at boundaries) you don't
+it's not that crazy if you want to rename keys
+`{foo-name :name}` to avoid shadowing `name`, for example
+I've literally never seen :syms or :strs used in the wild and I would have to look it up :slightly_smiling_face: probably still better
+Is there a better way to do `(filter identity coll)`? I'm needing to do it to interpose `" "` between args before `(apply str ...)`.

@@ -1,0 +1,90 @@
+})```.   It would be nice to know what the first argument is.
+<@U135X3DB3>: here is the docs from Slack for that method: <https://api.slack.com/methods/channels.list>
+you can check the examples folder of botkit to see some samples
+I'm trying to learn how to make a bot. Right now, I have an application in Java on Ecplise that is able to use the scanner and do what I need it to do. I got some server space on the AWS free tier to host my bot. Now, what do I do to get the program able to read responses from a slack bot? I already have a bot that is trying to check for a message on a website to interact, but I have to figure out how to make my Java program to react to the Slack responses
+Hi! anybody here?
+<@U136XPJGL>: yes
+Still looking for help! Doesnt have to be a long explanation maybe just a link that will help me get in the right direction
+<@U0T05GGGJ>: Your question is pretty open-ended. It's hard to know how to help, but I'd say <https://api.slack.com> is the right place to learn about how bots work in general, and <https://api.slack.com/community#java> is where you'll find libraries specifically for Java.
+Hey all! :simple_smile:
+Hello all !
+Hello <@U13EKGY86> and <@U13C09BJP> what brings you here :grin: bots?
+Hey <@U0KJ5A91V> ! :smile:
+Gonna try to make a multi-team bot using <https://github.com/BeepBoopHQ/beepboop-botkit>
+haha awesome name :stuck_out_tongue:
+same here but using the howdyai/botkit
+having fun with it for now and just said I'd drop in and say hey! :smile:
+I will use webhooks, storage, notifications, conversations on a multi-team base
+cool ! Hello <@U13C09BJP>
+Does anyone can share has some things they wanted to know before starting a bot ? Some obstacle I don't know about yet ?
+<@U13EKGY86>: nice, any reason you're using beepboop?
+There's <#C0AV5N8NA|botkit> <#C0J61PA31|botkit-basics> and <#C04SPC24T|bots> for you <@U13C09BJP> <@U13EKGY86> 
+Then there's also a bunch of #place- channels
+Also, I could use Heroku (I read they have some great tutorials) but beepboop is free for 60 days, and my bot will be used during a span of 40-60 days
+Would love to hear your opinions
+It's written for a general audience, but maybe useful enough to devs too
+<@U13EKGY86>: in case it's helpful, here's a repo I have for a bot running on beepboop that's doing multi-team rtm connections with botkit, slash command webhooks, and has a redis cache layer it's using.  There's probably some stuff in there you don't need, but maybe some of it will be useful.  One of the nice features you'll get w/ the multi-team bot on beepboop is auto-scaling, so your teams will get distributed across multiple docker containers as you need more resources.
+<@U0JVDCDBL>: thanks!! But what is the link? :blush:
+derp :pug: <https://github.com/selfcontained/joke-bot>
+<@U13EKGY86>: ^^ sry bout that :stuck_out_tongue:
+what kind of app/bot analytics modules are folks using? I'm tired of searching through my `console.log` lines, exploring some basic tools
+I'd be interested in this too, maybe there's already some kind of framework out there that dumps bot events into a DB
+or even a flat file
+you should look at prometheus for stats
+well, prometheus is for metrics rather than events
+isn't it?
+<@U0GPSB7V1>: ^^
+we've been using <https://mixpanel.com> for basic stuff w/ some of our bots on beep boop
+We're using a custom logger and logStash on Heroku
+invoking <@U0H1Y7M1S> for analytics :simple_smile:
+have any of you guys hooked up botkit to the new <http://wit.ai|wit.ai> APIs?
+hey everyone :simple_smile: i work at segment and have a lot of experience with various analytics and marketing tools out there (there are 150+ on our platform); happy to answer any questions! feel free to DM me
+<@U0CS6NSF5>: metrics, events, tomato tomato
+you want to know how many times X event happened in Y amount of time? :simple_smile:
+In the end you can use any analytics tools that can track events and user/client ids. Even Google Analytics can do that. But I highly recommend to use Segment for the initial tracking and then pipe the data into your preferred analytics tool. Because when you use Segment you can also get the raw data directly into your Redshift or any Postgres DB.
+<@U0H1Y7M1S> perhaps you could reshare your great blog post here ?
+<@U0GPSB7V1>: it's different, with events you probably want segmentation, funnels, etc besides gauges, histograms etc :)
+About Analytics, I just saw that in Product Hunt : <https://www.producthunt.com/tech/botlytics> :simple_smile:
+hey team! check out this blog post i wrote about tracking and analytics for bots: <https://segment.com/blog/analytics-for-slack-bots/>
+thanks <@U0HH00DS7> :simple_smile:
+slightly off topic i suppose but has anyone else noticed that slackbots stopped picking responses at random?
+i mean the real slackbot, not one i wrote
+hi all.  does anyone know if there is a way to escape formating charachters?
+    • *Calendar 201510 201610* (14 new :speech_balloon:)
+the bot manually added the * chars to bold the title's
+however, im running into trouble if the title itself contains charachters like * _ ` etc
+yeah you can tell slack not to format the message. See Parsing Modes -&gt; <https://api.slack.com/docs/formatting>
+But that would be for the entire message, not specific characters
+<@U0YQS1FAR>: yeah, prblem is i am listing the titles inside a message that I very much would like to have formatted
+Have you tried escaping with a /?
+tried with \
+sorry, that's what I meant
+but that just adds the \
+tried html entity encoding…but that just makes it show up as html entities
+Are your links and such in attachments?
+I think your best is probably to remove the * between what you want to put in bold...
+If you can live with turning off formatting for all titles you could play around with `"mrkdwn_in": ["text", "pretext”]` and specify the fields you want to be formatted
+Is there a way to programmatically remove an archived channel from the “CHANNELS” group?  We are programmatically creating and inviting team members into channels and after a certain period of time we are archiving the channels.  This all works but it leaves the channel in there list with the little box looking icon.  Is there a way to completely remove the channel from their list?  Should I `kick` them first before the archive?
+kicking would remove from their list 
+if it were archived I believe it still shows in their list until they manually close it 
+so I think the kick before archive would be better, of course slackbot will send a message they were kicked 
+<https://medium.com/slack-developer-blog/changes-to-file-events-in-the-real-time-messaging-api-5fa75c8c4d99>
+This doesn't talk at all about `type=message` + `subtype=file_*` but they don't mention it in the post. Will those those events keep the full object in the `-&gt;file` property?
+<@U0GT29N3A> ¯\_(?)_/¯
+I would think that means those events will remain untouched
+but you can probably migrate those events anyway, since they might change them in the future
+and it seems you will only get one or two weeks notice based on the last announcements of breaking changes
+less than that :simple_smile:
+they'll explain how the special scope will work for bots "sometimes in the next two weeks", and the change will happen on the 16
+:feelsgood:
+has anyone got the <https://github.com/howdyai/botkit/blob/master/facebook_bot.js> demo working?
+when I run "node facebook_bot.js" I just get "debug: No handler for tick"
+over and over again
+that's not an issue
+it's because you've left the verbose mode
+you might want to check <#C0AV5N8NA> or <#C11Q41CR3> for more advices though
+wow <@U0HBN0L9M> thanks for the heads up
+<@U0GQ2JCCA>: Thanks for the followup.  I think I will try kick before archive.
+sounds good :simple_smile:
+has anyone got botkit facebook messenger set up on azure
+i'm a newbie but am trying to configure the example from github

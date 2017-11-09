@@ -1,0 +1,107 @@
+```(-&gt; csv-rows (nth 7) (nthnext 10))```, if I got it right
+What exactly are you trying to do there, <@U06B8J0AJ>?
+<@U067BPAB1> Take the 7th row in a two-dimensional vector, drop the 10 first items in that row.
+nthnext version is shorter :slightly_smiling_face:
+<@U5XMV6DQT> A superior editor, I know. I'll sit down and learn it when I become a real developer.
+<@U06B8J0AJ> Just use Cursive. :stuck_out_tongue:
+„And thus the peace was broken once more."
+Cursive and Emacs are roughly at the same level of approachability for me. I'll pick a proper editor to learn when The Guild of Real Developers write my name into their books.
+I briefly used Atom and Proto repl. Went back to Sublime when I couldn't figure out a way to automatically clean up indentations/spaces in a document in Atom.
+I.e., ctrl+i from LispIndent.
+Also, Emacs is written in lisp, so it's pretty simple to hack it yourself.
+That's the thing, because Cursive is just a plugin for IntelliJ IDEA you install that plus whatever other plugins you need and you have a single environment for everything.
+After years of Vimming this plus IdeaVim just works for me, and I don't have to learn a whole new operating system to write text files. :wink:
+Of course, tongue half in cheek. Everyone use what they are comfortable with, but unless someone is strongly entrenched in the Emacs ecosystem I think he/she would be better off just using Cursive. Plus it earns <@U0567Q30W> some dough for the great effort he put in when said person then proceeds to write Clojure commercially and decides to stick with Cursive (and hence will need a commercial license)!
+Thanks <@U067BPAB1>! I appreciate it.
+Is anyone still using Light Table? I'm unsure of it's current status. I've tried emacs a few times but didn't put as much effort into it than when I learned vim a few years ago. Light Table + vim mode works well for me...
+<@U1DLD0WNR> afaik, LightTable is abandoned. But that might be incorrect.
+Vim &amp; Clojure work well together. Whole community of us in <#C0DF8R51A|vim-fireplace>, I've written some blogs which I'm happy to share if you're interested.
+<https://github.com/LightTable/LightTable/commit/5db6b70f8a4fec3e4806d9d062d95d15fc7a4b36>
+mluisbrown committed with sbauer322 on 29 May 2016
+JFYI spacemacs uses evil-mode (vim emulation layer) by default
+it also has a preconfigured layer for clojure
+I just started using proto-repl for atom and it's *amazing* so far
+actually there are newer commits to LightTable
+At first I though I'd just "learn emacs" and then move to spacemacs, but the more I procrastinate the more I think I'll just go straight into spacemacs soon.
+<@U1DLD0WNR> have you tried atom + proto-repl?
+I've used Cursive for a while, but I don't know why it just doesn't work for me. Also the instalRepl thingy is a killer feature for me.
+I must admit I haven't try atom + proto-repl, days only have 24 hrs :joy:
+but moving from 0.8.1 is taking a while but .. <http://lighttable.com/blog/>
+I've read that, that's why I said I was "unsure".
+Does Atom+proto repl have an interactive debugger like cider?  
+I'm curious about private functions and data in Clojure. As my application has grown, there are now some fairly large (to me at least) maps that hold app state. So I have functions to handle a lot of the manipulation of that state. It seems rather unnatural for me to these large state objects in the global space so I've made them private. However every time I make something private in Clojure I feel like  I'm kinda going against the grain.
+any thoughts on app design and when to it makes sense to shed some of the old OOP style organization and when to keep some of those features in Clojure?
+<@U4X9H6JUA> I personally find that having private functions and data is not something that is worth doing, see <http://steve-yegge.blogspot.de/2010/07/wikileaks-to-leak-5000-open-source-java.html> for a (probably mildly satirical :wink: ) overview
+If it's large maps that you're struggling with, it's usually more helpful to split their handling in a clean way, e.g. with something like cursors in particular or having your functions only operate on well defined subtrees in general
+well that's only part of the problem. I'm actually more interested in design philiosophy when it comes to ensuring that data is consistently maintained. Spec will help a lot with this however its isn't production ready so I'm not using it. If someone updates app state and fubars an inner struct by removing a necessary key word, or accidentlally replaces a map with a vector, this is all possible when the app-state is available to anyone. THose kinds of concerns have always guided my design choices and its kinda hard to shake those concerns, know what I mena?
+mena = mean
+Sure, and I do agree that it's a problem, but making functions private doesn't prevent them from breaking something in your state :wink:
+You prevent that by limited scope and good tests
+Any ideas?
+Are you using boot or leiningen?
+Actually just tried <https://github.com/weavejester/reloaded.repl> and the same thing happens.
+<@U09LZR36F> Just adding a println into one of my system constructors, and it seems to hold onto the old function.
+Just ftr, records hold onto the old behaviour for `stop`, but the subsequent start should work.
+Instead of passing a function into `reloaded.repl/set-init!`, I passed an anonymous function, and that causes it to update.
+Kinda strange, but oh well.
+that's odd :thinking_face:
+Oh, maybe it isn't.
+How did you require the function you were passing to reloaded.repl/set-init?
+The function was originally in a (ns user) with a (disable-reload!) maybe/
+It was in the same namespace.
+That was confusing.
+I'm wondering if you had a missing `(:require)`, that would cause the refresh to not fully work I think
+No, I don't think so. I'd tried with an alias to my system namespace and fully qualified.
+Oh well, I'm not too worried about it now. I'm sure I was doing something that's mentioned in the readme.
+¯\_(?)_/¯
+Thanks :slightly_smiling_face:
+<@U4X9H6JUA> we've got large state maps client-side in our re-frame app - we've been using prismatic schema to ensure that state is updated consistently during development, though since schema doesn't do efficient delta checks we don't do it in production
+<@U4X9H6JUA> quite a few people use spec in production. Most of what's "not finished" in spec is around feature requests, not so much in api changes or bugs.
+<@U0524B4UW> yea, I'm aware of prismatic schema also. I was kinda more interested in having a discussion about why building apps this way (everything open vs certain things being walled off and only accessible via well defined interfaces).
+I thought spec was only part of clojure 1.9, no?
+One of the reasons IMO is code bloat, writing all those interfaces will result in simple changes to the data model requiring devs to add new "add-person", "add-contact", etc. interfaces.
+Sure but there's a fair amount of people using 1.9 in production as well :slightly_smiling_face:
+Clojure is very good about adding new features that don't interfere with previous code. So it's very rare that upgrading to a new "alpha" of clojure will break existing code.
+maybe I'm just too old school ( or just old! ) I've never used alpha/beta versions of languages in prod
+so far none of the arguments for having everythng global are convincing to me
+The other problem you'll hit is that Clojure doesn't put any real meaning to the words alpha and beta. Core.async, core.match, etc. have all been in alpha for quite some time, and yet they're used in production a lot and relatively bug-free.
+i don't think that's unreasonable at all
+But about global state, we should talk about it in this way, with a global atom for your app state you have one place to look for the state of your app. You can "go back in time" simply by replacing the state with a previous state (global undo)
+I guess I am a little more open to libs like core.async
+Debugging is simply a matter of grabbing the state and then using Clojure's normal functions to poke around.
+a global *persistent* state, solid consistency checking and a principled model for managing updates beats fragments of state in lots of places, variable consistency management and ad-hoc updates every time for me
+Yeah, it all depends on what sort of state we're discussing
+also - global app state as the output of a reduce over an immutable stream of events is a model with a bunch of really nice properties, and is easy to pull of with clojure, with help of tech like datomic and/or kafka
+for example: "bug just happened, dump the last N events into transit data so I can replay them in a unit test reproducing the bug"
+that saves days of debugging in a microservices type app
+or even… "bug happened last week, dump the N events preceding the bug" etc. - so much nicer than reading log files for 3 servers in parallel
+<@U051SS2EU> do you have good articles/examples of this other than datomic?
+<https://circleci.com/blog/why-we-use-om-and-why-were-excited-for-om-next/>
+<@U5ZAJ15P0> I have an open source lib that's still young, working on moving more of my production proprietary app's logic into the open source lib… but it really can just be done as a reduce that calls resset! on an atom, where the input sequence is a lazy infinite sequence of kafka messages (or even rabbitmq or whatever if you want to do your own persisting)
+<@U056QFNM5> thank you!
+the thing is that the approach is natural enough for clojure that you hardly need a framework
+<@U051SS2EU> what is the open source lib?
+it's very young, but it's ludic (named because the initial metaphor was a game of chess by mail) <https://github.com/noisesmith/ludic>
+awesome, thank :slightly_smiling_face: I'll take a look
+also useful for dumping and replaying data even outside such a context <https://github.com/noisesmith/poirot>
+it seems to me that a lot of the headaches with event sourcing come when you try to have a distributed, async system
+but in a single process, as you said, it fits nicely with clojure's model
+if you do it right (with deterministic processing) you can replicate state - the trick is that every "decision" needs to be reified as an event sent to the rest of the system
+this is the part that ludic is going to flesh out more in the future (still closed source stuff now sadly)
+do you use event sourcing in production on any project? (excluding Datomic)?
+yes - like I mentioned, this closed source app, which is my day job and a production app
+oh, sorry, missed it. Do you use Kafka with that app?
+and I mean really every db from postgres to cassandra to mongo is using event sourcing internally
+right, yes. By "using event sourcing" I mean as a first-class citizen
+not an implementation detail
+yes, I use kafka, since it simplifies the persist / replay part (and guarantees ordering which is a huge benefit)
+if that makes any sense
+Do you use Kafka as your primary datastore (e.g. with infinite retention period)? Or do you store your data elsewhere and only have a retention period of X weeks on kafka?
+right, just pointing out for the postgres etc. devs event sourcing is a first class part of their architecture :smile:
+for client data we use postgres and mongo - kafka is for system state / messaging
+if every server needs to agree about the state of FOO - FOO is managed by events on kafka
+I'm also working on a scheme to migrate events off the kafka log into s3, and off of s3 back into the app (via an adaptor compatible with our kafka input…) - but that's in design stage still
+so you do use kafka as a datastore? or just as a transient message broker?
+message (I don't like the implication of "broker" - for example with a proper broker you can't do rewind/replay and these are trivial with kafka)
+where some messages are explicitly stored because they are relevant to some bug or question etc.
+I have a multimethods question. Suppose I am dispatching on the class of two arguments so my dispatch-fn looks like `(fn [x y] [(class x) (class y)])` I can create a method matching against [class-a class-b]. Suppose for a given class-c occuring in the second position I don't care what was in the first position. I want to match on something like [_ class-c]. Is this possible? Otherwise I need to write a number of methods, one for each [class-a class-c] [class-b class-c]  I'm not actually working with classes.

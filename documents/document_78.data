@@ -1,0 +1,10 @@
+```
+Yeah - this is a cool approach to discover the structural sharing. I hadn't thought of using `identical?` for this.
+keep, for, map -- they want pure functions and return a lazy list
+I want something which is okay to pass an unpure function to ... and returns a strict list
+in good clojure style, do people do (map impure-function ...) or do we do something else when we have to run an impure function and also get its return value ?
+<@U3JURM9B6> usually you'll use `doall`
+if you care about the return value
+<@U3JURM9B6> it is fine, as far as I know, to pass a function with side-effects to `keep`, `filter`, etc -- the gotcha is that you should not *expect* that your code will necessarily execute. So, your side effect may happen, and if you don't mind, great -- but, your side effect might *not* happen, and that's why it says to avoid impure functions (or in some cases, may get called *more than once*).
+it also might happen 31 times more than you expected
+right

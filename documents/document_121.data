@@ -1,0 +1,27 @@
+#{1 4}```
+is it possible to use clojure.java.shell to invoke a shell command like `tr &lt; infile.txt -d '\000' &gt; outfile.txt` ?
+<https://github.com/clojure/clojure/blob/master/src/clj/clojure/java/shell.clj>
+<https://twitter.com/clojure_conj/status/889899202767147008>
+^ How cool is that?
+yeah got the email earlier. super super cool
+<@U0CDMAKD0> in order to use things like `&lt;` you need to invoke /bin/sh
+clojure.java.shell/sh, despite the name, is a raw system command that doesn't use sh
+of course that's not portable, and then you've created code that only works on a *nix system or reasonable facsimile
+yeah, <@U051SS2EU> there is a thorny translation that `tr` handles well at the command line that I'd like to shell out within a clojure program ( that does a whole laundry list of things).  Haven't yet found the right syntax for calling `tr` via clojure.java.shell/sh though
+<@U0CDMAKD0> you send a normal shell command to sh `(clojure.java.shell/sh "/bin/sh" "-c" "tr &lt; infile.txt -d '\000' &gt; outfile.txt")`
+wow, thank-you.  That works. I tried a lot of other combinations but without the "/bin/sh" "-c"
+right, sh -c says "find and run the sh executable, tell it to run this"
+that class of example should probably be added to the other examples (<https://github.com/clojure/clojure/blob/master/src/clj/clojure/java/shell.clj#L130-L142>)
+thanks again
+np, glad I could help, I wonder if it would be worth submitting a patch to JIRA for adding another println to that comment block
+agreed - I think that would help others.  Not sure how easy that is to do...
+<@U0CDMAKD0> there is an example of using sh -c as an arg to sh on the clojuredocs page <https://clojuredocs.org/clojure.java.shell/sh>
+true enough, perhaps a few words there describing why it is useful/needed would work too
+<@U051SS2EU> thanks for your help yesterday, you were correct !!!!
+I know this is a clojure channel but maybe someone will know the answer. I'm trying to ssh into a server, run a shell script, and the disconnect from the server and have the script continue to run
+ssh + nohup?
+<#C03RZGPG3|off-topic> :slightly_smiling_face:
+tmux or screen
+<@U5ZAJ15P0> 'what makes a good REPL?' - what value do REPLs bring, what features make for good REPL, what programming language features enable them
+<@U064X3EF3> a bit too long :) I need a 2-minutes thing
+Thanks,  that helped me

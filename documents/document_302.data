@@ -1,0 +1,71 @@
+```type Msg = PortMsg Port.Msg | &lt;rest...&gt;```
+seemed not really the solution
+Ah. Well that's a possibility too, but then you're spreading out the logic of your application; which might make sense, depending on your exact use-case. To do that, you'd create a `subscribeToThis : (Msg -&gt; wrapper) -&gt; Sub wrapper` function in the port module, and give it an implementation like `subscribeToThis wrapper = mySub SomePortMessage |&gt; Sub.map wrapper`
+I see
+If I wanted to put the port logic into a separate module as a reusable package is that the way to do it?
+Yeah, pretty much. Though keep in mind that port modules cannot be shared on <http://package.elm-lang.org|package.elm-lang.org>
+Thanx
+Anyone know when Elm 0.19 is expected roughly? 2017? 2018?
+<https://github.com/elm-lang/projects/blob/master/roadmap.md#what-is-the-timeline>
+If I had to guess I'd say this year, based on nothing in particular :slightly_smiling_face:
+I'm hoping for October-ish :slightly_smiling_face: We could start a betting pool
+Glad to hear that 2017 is more likely than 2018.
+Mine, like <@U0CLDU8UB>'s, is based on pure wishing, not on any actual knowledge or anything.
+Is the work in progress publicly accessible on GitHub?
+<https://github.com/elm-lang>
+Although my understanding is that there is A LOT of work being done that isn't in there yet.
+You probably have a better feel for it 
+Experimentation, thinking, planning, etc.
+I wouldn't count on me having a better feel for it. :slightly_smiling_face:
+<@U0FP80EKB> Ok that makes sense.
+Just don't want you to get the wrong impression about any knowledge I have. :slightly_smiling_face:
+Look at the `dev` branches.
+Is elm-node presently the best way to run on Node?
+I'd actually love it in September, as we are going to be going very heavy on having our app hosted on our customers' websites as embeds. The work to shrink the size will be happy for us.
+I think we'll benefit a lot from the DCE stuff
+There is no good way to run Elm on Node
+What are you hoping to do?
+<@U0CLDU8UB> Read a file and write another. I'm aware this isn't anywhere near supported.
+This looks like it might work <https://github.com/ElmCast/elm-node>
+Yeah, it's going to involve a lot of ports and depending on what you're doing, maybe not that much Elm :slightly_smiling_face:
+I would think of it as "reading from in, writing to out" then pipe, rather than thinking of it in terms of files.
+I would even claim you'd have a better time doing that sort of stuff in Haskell, but we all have our hobbies
+Thanks. The native interop story seems pretty good with ports and native modules.
+<@U0CLDU8UB> Haskell or F# have this covered but I need Elm in this case.
+~native~ _kernel_ code is about the easiest way to throw all guarantees that Elm can give you. If at all possible, use ports :slightly_smiling_face:
+<@U3SJEDR96> Native has been renamed to Kernel as of late? I think I saw a commit to that effect somewhere?
+<@U61RNCASK> yes. Well, reframed is a better word. "Native" sounds as if it belongs there. Kernel implies low level and "extreme caution is advised".
+<@U61RNCASK> If you do want to do it, you could take a look at `stoeffel/elm-verify-examples` on GitHub. It's mostly written in Elm, even though it deals with text files.
+Does anyone has an example of Dict.update usage?
+I am trying something like that
+{ model | books = Dict.update isbn (\book -&gt; { book | review = review }) model.books }
+But it doesn't seems valid
+Ok I didn't handled the Maybe case
+Going with
+            Just { book | review = review }
+Yeah, so the easiest way to do that is `Dict.update isbn (Maybe.map (\book -&gt; { book | review = review })) model.books`
+In Visual Studio Code, how do I observe output from Debug.log?
+I checked the "Debug Console" tab, however I don't see any debugging info.
+It appears in your browser's dev console
+not sure if VC has some sort of integration with the browser?
+I'm using elm-live, if that means anything...
+Found it. Thanks!
+I'm new to web dev. So there's a lot of fundamentals that I don't have yet.
+No worries! :slightly_smiling_face:
+Hi!
+Does someone has a recommendation how to make <https://gist.github.com/dawehner/0d1ce58a402af5c959ce3597dc731788> nicer, aka. not having a lot of case -&gt; Just else Nothing ...
+Oh wow. This might be a case for `andThen`. Hang on a bit.
+yeah right, this can't be right :slightly_smiling_face:
+Is it possible to decode this kind of JSON: <http://openlibrary.org/api/books?bibkeys=ISBN:0385472579,LCCN:62019420&amp;jscmd=data&amp;format=json>
+in a dict
+<@U5R6L5MT4> it's not a straight up key-value list, so it would depend on what exactly you need
+<@U5R6L5MT4> I don't think there should be a problem. Do you know already which data you actually need?
+it's definitely feasible to make a nice decoder for that
+Basically, at the end I want a Dict ISBN Book
+ISBN being the part after the colum in the key (so I would need to map at some point)
+And then the I want to decode the value as a book
+    , url : String}
+<@U5R6L5MT4> so start with defining a decoder for a single book
+ok
+I can do that
+The do something like `keyValues bookDecoder |&gt; Json.map (List.map (Tuple.mapFirst extractISBN) &gt;&gt; Dict.fromList) `

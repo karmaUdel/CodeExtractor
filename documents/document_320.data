@@ -1,0 +1,35 @@
+```
+are you calling that `handleHttpError` function from anywhere else? You first attempt looks correct to me...
+yes, check the location of the error
+oumph, thx <@U3SJEDR96> <@U4872964V>. I was searching at the wrong place. There was another call which caused the error... This took me 30 min to realise xD
+so new 'beginner' may be overstating it ... been trying to wrap my head around the concepts in Elm vs JavaScript.  I have some basic framework (object ... record, some similarities, many differences ...that kind of thing).  At a high level I understand subscriptions in the time clock sense or even keyboard input.  The one area I can't seem to figure out is the equivalent approach/style to deal with observables.
+Can someone point me in the right direction.  In the past I would have used Flyd observable streams.
+in Elm, the concept of observable corresponds to a Msg
+there is only one stream of Msg, they go into your update function
+maybe that confuses you more, and now I have to go, sorry
+All the examples I have seen have been ... not sure how to say it... external.  Does anyone know of an example where one variable impact another.  For example, if game variable of "health" changes, a number of dependent variables also updates.
+I would say there is no concept of observable in Elm. The entire program is a reaction to a "stream" of messages, like norpan said, but you can't really see it from the perspective of the developer
+You're on the right track. You cannot do dependent streams in Elm. The concept just doesn't exist.
+Yeah, I kind of get that.  So now I am looking for an example of the pattern I would use to do it in an Elm way. Have not found it yet.
+well, when the health changes, a message must have been triggered
+then in update, you can do whatever you need to move the model to a new, valid state, say `{ model | health = model.health - 5, durability = model.durability - 10}`
+This is very abstract without a concrete example, I'm afraid.
+Yeah, your right. I guess I just need to dive in.  <@U1CE9DL9H> that makes sense. I guess this model in my head where you assign relationships and move on needs rework.
+I don't know if this helps or just confuses more, but here's an update with plenty of interdependent things from a game I'm building for fun: <https://github.com/ohanhi/bike-wars/blob/master/src/Bike.elm#L53>
+oh thanks, yeah, looking at examples for me is a great way to learn.  Appreciate it.
+Essentially there are just multiple calls to functions and some case expressions in the let block. They are interdependent too: figuring out the collisionPoint needs the nextPosition to be calculated etc.
+But the thing is, in Elm you need to store _everything_ in the model. There is no other source of state in a program. If you think about it, every single Observable can be a source of state. This is why the two mindsets are a little hard to combine.
+In some ways that is how I ended up here.  In JS I had just moved my world state to Baobab (immutable structure) and was struggling with 1. Changing my mindset 2. All the options and tools and what was right.  Hence, Elm offers (I think) someone with entry to mid level skills (kind of new to this in general) ... structure.
+II will follow your code example through.  Thanks for the help.  Off to work.
+<@U62R599PU> if you look at something like debouncing, which you'd use an observable for, this can be handled by explicit state, like done in the various debounce packages for Elm
+pzolla: I'm doing an RPG in Elm and your observations resonate a lot. Coming from imperative language we need to reframe a lot fo things :slightly_smiling_face:
+Any idea of how I could listen to onkey on a single touch? or have something better than `App.Action.NoOp` for the case that doesn't interest me and that would not interfere with the user inputs?
+Could you filter the signal in the part of the code that handles signals rather than having a conditional in the event handler?
+Alternatively, write a custom decoder instead of using `keyCode` and make sure it returns `Json.Decode.fail` for non-ESC characters
+For reference, see how the `onEnter` handler is implemented here: <https://github.com/elm-community/html-extra/blob/2.2.0/src/Html/Events/Extra.elm#L267>
+oh that's a neat idea!
+`escDecoder tagger = keyCode |&gt; andThen (\k -&gt; if k == 27 then succeed tagger else  fail "not esc")`
+or, indeed, go all the way and make it a custom `onEsc` :slightly_smiling_face:
+I'll try that :slightly_smiling_face:
+Awesome that works !
+Thanks a lot <@U3SJEDR96> and <@U0LPMPL2U>

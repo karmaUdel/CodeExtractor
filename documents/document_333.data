@@ -1,0 +1,243 @@
+I saw something like this in elm-spa-example: ```type alias CreateConfig record =    { record | otherField : .... }`. All ids in my API are `Int` so maybe having something like `type alias Persisted x = { x | id = Int}`?
+<@U0FP80EKB> something liek what you mention is what I was thinking of
+I don't like extensible records like that, personally. They always end up causing me headaches, because they are a form of inheritance with all the problems that come with that.
+I'd say pick one, use it, then identify the pain points and migrate to another solution to fix those pain points. It is easier in Elm to refactor than in other languages
+<@U0FP80EKB> that last example you wrote looks pretty good, and it's easy to see what the data actually is.
+Every time I use an extensible record, for example, and I do try using them (currently experimenting with using one in our current system), I end up finding they aren't worth the headache, so I migrate away from them
+Exactly <@U2SR9DL7Q> Also I prefer to use the most "voted" option considering other people experience and probably I never have to pick the other one
+`type Id = Id Int` rather than `type alias Id = Int`
+We started doing this a long time ago and it has been very nice
+<https://stackoverflow.com/questions/44989599/how-do-i-initialize-a-value-thats-based-on-a-recursive-type-alias>
+<@U0FP80EKB> doesn't it become annoying to destructure things all the time?
+no, I only have to destructure it at the api boundary
+The rest of the code uses it just fine
+for instance to render it in views?
+<@U638BAUJZ> this usually has to be solved splitting your definitions in different files
+K. I'll try that suggestion.
+Oh, we don't tend to render it in views, but you can. We have a couple helpers
+Here's a gist of the main stuff around it <https://gist.github.com/coreyhaines/5f2a8d15de99ce91adbb10ac855172b1>
+<@U638BAUJZ> :+1:
+If we do need the value, we use `idValue` to get it
+ok, great. We have few special types like Id, something for monetary amounts and not much besides that so great, I think I'll try that
+thanks for the help <@U0FP80EKB> <@U2SR9DL7Q>
+We started using it a while ago, and it has ended up being wonderful.
+`List.filter (Id.idIs idToFind) items`
+so I just learned gist exists... instantly bookmarked.
+<@U3X6H8X8W> Won't I still get a circular dependency by splitting the files in which each file relies on the other?
+can you share the code?
+I guess my question is: will the Elm Architecture bend enough to allow dynamic  *Msg*  - perhaps running multiple _message pumps_ in parallel, or using some other construct to basically map ‘new' messages on to the Msg union type ?
+<@U64M3DF1B> - _dyanamic_ isn't likely to happen.... but distributing your `Msg` types around your modules can be done cleanly, and safely: If each module has a `Msg` type, and associated `update` function.... then you can combine them in a roll-up module:  `type AllMsg = ThingMsg Thing.Msg | BarMsg Bar.Msg | FooMsg Foo.Msg`  then your `update` function looks like:
+hi, I am trying to talk to a go webserver from elm but I am having cors issues, even though things work just fine from js (testing using fetch api)
+do I need to set specific headers when sending the request or is there something broken with my server?
+<@U601ELFEG> K - hmmm - you mean `update : AllMsg`?
+Oh - whoops - yes
+:smile:
+great
+or just rename `AllMsg` to `Msg`
+sure - do you see any way to (mis) use the port construct
+remember that each module can have a `Msg` and `update`
+in this way, adding a new module is just one line to the top level `Msg` and one line to `update`
+I can think of all kinds of ways to mis use the `port` construct.... :stuck_out_tongue_winking_eye:
+perhaps build a ‘generic' protocol that any ‘stray' module could implement and thus be "allowed" to have it's messages processed?
+:smile:
+but I get your BarMsg thing!
+it's a start
+thx!
+Not really for that, thought: No matter what, back in Elm, you're going to have add something "global" = be it a `port` or a `Sub`
+and the method I gave I think is the least amount of typing you'd have to do
+kk
+Wonder how people deal with blobs of text or markup that I want in my page (like dialog text or help text) -
+I should say, static blobs -
+<@U601ELFEG>, I think you miss Cmd.map-s from your main update, don't you?
+I don't want to author them in elm as strings or `Html` functions -
+<@U5J0H2NS2>   - ah, yup
+though you could go to the trouble to make any module able to return `Cmd Msg` for the overall type - but takes more work, I suppose (have to split the modules into the `Msg` type modules and the code modules)
+<@U5J0H2NS2> <@U601ELFEG> - I feel the :cold_sweat: Even though I can (as per mzero) send off a msg to the Thing.module - my update signature is wrong (Thing,module will return a Thing.Msg) :disappointed:
+No problem, you just have to map it via Cmd.map
+working now :slightly_smiling_face:
+<@U5J0H2NS2> K - thx
+Before splitting everything, take a look at this presentation, if you haven't before : <https://www.youtube.com/watch?v=nE9jLacXOys&amp;feature=youtu.be>
+is there an idiomatic way to check which of a given list of ranges cover a given value. I have 6 ranges and could just  do 5 "else if" conditions but I am wondering if there is another way
+List.filter?
+Hope this makes some vague bit of sense :slightly_smiling_face:
+more sense than you think, although less than you'd hope.
+elm makes for a gentler introduction to the mathematics behind some FP constructs that say, Haskell
+but some of it is still a bit opaque.
+hey is there any sample elm code for taking input from a text box and displaying it?
+<@U64MK7215> yes
+<http://elm-lang.org/examples/field>
+I built a little data structure that I'll eventually use for browsing time series. Does this look ok? Is there already something out there? I'm calling it `ShiftList`.... <https://ellie-app.com/3Hqfm89DRS8a1/0>
+how do i trigger 2 events with onclick?
+trigger just 1 event, it's in your update function that you can do multiple things
+what are you trying to achieve?
+I want to display the text entered in the box and reset it using submit and reset buttons
+<@U64MK7215> <https://ellie-app.com/3Hqfm89DRS8a1/1>
+<https://ellie-app.com/3Hqfm89DRS8a1/1>
+no need for the alias in that simple example
+Is there a tool to bootstrap applications? I've run through the tutorial following the elm-architecture stuff and want to start playing around with my own ideas and want to be able to create applications quickly.
+What kind of bootstrapping are you looking for?
+Anything - I'm a rails developer so most of the newer front-end tooling built around npm is not familiar to me. I'd prefer to worry about my application than setting up folders and build tools.
+can anyone tell me where i'm screwing up in this ellie? <https://ellie-app.com/3Hq96fJSftQa1/4>
+<@U6589U6DN> what tooling do you want? wants the big deal with creating folders? elm-make is what builds your elm. Maybe check out <https://elmseeds.thaterikperson.com/elm-webpack-extras>
+hrb90: what supposed to be happening?
+in rails I type `rails new &lt;project&gt;` to bootstrap a project.
+so...?
+With `ember-cli` I can run `ember new &lt;appname&gt;` to start a new app.
+Is there an elm equivalent?
+oh, SwitchColors is getting triggered 2 times for some reason
+elm comes with something called elm-reactor
+I'd just use this to get started
+<https://guide.elm-lang.org/install.html>
+yep - that seems to run a development server but not create anything to actually run?
+have you  used `elm-make`?
+`elm-make` seems to compile an existing app rather than setting up the structure of an app? I feel like I'm missing something.
+you just want some boilerplate?
+I'm getting tired of copying things out of the `elm-architecture` project and setting it up just right. Is there a recommend, or supported way of bootstrapping an application?
+what kind of application?
+a single page app?
+Can I not make this decision after starting the app?
+yeah exactly
+as far as I know what you are asking for does not exist as part of the stuff that you get when you install elm.
+<https://github.com/rtfeldman/elm-spa-example>
+its seems to  be  the opposite
+?
+`rails` and `ember-cli` generate code, migrate databases, run dev servers, right?
+it seems you are looking for "scaffolding"?
+i think that's the rails term
+Once a app has been created they do.
+But thanks for answering the question. I was wondering if I was missing something. :slightly_smiling_face:
+`touch Main.elm`
+done.
+:wink:
+put your view, model, update subscriptions in there
+and then break things up according to the specific domain you are working in
+the think hes looking for is so  fundamenal that every elm program includes it
+TEA itself?
+I would rather start my app like I intend to continue working with it. That app you linked me to has everything split up into domains already.
+exactly, thevtea is baked in.
+<@U6589U6DN> i think you don't need to worry about it with Elm.
+rails and ember are built with more general purpose languages
+elm is specifically for front end web apps
+20+ years of programming tells me I _do_ need to worry about it,
+and maybe you're right that I shouldn't concern myself with it, but if I don't address my concern I will be distracted by it every step of the way..
+seriously you are over thinking it
+take a step back and implement something simple
+how often are you creating new applications? could you create a basic structure you like and put it in a "starter" repo?
+I am implementing something simple - since I'm doing something simple I would like to explore a technique that is used in a larger application.
+ah
+i think i see where you are coming from here
+so, with Elm you don't really need to worry about that
+fp is going to be different
+you can literally start with `Main.elm`, compile that to `app.js` embed it in an `index.html`
+then when you are ready to grow you just... grow... follow the compiler...
+i know because I started with a small `Main.elm` file, and using the same patterns now have a ~6,000 line elm app
+Model / View / Update is the pattern
+and it's maintainable
+you can start with `Html.beginnerProgram` and build out your entire app... then if you suddenly need to actually do something useful with an Http request, change to `Html.program` and it will walk you through all the changes you need to make in your code
+evan gave a really good talk titled "the life of a file" <https://www.youtube.com/watch?v=2ihTgEYiKpI&amp;t=1s>
+it's totally fine to start out simple, small and naïve and then grow from there. a fundamental understanding of the architecture is important, but the compilers got your back and the language is so simple, it's hard to do anything completely wacky
+by "simple" i mean "small and strict"
+only immutable data and pure functions
+<@U6589U6DN> i can relate to the feeling of wanting a more prescribed way/initial structure - years ago i worked with a legacy PHP application that did not use any sort of framework (was likely "started small and then grew ugly"), then I moved to django which is very batteries included. neither used helpful compilers or types, so it's been quite a paradigm shift. Elm's fun and has a nice learning curve and from my experience is very developer friendly
+I want to experiment with a bunch of different things as quickly as possible. Hence wanting a bootstrapping/boilerplate tool. I learn best by playing and reflecting so being told to just accept something isn't satisfying.
+Has anyone been encountering problems with upgrading elm-test? (And, the associated node-test-runner, I suppose?)
+Edit tests/elm-package.json - you should remove the node-test-runner dependency there, and bump the major of elm-community/elm-test to 5.0.0 &lt;= v &lt; 6.0.0
+<@U6589U6DN> there a few starter/template/bootstrap type tools around, but they tend to be opiniated and fit specific use-cases. I.e. a starter for webpack projects, a template for a page-based architecture, one which assumes sass+coffeescript for extra deps, etc. You may be interested in those, tho I'm very wary of a one-size-fits-all solution.
+<@U3SJEDR96> I had already removed the node-test-runner dependency. As for elm-test to 5 &lt;= v &lt; 6, elm-test proceeds to stop being able to find elm-core.
+Anyway, a fresh directory and running `elm-test init` chokes too.
+Hmmm.. what happens if you remove the `elm-stuff` and `tests/elm-stuff` folder?
+`elm-test init` drops "elm-community/elm-test": "4.0.0 &lt;= v &lt; 5.0.0"
+<@U3SJEDR96> I did. It finishes the downloads and then chokes saying it can't find them.
+What's the output of elm-test --version?
+0.27.5
+Hmmm, try `yarn elm-test -- --version`
+Oh, hahaha
+Thanks, I'm an idiot.
+0.18.7
+I was scratching my head there too.
+I was like, wtf, version is ^0.18.7 in package.json
+Okay. So, let's see, step by step.. can you: remove tests/ altogether, remove elm-stuff, and tell me what dependencies you have in elm-package.json?
+(also, it should indeed be 4.0.0 &lt;= v &lt; 5.0.0 for elm-community/elm-test. My bad :))
+Sure, one sec. I'm creating a whole new directory where I only have my package.json / elm-package.json pulled across.
+len: if you like playing and reflecting, check out <https://ellie-app.com/new> if you want boilerplate, search for elm starter apps and yoemen. there templates out there.
+OK. Put elm-community/elm-test back to 4 &lt;= v &lt;= 5
+Deleted node_modules, elm-stuff, and tests/elm-stuff
+Removed all dependencies except the default.
+Finally working.
+I'm not going to question it.
+commit and push to CI. How frustrating.
+This was a minor version upgrade... :disappointed:
+<@U3SJEDR96> Thank you for your help!
+Well, in semantic versioning world, anything pre `1.0.0` can do backwards compatibility breaks in even patch-versions; and the npm `elm-test` tries to mirror the Elm version it works for in its minor and major parts; so `0.18.x` should work with elm 0.18. Nevertheless, yeah, it was a somewhat painful upgrade, and we're working towards ensuring such surprises don't happen anymore. The project now has a changelog (<https://github.com/rtfeldman/node-test-runner/blob/master/CHANGELOG.md>) and if we ever need manual steps to upgrade a project again, we'll definitely look into having the executable tool attempt to guide the user through that process :slightly_smiling_face:
+Fair enough on the semver point.
+There was no pointer to the changelog as the source of upgrade instructions. And, having it off in node-test-runner is a bit surprising too; since I was focused on elm-test. Took a while to dig that deep. sigh. Yeah.
+Cheers!
+Hello, can someone help me a json decoder for months and days&gt;?
+	}
+i found some packages for it, but am not able to use it
+<https://ellie-app.com/3HvJVvLtnyWa1/0>
+<@U6531GSTW>  ^
+Moin Moin!
+I am having some issues with circular dependency caused (I think) by having a field in a record containing List (Html Msg)
+<https://gist.github.com/allansideas/4e206abab9b158c6eb03c0714d5aa277>
+An expample of the reason I need Html Msg as the "content" would be a Message could contain text - then a link that fires off a Msg - then more text
+I don't have time to look at this in detail right now, but my advice would be to try and make those `content` elements be a datastructure that describes _what_ to render, rather than the actual virtual-dom representation of that rendering, and making a `viewContent : Msg -&gt; (List Content) -&gt; Html Msg` function where you explicitly pass in what message to use when someone clicks a link. Content could be something like `type Content = Text String | Link String String` which could then be used like `[ Text "some text", Link "<https://google.com>" "a link", Text "some more text" ]`. Basically, make your data data, and your view something that can take this data and turn it into html.
+Awesome, I will have a crack at that then :slightly_smiling_face:
+thanks!
+I have install elm-format but it looks like the binary is `elm-format-0.18`, however my editors (emacs, atom) expect it to be `elm-format`. Did you experience similar issue ? If so, how did you solve it ?
+could you create a symlink that points to that executable?
+Using `brew` you do indeed get that name. Using `npm -g i`, you get a proper `elm-format`. As for editors, if you do decide to use the `brew` version, in atom at least you can configure it to look for `elm-format-0.18`. Not sure about emacs :slightly_smiling_face:
+another "advantage" of going the `npm` route is that you can try out the experimental version `npm -g i elm-format@exp`
+<@U641LDZFU>  I indeed considered the symlink options but it seems a bit overkill to me. <@U3SJEDR96> using brew was my mistake, I have switched to `npm` and all work now as expected. Thanks you all for the swift replies!
+It's a perfectly valid installation method, but yeah, it means you also get the formatter for `0.17` code which you (hopefully) aren't dealing with
+I tried to output a Cmd in the end of the init function where I call UrlChanged with the current (first) location, but I can't get it to work
+as in "I don't know how to create a Cmd that triggers the update function with a Message I want"
+I am a complete noob
+But when I was having trouble with Cmd in update
+I was able to solve it by calling update recursively
+a-la: update (TransitionStoryNode transition) nextModel
+TransitionStoryNode being the message
+Could this help?
+(the update (TransitionStoryNode transition) nextModel) was called in the update branch from another Msg
+<@U604S603Y> If you're using <http://package.elm-lang.org/packages/elm-lang/navigation/2.1.0/Navigation#program>, then `init` gets the initial `Location` as an argument.
+So do whatever the `UrlChanged` update branch would do also in init.
+Do not try to make a `UrlChanged` message, just do the thing you want to do :slightly_smiling_face:
+and I'll keep the suggestion of <@U641LDZFU> in mind for the future, too
+is the process that Elm uses to convert JS data into Elm data when it goes through ports quite fast? would it make sense to send rapid streaming data through ports into an Elm program?
+Elm is cool
+I failed to run sample of Clock and Drag, Can anyone help? I use 0.18.0
+hello world is OK
+It said need SVG and Mouse
+Hi <@U6612TJLC>, try `elm package install elm-lang/svg`
+`elm package install elm-lang/mouse`
+you need to run those commands in the project dir
+<@U62UFEG4D>, really thanks
+ur welcome!
+is it possible to expose the type UnionType = This | OrThis when importing a module?
+<@U641LDZFU> since it is possible to expose a type, I would say yes
+I have seen this `import Msgs exposing (Msg)` where `Msg` is defined as a union type
+<https://www.elm-tutorial.org/en/04-starting/07-multiple-modules.html>
+ah thanks
+the key was exposing (UnionType(..))
+Is it possible to install SVG automaitically?
+i'm wondering if it is possible to build an Elm app that is just a component for embedding in html, but not for a single div, for multiple divs that would run that elm program. the docs show embedding in a single div, is it possible to build Elm stand-alone programs that run in any arbitrary div, even if multiple divs run at the same time?
+Hey <@U6612TJLC> can elaborate on that, not sure I got your question :slightly_smiling_face:
+I manually installed ,and worked.
+maybe run  `elm package install elm-lang/mouse` in the project dir
+OK, I see, thanks.
+<@U5QJW0DDE> you can embed a single program in multiple divs, but they'll be separate instance with their own state and events. I take it that's not quite what you're looking for? :slightly_smiling_face:
+<@U3SJEDR96> that is indeed what I am looking for. now the question is about ports. getting data into the programs is through ports, from outside Elm. i'd be streaming lots of stuff into Elm through the ports and different instances of the Elm program would need to respond to different data through the ports.
+i suppose I could just have each Elm program filter out what it doesn't need
+Every app gets its own instance, so has separate ports. `var app1 = Elm.App.embed(div1); var app2 = Elm.App.embed(div2);`
+ah i see
+it's not clear to me what the data conversion if like, if anything, between generic JS data like numbers and Elm data. If I am streaming a lot of numbers or even JSON objects through ports, is there an expensive overhead to Elm's conversion of these into Elm data types?
+Elm might wrap numbers, for example, into its own numbers type (perhaps?) but does it do something more complicated than this
+For the most part, they're just type-checks. Like, a string in JS or a String in Elm, it's the same thing. A record is essentially a JS object. A few things need little more work, like lists. I wouldn't worry about it, if it does become a problem, I'm sure we can figure out a way to get it working :slightly_smiling_face:
+i'm trying an experiment to port part of an existing Clojurescript app to Elm. The Clojurescript app uses React via Om and is extremely fast, handling streaming financial data dozens of times per second, streaming over a socket.
+I'm hoping there won't be any surprises to Elm's handling of this kind of data at this speed
+Dozens should be fine, generally. Handling a subscription to requestAnimationFrame (which fires at 60fps) is perfectly fine in Elm. One thing to do is to try and keep calculated data in your update low; prefer to just take the data in, letting the render manage the calculated data instead. If you find the overhead of the DOM rendering to be too slow, adding some `Html.lazy` nodes high up in the tree should take care of that, too
+i don't follow you with regards to calculated data; can you express with a simple example?
+say you receive a string that represents an integer, prefer to save that string in your model rather than doing the `String.toInt` and matching on the result in your `update`.
+oh, i see
+Though even that is something to worry about only after you notice you need it. Start with the most simple, most obvious setup. If you do get into trouble, benchmark and figure out how to speed things up :slightly_smiling_face:
+is relying on Chrome's dev tools typical in the Elm world, or are there more Elm-specific ways to profile and debug?

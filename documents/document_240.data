@@ -1,0 +1,43 @@
+```
+init logs
+<@U0JL9RPC4> just a quick update. did some reading. should be possible to keep the css locally. i'll need bower, some build steps and some finnicking, but it *should* work. thanks again!
+i gtg, but follow it down the rabbit hole, look in the `parseLocation` function.... then keep digging :wink:
+Alright, take care!
+good luck
+Problem solved
+What do you recommend in the way of application icons.  Material? Something else?  I'd love to see an example of styling a button or something with an icon.
+Oops: TheSeamau5/elm-material-icons doesn't work with 0.18
+i'm thinking how do we handle a textbox that holds a field of type float. Whenever a user inputs a dot, it doesn't pass as a valid float (in the update) and then the re-render causes the textbox to remove the dot.  Same goes for clearing/emptying out such a field .
+Are you setting `value` ?
+<@U3LUC6SNS> yes
+<@U5GJ5FEAU> Maybe you should have two different checks for whether the input is valid. One for when the user is still typing and another for when they attempt to submit the value.
+yeah! i was thinking of that as well. Earlier method seemed like the easy way out :smile:
+Another thought was to do the check onBlur but unfortunately we don't have the value on blur. Maybe i'll try to write a custom onBlur event handler
+custom onBlur seems like a good way to do it. Just not sure if it punishes me sometime in the future :smile:
+is there a syntax for combining exposing all `module My.Module exposing (..)` with exposing union types `module My.Module exposing (MyType(..))`?
+<@U5UP0B6QM> combining how?
+just wanted to expose everything in my module, but it seems to be having trouble with me union types when i try to access them in other files
+woops i figured it out.. my mistake. thanks for the quick feedback though!
+How do I create commands? I'm not finding any docs about it
+And how do I use `if else` with Maybes?
+<https://www.elm-tutorial.org/en/03-subs-cmds/02-commands.html>
+Yes but it's not really helpful, because it only shows how Random gives you a command, not how to issue one of your own
+from my understanding commands can only be called in the update
+Yup
+<@U3YDBDP4Z> a Cmd is a structure that the runtime can interpret and allows the runtime to execute something, after which it would call your update with the resulting msg. What is your use-case for creating commands?
+as for `if..else` with `Maybe`; could you explain what you're trying to achieve? I'm sure we can help you figure out how to best handle it :slightly_smiling_face:
+Basically, in pseudo-elm code
+`cmd = if model.user then Cmd.none else ChangeLocation "sign-in"`
+model.user is a `Maybe User`
+Right, so, `ChangeLocation "foo"` is a branch of your `update`, right?
+Yup
+Does it change anything in your model, or does it just return your model and adds a cmd to actually go to a different page?
+If the command is ChangeLocation, then model.route would also need to be updated
+So the url and route match
+Right. So what you'd basically do is take the content of that branch of your update, turn it into a function, and call that
+I mean, you already _have_ the code you want to execute, now you just need to call it. But rather than you telling the runtime to execute your `update` with a certain message, you can just call it directly
+Sure. But then this branch of `update` would just return `(model, Cmd.none)` if that's the case?
+If I call `update` with another message directly?
+I wouldn't call `update` directly, making `update` a recursive function can get confusing while there's no real need for that. Taking the code you actually need (the content of tht branch) and putting it into a function, then calling that function from both places is going to be much easier
+Then you lost me. :slightly_smiling_face: Cause I thought we were talking about recursive update calls
+I see how I could've given you that idea, but I was rather talking about calling the common code directly, rather than update itself. Could you perhaps post your update somewhere? I could give you some pointers :slightly_smiling_face:

@@ -1,0 +1,68 @@
+so i can do a thing like: ```bot.on('reaction_added')...```
+I think is connector.on('', func....)
+or controller.on
+controller yes im sory
+Thanks!
+does anyone know if you could fwd messages from Live Chat (<http://livechatinc.com|livechatinc.com>) to slack?
+looks like you could using their api: <https://developers.livechatinc.com/>
+I noticed some popular bots only use single slash command with multiple params, vs multiple slash command. What do you guys think about pros and cons? I think single slash command might be more discoverable, such as /app-name help to get help for an app. But it's longer to type.
+<@U1F77D0NS>: that's what the autocomplete is there for :slightly_smiling_face:
+Make it easy for users and you shall succeed.
+it looks from the way it's setup that multiple command is the best practice
+That's how I've done it so far.  I even have multiple commands that hit a single service.
+yet I don't see that from many apps, now questioning my judgement
+what about natural language ?
+in terms of making it easy for users
+that'd be sweet yes. but high engineering cost. moving that back
+<@U0HUTFBHS> glad to know someone else is doing it this way, thanks again
+alyssa_b.: I've been flirting with that off and on for a couple of years.  I think of it as the holy grail, and it is quite the pilgrimage to get there.
+Ideally you want your users to speak naturally to the bot.  But wow, english is hard.
+Forget about idioms and sarcasm, for instance. :slightly_smiling_face:
+Hey All. A doubt -  Why aren't the images uploaded to slack being shown in message builder? Neither they are posted. But other images work.
+If I use any other image (Not of <http://files.slack.com/|files.slack.com/>) in the 'image_url' in attachment, Its also working. But why aren't the images with slack url working? And the way to make them work. Thanks
+<@U1DUQ5VSM>: because that URL requires authentication
+if you log out from your Slack team you won't see the image either
+<@U0CS6NSF5>: Thanks a lot! Is there any way by which we can use this image?
+make the image public?
+:point_up:
+<https://api.slack.com/types/file#authentication>
+<@U1F77D0NS>: gut feeling is 1 command per app, if at all possible. command having the same name as the app (obvious, right)
+I don't have any data to back that up
+but I sense that users will miss commands when there are mutitple app installed
+or commands can crash into each other
+like /feedback or /help
+Hello, there, I have a stupid question. Say, I have a bot user whose name should be @whatevson. I remove the integration and add it again, but it adds with the name @whatevson2. As I go further and repeat, the number increases, but I would never end up with the original username @whatevson, despite I have long since removed that user. Is it Slack's limitation/feature?
+past integrations are actually "remembered". you can see bot names in the RTM.start result
+you can see all the old apps you installed
+Okay, so seemingly no way to remove an old integration. :disappointed:
+<https://www.producthunt.com/tech/music-rover>
+FYI, many API requests are failing right now
+the status page was just updated <https://status.slack.com/2016-06/f043160958492d7f>
+Yep, seeing lots of failures
+<https://medium.com/@wtd/origin-story-of-talentbot-8ea7667fb2d9>
+Hi all, I'm having some trouble with oauth flow - specifically the `redirect_uri`s. I'm finding that I must only use the url I provide in my app's config. All others produce an error. Can anyone help me understand this better?
+I believe it's for security - so no one else can put ‘your' add to slack button, and get users auth tokens under the guise of being your app
+you can control which url's are allowed to receive the credentials
+you can add multiple url's there
+but you have to manually add them to verify those are ones you control and are listening to
+I've tried listing two different urls in the config: `<http://myapp.com/a|myapp.com/a>` and `<http://myapp.com/b|myapp.com/b>`. My Add To Slack button has `redirect_uri=<http://myapp.com/a|myapp.com/a>`. And this works. When I need to exchange the code for a token, I set the `redirect_uri=<http://myapp.com/b|myapp.com/b>` and this produces `bad_redirect_uri` error.
+<https://api.slack.com/methods/oauth.access>
+looks like if you want to pass a redirect_uri in that call it has to match the original one
+I remember reading that now that you mention it - so this means you must use a single endpoint to receive the code and token - correct? That seems strange to me. Is that normally how it's done?
+yeah that looks right
+not sure how typical that is
+If this is the case, that endpoint would have to basically inspect the request data to know whether it's dealing with the code or token. Wouldn't it be cleaner to have separate endpoints?
+Ok, thanks <@U14H7AYJU> would be interesting to understand this more, but I can move forward now.. thanks again.
+<@U1G1G4HED> The call to `oauth.access` is an API call. It's not a URL you send the user to, and no redirect happens. So your `redirect_uri` handles exactly one case: when the user has authorized (or not) your app and you're being delivered an authorization code. After that, you make an API call to `oauth.access` and receive an access token in the API response.
+(The reason the `oauth.access` call takes a `redirect_uri` is just to check that it matches the `redirect_uri` used when the authorization code was obtained in the first place.)
+I've just noticed that if you run `<http://user.info|user.info>` with slackbot's id the response states that `is_bot` is false, any reason for that?
+<@U1C5VL0EQ>: I think slackbot is an exception...
+Thanks <@U11C8V57T> for explaining that
+Anyone here with a slack app / bot / software idea that is going to launch in the next 4 weeks?
+Hi all, my name Timotius from Indonesia. I wanna learn bot development. Anyone can help with which Channel I need to join and any basic tutorial ? Tx all
+<@U1G51L0NM>: most people here are using botkit, so join the <#C0AV5N8NA|botkit> channel and they probably have some bit examples
+<@U0CS6NSF5>: tx
+<@U1905D466>:  Me and my team are launching Halfway app and Halfway slackbot first week of July, check our website to know more <http://www.halfway-app.com|www.halfway-app.com> and our video  <https://youtu.be/zwM9S6ZyqaU>  Everybody else: I would be more than happy to hear your comments about our idea :wink:
+<@U1FF1FF0C>: shameless self promo: <http://puuush.com/funnel/the-beginning-of-slack-bot-marketing/|puuush.com/funnel/the-beginning-of-slack-bot-marketing/> I'm thinking of updating this page cause I've helped 12 more slack apps with marketing… Seems to be a growing market right?
+Hey guysI have a question.
+I've created a slackbot and it executes a command on my application, and every stdout I send it to slack using `convo.say` *But* there is a slight delay in-between messages and it seems that botkit terminates the conversation prematurely. How can I extend the conversation length?

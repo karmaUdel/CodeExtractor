@@ -1,0 +1,44 @@
+```
+<@U0GN0S72R> nice! that's actually a pretty common use case
+suggested usage: `(doseq [[x more?] (partition-all 2 1 coll)] ...)`
+<@U04V1HS2L> Cursive allows you to control this, _Settings-&gt;Editor-&gt;Code Style-&gt;Clojure-&gt;General-&gt;One space list indent_
+Recent versions of CIDER will also allow you to configure Emacs to do the opposite if you prefer that, I'm not sure what the setting is though.
+is there a way to get the emacs repl to display reagent/hiccup/react/dom/svg elements ? so I want to write sexps that return hiccup, then have emacs, instead of displaying the raw clojure data, to render it and display it
+if I had this, it'd give me most of ipython in eamcs
+So I'm thinking about writing a clojure desktop app. Does <https://github.com/halgari/fn-fx> seem relatively stable and usable?
+<https://ring-clojure.github.io/ring/ring.adapter.jetty.html>
+why is there no websocket option there?
+how do I specify a websocket (which, iirc, jetty9 supports)
+can anyone recommend me an async http client based on core.async?
+config: nomad, aero, environ, cprop, ... who uses which library and why? (it's always nice to have some kind of experience reports before deciding)
+<@U3QUAHZJ6> why should it be based on core async?
+<@U0E0XL064> We wrote our own. We haven't gotten around to open sourcing it yet tho'. It's partly inspired by `outpace/config` but does some specific stuff we needed, and it's Component-based. This is a good article comparing some of the config libraries: <http://realworldclojure.com/application-configuration/>
+Hmm, actually now I re-read that article, I suspect Sonian's `carica` is more likely the inspiration for what we ended up with.
+Not entirely sure. Define 'arbitrary'. But on the face of it, I would think the answer is 'yes'. However, like all such things, it is not miraculous - it does not provide totally open ended automated UI generation...
+<@U04V70XH6> right, thx
+<@U0E0XL064> we use aero, I like it's philosophy of centralising as much config as possible, and just separating out sensitive config
+Does clojure have any sort of plugin loading library? I'd like to create an application which loads plugins, but I haven't seen anything around.
+<@U1C03090C> <https://yogthos.net/posts/2015-01-15-A-Plugin-System-in-Clojure.html>
+<@U0E0XL064> we use <https://github.com/typesafehub/config> with a tiny clojure wrapper
+<@U0E0XL064> aero here too, it's just edn + some data readers. nothing too fancy, but quite powerfull. And you can extend it if you need it to do something it can't. It's quite lightweight.
+I am familiar with {:keys [...]} . What does the :or mean?
+if value is not present, use default
+<@U3JURM9B6> those are alternate values if not found
+note that it checks using `contains?` not nil/false
+[in (if (contains? args :in) (:in args) chan))]
+semantically yes
+great; thanks!
+Thanks!
+<@U0D33A4JF> any reason why you don't use one of the clojure config libs?
+no, I just like that config format
+well documented, does everything I want
+question: In Clojurescript it seems that the `&amp;env` passed to macros contains the `def` vars as well as locals. How do I get the same in Clojure?
+I need to filter this out by matching the inner vector for example this [[:x [3 2]] [:y [1 1]] [:z [3 2]] [:i [3 1]] should be [[:x [3 2]] [:y [1 1]] [:z [3 2]]]
+[:i [3 1]]  will be removed because the first element of the inner vector appeared before with a different value of the last element
+is there a clojure naming convention preference for a function which returns a predicate? Assumption here is that some extra data is required to create the predicate and we need a separate function taking that extra data and returning the predicate function
+I think `foo-fn`is quite common
+at least in clj.core
+did anyone try to call an external program with clojure with timeout? none of the examples (conch), (clojure.contrib.shell-out with java.util.concurrent.TimeUni) did work... stuff runs forever
+i mean a seperate process
+like call a windows exe and kill it after 10 seconds if it still runs
+I think you need to do the bookeeping yourself and call destroy on the Process instance if not completed

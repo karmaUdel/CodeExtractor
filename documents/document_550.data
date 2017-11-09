@@ -1,0 +1,50 @@
+```
+it still fails on a clean compile
+You don't have any custom effect modules, right?
+david_hernandez: Maybe installing a  version in `yarn.lock` and have the team configure their editors to use `node_modules/.bin/elm-format` could be one solution?
+I guess that doesn’t ‘enforce’ though.. :smile:
+That could be a solution. But there is a problem if anyone is working in two different projects. But don't worry, we found a different solution: a elm format check on the CI to block PRs that don't follow the formatting of the last version of elm format
+<@U3SJEDR96> no I don't have any custom effects
+(don't even know how to do that :slightly_smiling_face: )
+alright. Curious. I don't suppose that code is available somewhere by any chance?
+not really sorry this is work stuff
+Right. Does it work if you comment out the subscriptions? Does it work with only one? If so, can we pinpoint which one?
+let me check
+so it's def not hot releading I commented that out
+and amazingly the error still occurs with a Sub.none
+weird
+but I kind of have the feeling that it's more related to a port going into JS
+<@U1N4KAHT6> Quick comparison between elm-visualization and elm-plot? It would help to have it, if possible.
+That is… Is the approach fundamentally different from Elm-plot?
+<@U3R7CKQRX> ah, reproduced it. It's a JS side thing, indeed - subscribing `undefined` to a port triggers that. <https://ellie-app.com/3DW84DP65tBa1/0>
+or even just `app.ports.foo.subscribe()`
+oh wow <@U3SJEDR96> thanks
+that fixes it
+Anyone got any suggestion on how to track whether the current browser tab is the active one? I believe checking window.blur/focus is a common way in JS land. But in Elm..? :slightly_smiling_face:
+i'll remember that for next time
+<@U4PT7NG4V> you mean something like this: <http://package.elm-lang.org/packages/elm-lang/page-visibility/latest> ?
+Sounds exactly like it! :slightly_smiling_face: That's super
+i’ve never used it though, but it’s maintained by `elm-lang` :smile:
+<@U41NK9BM4> the approach is fairly different, although elm-plot has changed a lot recently. elm-visualization is meant to be a fairly low-level toolkit suitable for implementing fairly custom visualizations (for example something like <https://ellie-app.com/3DR8Yd6sHBQa1/0>), whereas elm-plot roughly fits the charting library bill. So in summary, if you need a pretty standard chart, elm-plot makes that pretty easy, whereas if you need some help building something new, than elm-visualization should be a good friend
+<http://caniuse.com/#feat=pagevisibility> That's promising too :slightly_smiling_face:
+Thanks, <@U17J54S2U> ! I'll give it a go
+<@U1N4KAHT6> Crystal clear. Thank you
+How do you peeps work with CSS files in your projects?
+<@U17R26VR8> <@U3SJEDR96> . Sorry, I've just gone out. I don't touch anything on DOM. I add material design lite css with elm and webpack. When I work on menu and I click on menu, the error appear.
+<@U3U2EA14G> do you have this code anywhere on github?
+sorry,  It only have on my computer
+let me take a picture
+<@U3YDBDP4Z> We use a combination of css files and elm-css
+we store the css files in our server code (we use rails)
+this is gist <@U3SJEDR96>
+what is `layout.js`?
+ah, it's material design lite module.
+Does the error still appear if you comment that out from HTML for a minute?
+wait a minute. let me try :smile:
+wow, it work
+so it conflict with material desgin js file.
+:tada:
+well, the material design JS seems to add/change/remove/replace DOM elements, which tends to really confuse Elm and can give very unexpected results
+Thank you so much <@U3SJEDR96> . I think i need to change material design js file.
+btw, if i build a website with elm and golang. So I will use golang for build html and url, elm only used for single page. Is it ok ?
+But I don't know how to pass parameter or session via elm.

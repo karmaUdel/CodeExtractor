@@ -1,0 +1,63 @@
+```
+<@U23SA861Y> That's perfect. Thanks :wink:
+the problem is there are two major regex standards and you never know which one is in use.
+Almost have half a mind to use the parser library instead of regexs
+more power than you need but the api isn't encoded in backslashes
+although it looks like people are trying with all the `|.`  and `|=`
+Yeah, the regex libraries in Haskell are rather complex because they support both standards.
+Just noticed that a float division with 0 / 0 throws NaN. Is this expected behavior? <https://ellie-app.com/3VsqdPFWwgba1/0>
+that would be standard floating point behaviour
+what would you expect to have occurred
+ahh right this is ints
+compiler error but I guess there's no way for it to check
+right
+they are values, which means the result needs to be encoded as a value
+I think the only really strange thing is that a `0/0` as an int also returns `NaN` but that is more because of JS
+Hi! I'm wondering whether there is something like a ring in elm, aka. something we can continuely cycle through
+<@U1NME8MS8> <http://package.elm-lang.org/packages/eeue56/elm-lazy-list/1.0.0/Lazy-List#cycle> ?
+<@U48AEBJQ3> ah nice, so I could just call head on this list and get the next element out?
+You would probably call <http://package.elm-lang.org/packages/eeue56/elm-lazy-list/1.0.0/Lazy-List#headAndTail>
+<http://package.elm-lang.org/packages/maorleger/elm-infinite-zipper/latest>
+That's another interesting way to do it.
+I love the idea of storing at least on element
+Yes, non-empty lists clean up a lot of maybes.
+<@U1NME8MS8> I'm using a non-infinite zipper to cycle through 4 players in a game app. I didnt use the infinite one so I could preserve order and always reference the last player specifically. I just added a next  function that jumps back to the first element from the last.
+<@U23SA861Y> `(/)` returns a float in elm, so that one is actually ok
+I could create a new function with swapped parameter but I was wondering if there could be a simpler solution
+There is always `flip : (a -&gt; b -&gt; c) -&gt; b -&gt; a -&gt; c`. In other words, given a function that takes two arguments, it returns a function with those arguments reversed
+so `66 |&gt; flip String.repeat "foo"`
+<@U4R17T6F7> and if you don't like `flip` you can always explicitly do `66 |&gt; (\n -&gt; String.repeat n "foo")`
+good day everyone
+I've been messing around with a nested JSON decoder. I have it working and all but wanted to see if there was an easier way that I might not know about since I'm new to this.
+You can take a look here: <https://ellie-app.com/3VjdtsVDqYta1/4>
+<@U3SJEDR96> , <@U4872964V> thank you for the two suggestions!
+It seems very complex to me. But I've read that decoding JSON in elm is kinda complex most of the time. So I'm not sure about it.
+<@U1EEBCQM6> What is the final type you want to get?
+that doesn't look that complex to me, but maybe I'm just used to it by now
+come to think of it, it could be a little simpler to just go straight to the final representation using `andThen`
+<@U3FJSB596> the final type is `List Option`
+<@U3SJEDR96> how do you mean?
+<@U3SJEDR96> is it possible to drop the temporary type `Opt` and go straight to the `Option`?
+Is it possible to use numbers as a union type?
+`type Binary = 0 | 1`
+no. The reason is that 0 and 1 are already values of type Int, so they can't be used as values of other types
+`type Binary = On | Off` or `type alias Binary = Bool`
+or use something like `B0` and `B1`
+I am trying to format a date as `Nov 2017`, and I am looking at <http://package.elm-lang.org/packages/rluiten/elm-date-extra/latest> but alas, I can't make sense of it
+The examples aren't very clear
+any help?
+that's a bit confusing, isn't because int is primitive?
+<https://github.com/rluiten/elm-date-extra/blob/9.0.1/DocFormat.md> may be helpful
+because I can use types that exist in other types in new types
+why that wasn't on the package doc, I can't tell but thank you
+it's on the doc but the link is broken :disappointed:
+but you guys are a real great help
+comeon with the guys thing
+I'm not sure if there's such thing as primitive in Elm.
+Yes, you can use other types, but not values of these types
+for example if you do `type Foo = A | B` you can't do later `type Baz = A | C` because A is already value of type Foo, so it can't be also value of type Baz
+`güeyes`
+Looking for example of mapping a list of tuples to html…
+`List.map (\(name, age) -&gt; Html.text &lt;| name ++ " is " ++ toString age ++ " y old") [ ( "foo", 12 ), ("bar", 30) ]`
+Brilliant
+Template syntax is a little rough / figuring this out;

@@ -1,0 +1,36 @@
+```
+is that an elm signature?
+no, that's just `elm` as short for `element`
+ha, ooops
+yeah, their website is mostly react
+hey elmos
+from the Html package
+where does `Node` comes from?
+from the `VirtualDom` package
+similarly, `type alias Svg msg = Node msg`. That is to say; they both use virtual-dom nodes under the hood :slightly_smiling_face:
+Oh I see
+but the documentation don't link Node with VirtualDom.Node
+yeah, it's a little annoying that it doesn't do cross-package links
+I think there's a bug for it
+thanks so much
+now, `type Node msg = Node`
+what is `msg` ?
+That's because it uses Native. So basically, it's a combination of phantom types and native magic; through which you can save information in structures in an "non-type-safe" manner
+`msg` in this case is a type variable for the message type that can be "emitted" from your dom-nodes through events
+so you can do `onClick MyMsg` which is an `Attribute Msg` (because `MyMsg` is of type `Msg`). A dom node can have multiple attributes, and all of its children can have attributes, but they have to match types, so your final structure can only emit *one* type of events
+<@U3SJEDR96> thanks !!
+hi can someone advise on List mapping?
+this is my code:
+        List.map updateVideo model.captions
+and the error is
+    an upper case name
+Hi, there is something that I quite yet don't understand with elm: how `&lt;textarea&gt;` or `&lt;input&gt;` are handled. In the examples, the `&lt;input&gt;` are left blank in the view, without using the model: `input [ onInput Change ] []` while I'd think something like `input [ value model.something, onInput Change ] []` would be more appropriate.
+Why does the compiler want an uppercase name?
+<@U5QPUBDQR> I think you're missing a `let ... in` around that first part
+<@U3SJEDR96> that code is already nested in a let … in
+can i nest again?
+<@U59AF21LJ> the DOM (in your browser) keeps it own state. _Usually_ we'll make sure that the dom reflects our model by using `value model.something` in the view, but this in't always required (and actually, not always what you want)
+        ({ model | captions = newCaptions, debug = b }, Cmd.none)
+hm, but where do you expect the result of that `List.map` to go?
+<@U3SJEDR96> i have a list and i want to update one element of that list
+i need a specific element with a certain ident

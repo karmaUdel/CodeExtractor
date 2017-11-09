@@ -1,0 +1,11 @@
+```
+`RemoteData.map (\foo -&gt; { foo | bar = List.map (\l -&gt; l) foo.bar })`
+or split that lambda of into a proper `Foo.mapBar : (List String -&gt; List String) -&gt; Foo -&gt; Foo`  function
+To sort these things out, try to make a function to update a Bar, then make a function using that to update a Foo, then make a function using that to update the whole shebang
+Any ideas?
+<@U6B9DCP28> There is no exposed constructor for `Cmd` you can't create them like that.
+If all you want is to have the runtime invoke `update` with a particular message, the simplest way is to just call `update` where you want it, but you are usually better off splitting off the shared functionality to its own function and then calling that from multiple places.
+<@U6B9DCP28> here is more info about `Cmd` <https://guide.elm-lang.org/architecture/effects/>
+Cmds are not for sending messages, cmds are for doing effects that return messages
+<@U4872964V> I took your advice
+so I have:

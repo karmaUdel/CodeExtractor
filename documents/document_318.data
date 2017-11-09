@@ -1,0 +1,14 @@
+True : Bool```
+From the 0.18 repl :point_up_2:
+can somebody explain me in simple words how Fuzzer Shrinkers work and how to write them? I get that their role is to determine the closest value that makes test fail but do you know some more sophisticated examples of their definition? :slightly_smiling_face:
+<@U1RK41R0T> generally, they're built using `elm-shrink`, might want to have a look at the code of that project (it's not overly complicated)
+and generally, they work by defining a "lower" value, given a certain value. So for a list, this would be a shorter list. For an integer, this would be an integer closer to zero. For a `Just x`, this could be the `Just (shrink x)` or `Nothing`
+thanks! I didn't hit upon an idea of checking `elm-shrink` package itself :slightly_smiling_face:
+I've searched for ‘embed' on <http://github.com/elm-lang|github.com/elm-lang> - and to my surprise it's not there? Even so, a number of posts says it can be done like that - even <http://elm-lang.org|elm-lang.org> has it front and center in a piece of code? I am going crazy over this!
+Usually that `Elm.Main.embed(...)` is defined in the generated file by `elm-make`.
+So, how do you have compiled the Elm file?
+I did elm make Main.elm --output=elm.js
+Good.
+perhaps the problem is a `require` statement that must be translated/bundled into ES5 code runnable on the browser?
+:$
+And you added that elm.js to you HTML file, right?

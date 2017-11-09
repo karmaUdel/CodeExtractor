@@ -1,0 +1,32 @@
+```A submachine State implies a macro-like insertion of the specification of the corresponding submachine StateMachine. It is, therefore, semantically equivalent to a composite State. The Regions of the submachine StateMachine are the Regions of the composite State.```
+I'm trying to "live at the REPL" more. One common debugging issue is how to quickly evaluate forms within functions or let bindings, where the symbols are not defined. ProtoREPL has a whole feature around this, and it looks like Cider does too.... (We use Cursive as we've come from a Java shop and deal with lots of Java code still.) Is this something people use a lot? Is there a repl independent approach to this?
+<@U3TSNPRT9> You should be able to do this in Cursive - if there's something missing (or if you have a link to some doc about ProtoREPL's approach to this) I'd be very interested to see it.
+You can select any form and that will be sent, or there's the "Send form before caret" action. Cursive doesn't do anything clever with missing symbols though, is that what you're referring to?
+Sorry I meant to quote this discussion <https://github.com/clojure-emacs/cider/issues/1809>
+<@U3TSNPRT9> So that's sort of what I had in mind. If you send a form for evaluation, I can check if any of its bindings are not defined in that form. I had envisioned a popup dialog when you evaluate the form which would allow you to enter a value for each one. Does that sound like what you had in mind?
+That sounds nice :slightly_smiling_face:
+Definitely. Could you file an issue for that and I'll see what I can do?
+I think this is related to tracing though. In protorepl (sorry to mention the competition!) you stick a (save) form in your code and it can remember values flowing through code as a test runs say, and then you can def these values so you can evaluate forms and debug as you go.
+No problem at all, ProtoREPL is awesome, it's by far my second favourite Clojure environment :slightly_smiling_face:
+Ok, I see - I think that should be possible. One issue with that is that IntelliJ's ability to paint things over the editor isn't as slick as Atom's yet.
+But that's just a UI issue that can be worked around.
+Hi, how to do optimistic locking in `java.jdbc`, write a sql that update by id and version field?
+<@U0567Q30W> I think tools like this would really help the team debug efficiently. Experienced Java developers used to debuggers balk at the debugging approaches we resort to - still generally sprinkling printlns in the code. We know evaluating forms in the REPL is the way, but it feels like it's hard work to be efficient. Not sure if Sayid's approach to tracing, where every function call's arguments is saved is too "omniscient" or could be drawn upon? <https://github.com/jasongilman/proto-repl-sayid>
+Sure, I think Sayid is great too - there are lots of different ways to skin the cat.
+Cursive does offer a traditional Java-style debugger, FWIW
+It works very well, with some caveats.
+Yes - perhaps I should stop being so purist and get better at using it!
+It's essential to my work, definitely. Fortunately we don't have to choose, we can have both!
+hey, I have a function `f` that calls `g`, and `g` calls `f`, how to order `defn's` so the compiler knows about all definitions?
+Declare
+`declare` I mean
+<@U0T4T70KB> that's it, thanks
+Here are the errors: <https://gist.github.com/f3f62cb6633979ebbfb849a8b6b20861>
+This is upon running `lein ring server`
+I also just noticed that `lein deps :tree` seems to output a good deal of warnings regarding my dependencies. I'm honestly not sure what the best way to fix that would be, so I'll post that as well: <https://gist.github.com/87f04f1805c2cc20e1dee2a9defe0462>
+Hmm. This seems to have something to do with datomic. I added exclusions like this: `[com.datomic/clj-client "0.8.606" :exclusions [org.eclipse.jetty/jetty-http]]` and eventually got it to run. Now the `lein ring` server starts but attempting to connect to it just results in a connection reset
+?
+so that `x` doesn't have to be re-evaluated multiple times
+Different question: Is this an ok way to access both the first arg and all args? `(fn [&amp; [head :as all]])`
+how would x be re-evaluated multiple times in that scenario?
+<@U06F82LES> ^

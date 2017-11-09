@@ -1,0 +1,31 @@
+```
+What happens when you rename it to `some-other-conn#`?
+tried that, didn't work. Trying again now just to make sure
+is that a real pound sign, or some unicode nonsense?
+Well the second usage of `conn#` expands properly. (in the map)
+yeah, which makes me  suspect the first has some weird shenanigans
+Wait, I think I found the issue
+`some-other-conn# (:conn datomic#)]`
+the "space" between # and ( has charcode 160
+instead of 32
+oh lol. :slightly_smiling_face:
+hah!
+unicode malarky
+did you copy past some of this from a github page?
+nope, I wrote it myself
+no idea what happened there
+well, I copied an earlier version of that code, which worked
+then added that line myself
+from where?
+it might have picked up a character from somewhere
+github
+oh
+weird
+I just checked and none of the characters from the snippet I copy/pasted had character 160
+oh well
+sorry for the trouble
+there is actually an open jira issue that has had some recent activity about changing how clojure handles unicode whitespaces
+`char code 160 would be &amp;nbsp;`
+the fun thing about this is, thats 160 is not even considered whitespace by java
+oh, I guess the issue it got declined
+Probably what happened is that OS X and/or Atom (the editor I am using) has some shortcut or some way to enter this type of whitespace, and it fat-fingered on the shortcut

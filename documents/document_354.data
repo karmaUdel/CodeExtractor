@@ -1,0 +1,31 @@
+```
+well it should be `processFetch model result`
+what is the rest of the error message? i think the hint should say it may be missing a parameter
+meh stupid me
+i try to outsmart the compiler error messages all the time and every time end up facepalming
+no brackets for function application
+and yes the error message was telling me exactly this
+<@U4JT89FGB> :facepalm:
+:smile:
+thanks guys
+thanks peeps
+:bow: my pleasure
+Interested by your opinion: my Model is a list of stuffs. In order to handle the loading delay of those stuff (and display an animation), I made my Model be a `Maybe (List Stuff)`, that way I can return a `Nothing` to my `init` function
+then in the view I can deal with what to display depending on the `Nothing`, empty list or populated list
+<@U1X5ZRJUX> Take a look at `RemoteData`. It is a nicer way to handle this situation
+going to suggest
+<http://package.elm-lang.org/packages/krisajenkins/remotedata/latest>
+Here's a good post explaining it <http://blog.jenkster.com/2016/06/how-elm-slays-a-ui-antipattern.html>
+It's a little more descriptive of the possible states which unloaded data can be in
+ah cool thanks, It's working ok and it's even more elegant compares to my previous solution, but I end up having to deal with `Maybe` values everywhere
+well maybe is alright
+Yeah, that's no fun. It makes it confusing (to me) about whether it is loaded, or not, whether there was an error, etc.
+I tend to not use `Maybe` hardly at all. It often masks what is going on.
+you will have to do the same with `RemoteData` but you need to leverage the functions available
+I try to build more types that describe the situation, like `RemoteData`
+such as map and andThen
+I'm trying to figure out how to chain a task.  I'm basically using this: <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L245> and I can't seem to figure out how to add a Task.andThen (Dom.Scroll.toTop "body")
+right, cool I'll give that a read then
+speaking of `andThen`
+<@U26LR8F4H> `andThen : (a -&gt; Task x b) -&gt; Task x a -&gt; Task x b` so you need to pass `andThen` a function that produces a Task
+`(Dom.Scroll.toTop "body")` isn't a function, it's a Task

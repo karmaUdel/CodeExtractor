@@ -1,0 +1,18 @@
+``` but it seems pretty silly given there only one constructor. Is there another way? Or is my approach wrong?
+<@U3SQ42JJW> you can only write pure functions in Elm, if it compiles then it's a pure function
+Well… `type alias Locality = String` <@U2D7NUGS1>  It is not the same thing, though
+<@U2D7NUGS1> `listItem (Locality foo) = ...`
+Dang, pattern matching to the rescue :slightly_smiling_face:
+<@U153UK3FA> Thanks… Maybe I have to study this whole purity thing a bit more. Feel like I still did not get it.  :slightly_smiling_face:
+Awesome. Thank you.
+<@U3SQ42JJW> "A pure function is a function where the return value is only determined by its input values, without observable side effects"
+It's all there, really
+Even we you do an HTTP request inside a function you are writing a pure function. Go figure! :slightly_smiling_face:
+are you sure?
+Of course. Because you return a *description* of what to do and pass that the Elm runtime.
+A description cannot fail or return something different each time.
+A decription is "Hey Elm runtime, grab that URL and return to me the payload". Elm does the job and call your `update` function.
+sure, that makes sense
+I thought you meant that literally making http requests still gives you a pure function
+Ah sorry. Indeed "you do an HTTP request" is not precise :slightly_smiling_face:
+(hence why you can only trigger side-effects by returning them from `init` or `update`; both which "happen" to be called by the runtime)

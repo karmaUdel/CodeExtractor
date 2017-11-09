@@ -1,0 +1,22 @@
+                                                ]```
+<@U3SJEDR96> is it possible to create a `Value` in elm? Without it being passed in from outside?
+<@U5US3G22C> Look at `Json.Encode`
+Thanks. Another question. I realized you can pass in arbitrary json to elm through ports and handle it as long as you have a record that represents that json. Is it possible to do the same with http request json? Or must I decode it manually?
+You have to provide your own decoder to the `Http` functions.
+So I cant just pass in the `value` decoder and then later on apply that value onto a `type alias`?
+Nope, you have to make your own decoder if you want to avoid hacky work-arounds.
+(e.g. passing the value out of and back in via a port)
+That's interesting, but hacky as well. Thanks for the help
+One more random question. What are some tips for being productive with elm?
+I hope this isn't a FAQ. If so, a link to existing notes would be great also
+<@U5ABF3BH7> :thinking_face:
+That's a pretty vague question :slightly_smiling_face: Could you be more specific?
+Let me try to be clearer
+If I'm working on a module, how can I try it out without integrating it into my existing code? Unit tests?
+When I make a new feature, I usually have to rewrite it a few times to make it nice and elegant (including making it work first). Having to make a Main for each one is kinda tedious. Is there a better workflow?
+I personally prefer to see it as a part of the whole. i.e. "Chase compiler errors until the feature is done". But unit tests sounds reasonable to me
+Maybe I don't have enough experience with the different features and how everything works. I see a bunch of errors and fall back on the workflow i just described.
+It's an interesting question for sure :slightly_smiling_face:
+<@U5US3G22C> Code organization in Elm is likely going to be different from what you are accustomed to. I would advise not worrying so much about organization until after at least one round of refactoring. Don't go making a bunch of modules before you know that you need them.
+It's not usually the organization that's the issue more along the lines of, "I've got this piece of json i need to get from the server, but I need to handle it in this way and how do I setup the decoding pipeline and etc to make it all work correctly (what records will I need, what unions types, etc.). I think this might just stem from a lack of understanding and experience with functional languages and elm
+<@U5US3G22C> Probably. I think that starting from "I've got this piece of json" is often the wrong approach. I usually start by thinking of the data structures that I want and then figuring out how to build one given the API requests I have available to me.

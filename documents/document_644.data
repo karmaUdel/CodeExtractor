@@ -1,0 +1,43 @@
+```
+my parent update can get cluttered, but I can always extract the code into reusable functions
+Ah, that sounds like a better pattern
+I find it easier to reason about this way
+<@U170TNSTZ> it’s definitely an anti-pattern unless you really do have a completely separate component
+Sure. Is it something you picked up anywhere? I’m trying to stick to rtfeltman’s  `elm-spa-example`, but it doesn’t do much child-&gt;parent communication
+<@U170TNSTZ> I found `elm-spa` to not really meet my needs
+I am trying to do an autocomplete which has some self-contained state.
+Ok
+<@U170TNSTZ> that “pattern” is just how we do things in functional languages: if a function needs to return more info, we return more info
+just a heads up that "easier to reason about" is typically a euphemism for "this is the way I'm used to thinking about things"
+there is nothing magical about the `update` function (except for the one you pass to the `program` of course)
+<@U170TNSTZ> that sounds like a separate component, but you can use `opaque types`
+<@U23SA861Y> well...
+<@U66RFDZ8F> I haven’t heard of that before?
+<@U170TNSTZ> I think <https://github.com/evancz/elm-sortable-table> has a really good way of doing it
+I mean self contained components
+<https://stackoverflow.com/questions/40794368/what-is-an-opaque-type-in-elm-and-why-is-it-valuable>
+<@U66RFDZ8F> Great, I’ll read up on both :slightly_smiling_face:
+I generally lean more towards the sortable tables method of a config/context where you pass your message constructors in
+the reason is because then it plays nicely with partial application and currying
+<@U23SA861Y> definitely the best way to do reusable components
+<@U170TNSTZ>, unless your component is meant to be reusable, opaque types are a headache to deal with
+Sortable tables has a great pattern as mentioned by <@U23SA861Y>
+Though be careful with sending calculated state through messages. Sortable tables can get away with it because it doesn't need the previous state to calculate the new state, but if you happen to calculate new state based on rpevious state and send _that_ in your msg from the view, you're up for subtle bugs the moment someone can trigger two messages without your view re-rendering in between...
+<@U170TNSTZ> I went with returning `(model, Cmd msg, childState)` from `update` in my first approach to a reusable autocomplete thing.
+You should _never_ send messages that contain something from your state :slightly_smiling_face:
+in my _humble_ opinion
+if you want to get data from your state, it’s right there, no need to put it in a message
+It seems intuitive. You want to get the selected state back out of it.  But later I dropped doing this, I can't remember exactly why
+I guess it was more of an approach that your app should own its own state, not rely on the component to pass it back up.
+The potential bugs it can lead to are _very_ tricky to figure out
+I meant less passing in a message wrapper that dispatched back state and more just providing a dispatch table that lifts the lower events to your upper messages
+That _is_ a great pattern
+Got a list of `a` tags that I want to drop into a `td`, but I want to have them comma separated. How would you recommend doing this?
+`<http://Html.td|Html.td> [] &lt;| List.intersperse (Html.text ", ") [ Html.a [] [], ... ]`
+thanks
+Has anyone deployed an Elm app into an android WebView? I'm thinking about using elm to implement a part of my android app that has to done with a WebView...
+<@U6DUP1WMA> yes, I have
+Works fine
+cool, might give it a shot. Thanks
+<@U6DUP1WMA> we are doing so now using React Native to wrap it.. works fine on Android
+Wow that sounds dangerous, but I'm glad it's working fine for you. Will definitely try it out.

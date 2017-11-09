@@ -1,0 +1,47 @@
+```
+Hi jonf: Thanks, that's helpful! But I think it doesn't quite work for what I'm doing. The idea is that I want to do the error checking before the end of the Point parsing, so as to get a "precise position" of the error. Say for example if the Point has 3 floats, and if there is something wrong with the first two, then I want that error to be generated at the position where the 2nd float is parsed, instead of waiting until the end of the parsing to check the whole thing. My application has several things in a row that are much larger than floats (spanning many lines) so it's important not to wait until the end to do the validation, so that I can direct to the exact line where the error was first detected.
+I believe that will do what you want (after all you can't validate that that statement is true until after you have both values
+how are you producing the tuple from the two points?
+I presume via map2
+I must admit my knowledge of the parser library is a not fantastic.
+ok then, rather than `succeed Point` you can use pointVerify
+Suppose the Point is 3 floats, then at the time I've read only two of the floats, there is no Point constructed yet, so I can't pass that value to the pointVerify function.
+so what that Parser Point is doing is creating a parser of the type `Parser (Float -&gt; Float -&gt; Point)`
+so the parser you have doesn't handle tuples any bigger than two
+you want something a bit recursive
+hmmm
+Well, suppose the Point is 3D (i.e., `type alias Point = { x:Float, y:Float, z:Float}`)
+so Point isn't dynamic in size like that as you have coded it.
+No, say it's fixed size, but that the float descriptions are so long that it's really important to pinpoint the exactly position of an error.
+The `|.` and `|=` syntax is very nice, but a bit alien to me, so I'm not sure precisely what it's a shorthand for, and how to get a name for some of the intermediate values it produces and then run a check based on those names. I see from the source code that `|=` calls map2, but I have trouble following the logic exactly.
+But perhaps I should call map2 directly instead?
+so whats going on here, is you take a function which takes the values you care about and then those operators slowly consume values which get handed in as parameters
+right
+use the operators as the library recommends that
+the function isn't "called" until the last value is specified
+However, when it is called you can then provide a message indicating which value is out of place
+there is also some stuff you might want to read in regards to delayed commits
+yeah, there looks like there is something in there that may be useful to you
+ok, thanks :slightly_smiling_face:
+Can anyone help me understand this stack overflow answer? <https://stackoverflow.com/questions/12405555/css-extend-div-to-fit-the-whole-page> I'm trying to get a div to expand to the full height of my page and it absolutely refuses.
+<@U2SR9DL7Q> do you have an example?
+it's usually the case that the div's parent does not have a height
+<@U0ZRNV5M3> yeah... I'm using mdl, so the whole view is nestled in this Layout object. Let me see if I can cut out a snippet that makes sense.
+The second grid element is what I need stretched to fill the space in the page.
+so you want things to be the height of the page at minimum?
+min-height: '100vh' or something along those lines will work
+vh &amp; vw are very useful units
+<@U5W5F6QGP> I'll give that a try.
+What I really need is just that little footer bound the bottom of the page, and the middle page to scroll as it's content increases. I managed the footer part. But the middle div behaves very strangely when there's too many dominoes (really only a problem for mobile)
+Rather than just resize itself as the new elements come in, the domino chips spill into the player data space... 
+it feels a lot more sane
+Thats the thing. Elm mdl grid components use flex box . But I'll have to look through the source code to see how they manage it. 
+ahhh right, sorry, I'm not super familiar with the mdl package
+It's a great package. Very comprehensive. But it thwarts me sometimes in these types of situations. 
+Hey all, I'm getting the following crash when running elm-test. I think I'm not doing the recursion correctly across a list and blowing up the memory. Does anyone have any tips on where I should look?
+FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
+Do you have any example code? In general, commenting out bits of code at a time can help debug. There are probably better ways
+are you doing list recursion yourself or using fold or map?
+<@U6907LQ6S>
+Thanks - I'm using List.map as part of a recursive method. I'll simplify the code to its essentials and paste it in
+<@U6907LQ6S> what is your goal? Are you trying to create a generator for GroupValue?

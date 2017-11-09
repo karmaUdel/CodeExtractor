@@ -1,0 +1,185 @@
+```
+(where `gen` is `clojure.spec.gen.alpha`)
+<@U1ALMRBLL> ya your test doesn't compare as I am talking about a series of hashmaps with multiple keys in each one
+but <@U07S8JGF7> your suggestion is what I landed on, so I'll just change my json decoding to get string keys
+oh, so there are many such keywords in each hashmap?
+<@U1ALMRBLL> correct
+how many total?
+I bet the map construction when converting is the more expensive part, not the keyword/string part
+^^ yep
+but avoiding converting avoids both
+<@U0W0JDY4C> re: `field` vs `(:field this)` -- I asked a while back and Alex said to use `field` as it will be faster and it's the "correct" way to deal with records /cc <@U050MP39D> <@U0NCTKEV8> <@U051SS2EU>
+Is there a library to handle this for me?
+<@U68M9194Z> This should probably do the trick <https://github.com/wkf/hawk>
+Or, actually, I think boot has that as a built in task
+I see now. The core of my problem is just a "watch + notify." Right, there's a boot task. Boot can do this already for me.
+i want ask, how create multiple connection database  or host in sqlkorma ?
+How well would a clojure dev environment work on a Raspberry Pi?
+The arm jvm is not so great last I checked, and startup times go into the multiple minutes if using nrepl and lein
+But it can run things once it gets going.
+I have two REPL clients connected to the same nrepl and I want them to share a stdout/stderr, is this possible without unix hackery?
+nrepl is a network library, it doesn't share stdio between processes
+you'd need some other infrastructure entirely
+you could set something up for multicast output to clients, but it would require new middleware on both the client and server sides
+hm.. maybe only server side
+Thanks! <@U051SS2EU> I guess nirvana is not for this world. I'll just do the unix hackery
+Is it just a java-esque OOP overhead, or is there key semantic difference?
+"trigger" is more general, "event" assumes a specific interpretation of how the state machine interacts with an unknown outside world
+by unknown I mean "something not specified by the machine itself"
+you can of course describe all things as events, but that's a more specific term, and some semantics prefer to draw a distinction between eg. an event and a start of a timer
+can you give an example, where having an event and a trigger would not be "redundant"?
+since that can be triggered internally by another part of the machine
+maybe I did that already as you were typing? if a change in one part of the machine activates another part of the same machine, that's a trigger, but not an event because it came from inside the machine itself
+so let's say a parser: if your language rules say "you are now in a closure" that's a trigger but not an event, if you read a semicolon and that means you end the closure, that is an event that is also a trigger
+I have a feeling, that having both events and triggers (which are followed with guards (predicates)) - is somewhat excessive, at least in the clojure/edn/library context
+they are different levels of abstraction - an event is a special kind of trigger and most users of fsms differentiate them
+definitely implement in terms of triggers first, if you do it right you can build events on top if you need them?
+but calling a trigger that is totally internal to the state of the machine an event seems weird (unless you also reify the trigger as some output and re-consume it I guess? I've done that for coordination)
+I get that there are less/more specific events. what I cannot pin point, is why some would be triggers, not events (or vise versa)
+so basically: internal=trigger, external=event? (interna/external to machine, not particular state)
+or even: event/type is a trigger, but event is an entire "object"? sort of
+no, event is not the general thing, a trigger is the general thing
+all things that cause transitions are triggers, period
+if you only want one abstraction, it's a trigger
+an event is a special kind of trigger
+thank you for the input
+<@U051HUZLD> it could be that what you really want is event sourcing. That works very nicely with clojure / immutable data.
+while a state machine is kind of designed for c or assembly, it's all about when to do what mutation
+if so, yeah, everything should be an event, you have a log of events to consume, and you project various views from the events via a projection (aka fold, aka `clojure.core/reductions`).
+I'm currently building a system around that, and it's very nice (especially the fact that when I hit a bug I can just dump an excerpt of the log, and replaying that log builds my regression test)
+<@U051SS2EU> I am trying to reconcile my understanding of the components of: rule based systems, FSMs, and event sourcing, to "solve" single page apps state management for myself. I tried basic event sourcing, but when you have: few audio/video html tags with their own states, some i/o, a bunch of buttons depending on the above, and custom performance-sensitive progress bar – it kind of is not enough, and coordinating all of this is not much easier, than just a bunch of atoms with a page of `add-watch`es connecting them. So i went looking for a better way, or just to improve my understanding of the building blocks.
+<@U051HUZLD> OK - I suggest checking out petri nets btw because they are async and have a formal provable semantics
+those are on my reading list, yes
+<@U051HUZLD> also the very high level response to that problem is "when event sourcing leads to local state changes, reify the state change by sending it out as a new event and then consuming it"
+that way you still have the events as the canonical source of all truth
+when you have local state changes that will guide behavior that are not visible in the events, you've undermined the event sourcing system because you now have an irreproducible state
+it's actually not event sourced any more
+I sort of did that. But having few "a pure state {} depending on side-effectful io/video/audio and vice versa" loops messes things up. So I went for specs to get some vocabulary for "internal/external/pure/io events", etc.
+the challenge is: from event sourcing pov: there are like 100 states, but from ui components' pov: 10, and I am looking for a way to manage those 2 "projections"
+(basically states vs. <https://en.wikipedia.org/wiki/UML_state_machine#Extended_states>)
+my solution was to base things on a petri net - which have two kinds of things, places and transitions, a transition consumes tokens from 1 or more places and puts tokens into 0 or more places. All canonical state is the content of places (keys in a hash-map, obviously) and transitions are described by predicates on the contents under those keys and an update that removes tokens from N places and places tokens in N places
+but yes, I have dealt with that problem you describe in my reagent app
+what do tokens represent? "should I run this predicate?"?
+tokens are immutable data
+the predicate says "given these tokens that currently exist, do I fire?"
+and firing consumes some tokens and maybe produces some in other places
+it's like actors without the data hiding
+instead of mailboxes they have some places they watch (and anyone else can watch), and instead of sending messages they remove data from one place and maybe put new immutable data in places
+so the places are basically like queues?
+they aren't ordered
+like an (atom {}), which you take values from or put into?
+and you might say "I only fire if I can consume 3 from :a plus one from :b" - eg. that is what assigning work to a worker ends up looking like - you have a token for a worker and a token for the job, you consume both and create a new token representing a pending result
+so 10 places (nodes) = 10 atoms?
+no, you don't even need an atom
+I put it all in one hash map, but you could eg. represent the whole thing with `reductions` which would mean each state is another item in the lazy-seq that reductions outputs
+(free history!)
+or reduce on an atom
+or whatever
+thats how i designed my deterministic game simulation
+<@U3DUA3TPY> hehe my event / petri based library is called "ludic" and the primary metaphor is playing chess by mail
+but really it's doing a bunch of data transitions based on a petri net model from an event source :smile:
+(ludic is a super intellectual word describing playfulness)
+so you have a list of "workers", and just (while true) apply them on the same {}? and each of those modify it, if "there is enough of particular tokens"
+<@U051HUZLD> one thing it does is manage workers and tasks, but that's just because I'm running a computation cluster
+if you are in the browser, you don't need workers - make places / tokens that model your domain
+eg. a place could be a dom node and the tokens represent the data driving it… (maybe?)
+or maybe better would be a place being a UI state, tokens describing it, and transitions deciding where it should go next
+Hi! I have a set containing vectors, e.g. `#{[1 2 3]}`, and I want to get the first element of the first member of the set. Is there a more idiomatic way to do this than `(first (first set))` ?
+I'll read your lib's readme first. Did not quite get the analogy yet : )
+<@U5ZAJ15P0> sets don't have "first" anything, they are unordered
+if you want an implementation-derived item that will change when you change contents in odd ways, sure, you can call `ffirst`
+<@U051SS2EU> right; in my case I don't care about which element of the set gets picked; hopefully it should be a singleton set, or empty set
+but don't count on any particular item coming out
+There's a `ffirst` function.
+ffirst is exactly what I was looking for; thank you!
+<@U051HUZLD> I almost regret mentioning my lib - it's still super young and I don't think the examples are good yet and it's still changing fast
+just FYI
+I only brought it up because of the game thing
+<@U051SS2EU> I just need lots of input and analogies to straighten my thoughts at this point :)
+<@U051HUZLD> on that account, this book is very well written, has beautiful illustrations and typography <https://www.amazon.com/gp/product/3642332773/ref=oh_aui_detailpage_o04_s00?ie=UTF8&amp;psc=1>
+(it's a book about petri nets, since the url doesn't reveal that)
+definitely the most beautiful CS book I own
+no kindle edition :harold:
+just a reminder that the first element of a set is not a well defined concept. it may be consistent but this would only be due to implementation details
+thank you. everything was really helpful
+<@U11BV7MTK> thanks! I'm aware of that however, and in my case it doesn't matter. The set should always be either empty or a singleton
+np - and keep in mind you might not need the petri net model - you might just want eg. CSP instead (since core.async is right there) - but do think about how well the foo you connect your events to is something that works nicely in the clojure ecosystem
+events -&gt; datalog works great too
+sounds good. just wanted to remind just incase
+thanks :slightly_smiling_face: it could have introduced a nasty bug if I relied on the first element being stable..
+about that :kappa:
+the bigger picture I keep in mind, is some kind of format, which can help describe system in concise way, so you could see it all at once, to some level of details
+like: <http://www.thelogbook.com/phosphor/2008/frisky.gif>
+channels are cool, but when all the plumbing is spread across entire project - it becomes challenging to see the "project mini map". And anything I encountered so far – are either one way graph wiz pngs, or completely new visual-first language.
+it was pretty straightforward to make a function that consumed my rules and based on the places they consume from and produce to (fields on the rule record) generate a `.dot` file for graphviz showing a petri net.
+not the precise petri net my code implements (since my code can easily break that abstraction…) but at least a diagram that is helpful
+yeah, I saw the .dot support
+you also might find Milner' Pi Calc useful <https://www.amazon.com/Communicating-Mobile-Systems-Pi-Calculus/dp/0521658691>
+<@U0LGCREMU> oh nice thanks for reminding me of that
+np, thanks for the petri book ref, always wanted to find sth like that!
+is there a parallel transduce? say, something like `(pmap send-messages!)`
+Is <https://github.com/stuartsierra/component> "state of the art" to structure a system in Clojure? Or does anyone have better advice?
+I prefer <https://github.com/tolitius/mount> by far. Simpler, less opinionated, less viral.
+mount is just terrible though
+could be. I rather don't like component.
+<@U5ZAJ15P0> check out integrant: <https://github.com/weavejester/integrant>
+:smile: well, let me turn my question around then: what would be your preferred way to structure a system to as to make dependency injection / mocking easy?
+component
+I am new to clojure and about to build my first app
+mount :slightly_smiling_face:
+lol
+Integrant :wink:
+mount is a formalized system of global state, component gets rid of global state
+I guess I'll try all three then
+But I might be a touch biased
+:smile:
+oh, integrant is your project <@U0BKWMG5B>
+<@U0NCTKEV8> why is mount terrible?
+Component is the most used. Integrant is a little new, but YMMV.
+yeah, I guess that's the best thing to do: try all :slightly_smiling_face:
+<@U0BKWMG5B> what does integrant do better than mount and component?
+mount is based on global state in global atoms
+I've done that, it sucked
+component turns your system in to another first class value you can pass around, have multiple copies of, etc
+<@U0NCTKEV8> we've all done all kinds of stuff, I never liked component. No need to argue with : I like it - I don't.
+I fear I've asked a more contentious question than "should I use VIM or Emacs?"
+<@U5ZAJ15P0> Compared to Mount, Integrant doesn't have global state. Compared to Component, Integrant can have dependencies between things that aren't maps/records.
+I feel like Vim and Emacs users can be collectively smug toward users of lesser editors :wink:
+we know <@U0NCTKEV8> doesn't like mount : <https://gist.github.com/pandeiro/9a1c8fd431e1b4c78c99>
+That discussion actually drew my attention to mount, and I like it since. Thanks to <@U0NCTKEV8> :slightly_smiling_face:
+huh, I  didn't know there was acopy of that floating around
+isn't this the way I am supposed to do things? :kappa:
+god no
+singleton global state is bad and sprinkling clojure on it doesn't make it good
+still, thanks for pointing me to mount :wink:
+actually, I'd love to see good example of not doing global atoms, asking for a friend™
+I guess good component example would suffice as well
+all the main component projects I have worked on have been closed source apps
+Oh, I didn't realise you're the maintainer of Ring and Compojure!
+Here is the problem with global state: you don't know beforehand how you will want to use your code later. So, inevitably the system grows to the point where your previous "application" is subsumed in some larger structure, and you have to refactor all the global state out of it. Which is a much bigger pain later.
+Indeed. Feel free to hit me up with any questions when/if you happen to have any.
+Read the discussion... it's enlightening
+<https://github.com/hiredman/songs-of-future-past/blob/master/src/com/manigfeald/sofp.clj> is an example of something using component, I don't know that it is good
+thank you
+it doesn't have any tests, which is where the lack of global state would really shine
+<@U0BKWMG5B> thanks, will do! Watching your talk on Integrant now
+I only say this because I went through this before. Component solves a problem I was having, and has been great ever since.
+I feel like you can go through this yourself, maybe that is the only way to see it
+hmaurer: in that case, build it yourself.  once you've got that experience under your belt you'll be able to evaluate mount, component, etc.  walk before you run. 
+I would say it is a classic easy/simple split, component is way simpler (<https://gist.github.com/hiredman/075b45eaeb01e4b526ce6f8854685487> implements all the functionality of component in 30 lines, but lacks refinement), but mount is going to be easier because using globals is always easier for a few months
+<@U0LGCREMU> good point. that has been my general philosophy so far
+I think of it as an "easier now"/"easier later" divide
+Global state is easy now. You don't have to learn anything and it doesn't take work to set up
+Going the 'simpler' and 'easier' way, are we?
+hmaurer: fwiw all that stuff is interesting and useful, i suppose, but i've not needed to use any of them.  mastering clojure is already a tall order, those things are for ninjas (imho).  good luck!
+Right, it may be easier, and if it solves the problem, why make it more difficult? - What is the problem you want to solve? This may be the first question to <@U5ZAJ15P0>
+But there will come a day when you are screwed
+Having a viral framework, I never liked that. Component is more a framework - I will be screwed as well
+<@U0LGCREMU> thanks! any tip on mastering clojure itself?
+<@U0E0XL064> Agreed. <@U5ZAJ15P0> If you are trying to learn Clojure, just use a global atom
+Have used enough frameworks, they always hit you in the face as well... and hard :slightly_smiling_face:
+I don't really want to use a global state atom. While I am new to clojure I've been interested in functional programming for quite a while; if there are ways to avoid global state I rather do so
+But I'll try out mount either way
+<@U0E0XL064> We disagree in general, it is okay
+I might learn some valuable lessons
+<@U5ZAJ15P0> That is good context. In that case I think you will appreciate component

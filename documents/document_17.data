@@ -1,0 +1,37 @@
+```
+It looks like `(not (nil? pin-config))` is transformed to `(not (not true)` but then this is not evaluated to `(not false)` and then to `true`
+Any suggestions on what I might be doing wrong?
+nvm
+roberto: unrelated, but `(not (nil? x))` == `(some? x)`
+ah, thanks, I switched to `(complement nil?)`
+switching to `some?` :slightly_smiling_face:
+Is thery any kind of "memoization" library that supports an external in-memory storage backend?
+<https://github.com/clojure/core.memoize> is very flexible
+what does "external in-memory storage" mean? like Redis?
+Yes, Redis is fine.
+then <https://github.com/strongh/crache>
+Thanks! Exactly what I look for!
+Anybody knows how to make figwheel load all builds or at least a specific one, when calling (start-figwheel) ?
+sort of a general design question, but I'm trying to figure out how fine-grained certain events in my system should be
+we have records that move through various states
+and I'm trying to decide if I should have events for each possible transition, which would be a lot
+or just one event that records the new status as a parameter
+so `(defrecord ProjectApprovedEvent [project-id])` vs `(defrecord ProjectStatusChangedEvent [project-id new-status])`
+or maybe the difference between `(defn approve! [project-id] ...) (defn reject! ...)` vs. `(defn update-status [project-id new-status] ...)`
+I have a Ring application that works perfectly fine running on jetty when compiled with `lein ring uberwar` and runs locally with `lein ring server-headless` but when I compile with `lein ring uberjar` and use nginx-clojure 0.4.5 locally, it complains that it can't find `medley` in the classpath.
+Googling the medley classpath error led to a comment that said that it was likely the result of using an old clojure version but I'm running 1.8 (nginx-clojure runs on 1.5.1 but I don't think that should matter)
+Can anyone help?
+<@U1A6BTMPA> have you tried `lein clean` (this can clean up stale classes and resolve weird problems from time to time)
+`lein clean &amp;&amp; lein ring uberjar`
+I have and I get the same error
+<@U0K0TFQLW> I can use the same jar in EC2 with same version of nginx-clojure and it will run :confused:
+There must be something different between my environment locally and the remote one but I can't figure out what it would be
+I'm not familiar with nginx-clojure, does it setup a classpath for you (and possibly include a different version of clojure)? In the past, I've witnessed systems like that (Storm and Hadoop come to mind) that cause weird dependency issues
+oh, yeah it does
+can you try to add a :provided profile to your project.clj and put your clojure dependency on that
+I'll try that now
+the example for nginx-clojure seems to indicate that v1.5.1+ is okay (and uses 1.7.0 specifically)
+<@U0K0TFQLW> I got the same issue after adding my clojure dependency to :provided :confused:
+is the <#C0FM7N1SM|quil> channel dead?
+<@U090G4C05> I'd say that it's just _quiet_…
+how can I get the list of protocols which a type implements ?

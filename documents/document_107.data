@@ -1,0 +1,41 @@
+```
+(do-stuff data) *****
+If I wish to set up some data that should be accessible to all tests (either set up once before all tests or set up and tear down before and after each test), how can I do it with clojure.test? with-fixtures doesn't appear to let me pass data down to the test. I could use a global atom but that seems nasty
+<@U3QUAHZJ6> oh wow, haha, I hadn't read your message before posting
+looks like we have the exact same question
+<@U07TDTQNL> sounds reasonable. but sometimes you want it opaque though? my main concern with records is that I want to keep it as functional as possible, and I worry that my code will start to look like OO if there are too many records all over the place. what's your experience on striking the right balance between records and fns?
+<@U3L6TFEJF> records are still immutable. they're still functional
+<@U3L6TFEJF> in clojure Ive never been like, I wish I had less information at my disposal
+Right, you got to separate out "is a protocol" from "looks like OOP"
+polymorphism is orthogonal from "functional" imo
+also I would recommend checking out stuart sierra's component or weavejesters integrant
+OOP = information hiding, local mutation, and inheritence
+records and protocols don't do any of that.
+true, true. and I actually have polymorphism in this case, so I'll go with records. thanks for the input!
+<@U2J4YH6BG> I've tried the whole gamut of state management libs in clojure, I'm currently experimenting with <https://github.com/vspinu/commix> which I think is fantastic so far!
+:slightly_smiling_face: there are alot, I havent even heard of this option
+It's less than a week old :smile:
+sounds ready for production to me
+I wouldn't, but hey, I won't judge you :wink:
+Better than most node libraries! #burn
+&gt; Commix was built as a response to a range of limitations in Integrant which in turn was designed to overcome limitations in Component.
+turns out dependencies are hard?
+I've been using integrant for a couple of days, it has been great so far
+I liked it as well when I compared it with component
+I tried using Integrant but I immediately found myself working around it instead of with it, then I stumbled over commix here: <https://github.com/weavejester/integrant/issues/21>
+I recognized some of the problems I encountered in the "differences from Integrant" section
+anyways, more options on the table, more innovation = win for everyone
+Does anyone have a recommendation for me on how to share some stuff between tests? e.g. a database connection
+i really would like to know how i can share data that is produced by one test in another test
+<@U3QUAHZJ6> why would you want to do that?
+afterwards in another test id like to user this id to create a bank account for this user (or something like that)
+<@U3QUAHZJ6> ah, I was planning on doing the same thing. It seems to me this should be done within one test block? I don't think there are much guarantees as to in which order tests will run
+and you would rely on order there
+im trying to avoid a giant let with tons of implicit tests, but i seems that i got no other option
+<@U3QUAHZJ6> I am a newb, but what do you think would be the issue? You can nest `testing` calls to create context
+dynamic vars and a fixture would be another option but probably not a very good one
+and from what I just inferred from the source of `testing`, it returns its last expression
+so you could use that to pass values around
+not sure though…
+like
+the last line of deftest is returned?

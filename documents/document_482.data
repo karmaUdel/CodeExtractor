@@ -1,0 +1,126 @@
+```
+<https://www.reddit.com/r/elm/comments/3hhlsp/htmllazy_for_any_number_of_arguments/cu7fn9d/> is this really true? The comment says how to write `lazy4` by using tuples, but lazy is defined using pointer equality on the argument, and surely every time the model changes you'll get a different tuple pointer, so the whole thing breaks?
+Old lazy is different from new lazy
+Ah
+I’ve noticed this too, with lazy. It’s not obvious, and it sort of goes against the notion to make your function types less general, for instance if you have a view function that only uses part of the model, you’d like to call it with just that part, but then you can’t use lazy
+Sure you can, `lazy f foo.bar` is fine
+Or did you mean `lazy (\{bar} -&gt; f bar) foo`, and have that be actually lazy on `foo.bar`?
+it is, but `lazy f (foo.bar, foo.baz, foo.qux, foo.quux)` isn’t and `lazy4` is not defined
+So, let’s say I have a model that updates frequently (some animation or whatnot) and then I have another part of the view that uses four fields from the model. Agreed, it’s not a very common case, but still
+right
+but in the process of making your function type more specific this will probably happen more often, since you replace `model` by specifc fields in the `model`
+So, having `lazy` work with a tuple or record by checking the fields is something to consider. Or adding a version of `lazy` that does
+and so, to make it `lazy` you’d then just do `lazyThatWorksOnRecord viewX { foo: model.foo, bar: model.bar }` and not have to change the function style
+I've got a UI question: I'm using RemoteData/WebData, so when my users submit something, I switch a value to`Loading` before the value is turned into a `Failure`/`Success`. Initially, I wanted to show a "Loading" message while the value was `Loading`; however, most of the time, it only stays `Loading` for a very brief time, which leads to the UI flashing and the "Loading" content not being readable
+in my Redux days, I used to delay updating the model for about 0.4 or 0.5s so that users could see what the flash was about
+how would you deal with that in Elm?
+I think you can try adding an animation delay - see here for more info: <https://dev.to/rtfeldman/tour-of-an-open-source-elm-spa>
+ah yeah, thanks; I'll look into it but I'd like a no-CSS solution if possible
+<@U0U6ML22H> You can return a `Cmd` from your update that triggers in .5s.
+That’s what we do with our flash messages.
+ideally, I'd like the "entire process" to take "at least 0.5s" but no longer that strictly useful
+ie, if it takes less than 0.5, wait for it to take 0.5, but otherwise don't needlessly delay it
+Is it like you always want the user to wait at least 0.5s?
+I'm thinking, from a UI point of view, I'd rather delay my user for an extra .3s  but allow her to see what I'm displaying, instead of having a quasi-instant flash of useless content
+Right. That sounds rather complicated in terms of logic, but of course can be done once and reused later.
+but maybe it's an X/Y and y'all have a better solution entirely!
+<@U0U6ML22H> I gave a talk at Remote Elm Meetup (4?) about our animation library that works alongside css transitions (manages the timing)
+I'd have a task with a process.sleep 500 * Time.millisecond, and when that's done, check if your model is `NotAskedYet` and if so, bump it to `Loading`. Something like that.
+We also have a case where we set a “showing” flag in our model, then return a `Cmd` that triggers in .5s. When that msg comes back to update, we set “showing” to false
+Here’s the gist that went along with the animation talk <https://gist.github.com/coreyhaines/963029ef49f088e41e1b3485e1c794c3>
+And this is how we use it to show user alerts (roughly) <https://gist.github.com/coreyhaines/686c48da891d3babcf56daf6e739d629>
+I guess one day I could move them to ellie
+Maybe you need to expand on `RemoteData` to capture "Well, technically we have the respond and it's a Success, but we still want to show Loading to the user" :slightly_smiling_face:
+You can grab a timestamp on the first message to tell if the time limit had expired when your response comes back. Search for using a GetTimeAndThen msg for an eloquent way of doing that 
+I don’t remember what site was, but the server response was very fast but at UI level they showed “Calculating the best price/travel combination/what ever” to give a sense of a well thought result.   :slightly_smiling_face:
+thanks for the suggestions; it seems that although it's obvious to me to do that, you don't necessarily think so :smiley: Would you care to elaborate on that? Is it because in the real world, you aren't faced with "instant" results?
+it might be that I'm trying to solve a problem that won't occur to my users
+It’s not your case of course - it’s quite different. The only analogy here is that the server response is too fast for we poor humans. The take away is tha sometimes being just too fast is not optimal from an UX  perspective.
+My compile times have gone crazy long. elm-make hangs at file 37 (of 42) but how can I find out what file that corresponds to?
+I think the standard advice is to look for complex `case...of` if you have sudden build time degradation
+take any long `case...of` and replace with Debug.crash and see what effect it has
+Hi all, can somebody point me in the direction of materials on tail recursion in Elm? I have a function that blows the stack; and I'd like to understand why: <https://gist.github.com/marceloomens/6416d04f5472be6775487ec258144592> My guess is that either `let` expressions are expanded into the main body of the function or the cons (`::`) on the last line is messing with the tail recursive nature of my function. I'm not expert enough on the Elm compiler to comment :slightly_smiling_face:
+there is some info on it here <https://evancz.gitbooks.io/functional-programming-in-elm/recursion/tail-call-elimination.html>
+thanks <@U17MHJ12N> I know of that advice and odn't have any crazy case statements at present. Am wondering how to work out which file is causing the issues so I can start digging in
+<@U0GR6DHEK>
+Are you missing an n - 1 on the recursion? 
+I feel your pain - I have the same sort of issue. Hanging out for 0.19 in hope
+I was told it is fixed in 0.19 - hope to recall it correctly
+Thanks <@U17MHJ12N> that might be helpful I'll look into it
+<@U5V5B3F9N> `::` evaluates the RHS before the LFS, so yeah, not eligible for tail call elimination
+or, well, rather, it evaluates both before actually consing
+Hi <@U3SJEDR96>, thanks. I also come to that conclusion after reading <https://evancz.gitbooks.io/functional-programming-in-elm/recursion/tail-call-elimination.html>. What I'll try is to introduce an extra 'accumulator' argument into the call to refactor the `::` in that call
+I don't do this very often, and it took about 30 seconds to do using the website, so not worth optimizing :wink:
+Hi. Sorry for my bad eng. Does anybody know about elm 0.19? Activity on github is low and i am worry about it
+<@U5MQ18UFK> Why are you worried?
+See this: <https://github.com/elm-lang/projects/blob/master/roadmap.md>
+I think it's a fairly reasonable concern: <https://github.com/elm-lang/elm-compiler/commits/master> - shows no code changes to the compiler at all this year
+oh, my bad
+Evan works on the `dev` branch
+It’s not a reasonable concern.
+There is work constantly going on.
+Not all of it is visible.
+The reasonable concern is that is not visible
+or darkconsul wouldn't have said it
+I don't think it's fair to say "your concern is not reasonable"
+Please read this: <https://github.com/elm-lang/projects/blob/master/roadmap.md#what-is-the-timeline>
+I have read that
+Please read it again :slightly_smiling_face:
+Oh, now I magically get it
+Perfect!
+:wink:
+Anyway, <@U5MQ18UFK> perhaps have a look at the `dev` branches if you haven't seen them. The mailing list might be a better option to try and get a status update, if you want one
+Please don’t do that.
+Evan posts status updates _when there are things to report_
+But good luck showing roadmap.md to your team lead have them convinced Elm wouldn't be a big risk
+You can find these at the elm-dev mailing list.
+Asking for further updates is frustrating the process.
+(on elm-dev, you can ask here)
+Visible commits and changes only make up a small part of the work that Evan does.
+A lot of it is researching, discussing, and identifying what makes sense to go into the language, and what makes sense to fit together.
+This is how Elm has ended up so nice. Sadly, this is the parts that don’t come across visibly to outsiders.
+Hence, status updates on elm-dev.
+There ya go <@U5MQ18UFK>
+Thx. Earlier they released versions every half a year. So i hope that 0.19 will be soon)
+There is no need to fear: the community is both large and strong, and NoRedInk is a great parent company for Evan to be based at, since it is home to people who love and use Elm every day. If there was a concern, it would be addressed.
+I don't think you will be able to expect that
+<@U5MQ18UFK> There is no fixed timeline for releases - if you see the document I linked, it will explain why (<https://github.com/elm-lang/projects/blob/master/roadmap.md#what-is-the-timeline>)
+My compile times have gone crazy long. elm-make hangs at file 37 (of 42) but how can I find out what file that corresponds to?
+It will be released once there it has be sufficiently ironed out, and the features all fit together in a way that makes sense.
+<@U0GR6DHEK>, find the ones with the big case statements
+that means ones `case (x. y, z, w, t) of`, correct
+?
+I don't have any of those as I know it is an issue
+this case statement has 2 branches
+or does it also mean long update functions
+find the ones which have more than 16ish
+Yeah, update function also counts
+e.g if you have 32 constructors for `Msg` then you probably have a giant `case..of` to go with it
+is there any way of knowing which file is causing the slowdown (by name)
+Not easily, atm
+You can do some things like compiling one file at a time, with your elm-stuff folder already populated and your elmi/elmo for that given file deleted
+maybe using a CLI tool to find Messages.elm files with over 12 lines and checking manually
+yes, i saw this. But having a plans and doing smth is a different things) Document it is good, but i want to be shure that all ok. I need to start new big project and i want to use elm. But using in production something, that has version above 1.0, is dangerous imho
+<@U5MQ18UFK> Elm has been used in production by several companies safely since 0.15 :wink:
+version below 1.0 :slightly_smiling_face:
+this means what ? because `Form.Option` is not exposed - i can't build my `validationFeedback ` function?
+Don’t let the fact that it’s not `1.0` put you off - Elm’s versioning is not semantic versioning.
+<@U0EUHKVGB> It would be nice to have a list of companies that are using elm in production.  Do you know of such a list?
+<@U5MQ18UFK> Version numbers are just labels, really.
+ok, thants
+thanks*
+<@U2T2MKL58> <http://elm-lang.org/>, but it’s by no means complete at all.
+See at the bottom
+yay, my company is there :slightly_smiling_face:
+yeah.  I knew about that one…would be cool if there was a more complete list.  I think I saw
+<@U0CL0AS3V> tweet or something about some companies he recently found out about using it
+<@U2LAL86AY> Form does not expose Option, it's exposed by the specific "inputs" apparently
+may be helpful for convincing our own employers that elm is something we should be using
+<@U2T2MKL58>, the company simply has to tell evan to be added to the list.
+hmm, ok - I might have to give that a try
+I personally know of at least ~20 other companies using Elm
+we're one! ^^
+<https://github.com/lpil/elm-companies> &lt;- there's another list here
+Some of them sponsored osloelmday: <https://osloelmday.no/>
+And more of them sponsored elmeurope, with the exception of mozilla and google: <https://elmeurope.org/#sprs>
+(and efrei)

@@ -1,0 +1,134 @@
+```
+<@U5ZC6V535> oh, I see, you have to use something like `(GeneratorMsg &lt;&lt; BoidsGenerated)`
+<@U4872964V> Hmm, so we are combining `GeneratorMsg` and `BoidsGenerated` messages together. That makes sense :slightly_smiling_face: Thanks
+(seeing answers *click* like that makes me so happy)
+That last part is the one that is bending my mind.. any pointers would be greatly appreciated :)
+I have been looking into List and List.Extra, but I don't see anything too obvious
+if you had the array `[c1, c2, c3, c4, c1]` could you solve it easily then?
+That came across my mind. It would then reduce the problem to something a little simpler. Now I would need to find the highorder function that applies a function to every 2 items of an array
+highorder midpoint [c1, c2, c3, c1]  &lt;-- looking for the correct `highorder`
+because I can create an `appendHeadAsLastItem` to get my list into that state
+if you had the arrays `[c1, c2, c3, c4]` and `[c2, c3, c4, c1]` and the function `map2` perhaps
+Ohh! I like your thinking
+I'll give that a try, if I can find something like a shift function
+<@U4G7CC18U>: i can help there. that sounds exactly like the one question i had a while back: <https://stackoverflow.com/questions/36485819/map-list-onto-shifted-self>
+<@U1AN4JRFV> even easier is `drop 1 list ++ take 1 list`
+indeed!
+and double `reverse` if you do it the other way
+alternatively, <https://ellie-app.com/3SZgnyK64WGa1/0>
+but it serves as an example for pattern matching with lists, which was a great lesson for me back then.
+so, `List.map2 midpoint list (drop 1 list ++ list)` :slightly_smiling_face:
+heh, true :smile:
+It actually worked, I got a little further down the road, but I must now re-challenge my model, because maybe the one I have isn't being too useful haha :D ELM is such great fun :) :)
+Being able to confidently challenge yourself and knowing that the compiler has got your back.. :)
+then ELM might after all be an acronym for: Elm Loves Muckers
+(or something.... but it's not, it's either elm or Elm, sorry for being pedantic)
+ELM = Entry Level Mathematics.. I read that somewhere official enough
+what is the best way to approach concurrency; if I have a long-running calculation that is easily broken up into joined parts and I want it to process without hogging the UI, how best to approach?
+(without using web worker)
+<@U5QJW0DDE> make a state model of the calculation and do each part and send a message for the next part, put that state model as part of your application model
+so it will run a part on each requestAnimationframe ?
+yes
+is there a higher-level library for handling this automatically, like a calculation queue, etc
+or more, not sure of how the runtime schedules that, actually
+this is where the purescript people come in to say that they can do `map2` on `Cmd`s, right?
+because I believe multiple Cmd`s are already ran concurrently, so the tricky bit is putting your individual results back together into something you want in your model
+i'm trying to find a similar abstraction to core.async where you can have multiple channels reading, writing and processing data on queues simultaneously
+i suppose i could try to do it manually with the models and messages as you say
+well, you can do it with tasks and `Process.spawn` I suppose, I’ve just never used that
+you can't get the result out of those tasks
+maybe not, when I look at ti
+so if they are http requests that hit a server somewhere, that's fine, but you cannot actually access the result of those tasks, for now
+hm ok
+which is a shame, because any sort of scatter/gather you create will right now be very specific to your application
+it is not re-usable
+i find that asynchronous programming has changed my mode of thinking as much as functional programming did
+and they are great in combination
+in many cases functional programming can make the asynchronicity an implementation detail, which is really nice
+that is true
+is there an Elm idiom for downloading Json files without clicking on anything?
+so they should download on page load?
+i am drawing a map, but the shapefiles are stored in json
+yes so you'll need to load these, probably when the elm app loads. The http package allows that <http://package.elm-lang.org/packages/elm-lang/http/latest>
+the cmd that you eventually get should probably go in your `init`
+and - if we're talking patterns - it's nices to store the data you fetch in your model as a `WebData WhateverYouNeed`, rather than as a Result or a Maybe, see <http://package.elm-lang.org/packages/krisajenkins/remotedata/latest>
+i got it
+Elm just works!!
+In <http://package.elm-lang.org/packages/yotamDvir/elm-pivot/2.0.0/Pivot>, what is the meaning of `type alias Pivot a = Pivot a`
+`type alias Pivot a = Pivot.Types.Pivot a`
+this is a commonly used trick to re-export types
+so, it’s not actually an alias of itself, which is what it looks like in the docs :smile:
+<@U1CE9DL9H> Please explain the advantage of this _trick_.
+I use it in my packages when I have an internal type where other modules in my package need access to constructors, but I don’t want to expose the constructors to the user
+however I also want to be able to expose the type name so they can write annotations if they want
+unlike some other languages, in elm a module cannot expose a value that is not defined in that module, so if a type (alias) is defined somewhere else , and it should be exposed then re-exporting in this way is the only option
+is it ok to compare dicts for equality?
+<@U17P7CBFB> if they don't contain functions, should be
+Naming question: if I have a container of things, do I call it "thingContainer" or "thingsContainer"? (ie, plural or singular?)
+singular
+usually
+thingContainer = container of things
+thingsContainer = container of collections of things
+i prefere singular to, note though  i try hard to not have an identifer of 'somethingXYZ' and 'somethingsXYZ' cause i just know i will misread it later at least  afew times
+like, if you have `arrows` as type which is a collection of `arrow`, I'd use `arrowsContainer` for a container of `arrows`, but not for a container of `arrow`
+also, that extra s could be slightly annoying if you're doing search/replace
+so if I have a dictionary of targets, I'd call it "targetDictionary" rather than "targetsDictionary"?
+yep
+targetsDictionary : Dictionary targets
+targetDictionary : Dictionary target
+Cool, thanks
+:smiley:
+aaand bam! Just committed unlimited undo/redo using ctrl+z / ctrl+shift+z for my app!
+this is one of those times you really love functional programming, and persistent data structures
+<https://github.com/kfish/elm-shadertoy>
+Hi nzleemann, my understanding is that the glsl handling is baked into the elm compiler
+Yeah, I saw that too. I was just hoping for another possibility.
+correct, only GLSL quasiquotes are supported. I don't think supporting others is anywhere on the roadmap, though. What's your use case, <@U4XT6TB7F>?
+<@U3SJEDR96> I would like to create records based on another specification format
+Hi! Can I set CSS variables in Elm? I had no luck setting them as `Html.Attributes.style [("--my-margin", "1rem")]`. In JS I would set the variable like so: `domNode.style.setProperty('--my-margin', '1rem')`.
+That's currently not supported. It's certainly not impossible to support it, but there hasn't been a very strong/compelling use case for it, given that Elm supports variables :slightly_smiling_face:
+I am porting a CSS/JS framework to Elm by keeping the CSS and re-writing the JS in Elm. The upstream framework uses CSS variables.
+Thanks for the info though! :slightly_smiling_face:
+<@U17TXDBJR> so you’d like to set the css variable on a specific dom node, from within Elm?
+I’d be curious to know how that framework works actually (even though it’s probably not a good match for Elm)
+<@U4872964V> Yes. I would like to set them like I do set attributes/styles. I am porting <https://github.com/material-components/material-components-web/>. It uses CSS variables for theming and animations.
+oh i see, so the animations would be handled in Elm by changing the values of these variables
+<https://github.com/elm-lang/html/issues/129#issuecomment-313608729> this is relevant.
+Yes. For instance, Ripple's animation uses CSS variables (<https://github.com/material-components/material-components-web/blob/master/packages/mdc-ripple/_keyframes.scss>). So my two options are to wait for CSS variable support or rewrite the CSS animation in Elm, I guess.
+<@U3SJEDR96> Thanks! :slightly_smiling_face:
+and <https://github.com/elm-lang/virtual-dom/pull/44>
+Thanks! I think I will share my use-case in one of those discussions.
+yes, that’s good1
+Great that there's already a PR for it. :slightly_smiling_face:
+Did anyone else notice stack overflows (size exceeded) errors going from Chrome 57 to Chrome 58+ (i.e.60)?
+my elm apps won't run anymore =(
+Huh, I haven't ran into that. Can you verify that those exact same apps in the same circumstances (i.e. with or without the debugger, ..) still work on chrome 57 ?
+you might want to give your apps a try on browserstack. i'm running Chrome 59 myself
+<https://news.ycombinator.com/item?id=14889605>
+<@U3SJEDR96> yes. or rather, some customers have. the apps works on all our machines, but none use chrome on windws &gt;58
+<@U3SJEDR96> debian stretch, chromium 57 works. 58 doesn't, 58 on win doesn't, 60 on win doesn't (so i'm told).
+Do they report the app crashing on startup or during use?
+<@U6D1E91QV>  i strongly recommend browserstack if you have lots of customers on different systems. you can test different versions of every browser, and also different operating systems, including mobile. great not just for the problem you are having but also to ensure good cross-platform css and html. you can confirm the reports you are hearing very quickly that way.
+<@U3SJEDR96> startup
+<@U5QJW0DDE> checking it out right now
+can i post pictures in this slack?
+you can post images here
+<@U6D1E91QV> do you have any large list literals in your code? I.e. `[ a, b, c (...), z ]` where you have either very large items or a sufficiently high number of entries?
+<@U3SJEDR96> how large is large? i think the largest are still &lt; 15 entries
+It would depend on how large the entries are..
+i have some fairly large case statements that caused the compiler to get OOM killed
+and it's also browser-dependent, but would manifest itself at launch-time
+nah, it's really about list literals, as they are built-up recursively in the compiled code of 0.18
+literals are only types. like a list of folders to be shown. no (or almost no) fields
+a large source file shouldn't be a problem, should it?
+No, or at least it shouldn't lead to a stack overflow on startup
+for reference - <https://github.com/elm-lang/elm-compiler/issues/1521>
+(note that a fix was commited for 0.19)
+i'm well away from 1521 :smiley:
+Sure, but every call that can create a stack-frame can make this problem rear its ugly head, unfortunately.
+so, what you can do is open up the compiled code in an editor and look for `ctor: '::',`. If you find a place where it looks like it's going "deep", that's one to investigate. Splitting it up into multiple smaller lists and concatenating those using `++` is the suggested workaround for now...
+if you're able to load that page with the chrome dev-tools on, it should pause before exploding, and this might also give you some information on where to look
+<@U3SJEDR96> i'll give it a shot, thanks
+ping me if you run into anything, I'd love to help out :slightly_smiling_face:
+<@U6D1E91QV> updated us later if you figure out what the problem is, i'd like to know
+that sounds awesome!.:smile: I'm curious about memory consumption :simple_smile:

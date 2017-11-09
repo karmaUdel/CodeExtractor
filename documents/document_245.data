@@ -1,0 +1,29 @@
+```
+<@U5H8JJP24>, you can use `toString` for that
+Or implement a function which is `Theme -&gt; String` if you don't want the default toString
+<@U0EUHKVGB> Thx I will have a try
+<@U0EUHKVGB>  Doesn't passing in the previous ID break information hiding? It is interesting that something trivial in JS is not so in Elm.
+UUID's tend to involve randomness, which means "do something else every single time". It makes sense for that to not be trivial in a language where all functions should return the same result every times they're called, though it definitely makes some things harder..
+<@U5FU80S06> it looks like you want the "ID" module to keep track of an internal state, which is impossible given Elm's design
+<@U5FU80S06> Lots of things are trivial in a language with unmanaged side-effects.
+Elm is a different language. Some things are trivial in Elm that aren't in JS
+For example, writing code that does not break :wink:
+Storing an ID is a side-effect.
+The way to solve that in Elm is to use a generator, like the package I linked.
+As an aside, the official doc which shows the similarities between JS and Elm, should also point out some major dissimilarities such as lack of side effects...
+:point_up: <https://guide.elm-lang.org/core_language.html>
+Techincally, in Elm, we have side effects - they are just managed side effects which are represented via `Task`s, `Cmd`s, and `Sub`s
+Which is how that library works :slightly_smiling_face:
+<@U353R9MA8>  If you're interested, I released this as its own package -&gt; <http://package.elm-lang.org/packages/ericgj/elm-csv-decode/latest>
+Thanks <@U0JFGGZS6> .
+What's the idiomatic way to map over 2 adjacent elements in a list? e.g., I want to get the differences between adjacent elements, so I need a function that maps: `[1,4,6,9] =&gt; [3,2,3]`
+But generically, for any fn that takes 2 values?
+I wrote my own little function for it but I've run into it enough times that I'm wondering if there's already a functional way to do this that I'm missing
+List-Extra has a lot of list helper functions that are sort of a community agreed upon idiomatic way of building out these functions. You may also find something to simplify the function you wrote. <http://package.elm-lang.org/packages/elm-community/list-extra/6.1.0/List-Extra>
+aha, looks like I wanted scanr!
+:thumbsup:
+Wait, nope. I'll keep reading. Thanks justin!
+<@U5AEH3L05> I think this is the right search, but I'm not seeing anything: <https://klaftertief.github.io/elm-search/?q=(a+-%3E+a+-%3E+b)+-%3E+List+a+-%3E+List+b>
+<@U48AEBJQ3> Yeah, I just tried that as well and didn't see anything
+You could use `foldl`. Any fancier function would probably be implemented in terms of `foldl`
+Got it. Okay, sounds like the version i have is as idiomatic as it gets!

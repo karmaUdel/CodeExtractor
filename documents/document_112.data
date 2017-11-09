@@ -1,0 +1,9 @@
+```
+<@U060FKQPN> could you point at where exactly it is handled?
+<https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/LispReader.java#L986-L990>
+<https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/LispReader.java#L1040-L1044>
+from within the implementation of syntax quote
+the tl;dr is that when the compiler sees `~foo` it expands into `(clojure.core/unquote foo)`
+<@U060FKQPN> ah, so if it's an unquote form it simply gets rid of the "unquote" and "quote" bits at reading time?
+then syntax-quote walks its expression and expands all the unquoted forms
+you can see how that gets transformed by quoting a syntax-quoted expression

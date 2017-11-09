@@ -1,0 +1,41 @@
+        nil))))```
+Let's move this to a thread, if you don't mind? <@U051SS2EU>
+I'm unable to start the server while listening to that port. The address is already in use
+what I meant was to test if you could open the port with nc - that rules out another point of failure
+Oh yes, the port is definitely open. The api serves traffic. The nrepl server just won't start
+I'm talking about the nrepl port not the api port, but OK
+Ah, let's make sure of that
+Yep, the nrepl port is definitely available as well
+OK - that verifies it's an nrepl problem then?
+That's my guess
+But nrepl works fine when I start the server using `lein repl`
+is it trying to bind to localhost?
+It is
+you could double check eg. that localhost is resolved in the vm
+sometimes you need to add that mapping by hand
+and localhost not being found would be consistent with that error
+So that might actually be it, when I start the nrepl server using `lein repl`, I also add `lein repl :headless :host 0.0.0.0 :port 4343`
+you could try adding :host to the args map to start-server
+That's a good idea
+I'll try it now
+Different error, not sure if it's failing sooner: `Exception in thread "main" java.lang.NumberFormatException: Invalid number: 0.0.0.0`
+The host is looking for a number?
+wait, are you providing `0.0.0.0` or "0.0.0.0" because clojure will give that error for the first one
+0.0.0.0 is an invalid literal in clojure, is what that means
+I found this: <https://github.com/clojure/tools.nrepl/blob/9eed58bed6aa01cfeb3c328adc5a12d487a5d305/CHANGELOG.md>
+If you look st 0.2.8
+right - just make sure :host is a String
+I bet that will work
+That did it
+:heart:
+sweet!
+Thanks for that <@U051SS2EU>
+np - glad I could help
+btw it might be better for security to adjust /etc/hosts so that localhost is defined, rather than providing 0.0.0.0 as your host - I'm not an expert on these things though
+IIRC 127.0.0.1 can be used instead of 0.0.0.0 and is safer (but if you intend to connect from outside the vm... maybe you need the 0.0.0.0 binding)
+You're right. If this were to be deployed with an nrepl server started it would certainly be a security concern
+anyway, at least you know the precise parameters now and can make an informed decision
+Indeed, I very much appreciate the help
+I seem to recall a recommendation to bind on 127.0.0.1 inside the vm, and use an ssh tunnel to access it from the host
+but maybe that's silly.
+I'll test to see if 127.0.0.1 works as well

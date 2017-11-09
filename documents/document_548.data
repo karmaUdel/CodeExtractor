@@ -1,0 +1,42 @@
+```
+hm, is there some way to do it differently then?
+<@U41NK9BM4> that is not what I was asking for
+I suppose "adding a new tab" in your original question could mean either "add a new tag to my tab type" or "add a new instance of type Tab to some list"
+I as looking at your `type Tab = TabOne | TabTwo` above
+So if you add `TabThree` Elm will complain. This is the meaning I was extracting from your example :slightly_smiling_face:
+It seems your tabs are a closed set so it makes sense to use a union type.
+<@U0H3A9XLN> can you point out which part you feel like you might forget?
+<@U3SJEDR96> I guess I am more afraid about “add new instance of type Tab to some list”
+So you are modeling a row of tabs like in a browser, maybe?
+so basically, you're afraid that when you add a new entry to your `type Tab`, you won't add it to your list of possible tabs, right?.. Hm, I'm not sure if there is a very clean "compiler will make sure you have all option in there" solution, though that also means that you can easily disable tabs by removing them from the list without removing the supporting code; so it has advantages, too. Then again, it's likely to be very clear what you forgot when you see a page missing a tab :wink:
+Yeah, that’s true. Unfortunately in my case I have many pages which are dependant on these “tabs”. I can’t really tell the exact thing because it’s under NDA. So if I add one more “tab” I need to go and make subsequent changes to a lot of different parts of my application. That’s why I am so keen to delegate search for these places to compiler.
+do you always use all the tabs? if you do, can you just define an `allTabs = [Tab1, Tab2]` and then,  you only have one place you need to keep updated
+actually, even if you don't, you could make an exhaustive list, and loop through them in your view with some sort of `List.filter shouldUseTabForView tabs` function. If you make sure to use exhaustive matches in those `shouldUseTabForView` functions, you only need to update the one "masterlist" and the compiler will make sure you add cases to those filters
+ok, thanks!
+So nice to see real world friends get answers here :heart_eyes_cat:
+I have attached a scroll handler in Elm, which triggers a port. Now I found out that the commands are only being sent when the scrolling stops (in a batch). I kinda need the scroll events to happen synconously to update other stuff. Does anyone know why this happens and if there is a way around that?
+I think it has something to do with animation frames, but not quite sure how it would work for you
+Are you testing on an Apple OS?
+Scroll events are tricky, and especially Apple seems to want delay sending them until the last possible moment.
+(this is because if you naïvely listen for scroll events, it very likely becomes a performance bottleneck and Apple wants to enforce smooth scrolling rather than trust web developers)
+When working on a team, has anyone found a way to enforce the version of elm-format being used? We are a small team (3 people) but each of us is currently using a different version, causing a lot of changes that are just reformatting things back and forth
+One option is to "enforce" it through a combination of `package.json` and pre-commit hooks... Another is good communication :wink:
+Well, package.json and pre-commit hooks will require more job, as we use elm-format on our IDEs / editors. Communication is what we use when a new version appears. Still, I think is better to automate things, right?
+Seems like the solution we are adopting is adding an Elm format check on CI
+we do that (run `elm-format` on CI) :slightly_smiling_face:
+`yarn run elm-format -- --validate src/ tests/`
+Or you can do a post-receive hook on the server to check that code adheres to the correct elm-format version
+so a `git push` can be "denied"
+sounds like you’ve got bigger problems…
+<@U0CLDU8UB> yeah I am developing on a mac. So do you know if there is a way around that? And are you basically saying this isn't Elm's fault but the OS's?
+It is possible that the browser simply isn't sending the events. Try `document.body.addEventListener('scroll', ev =&gt; console.log("now"))` and see how often that gets triggered
+I did that, I clear the console =&gt; no events. I scroll =&gt; still no events. I stop scrolling =&gt; now all the events arrive on the console.
+Then I'm afraid there's very little we can help with. :disappointed:
+then it's just the browser. Weird, I thought it only did that on IOS
+Then I guess this a problem that everybody is facing right? Elm or not.
+That's right. I suppose googling for stackoverflow answers for workarounds might yield something.
+<@U3R7CKQRX> not sure about your usecase of course but CSS might be able to help you positioning stuff in the right place while scrolling.
+Yeah, `position: sticky` also exists, even though its browser support is not that great.
+<@U2W22AHNU> I don't really need to position things rather update some content as you scroll.
+Anyway thank you for the help everyone.
+I am just happy this isn't caused by Elm :smile:

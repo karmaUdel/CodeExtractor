@@ -1,0 +1,70 @@
+```
+Yup
+in this case, I want to write `helper`
+In particular…
+I want to write `helper` that just passes the `va_list` to another (C) function.
+Because I'm hooking up two libraries.
+Through Racket….
+Of course, this still isn't enough to duplicate va_copy, as that's  macro. To do that, we would need to make scheme_va_copy, or something like that.
+Which does nothing but call the macro.
+Of course, if we do that, it would make sense to do that for va_arg as well.
+We couldn't do `va_start` and `va_end` though, because that would require supporting vaargs, and `...`, which, as you rightly pointed out, is terrifying.
+At least, what it looks like anyway. Perhaps I'm wrong.
+Thanks for the example.
+Any time. :slightly_smiling_face:
+<@U3NJS8H7C> worksp/librktio/… vs librktio/… these two directories seem pretty similar. Is one of them deprecated?
+There should be a "rktio" directory with the rktio implementation and a "worksp/librktio" directory with MSVC projects
+I'm not seeing multiple "librktio" directories
+err…ya, I mean worksp/rktio. That makes sense that one is for windows. Thanks.
+<@U3NJS8H7C> oh wait, no
+I do see a worksp/librktio.
+racket/racket/src/worksp/librktio
+Just to be sure: there should only be one "rktio" and one "librktio" directory; the "librktio" directory should be in "worksp", and the "rktio" directory should not be in "worksp"
+Although that one does look like a visual studio project.
+Ah, okay.
+That is correct.
+So, since windows has `src/worksp/libffi`, does that mean it doesn't use `src/foreign`?
+OH….
+src/worksp/libffi probably is in pace of src/foreign/libffi.
+The `foreign.c` part of `src/foreign` is included directly in `libracket`, while `src/worksp/libffi` is the project for `src/foreign/libffi`
+Okay
+Also, I realized, adding a primitive for va_list is silly, since per the spec, its just an (undefined) struct type.
+So it would make a lot more sense to just add a function to the core that calls `sizeof` (which I suspect already exists), and then define _va-list in racket.
+<@U08JL5H89> Is even `sizeof(va_list)` useful, since the calling convention can depend on more than the size? For example, `long` and `double` are often passed differently – though I'll grant that `va_list` is unlikely to be represented as a `double`. I still think it's best to use `(system-library-subpath #f)` and hardwire a representation in `ffi/unsafe` for various known results.
+Ah, fair.
+<@U3NJS8H7C> Actually, no. Since `va_list` is NOT a primitive in C (per the spec), it'll be handled just like any other struct will.
+(Like, the size and field order of the struct is undefined, but the fact that it is a struct is.)
+"The type declared is va_list which is an object type suitable for holding information needed by the macros va_start, va_arg, va_end, and va_copy”
+"object type" =&gt; "struct"?
+Even so, I thought the way a struct is passed could depend on its content beyond just its size, but I forget these details
+That is how I interpret it. Although I admit I didn't make the spec so I'm not 100% sure.
+Ok. FWIW, I don't think "object" means "struct" in the C standard
+Also ya, it certainly is true that structs are passed differently based on what is in them.
+Hmm…okay.
+I'll see if I can find an answer to that. Thanks. :slightly_smiling_face:
+<@U3NJS8H7C> "object: region of data storage in the execution environment, the contents of which can represent values”
+So I guess it _could_ be a primitive.
+Just not a macro.
+According to <https://www.openhub.net/p/racket> the last commit to Racket happened about a year ago - what happened a year ago that it doesn't include anything since then?
+<@U3VT0L7C5>   <https://github.com/racket/racket/commits/master>
+Oh! You are asking why OpenHub does update. No idea.
+yes, that's what I was wondering about
+Do other projects show updates?
+yes
+maybe it doesn't redirect from plt/racket to racket/racket: <https://www.openhub.net/p/racket/enlistments>
+yep - that's it - can you change it?
+I tried but got this: "You can view, but not change this data. Only managers may change this data. "
+who are the managers?
+<https://www.openhub.net/accounts/elibarzilay>
+Is he on Slack, can't find him?
+send him a mail
+<http://www.barzilay.org/contact.html>
+will do, thanks
+done
+Hi I'd like to improve my Racket programming and abstraction/algorithm design in general. Can anyone suggest a good place to post Racket scripts and discuss how to improve it, other than Code Review on StackExchange? Thanks
+<@U6F1KCK6Y> Here would be ok. Use <http://pasterack.org|pasterack.org> then post url here.
+<@U3VT0L7C5> Alternatively, he probably is on the <#C088CK7J6|irc> channel.
+thanks <@U08JL5H89>
+I just had to rebuild a machine and things seem a bit wonky with my packages… is `raco setup --clean` sufficient to sanitize and sanity check everything?
+<@U086VDRBK> thanks
+<@U086VDRBK> pasted my code into paste <http://rack.org|rack.org>. The url is:  <http://pasterack.org/pastes/72152>. Thanks. Your feedback would be great.

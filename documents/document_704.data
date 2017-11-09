@@ -1,0 +1,275 @@
+```
+lxml has cssselect, which is a godsend
+I'm not concerned about that, to be clear, I'm not using it in this environment, just wanted to see if <@U4BMZ90T0> was doing something wrong.
+I can try and deleting it real quick
+then reinstall
+one sec
+<http://lxml.de/installation.html>
+im using the pypi ones though
+Yeah, I just tried updating setuptools and pip and it didn't work for me. May want to try those other binaries if you need it.
+#JustWindowsThings
+How is a date supposed to be formatted through a GET?
+should it be a date object?
+such as using `datetime.datetime`
+That's what I suspected when I saw the token in the url didn't match the token in the INFO log. I hope it turns out to be an easy fix for you!
+holy... there's legitimately no easy way to just grab every element with a tag inside an xml
+xpath?
+I figured it out had to use `.//{tag}` to grab all subelements of the root
+I've got this whole thing figured out now I think. A bit of a larger project than I imagined because I have to make like 4 different requests to get all the information/keys I need to be completely automated so I'm trying to skeleton out a small class to do everything in the end.
+Hello, a design question for a slackbot. I'm using slack's RTM APIs to establish a websocket connection with slack. Code is deployed on a single instance/machine and everything is working well. Now, I want one more production instance to ensure availability in case one is down. How can I replicate the deployment on two machines?
+You really can't with a slackbot <@U4JJH96TS> - otherwise what would happen is you'd have two bots listening and responding to all events. You may need a fail-over instead where another machine starts up and starts the bot if the main machine fails (of course you would likely have a period of downtime during that failover)
+Yeah, that was the problem even I had in mind. Should I explore on message queues?
+I guess you could, I haven't checked for any that de-duplicate repeat messages though
+I have never worked with message queues before. Can we have a configuration where event is consumed only by _one_ consumer at a time? Or, is it replicated to all of them?
+But all this sounds too complicated, I think. We only have about 800 users using out bot
+I am not aware of a way to only have one consumer listening at a time, but you could use a distributed lock for who is the "active" listener - but those are somewhat complicated.
+consul has a mechanism to do this
+i'd just keep all the state in a database
+messaging queues and consul in this would make things overly complicated in what's basically a feed consumption mechanism
+Could you please elaborate more on this?
+  service b: consumes messages from incoming database, does logic to generate response, puts outgoing message onto database
+That doesn't really solve the issue of service a going down though, which is the desire, from my understanding
+e.g. HA consumer
+service b can run as many instances as you'd like
+and you could run multiple service a as well if you wanted
+you'd just have a constraint on message ID uniqueness in the DB
+so, basically, we are using database as an alternative to a message queue here?
+<@U4JJH96TS> the difference with a DB is the unique constraint if you get message IDs
+so you could have any number of consumers from the RTM api
+alternative isn't quite the right phrase i think
+I see
+But depending on your load, you may get some DB locking issues. With 800 users, you are probably OK
+even our chat at its busiest wouldn't cause any trouble (that I can think of)
+message queues are really good for service discovery but not as good for reliable storage
+You can do different routing mechanisms so the same work goes to the same worker, but instead just allow dupes and test for dupes on the consumer side
+But that's way overly complicated for the current need, it sounds
+One more question, I am using `crontab` as a kind of “automated restart” setup for my bot's running service and other scheduled events. Few days ago, there was a problem with `crontab`. Not sure about the cause. Any suggestions on improving this setup? Alternatives to `crontab`?
+Can we have notifications setup to know if `cron` didn't run?
+Are you polling for it to be up or something?
+A `systemd` service would be better, IMO
+Well, I'm using `cron` to poll and monitor for my bot's running process. So, to poll cron, we need another monitor?
+No, systemd would replace that need
+RabbitMQ with HA queues and publisher confirms is a pretty good reliable storage for temporary data
+basically the OS has a construct to ensure a process is always running at a certain "runlevel"
+Look into `systemctl` or `systemd` <@U4JJH96TS>
+they should be synonymous
+<@U07JGLLKF> :taco:
+:toot:
+<@U4JJH96TS> :thumbsup::skin-tone-4: here is an example from the <#C2FMLUBEU|community_projects> bot (<@U56EV8LAJ> ) <https://github.com/pyslackers/ansible/blob/master/roles/system_service/templates/etc/systemd/system/service.j2>
+It's using ansible, so slightly obfuscated, but should give a good example if you can read through that
+Thanks anyway though. It was worth a shot. :slightly_smiling_face:
+`latitude = db.Column(db.Float, nullable=False, asdecimal=True)` gives me `Unknown arguements passed to Clumn: ['asdecimal']`...am I doing something wrong here?
+not sure how to pass an argument to `db.Float` when constructing a Column with ORM
+but you can achieve the same with:
+`latitute = db.Column(db.Decimal, nullable=False)`
+`db.Decimal` (or `db.Numeric`, which is the same) is basically `db.Float` with `asdecimal=True`
+<@U5NMSURAQ> `db.Decimal` didn't work but `db.Numeric` did. Thanks! :smile:
+:slightly_smiling_face:
+Is it better to have a local Postgres database for local testing of my app, or just have Postgres connect to the remote database on the staging server? :thinking_face:
+I can think of pros and cons to both, but I think that it's likely one of them is considered best practice...
+It doesn't matter, although you want to be accessing a separate _database_ on it (i.e. `CREATE DATABASE testing`)
+<@U5LNXQHN3> A different database on the staging server though? Wouldn't that be redundant or am I missing something?
+I would say that it is good practice to have local, staging and production environments
+with everything as close to 1:1 as possible
+and not doing so is a major red flag
+You don't want your testing environment accidentally trashing your live or staging environment.
+seen that happen :slightly_smiling_face:
+<@U0LSCQQNR> So, as in having a separate database locally, on the staging dyno, and on the production dyno? (Already have the latter two)
+correct
+so, you work on a laptop, right?
+I work on my desktop at home, but switch to a laptop when I work remotely sometimes.
+what happens if you want to do a little bit of testing in an area with spotty wifi, eg a coffee shop with a saturated network
+if you have a local db, that's one less network resource you need to worry about
+That's a good point. Actually I sometimes work places without any internet.
+Guess that's been decided then. Thanks :smile:
+so you can keep a small portion of the prod db on your local machine
+don't need to replicate the entire thing fully, especially if you have multi-gigs of records
+just enough to have testing and data integrity :slightly_smiling_face:
+furthermore, if you use vagrant or docker, you can make onboarding and environment issues between developers much smoother
+because _everyone_ is working from the same environment
+no worries about Windows issues when 3/4s of your team are on Linux
+<@U0LSCQQNR> Docker isn't for Windows?
+you misunderstand me
+docker is cross platform, and isolates your codebase from the environment
+<https://docs.docker.com/docker-for-windows/>
+<@U0LSCQQNR> Oh, yes, I just didn't understand your last sentence I guess. Thanks for telling me about Docker. For some reason I thought Docker was another PaaS or something. Is it actually meant to compliment other PaaS?
+Anyone here familiar with PostGIS?
+I've done a bit with it.
+<@U5LNXQHN3> Cool! Do you know where I might be able to get my hands on some sample geography data to experiment with? I have a database but it's full of shape and geometry data and I want to try querying for all objects within a certain radius of a point which I can't do without geography data.
+you should be able to convert from geometry to geography
+<https://gis.stackexchange.com/questions/18011/is-it-possible-to-convert-from-geography-to-geometry-in-postgis>
+so, docker basically puts a bare bones VM in which you specify containers for parts of your application stack.
+so, if you're on windows and another dev is on mac
+<@U5CGPBF0U>  I personally just used data from sources like Google Maps, querying for places and their long/lat, and adding to my DB
+you can ensure that whatever issues you have are code related and not OS related
+furthermore, bringing in a new dev and getting them integrated with the projects is much simpler, because you already hhave the environment and code _right there_
+<@U0LSCQQNR> Thanks! I'll look into that. Also, Docker does sound really useful. I'm going to check them out! Thanks! :smile:
+through the API
+<@U5CGPBF0U> <@U5LNXQHN3> <http://workshops.boundlessgeo.com/postgis-intro/geography.html#casting-to-geometry>
+if you already have the data, no need to use google maps
+and the US Census bureau already has plenty of data for download
+<https://www.census.gov/geo/maps-data/data/tiger.html>
+Yeah, I wasn't suggesting he use Google Maps, just saying that my application did
+ah ok
+By `statement 2` I think it's actually referring to `ST_MakePoint(71.3033,44.2706)`. This is a valid lat/long though and looking at the documentation it appears `ST_MakePoint` does in fact accept a lat/long. :thinking_face:
+<@U0LSCQQNR> Oh, not sure why census data never occurred to me. Nice!
+you're in canada, right?  there should be something similar for you there
+<http://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/bound-limit-2016-eng.cfm>
+Yep. Although any dataset with a lot of records is good. I think I used the US census site awhile ago when doing machine learning so I'm a bit familiar with it, so I'd probably just use that again.
+Oh, well since I don't have to look for it I might use the Canadian information then. :joy: Thanks
+What I'm trying to do is get all recorded locations within a radius of a specific lat/long. I'm using PostGIS now which has been nice so far, but I'm wondering if there might be an even simpler solution...
+and regarding your query
+what is `geom`
+To get all locations within a radius of somewhere is exactly the right sort of problem for PostGIS
+yeah
+because you're working with spatial data
+The only simpler solution is to call someone else's API to perform the same operation on their database
+and postgis is highly optimized
+you could do a naive solution
+but it would be significantly less performant
+`geom` is a column containing geometry data (in this case it's the boundaries of towns in a small section of the US).
+<https://postgis.net/docs/ST_DistanceSphere.html>
+It needs points, not just any arbitrary geometry
+Well I better stick with PostGIS then. While load will be very light at first it could become quite heavy later on.
+for example, make a multilinestring
+<@U5LNXQHN3> I assumed the geometry was in projectable coordinates...?
+<@U5CGPBF0U> if you want more help about gis stuff
+<http://thespatialcommunity.org/>
+It needs one single point
+<@U0LSCQQNR> Oh nice! Didn't think there'd be a Slack for this. I requested an invite now.
+are you using flask or django for this
+<@U5LNXQHN3> Oh yeah, my bad. I guess what I want to do then (to keep things simple) is to work out the center-point of each shape first.
+I think there are other functions that are more lenient on which types they accept for distance calculations, but the docs for that one suggest that it doesn't
+<@U0LSCQQNR> Flask
+<https://geoalchemy-2.readthedocs.io/en/latest/>
+might want to use that instead of raw queries, especially now
+<@U0LSCQQNR> Oh, yep, you or <@U5LNXQHN3> (or somebody at least) posted that here the other day so I have it. I'm running these queries raw in pgAdmin against the database though just to familiarize myself without having to run a .py script each time. :slightly_smiling_face:
+there isn't a shell for flask, like there is for django?
+There is
+so why not use that ORM instead?
+but my database in my Flask app isn't set up with the proper data
+gotcha
+I just loaded a sample dataset into a database in my local postgres install to play with it, for now
+Once I feel comfortable with how it works and the data I need and how to structure the tables for my data I'll do that part (hopefully soon!)
+alright
+So I've loaded a table with a list of world cities but I'm not getting the expected results. For example I can run `SELECT * FROM cities WHERE ST_DWithin(geog, ST_MakePoint(45.4215,75.6972)::geography, 470000)` which _should_ return Toronto and a number of other surrounding cities. I've confirmed that Toronto exists in the database with the expected lat/long. However 0 rows are returned. :disappointed:
+I'm not sure what I'm doing wrong. I've been following examples from articles and there are no errors returned...tried a few variations too.
+dear friendssss
+why does python tell me:
+<@U5CGPBF0U> Do you ever get any results? e.g. if you increase the distance to a very large number?
+FileNotFoundError: File b'Macintosh HD/Users/Desktop/Programming/AAPL.csv' does not exist
+<@U5U4MSHC1>
+i copied and pasted the path tho
+<@U5LNXQHN3> Yes, I increased the number to something huge like 57000000 and had some results - from somewhere very far away from Toronto, or North America for that matter.
+<@U6944D5GU>, try adding a forward slash before "Macintosh"
+<@U486CN4VD>  it shows me the same thing
+<@U5CGPBF0U> _"the source geometries must both be of the same coordinate projection"_... are you sure the data is all correct?
+<@U6944D5GU> I'm not a Mac user but where are you running your script from? Is that path relative to the location of your script?
+I don't think you need to include the MAC HD bit in your path
+<@U5CGPBF0U> yes its exactly the location
+The path looks to be attempting to be absolute but is missing the initial slash
+HAHA! i got it
+<@U486CN4VD> you are right
+The if/main thing simply means: if executing this script directly run this code. It allows you to have a module that is runnable or importable (that code won't run on import)
+<@U5LNXQHN3> So I took a very large dataset of world cities in .csv and imported them into my database, then I added a `geog` column and used `UPDATE cities SET geog = ST_SetSRID(ST_MakePoint(longitude, latitude), 4326);` which ran without errors. Did I perhaps miss something in that command?
+how does one “executes this code”
+Probably not, but that's beyond my knowledge
+`python myscript.py`
+how does one “executes this script”***
+oh!
+<@U5CGPBF0U> :taco: 
+vs. running `python myotherscript.py` - on a script containing `import myscript`
+<@U1BP42MRS> :fork_and_knife:
+Although it looks like you're assigning geometry to a geography column... not sure if that's okay or not
+There aren't all that many times when I have enough knowledge to help around here, so I try to do it when I can.
+Maybe I should have ran `ST_MakePoint(longitude, latitude)::geography`?
+Nice!
+ST_SetSRID returns geometry
+Oh does it? I used the command because I think it was in a solution on StackOverflow...now I can't seem to find the page so maybe I just got mixed up. :joy:
+Those commands look fine - but if you try to assign a geometry to a geography column I don't know what will happen
+I see... Well, I'm having a lot of difficulty finding a way of populating a geography column from lat/long coordinates :confused:
+you probably just want a geometry column
+Ok so I found the StackOverflow post. I see that it was recommended to run `ST_SetSRID(ST_MakePoint(long, lat), 4326)::geography`. I omitted casting completely.
+After reading it doesn't sound like geometry would be a good fit as my use case involves locations on a global scale
+Unless I misunderstand the pros/cons which is certainly possible
+Usually it'll depend on what sort of distances are involved
+i am still trying to figure it out lol
+The if/main thing simply means: if executing this script directly run this code. It allows you to have a module that is runnable or importable (that code won't run on import)
+this script here means this chuck of code?
+chunk*
+    print(df)
+?
+and can i say, whenever i import something i have to have “if __name__==‘__main__‘:”
+or else the imported code cant be run?
+<@U5CGPBF0U>
+I wouldn't want it to meow until I tell it to
+So everything...oh wait he beat me to it :joy:
+<@U1BP42MRS> :lightning: :runner:
+lol
+The background on this is that `__name__` is a build in dunder (double underscore). It is set to the name of the module running - if the module is executed directly it's "__main__", otherwise I think it defaults to the file name (I don't recall ATM)
+Tldr you only need the if name/main if you want to be able to execute some code when the script is directly invoked
+so accordin to what you said, how do you let it say meow on the second code
+        pass
+Sorry, a class may have been a bad example
+<@U1BP42MRS> <@U5CGPBF0U> <@U486CN4VD> :taco: thanks so much!
+<@U6944D5GU> :knife_fork_plate: Thanks! I was actually pretty hungry.
+haha you havent had breakfast
+we share the same time zone!
+oh you meant my taco
+lmfao
+Oh, cool! Didn't notice the time zone. Actually I had a small breakfast but I woke up at 1AM, so I haven't eaten in 8 or 9 hours. :dizzy_face:
+:fearful: hope your bed time is not usually like this lol it doesnt sound good
+Haha, I don't really have a bedtime. Sometimes I'm going to sleep at 10PM, other times 6AM, other times 2PM. It seems to change every day too. I can't hold a schedule. Today maybe I'll sleep around...I'm not even sure...8PM? I was a night owl but now I'm a cuckoo bird it seems. :joy:
+<@U6944D5GU> By the way, if you don't mind me asking, I'm just really curious; are you learning Python for school?
+haha! i learn it for my career :joy: i wanna be able to build a trading program and things like that
+i am studying finance at school
+python is kinda cool. i was thinking of learning SQL or R after it, but woah, python seems deep enough for me to learn quite a while <@U5CGPBF0U>
+<@U6944D5GU> Oh, niiiice! That's really cool. Yes, I'm not sure whether R would be all that helpful if you learn Python, although learning at least basic SQL could come in handy sometimes. I suppose you'll be doing a lot of data science in your field? Perhaps machine learning?
+I've been doing web and software dev for a long time but started learning Python more recently as it was required for a project involving machine learning.
+see. i found something online, here:
+Banks use Python for pricing, risk management and trade management platforms. More recently, they've been reprogramming their trading systems to run off Python rather than other, clunkier languages.
+I was a finance person <@U6944D5GU> - started with python too :smile:
+<@U1BP42MRS> Oh that's right! Then did you work with pandas, numpy, scikit or similar tech?
+I'm not sure how long ML has played a big role in finances but would be interested in knowing.
+<@U1BP42MRS> so cool. was python helpful to you during work?
+No, I was more in the retail side (to clients directly, vs in a bank) and at the time I didn't know how much was out there!
+Yeah <@U6944D5GU> , I wasn't doing a ton of high intensity stuff with it - but I was able to remove about 10-12hours of work/week by automating silly tasks
+so cooooooool
+were you in a retail bank you said?
+what kind of bank
+<@U1BP42MRS>
+No, the retail side (not a bank). I was a financial advisor
+and stock trader for clients
+<@U6944D5GU> I believe there's a ton of opportunity in this space, and it also allows you to branch in different directions should the economy change. Not only a lot of jobs but a lot of entrepreneurial opportunities as well. It's a smart choice.
+<@U1BP42MRS> SO COOL what do you do now then
+<@U5CGPBF0U> :+1::skin-tone-3:
+I wouldn't suggest this for a larger project though, but for something simple or just to test in development it works.
+That's a good idea! Do you ever use doctest too? It's excellent for simple functions <https://docs.python.org/3/library/doctest.html>
+plt.grid(True)
+what does this mean
+I want to learn python . What is the best resource to refer for object oriented python ?
+<@U6944D5GU> I'm not entirely sure what library `plt` is referring to but if I'm correct I think it simply enables the display on a grid in any charts you generate.
+Oh ya, probably pltlib
+<@U3T76H0JW> Do you know any other programming languages, or are you just starting out?
+<@U6944D5GU> might mean the matplotlib library, since `import matplotlib.pyplot as plt` is common convention
+and for future reference, when you ask these kind of questions (what does this variable do, etc), its best to add some more information
+and in this case, if you had the code in front of you, you could search for instances of `plt` in the code
+which would have brought you to the import statement, among others
+yea i just didnt know the grid(True) part and kai_m answered me ;D
+yup . I know basic programming .
+understood
+but my concepts of object oriented programming are not so cool .
+can you suggest some good resources ?
+Hoping others come along that are newer than I am with their resources they used :smile:
+and can you share some advanced resources you use ?
+May be something may help
+Later when you know Python better, Effective Python is a good book - but again, after you know the language and can appreciate the tips
+Exactly how much water should be in the paddy for my summer crop of rice? I need agricultural advice.
+and getting stackoverflow working for you is also a skill that should be honed.
+`from stackoverflow import fibonacci`
+if you want to understand OOP, I would recommend learning Java. Java is a statically typed language, but all of it is object oriented and must be inside of a class.
+Has any one here ever tried to implement a SDN using python ?
+<@U5JF1KD18> sdn?
+Software Defined Networking
+<https://en.wikipedia.org/wiki/Software-defined_networking>
+Anybody have any idea ?

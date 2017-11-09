@@ -1,0 +1,55 @@
+```{municipios: [ `geometry`: [[[....]]] ] }```
+I'd just like to dump the entire json file as as string
+sadly, I haven't worked through the JSON tutorial yet, or I could probably help &gt;_&gt;
+How is the `Array` type implemented?
+<@U1L4GLFJ6> You just got the import slightly wrong. It should be `import Html exposing (Attribute)`
+Attribute being an opaque type is somewhat peripheral to the matter
+<@U1L4GLFJ6> You need to create a decoder. <http://json2elm.com> might be helpful.
+I'm not sure what you mean by "knowing the structure all at once." Don't you need to know that anyway in order to extract the parts of the data that you care about in JS.
+<@U1AN4JRFV> Thanks so much -- yes, it turns out that with <@U0JFXEUCT> 's 3.2 update to style-elements, the problem is solved for those using that package - code at <https://github.com/jxxcarlson/nanoedit> in case anyone else runs into this.  :slightly_smiling_face::+1:
+Folks, explaining what an opaque type in this context was not the right path to go down, and can lead to more confusion than aid. It's best to identify what the questioner is actually stuck on before answering in such situations
+Especially in this case since it was an import error :slightly_smiling_face:
+Yeah. I just kind of went into Wiki mode :X
+If that's the case, what's the best way of passing multiple values through ports? I thought maybe doing `port addSpotMarker : (Geolocation -&gt; String) -&gt; Cmd msg` and having the JS-side subscriber take an array, but that seems error-prone. I could also make `addSpotMarker` take a single record that "embeds" both parameters, but that seems too verbose. Is there a better way?
+<@U5XHTBFS6> yep, only one argument
+you can send a tuple or a list
+`port addSpotMarker : (Geolocation, String) -&gt; Cmd msg`
+the JS side will get it as an array
+hmmm that's what I thought, then. thanks!
+Because it's talking to JS it's error prone either way, if your JS callback to the subscription took less arguments than it was given those values would still be lost
+I want to have a global `Int` count which increments by one to give latest count. But everything is immutable, so I do not know what to do.
+<@U5FFVDC4W> See something like this: <https://ellie-app.com/D9Q8Xy9sdza1/2>
+Do you need to specify anything more than the "main" .elm file to elm-make?
+Oh nice. It looks like it.
+jdm06: `Json.Decode.field "municipios" Json.Decode.field "geometry" Json.Decode.list Json.Decode.list Json.Decode.list` .... :slightly_smiling_face: I would reccomend playing around in the repl for a good while and decoded small parts, then put them all together
+Hello. On this example <http://elm-lang.org/examples/binary-tree>, on 5th exercise is saying that `flatten: 21` - means that it's possible to write `flatten` function with `fold` so the length of function definition will be 21 character including function name and whitespaces.
+Which is 22 character. How I can do it with 21? Or is it typo?
+Hey, i would like to see how my elm code looks like after its compiled to JS. Whats the best way? When I compile with elm-make I cant find my own code.
+<@U5Q1H5XC2> look for `_user$project`. It will probably not be all in one place, but that's to be expected. Function names are preserved, so you can look for those, too. Be aware that the compiled JS is an implementation detail, though :slightly_smiling_face:
+Sweet, thanks :slightly_smiling_face:
+<@U0J8D9M2P> probably a typo, that looks correct
+Hi all, how can I pass multiple arugments to a `List.map` function? I currently am passing my type alias `Foo` but I also want to pass a float called `time`
+currently the type signature looks like `renderFoo : Foo -&gt; Html Msg`
+`List.map (myFun withArgs andMoreArgs) someList`
+assuming you have a list of `Foo`, you just have to make sure that's the last argument, so you can partially apply the others, first
+perfect
+thanks <@U3SJEDR96>
+After reading the guide for elm on the official page I'm concerned having 30+ input fields will result in a lot of Message Types and a quite unwieldy update function etc?
+maybe you could take a look at something like `<https://github.com/etaque/elm-form>`
+it could avoid some boilerplate code for complex forms
+wow, there really is a package for everything in elm already oO
+I already use it and I love it
+<@U604S603Y> Sort of :slightly_smiling_face:
+…and when there isn't there are ports.  But I tend to think to those as a last resort
+At first I was going to use socketio library for elm but it does not support elm 0.18 :confused:
+<@U5LHS71SM> For what it is worth, I am successfully using SocketIO with Elm by using a thin comm layer, written in JS, that talks to Elm via ports. NodeJS on the server. Working well.
+I was doing that, but I'm trying to get rid of that layer. Not for a special reason but I think without that js layer it would be more elegant actually.
+True, it would be, but Elm does not support SocketIO directly. I opted for the benefits of SocketIO over straight websockets, but it will depend how you see things in your project. I am not finding that extra layer much of an issue to manage though since I am keeping it thin.
+     ]
+`|&gt; Html.map TableMsg`
+in your view, that is
+<@U3SJEDR96>  thanks!!!
+Am I missing something?
+yeah, when you do `case foo of bar -&gt; ` you're essentially asking "can I describe this variable with this pattern", not "with this value". You can use a literal in a pattern, but not a variable, then it will just go "sure, I can put your `foo` in a variable named `bar`", and inside that branch, `xdim` is now your `input` :slightly_smiling_face:
+ok, so how to enforce xdim to be interpreted like pattern? Just use: if else construct?
+<@U5P4FLYLE> exactly :slightly_smiling_face:

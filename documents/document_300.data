@@ -1,0 +1,35 @@
+```
+did you run `yarn` to install npm dependencies?
+I don't believe so.  Doing that now  Lots of activity.
+:thumbsup:
+and if that doesn't get you any further, then maybe `yarn global add webpack-dev-server`?
+All working!!! I had to kill some stray `webpack` processes, but then ... YAY!!  Thanks so much. Would never have been able to do this by myself.
+<@U4BJ8UDCP> module names in elm match the filesystem 1-1: `src/Foo/Bar.elm` corresponds to `module Foo.Bar`. Case sensitivity is also important.
+(the above assumes `"source-directories": ["src"]`)
+Server.Main fails to import Server.Request :disappointed:
+Yeah, go for `/Server` instead :slightly_smiling_face:
+in the package.json?
+in the folder structure
+ah
+and the package too
+the `elm-package.json` doesn't need any changes, but the directory needs to match the module-name, exactly
+the funny thing is - it was working great on my macbook, but now I'm on my ubuntu machine it isn't working :disappointed:
+Mac is case insensitive on the folders
+oooooooooh :slightly_smiling_face: makes a lot of sense now
+thanks guys ^_^
+<@U0CLDU8UB> I made `EverySet` today: <https://gist.github.com/leonderijke/18f04f991a5f1945876e285249f5c8ad> For now, only the functions I needed in the project, but is does work. Is this what you had in mind?
+Yep, that's exactly it! :slightly_smiling_face:
+Cool, thanks!
+Hi! I have a type CycleList which contains List Cycle:
+`type alias CycleList =    { cycleList : List Cycle }`
+`type alias Cycle = { cycle : String , productList : List Product }`
+Cycle.cycle is a date in form of a string 'yyymmdd'
+What I want to do is find the latest Cycle (with the greatest string)
+I tried to do it with foldl, but I don't know if it's the way to go
+There's also `List.maximum` you could use to find the maximum element in a list: <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/List#maximum>
+Maybe you can express `yyyymmdd` as an Int instead of a String? That would make the comparison easier, I'd say.
+strings are just as comparable, and `yyyymmdd` especially. As for getting the maximum; it's a little annoying that there is no `List.maximumBy : (a -&gt; comparable) -&gt; List a -&gt; Maybe a`
+but as luck would have it, `List.Extra` has _exactly_ that :stuck_out_tongue:
+<http://package.elm-lang.org/packages/elm-community/list-extra/6.1.0/List-Extra#maximumBy>
+Then it would be `List.maximumBy cycleList.cycleList.cycle cycleList` ?
+So I have a validation function which checks the length of a String, what type would I use such that I could provide a type `a` which I know supported `length`? So my function could take more than `String` (say `List`, `Set`, etc)

@@ -1,0 +1,82 @@
+```
+<@U0RPQMZ9S> click on that ellie a few lines up :slightly_smiling_face:
+I just felt the urge to model the domain so strongly
+:slightly_smiling_face: i know that feel
+(I was writing one myself, albeit more slowly)
+It's pretty straightforward to represent generic JSON in Elm, type-safely, and allows you to quite easily make a pretty UI for it, too.
+this could easily be a pulled out into a library
+So what I'd do, <@U61JQ4F4J>, is make a nice datastructure for your directory tree, `type FSTree = Directory String (List FSTree) | File String JSVal` and have a nice little decoder for it
+<@U3SJEDR96>, never thought of that, good point. I wouldn't want to use something like this because it loses all domain meaning. JSON decoders might be tedius but I think this is a plus in the sense that it makes you think about the necessities in API design :slightly_smiling_face:
+Arbitrary JSON *is* the domain. The idea would be to use that _within_ a semantic structure.
+<@U3SJEDR96> while we're here, I'm curious why you included JSOther in there?
+seems unnecessary
+`app.ports.foo.send({"magic": function () {}})`
+for JSON, it's redundant, yes
+for JS values, less so :slightly_smiling_face:
+example: <https://gist.github.com/owen-d/b727b9a1a5d4990ed947c6fa7056a92a>
+I always forget you can tuck arbitrary JS away in a `Value`
+which is probably a good thing haha
+oh and don't try to use that decoder ^ on a JS Event. :sweat_smile:
+<@U3SJEDR96> yes it is the domain in the OP case, I was trying to refer to my own code where JSON isn't the domain. You're totally right in this case
+Oh, alright, gotcha. Shouldn't use that unless what you're trying to represent _is_ arbitrary JSON, indeed! Good point :slightly_smiling_face:
+:smile: does it launch the rockets on JS events?
+ok I feel like I should try the type safe version first and keep the port as a fallback
+events have domnodes tucked away in them, and you start to endlessly recurse quite fast :slightly_smiling_face:
+(domnodes tend to be cyclic: child has a parent has children etc)
+OMG I didn't consider that - my life is so much better thinking in Elm
+<@U64FYS317> as kind of a first thing, I wouldn't think about it in terms of `casting`. You're ultimately creating values of the higher level `Msg` type, and one way to do so happens to be via the data constructor `LayoutMsg`, which is a function `SubMsg -&gt; Msg`
+life's nicer without cycles :smile:
+I kind of wonder why this isn't part of Json.Decode
+at least the union definition
+It represents a very specific Domain, though - it's not terribly useful outside of that domain
+but to more directly answer your question, if you have a chunk of `Html SubMsg`, and you want to get an `Html Msg`, `Html.map` is the way to go
+I pondered including it in json-extra but decided against it
+but if you have solid arguments for including it, feel absolutely free to open an issue and we'll talk about it :slightly_smiling_face:
+<@U0RPQMZ9S> Thanks for linking html.map
+yeah my mindset is closer to Rust's serde's `Value` on this
+which is practically the above union type
+i wonder what the cross pollination between elm &amp; rust are.
+clarification: in terms of userbase.
+should also point out that doing the whole SubMsg, SubUpdate, SubView pattern is often overkill....... a lot of the time, the cleanest way to separate concerns is just with a few helper functions with narrowed down types
+oh, thanks. Could you elaborate? Really looking for a clean way to extend my codebase
+the recent elm europe talks by Evan and Richard go in to this in a good amount of detail, let me rustle up some links right quick
+oh hell yeah, thanks a bunch
+here's Richard's: <https://www.youtube.com/watch?v=DoA4Txr4GUs>
+looks like evan's isn't online yet, I only managed to catch it when the stream was still up
+Hey everyone! Where would be the correct spot to discuss tackling tickets in core?
+they're probably still editing Evan's talk
+<@U681TBBUP> define "tackling"
+As far as I know issues on core libraries are Evan's realm right now
+... and his only
+:slightly_smiling_face:
+So we wouldn't be taking in any prs there?
+Depends. Can you expand a bit what you're thinking of?
+<https://www.youtube.com/watch?v=DSjbTC-hvqQ> remember me of Evan's "Code is the easy part" video
+...reminds...
+The issues within <https://github.com/elm-lang/core/issues/721> look like they would be good candidates for a first contribution
+Right. The idea is certainly appreciated, but I'm afraid that it's not _really_ how work on Elm happens - it tends to be batched so a _single_ coherent solution to things can be found and implemented - where the implementation usually takes only a fraction of the time spent thinking, researching and coordinating things
+The approach is strange at first but I think it really pays off well - other languages like JS grow/mutate where Elm shrinks in complexity
+If you're thinking about contributing to Elm in a more structured way, I highly recommend having a look at <https://github.com/elm-lang/projects/blob/master/README.md>
+<@U3SJEDR96> thanks for that link! I was looking in the wrong places for the usual contribution guide. And <@U4WH8STNX> yes I completely agree with that approach
+It's all part of the "doing things right vs doing things right now" philosophy; and the long term goals of Elm. I sincerely hope this doesn't scare you off - we tend to be a very welcoming bunch. But jumping in and writing code is - contrary to how it happens in many other projects - not quite how things in Elm are done :slightly_smiling_face:
+I'm happy you came here to ask actually - just making a PR, having it sit there for a few months and getting frustrated over the seemingly slow progress can be _extremely_ frustrating!
+Right, I'm really excited to see what Elm 1.0 will eventually look like, although the bus-factor of 1 is kind of a risk :rainbow:
+<@U681TBBUP> I'm glad you asked, too, as I wasn't aware of the process until <@U3SJEDR96> explained it
+Part of my motivation for peeking into the core repo was that I want to start using elm, but I need to also have some somewhat advanced graphics. Given the current ecosystem of javascript plotting/charting libraries D3 seemed like the right choice, but since Elm uses it's own virtual-dom implementation as of 0.17, I can no longer use hooks like described in this blog post (<http://sgillis.github.io/posts/2016-03-25-highcharts-integration-in-elm.html>). It looks like there is a data visualization project though (<https://github.com/elm-lang/projects#data-visualization>). Has there been any progress down this avenue?
+yes
+<@U64FYS317> would there be any interest in making this process more documented for people coming in through a route similar to mine?
+<@U681TBBUP> I haven't poked around the contribution docs at all, so I'm afraid I'd have a rather poor opinion on that. I'm flattered you asked, though
+<https://github.com/gampleman/elm-visualization>  is pretty much a port of D3, or at least the parts Elm needs (not the jquery-esque stuff)
+also for very common business plots there's <https://github.com/terezka/elm-plot>
+<@U0JFGGZS6> oh awesome :slightly_smiling_face: my googling unfortunately yielded <https://github.com/seliopou/elm-d3> which appears to be dead
+doesn't have everything yet by any means, but the author has been adding stuff steadily
+recently added force-directed graphs for instance
+<@U681TBBUP> Actually the projects link is supposed to be that better documentation of the contribution process, maybe you can file an issue there and make some suggestions?
+I mean this one: <https://github.com/elm-lang/projects/blob/master/README.md>
+he also gave a talk on it at the recent elm europe conf
+<@U4WH8STNX> yes that documentation of the process is great and my suggestions were not related to its contents but rather how a newcomer would go about finding it. The first thing I looked for was a `CONTRIBUTING.md` in the core repo as this is the way other langs (<https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md> , <https://github.com/golang/go/blob/master/CONTRIBUTING.md>) seem to do it. Granted that elm is structured differently but it might be easy to just redirect people to the projects repo
+that would be a good suggestion, I'd like that
+<@U681TBBUP> welcome to Elm, let's conquer the future
+:elm: I have certainly never been nearly as excited about writing a front end :grin:
+Hey there, I have a small question
+Is it possible to add an extensible record to another record?

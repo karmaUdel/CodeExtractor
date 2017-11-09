@@ -1,0 +1,35 @@
+```
+`IllegalAccessError tried to access class org.lokra.seaweedfs.core.Connection from class &lt;class info&gt;`
+I have found <https://groups.google.com/forum/#!topic/clojure/zr2N0dbidAI> and <https://dev.clojure.org/jira/browse/CLJ-1243> that seem to point to this being a problem
+Any suggestions or workarounds I can try?
+Plot thinkens, I can use the code without problems on my Mac but on Windows it breaks
+:thinking_face:
+<@U0S3YK6HK> What's the Java version on both? `lein version` should print it
+Also possibly compare the outputs of `lein deps :tree`
+I don't see any signs that CLJ-1243 has anything to do with it
+hey guys! I want to read a stream with unknown number of lines (e.g. a file) and fire an async get request per each line (lets say using an http-kit async get with `(go (&gt;! c response))` as a callback). then, read the responses one by one into another file. is there an elegant way of closing the channel making sure I am not missing any async puts into the channel? I can do so with putting my own guard msg at the end but it feels awkward.
+I'm not sure I understand what you're trying to do exactly; any reason why the producer can't just close the channel when the stream runs out?
+<@U061HGP8C> the producer might close the channel before the last response is put there
+How so? The producer being (in my mind) the single sequential process that reads from the stream and puts on the channel, it should be able to not close the channel before it's finished reading the stream
+maybe you're missing a channel
+read file -&gt; channel -&gt; http calls -&gt; channel -&gt; write file ?
+if that's the general shape and you want to ensure some parallelism in the "calls" step, maybe look at what the `pipeline` functions have to offer in core.async?
+I would suppose they already handle closing the channel in the right order
+Any other ideas or thoughts? Or anywhere someone can point me?  Thanks.
+<@U5YA41N3G> - Don't have time to think deeply about this now, but your question strikes me as one that could be asked at the Clojure or Clojurescript subreddit. That way it's less likely to be buried by other conversations while people think about it.
+Any news on when clojure.spec become part of core?
+It won't. It's been split into its own library.
+wasn't it going to be merged in later, on a "when it's done" kind of schedule (so after 1.9) ?
+There's a good discussion about this on the latest defn podcast (<https://defn.audio>) - with Stuart Halloway - it's not on the website yet but it's episode 23 - it's in the RSS
+for check i've been through variations of some, every? not-any?, etc.  But still can't quite get what I'm looking for .  I just need to flag the fact that there's something in the first collection that's not in the second
+convert 2nd arg to set?
+are you looking for set equality or set subset?
+not equality, just that "a has something that b doesn't" ,it's ok if b has somethign that a doesnt
+yeah I guess set/difference would work too
+the problem is that 'set b' may be large
+subset sounds like it?
+oh, you need one to be a proper subset of the other
+so was wondering about the cost of converting from a list/vector to a set to do the comparison
+but i think I'll just go with that for now
+set uses transients, so don't think it would be a big overhead
+ok wasnt sure how effcient it was in that scenario

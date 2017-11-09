@@ -1,0 +1,21 @@
+```
+the Composed tag causes the compiler to drain my resources, couple of minutes to compile / elm-make takes as much RAM that is left
+over 4 GB of RAM
+Hey all, is there any way to do a “cleanup” before an Elm application is destroyed?
+I’m using ports to do some stateful stuff.
+<@U17J54S2U> no
+You’ll need to send a message out of the port to say that the elm app is going away.
+<@U3AAB7A4C> try changing the name of `Type` to something else
+Got it
+<@U0EUHKVGB> okay thanks I’ll try that
+That’s just a guess. But I actually doubt that is the issue
+<@U3AAB7A4C> you probably have a large case..of statement or something?
+I've seen that issue a few times. What's considered a "large" `case .. of`?
+according to the tag Composed it is and will be large yeah
+<@U3AAB7A4C> I don’t understand what you mean by that
+it was kind of larger already, the compiler now says there are missing some branches after minutes of compile time
+if I remove the last type of the constructor label it’s fast as alwazs
+<@U4PT7NG4V> I would say more than 16 branches is worth investigating
+always
+<@U3AAB7A4C> Yes, you have too many branches in your case..of
+Split your pattern matching up.

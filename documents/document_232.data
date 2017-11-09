@@ -1,0 +1,66 @@
+         _ -&gt; ({ab=0, hits=0}, {ab = 0, hits=0})```
+you can't do it for a variable length list
+you can't pattern match like that
+if you know the exact size of the list at compile time you can write a function for it but tuples cannot be dynamically sized at run time
+but it looks like you don't care about the record contents anyway
+so just do `case l of a :: b :: [] -&gt; (a, b)`
+<@U4872964V> Your version does work for me in the repl. But when i annotate it in my program, I get that elm-make compilation error I mentioned a little while ago.  Let me see here...
+why are you trying to do this, it seems like there should be a better way?
+that is always a good question :slightly_smiling_face:
+I am parsing a JSON object. That object comes in as a list, but my model represents them as a tuple.
+is the list a fixed known size or is it variable
+Maybe I need to rethink the model?  I know, though, that there will be exactly two items needed for this piece as far as the application is concerned.  I'm representing my 2 sons batting averages in the app: "ab" is at-bats, and "hits" is number of hits for each game....
+are you going to have another kid?
+:slightly_smiling_face:  Haha!!
+that sound like a many problem, I would leave it as a list
+zero, one, infinite kids
+Alright, I will rework things.  I think you all are right, even though there's *no way* we're going to have any more kids!
+well, not intentionally anyway
+:stuck_out_tongue:
+I'm too old for that stuff! Too old to learn a new language like Elm, perhaps, much less too old for having another kid!!
+Most of the difficulty isn't in the learning of a functional language. It's in the unlearning of all the object-oriented crap :stuck_out_tongue:
+Its funny because if you were taught FP first, then imperative would seem absolutely nuts
+So often, "How do I do X" has to be answered with "?"
+(mu)
+<@U57KYFW67> Friend, I've got to unlearn OO, along with procedural stuff like Basic I learned back in the 80s...  Got a lot to unlearn here, folks!
+hah
+It's a very Zen experience. You have to think less about "Doing" and more about "Being". What things are, rather than how things change.
+From a mathmatics background it makes alot of sense because nearly all of mathematics is statements
+declarative programming
+So, when I come home in the evenings, I need to unlearn OO and such and learn some FP (using Elm), which is great. Except that OO is what I do during the day, so I go and relearn it again! Ha, it's a vicious cycle. One day I'll retire and stroll along the beach  with my grandkids and think, "yep, this is what all that madness was about. Basic-&gt;OO-&gt;FP-&gt;OO-&gt;FP...."  Just so that I could enjoy a nice week at the beach with the little ones....
+Unless you have an OO language that lets you be sneaky and start including some FP stuff in it
+It may seem like infinite recursion, but it actually converges on a fixedpoint: a very practical viewpoint where you recognize the advantages and disadvantages of each way of thinking.
+To your point, though, FP does feel a lot like mathematics, algebra 2 and such. I'm finding myself coding much quicker in Elm, even if I screw up by representing the model wrong.
+I teach math. And one of the things that I find the FP community is a little misleading over is how "mathematical" FP is. I think math tends to signal to people that it's very numeric, but a better word may be "logical".... but of course, the word "logical" is totally wrong too!
+It is the logic of mathematics, but with none of the numbers.
+<@U57KYFW67> what about the name "discrete mathematics"?
+Which I think most people would find a little more palettable
+i like to think it is "discrete" cause it doesn't have numbers :stuck_out_tongue:
+I actually had my current employer ask me (out of curiosity) what Discrete Mathematics was during my interview.
+when I say it's more mathmatical I mean that you find things like this `f(x) = x+2, g(k,x) = x^k(x)` in math as opposed to `take a number, now increment it , now put it aside, now take another number`
+and you most definately don't side up with `f(x) = x + y` in math unless y is a constant
+more declarative then imperative then, borrowing some math symbols
+Every man's constant is another man's variable.
+for the purposes of that expression it is constant
+whereas in imperative languages y could be whatever and maybe change from time to time
+f(x) = x + ? &lt;---- ? is a variable just like any other
+<@U57KYFW67> why is it not a constant?
+A constant is just a variable for which you can't see where it was defined.
+It's a matter of scoping.
+makes sense, philosophical!
+outside the matrix we live in maybe pi is different :wink:
+The variable ? is sometimes used for other things in math. For instance, projection maps (like \(x, y) -&gt; x) are very commonly called ?.
+? is "p" for projection
+cool, didn't knew that! til
+except ? == 3 is never true
+<@U57KYFW67> the symbol pi is sometimes useful for other things, not the variable.
+Let ? = 3. Then ? = 3. I have shadowed the variable ?. Not good practice, but you can't say I'm wrong, because I just gave a definition for what I mean by ?.
+The only thing is that some variables have historical importance, and are used nearly universally in certain ways. But that's  convention, not logic.
+we coloquially refer to archimedes constant as pi because its frequent use as the symbol. But the constant itself doesn't change
+A good example is something like ?, the Euler-Mascheroni constant. Surely ? is used in lots of ways, but it is also an important naturally-occurring number -- not all that different from ?.
+the concept of a fixed ratio between a diameter and a circumference that is the constant.
+jonf: Just taking this aside, since it's not programming-related. But if you look at situations like multiple integrals, you can have "constants" which "vary" Like ??xydxdy (taken over, say, a rectangle) which is equal to ?y (?xdx) dy. We say the variable y is constant with respect to x. It's treated as constant because when you zoom in on the inner integral "?xydx", you can see the quantifier for x (the "dx" in a sense brings the variable x into existence), but you can't see the quantifier for y until you zoom back out.
+y isn't a constant in that scenario it is a variable of the inner function f(y,x)=xy you are simply recoginizing that there exists an identity g(y) = ?xydx = y * ?xdx
+Right. But that requires a global perspective. Locally, (when you confine your analysis to just the inner scope) it acts in all ways exactly like a constant.
+The perspective I'm arguing here is useful if you're, say, writing a compiler, and you want to concern yourself with local data whenever possible.
+But ultimately, you can take different perspectives on it.

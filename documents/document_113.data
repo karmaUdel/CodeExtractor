@@ -1,0 +1,94 @@
+```
+because the list is already in `a` (so to speak)
+the impl is quite more complex because it has to deal with maps/vectors/sets other than just lists
+but that's the basic idea
+thanks! that clarifies things
+has anyone written about how to organize specs when they don't perfectly map to namespaces etc?
+When I use `(:require [acme.spec-ns :as spec-ns]) ... (clojure.spec.alpha/validate ::spec-ns/spec-name) ...)`, this is the context I have using a namespaced spec in
+I'd be interested to see a well reasoned pitch justifying the practice
+your data domain doesn't match your namespace organization?
+organizational/insitutional inertia?
+because that's why _my_ namespaces don't match my data domain.
+Professional software dev is hard, man.  Companies are hard.
+it seems like people are really tied to namespaces on keywords matching the namespaces code is organized in to
+there is no reason for that
+code should change and reorganize way more often than your data formats
+The only time I ever use a code namespace name on a keyword is when I am sure it is temporary and will change
+well lets say I have some type of domain object. Most functions operating on that are in some namespace that might contain multiple spec'd domain objects. To define specs for these objects I'd have to do something like `(s/def ::my-object-name string?)`
+does that make sense?
+no
+never use `::` and instead of tying to the namespace the code is currently in, use a namespace like :my-org.project/whatever
+ok yeah, that seems like a sensible argument
+right... I'm also more and more inclined to _not_ use `::`, but using data domain logic.
+your specs are like a database schema, imagine if in tables you named columns after the code that is currently accessing it, terrible
+Yeah, I am not sure why they use `::` everywhere in spec's doc
+it makes for shorter docs
+<@U0NCTKEV8> another option is to have namespaces dedicated to your specs, I've being doing that and I quite like it, you can have a namespace like `your-org.specs` and inside of that you create the namespaces with your data definitions, by doing that the `::` gets very convenient, also you ensure very long namespaces so you have a more strong uniqueness sense
+Yeah, but putting all specs in there isn't much fun either...
+I've been splitting the specs and where to put them and how to name them depending on the purpose.
+here's something easy to do with state monad but non-obvious to me how to do with reduce: I have a expression tree. I want to compile it to Three-Address-Code, i.e. a list of statements where each statement is (set! a (op b c)).
+I'm writing a blog post on REPLs, can anyone recommend a short video demonstrating the Clojure REPL?
+Out of curiosity, what exactly will be the focus of your blog post?
+<https://vimeo.com/223309989>
+is anyone aware of an *async* ring (compojure) middleware to log requests and responses?
+<https://www.youtube.com/watch?v=2AvoH6XNAWY>
+<@U3JURM9B6> clojure's reduce isn't really for folding over trees. it only folds over  seqs. so you'll need to write your own fold over a tree or flatten the tree first
+<https://gist.github.com/hiredman/2b2707d74ad2ff0b2f941b965f7dd97f#file-ref-clj-L3-L13> is an example of a custom reduce implementation over a tree using cps
+I don't know what  your expression tree is like, but if you can transform it in to something like anf generating three address code will be much easier
+I was wondering if someone could point me in the right direction?
+*e will show you the whole stacktrace
+also, the most likely cause of that error for that code is using a headless JVM
+which won't include awt
+<@U6DJH8TCL> what does `(resolve 'java.awt.Frame)` say?
+(<http://matt.might.net/articles/a-normalization/> is a good write up on anf)
+hey <@U051SS2EU>  I think you got it right, I´m in another environment right now. But I recall a message mentioning something about "Headless", if that is the case, do you know how can I solve it?
+by installing a jvm that's meant for doing desktop /gui stuff
+but that shouldn't be urgent for learning clojure (though playing with windows and widgets can be nifty)
+typically on eg. a debian system, you can pick different jvms and decide which is default, and the one they pick for you if you aren't too bothered to customize doesn't come with the desktop and graphics stuff just to keep default installs smaller
+but the process of getting the right jvm installed for the features you want will vary based on your OS
+<@U051SS2EU> I thing I´ve got it, I´ll try to fix it later and I´ll let you know, but anyway I will follow your advice and wont let it get to much in the way of my progress, thank you very much!
+how would you do it with the state monad? I think the trickyness here is more traversing trees than building up state
+I would probably just use an atom and postwalk, fwiw
+oh... or tree-seq. which I found out about just now
+I'm trying to wrap my head around `core.async/pipeline-async`, and it seems to be running more parallel tasks than I'm requesting: <https://gist.github.com/lynaghk/01aaa39bedcd2d37032dba3b68d9f94f>
+Is the "parallelism n" in the docstring more of a suggestion than a hard limit? Even when setting n=1, I'm getting three async tasks running at the same time.
+<https://dev.clojure.org/jira/browse/ASYNC-163>
+actuallly
+pipeline-async is really weird, the other two pipeline variants are much easier to work with and much more likely to end up something that works like you expect
+<@U0NCTKEV8> Thanks for the link! I have to run this in cljs, so pipeline-async is my only option.
+I believe pipeline-async is meant for working with callback-based libs
+Off-by-two isn't going to be a dealbreaker for me, I just wanted to make sure my understanding was sound.
+Looks like the async.clj and async.cljs implementations are the same, so presumably cljs would have the same issue.
+anyone know why running `lein run` might overwrite my `.lein-env` file?
+<https://github.com/weavejester/environ/blob/master/lein-environ/src/lein_environ/plugin.clj>
+it looks like .lein-env is a generated cache that environ owns and you shouldn't be modifying
+I was (with much rejoicing) teaching a couple of colleagues Clojure today, and one of them asked a question that stumped me. Why is there no `delete` function for vectors? As in, to drop an element at an index out of the vector and move the succeeding elements backwards by an index to fill the hole?
+because that's a very expensive operation, so you should stop and think rather than just seeing an 'easy' core op that does it
+OK, fair enough. I wondered if that was why but wasn't sure.
+<@U0NCTKEV8> is correct, <@U17DY48BW>. The `.lein-env` file is for internal use, and shouldn't be modified manually. It also mentions that at the top of the README.
+I'm trying to use environ, but using it at compile time(our build machine have all env vars), if I wrote `(def ^:const x (env :x))` it works, x will be compile to a constant. but `(def ^:const x (Integer/parseInt (env :x)))`will not work.
+imho, the trick part is assigning a unique var to every node of the tree
+with a state monad, you just keep an int counter, and increment it as you traverse the nodes of the tree
+<@U0NBGRGD6> are you doing AOT compiling? Or is this ClojureScript?
+<@U050MP39D> : why should delete be more expensive than assoc? can't we just 'mark it with a tombstone' ?
+<@U051KLSJF> I'm doing AOT compile in Clojure. 
+<@U3JURM9B6> A look at the source for `assoc` on vectors should convince you that `delete` would be more expensive -- `assoc` doesn't change any of the indices for the vector so only the segment containing the "changed" item needs to be updated. `delete` would cascade a change of indices across the segments of the vector. _As I understand how vectors are implemented in Clojure -- happy to be corrected._
+<@U0NBGRGD6> Aside from all the myriad problems associated with AOT and why you should avoid it... _ahem_ ...could you be a bit more specific about "will not work"? What exactly is the error/behavior you get?
+<@U04V70XH6> : I failed to consider indexing. Does vector maintain the invariant "the only non-full 32-item block is the last block" ?
+if I use `(def ^:const x (env :x))` and :x in env is "hello", it will be compile to `(def ^:const x "hello")` i think, because our build machine have environment variables, and production machine dont, this is the way we want. if I use `(def ^:const x (Integer/parseInt (env :x)))`, x will not be compiled to a literal constant. so at runtime, this `(Integer/parseInt (env :x))` will run again.
+I'm not sure about the internal implementation, but vectors guarantee constant time index lookup.  seems hard to have both that guarantee and a fast  delete-at-index op
+no
+^:const has a very small very specific use, that is not it, it only happens to "work" for (env :x) but that could change at anytime
+vectors guarantee a (log_32 num-elements) time lookup, it's stored as a btree with branching factor of 32
+<http://hypirion.com/musings/understanding-persistent-vector-pt-1>
+I think it's possible to store "how many elements does this subtree have" , which also allows fast lookup
+what's the explain for this, what's the difference between these two?
+(I'm a bit surprised `(def ^:const x (env :x))` works, to be honest)
+^:const causes the value of def to be inlined at the invocation site, it doesn't care about how the value is produced
+`(env :x)` is fine if that returns an value that can be used as a constant
+const doesn't mean that the literal expression passed to `def` will be inlined, `(def ^:const x (do (println "foo") 2))` the println will only ever be runned once
+and x will be 2?
+yes
+and x will be 2? 
+I know how to write macros. Is it easy to write reader macros?
+I'm trying to implement a special macro (:: a t-sig) where it always evals to a, regarxless of where the :: is located at

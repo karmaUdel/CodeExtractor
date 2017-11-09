@@ -1,0 +1,44 @@
+ (try (something) (finally (clojure.core/pop-thread-bindings)))) ```
+<@U04V70XH6> so deftest sets a dynamic var which is available anywhere within the callstack during its execution?
+thanks for checking it!
+do you have a better suggestion to do what I was trying to do? (split a test in this way)
+is it "not ok" for some reason to split a test in multiple functions that way?
+it seems that it improves composability
+I haven't seen it done that way before -- so it looks unfamiliar -- but if `clojure.test` manages all of its testing context dynamically, I guess it's fine. I guess I would have a specific test for each creation function that asserted whatever behavior I expected (and cleaned up after itself), and then in the main test I'd just call the creation functions without worrying about `testing` or `is`...
+In other words, I'd only have "one" test for those common things, rather than repeating the tests every time they are called.
+Ah, I see.
+How should a regex look for the `:aot` option in leiningen?
+The way I used it seems to have no effect
+are you sure you want to aot compile?
+if you don't have :gen-class in a ns form, compile is a nop, and if you don't have gen-class I doubt you really want to aot compile
+<@U0NCTKEV8> I'm sure. I'm trying to minimize startup time in resulting jar.
+I noticed that most ns don't necessarily get aot'd, when I stripped out clj files jar started to fail
+does anyone know of a library for doing set-like operations (`intersect`, `union`) on possibly infinite sets?
+f.e. `(set/union inf/all #{1}) =&gt; inf/all` or `(set/intersect inf/all #{1}) =&gt; #{1}`
+I'm crawling through a clojars search but figured I'd ask
+I suspect what you want is a symbolic logic library
+how so?
+I didn't find anything in my quick searching, but rolling my own shouldn't be too hard
+just gotta figure out what infinity looks like
+oh, just because that is a more logic based representation of a set vs. a datastructure
+ah
+for my use case, 95% of the time it'll fall back to regular set ops
+can you recommend a good primer on the topic of symbolic logic programming?
+the core.logic readme mentions _The Reasoned Schemer_
+core.logic isn't really that, the little prover (which shares an author) would be more like it
+thanks
+I actually have enough time to read this before I have to tackle this problem for real
+<@U5ZAJ15P0> re: tests, you may want to watch this: <http://2017.clojurewest.org/full-stack-teleport-testing/>
+youtube video: <https://www.youtube.com/watch?v=qijWBPYkRAQ>
+does anyone have any idea how to encode the `::selection` selector in `garden` ?
+ah.. need to define a pseudoselector.
+I have seen it. Mind-blowingly awesome. It's on my todo-list to implement something similar :slightly_smiling_face:
+cljr for Clojure CLR
+Is it a common/recommended practice to add tests as metadata directly on functions?
+I can't `apply` macro, can I?
+what my options are?
+write a macro to do it :disappointed:
+or eval
+Nope. See <https://stackoverflow.com/a/9273469>
+pick your poison :slightly_smiling_face:
+oh, wait, there is a ~@

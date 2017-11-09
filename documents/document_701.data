@@ -1,0 +1,94 @@
+```
+(untested and from memory <@U4JJH96TS> :point_up::skin-tone-4:)
+Sure, let me explore `futures`. So, I'll be doing I/O with these forked processes. Reading from the web, suggestions are to keep workers equal to number of cores. Is that reasonable?
+Yep, that's usually what I see/hear around. Note that if you are doing I/O - probably best to use `ThreadPoolExecutor` since your bottlekneck isn't CPU and processes in python are expensive
+Especially resource sharing
+Thanks. Let me read more on the subject
+Hello guys
+I got a problem, I want to connect my self to an external site using python requests.
+What I aim to have at the end is a way by which I can connect myself to the site using python requests and when I open my browser, I should see myself already logged in
+But the problem is when I connect myself using python requests and I open thee browser I'm not logged in
+Here's my code
+Being logged in is stored in a cookie. Requests has one set of cookies, your browser has another set of cookies
+OK I see. And how can I make them communicate then
+and ne'er shall the twain ever meet
+You'd need to be able to inject the cookies into whatever the browser uses to manage them, which sounds difficult
+<https://stackoverflow.com/questions/35495416/importing-request-session-cookies-to-browser>
+I mean, seems possible using selenium
+if you wanted to go the other way
+<https://pypi.python.org/pypi/browser-cookie3/0.6.0>
+so, you have a number of problems
+<@U0LSCQQNR> selenium is it a python module or what ?
+* Browser cookie storage location path varies by browser and OS.  How will you handle all that?
+I'll rather try to import requests session cookies to the browser
+good luck
+what's the use case?
+<@U0LSCQQNR> use case ?
+what is the purpose behind this?
+how do you expect it to be useful?
+how do you see someone using this?
+<@U0LSCQQNR> I'm trying to implement a Single sign on system on a Wi-Fi and an external website. I want that every person connected on my Wi-Fi to be automatically logged in to that website
+I once mentioned it here
+so how is this supposed to work with that?
+<@U5UKKT0EP> Thanks! I'll try that :smile:
+<@U5JF1KD18> I regularly use *mechanize* to access websites where you have to login etc...
+and fill out forms in general. *mechanize* emulates a webbrowser.
+If I have a question that isn't really about Python can I still ask it here? Or do I need to go to general or random?
+It is development related at least
+why not?
+if its not, we could probably point you in a direction
+I'm trying to implement a class that create a 2d array, but I'm running into some issues with `__getitem__`
+<@U4BMZ90T0>, are you using a dict?
+No, using a list.
+Basically just taking a 2d array of N x M
+and I have to sum all the values in the columns
+I'd argue that it's probably not worth trying to go overboard on the overloads
+Which is easy enough
+My trouble comes in here
+Basically saying that `__getitem__` is not defined for list
+but I've defined it in my class. And it works if my 2d list isn't an object instance
+of my class
+You're assuming it's saying the wrong thing about your class, but most likely you have given it a list when you think you've given it your class
+How should I initialize the list in my class then
+No idea, you're showing only tiny snippets of code and we've not seen the actual error or the actual structure yet
+Alright let me do this then one sec
+The error comes in line 4 with `self.xl_grid[i][j-1]`
+okay, so obviously your __getitem__ function is irrelevant as you're not dealing with that type here, only lists
+Oh wait
+Personally I wouldn't be trying to implement that logic in a single hairy one-liner, either
+Yeah i think that's what's broken
+what is the _actual_ error?
+The error I had previously was due to attempting to subscript the list twice
+it was giving me a message about the list
+But not it's not making a 2d array, but that was my fault
+Works now
+And that requires that Postgres be installed on my local machine. Is there any way around this? Do I _have to_ install Postgres on my computer?
+how are you working locally?
+eg, dev/staging/prod with their own specific env configurations
+I just run my code locally...um...I guess that's it. I have the Heroku toolbelt. When I run the command with the toolbet I'm informed that psql.exe could not be found. After a quick search it seems it's because Postgres needs to be installed.
+Sorry if I didn't understand your question correctly
+I run my app in its development configuration when running it locally. Not that it's that much different from the other modes.
+How can you be running locally if you use Postgres but don't have it installed? Are you accessing a Postgres instance remotely?
+I didn't think Heroku had a local option
+it does, but you really should have everything replicated locally that's on heroky
+as close to 1:1 as possible
+Aha. Still curious about how it handles the DB.
+Ya I have no idea. I just want to get PostGIS running on Heroku. But I guess I'll need Postgres anyway if I intend to test my app locally. Currently I just plug it into an SQLite DB to test it.
+yup, switch that out for postgres.
+I must say that I did enjoy the simplicity though, and especially when we have new developers coming in. I wish Postgres could be self-contained somehow to avoid having to set anything up. Oh well.
+That's the tradeoff though... SQLite basically has the whole database functionality built right into your application. That's only practical because the functionality it offers is quite minimal.
+If you're writing something for multiple developers to work on then everybody could share a Postgres installation on a central server
+That's true. I suppose I could have everyone connect to the database on the Heroku staging Dyno for the project though...
+Hello. Anyone with experience in django-filer and django-storage (i.e. s3) ?
+try <#C0LMFRMB5|django>
+<@U5LNXQHN3> what
+&gt; That's only practical because the functionality it offers is quite minimal.
+SQLite's Full-text search was blazing fast before Postgres had a reasonable FTS at all.
+Docker!
+I put a `docker-compose.yml` in all my projects now so people can be up and running with it in a few minutes
+It won't solve all problems, but it's really nice for dev-prod parity, ish
+<@U5NMSURAQ> I didn't say the functionality was slow or bad, just that there isn't so much of it
+true that
+but I'd guess the most useful stuff is already there
+I'd imagine if there is no WADL or some sort of blueprint for a given server than probably not
+anyone comfortable with marshmallow? ,trying to remove missing data after deserialization ,i don't want `{'first_field': &lt;marshmallow.missing&gt;, 'second_field': u'some value'}`

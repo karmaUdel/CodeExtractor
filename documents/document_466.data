@@ -1,0 +1,76 @@
+        on "keyup" (JD.map handler toTuple)```
+since list takes `Value` and my single encoder returns `User`, but my `UserEncoder` returns a `Value`
+Which handles the entering and deleting of items. Not sure how to handle a cut and paste
+<@U6HCJ8JHM> you put those `Value`s in a `List` and pass it to <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Encode#list>
+If you've got a `List User` you can `List.map` your encoding function to get a `List Value`
+ah ok. i just had to put `List` in front of map and hit save in vscode haha
+thanks for the help <@U153UK3FA>
+Is there a `paste` and `cut` event?
+hello
+How to update an element of a list?
+i mean
+i have a list of tasks
+i update a task
+it makes the changes
+but on the ui
+it apears after reloading the page
+<@U6B7NBTLZ> What do you mean you update the task?
+A code snippet would be helpful here.
+Did anybody ever encounter this?
+is there an `elm-package.json` within `elm/tests`?
+there isn't right now. I tried running `elm test init` to create one, but it didn't make a difference
+I'll try again though
+yeah, `elm-test init` assumes a certain project structure. You can use <https://github.com/rtfeldman/node-test-runner/blob/master/templates/tests/elm-package.json> as a template, though you'll need to add the path to your regular elm files to the `source-directories`
+after that, you can run `elm-test --add-dependencies elm/tests/elm-package.json` to sync other dependencies
+with a little luck, that should get you going
+<@U3SJEDR96> I just realised that I had not properly setup the `source-directories`, it now indeed goes past that step :slightly_smiling_face:
+I already tried deleting all `elm` folders I could think of (`elm-stuff`, `tests/elm-stuff`, `~/.elm`) but I still get this. in order to install `gdotdesign/elm-ui`, I had to rely on `elm-github-install`, not sure if/how that's related. any clue?
+ah I think it is somehow related to <https://github.com/elm-lang/elm-package/issues/253> will check my versions
+Possibly, thoughI think it's more `elm-install` is messing things up, since `elm-test` runs `elm-package install`. I think <@U0EUHKVGB> came up with a way to get it working, though I don't remember exactly what it was. Also, <@U0K7EBT3J> was facing the same issue, maybe they know.
+thanks a lot again!
+<@U4F64AKQV>
+i need a updateTasks function
+<@U6B7NBTLZ> so, model.tasks is a list of tasks?
+Yes
+<@U6B7NBTLZ> values in Elm are immutable, they can't be changed, you can only create new values. So to update a task in that list you create a new list with the updated task in place of the old task.
+undestood
+but
+i edit mai tasks name and description
+in my updateTasks function
+what comparation should i make
+in the if statement
+shoult i compare the list of tasks with model.tasks
+?
+Your `updateTasks` function will need to take the list of tasks and the new task as parameters
+And return a new list of tasks
+You'll need some way to match the new task value against its old value so you can find it in the list
+Commonly this is an `id` field on the task
+yes
+Task has an id
+so
+updateTasks : List Task -&gt; Task -&gt; List Task
+Right
+?
+Yep
+<@U3SJEDR96> indeed, this made it work (all credits to <@U0K7EBT3J>) <https://elmlang.slack.com/archives/C0CLGCMMF/p1498829721172985>
+:thumbsup: great!
+While the beginner is super active right now. Does anyone know how I can handle cut and paste in a form?
+copy/paste in the browser is (unreasonably) complicated. Using an existing JS library and ports is _probably_ your best bet
+though I do wonder - cut and paste in forms should just work, so it depends on what you ctually want to do :wink:
+<@U3SJEDR96> that is not what I wanted to hear (re it being complicated) :disappointed:
+So far I have it so that I can type in a number and delete a number
+`on "keyup"` triggers a port which is to `libphonenumber-google` doing AsYouType Formatting
+I also capture the `delete` keys which resets the formatter and resends the current state of the form. However cut and paste is pretty much buggered at this stage
+whats the exact problem with handling copy / paste?
+The cut and paste is visibly done. However is immediately reset to the state.
+I don't know how to trigger an update from them and to update the state with the new state of the input field
+I think it would be relatively easy if there was an `oncut` event like there is in JS. But there doesn't seem to be these events in the Html.Events of Elm
+well you can always `on "cut" decodeTheEvent`, though I'm not sure what information you'd decode from it
+other than "it happened"
+I had tried that.. But it didn't seem to work. I will try it again
+are you catching the "input" or "change" events?
+wouldn't input be triggered if you paste?
+Important to know - if the decoder fails, it will simply do nothing
+but yeah, I'd think input and change would be triggered, though if you're basing things on keyup, it might start to get weird
+yea input overrides the keyup. I will have a look at change. I wasn't aware of this event
+for reference this is where I am at

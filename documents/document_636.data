@@ -1,0 +1,46 @@
+```
+deriving decoders is definitely possible, the issue is to have the _best_ solution, not just _a_ solution
+Potentially, this might keep people from using the proper types for things, instead choosing to rely only on primitives, records and lists because they map so nicely with json. Also, having a `Maybe` becomes tricky - should it be equivalent of `oneOf [ map Just decoder,  null Nothing ]` or `oneOf [ map Just dec, succeed Nothing ]`? Currently, it is the latter in decoders, and equivalent to the former in ports, I think
+yeah, I suspect that instead of creating `Decoder MyFancyTypeWithADTsAndStuff` one would have the `derived` line and then a function `ApiResponseWithOnlyPrimitives -&gt; MyFancyTypeWithADTsAndStuff`.
+which doesn't sound _that_ bad, but it's on the user to do that and not use `ApiResponseWithOnlyPrimitives` in his Model etc.
+I got lost in the `Maybe` part of your post (behaviour of `null`), will chew on that a bit
+So, the main hurdle is that you’d very soon run into situations where you’d want to tweak the decoders a bit
+<@U0D4VR7BP> difference being that `type alias Foo = Maybe Int` with input "`foo`" could either end up an `Err "wrong type"` or an `Ok Nothing`. Perhaps it's not strictly related to this discussion, but it serves as a reminder that even the current ports decoders work subtly different from how you'd (naively) write a manual decoder
+I’m more leaning towards somethine _like_ <https://github.com/norpan/elm-dynamic-types/blob/master/Dynamic/Json/Decoder.elm> where you could traverse the type definition and decode accordingly, using an Elm function to do it
+Is ist right that Dict’s are always sorted alpabetical? So I have no chance to preserve the order of a list when transforming it to a dict and then back to a list… or?
+<@U3SQ42JJW> yes, in ascending order by key
+if you want order, you have to keep it a list
+(or put some kind of ordering info into the values)
+Thanks. Yes I will do the second… giving those items a sort ID…
+I looked into `core/List` and `community/List.Extra` and I can't seem to find anything pre-made, which makes me wonder if I am going at it with the right approach at all..
+I have also thought of thinking about `Edges` instead of `Vertices`, but I would end up with the same problem, I think.
+Take a look at `List.take` `List.drop` and `::`
+anyone else getting some gruff from elm-package? random packages not downloading for me
+<@U4G7CC18U> coincidentally, this is problem 21 from 99 Problems (in Elm) <https://johncrane.gitbooks.io/ninety-nine-elm-problems/content/p/p21.html>
+Ohhh! :+1: thank you
+<@U2U94G0QG> I didn't know this existed...
+It looks like an awesome resource!
+mind = blown
+I remember looking through the haskell version. An elm version is *way* more exciting though.
+Yeah it's great! It's really helping me with improving my Elm chops without focusing on web apps
+This is not so much elm itself, is just my brain struggling from hours and hours of OOP at work, and then using FP at home
+practice, practice, practice
+I have been doing them on <http://ellie-app.com|ellie-app.com>
+it's a bit like chess. 99 problems is a bit like practicing tactics, vs evan's elm architecture tutorial which focuses on strategy.
+Hi, does anyone know of a any chart library purely in Elm?
+i’ve used elm-plot - <http://package.elm-lang.org/packages/terezka/elm-plot/5.1.0>
+Nice! That's exactly what I was looking for. Thanks.
+<@U2GTQM83A> there's also an <#C2W8GFQF9|elm-plot> channel on here
+I think it has to do with wrapping `debug.log` in `( )` - does anyone know how to build a maybe with default function that can be used with debug.log, in  pipeline style -&gt; in such a way that will not log for no reason in the `Just` case ?
+`Maybe.withDefault` is not lazy. It evaluates the "default" expression even if it doesn't return it
+So `Maybe.withDefault (2 + 2) (Just 1)` is always reduced to `Maybe.withDefault 4 (Just 1)`
+So if your default expression has side effects, they will always be executed
+thanks, but can we build an alternative that will be lazy?
+a custom one
+somehow
+yes it can be done
+I think there might already be one in a third party package. Perhaps `Maybe.Extra` ?
+aa
+ok
+Essentially it's just doing `\_ -&gt; *side effect here*`, though
+It's that major difference between `always Debug.crash "foo"` and `\_ -&gt; Debug.crash "foo"` :smile:

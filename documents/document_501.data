@@ -1,0 +1,119 @@
+Adding a div on the page with ```div [] [ text (toString model.rolodexlists)]```, where rolodexList is the array of the data I am getting takes that long to be updated
+I am wondering if it is better to get the data in batches later instead of in the initialModel through an initial Command
+<@U0FP80EKB> How do you load it in the background?
+The same way to load it, create a cmd to load the data
+don’t think of it as background, I guess, as much as thinking of it as loading it second
+Where do you add the command for it to be in the background? (I am pretty new to Elm)
+2) when the data arrives in your `update`, set it in your model, then return the cmd (next http request) from this `update`
+Make it work, make it right, make it fast (in that order)
+Ah right, we had discussed this. Writing down my ideas would be a useful exercise for me as well! Hopefully I have some time for higher-level design thoughts this Sunday.
+wow!  I've just seen `elm-benchmark` in action. I'm blown away - super useful library, thanks so much <@U19JQD9DF> Hicks :smile: . <https://elmseeds.thaterikperson.com/elm-benchmark>
+Hi all
+I have an app (dashboard with widgets) in which I'm constantly editing the model and then running PUT requests to save it
+I'm wondering what's the best way to be sure all the save requests are executed in the right order
+(with js I was storing a promise and chaining future requests to the globally saved promise inside a service)
+is it possible to have something like saving a Task is the model and adding andThen at each update ?
+and of course I also want to use debouncing and I'm wondering how to best implement it (there seem to be several libraries on the subject but do you have any recommandation?)
+you can store a `Task` in the model and andThen, but the task isn't actually evaluated when you do that
+<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Task#sequence>
+also, elm is fundamentally asynchronous, so you'll have to deal with that
+one solution could be to wait till the put request is finished before sending the next one
+yes that's what I want to do (what I'm doing actually in js today)
+when I need to save a new version, I get my promise and use a `promise = promise.then(() =&gt; { return model.put(); }`
+using Task sequence seems right in elm but the first task needs to start as soon as possible, but if a second one arrives it must wait for the first one to complete
+Are there any ways to create a nontrival Task (ie not one created through succeed or fail) in the core package?
+<@U57KYFW67> define non-trivial?
+I did :X
+well, you can combine primitives with `map` and `andThen`
+so, yes
+`map` and `andThen` both require you already have a `Task`... so I guess to be more precise, one which does not contain any reference to `succeed` or `fail`. So `map (\x -&gt; x) (succeed True)` wouldn't really count, either.
+<@U5Q42DDMJ> so I think you need to pick some nice data type to model what you want to do, for instance `type BackupRequest a = Sending { waiting : Maybe (Task Http.Error a) } | Done `
+it seems I need to chain Cmd, not Tasks, which is not possible without a custom manual implementation... ?
+for custom stuff, tasks are the way to go
+Ah, it looks like the `Process` module exposes a few
+<@U57KYFW67> well, `Time.now`
+yes but once the task is started (attempt ?), you can't use it any more for `andThen`
+true
+so you create a new empty task
+what for?
+actually, create a new task, that will be the next put
+Maybe I'm wrong, but `Task`s seem like they would be well-suited for working with random numbers.
+then as long as we're waiting for the server, swapping out that task with a newer version when the model is updated. once the request resolves, send the new task
+yes that's even an improved version
+but the implementation is completely manual, no help form the core library
+what would you like to see in core? it seems simple enough to implement and may give you material to publish a package
+not sure to be at the package level yet :wink:
+but yes ok I'll try something like that with a pendingModelToBeSaved, swapping it with a new one when an update is made
+If you want to have a way to say “I want to save it when finished” then you can add another state to it, something like `SavePending`
+So, the code only creates the PUT if it is in `Saved` state
+<@U0FP80EKB> Thanks for the explanations, they are helpful!
+<@U5ABF3BH7> Good luck.
+<@U0FP80EKB> Thanks!
+yes thx for the ideas
+<@U4F64AKQV> I’m wondering what the absolute timings in your benchmark are. I’ve found that for very short tasks things like requestAnimationFrame can add noise to Elm results
+another thing that chrome tools can help tell you…
+Can I get an _object id_ for an Elm _object_? I want to have a JS cmd pass back the id into Elm so I can locate a tree-node that needs highlighting.
+No, you have to create them.
+There are not objects in Elm in the same sense as elsewhere.
+Is there a library for generating ids?
+<@U0HMZCR5W> elm-benchmark uses interleaved samples of sufficient size, requestanimationframe isn't really that relevant here :slightly_smiling_face: (and the high-precision timing api)
+right on
+<https://github.com/BrianHicks/elm-benchmark#how-are-my-benchmarks-measured> it's pretty cool, actually
+If you are rendering a bunch of objects in a list or a tree or something, then likely you have some identifier you can tag each node with that the js can pass back.
+lohabuyshan: <http://package.elm-lang.org/packages/danyx23/elm-uuid/2.0.2/Uuid>
+a name perhaps
+The tree nodes can be identical in all respects, except ancestry of course.
+the they can be uniquely identified by a path then
+Would you go with that, as opposed to an id per-se?
+this does seem cool
+what's the difference between and uniquely identifing ID and a uniquely identifying path?
+aside from one being slightly more opaque
+<@U4F64AKQV> responding here since the conversation has moved on a ways. The things that cause high stddev are usually other processes running or window painting happening. Browser benchmarks are tricky since it's basically a miniature operating system inside another OS.
+so: quit browser tabs, run in an incognito window if you have a lot of extensions, and quit any electron apps (especially Slack, which spikes CPU randomly.)
+I'm happy to answer more questions in <#C3Y7SC0HF|elm-benchmark>; threads are a bit awkward :stuck_out_tongue:
+I may want to account for situation where in the interim the user can re-order the tree (for non-unique names of course), hence even though the path is fixed for now, path is not a universal solution.
+I see
+Random ids are going to require a task or some sort
+<http://package.elm-lang.org/packages/mgold/elm-random-pcg/5.0.0/Random-Pcg#step>
+I suppose a PRNG in your model would also work :stuck_out_tongue:
+Hi peeps! Just started out with Elm and I am trying to change the elm-styled module to collect css rules while rendering a view and emit them in a single virtualdom style tag at the end. I got really excited thinking I could use Mailboxes and foldp to achieve this nicely and then my text editor pointed out they no longer exist anymore. I can't create a closure with a mutable list to keep track of the rules, I can't traverse through the virtualdom nodes collecting data attributes - I'm about ready to give up! :slightly_smiling_face:
+Any suggestions, or is this a lost cause?
+Your're going to have to slow down there, what are you trying to do?
+This library uses a nasty impure function to inject styles into a style tag:
+<https://github.com/styled-components/elm-styled/blob/master/src/Styled.elm#L681>
+I am pretty sure the performance is not great, plus you could have hash collisions on rules
+I imagined a world where you passed in an address as an argument to style and it would collect them all up in a mailbox while rendering a view
+then at the end of the view render you could dump them into a virtualdom style tab
+Google Richard Feldman oslo elm day and watch that video
+That's about elm-css though right?
+Yes
+Uses the same approach.
+Well they use an npm module right?
+Or inline styles
+Inline styles via a style tag
+wait
+hang on
+No, it does things differently
+I thought they applied the styles to the actual dom nodes
+I don’t know why on earth they’re using a native function to inject css to the style tag.
+It’s not needed.
+<@U5YKRLXGT> Nope. We put styles into an explicit style tag.
+You _can_ use it for compiled CSS
+but if you watch the talk by Richard, he talks about the different approaches a bit in there.
+FWIW we tested performance with real, production code
+I'll take a look, but does that mean there is no pithy "replace mailbox/foldp with X" statement :slightly_smiling_face:
+And the approach that the styled-css thing is taking is actually slower than using a reguarl &lt;style&gt; in the body.
+That's what I'm trying to fix :slightly_smiling_face:
+what are you trying to fix?
+It’s easy to fix that - just use a style tag in the body.
+Collisions aren’t an issue, if you use namespacing (which is general best practice for large production sites)
+Ok, hang on  - let me try and explain this again one more time :slightly_smiling_face:
+Ignoring the CSS part, which I think is a bit of a red herring
+I have a view
+As it builds up the virtual dom, I would like to accumulate some state
+that I can then append in a new node at the end
+What state?
+In this case, CSS rules :slightly_smiling_face:
+What do you mean by “builds up the virtual dom”?
+Ok, so:
+This guy:

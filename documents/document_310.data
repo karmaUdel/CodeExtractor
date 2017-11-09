@@ -1,0 +1,26 @@
+                ( model, Cmd.none )```
+Oh, alright. So even that `Ports.changeWindowTitle : String -&gt; Cmd msg` function doesn't have a side effect; and doesn't actually change the window title. Rather, it returns a `Cmd` that describe to the runtime that it needs to call a function in JS
+so you probably want `ChangeWindowTitle page -&gt; ( model, Parts.changeWindowTitle (getPageInfo page |&gt; .baseTitle) )` or something like that
+the important part is that you must return that Cmd from your `update` to have it do anything
+, please?
+so each deal is valid for each hotel? or..?
+making a few assumptions here, but possibly something like this: <https://ellie-app.com/3FLMJtntJm8a1/0>
+<@U3SJEDR96> I love those fancy resorts with free toilet paper ;D
+Don't we all?
+with the elm debugger (seems to be builtin?) running in Chrome -&gt; is there a way to look into the Message contents?
+if elm debugger is running you can just click on it and it will open a window with all the Messages and states
+the thing in the bottom right corner of the page
+also, for quick-n-dirty msg logging, `case Debug.log "msg" msg of` in your `update` :wink:
+yeah but the Messages part of it is so small so I can't see the data, even when hovering over it
+ah okay, it does not show the whole message content anyway (looked into the elm debug window with Chrome's devtools)
+well, it's still awesome
+ilias: Thank you very much for that!
+Hey, I have scanned the FAQ, but couldn't find an answer, could anyone help me with a wee problem?
+woah, `case Debug.log "msg" msg of` is great!
+Tell us, Allan
+I want to specify that the return type of a function could be one of a few things, is it possible? i.e. functio : Alias1 -&gt; model -&gt; Maybe OneOfAFewThings
+you could do that by making `OneOfAFewThings` a type: `type OneOfAFewThings = AString String | OrMaybeAnInt Int | SomethingElseEntirely FooBar`
+Awesome, thanks, will give that a whirl
+You have to be explicit about the types, wrap them with a "tagger" and unwrap them where you use them, though
+There are some good search terms for me :smile:
+<https://guide.elm-lang.org/types/union_types.html> might help :slightly_smiling_face:

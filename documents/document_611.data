@@ -1,0 +1,106 @@
+```
+This (broken) program doesn't list the line number of the error. However, removing the `exposing (..)` clause or.... the type annotation(?) causes the line number to be reported properly
+Could potentially be hard to track down in a large file.
+weird, it actually does _know_ the place (as evidenced by using `--report=json`)
+I have a simple form with numeric input  that is allowed to be empty initially. Thus I represented that as “Maybe Float”. However when I added validations add added Result String Float to the mix, to be able to show errors to the user. Now I have “Maybe (Result String Float)“. Is there a simpler more idiomatic way to do this, or is this the common way to have potential absence and validation for one field/value?
+<@U2Q5GJNTB> I would keep the errors separate from the form fields in your model. Do you want to validate the value incrementally or just when the form is submitted?
+If the latter, I would just make the field a string and if it fails to parse, add an error to your model. If you want to check it's valid as it's entered, you can do the same when you process the message which corresponds to input for the field. I've generally been following the pattern in the elm-spa-example, like this <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Page/Login.elm#L102>
+I'm interested to know if is possible to provide optional arguments to functions - `js style` - without neding this `null` idea. Are `we forced` between either using `null` or having no positility for `optional arguments`?
+`null` or `nil`or whatever other equivalent  - the null idea in general i mean
+<@U2LAL86AY> 'optional arguments' can mean many things, what are you referring to specifically
+elm typically uses records (e.g. `defaultOptions`) to handle such cases
+<@U153UK3FA>  say i have a function that can take 4 arguments - but is ok, it works  if i give it only one. It will work because the other 3 have default behavior. in elm you need to put all 4 of them.
+Was null invented because is needed in optional arguments?
+not sure on my history here, but null pointers seem "natural", because you need a default value for a pointer. the languages at the time weren't clever enough to support static checking of validity here (like rust does)
+<@U2LAL86AY> so you mean being able to pass Null for the other 3 args?
+hmm maybe i'm wrong about this, but i thing if you don't pass an argument is null by default.
+in javascript?
+yep
+In JS args are undefined by default
+ok then my mistake.
+The "issue" here is that Elm is curried. Every function takes exactly 1 param.
+I see no issue, the JS way has always seemed wrong to me
+To me it always feels that you have built to much logic into a single function if you need default arguments
+Hence the quotation marks. It's not an issue at all; but it sort of prevents to option of having optional arguments. Don't get me wrong, I love my curried functions, and optional params are simply a different paradigm, but I think that currying is more relevant to this discussion than having or not having `null`
+or, maybe not too much logic, but _too general_
+Yep, default values for args to a function indicate that you have multiple functions you're trying to pretend are one
+Python has a huge number of such APIs and they're really scary
+<@U2LAL86AY> that literally what they are. They're not `null`, they're `undefined` which is a separate concept.
+true that, was just my confusion -getting the best of me :smile:.
+So, let’s take an example, the `slice` function. In Elm it can’t take default values, so instead we have other functions `left` and `right`.
+and `dropLeft` and `dropRight`
+Does anyone know if there are any plans to make"debug" as a browser extension? Since m most of the times we are interested to investigate states that happen in production, where the app is running in production mode.
+<@U3RDE7LDP> thanks . I will give it a try 
+Does anyone know if there are any plans to make"debug" as a browser extension? Since m most of the times we are interested to investigate states that happen in production, where the app is running in production mode.
+<@U0VQB2TC7> Not really, and I think your premise isn't really correct either. Have you ran into a situation where you wished you could enable the debugger, in production?
+- with Elm
+No to enable the debugger, but be able to reproduce a state that happened in production
+I guess being able to record the Msgs would be useful in production, to reproduce bugs
+The crucial point of time traveling debugger is to be able to reproduce a state. But how can I reproduce a state that happened to a client in production?
+<@U2LAL86AY> I think Maybe can be used everywhere where you feel a null would be useful.  At our company we have a custom Maybe in C#, which some of us are using everywhere, where a method can not always return with a valid value. I think in OO languages nullptr could be (should be) replaced by some optional type.
+It's fairly trivial to push every msg and state into a port and send get access to that. You could build a "report an error" type thing that would simply push that whole tree to a remote server, too
+That can be done, of course. What is left is to know the JSON format of the debugger...
+"debugging in production" is a bit of a last resort, though
+I wasn't talking about debugging in production :simple_smile: 
+Just to be able to send the states to the support
+<@U5J0H2NS2> yep, i don't feel the need to use null that much. I know about maybes they are better indeed. I thought null is required if you want to have optional arguments as a feature in a programming language - but as <@U153UK3FA> pointed out - they are not related. my mistake..
+But again - this seems like reimplementing of what debugger does for us - gathering the state history and saving it in specific fornat
+Sorry, that was my assumption based on asking for a browser extension :slightly_smiling_face: So yeah, sending states to support is fairly trivial; making something to import that stream of messages and replay them locally is also pretty straightforward. Matching the exact format of the regular debugger is a little tougher, but still doable
+But again - this seems like reimplementing of what debugger does for us - gathering the state history and saving it in specific fornat
+No need to repeat yourself, I read up after posting :slightly_smiling_face:
+:relaxed: 
+I often miss the messages coming in as I type, sorry
+And it's perhaps similar; but the debugger is made for debugging, in development mode; in production you need your own solution which can differ wildly depending on what type of support you offer, and how you wish to offer it
+Saving the history in the format of the debugger is very helpful, since it can be played locally. Otherwise we should implement replaying ourselves - the question I asked yesterday :wink: 
+<@U3SJEDR96> thank you very much for the quick and helpful responses!!!
+Right, I'm not sure if you actually got a response to that, yesterday? Replaying is pretty easy, though
+Another question - do we know the size of the Elm community? In my company one of the main reasons they don't want to try out Elm is the small community
+I did get the answer yesterday, thanks! :grinning: 
+He knows more about this i guess
+almost 10k registered slack users,  many many companies using it in production, including a few big-name companies like Adobe, MS and mozilla
+Great insight! Can I find about big companies using Elm online?
+I hope your company isn't basing what to do on "how do big companies do things"... Because it really doesn't matter, as anything but "a datapoint to be aware of". I would recommend watching Brian's State of Elm presentation linked above; and hanging around on Slack :wink:
+the Elm homepage also lists some companies
+There's also this outdated list: <https://github.com/lpil/elm-companies>
+and then there's a whole big bunch of companies who don't feel like they have to write a blogpost whenever they try out some new tech :wink:
+(or who are too busy making software)
+no i guess we need an official page specifically designed for this reason
+the easiest way to start is to build a slack channel :smile:
+#we--are-using-elm
+bad name
+That is exactly my thought! I was pretty surprised that small community was such a heavy point. They also searched Stack Overflow and didn't find anything. Also google trends...
+questions tagged - with elm in stack overflow
+There's also the Elm reddit, the `elm-discuss` mailing list, and 3 elm-only conferences in the past 12 months
+which is 3 more than the year before :wink:
+(I couldn't resist and threw together a "replay messages POC" - <https://ellie-app.com/3PpG8HZs7BMa1/0> )
+:grinning: 
+Note that it intentionally drops messages resulting from a replayed message; which means no HTTP requests are triggered, no ports are called, etc. However, if those commands result in a message, that message would be included so that sort of a moot point anyway
+Ok
+instant replay! <https://ellie-app.com/3PpG8HZs7BMa1/1>
+crazy stuff :smile: i will use this for my bot
+Hi, I am trying to do a simulation using Elm (graphics package for canvas) and so far I have a moving object (boid) on the screen. The movement direction works alright until i start rotating the object. In JS i would have push+pop the matrix to avoid this but I am not sure how to do this in Elm. Can someone help with this? I have submitted my code here: <https://github.com/stelioskiayias/elm-boids>
+<@U5ZC6V535> push/pop as in removing an element from an array/matrix and then adding it back?
+<@U1CE9DL9H> Yeah, I think so. So getting it off the global transformation matrix, rotating it and then putting it back with the rotated state without affecting the global matrix state
+so, you have a global transformation matrix, and then each object has a matrix of its own. the object matrix can be modified (e.g. to rotate) and you're not sure how to make all of this fit together?
+<@U1CE9DL9H> Yes (roughly). I did this before by doing something like push to matrix, then rotate the object and then pop
+so, your model only has a boid (location, rotation) and a 2d location. that looks like one "local" matrix build up from those three values. am I missing something there?
+<@U1CE9DL9H> Yes, the main issue is the fact that the transformation matrix is not part of a model/type/etc. it is part of the canvas so when i do something like rotate boid, that changes the global canvas transformation behind the since. Then every other transformation is going to be offset by how much I have rotated one of the elements. So rotate object A one by 30 degrees and then rotate another object by 30 it will actually be rotated by 60 because transformation accumulate.
+I think that's your problem: having state that lives outside of the model makes elm unhappy. Can you put it into the model (even if it just mirrors the external state)?
+<@U1CE9DL9H> Yeah but you can’t control that state, it is part of the canvas. You can’t put it in a state an control it. The only way is that when you want to perform a “transformation” is to control the state through the canvas. Here’s an example <https://html5.litten.com/understanding-save-and-restore-for-the-canvas-context/>
+yes, but can't you store the offset, mirroring the external state in your model ?
+<@U3SJEDR96> I went a little crazy: <https://ellie-app.com/3Ps8DdvxF5na1/0>
+Not really, that will be really tough and I don’t think it is correct to do so. There are far too many transformations that I will make it unennecesairly difficult. Maybe I am missing something from the elm-graphics packages. :disappointed: :slightly_smiling_face:
+well maybe you can use a port to read that state in?
+Yeah, but it seems like there must be a simpler solution
+the simple (though not necessarily easy) solution is to replicate the state on the elm side, either through interaction with js, or simulating the canvas state. It seems that the canvas package wasn't developed far enough to include this sort of thing, so you'll have to do some of that work yourself
+Yeah..
+:aw_yeah:
+I'd like to have a discussion about elm and libraries being stack safe. A recursive function can potentially crash if there is no tail call optimization. There is an argument that stack safe implementations could be slower. My personal opinion is that potential runtime errors are worse.. 1000x. I'm happy to have input, opinions and perhaps information or pull requests regarding this topic :)
+<@U4KFY2V6V> sure. That's why we try to make everything stacksafe, and if you run into an error due to the stack overflowing, you should definitely log an issue.
+I generally default to stack safe, but I think it's reasonable to make the other choice if it benchmarks better and that matters more for the library in question.
+deep enough recursion to blow the stack can be rare enough to be irrelevant for plenty of libraries
+What JS data type can you pass into a subscription that will be received as a tuple?
+<@U2H92KKEY> just an array
+See `Customs and Border Protection` here <https://guide.elm-lang.org/interop/javascript.html>
+<@U1G51S63S> Thanks. It seems Native modules are treated differently.
+ah, you talking about Native?

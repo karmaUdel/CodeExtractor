@@ -1,0 +1,41 @@
+```
+?
+isn't that pretty much what the actual implementation does?
+<@U5ZAJ15P0> that binds `x` in the else branch
+`if-let` doesn't
+that's what the extra local binding is for
+<@U060FKQPN> oh, I see. that makes sense; thanks!
+I am getting a StackOverflow error when trying to use log4j with Leiningen, could someone please take a look at the stacktrace? <https://gist.github.com/hmaurer/40c1bc6d08550222f65e06a6366f0eb9>
+fixed it by removing a few dependencies… still strange though, I would like to understand why simply adding dependencies to project.clj could cause a stackoverflow error when launching the repl
+Hi everyone, I've been doing some experiments on visualizing clojure.spec fails and ended up wrapping them in a library
+<https://github.com/jpmonettas/inspectable>
+maybe it's useful to someone else
+Given that I have figwheel set up to use a ring handler via `:ring-handler`, and that handler is also set to auto reload via `ring.middlware.reload/reload`, is there some way I can make it reload *everything*? Basically restart the whole deal. I'm working with a library called `sente` which is for websocket communications, and it doesn't look like the code that initializes everything related to that is being re-run, so it's kind of painful to iterate.
+what I do is put all the code that has a lifecycle into <https://github.com/stuartsierra/component> so I have a way to restart the entire thing
+<@U0739PUFQ> Hmm, alright. I'll see if I can whip something up that works. Thanks :slightly_smiling_face:
+don't know if you are currently using something like components or mount
+but I've done that with sente
+you create something like a web-server component, and in the start/stop of that component you start/stop http-kit server, sente channels etc
+Okay, I see. Is it possible to get that to play well with figwheel using `:ring-handler`?
+I mean, if you move all the stuff that deals with state into components, and then create a system(a bunch of components) you end up with a restart fn you can use wherever you want
+I never fired it from that reload middleware but can't see any issues with that
+I see. I guess I just don't quite grok how all these things work together. But I'm sure I can come up with something from what you've told me. Thanks!
+does anyone have a pro-tip/link to an example of using core.async with ring? or some other http server? like how does one wait for input on a channel and flush said result to a response?
+aleph actually has an async request handler infrastructure - and it uses manifold that is designed to integrate easily with core.async
+if you use eg. jetty your async code will run but there will still be a blocking thread per request until you respond
+the real question I guess is why you are using async, then you can use that answer to guide how you integrate that with a ring server
+for the go-loop as you show it, you end up with a single block of code that can only deal with one request at a time - there's valid reasons to do this sometimes but it's a pretty severe bottleneck
+awesome - I will look into aleph. I was thinking of using core.async as a general abstraction on input/output
+something like that
+when I say "one request at a time in the block" I mean globally, only one of your requests can be in that block - so if you have five concurrent clients, it takes 5x as long to complete
+which usually isn't the kind of behavior you want in a web server at all
+yeah :confused:
+trying to figure out how to use the results of `(&gt;! out)` in that example
+with manifold, you can set up a function that gets called with an input channel and an output channel, and it is instantiated as many times as you get requests, which is a more reasonable pattern of behavior
+Is there a way to quickly run tests when a file changes? Manually running `lein test` takes about 10s to boot for me, and using <https://github.com/weavejester/lein-auto> take the same time
+I assume the delay is coming from the jvm boot time, but I don't know how to avoid it
+<@U5ZAJ15P0> fyi lein test just uses clojure.test, and you can require that and run `(clojure.test/run-all-tests)` in your repl (after requiring your test namespaces of course)
+<@U5ZAJ15P0> I'd recommend running tests from a persistent repl, and using something like clojure.tools.namespace to ensure code is reloaded and up to date
+you could hook up the run-all-tests to run as part of your system refresh if you have such defined
+<@U051SS2EU> ah, good point. Thanks!
+thanks! hadn't thought of that

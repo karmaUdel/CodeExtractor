@@ -1,0 +1,36 @@
+```
+`List.drop` doesn't return a `Maybe`, tho? Some more context might help clarify things :slightly_smiling_face:
+nested maybe's are _generally_ something you avoid using `Maybe.andThen`, though if you do end up with a nested `Maybe`; you can `Maybe.andThen identity` to unwrap it a single level
+:thumbsup: to using `Maybe.andThen` to chain operations that return Maybe
+Ahh that's how to get the values out of the `Maybe`
+<@U6D3ERLA1> `andThen identity` only works on nested maybe's, though - a single level of maybe is either pattern matching or using `Maybe.withDefault (defaultValue)`
+I've read (and reread) a lot of the Intro to Elm documentation.  But I keep struggling with one part.  You can see it on the MVCTodo example.  <https://github.com/evancz/elm-todomvc/blob/master/Todo.elm#L26-L33>.    What does `main : Program (Maybe Model) Model Msg` mean?   I can follow the syntax when there are `-&gt;` - i.e. `updateWithStorage : Msg -&gt; Model -&gt; ( Model, Cmd Msg )` but not that type.
+^^ You see it with lists too.  `List Int`, `List a` and `Cmd msg`.  Is this a compound type?
+it means you're dealing with a type that is _parametrized_. In case of `List`, it means it holds a type of value, which doesn't matter to how the list is actually implemented, but _does_ matter when actually using such a `List`
+Yeah, you see that in C++ with generics/templates.  - i.e. `List&lt;Int&gt;`.
+in terms of `List`, it is essentially a union type `type List a = Empty | Cons a (List a)`, meaning it's either empty, or holds a value of type `a` and then a nested list that also contains either nothing a value of type `a` and some mroe values etc etc
+`Maybe` is a little simpler: it's literally `type Maybe a = Nothing | Just a`.
+Yeah, it's pretty similar to generics, indeed
+Thanks <@U3SJEDR96>.  Disclaimer:  I've asked this question before.  :slightly_smiling_face:
+now, `Program` is a little special, as it is an opaque type and we don't know what it actually looks like. However, you can pass it a number of functions; and the types of those fucntions are also variable. A `Program flags model msg` is a `Program` that sends `flags` to its `init` function, which will return a `model` and a `Cmd msg`, has an `update : msg -&gt; model -&gt; (model, Cmd msg)`, and so on, all with *consistent* types for all those type parameters, throughout
+This allows creating a compile-time guarantee that you cannot possible have an initial model that is simply an `Int`, together with an `update` function that only works on `String`s
+I do remember the "leap" from `List a` to `Program flags model msg` to be a significant one, though, so it's okay if you _don't quite get it just yet_!
+How do you read that then? 'List String' is a list of strings. So then 'Program flags model msg' is a Program of flags of model of msg.. or?
+(I also found this hard to grasp when reading the intro)
+<@U6G2ACUSX> it's just the types for flags, model and messages that your program uses that go into those places
+So Elm knows what types your program uses
+Ok, I guess html.program is a special case, so I don't really need to understand it. Especially since I'm completely new to Elm and functional programming in general. But how would you create a function that has that sort of signature? Can you even?
+Oooor, it's not a function at all? It's a type?
+<@U6G2ACUSX> when you define types, you can add type parameters to them, yes
+It's like you can have small "holes" in your type that is filled in with the parameters
+Sure - `threeTuple : a -&gt; b -&gt; c -&gt; (a, b, c)`. Or `flags`, `model` and `msg` :slightly_smiling_face:
+but indeed, `Program` is a type, not a function
+Oh! It's like a constructor?
+in this case, it's a type that holds functions for interfacing with your program, and those functions must have signatures that match one another in a specific way, but can work on any type of value otherwise
+<@U6G2ACUSX> yes, it's like a type constructor
+Wow. That was a lightbulb experience. Thank you so much!
+I.e. `program` doesn't really care _what_ your `model` is, as long as it is consistent between `init`, `update`, `view` and `subscriptions` (which are the four functions you can pass to `Html.program`)
+My lightbulb is still kind of flickering.  But it will be AWESOME when I get it.  :slightly_smiling_face:
+The type parameters are there to ensure you only use functions that make sense, given the types of things they get to work with. I.e. it doesn't make a whole lot of sense to calculate the greatest common divisor of a list of strings, the imaginary function `gcd` would work on a `List Int`, rather than a `List String` or a `List a`. On the other hand, calculating the number of entries in a list is independent of what type of data you're actually storing in them, so `List.length` works on `List a`. Having it _only_ work for a `List String` would be pretty annoying
+as another example, a `Dict comparable value` allows making a dictionary where you can store an association between a `comparable` key and any type of `value`, as long as they're all the same type; so when you retrieve an element from a dictionary, you _know_ it will be of a certain type, it is guaranteed.
+And I am trying to write an update function for paused? I can get it to work if it was `    , controls : CallControls` but struggling with the maybe

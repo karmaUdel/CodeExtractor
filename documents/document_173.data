@@ -1,0 +1,64 @@
+error: Abnormal websocket close event, attempting to reconnect```
+does anyone know of a bot that passively picks up any URLs shared in rooms and puts them as a digest in another room? use case is i want to see what news is shared in our company's slack so i can put them in our twitter buffer :slightly_smiling_face:
+Are emails hidden now in this community <@U04SM6T2H> ?
+I have a Bot associated with the Slack App but that doesn't seem to have any influence.
+Scopes for my app is: X-OAuth-Scopes: identify,read,post,client,apps
+have you configured your app to send some evens to your server ?
+P.S.: I use BOTKIT, but as this library does not interfere with my route, I suppose this should not be a problem, is it?
+on your server, that seems ok
+but I meant
+have you configured in <http://api.slack.com/apps|api.slack.com/apps>
+your app to send events
+<@U0HBN0L9M> Yes I did and I tested it: Slack was able to confirm that my server is reachable (confirmation of the url of my server, the route was able to resend the challenge token).
+<@U0HBN0L9M> Can I safely interpret that to mean a user's email address would be hidden from bots/integrations on that team, as well?
+I have no idea, but I would say : no
+Hi all, I'm wondering if it's possible to use botkit without slack, messenger, etc.; i.e., to use it on its own?
+<@U2JPPRM8W> How would you use it on it's own without an interface like Slack/Messenger/etc to talk through?
+And I'm going to go ahead and go out on a limb and say no, it's not really possible
+<@U2JPPRM8W> for development work I wrote  <https://github.com/ben/botkit-shell>
+<@U0YQS1FAR> eg with your own chat?
+you can use twilio IP
+I guess what I'm after is to use botkit as a function really
+I think you would have to write an adapter for your own chat
+and embed it in any app
+<@U1BPBKXK5> spot on
+:slightly_smiling_face:
+the botkit-shell is a great example, my use case is even simpler
+only "one channel" and a direct communication with the bot
+Sounds like you'll need to write an adapter for whatever it is you're trying to connect your bot to.
+yup, that was the missing link, I figured it would go along those lines but there was no explicit reference to it
+I guess that the key here is that the logic works regardless of the target platform, right?
+Oh wow, you wrote botkit-shell <@U1BPBKXK5>. Any plans for future work on it?
+Accepting PRs. :slightly_smiling_face: My immediate need isn't great, but I'd like to help others. What are you looking for?
+Honestly, I can't remember. I had a few. I think TypeScript and better Slack support.
+<@U2JPPRM8W>: that's the goal, yes. But for certain features you'll want tighter integration with a specific platform (thinking Slack interactive buttons, or Kik suggested replies).
+<@U1ZFG84E4> yeah, doing better with Slack features would be nice, and that's in my use case. Actually supporting `startPrivateConversation` would be a good thing I think.
+<@U1BPBKXK5> good stuff! thanks for your time guys /cc <@U0YQS1FAR> <@U0HBN0L9M>
+2) changes in the app logic (especially when going from/to a B2C bot where you talk to one person, to a Slack bot talking to a team)
+good to know <@U0HBN0L9M>, thanks, our goal is to use the bot to help you code in a very specific environment, that's why we aren't after slack or messenger integration
+ok I spent a few minutes googling - and I'm just trying to confirm that I can use redis to serialze bot convos so if my bot dies I can get it back ? Is this correct ?
+<@U2K9GDEBH> as long as your code understands how to load convos i guess you're fine, are you using a framework?
+Bot news:
+<http://venturebeat.com/2016/10/04/google-assistant-bot-ecosystem-will-open-to-all-developers-by-end-of-2016/>
+What are the best practices for writing automated API tests for a slack api wrapper?
+Any suggestions? Right now I'm just posting messages, and uhhh...checking them by eye, for example
+I don't think there _are_ best practices yet
+You can mock out the HTTP layer and validate that what you're sending to the API _looks_ right, but that won't catch things like `&gt;` characters being sent to your app as `&amp;gt;`s.
+It'd be ideal if the platforms would publish a rendering tool, so you could send it a blob of JSON and get back HTML or whatever. Then you could do DOM queries for correctness on the actual output.
+I wonder if you could abuse the Slack Message Builder for that <https://api.slack.com/docs/messages/builder>
+<@U1BPBKXK5> Good to know :slightly_smiling_face: Aight - I'll just do this by hand for now, but...I'll consider my options
+Hey guys I've been developing a Slack Bot but recently it has some problems when goes away. None command works and I've to restart it. It's possible to set a bot always active?
+Likely losing the RTM connection. Are you using botkit for this?
+<@U1DM2B4SY> Yes
+You can set a 'retry' value in the controller.spawn method: <https://github.com/howdyai/botkit/blob/master/readme-slack.md#connecting-your-bot-to-slack>
+and <#C0AV5N8NA|botkit> might be a more appropriate place for botkit specific questions :slightly_smiling_face:
+<@U1DM2B4SY> thanks I will try it. OK next question will be there :+1:
+what are reasons for `token_revoked` ? My app Smooz is _not_ removed from a given team, and the bot token is still valid, but the _user_ token with channels:write permission is no longer valid.
+hypothesis : user left the team ?
+ping <@U07CW6N3A>
+<@U0HBN0L9M> for these it's best to go right to support -- the reason might be subtle. your hypothesis is definitely a good one, but since multiple users might install a bot, yielding multiple user tokens but just one bot user token, it could be that the originally installing user has removed the app but some other existing user that installed it is still puttering along
+<@U07CW6N3A> interesting. I knew user A and B could both install my app, yielding two user tokens, so I should do a better job of storing older user tokens to alleviate this issue of `token_revoked`. But I thought that if _either_ A or B uninstalled the app, the app would be uninstalled. You mean it needs to be uninstalled by _both_ A and B ?
+I won't be able to go to support with that issue, because it's not in my team. it's really an API issue, isn't it
+The support team helps both team admins and app developers pretty well. I suggest them because they're best equipped to give you the answer that's right for this particular situation and might be able to tell you exactly how that team's lingering install is modeled.     The Slack app install and uninstall model can be a little complex still, with all the actors and pseudo-actors involved.
+is it possible to implement conversations in slack without using a Slack App? Say, in response to a slash command?
+<@U2G6XRJ5V> Sort of.  Your slash command would have to do the persistence between requests, but you do get a user id so you know you're talking to the same person.

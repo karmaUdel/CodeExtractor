@@ -1,0 +1,38 @@
+```
+<@U4872964V> thanks, I go this direction definitely!
+<@U4872964V> it might be a stupid question but is there a better way to match the rest of the cases in that structure than `_ -&gt;` ?
+<@U4SM7ECAG> I'm not sure what you  mean
+define "better"
+I generally avoid using `_ -&gt;` because it can lead to me missing cases
+well I don't want to use `_` as much as possible
+but then pattern matching strings I don't know how else to deal with it.
+well, what would you expect? A string can be any string
+So you have to have a `_` case when matching string
+That's one reason not to use strings when you can use a union type instead
+context is important - sometimes you want to have a default value, sometimes you want to return an `Err "something went wrong"`, sometimes you want to `fail` a decoder or a parser, etc
+but what if then I add a new group then this piece of code is a point where I could potentially not get some error
+yes perhaps typing `Result Group` the return instead of `Maybe Group` would be easier to track once then code grow
+Yes, well, you would keep the `getGroup` function close to the type. But the best solution is to not use strings at all, if possible
+I mean, I would like to get ["test name", "test descrip"]
+yes I agree :slightly_smiling_face:
+you could instead have a `List (Piece -&gt; String)`, like `[.name, .descrip]`, and then do: `List.map (\fn -&gt; fn piece) [.name, .descrip]`
+what're you wanting this for?
+<@U6EV3H0N7> no need to hide your response in a thread; keeping it in the channel is easier to access for onlookers :slightly_smiling_face:
+sorry, never sure whether to go for threads or not!
+But I have the list of fields (withou ".").. I have to look the issue in a different way I think
+can I convert this Piece type alias into something like a list of tuples, where each tuple is something like ("fieldName", "value")
+you can do that with a Dict
+<@U2DF486HL> maybe you can explain your use-case? Right now, we might be helping you with an issue with your attempted solution, rather than the actual problem... :slightly_smiling_face:
+<@U3SJEDR96> I agree. I will rethink my use case and get back.. thanks
+Hey everyone! Excited to start learning Elm, expect lots of questions :grin:
+I'm using getString in a div and it complains that there is a type mismatch. It says div expects List (Html Msg) but it is List (Http.Request String). Is there any way of hammering the latter into shape?
+Your views shouldn't (and can't) be making http requests; as your view is _just_ presentation of your state
+issuing requests can only happen from `init` and `update` - the only two functions that return a`Cmd msg` :slightly_smiling_face:
+what does that mean?
+ah I see, put the div into update
+No, put the request in update. When the request receives a response, that will trigger your update, too. At that point, you save the response-data in your model, and that will then be rendered in your view
+the div stays where it is?
+Maybe you can show some code to illustrate what you are attempting?
+this may be a lot clearer to illustrate rather than explain :slightly_smiling_face:
+How to enrich folding like above?
+<@U5P4FLYLE> I'm not really following. You have a list of items and you want a count and a list of positions of the item?

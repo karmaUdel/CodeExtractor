@@ -1,0 +1,53 @@
+```
+I can traverse the tree to the leaf nodes that I want, without creating the others
+I like this, but I'm wondering if anyone else can see any pitfalls
+delay is under-utilized imho
+a fun fact - force is an alternative for deref on delays, and is identity on non-delay values
+will still blow the stack, no?
+only if you eagerly call it recursively
+but it is easy to make a non-stack-consuming recursion that goes into deeper delays as far as you like
+like with a continuation
+right, a delay is a zero arg continuation, effectively
+thunk? maybe that's the word
+yep
+anyway, that overloaded behavior of force makes it convenient to write code that may or may not hit a delayed value
+you've lost me now :slightly_smiling_face:
+thunks / continuations are how lazy seqs are implemented
+and delays do the same thing
+it's a function that stands in for a value we might access later
+<@U46LFMYTD> <https://en.wikipedia.org/wiki/Continuation-passing_style>
+<@U1ALMRBLL> that article mentions a continuation being a one arg function, which is why I was particular about argument count - these being zero arg
+<https://en.wikipedia.org/wiki/Thunk> whereas thunks are zero arg
+and then I could traverse the tree by calling the function returned by :left. Is this what is meant by continuation?
+that's what's meant by thunk
+ah ok, cool, im happy to be learning this
+yeah, it's cool stuff, and more common in the FP world
+thanks for your help
+<@U051SS2EU> what would be the pros/cons of `delay` vs a `fn` in this case?
+a delay is a way of making a function that gets called only once when forced, whereas a function could get called more than once and would not cache the prior result (unless you memoized…)
+delays are a more specific feature for this purpose so they eliminate some gotchas and boilerplate that come up in usage
+<@U1ALMRBLL> it has a function inside <https://github.com/noisesmith/clojure/blob/master/src/jvm/clojure/lang/Delay.java>
+apologies for linking to my fork but that file is unmodified
+another usage of delay I'm fond of is replacing nested lets inside conditionals with a let containing delays with conditionals that force certain delays as apropriate in a cond block
+additionally, the delays can force another let bound delay inside their body, which simplifies tricky side effect tracking
+noisesmith: ew :P
+that sounds very.. imperative
+it's something I only need for very imperative tasks
+where I'm maybe getting a resource, maybe retrying, maybe cleaning up and bailing, etc. and it doesn't fit a with-open or try/catch/finally well
+eg. trying to use zookeeper in clojure where every operation potentially requires me to re-try or fail
+(not coincidentally I am moving away from using zookeeper so I can avoid having to write code like this)
+It happened once in development that after a postgres io error, the connection would close and would render the app db-less. How do you guys handle this / what's a typical db component past the simple examples found online?
+use a connection pool library instead using the database connection directly
+c3p0 is a popular choice
+was thinking about that. Thanks!
+should clean up any defunct connections for you, with more and less aggressive options
+and I want to have the results in the end. I coudn´t figure out how to do this with threading macro, Is there possible?
+The defmulti and defmethod look ok. And threading is possible in general. Maybe you can past an example invokation?
+well, that´s the problem how to apply the rules to collection and get the result : `["1 RBMN GNRTS" ... ]`
+`(reduce #(conj %1 (command %2 collection) [] '([:command "upper"] [:command "reverse"] [:command "remove-vogal"]))`?
+I think this doesn´t pass the result to another, correct?
+<@U0YJJPFRA> It sounds like you want a `reduce` over the seq of commands. seq of strings is the initial value; each pass maps command over the seq of strings
+In this case I´m runing each command to a collection
+my needs is run all command to each element
+how can I use dynamic transform for each element? something like `(-&gt; element (commands ?))`
+That is what a `reduce` would do, if I understand you correctly

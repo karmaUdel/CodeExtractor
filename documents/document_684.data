@@ -1,0 +1,39 @@
+Joe, I get this code from api and then I request one api every 15 seconds in ```while True: ``` loop  and parsing response. After 2 hours code expires and my loop don't have response. This is proxmox KVM virtualization.
+ah okay, yeah then the previous mentions of daemonizing the process is probably your best bet
+Hey, versioning and giving my commits build numbers is something I've neglected for a while. How should I go about it? I'm using Mercurial + Kiln currently, and I know there is a tag system which can help out with that but I'm just not sure where to begin. Isn't the best practice to have something like `&lt;major&gt;.&lt;minor&gt;.&lt;hotfix&gt;.&lt;build&gt;`? Also, is there a way to make this automatically generated?
+I prefer to make my versioning explicit... at least the major/minor/hotfix slots. It's not usually practical for an automated system to know whether a given change is API-breaking or not, after all
+It really depends on what you're making. If it's a web app or API, then build numbers should be fine. However for a library you do want explicit versioning. Some ci solutions allow you to have a manual intervention point
+Hey guys, I'm trying to run Docker (with a Debian image) on a Mac. My Python installation on Mac has case-sensitive imports but not in Docker, and this is breaking the `queue` module which has both `queue` and `Queue`. I'm guessing the Python build on Mac deals with Mac having case-insensitive file system but in Docker it's a Debian build so it doesn't, but because Docker is using case-insensitive file system, it causes issue. Is there any way around this?
+I do access the namedtuple with the entry.client and such wherever possible, of course. But, I don't think that is possible here.
+<@U5LNXQHN3> <@U1BP42MRS> Thanks, I'll think about what exactly it is I'm doing. I think manual versioning is the way to go for now, and ignore tagging commits.
+I do tag commits... it's just a manual process for me, or facilitated with git-flow or whatever
+General question, that came up in the TestPodcast slack group: what preferred docstring format do people use? reStructuredText, Google, etc?
+reStructeredText here but i have used google and numpy before
+numpy is really nice to use when having to make ML researchers document their code.
+<https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>
+interesting
+I do the default pycharm (reStructuredText) too
+Shouldn't the math.pow arguments be the other way around?
+Also: <https://pypi.python.org/pypi/backoff/1.4.0>
+That packaged didn't work for me because I am yielding a generator and need the state vs just re-calling the function
+aha
+the short is I am hitting a few APIs with `requests` that do pagination, and sometimes they give random 502s because their SLA isn't great
+for a second i thought that was a joke class telling people to leave you alone when you were coding
+I think the `pow` is right <@U5LNXQHN3> - the retry count^backoff-factor
+is that not the normal way to do it?
+for my case, it goes from 10s, 21s, 33s
+hmm, I guess
+Nah, I think you are right. 1.1^1, 1.1^2, etc makes sense
+<@U5LNXQHN3> :taco:
+<@U5U4MSHC1> :taco:
+<@U673BSS76> did you get your problem figured out?  could you share how you tried to import things?  This shouldn't be a problem
+<https://github.com/h2non/riprova>
+<@U1BP42MRS>
+ooh, that's neat
+Thanks <@U5NMSURAQ> - I'll take a gander. Looks pretty neat, and likely that I could just define a nested function to make sure the state is kept correctly across paged requests
+Oh man, that lib showed me `pook`, which looks pretty awesome for testing
+<@U47HK8BS8> I did more research on my problem. It seems on Mac/Windows, Python enforces case-sensitivity with import at compilation. Because I run Debian in Docker on Mac, Python does not enforce case-sensitivity (it's Debian) but the filesystem is not case sensitive, so import does not distinguish cases. One of my dependencies uses `queue`, which internally imports `Queue`. Without case-sensitivity, it causes circular import, where `queue` imports itself. There are others reporting this type of issue: <https://forums.docker.com/t/python-import-source-files-from-docker-volumns-can-not-distinct-upper-lower-cases-in-lib-name/20527> . I worked around this with a very ugly hack, by appending the path of `Queue` at the front of `sys.path` right before a call that results in `queue` getting imported, and then I delete the path from `sys.path` after. I only need this for development so it seems to be OK.
+I'd be shocked if there's a case mistake in the python standard library.  It was Queue in Python 2, and is queue in Python 3 - are you sure perhaps it's not an issue of the python version?
+Looks like there is some platform-specific case-handling behavior (PEP 235) and it predates things like Docker, so maybe it's not surprising it gets confused
+Right but the general issue for people using Docker on Mac is that it's “Linux” so the file system isn't case-sensitive.  This isn't so much a Docker issue as an issue of people being exposed to a case-sensitive file-system
+I think the `queue` is for backwards compatibility for 3 to 2

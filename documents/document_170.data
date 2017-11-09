@@ -1,0 +1,55 @@
+```
+Does that mean I cannot POST to `response_url` with ephemeral and in_channel responses?
+I want to update the message everyone sees (it increments a count on the buttons) and send a link only to the person who clicked the button
+Okay, so yeah, you have to specify `replace_original` explicitly in at least the ephemeral message
+I did it in both just in case
+Hi there, I'm having a trouble when I try to use interactive messages with a bot user, because when I press an option automatically slack bot says "Oops something went wrong". Has anyone knows whats going on?
+<@U2908LWTY> u probably need to setup your intereactive messages endpoint on your slack app
+if you are using botkit, and use the `controller.createOauthEndpoints` method
+then it will setup the interactive messages endpoint at `yourhost:3001/slack/receive`
+so you go to yourslack app menu... go to the interactive messages option and set up the endpoint there
+are you sure that would work <@U1116QM2Q> ? I don't think it's a redirect
+I would think you'd need to use ngrok or localtunnel to expose the endpoint
+usually when slack gives you the `something went wrong` its causet he endpoint is not set :stuck_out_tongue:
+and yes i didn't mention that detail
+like <http://mylocaldev.localtunnel.me/slack/receive|mylocaldev.localtunnel.me/slack/receive>
+but your "host" needs to have SSL enabled
+so usually what we do
+is use either localtunnel or ngrok to setup a tunnel to your server
+localtunnel is HTTPS
+and that handles the SSL part
+yep
+with localtunnel you can save a subdomain with your bot name so you don't have to keep changing it in slack: `lt --port 4115 --subdomain yourbot`
+btw guys where can i get invites for my colleague to join this team.. i forgot the link :grin:
+<http://dev4slack.xoxco.com|dev4slack.xoxco.com>
+<@U0TGHKPEU>
+<@U28E8RWE9> thanks
+(Image, subject, comment)?
+Oh yeah.. It's not specifically for slack, but slack is one of the apps I'm testing against :slightly_smiling_face: 
+<@U1P3Q8JKV> attachments have special fields for all those things yeah
+Thanks <@U0KECURAT>
+<@U1116QM2Q>  Thanks man! I'll try that.
+<@U1116QM2Q>  Yes, I'm using botkit and I went to the docs and they explain the same thing that you tell me. So really apreciate it. Thanks man
+no problem! :slightly_smiling_face:
+Hi all, I have a question about bot authorization. On my website I have a button "Add to Slack" that requests oauth authorization with 'bot' scope. Works perfectly, except when a team integration limit is reached and Slack displays `You can't authorize X because your team has reached the integration limit` error to the user.  Which is okay in general, but I would like Slack to allow user through in scenario, when the app was already added to the team previously (for example, by another user). It looks like Slack checks for team integration limit before it checks if a bot/app has already been authorized for the team. Question is: how can I avoid error message about team integration limit to the user when a bot has already been authorized before? One option is to have two steps, "Add to slack" first and then "Sign in with Slack" (without bot scope) when first one fails, but it's not good user experience.
+<@U29GZAFCL> post in <#C0K8617D5|slack-api>
+:slightly_smiling_face:
+oops :slightly_smiling_face: okay, will post there
+<@U29GZAFCL> are you sure? I think we're at our integration limit, but I don't get that when adding my own bot (again)
+Yes, tried it with different (free plan) teams.
+hey, i'm building a bot with botkit in slack *
+i'd like to make it publish
+what's the easiest way ?
+can someone help ?
+<http://bit.ly/BotStackcompendium>
+Some folks PMd me about the Bot Stack Compendium, so I'm just going to leave the full table here: <http://bit.ly/BotStackTable>
+thanks mylogan for that compendium
+<@U1GTE56R4>: thanks for the compendium. You helped me in selecting a framework 
+Compendium is great. Thanks for that
+Hi, a quick question. I want a easy way of exiting a conversation with my bot. So i thought i could listen for `exit` when I start the `bot.startPrivateConversation()` but how do i remove that `controller.hears` listener after the conversation is over?
+<@U29SUUB0S> is this what you are looking for <https://api.slack.com/events/im_close> ?
+no, not really. i just want to have a way of exiting a flow of questions.
+not sure i follow... there's the `conversation.stop` method why do you want to remove teh controller hears listener?
+ok, so you need to know when a conversation is over. in Microsoft's Bot Framework they have similar behaviour. You can check it in GitHub and see how they do it.
+but maybe i should ask this in the <#C0HNPFAF2|botkit-conversations> channel instead... :wink:
+<@U1116QM2Q> yes, exactly. but how do i remove it

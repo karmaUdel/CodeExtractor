@@ -1,0 +1,286 @@
+```
+Huh, now dig returns way less data then 1 minute before.
+Alright, it's probably Namecheap shenanigans
+There is a reason they are not "Nameexpensive"
+did you change something ? I had one time a saved that wasn't taken into account so I just redid it
+they are usually not too bad
+:slightly_smiling_face:
+Thanks for your help
+<@U63CJP83X> you'll need to add a lot more context, such as environment (is this selenium?) etc
+Libraries you're using, that kind of stuff
+the website is the one that manages the folders - so I am not following what you are trying to do from the selenium side?
+At the moment the uploaded files are at the same directory as the script, upload works fine.
+So the server code needs to change to support saving in another directory - otherwise it's a vulnerability (directory traversing attack)
+Maybe os.path.join() can help?
+Do you control the server side code?
+Do you mean the website where I post the ads or the machine where my script runs?
+Script runs on my OSX, website is not mine, so no access.
+And you want to store the photos from the client machine in a different folder, or the server?
+On my machine, at the moment, at the same folder as my python script, and I want to store the photos in a subfolder.
+Oh, okay. Yeah, you should be able to just move them and `os.path.join`
+great, I will try now ...
+<@U1BP42MRS> you've used the undocumented Slack method `setInactive` right? It says here that this method doesn't work on the free tier. Is this true?
+I've not used that one, sorry :(
+Thanks :))
+Anyone know what could that be?
+It looks fine to me, but double-check the whitespace and line endings, because the interpreter might be getting confused
+Hi folks, i'm having a bunch of jobs, detail data of the job is stored in db. I want to create a pool, to process those jobs, after finished one, add a new one to the pool. My question is, do we have any lib to support that pattern? Or I have to write pool, queue logic, and a While loop to push into queue? I'm using python 2.7. Thanks
+concurrent.futures for python 3
+and maybe you'll reconsider using legacy python
+(but `futures` is backported to 2.7 as well :wink: )
+ugh, you're not supposed to tell!
+... Thanks, I'll try it
+2.7 for life! (Or at least until I start a new project.)
+2. If I use `map`, then even my 2nd job finished earlier than the 1st, my executor still wait for the 1st to finished then push new job to the executor?
+<@U5LNXQHN3>  I am thinking it might be due to missing dependencies for the `checksum` def. But I am not sure how to check that as the logs dont help much
+<@U2Q2LMZ6D> jobs are pushed when a pool isn't completely full
+Take a look: <https://pymotw.com/3/concurrent.futures/>
+There you can see better (almost real-life) examples.
+<@U36LXGMHP> Missing dependencies in Python don't cause syntax errors
+Anyone knows how to set an script to run every 2nd sunday in a month ?
+linux/mac/windows ?
+Linux. I'm using crontabs on django-beat
+I haven't found a way to do that using a crontab
+there must be :stuck_out_tongue:
+I have seen some hacking with bash but i think i don't have that available
+just a plain crontab
+don't have shell? how?
+<https://stackoverflow.com/questions/11683387/run-every-2nd-and-4th-saturday-of-the-month>
+it seems you need a small bash script indeed
+The crontab is ran by a scheduler built with on top of celery. Introducing the equivalent to the bash script will involve too much hacking i think
+meh. I'll just run the script every sunday (well they are celery tasks). And have the task checking if it's on the week that i want
+that should be the easiest
+I saw that the weekdays and the day of the month are an `or` proposition on crontabs
+I imiagne you could also run it only between the 7 and the 14 and only check if it's sunday
+more like 7 - 13 :stuck_out_tongue:
+That too. Or run it every sunday and check if it's between 7 and 14. I think this option will run less unnecessary times. There isn't much load on the system that i'm building so it doesn't matter
+:taco: <@U29163YQH>
+woot thanks
+:point_up:
+&gt; 24h_volume_usd
+Turns out columns cannot start with numbers. To anyone else curious
+Beat me to it... I suspected it, but was actually googling to confirm that
+haha i'm very unexperienced with SQL, so I just assumed it was allowed
+the error wasn't particularly specific but whatever, thanks anyways khdc
+For questions on getting some of the community projects up and running, would this be the right place to ask (or the <#C2FMLUBEU|community_projects> channel)? Have some questions about configuration for setting up the website in development -- just don't want to clutter the projects channel. :slightly_smiling_face:
+it's best to ask in <#C2FMLUBEU|community_projects> <@U621GSYUA> <@U1BP42MRS> (who is the main dev for the website atm) might miss it here
+Feel free to join us over in <#C2FMLUBEU|community_projects> :)  sorry, was off biking and grilling today!
+Hi peeps. What is the most state-of-art machine learning technique or research project on learning langauge?
+*language (clearly i have a reason for my research)
+What do you mean by 'learning language'? This is a VERY wide field
+Are you familiar with word2vec? It's not the 'most' state of the art but it represented a big step forward a few years ago and is widely used
+(You might also reach a more specific audience in <#C2J4B66PK|machine_learning> , but there are fewer people there)
+Hello guys, I got a huge problem
+Cool, thanks! No worries, biking and grilling should always take precedence.
+<@U5JF1KD18> best to say your problem
+OK bro here it comes
+someone will read it and say something, but you need to put your issue out first
+There is a website and a WiFi network. And what i want to do is to automatically connect any person on my WiFi to the website without theme authenticate themselves directly on the website
+Simple, flippant answer: disable authentication on your website
+No no, that isn't that. Persons on my WiFi can connect themselves but those out of it need to authenticate themselves
+do you have a static IP?
+No, no static IP
+then sorry
+if you had a static IP through your ISP, then you could check the IP address on the incoming request
+and then filter to authentication if necessary
+If you're on a Windows domain you can do more, but that's a bit specialized
+can you run custom code on the wifi router?  you might be able to have it regularly send its ip
+when it updates you might have a moment where the site isn't accessible, but it might do the trick.
+My problem now is to authenticate a person from it's IP address since I don't want to change even the website code
+why?
+ok, better step back and describe things in more detail
+because it sounds like you're trying to do some things that are not advisable
+and depending on how secure you want this, IP whitelisting may not be the best bet
+since you can spoof and use VPNs, and more
+Have the site listen on 2 network interfaces, one inward-facing to your network, one outward-facing to the internet, and the inward facing one can use different auth criteria
+<@U0LSCQQNR> Let me explain it more detailly
+There is a website that I am setting up and i want to grant direct access to persons i a given location that is persons connected to my WiFi. If a person is connected to my WiFi, he can access the website with no problem, but if he is not in my WiFi, he should enter a passcode before proceeding to the site's content
+why?
+why do you want to have such a huge hole in your authentication
+just have them sign in
+and keep a session cookie active for them
+and so when they re-access the site, their login session is still active
+I've seen this sort of thing done before to facilitate company intranets, and that's done primarily just by virtue of listening on an inward-facing network address. But sometimes there is still extra auth anyway, because it's not a great hardship.
+Is it the case that it's irrelevant *who* the user is that accesses content?  i.e. there is no user data specific to a user?
+...also that.
+if it's truly irrelevant who people are, then yeah, I'd combine <@U5LNXQHN3>'s comment with a VPN from the wifi router to the network that second interface is on
+not a bad suggestion
+<@U5JF1KD18> do you have the expertise to do this?
+what's the best way to join on a string x time the same value ?
+like `', '.join('hello' for _ in my_list)`
+But it seems a bit overkill
+<@U29163YQH>: is there a better way than that?
+`'hello ' * n`
+where `n` is the number of times to repeat
+But won't it add a space at the end?
+that does each letter <@U0LSCQQNR>
+can do that `('hello',) * n`
+I completly missed your point <@U0LSCQQNR> in fact :smile:
+got it
+`('hello, ' * n).strip(', ')`?
+I feel the original was good enough tbh
+Wait. Got it :ok_hand:@ndevox
+I hoped something existed for that. I'll stay with the for loop more readable
+Quick side question for my project server
+is forcing https everywhere bad?
+should i rollback and switch to 1? Not really python but web related, haha
+hey, arent you in the sneakerbible? ^
+No, I run House of Carts.
+Crazzyyyyy haha.
+woah
+<@U3JGK19NV> : you looking for extra developers haha
+Lol, DM me.
+House of Carts?
+<@U0NRYQNAZ> it's a sneaker group that I run
+“run” :troll:
+we need :dad_pun:
+:run:
+:laughing:
+is this even legal?
+Kind of depends on your locality
+its bots to circumvent/deal with purchasing ASAP, including CAPTCHA breaking
+<@U3JGK19NV> is this what you ask for help with here?
+He asked about SSL, I thought - what are you seeing for captcha?
+looked into what house of carts was
+<@U1NSCAY6R> : it's legal, just breaks site ToS I think
+Oh. Yeah, the community is generally against enabling breaking TOS or anything Illegal ¯\_(?)_/¯
+its a big grey area, so, yeah
+What? I asked for help with setting up a SSL certificate that has nothing to do with a sneaker group..
+I think it's more the soliciting DMs for help and such
+Ah, okay. He's the one who asked if I needed a dev, but there's not really a need right now.
+No worries though
+Okay, generally speaking - the group would prefer to not be used for anything gray-area or illegal, whether DM, public, or private channels
+Sure
+I am trying to read a .nc file using netCDF4 and get this error (NetCDF: HDF error) I have installed all the prerequisites (<http://unidata.github.io/netcdf4-python/>). is anybody familiar with this error
+recent i study flask - micro web framework. I need some good stuff about flask. Who know the good material about flask?
+you'll have more luck in <#C0LN2AD7T|flask> :slightly_smiling_face:
+<@U0LSCQQNR> I got your suggestions about the VPN
+Anyone using GCP here?
+Wondering if I can ssh with a service account but can't see any docs anywhere
+So i have a type error issue
+added b ref
+I got it thanks all sorry for the bother I needed to talk it out i suppose.
+no problem :slightly_smiling_face: If it's helping you
+I am just getting my feet wet with building stuff out of bits and parts i find and cleaning it up for my use.  I am still quite noob. This slack has pulled me out of the fire many times where i wanted to bang my head into the wall
+Question about unit testing and type hinting - is there a simple way to assert that a function call returns a certain type and that there are no other type warnings if return types have already been hinted in the function signature?
+mypy probably
+It's pretty intelligent in type inferring
+is it possible to run nosetests with mypy?
+anyone have any recommendations on best ways to test flask api's?  I am writing an api in flask and want to do unittests on it but not sure the best way to do it with flask
+do you want unit tests or integration tests?
+well this is all sorta new to me as far as testing goes I haven't done it much in the past but I want to mainly ensure the code works and get back proper responses, etc
+since its basically a bot
+So there are various levels of testing. If you want a lot of confidence, you should do `end-to-end` testing
+which basically means you spin up your app, then use `requests` to hit the api's and check that they actually work
+an integration test would be just calling the handler, not using http. And a unit test would only check the logic of one function alone, as in, the function where the logic is
+yea basically the end to end is what I want
+take the code spin up the flask app and make calls to the routes to verify they work
+before it deploys the code to heroku, etc
+so this will be a part of my jenkins setup
+I've never done testing in the past lol need to learn how to integrate it into my projects
+Unfortunantly I dont know of any "api testing frameworks" in python
+its more of how do I test flask
+but its really not very hard to just write tests that use requests
+since its a flask app
+and call your app
+yea if thats all it is I guess I can do that
+You also might want to look at: <http://flask.pocoo.org/docs/0.12/testing/>
+or ask more questions in <#C0LN2AD7T|flask>
+I was more curious how I test it and where for example where do I spin up the code and test it or does it just do it all local, etc
+yea I've been looking over that doc
+problem is that one is very db driven and I'm not even using a db yet, just want to test simple flask routes, maybe I'll just go the route of requests
+I'll see what I can find, thanks
+if you dont have a DB then ignore the DB code
+the rest will still work
+yea thats why I'm checking it out just wasn't sure if there was anything else or if this is the only info I've asked in flask too
+didn't realize they had a channel
+code review help: package all html file keys from a S3 bucket with a provided prefix into a list
+so, I have a bunch of websites scraped and archived on S3
+I want to get the key names for the html files only, for indexing in solr
+this is the naive solution, and while it works, I think it could be improved.  Any options?
+i think you can use map, Not sure if it would improve the code
+could change line 12 to be `for item in page.get('Contents', []):` or whatever empty iterable you want
+saves a line
+Similarly `if item.get('Key', '').endswith('htm') or item.get('Key', '').endswith('html'):`
+I thought of that
+but feel the readability is so-so
+yeah gets a little overly verbose there
+Well, I tried :slightly_smiling_face:
+I like `any(key.endswith(x) for x in ['html', 'htm']):` so you can arbitrarily add more extensions if you want
+but neither is "right" or better
+I like this one
+alright, thanks
+It was the nested looping and checks that I was unsure about
+wanted to be sure I wasn't missing something more pythonic
+You never know what Python has up in its sleeve
+<@U0LSCQQNR> now flatten all of the loops into a one-liner
+#ProTip - don't
+do that only if you want to be a clever bastard and screw with the people taking over after you :smile:
+generating DELETE statements from a dictionary that came from a csv lol
+:facepalm:
+i flattened it for funsies
+showoff
+:smile:
+it was a one-off script ¯\_(?)_/¯
+the actual code i think is on my other machine
+don't you mean off-by-one?
+:smile:
+don't you mean off-by-one?
+now i want to start an #ugly_code channel
+taking this to <#C07EFN21K|random> before i confuse newcomers
+Hello guys
+How can I implement a Single Sign on system for persons connected to a WiFi
+this the same thing you were asking about the other day?
+<@U5JF1KD18> what kinda of enviroment do you have for wifi.
+<@U5JF1KD18> define single sing on.  To my network ears that sounds like 802.11x
+for your needs
+I'd like to be able to record in the model record for that particular instance _how_ many URLs were successfully indexed.  But as the sub-tasks are executing asynchronously, with no feedback to the parent task, I'm having a hard time figuring out how to update the db on completion of the last sub-task.
+Only thing I can think of is for each subtask to increment/update the db record on completion.  Is there a more elegant way to do this with Celery?
+I don't think that is too inelegant, but you could have the parent task get all results of the subtasks by polling them and do it that way - not sure it's much more elegant though
+yeah, agreed
+thats about what I was thinking as well
+but its pretty necessary for the parent and child tasks to be on different queues
+Anyone have experience trying to persist CloudSearch/Elasticsearch search results? I am working on a system that maps document ids to search queries so relational data can be added in an RDS. However because documents AND search queries can be edited you need to routinely re-run the search to see if new documents need to be added in the mapping table or delete the outdated ones and the runtime is just going to grow as documents and saved search queries are added.
+<@U0LSCQQNR> - I don't think which queue they run on matters for getting a result
+<@U1BP42MRS> I have to think about the queue and workers getting clogged up
+yeah, so the master task blocking them will cause issues
+correct
+thus, the different queues
+It would only block on 1 worker
+But yeah, in that case - DB increment seems like the option
+alright, thanks
+nice to know I'm on the right track :slightly_smiling_face:
+<@U13L8J76J> - any other thoughts :point_up::skin-tone-4: ?
+nobody else here uses python or the tools I use, so its good to get confirmation
+he's probably sleeping right now
+but woould be interested in his and <@U1NSCAY6R>'s feedback as well
+I thought they had an on-done callback option, but I am not seeing it
+<http://docs.celeryproject.org/en/latest/userguide/tasks.html#on_success>
+that's about the closest, I think
+ill catch up in a few, fire at work
+not a literal fire
+ok, good luck
+need some marshmallows?
+literal fire by my mountain house :disappointed: may cancel my bike trip :cry:
+whoops
+colorado
+no its someone using RUBY of all things spamming us with bad requests
+snowbound seven months of the year
+the rest you're bone dry
+<@U1BP42MRS> having fun with Joe's API?
+:smile:
+LAWL
+Can ruby run fast enough to spam it?
+eventually
+probably not DDOS level of spam though
+like the one that took down kreb's blog
+oh yeah, that was crazy
+that was the IoT hack, IIRC
+yep
+well, I'm out
+time to get home and head out on the bike for a bit
+good evening/night/morning!
+no ruby cant DDOS aws im sure :stuck_out_tongue:
+we have a really bad customer that spams us a lot with bad requests and they seem to do it scripted and its 400 400 400 400 and they dont handle errors in their scripts so it just keeps going
+:facepalm:
+<@U0LSCQQNR> I was going to suggest `on_success` with a handler to write results to the db

@@ -1,0 +1,37 @@
+```
+Date is a less than great API, but clojure makes it readable
+does this `#inst` mean <https://clojure.github.io/clojure/clojure.instant-api.html>?
+no, it's how Date objects are printed, its the instant reader
+I confirm the fishiness, was pulling a dependency in the code :facepalm:
+so that was fun
+this is cool. didnt know about `#inst` and `#uuid` and stuff
+thx
+is there an easy way to run this guys in parallel and do something else when they *all* finish?
+plins: `(let [results (map deref  [(future trans1) (future trans2)  (future trans3)] do-something-else))`
+hey all… for a number of strange reasons I want to create an instance of a class whose name I only have as a string. How would I instantiate one?
+either via a macro or reflection possibly
+cheers <@U050SC7SV>. I just found `Class/forName` which does what I'm after
+(.newInstance (Class/forName "foo.bar.baz"))
+yes :slightly_smiling_face:
+tho `(.newInstance (Class/forName "foo.bar.baz"))` only seems to have a 0-args sig
+ah, you have to use `.getDeclaredConstructor` on the `Class` object to get the constructor method and then call that
+Do multiple threads just reading from (derefing) an atom that has a constant value block or cause any kind of contention?
+no
+Awesome -- so should be the same as just reading a var?
+in terms of multithread contention
+that is kind of complicated, they are different things. my intuition would be that vars would be ever so slightly faster before the jit has kicked in, and an atom would be ever so slightly faster after
+but they are different things, not drop in replacements for each other
+understood. the story is that we have a system with config data in atoms, which are constant after configuration, and our multicore scaling is bad. the question came up of whether billions of accesses to  constant-valued atoms might be causing contention. the alternative we're considering isn't actually to use a var (actually, we'd get rid of the vars that currently hold the atoms), but just to pass all of the config data as an argument throughout the system. it'll be a relatively big job to try this, so i'm trying to figure out if the underlying theory is even true, that reading (derefing) the atom in a var can cause contention among threads.
+atoms contain an AtomicReference <https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/Atom.java#L20> and use the get method to access their value <https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/atomic/AtomicReference.html#get()>
+get on an AtomicReference is the same overhead as reading a volatile, which sources claim is cheap
+this should also be easy to microbenchmark though
+you should actually hook something like visualvm and look at the hot methods
+don't just guess
+if your configs are in global atoms, then you are dereferencing both the var containing the atom and the atom
+that's a good point, based on profiling I've done I'd expect the var lookup to be more expensive than the atom deref
+I mean for the config thing
+for vars vs. atoms, without the jit, my guess is the atoms still have to traverse a few extra pointers for access, but with the jit I expect it is a regular reference that just uses atomic instructions
+(I don't know, I haven't profiled it or looked at the code the jit produces)
+but I would expect just about anything else to dominate those differences
+there should also be some improvement with direct linking on
+direct linking is only for functions

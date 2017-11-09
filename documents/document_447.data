@@ -1,0 +1,22 @@
+```
+no worky
+unable to get js values into my elm app
+So, you can do basically that but using `Random.generate`, without using ports
+as for the ports syntax, it's `app.ports.fromElm.subscribe(function (arg) { * do something with arg. There is no callback, tho, but you can app.ports.toElm.send(..) it back in * }`
+ports are always async and always "decoupled". It's not two way traffic. It's basically a remote API that you send stuff to, and that may send stuff to you
+<@U3SJEDR96> How do I read the sent value `app.ports.toElm.send(..)`
+quicky using `Random.generate` <https://ellie-app.com/3SYQyLhXzmha1/0>
+you'd have a `port toElm : (String -&gt; msg) -&gt; Sub msg` for example, which would allow sending in a  string. You also have to hook that up to your `main` program using `subscriptions`. I'd advice going through the guide (<https://guide.elm-lang.org/>), especially the section on JS interop
+and adapted for manual seed management, with the initial seed provided on startup through flags: <https://ellie-app.com/3SYQyLhXzmha1/1>
+Note that random generators can be combined using `map`, `andThen` and related functionality to create pretty powerful generators, that make "now give me a random battleship board" completely feasible and calling that would be no more complex than getting a single random number.
+If I could get a single random number I'd be good
+`Random.step (<http://Random.int|Random.int> 0 100) (Random.initialSeed 0)`
+It will be random, but it will be the same sequence every time you run your application.
+Well, actually, if you don't save the resulting seed anywhere, you'll just get the same value every time
+Yes
+So that might as well just say `25`
+yes
+Another question...
+why does this not work in repl?
+$ list = (1,2,3,4)
+$ (a,b) = list

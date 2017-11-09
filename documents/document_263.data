@@ -1,0 +1,21 @@
+output = [ [1,3,5,...], [2,4,6,...]]```
+<@U5P4FLYLE> Does this meet what you are hoping for? <http://package.elm-lang.org/packages/elm-community/list-extra/6.1.0/List-Extra#transpose>
+yes, this is what I am looking for - thanks
+`
+As ever, grateful for the help!!
+<@U5J08KX0D> it works just like the Html package, <http://package.elm-lang.org/packages/elm-lang/svg/2.0.0/Svg-Events#onMouseOver>
+OK, thanks <@U153UK3FA> - exactly the advice I needed and got me underway!
+I now get a "Click" msg onClick... how can I get the name of the object clicked on. onClick only expects one argument, and I'd like to say [onclick Click "head",...]
+Message = Click String
+`onClick (Click "head")` or `onClick &lt;| Click "head"`
+is that correct?
+Great <@U236M9FH9> - thanks!
+But if you have a fixed amount of strings you're going to use, you could make it it's own type: `type BodyPart = Head | LeftArm | Torso | ... `, `type Message = Clicked BodyPart`, `onClick &lt;| Click Head`
+And then the compiler will tell you if you accidentally misspell one :slightly_smiling_face:
+Architecture question.  I have an API module with internal state that's needed to generate a Http.Request.  Other child modules don't have access to that state, so they can't call the API module directly.  Instead, I use an OutMsg from children back to Main.  That OutMsg causes Main to tell API to send a specific request.  I'm having trouble finding a clean way to get responses back to the children that initiated requests.  They way I'm doing it involves a lot of tagging functions and making all my child models and msgs variable types (where the type variable is the main Msg type).  Any examples of clean solutions to this type of problem?
+<@U5VTA57UN> I have a model w/ an array of items nested under another array of items. I use indexedMaps to generate the HTML. When one of the nested items creates a Http.Request, I identify which one by adding the indexes to the msg: `type Msg = SaveSectionExercise Int Int (Result Http.Error SectionExercise)`, that lets me update the proper nested child.
+<@U236M9FH9> I see.  I suppose I could do the routing using identifier strings (in place of the 2 Ints you use) and have main pass the response to the child that wants the response.  But that means that for every call to the API in every child I'll need a unique routing string, and I don't get any compile time checks to make sure I didn't typo a routing string.
+The initiating children don't have some unique identifier in their model?
+<@U5VTA57UN> Talk of children and routing of messages sounds like you might benefit from letting go of how you are accustomed to architecting things. Instead of children, it is often useful to think in terms of data structures and functions. Evan's talk at Elm Europe might be worth watching for some guidance in this area: <https://www.youtube.com/watch?v=2ihTgEYiKpI>
+I could get used to this help from the compiler :slightly_smiling_face:
+so, when I do floating type division 0 / 0 I get NaN, but integer division 0 // 0 gives zero, is there another way to safely handle this case?

@@ -1,0 +1,30 @@
+```
+leave off the `--warn` part
+I want to show other sorts of warnings...
+oic now :sweat_smile: I don't think so
+Hi everyone! Has anyone ever run into debugger not synchronizing it's changes with the actual view? I mean, I do things at my page and state indeed changes, but when I travel through it (in a separate debugger history window) it doesn't change view accordingly - it's like view is reflecting the last change made to the state. Is there a chance that it is a webpack problem? Or, maybe, something about programWithFlags that I don't know?
+Hmm, are you using JS?
+If you're doing anything outside of elm (ports, commands), those things won't get brought along
+As for now, I'm only using flags.
+Is there a way to debug debugger? :thinking_face:
+<@U5P1BDUM8> all I can think of is to ignore them or  put in the type annotations
+<@U31FGNWCT> what type of things are you doing and what is not changing? There are a couple of scenario's I can think of where this would be expected, like an `input` without a `value` or a `checkbox` without a `checked`, but to help you better, more info would be useful, and actual code on <http://ellie-app.com|ellie-app.com> would be perfect :wink:
+<@U3SJEDR96> Unfortunately it's a relatively big chunk of production code, so I can't share a part of it.
+The only thing I can think of, then, is that it's part of your view that relies on state that isn't part of your model - uncontrolled inputs first and foremost
+It happens on a simple login form, login &amp;&amp; password inputs with a submit button. Nothing extraordinary.
+can you verify that on those fields, there is a `value` attribute in  Elm, and not _only_ an `onInput`?
+Aha!
+That's it!
+Thank you very much!
+The debugger renders your view with the given state, but of course that only does something if the view represents _only_ that state :slightly_smiling_face:
+I didn't understand you well when you had mentioned it earlier, sorry
+Yeah, that's alright, it's hard to explain because intuitively, what you see is a reflection of your state :slightly_smiling_face:
+I am slightly nervous about how that would play out in practice though, any advice for big records?
+I'd go for a `Dict String Data`, I think
+though you'll probably have some keys where some data doesn't make sense for
+:thinking_face:
+The nesting seems like it would introduce more complexity though
+If the values vary, and you know all the possible things it could be, you want to use a union type most likely.
+rather than lots of maybe values
+possibly, a mix of a record with some strongly typed keys, and a `Dict String Data` for the "freeform" stuff
+Thanks y'all! I'll trial a couple of small scale things and see how they play out

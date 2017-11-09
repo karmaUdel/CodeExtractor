@@ -1,0 +1,18 @@
+```
+So I'm pretty sure there is a bug here.
+^ this test = <http://pasterack.org/pastes/86496>
+(point is, now the failures are consistent)
+As far as I can tell, adding `#:wrap (deallocator)` slows down `av-frame-free` enough that the finalization thread moves more slowly than the allocation thread, so my original answer is still what I think is happening. Removing `#:wrap (deallocator)` might be a reasonable solution if `av-frame-free` is not to be called directly.
+Ah, okay, thanks makes a lot of sense. Thank you.
+That would also explain why writing my own finalizer (and a single thread that calls the will executors in a loop), doesn't have the same problem.
+If I register a will for a value exported by a module, can that will ever be executed?
+use case is a value used by test modules, wondering if it can be automatically cleaned up after the tests finish by relying on `raco test` somehow
+<@U07SJGB4H> The namespace where the module is instantiated would have to become inaccessible, including not being `current-namespace`
+<@U3NJS8H7C> if I `raco test -p mypackage`, which contains some test submodules that require a module providing a value with an attached will, would `raco test`'s shutdown process trigger the will execution? would running the tests in parallel with `-j` affect that?
+<@U07SJGB4H> No, I don't think `raco test` will trigger the will execution. Either you're in `--direct` mode and it's all done in one namespace or the relevant place/process exits still holding its namespace
+drat
+leif: Hi Leif!
+Awwww
+is there an addendum for the redex book anywhere? the syntax in the book is a bit crufty. not sure what else changed
+Hello
+<@U3NP867S6> JFYI:

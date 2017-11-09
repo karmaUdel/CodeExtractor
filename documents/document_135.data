@@ -1,0 +1,14 @@
+hey I was thinking about a way to minimize the memory requirements of a nested clojure data structure where some substructures are identical, and I came up with this: ```(partial clojure.walk/postwalk (memoize identity))``` but I haven't really given it much thought. How would you do something like this?
+<@U1ACUMJKX> if you just use the same object as an arg to assoc, it won't be duplicated
+depending on how the data was created, of course
+my use case involves taking an .edn file from disk that is probably too self similar and large to fit in memory
+oh, yeah, fun
+it would be interesting to try the postwalk identity and then compare the object pointers via jdb maybe(?)
+yeah i haven't tested it i was just wondering if anyone else had ideas
+what's "fn*"? I cannot find the document of it~
+it's an implementation detail of fn
+fn is implemented as a macro, and uses the destructuring functions that clojure.core defines for macros
+so means: I don't have to care about it?
+fn* is implemented in java code
+right, remembering that it's an fn that can't destructure is probably enough
+could you please give an example? of the difference?

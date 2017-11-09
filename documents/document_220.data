@@ -1,0 +1,91 @@
+```{"playerNames":["Fred","Barney"],"games":[{"date":"May 20","stats":[{"ab":2,"hits":2},{"ab":2,"hits":1}]},{"date":"June 3","stats":[{"ab":2,"hits":2},{"ab":3,"hits":3}]},{"date":"June 4","stats":[{"ab":2,"hits":2},{"ab":2,"hits":2}]},{"date":"June 10","stats":[{"ab":2,"hits":2},{"ab":2,"hits":0}]},{"date":"June 17","stats":[{"ab":2,"hits":2},{"ab":3,"hits":2}]},{"date":"June 19","stats":[{"ab":0,"hits":0},{"ab":4,"hits":4}]},{"date":"June 20","stats":[{"ab":2,"hits":2},{"ab":0,"hits":0}]}]}```
+You can also paste that in to <http://eeue56.github.io/json-to-elm/> and you'll get a generated parser. But it's good to write one yourself when learning so you actually understand how it works.
+No doubt.  If I'm pulling my hair out over writing my own after a couple days, maybe I'll resort to that. Thanks for the link.
+I wrote the encoder piece fine on my own, so you'd think I'd get this decoder stuff better than I do!
+it's good for pasting in small bits of json, eg. paste in just `{"ab":2,"hits":2}`
+Yeah, that makes sense.  I'm brand new to functional programming, and so I'm still shifting my mind a bit.
+How can I convert a list of 2 strings into a tuple?
+<@U5HM74BD0> `List.map2`: <http://package.elm-lang.org/packages/elm-lang/core/latest/List#map2>
+Or `List.Extra.zip`: <https://klaftertief.github.io/elm-search/?q=List%20a%20-%3E%20List%20b%20-%3E%20List%20(a%2C%20b)>
+<@U236M9FH9> Doesn't `List.map2` give another List back?  I want ["apples, "grapes"] to become ("apples", "grapes").  What am I missing?  Maybe I'm up too late at night. Sorry if this is obvious.
+(apples and grapes are unknown strings at compile time in my case)
+Ah sorry, I read 2 lists, not list of 2
+Really you're list of 2 should be a tuple the whole time, otherwise you'll have to return a `Maybe (String, String)` instead, but you write a function that uses a `case ... of ...` to match `x1 :: x2 :: []` which is a list of 2 items. Return a `Just` for that and `Nothing` for all other cases(you can use `_ -&gt; ` after the 2 item pattern to match everything else).
+Hmmm. I've got a json string which comes in as a list of two strings, but my model represents those things as a tuple.  Okay, let me try what you're suggesting.
+If you're starting with a list because of JSON decoding, you should be able to skip the list using something like `Decode.map2 (,)` along with `Decode.index`.
+Oh! That'll be much better, yes.
+I feel like my model should have represented these things as a 2-item List to start with. Not sure I'm buying much by having these stored in a tuple.
+A tuple gives you a guarantee about the number of items. With a list you'll find you'll have to handle cases of empty lists, 1-item lists, &amp; 3+ item lists as well as the 2-item list
+If you'll be pulling the values out of the list often, you'll probably have to repeat the above a lot, or handle a lot of `Maybe`s
+Thank you for the help. I'll give it a shot tomorrow.
+Good Night everyone hope everyone is doing okay.
+jonf: We should have a numpy like converntion. in scipy/numpy you always import a bunch of common modules using accepted aliases, so it makes examples lot terser. if I see np, I know you have done `import numpy as np`, and I need not ask what is `np`.
+<https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt#overview>
+I always import Json.Decode as JD, Json.Decode as JE, RemoteData as RD and so forth. I feel it would be good if we had a community maintained page documenting a convention.
+hey! for some reason my time travel debugger stopped popping up at app start at some point... i still `use elm-make --debug` is there a way to start it from console or something like that? or does anyone have a clue why my time travel debugger could have stopped starting?
+Do you see the "tab" on the bottom right of the page?
+Or does it fail to expand when you click the tab?
+the tab is missing! it was there at some point (expanded and in tab form) but now even after recompiling/restarting computer it does not shop up anymore. application works still fine (sorry for late answer)
+Have you tried running `elm-reactor` from the command line?
+The tab is a div abs. positioned in the page so it might happens that it plays badly with other elements.
+Check if you have other page elements which overlaps with the tab.
+<@U41NK9BM4> thats probably it! I will check 
+Let us know :slightly_smiling_face:
+Is there an event in elm for onFocus but for when you leave the element?
+like onBlur?
+The event is called "blur", I'm not sure if there is a ready-made helper for that particular event but you can do it with `on "blur"` at least.
+I think there is <http://package.elm-lang.org/packages/evancz/elm-html/4.0.1/Html-Events#onBlur>
+<@U2M4VPZ9D> <@U0CLDU8UB> thx!
+Works like a charm
+<@U3SJEDR96> <@U23SA861Y> <@U0LPMPL2U> Thanks for yesterday. I had to run, so I didn't have time to reply or get into the feedbacks. Will check them out today.
+How do I get the size and position of placed DOM elements?
+<@U5X2VC483> i have the feeling think we can't get that just in elm. i'm still learning :smile:
+If you have your model with properties for position and size you can always take control of it
+that's true!
+but cannot get it of a rendered DOM element, right?
+Elm does not have direct access to DOM
+So if you can design to use your model for it, it's the way to go. If not then you can use JS with ports.
+I don't want to implement my own flow, I would like the browser to do it. As in, I don't want to decide myself the position and size of the elements, but get the size after the fact
+Okidokies, thanks for your help
+<@U5X2VC483> what's your case by the way?
+I would like to draw arrows between elements
+such as from and to centers of two DOM nodes
+You can do this using port. Write a port like `findDimension : String -&gt; Cmd msg` where you can pass a selector. Then have something like `elementDimension : ({ r | selector : String, dimensions : Dimensions } -&gt; msg) -&gt; Sub msg` that the javascript can provide the dimensions.
+Alternatively, if you are doing this in reaction to a click on an element, for example, you can probably decode the dimensions from the event using `on`
+<@U5X2VC483> And can you achieve positioning with css?
+<@U0J8D9M2P> Yes
+<@U0FP80EKB> Thanks. That looks like a good start.
+I made a thing! <http://cloud.jorisooms.be/1B0m3R2f3M2I>
+<@U2FP79HN3> it's a pretty thing :slightly_smiling_face: but what is it?
+dunno :disappointed:
+just generating random svg paths and animating them
+I like it, could easily become hypnotic :slightly_smiling_face:
+nice!
+passiomatic: sorry for answering so late again: but yes! that was it! i used a footer, which is also `position: fixed` and it was just underneath it! i didn't think about checking the dom! thanks!
+Great. Glad it worked
+Hi! My project is based on reading information off a local JSON file. I can then update the data from the browser, what can I do to save it back to JSON (I'm not asking about JSON.Encode but rather about how to save to an external file)? Do I need to use `port`?
+<@U59AF21LJ> elm is compiled into JS and this is executed into the client browser. The browser does not have access to write into the server file system. You will need a backend for that.
+<@U1P6FFJ64> Oh yes I had forgotten about that… I guess whatever memory I want to last would need this. I guess I should make a little program than runs in parallel, listening on a socket or something? Thanks.
+If you want to store information in the browser, you can use LocalStorage (via a port)
+depends on what you want to store really
+Basically I have a tree that I manipulate and want to save even after I close my browser (I don't want it to be save in the browser memory).
+yes, so you could either use LocalStorage, which will store it on disk locally, but will be restricted to that particular computer/browser, or you need a server
+Can I get elm-reactor to refresh the site when saving the file? Even better, can I get it to do hot module reload? (I.e. maintain the state)
+`elm-live` has at least one of those features
+Right <@U4872964V>, thanks. I think I'll make a server on the side. And then use websocket / port?
+Well, if you have a simple REST service you'd just use the <http://package.elm-lang.org/packages/elm-lang/http/latest> package
+Hi does anyone know how I can encode a set to a JSON list object?
+I tried: Encode.list &lt;| Set.map Encode.string formData.objectives
+<@U5X84PY9G>, just use `Set.toList` first
+<@U4872964V> Oh right. I'm still not familiar with what you can and cannot do.
+Thanks
+<@U3SJEDR96> thanks!
+<@U4872964V> do you mean: Encode.list &lt;| List.map Encode.string &lt;| Set.toList formData.threat_objectives_at_stake
+looks right
+Ok thanks a lot
+<@U5X2VC483> <https://github.com/fluxxu/elm-hot-loader> maintains state too :smile: 
+perhaps, but unlike in python the compiler enforces it. You also don't get ancestor imports either. I suspect it's less of an issue.
+<@U5X2VC483> I also used this <https://www.npmjs.com/package/create-elm-app> which packages up the elm-hot-loader mentioned by <@U0JFEBK6F>
+Hi <@U0CL0AS3V>, I have a quick question about the SPA Conduit App that you shared a few weeks back. Is this the appropriate forum in which to ask it?
+In your comments for the Main.elm file, you say that the majority of the code in that file will go away in 0.19. I've found that as I've built my app (based on your work), that Main.elm is getting bigger.  I'm anxious that based on your comment that I'm moving in the wrong direction. so, when you say that Main.elm will largely go away what does that actually mean?
+(I guess I'll just ask the question here :slightly_smiling_face: )

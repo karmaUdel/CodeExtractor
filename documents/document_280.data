@@ -1,0 +1,27 @@
+```
+So the best will be to check latitude/longitude values in function implementation and return Result, either with Ok or with Error.
+Is that correct?
+Yes, if `getPosition` can fail, I would return a `Maybe` or `Result`
+so that the caller has to handle those cases
+where `StringHappened` is a constructor for my `Msg`. It just so happens that the `detail.value` is a `bool`. Currently in my app nothing happens. I want another variant of `Msg` to be used, say `ErrorHappened`. How can I do it?
+so detail.value can possibly have two types?
+Or maybe he wants to handle the bad value more gracefully?
+<@U41NK9BM4> yes.
+But does it crash if arrives a bool type as `detail.value` ?
+I'm working on a library and the events are coming from a 3rd party JS code.
+No, it does not crash. It just does nothing.
+I guess it's how `Json.Decode.map` works.
+It just ignores the `Error` case.
+Of course as mentioned by <@U1CE9DL9H> you are gonna have the same field with two types.
+Which is not desiderable I guess
+Well, it can by any type really. I'm mostly interested in string (in this case), but I want to handle exceptions nicely.
+I mean it should be a string, but it's coming from JS, so in practice it may be anything (`null`, etc).
+Yep. :slightly_smiling_face:
+In that case I want to give consumers of my library nicer experience by logging the problem using `Debug.log`.
+So if it's a String - map it to Msg, otherwise - log.
+then, create a decoder for both cases, and use `Decode.oneOf` to combine them
+What's the other case? Can you give short example?
+I'm not sure from your description. The case you want to catch is "detail.value is of type bool"?
+No, `bool` is just an example. I want to _catch_ any failure in decoding. E.g. if the whole `event` is `null`, or it doesn't have `detail` property, etc.
+It needs to be general purpose.
+Anything except the expected structure.

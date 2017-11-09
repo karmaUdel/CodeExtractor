@@ -1,0 +1,56 @@
+```
+these seem incompatible. Add edge and destructure [n1 n2] so why bother with defining edge on peristent vector as 0 and 1 elements?
+I guess so
+The library author coded against his implementation of edges
+Which makes the whole thing busted
+I am sure you can create a pull request to fix this
+just making sure I wasn't overlooking anything
+anyone using clojure w/ grpc? I've found a few examples on github, but nothing official looking. trying to find some good boilerplate.
+anyone watch Stuarts talk on REPL-driven development? <https://vimeo.com/223309989>
+at 16:55 he talks about "REPL at a point of interest", anyone know a library that does that?
+I'm looking at <https://github.com/razum2um/clj-debugger>, but when I tried that I got weird error involving `java.lang.UnsupportedOperationException: Can't type hint a primitive local`…
+I guess his code is busted
+can you publish whole code and stacktrace
+the issue is likely <https://github.com/razum2um/clj-debugger/blob/master/src/debugger/core.clj#L12-L16>
+here's the full stack trace:
+but yeah hiredman, you're probably right
+&amp;env will contain symbols with metadata like {:tag 'long} (where long is a primitive type hint) and the compiler will barf with that error message if you use a symbol like that as the name in a binding
+i agree, i think this is what i was looking for, thank you
+the compiler wants `(let [x (long ...)] ....)` not `(let [^long x ...] ...)`
+it bites everyone writing a big macro eventually
+If I want to create a logo for a clojure library that I have been developing. is there any sort of legal issue if I use the same colourscheme as the clojure logo? That is, I use the 2 green and 2 blue colours to colour my logo?
+go for it
+ok cool, thanks
+just dont make it a blue c with two green strokes through it and come near kansas city
+lol, ok
+michaellindon: <https://www.cerner.com/-/media/Cerner-Media-folder/Home-Page/logo-2x.ashx?la=en&amp;hash=BC8406D09620541FFB525E9C27687C750297C604> sorry for context
+what does t do?
+<https://raw.githubusercontent.com/michaellindon/sss4clj/master/logo/sss4clj.png>
+that looks nice
+thanks
+`what does t do?` sorry what?
+hehe sorry, i thought Cerner was the name of a clojure library
+what dose it do?*
+i just chekced the website
+do you work for them?
+yep
+sorry ya its a med tech company
+Is there a best practice to read/write ZIP files in Clojure? I have found the fs library today and the Java way but unsure what's the recommendation.
+I've only ever used the java.util.zip package
+works fine
+Is there some kind of shortcut for programmatically associating a symbol with it's same-name key?  Sort of the inverse of `{:keys [a b c d]}`, instead of having to type `{:a a :b b :c c :d d}` to create a map.
+there's a macro in flatland/useful that does that <https://github.com/amalloy/useful/blob/develop/src/flatland/useful/map.clj#L9>
+and it's totally legit to just copy/paste one function from that lib if you don't need the rest IMHO
+Thanks, just what I was looking for
+<@U5JEJN1CP> or zipmap?
+No, zipmap still requires you to write you your keys.  I was looking for something equivalent to JS's `{a, b, c, d}` notation which produces the equivalent of `{:a a :b b :c c :d d}`  The keyed macro in flatland does exactly that.
+With the macro `(keyed [a b  c d])` becomes `{:a a :b b :c c :d d}`
+I see
+<@U3L6TFEJF> <@U0NCTKEV8> I'm the author, but frankly speaking, haven't used it for long :slightly_smiling_face: can we solve this?
+<@U04V1HS2L> looks like you'd need exclusions in there to avoid certain `sym` values (any primitive Java type symbols)
+I am new to clojure-api. I develop small app using clojure-api. I have done DB connection, Logs capturing mechanism in my APP. I need help in exception handling mechanism. Is there any library to catch exception all types of exception and to send exception to developer mail?
+<@U65F82796> A Google/Bing search reveals lots of Clojure wrappers for SMTP mail but, to be honest, I'd just use javax.mail directly. It's not hard.
+<@U04V70XH6> Okay. Thanks for quick reply.
+Sending email to developers every time you get an exception is... less than best practice... You could cause a denial of service attack on your own email provider if you app goes wrong. I definitely would not recommend that approach.
+<@U65F82796> we use <http://sentry.io|sentry.io> for such exception capturing purposes... and there are many similar services out there
+<@U0524B4UW>, <@U04V70XH6> Okay. Thanks for valuable suggestions.

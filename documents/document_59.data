@@ -1,0 +1,33 @@
+```
+I prefer `get-in` because it makes the intention clear, we know that the first argument is a map, and that the second argument is a path. That information is lost with `-&gt;`, also, that means you can't pull the path, `[:b :c :d]` from a data source or generate it without your own macro, because you can't apply to `-&gt;`
+sure, that is the flip side to what I said about the key vector
+if it is constant and known at compile time (which it seems like it almost always is) then keeping it around at runtime is (admittedly an insignificant) waste
+true that
+specter keeps popping up here and there with some nice solutions.. i'll have to look more closely around its api
+<https://aws.amazon.com/lambda/faqs/> &lt;-- java is listed as supporrted language; does this mean one can do "clojure -&gt; java" for lambda instead of "cljs -&gt; js" ?
+<@U3JURM9B6> my guess is that startup times might be problematic for many lambda use cases
+but yes, you definitely *could*
+Both clj and cljs can be used, but yeah, startup times become a thing.
+just a lot of the use cases I can think of for lambda, a very fast starting VM such as the js vm is more appropriate than jvm+clj
+to be clear, by java they mean jvm, clojure doesn't compile to java like clojurescript compiles to javascript
+clojure generates jvm byte code
+and with the incredible support cljs has for the node ecosystem these days... I would choose whichever vm makes the most sense for the scenario. which is a pretty amazing thing to be able to choose while keeping the language constant :slightly_smiling_face:
+<https://aws.amazon.com/blogs/compute/clojure/>
+relevant ^ though im sure most have seen it
+zylox: thanks for link, first time I'm seeing it
+<@U3JURM9B6> <@U050MP39D> the data from this talk suggest it might not be as big of a deal as you'd assume (if you are running lambdas frequently enough to limit cold starts): <https://www.youtube.com/watch?v=GINI0T8FPD4>
+<https://github.com/clojure/clojurescript/wiki/Differences-from-Clojure> just gets larger and larger
+<@U1CTH1TUY> yes! true. my assumption is that most people using lambda are using it for reasonably infrequent operations (to take advantage of paying for only what you use). but if that's not the case then clj could be perfectly fine
+somethings I know are different between clojure and clojurescript because I follow the jira issues aren't even on the list yet
+actually I'm using it to not think about scaling
+i.e. if my problem can be decomposed into an 'obviously parallel' setup, then AWS just scales everything for me
+and I no longer think at the grainualarity of machines
+if you create a language binding to a library written in another language
+how do you license it?
+do you keep the license of the source library?
+depends on the license of the source library. If you aren't distributing their library, you might be able to license it however you want. Not something that can be answered in the abstract
+Hi all, I'd like to fan out the same input sequence to several transducers and collect the results into a single sequence... is there a function for that?
+Any one experience with Lanterna?  I'm looking into making a snake game, and would like to know if it can do a non blocking ui
+<@U60259LCB> I believe it does, haven't used it in a while, but I see from the docs it has both `get-key` and `get-key-blocking` — the first returns nil if there's no keypress waiting to be read.
+I need to write a test, but I do not know how to mock the utils/count  (for example)
+what if I have several functions inside the same function and I need to test it

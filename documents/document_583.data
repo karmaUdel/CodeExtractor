@@ -1,0 +1,82 @@
+```
+You were right, my JSON was inconsistent with Decoder. Thanks.
+Yes I'm just wandering whether anyone had borrowed the React vernacular. Thought it might help other people get the idea more easily.
+I’m not sure we want to do that
+Elm is not React
+your update function is more analogous to Redux not React anyway
+it is architecturally extremely similar to certain flavours of React
+So, thinking in terms of components and ownership often leads to complexity
+it’s much easier to think in terms of functions. there is only one update function that has a specific form, all other functions are free to be whatever you think they should be
+so, sometimes you don’t need to return a `Cmd`, then you don’t
+sometimes you only need to pass part of the `Model` then you do that
+but in a large app there are many update functions. Thinking about ownership is critical.
+a function owns its output, that’s all
+there is still a perfectly valid concept of encapsulation in elm, that's all I'm talking about here
+yes, but not as react components necessarily
+Not really, there is just one update function composed of other functions - like in a Flux architecture you'll have a reducer composed of other reducers
+each reducer is an update function, so there is not just one.
+so, the caller of the sub-update function determines what to do with the result of the function, the function does not own anything else than its output
+<@U17MHJ12N> but in Elm there is only one relevant update function, the on that is called by the Elm runtime via the Program
+all other functions are free form
+<@U17MHJ12N> if you’re doing something in React style then you wouldn’t be passing in Props to an `update`
+<@U4872964V> Thanks.
+it applies equally to the view actually.
+if you want to do something like `combineReducers` you can do that of course, but you can structure it completely differntly if you want
+Elm is basically agnostic about how you do that
+The Elm Architecture clearly describes nested update function however, and that is what I am referring to.
+maybe some people do, but the basic Elm Architecture does not, it only specifies one update function
+it's a ubiquitous pattern - I think we know what I am talking about.
+making helper functions is indeed ubiquitous but the actual form of them varies a great deal actually
+yeah personally I would avoid doing this like the plague :smile:
+I've observed that if people know a little bit of React, it's easier for them to learn Elm than people who know zero React
+I've also observed that people who know React really well have a *much* harder time than people who know zero React
+it's a weird curve
+trying to learn Elm concepts in terms of React concepts, especially when it comes to scaling, is the cause of more learning-related pain than anything else I can think of
+for example
+&gt; but in a large app there are many update functions. Thinking about ownership is critical.
+I would disagree with this statement 100% :sweat_smile:
+so you're saying react is kinda like LSD. a little bit will let you see things you didn't realize before, but too much will leave you as a gibbering mess on the floor.
+hahaha
+I wouldn't go that far :wink:
+I think it's more that
+Yes, it’s a pure functional language, this means that a function owns exactly one thing: its output
+understanding the idea of a virtual DOM instead of mutating DOM nodes is something you need to understand
+and if you've done some of that in React, it's one less thing to get used to
+basically everything else beyond that is different :sweat_smile:
+but it intuitively seems like it shouldn't be; hence the problems
+why would you disagree with that statement. Having got to about 30,000 lines now, most of the problems we have had come from failure to properly think about where data belongs (having it in two places etc)
+also I am coming from a specific style of react which is actually very similar to the elm architecture in spirit.
+I think that's the most dangerous of all :grimacing:
+The data belongs in the Model, and having data in two places in the Model for the same data is indeed problematic
+exactly and if you don't think about ownership, that's what happens
+it's the last tiny change where you say "we will literally never have local mutable state" instead of "we will have it rarely" that leads to the biggest differences
+<@U17MHJ12N> i don’t see what ownership has to do with that
+oh, so you're saying ownership as a synonym for data duplication? :thinking_face:
+as in "where in the model the data lives, with the implicit expectation that it should only live in one place"
+(because I definitely agree with that)
+yes
+got it
+ok, never mind then! we agree about that after all :smile:
+actually I wrote these problems up <https://hackernoon.com/the-importance-of-state-ownership-in-elm-72f711ceb244>
+but I no longer agree with my own conclusions!
+this is how I came to the idea of hijacking Props as a concept
+:smile:
+thinking in terms of components is a sure way to get the structure headache for sure
+yeah
+thinking in terms of data is what I try to do, then “ownership” becomes a moot point. Data is data.
+I've been trying to come up with a concise way to explain how I think about views
+it's something like
+"start with writing the DOM I want, then if that needs state data, make it a function that accepts arguments for the data it needs to render, then figure out how best to model that data"
+the important part being that there's no recipe for the "model the data" part
+that's where all the thinking happens
+it's really easy to be like "I want the DOM to end up like this mockup"
+and then it's also really easy to say "here are the pieces of information my function must accept in order to render those"
+and then figuring out where that data ought to live...there is no one-size-fits-all answer
+what is the addage, "show me your code and I will have no clue what you're doing, but show me your data and I can deduce your code"
+or seomthing like that
+never heard that one haha
+show me your data... :smirk:
+Yes, my experience is that when I run into trouble I have modelled my data incorrectly
+I agree. The data modelling is the most important thing. But I maintain that there is a case for components and there is a case for encapsulation and that _can_ lead to duplication unless you are careful. In that cicumstance you have to separate the data the component is responsible for from the data it is not.
+I guess there is if you try to fit all sub-update functions into the same form.
+but the point is that you don’t have to

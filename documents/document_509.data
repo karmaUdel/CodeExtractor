@@ -1,0 +1,216 @@
+```
+thanks, it works.
+what do you think is the better way to store data between outgoing port calls (I will need it in port callbacks at JS side) - global vars or store it on Elm side (`Json.Encode.Value`) and then pass to port?
+<@U1G51S63S> what are you trying to do exactly?
+<@U1CE9DL9H> google maps for example. I have 2 ports `loadMap` and `setMarkers`. second port will need `map` instance from first port
+so when map is initializing within `loadMap` callback - I will need to store `map` instance somewhere. I can put it into something like `window.map` or send back to elm side and store inside my model
+and I am trying to find more idiomatic way of doing it
+well that would absolutely be to store it in the model
+global variables and pure functional languages don't play well together
+but js is not functional and I will use it on js side only :smile:
+sure, but using elm more and js less - especially for managing state - sounds like the better idea
+yeah, sounds like a better way anyway :slightly_smiling_face:
+Would it be a correct assumption that the `init` function usually resembles some branch of the `update` function as well?
+Atleast that's the feeling I'm having :slightly_smiling_face:
+not always. if it's the case for you, create a separate function and call it from both init and update
+Sure. Then it comes down to naming. That's the hardest part! :smile:
+And where to keep this shared function
+`init` rarely looks like update
+It’s hard to say where things should go without knowing in what way they look similar :slightly_smiling_face:
+is there a simple way in Elm to tell if a date is today in elm?
+<@U37HUSJ4R> Storing the current date in the model and comparing it in some function?
+Quick question: `import Polymer.Paper.IconButton as Paper.IconButton` gives me syntax error. Does it mean that I cannot have dot in a qualified import name?
+yes
+Do `Cmd` ports have any access to which embedded Elm application called them?
+That is, if I have more than one Elm app embedded on the page (likely, two copies of the same Elm app), and the app makes use of a port, can I somehow find out which instance (ie, which DOM node is associated) sent a command to the port?
+Thanks <@U1CE9DL9H>.
+Definitely pseudo-code, but you can do something like that.
+I guess I could do that
+As always, this could be an instance of the XY problem, so perhaps if you talked a bit more about what your problem is, there might be a different solution.
+I don't have any immediate problem to solve, but for my blog, I imagine having multiple elm applets running on a single page. Likely all close variants of each other, even being the same module with different parameters passed, as to build up to an idea I want to illustrate and talk about.
+<http://xyproblem.info/>
+I would probably build my initial idea if I was looking for a way to specify which app’s port was firing.
+Yes, I know what the phrase means. I just think it's a bad term for the notion.
+Alas, it is the term we have. :slightly_smiling_face:
+But, since the ports aren’t shared across apps, and you have to subscribe to them on the js side independently, I’d probably use my original idea
+If I wanted to have a single function that handled them the same.
+Ahh. I forgot you have to wire them up manually anyway. Ack.
+Yeah. That's something I need to take into account with my design.
+Alternatively, you could pass an identifier into the init function, have that includes in all port calls.
+That strikes me as a bit over-complicated, though.
+Also asks the elm app to be responsible for something that isn’t really relevant to itself
+Well, to be a little more concrete, I currently have a rough draft of a system where my blog posts are structured as xml files which specify which parts are Markdown and which parts are Elm, leaving me plenty of room to add things like LaTeX support, images, or other fun things
+It looks like `&lt;elm module="Main"/&gt;` right now, which pulls in `Main.js` (compiled from `Main.elm`) and `Main.ports.js` if it exists
+But it looks like I might need to actually try building something with multiple apps and non-trivial ports to see how I need to change my design.
+and the one really important use case I know I'm going to need is the ability to track mouse movement and mouse clicks relative to each app
+I got some suggestions on how to do this the other day, but it's finally time for me to code it.
+sounds interesting.
+My advice is to not overthink it.
+Just dive in and you’ll find something that works.
+Indeed.
+But at the same time, I want to get to a point where I can just drag&amp;drop my folder with the XML and the .js files (or ideally, the .elm files) and have it just kind of appear on my site
+The old way I was doing things made it so tedious to actually upload anything that I never bothered :stuck_out_tongue:
+What would you name a callback that subscribes to all the necessary ports... `subscribeToPorts()`? `installApplet()`? `wireItAllTogether()`?
+This counts as over-thinking it
+Go for whatever name makes best sense to you :slightly_smiling_face:
+I would personally go for `subscribeToPorts` if it’s only subscribing to ports, since the other two names don’t make it clear what’s happening.
+But naming is very subjective
+names can be changed later :slightly_smiling_face:
+it looks like app.ports will be undefined unless the module has at least one port. That seems like it should be useful.
+Well, I got the local mouse coordinates working pretty well. I just can't shake the nagging feeling that, ideally, this should all be expressible in pure elm code.
+It looks like the `elm-lang/mouse` library does it using the `Dom` module... but the `Dom` module looks a bit underdeveloped currently. At the very least, the embedded elm instance doesn't get a reference to the very DOM element it has been embedded in.
+Use a `mousemove` event.
+The mouse package is intended to be used for mouse position relative to the window.
+hey everyone, does anyone have experience deploying an elm project on github pages?
+Yes
+<@U2SR9DL7Q> I’ve done it once. Since an Elm app is compiled into javascript, you can host both your html page and the js file and just include it as normal.
+Are you running into issues?
+That’s how <http://json2elm.com> is hosted
+yes. i made a small one pager with elm-mdl that holds a crude sample resume. i've been using elm reactor up till now. I followed these intructions <https://jasonneylon.wordpress.com/2015/11/08/quickly-create-github-io-pages-for-your-elm-projects/> to try it out on github pages but when i visit the site, I just get the default readme
+If you are getting the default readme, then this is probably an issue with your configuration for github pages, rather than an elm issue.
+I would recommend making a static index.html and have it just say “Hello, world”
+Get that working first
+Then, once you have that, you’ll know that you configuration is good. Then you can include the js file
+Follow this: <https://pages.github.com/>
+<https://github.com/tkshill/tkshill.github.io> is my repo. It's a bit raw. I threw everything up there (dont even have a proper gitignore yet)
+i followed that for the github process i think. I'll take another look though.
+<https://tkshill.github.io/>
+You’ll need to compile the js file
+works for me
+Yeah. You need to check in the compiled JS
+Oh, this is the index.html that elm make generates
+You are deploying the _end_ result of your build process
+That explains it
+So, looking at it, you did an `elm make` and checked in the index.html
+It is there and appears to be working fine
+Oh, I see
+actually... yeah, it's working now. strange,
+<@U2SR9DL7Q> The readme will always be the README
+On the github repo page - it will never show index.html, it will show the README
+Although I’d highly recommend switching to something like `elm make Main.elm --out elm.js` and then include that in a static html page
+I... normally dislike when things start working and I don't know why.
+You have to go to <https://tkshill.github.io/> to see the index.html
+<https://tkshill.github.io/> -&gt; index.html
+So... next I should compile to elm.js, and refer to that in my index.html file?
+I’d recommend that
+Eh, you don’t really need to
+Yeah, you don’t have to
+If this is just a resume site like this, could be simpler to just keep index.html
+But, if you are building something larger, could be good to separate them out.
+You can if you want to. It can be handy if you want to do some fancy html things like put stuff in the head.
+But, of course, context
+Cool. Thank you both. I've come to elm from a few years in python. And a few months dabbling in haskell but never managing to be very useful.
+But it’s not needed, and I personally avoid it unless I really need a seperate index.html :slightly_smiling_face:
+the project will eventually expand.
+Opengraph stuff, etc, in the head (as <@U0EUHKVGB> mentions) would need to have your own index.html that references the js
+If you are just learning, I’d probably recommend it just as a next step.
+Get used to that.
+Elm is pretty brilliant (I've never enjoyed debugging before), but I'm new to serious web dev and front end design.
+Welcome!
+Elm is a great way to get into it.
+I’ve been working in Elm for a little over a year now. Loving it.
+My brief experience with javascript... gave me VBA flashbacks. elm reminds me of python from the practicality standpoint, but you know... delightfully static.
+:slightly_smiling_face:
+One of my first contracts was building an app in Excel in VBA :slightly_smiling_face:
+Back in about 94. Built a small relational database. :slightly_smiling_face: (of course, we are getting into <#C0CJ671HU|random> channel territory here, so I’ll pause)
+indeed, thank you again <@U0FP80EKB> and <@U0EUHKVGB>
+Oh, looking at your repo, might I recommend you pull everything into `Main.elm` for now. Don’t prematurely pull things out into `Types.elm` and `Views.elm`
+I kind of really like pulling it apart though... it forced me to get used to the import system. and there's quite a bit on the way.
+I originally wanted the resume to be a json file that i would decode, but i wasnt sure how to configure the http request when working locally
+I figured out the decoders, but I typically work locally, and wasnt how the http requests would work to get to the file.
+My one recommendation is to wait until things force you separate them out, so you get a sense of how you want to extract things. For example, I’m not a fan of the `Types.elm` `Views.elm` etc extractions. I prefer to extract modules around data structures.
+Use `python3 -m http.server` and serve the json locally.
+So, prematurely picking an extraction style might calcify before developing the feeling for yourself.
+But, as with everything, when you are learning, it is probably one of the lesser of important things. :slightly_smiling_face:
+I see your point. I read as many docs as I could on abstraction style before I started, and checked through some of the popular repos. In the end, this one seemed to make sense for this small project, but I'm not committed to keeping if if it grows a bit more.
+<@U0FP80EKB> do you have an example of the structure that you mentioned?
+<@U0EUHKVGB> I'll look into that.
+for now, the elm type mimics the structure I'd like, but json will let me be a lot more flexible with the data (next step is looking into exporting a pdf from the site)
+I don’t really have an example to show. But, I generally start with a file, then, start grouping the types and records and functions together that seem to work on a similar thing, then, eventually those move into a module with a name around the domain concept.
+Let me look at your repo for a second
+Just a cursory glance, i wouldn’t be surprised if I ended up with a `Resume.elm` that contained the type alias. That module would then contain the views associated with displaying it. It would also potentially include the decoders for pulling it out of the json.
+That would be the start
+Then, as it grew, I would start noticing other structures.
+In this case, since it is a read-only thing, nothing too interactive, then you aren’t going to have a lot of functions associated with manipulating the resume. If there were, they would go there.
+I like to group things together based on how related they are in the domain, rather than how related they are by programming language feature
+When I’m going into the system to work on it, I’m usually thinking “I want to work on things around the Resume” rather than “I want to work on something with Types”
+So, I like things related to Resume to be together
+hmm. I'm so used to MVC architecture... so I immediately thought Model (core types), Views (views) with 'controller' facilitated by elm itself.
+Understandable totally
+This is why I mentioned pulling everything back into a single file until you feel the pressure to pull some stuff out into a module. It helps break out of other architectural mindsets.
+If you think “I want to extract some modules” then old habits come in when there isn’t much guidance
+I try to only extract a module when I am doing it as a form of refactoring.
+Yeah. I think most of my mental resistance is just me considering the sunk costs of the time i spent figuring out how to pull it all out... which rationally, shouldn't weigh on my decision to pull back.
+and I say to myself “that’s duplicate code, the knowledge that these work on Resume” so I eliminate that duplication by grouping them in `Resume.elm` and removing `Resume` from their name
+Consider it that you’ve learned a lot about building modules and importing them. That skill will come in VERY handy when you extract something out for real
+One of the great things about deleting learning stuff is that it almost always is less than optimal. If you delete it, then you don’t have to live with it later.
+And who knows, you might end up liking that structure. It seems like there are people who do structure their stuff that way.
+I’m a big fan of deleting things I’ve done and starting over
+I even wrote a blog post about it. #shamelessplug <http://articles.coreyhaines.com/posts/short-lived-branches>
+that... gets easier with practice. one of the hang ups of the beginner life is that every line seems so much more precious. I spent hours understanding some of the pipes... I don't want to lose them. But what you're saying is exactly what I told my interns learning python for the first time.
+:slightly_smiling_face: definitely
+Well, I’m off to get a porter-infused milkshake. Welcome to Elm, <@U2SR9DL7Q> ! It is a wonderful way to write software!
+for the first time, i dont feel like i'm stepping in a mine field learning web development <@U0FP80EKB> my brain is glad, my heart rejoices. have a good night.
+This is probably a question that has been beaten to death. Is there a good way to do drag and drop. Basicaly my interface looks like this (<http://imgur.com/a/XYqBL>) and I want to be able to drag (to reorder) the lists, as well as the list items, which can also be dragged between lists.
+<https://github.com/mordrax/cotwelm/blob/master/src/Utils/DragDrop.elm>
+mine was inspired by React DnD ( great design, very hard to debug errs… ), in contrast, i spent a few days 2 weeks into Elm to write it and it’s been solid ever since
+<@U17R26VR8> thanks, I fear is most example are only dragging on type of item and I have two (one being nested)
+so updating the model also seems difficult
+That's a problem outside of drag and drop though
+i drag items which are a union type, and inside, they hold composite records… the dragdrop module is flexible enough to allow different ‘types’ of things to be dragged
+e.g: <https://github.com/mordrax/cotwelm/blob/b72efbb428a6d190ff8a8a9ba61638efa2b8e89e/src/Inventory.elm#L51>
+Alright, I'll take a look at it.
+then when you drop it off, you need to handle which ( of the two types ) you need to update in your model
+if you’re looking at my version, it might be useful to have a quick read of react-dnd, esp dragsource and droptarget, i found the concept to be really great and it would explain my code alot better than me or looking at the code ( <https://react-dnd.github.io/react-dnd/docs-drag-source.html> )
+it’s a layer that abstracts what you’re dragging (html) from where (source) to where (html) into what (target)
+okay, I'll give that a read too.
+I'm a little surprised this hasn't been abstracted into something painstakingly easy to do yet. I would think that it's such a common problem, it could be generalized over.
+check out the elm packages, there’s a few of them, i haven’t tried them yet, haven’t needed to
+will do
+does anyone have a clean way to write a msg where i can just specify what item in the model i want a textinput to update?
+i normally use ID's but i want something a bit more generic
+Thanks!
+<@U3KSN5MAL>, I do something like `type Field = Username | Password` `Type Message = UpdateField Field String | ..`
+hmm
+so you would still have to specify a case in the update for explicit types
+thanks though
+Anyway, i think is useful know this - especially if you notice it takes longer to compile. :simple_smile:
+Yeah, sometimes that works, sometimes that doesn't - there are a lot of factors that influence compile times, and those factors tend to shift around between releases :slightly_smiling_face:
+sometimes you end up with a helpers file that is referenced basically everywhere, and that can actually slow you down because every module that uses it, needs to be recompiled whenever you touch those helpers... Having simple, clear functions that do one thing does tend to make life easier, though, and having `update` act as a dispatcher more than anything is always nice, lessens the mental burden, too
+And for the shared helpers - use a specialized `shared` module. So when working only with update logic - all other modules will not be impacted. good to know :smile:
+I have got an odd behaviour when using elm with Chrome (version 58.0.3029.110). I have a page that renders a dashboard by fetching a json using elm-rails. When I leave this page by clicking a link and then use the back-button to go back to the dashboard, I get the JSON and not the rendered page.  On safari this does not happen.
+Heh, that is really weird. Fetching this JSON happens within your init, I suppose? (to verify your elm app gets started at all)
+Anyone working on adding effect types a'la Koka to Elm?
+<@U5X2VC483> most likely not. Elm intentionally has a very simple type system
+Seeing that it already has row/label polymorphism for records inspired by Leijen it looks like the natural next step to to take
+The type system wouldn't need to be changed much
+elm is a little atypical: to add something to the language, an actual compelling use case is needed, rather than "it would not be a lot of work to add feature x". So, how would those effect types make creating interactive web apps easier/nicer?
+taking into consideration that the benefits have to outweigh that we have to teach beginners how it works
+The answer to those questions is not immediately clear for a lot of fancy type stuff, and so elm has put off extending the type system
+I just wondered if someone else besides me is interested in it
+hadn't heard about koka before, looks like something I'll have to investigate
+It looked pretty neat. I remember seeing it a few years ago on reddit.
+I remember it had a particularly simple effect system. If any effect system would be Elm-ish, it would be that one.
+(In my experience, effect systems can very easily grow to to become monsters. I spent a few months learning DDC aka "Disciple" and... dear god)
+it looks neat on paper, are there examples of larger programs using the effects now?
+The madoko markdown editor is written in it
+(which was around already when the popl-paper was written)
+Here's the paper btw: <https://www.microsoft.com/en-us/research/wp-content/uploads/2016/12/algeff.pdf>
+any particular part of the editor that is interesting? most seems pure functions or IO
+Hi there,
+Got a question that Google isn't helping me with so far :slightly_smiling_face: I need to select all text when a text input get's focus. Can I do that in pure Elm or do I need to use a port for that?
+I don't think there's a `setSelectionRange` type thing in Elm, triggering that over a port when an element gets focus is probably your best bet atm :slightly_smiling_face:
+Thanks <@U3SJEDR96>
+I'm diving in elm code after 2 week break, it's so easy to get back into, I don't need to re-create a full mental image of the app, I can just continue where I left.
+I read there way no "official support", but do you know what is the elm browser support?
+And if some browser is not supported, can we easily polyfill it? I saw somewhere that Object.assign was necessary.
+Compiler compiles to ~ES3, mostly. RequestAnimationFrame is also used, but has a builtin fallback.
+I don't think Object.assign is used at all, or at least not in core+vdom
+Apparently it is used only in dev tools (searching the mailing list now). So I guess it's safe.
+But I guess it would help to throw "wide browser support" somewhere on the elm home page. I am working with a lot of enterprises still under IE 9.
+The bleeding edge, apparently
+oh, indeed, elm-hot-loader (which I also encountered on my GH search) seems to be about the only thing, but that's only tangential anyway
+Yeah
+and get just a plain list via API where `path` is a key like `a.b.c`
+at the end I want tree like AreasTree(a) -&gt; children (AreasTree(b)) -&gt; children(AreasTree(c))
+I think fold will fit my needs, but I am not sure what is the best way to put `c` for example into nested structure

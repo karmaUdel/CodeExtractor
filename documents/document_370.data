@@ -1,0 +1,20 @@
+```
+this is out of curiosity, really :slightly_smiling_face: I've played around with decoders a lot, and experimented with stronger error types (<http://package.elm-lang.org/packages/zwilias/json-decode-exploration/3.0.0/Json-Decode-Exploration>) and a simpler version of that is also coming to Elm in 0.19
+That looks like you could probably make use of `Result.map`
+Oh, right. I could actually add a `failWith : Error -&gt; Decoder a` option :thinking_face:
+`Result.map` allows you to transform data contained inside a result.... if there is any.... otherwise, it keeps the error the same
+<https://github.com/ohanhi/ohanhi.com/blob/master/site.hs#L105-L110> :grimacing:
+<@U3SJEDR96>, isn't that what the null decoder does?
+(kinda)
+If you're using `null ERROR` and checking on `Ok ERROR`... Maybe? But... Ew :scream:
+considering that sends cold shivers down my spine
+well, no, I was only remarking on your type sig.
+I haven't touched Haskell in a while. I should learn the new Stackage package manager so I can hack on the elm compiler.
+null decoder `find this or if err then find this ...` if you chain it together.
+I have a feeling we're talking about completely different things, here
+<@U3SJEDR96> maybe have `ErrorType s = ... | Custom s` too :slightly_smiling_face:
+when we're going all custom on the errors
+Yeah, was considering that, too. `Decoder e a` seems like it could work, actually
+Now I'm sort of thinking about how to have extensible union types
+boo hiss at extensible union types! The goodness of having a fixed set of constructors is that our `case` statements can be complete.
+well, maybe this is not for <#C192T0Q1E|beginners> :slightly_smiling_face:

@@ -1,0 +1,17 @@
+```
+question: how to find a dependency a leiningen plugin pulls in at runtime?  I've run `lein deps :tree` on the most obvious dependencies, and I don't see where a particular version of ring is coming from.  I've sprinkled `:exclusions` all round.  Yet I find the dependency in `target/stale/leiningen.core.classpath.extract-native-dependencies` ...
+(context: trying to upgrade gorilla repl to 1.9, but  it barfs on an old version or ring)
+happens when I do `lein gorilla :port 9000`, yet neither gorilla-repl nor lein-gorilla seem to need it
+have you tried deleting `target`?
+I've deleted all the content yes
+`lein deps :tree` should work, unless gorilla-repl does something funky
+you can issue a global exclusion for ring
+<https://github.com/technomancy/leiningen/blob/master/sample.project.clj#L86>
+hm.  the problem being that lein-gorilla does need ring, just not that old one ...
+that's ok, you can specify the latest version
+exclusion just means "ignore whatever transitive dependencies there are relating to this"
+thank you, will try that :slightly_smiling_face:
+to look at plugin deps there's a separate plugin tree command `lein deps :plugin-tree`
+<@U051SS2EU> did not know that
+<@U051SS2EU> nice one, that should help
+thank you!

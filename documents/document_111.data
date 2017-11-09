@@ -1,0 +1,21 @@
+using it outside throws ```java.lang.IllegalStateException: Attempting to call unbound fn: #'clojure.core/unquote```
+does this only get bound within a syntax quote?
+or is that a different error?
+right, it exapands to unquote, that is undefined outside `
+this is all stuff implemented in the java code of the reader
+it isn't built on the normal machinery, it's the basis for it
+is unquote a special form?
+syntax-quote ` is special, and it handles unquote
+so unquote will get evaluate somehow within a syntax quote
+but outside of it it has no meaning
+and even inside, it's not a function
+it's just a symbol that ` interprets
+correct?
+right, it's a parser machinery basically
+we're at the point in this convo where I'd probably have to read more code to answer more questions though
+Luckily for you I don't have more questions at the moment :smile:
+like whether there's an actual unquote method somewhere in Compiler.java or if it's entirely a figment of syntax-quote
+For now I think I am contempt with the answer that clojure.core/unquote is not a function, but something that has a special interpretation within a syntax quote
+there's this, but I am not totally sure what it means - UNQUOTE used to be defined as a special symbol but now it is commented out <https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/Compiler.java#L70>
+Ah, to be more specific, I am using `lein eastwood '{:add-linters [:unused-namespaces] :namespaces [:source-paths] :exclude-linters [:unlimited-use]}'` as my command, and I get an error for a namespaced spec (so you might be right that a namespaced keyword would not create problems, sorry!).
+unquote never makes it to the compiler

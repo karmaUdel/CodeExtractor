@@ -1,0 +1,83 @@
+```
+I would like to avoid the duplication of the shapes definition
+There is currently no way to automatically enumerate a union type. Keeping the list of possible shapes as close to your `shape` type should help in making sure you don't get them out of sync by accident :slightly_smiling_face: (i.e. `shapes = [ Poly, Star5, Image, Ellipse, Circle, Rectangle, Unknown ]` and refer to `shapes` whenever you need that enumeration)
+is it worth to spend time on implementing that feature ? Something like
+`List.fromUnion Shape`
+?
+dont know if I can do it, but I would love to give it a try ...
+It would need support from the compiler since type-info isn't available at runtime. Additionally, it would only work for enumerations, not unions that actually hold content.. So in reality, it would be of somewhat limited use, and fairly complex to implement in the sense that it requires "magic"
+i.e. if you decide that a `Poly` shape should also have an Int that defines the number of edges, you can no longer enumerate it
+all right understood, thank you <@U3SJEDR96>
+I found this comment intriguing <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L25-L26>
+Anyone know where to read up more on plans for SPA stuff in 0.19?
+<https://github.com/elm-lang/projects/blob/master/roadmap.md>
+<@U3SJEDR96> Thanks! I've seen that but didn't quite make the connection to why there won't be anything your Main.elm anymore :stuck_out_tongue:
+If SPA in 0.19 starts to look more framework-like I will be very happy
+Ah! Interesting, and much cleaner :slightly_smiling_face:
+Thanks!
+Then I can just switch on the nodeType field for different UI behaviour!
+syntax for Dict literal?
+I see Dict.fromList in the docs - is that how it's usually done?
+Hallo everyone!  I'm back with another question about... you guessed it - Union types!
+Basically in a list of records with different types is it possible to filter by a field without using a case for each different type?
+here is the code:
+<https://ellie-app.com/3H7WyZXf2F7a1/0>
+line 88 is what I would like to do
+the rest of the function body is what works
+<@U5WS7CJLV> Dict.empty does also the job then you can add and remove elements (does this answer your question?)
+sure
+was just wondering if you could do something like list literals
+but it seems like with Dict you must be function-y
+<@U641LDZFU> I am a super noob myself, but I have an idea and will do my best to explain it
+union types can have more than one "constructor" arg
+what if you passed the common stuff, like id - as the first arg to your different union "constructors"
+type MyUnion =
+Cool Int Float
+I think I did in the list at the bottom of the file :slightly_smiling_face:
+AlsoCool Int String
+<https://ellie-app.com/3H7WyZXf2F7a1/0>
+Is that what you mean?
+or do you mean take the ID out of the record?
+yes, I think that's my idea
+but now that I'm thinking about it further, maybe it won't work.  I am new to this union stuff myself
+<@U5WS7CJLV> it seems that there is no other syntax
+taking the ID out of the record, I mean
+<@U5WS7CJLV> you _could_ have special syntax for Dicts.. and sets, and arrays, and whatever other data structures. But having more syntax wouldn't necessarily make things more legible or easier to understand :slightly_smiling_face:
+right, I just wanted to make sure there wasn't literal syntax before I started functioning everything
+for example, I've used List.singleton when [ myItem ] is simpler, I think
+<@U641LDZFU> what if StoryNode were not a union type?
+Fair enough :slightly_smiling_face: `Dict.fromList [ ( "key", value" ), ( "other", "value" ) ]` is the most succinct syntax we have for it
+what if it were a record with an ID property, and some other property that held the union-y stuff?
+I think then I couldn't have a list filled with different "StoryNodes"
+because the format of the records are all different
+ah, interesting
+I'd like to hangout and talk more Elm, but my children be calllin' - later fellas!
+<@U641LDZFU> Here is a fairly light refactor which fixes that particular problem. <https://ellie-app.com/3H8hWdzqWCCa1/0>
+The basic changes are merging the two identical record aliases and switch from using a string to represent the different node types to using a union.
+Very nice
+I think that's what you were hinting at too <@U5WS7CJLV> !
+Thanks so much
+<@U641LDZFU> I don't understand where `rawStoryNodes` comes from.. :slightly_smiling_face:
+line 89
+it's at the bottom of the file isn't it?
+it's just a list to play around with
+saw it later… why don't you pass it to the function?
+if it's just as a quick trial still this makes it error prone
+ah, that could be a good tip!
+it's basically my "database"
+you want to have pure functions (event though in Elm you cannot mutate at least)
+Ah yes
+Then would I have to pass it into the view function too?
+or would it just be worth attaching it to the initial model?
+you pass the model to the view function usually.. so yes
+and if it's 100's of nodes long
+it won't have a huge impact?
+considering the model gets passed around all over the show
+(on performance)
+Data rarely gets copied in Elm. Since it is immutable, you just pass or copy references.
+btw, Thanks <@U48AEBJQ3> here is a diff with your fixes, incase anyone else ever comes across this :slightly_smiling_face: <https://gist.github.com/allansideas/2360e065c13a48b419fce245d0485a12/revisions>
+Ah alright!
+Thanks again everyone for all your help!
+The door buzzer has geklingelt, so I am off for a bit :slightly_smiling_face:
+ciao
+Of course i could create my own but there must already be an implementation somewhere? I saw that in an earlier version this was in Http but seems to have been removed in Http 1.0.0

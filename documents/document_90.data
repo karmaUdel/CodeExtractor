@@ -1,0 +1,69 @@
+        }```
+2017-07-20T16:45:14.220723
+there are two boxes (and invisible chars) that I don't want in my string.
+slice
+<https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html#slice()>
+2017-07-20T16:52:42.454039
+debugging charsets, I try all the combination until I get something working :slightly_smiling_face:
+I don't think programmers have a good vocabulary for discussing time[-zones]
+My apologies if this is a FAQ, I did try searching here and in the Google Group… but I'm just curious, does anyone have a sense for when Clojure 1.9.0 might start making its way to beta and then final releases? I'm not stressed about it or anything, really I'm just curious. Thanks!
+solved my shit above, someone from the past made osc message decoder that I could just use directly. This is what happens when I program without a beer.
+<@U69US348Z> I get the impression sometime later this year. The hold-up is because 1.9 will include its own dependency management.
+dependency management?
+<@U0GN0S72R> There was a talk about it at EuroClojure a few hours ago. Because spec is now its own package, the idea is that Clojure needs to be able to download dependencies without requiring an additional build tool like Leiningen or Boot.
+oh man
+:exclamation:
+So Clojure will get a `clj` script that will use a `deps.edn` file to retrieve packages and construct a classpath. The classpath will be cached so that the shell script can use it directly the next time its called.
+huh. i wonder if stuart sierra was getting at this a bit in his recent article
+It looks pretty nice.
+or was that in the comments about caching the jar deps
+the next question is how that composes with lein/boot
+and where do you get the script from
+Thanks <@U0BKWMG5B> !
+And thanks so much for all the excellent libraries and tools that you share with the community!
+<@U0GN0S72R> Script will be packaged up in brew, apt, etc. I believe it's a script around a Java jar for performance, IIRC.
+Lein and Boot probably won't be affected at first, since it's a separate system
+But I can see a build tool being made that's effectively just a bunch of `clj` aliases.
+<@U69US348Z> You're welcome
+please tell me `deps.edn` uses the `[org.clojure/clojure "0.9.0"]` syntax at least
+<@U0GN0S72R> Nope, it's more like: `org.clojure/clojure {:source :mvn, :version "0.9.0"}`
+So it's a map of symbols to maps.
+But the idea is that it's not necessarily limited to Maven
+e.g., npm?
+Yeah, or raw Github for example. Funny you should mention npm, since ClojureScript is getting the ability to use that directly.
+via `deps.edn` or something different?
+Via a compiler option I believe
+I imagine that it'll converge with Clojure
+Advantage is that npm packages can be pulled into Google Closure, so you don't need externs
+As well as being convenient.
+computers are complicated
+:thinking_face: probably naïve, but when you first mentioned dependencies I thought of Rich Hickey's talk last year (?) about maybe radically changing how we manage dependencies… IIRC to boil it down reductively, to track dependencies at the function level rather than the "library" level, and to never change the contract of any given function… pretty compelling stuff!
+<https://www.youtube.com/watch?v=oyLBGkS5ICk> for those who have not seen it
+It doesn't go that far, yet, since it's just for classpaths and only supports Maven currently.
+But I get the impression it could go that way in future.
+yeah that makes sense
+gotta start somewhere
+And it has the advantage of not using Maven's dependency resolution algorithm.
+I don't know the details of why that's compelling, but moving away from Maven sounds positive to me
+so transitive deps are all entered manually?
+<@U0GN0S72R> No, it'l resolve transitive dependencies, but I believe it all has to be unambiguous otherwise it'll complain.
+Presumably if the Maven artifacts lead to conflicts it'll require that you resolve the dep explicitly.
+Rather than the Maven resolution of just going with the "closest" dependency.
+Same thing I heard with the cljs npm deps. They want the deps to be unambiguous and not subject to change.
+Which I can get behind.
+So there is no support for specifying version "ranges" then
+or is there a lock-file type thing? a la Bundler/Cargo/Yarn?
+No support for specifying ranges, I'm pretty sure.
+There's support for overriding deps, though, IIRC.
+And (eventually) for excluding transitive deps, but the syntax for that is pending a talk with Rich
+Take what I'm saying with a grain of salt, until the EuroClojure videos comes out :slightly_smiling_face:
+Since I'm a secondary source, and it's late
+That's Alex Miller's talk today?
+Looking forward to the video ... hopefully tomorrow? :slightly_smiling_face:
+Yep, Alex's talk was on the `clj` script, `deps.edn` thing.
+I'm kinda thinking about a `build.edn` now…
+Or a `tasks.edn`, either in the project root, or included in the resources path.
+We use `deps.edn` for regular coordinates today and load them from various subprojects and concatenate them (and then update them from a list of "pinned" versions in a `versions.properties` file) as part of our dynamic Boot-based dependency analysis.
+Is there a way to do something like map fusion on lazy seqs? Does it even make sense to do that (given chunking, or for some other reason I haven't thought of)?
+<https://clojure.org/reference/transducers>
+Thanks! I'd been under the impression that transducers only made sense in an eager context, but further research suggests that belief may have been oversimplified :stuck_out_tongue_winking_eye:.

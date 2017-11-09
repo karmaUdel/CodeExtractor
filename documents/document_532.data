@@ -1,0 +1,106 @@
+```
+attempting to install via sudo so this is odd
+Sounds like an issue with npm permissions
+right, but sudo
+did you try `npm i -g elm` without sudo?
+thats a global install, it should never work
+on some systems that works out of the box, just installs it for your user
+then npm is broken and doing things it shouldn't be
+as in `~/.node_modules` or something
+no -g tries to install globally
+Hmm, I got it installed globally with npm 4 on my Fedora.
+hmm, attempting to install locally to the project is also giving me grief
+Have you installed your node with `nvm`?
+node is installed via the system package manager
+If you install it with `nvm`, everything should work.
+And it is also very comfortable.
+Which distro are you on, and which version of `npm` are you running?
+anything which suggests this as an install pattern `wget -qO- <https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh> | bash` is not touching my system
+I'm running gentoo with npm version 5.0.4
+You can read the code before piping it if you are afraid.
+So then this won't help you either: <https://github.com/nodesource/distributions>
+node seems to be installed fine, other node tools I have seem to work
+it's just elm
+I think it's because the script doesn't realize that /usr/lib is a symlink for /usr/lib64
+or something like that
+Well the error message is pretty clear: the installation starts at `/usr/lib/..` and tries to put the `/usr/lib64/..`, which your system does not allow.
+right, what you said
+despite a sudo user having full permissions to do so
+also, some of the install folders where my local user despite me installing with sudo
+I think npm is just broken and forking wrong
+Yeah, it's strange. Does your system have any sort of SELinux set up? I think I may have seen something like that some time ago with some npm packages.
+nope, its just a desktop all of that jaz is disabled
+<@U0EUHKVGB> would you have any idea about this npm install issue?
+hold on something is strange here
+despite me running as sudo it keeps creating folders as my local user
+`someRecord = { field1 : String, field1: String }`
+wait
+<https://ellie-app.com/3Cd35KmNBpba1/0>
+yes it compiles. but why?
+<@U0CLDU8UB> what error?
+2017-06-29T14:07:08.442945
+<@U23SA861Y> are you trying to install it in docker?
+What distro?
+`sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}` and this is probably why npm is broken given that those instructions comp from <http://npmjs.com|npmjs.com>
+no, base system
+gentoo is the distro
+Eh
+compile elm yourself :wink:
+how does npm think that command is acceptable
+yeah, I suppose I can do it from source
+maybe even make a ebuild
+unless it needs some extreme version of ghc to work
+Personally, I would not really recommend using gentoo for anything you want to get work done on
+I would if you are doing embedded development
+But it’s your life :slightly_smiling_face:
+You can compile things from source on other platforms, and get minimal linux installs without needing recompile the world from source
+lets put it this way, my two coworkers are running ubuntu and they've encountered far more issues
+I would not recommend Ubuntu either :wink:
+Anyway
+If you do `npm install -g elm`, then it will install elm globally into your user’s directory
+if you have that set up
+(without sudo)
+it's trying the the permissions npm is using are screwed up
+<@U2LAL86AY> It's a remnant of the time when records' fields could be added and removed. Back then it would've been very hard to make the compiler not allow them. Since those things are not in the language anymore, it's now a bug and apparently it has been fixed in the current development branch.
+<@U23SA861Y> see this: <https://docs.npmjs.com/getting-started/fixing-npm-permissions#option-2-change-npms-default-directory-to-another-directory>
+I was looking at that
+do that :+1:
+that line of code should never be run on any linux system
+you’ll need to install elm-test etc anyway
+You’re not looking at the same thing as me :wink:
+Click the link I shared
+`Option 2: Change npm's default directory to another directory`
+that is more tolerable
+ok, that fixed everything. Why would `npm` as a default try to install to the system folders as an ordinary user. That's insane
+Glad you got it worked out!
+I've got a weird issue with SVG updates.  Minimal test case: <https://ellie-app.com/3CfnB4gyTRCa1/0>
+Essentially, when I change alignmentBaselines on text, if the structure of the SVG nodes doesn't change, the rendered image doesn't update.  I can see the properties change in the dom browser in chrome, but the actual rendered image doesn't update.
+Also, if I hit `(ctrl+shift+m)` (toggle device toolbar) that will get the SVG rendering to update once.
+What router does everyone use?
+I'm trying to modify the "elm-spa-template" to create a SPA (<https://github.com/hurwitzlab/elm-imicrobe-spa>).  I basically decided to jump into the deep end and see if I could swim.  I'm merging in code from <https://github.com/rtfeldman/elm-spa-example> to fetch my data, and I'm getting a compile error when I try to expand my Page.Investigator (<https://github.com/hurwitzlab/elm-imicrobe-spa/blob/master/src/Page/Investigator.elm>) to include the (currently commented-out) "investigators"/"loadInvestigators."  I have it down to this one change, so I'm hoping maybe someone can look at this and see my problem because I'm totes stuck.
+boons: `elm-lang/navigation` and `evancz/url-parser`
+<@U5LFUHH19> what is the error?
+<https://gist.github.com/kyclark/f4fbac36c207880ef3871ad0a456916b>
+Errors are coming from Main.elm, but I can't find how it's connected to what I'm doing in Page.Investigator.
+is this intented `| InvestigatorLoaded (Result PageLoadError About.Model)`?
+because you treat this record later on as if it is a `Investigator.Model`
+<@U40QW928G> ? You mean like Navigation?
+at line 132
+yes navigation for a spa
+I have defined lists of all Notes, Scales and ExerciseKinds - now I need to pick a random item from each list. Any tips where to start?
+<@U40QW928G> Well i use that that elm-navigation
+nice thanks, I just saw those two in the elm tutorial
+<@U285A8S8H> have you used random generators yet?
+I'll check it out
+<@U0LPMPL2U> nah
+Gah!  That's it, <@U1CE9DL9H> !
+<@U285A8S8H> I think random.pcg and random.extra have nice options for picking a random item from a list
+They work a bit like JSON decoders. You build simple generators and combine them into a more complex one
+that's cool
+Mind you, I'm still pretty lost, but I just could not see that bug.  Thanks!  I'll go back to figuring this out, now.
+`generate notes |&gt; andThen (generate scales) |&gt; ...`?
+more like `Random.map3 Exercise randomNote randomScale randomKind`
+oh right
+you only need `andThen` if the rolls are dependent on each other
+thanks, I'll play with that :slightly_smiling_face:
+If you've worked with Tasks before, that's also a helpful frame of reference.

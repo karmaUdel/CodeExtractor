@@ -1,0 +1,69 @@
+Never mind my question, I finally figured it out, I needed ```("case_types", Json.list [Json.string "at-need", Json.string ""])```
+How can I do Int -&gt; Float?
+Maybe too late, but you could use `elm-format-number` to format the number per se (customize separators for cents and thousands, amount of decimals etc) and then just concat the currency string in a separate function
+<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Basics#toFloat>
+`toFloat`
+Ah, jeez, just saw that.  Thanks.
+<http://klaftertief.github.io/elm-search/?q=Int+-%3E+Float>
+Fancy Search is oh so fancy
+That is soooo nice.
+I am hesitant to recommend packages outside the stdlib which I have not had direct experience with.
+also, yours doesn't support indian numbering :stuck_out_tongue:
+That's pretty cool! <@U3FJSB596>
+From modular parts build the whole
+asking the important questions
+I built smth similar in Elm using WebGL <http://unsoundscapes.com/elm-webgl-playground/tangram.html>
+you should fix that
+:stuck_out_tongue:
+Where is `Color` defined, such as used here: <http://package.elm-lang.org/packages/evancz/elm-graphics/1.0.1/Text#color>?
+“fix” hahahaha :stuck_out_tongue:
+<@U3L8MM10T> probably this <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Color>
+Thanks, it didn't occur to me that it was in Core.
+which brings up an interesting notion that the elm docs don't give you references to the imported library types that are exposed
+I have an &lt;input&gt; that "onInput" updates my model's `query` and I have a &lt;button&gt; that fires a search using that query.  How can I have it so that hitting &lt;Return/Enter&gt; will fire the search?
+setup onKeyDown to dispatch the search if it's keycode 13?
+OK, let me try that.
+Hi this maybe a weird question but I've never used Google groups before. I posted something to elm discuss but can't see my own post. Is that normal?
+If I set up the &lt;input&gt; inside a &lt;form&gt; I could possibly use `onSubmit`?
+possibly, is that exposed
+Yes, that works!
+I am correct that <https://github.com/etaque/elm-form> have no type safety at all? so I can use custom type with Dict instead and it will be the same typesafety?
+just started working on new large form and not sure if there is better way then I am doing it now. In simple forms I have just messages like `SetFirstNamee String` and in large one (there is 3 forms on single page with about 30 fields total) I am using a Dict with `UpdateField Form String FieldValue` message (params are form -&gt; field name -&gt; value)
+it would be roughly the same as using a raw dict in terms of type-safety, but with things like validation builtin, and a nice api to work with it
+Just not sure if there is a better way available with typesafety and w/o 30 msgs for each field :smile: just looks ugly since each message name should be prefixed also because each form have `First name` field for example and there is 2 ways to avoid name conflicts: prefix msgs or move messages for each form into its own file
+got it. I don't need client-side validation at all - everything proceed on server-side btw
+you can also have a structure thats only 1 msg like `FormUpdate formModel`
+it's similar to the msg prefix model except you compose the full item of data in your view and just dispatch it back
+cfr elm-sortable-table
+yeah: <https://github.com/evancz/elm-sortable-table>
+Your forms surface area becomes `viewForm: (FormData -&gt; msg) -&gt; FormData -&gt; Html msg`
+<@U23SA861Y> didn't get it. how keeping `formModel` in message will help with field routing?
+it dispatches back the entire form model so you only need one top level message
+in the view you do the append or edit and then dispatch the modified model back in the msg
+ah, yes. some fields have logic like autocompletion, masked inputs, etc.
+so I think it's not the best idea then. in case of `Dict` I am just pattern matching in `update` like `UpdateField "phone" (StringValue phone) -&gt; ...` and processing it
+btw messages becomes a problem only when page have more than 1 form. with single form it's fine for me - I am just defining `FormMsg` type to split it from main `Msg`
+<@U3SJEDR96> I'm looking at your sudoku solver
+and there's no type alias Model = [stuff]
+did you know in the beginning that you were going sans-model?  Or was that a discovery you made along the way?
+"Oh, turns out I don't need a model."
+I guess I've yet to see how the big kids do stuff.  All of the Elm I've read is the stuff in the docs.
+solving sudoku is something that can be done in an ordinary function, it doesn't need persistent state because it isn't interacting with the world
+I see.  My brain does not jump that far yet :slightly_smiling_face:
+perhaps some day I will think in terms of ordinary functions, but for now, I shall have to google what an ordinary function is
+it means I can write something like: `solve : SudokuBoard -&gt; SudokuBoard`
+type of input is same as type of output?  That is ordinary?
+ordinary was the wrong word, pure is what I meant
+you don't need random numbers, you don't need a network socket, you don't need to wait for a user. All you are doing is transforming one pattern of bits in memory into another pattern
+the only reason he is even using commands at all is to interact with the random number generator
+or so it seems
+so when you start writing some new Elm, jonf, do you start with Model, update, init, etc?  Or is it more organic?
+I am currently a robot following an Elm pattern
+this stuff he's got here is a bit experimental as it's a CLI thing
+If I'm reaching for elm its likely that I want to render some user interacting content
+so I'm going to be thinking about what I want to show and how I want users to interact
+Also worth noting that while it's convention to have a `type alias Model` in Elm apps, the name of the type that stores state can be anything
+yes, TEA is completely agnostic to the exact types of models and messages
+The elm architecture _does_ require some value for it's `model` / `init`
+but you can give it anything you want
+In the sudoku solver, that's the empty tuple `()`

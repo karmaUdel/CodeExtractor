@@ -1,0 +1,45 @@
+```
+(you can use `inContext "macro1" &lt;| succeed Macro1 |= something |. something else` to add contextual information to your parsers, btw)
+so error messages allow you to track how and where things went wrong
+Ah .. to have good error messages?
+Yay!
+my guess it's committing to stuff before bailing out. You'd need to delay that commit - <https://github.com/elm-tools/parser/blob/master/README.md#delayed-commits>
+That sounds right and is consistent with the information given about the column of the error.  I'll read up on delayed commits.  Thanks!
+And using context to provide better error messages I can confirm that premature commit is the problem.
+in your case, on those statements, you could consider using something like mentioned here: <https://github.com/elm-tools/parser/blob/2f9c3370fe82211b5b4a37166f795face6801326/comparison.md#expressiveness>
+Is there a package for generating the ordinal value of a char? (like ruby's String::ord method)
+elm-ordinal just gives the th/st/nd suffix
+elm-char-codepoint does almost the correct thing.
+`Char.toCode`
+keyCodes are three digit?
+no, but neither are ordinals
+I'm a little unsure what you're really after, tbh
+will test, thanks <@U3SJEDR96>
+I'll give it a test and get back to you
+`toCode` gives the UTF-16 code unit as a decimal
+I need a replicatable key in elm and in rails so that I don't have top pass keys around
+perfect
+`elm-char-codepoint` gives that as a utf-32 decimal, basically
+(oddly, I just implemented `utf-16 &lt;-&gt; utf-8` which involves a side-step through utf-32. In elm. It was painful.)
+your pointer is perfect for my use, thank you. I wasn't aware the keyCodes were exactly the same operation that I was looking for.
+<@U3SJEDR96>, Yes, `delayedCommit` works quite nicely!  Thanks again.
+Ie. Allow within innerCard not only eject its own InnerCard.Msg messages but also the ones from outerCard?
+Is there a way to have `String`?
+You lose the constructor function when not using a record
+however, you sure can
+`succeed identity`
+i.e. `Arg` is a `String -&gt; Arg` function, and you'd rather have a `String -&gt; String` function so you end up with a `String`
+`identity` fits the bill :wink:
+is there any syntax for { model | x = y } with nested models? I guess the Focus library is one, but is there anything I am missing here?
+I'm afraid not
+I've generally found that when I need to update nested models, I'm looking at some sort of abstraction that wants to come out with some helper functions around it. Not always, but a good indication. In a way, you can look at updating nested records as a good time to think about how the law of demeter applies in your case.
+<@U3SJEDR96>, thanks again!  Got it working like I want with `identity`
+Okay, thank you guys. So nesting is not a recommended representation of data in Elm?
+Nested records are fine as long as the data isn't updated often.
+When you do want to update a nested record, it's nice to make that into a function: `{ model | favoriteCat = updateCat "meow" model.favoriteCat }`
+Right, this is data that is updated pretty much constantly though.
+But only certain parts of it, so I guess a function that updates the stuff I want to update, makes sense
+are different cases of a discriminated union interchangeable, like base class and derived class in OOP?
+I'm trying to have only one field in the top-level model of my SPA which then "contains" the page data of the currently active page. So I tried making a DU with all the different page data types I have, one case for every page. But then I have problems calling the different pages' update functions, because they expect the correct data and not the top-level DU
+Then I tried pattern matching on the DU and only calling the update function when the case is the right one - but that results in problems with the overall return value of the top-level update function branch
+you'd need to "rewrap" that return value with the correct tag

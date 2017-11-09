@@ -1,0 +1,142 @@
+```
+Can you upload custom emoji via the API?
+Does anyone know?
+I think it's in the doc that you can't
+from top of my head
+got it
+<https://dev4slack.slack.com/archives/sf-meetup/p1464974036000057>
+I've created a PR with changes for better logging and debugging
+feel free to comment on it :slightly_smiling_face:
+<https://github.com/howdyai/botkit/pull/260>
+Hey all.. we've written up some learnings about our bot &amp; analytics. Check it out here: <https://medium.com/@artemerritt/got-bot-analytics-1909c677a6fb>
+<@U0DSTH2HL>: nice
+I'm just looking at my first conversation on <http://dashbot.io|dashbot.io> and I have to say I really like what I see so far
+<@U0DSTH2HL>: very cool. You might find <http://slackcharts.com|slackcharts.com> interesting to push your visualizations back into a chatbot #botception ;)
+<@U0DSTH2HL> looks like one of the first real shot at bot analytics
+One year ago:
+<https://twitter.com/benbrown/status/606529340306780160>
+today, there are 2128 members!
+42X growth :slightly_smiling_face:
+<@U04SM6T2H>: pretty nice growth!
+Hi all, I am going to develop a slack bot using nodejs and <http://api.ai|api.ai>. Which library should i use? botkit or node-slack-sdk <https://github.com/slackhq/node-slack-sdk>
+<@U1E7WGWRM>: Botkit!!
+There is an <http://API.ai|API.ai> middleware that makes it very easy 
+<https://github.com/xVir/api-ai-slack-bot>
+Is it the one you are referring to <@U04SM6T2H> ??
+No
+Botkit-middleware-apiai
+Thanks <@U04SM6T2H>
+(according to the docs it should work for custom integrations, and it's a custom bot api token that I'm using
+Hello guys! I have a question for experts familier with botkit. How to create a group or do any action requiring real user rights? When I call `bot.api.groups.create` it says me that I'm bot, ant that's right. But I can't find out how to do smth like `user_from_convo.api.groups.create`
+hello guys
+I wanna create a slack bot SaaS service, how are you scaling BotKit?
+micro services with separation of responsibilities and queueing services such as rabbitmq / redis
+okay but to scale the botkit layer, is it simple as spawning many controllers as needed?
+<@U1EG97KUY>: kind of, you need to shard RTM connections, which botkit won't do as it stands right now
+so it's up to you to architect that
+Ideally you want a single node process per slack team you're connecting to, so if an instance of botkit crashes it only affects one team. Look into something like pm2 (<https://github.com/Unitech/pm2>) to keep those instances up and errors logged
+<@U0CS6NSF5> but does botkit exposes anything? Right now it seems kind of black box
+I know they haven't built scaling within botkit yet, I don't use it myself :slightly_smiling_face:
+<@U1C5VL0EQ>: are you running one node process per team?
+yes, but only because I'm only connecting to one team :slightly_smiling_face:
+and how much memory does that team take?
+good question, I actually have no idea
+doing it that way will probably be more expensive, since you will need more memory per team
+and you still need to set it up to shard teams across machines anyway
+unless pm2 does run in a cluster and orchestates it
+Here's my app created for the company I work with. I just wondering if i can get feedbacks :simple_smile: I had already submitted it to Slack App directory and its passed the reviewed . I just waiting for the official listing.   <https://timetracker.mesasix.com>
+Do i have a way to know the team's id in a botkit conversation?
+<https://github.com/howdyai/botkit/blob/master/readme-slack.md#how-to-identify-what-team-your-message-came-from>
+<@U19J7PF7T>: ^
+<@U04SM6T2H>:  thanks a lot
+I almost got it working,. the only thing i need is to get the channel id where the bot has been added
+is there any method?
+<@U19J7PF7T>: they can be in multiple channels, right? You'd have to inspect the message to see where _it_ came from.
+right
+Hi Guys, as far i can see, there is no option to display postback buttons while sending message from slack bot. What is the best alternative guys?
+i think it will be added just in a <#C04SM6TAK> channel
+<@U1E7WGWRM>: You can do an attachment with a title_link? <https://api.slack.com/docs/attachments>
+Or maybe just send back a URL so the user's browser opens, and have a button there.
+<@U1BPBKXK5>:  no I dont want to display any url. i want to give three options to user which on click, can send me payload. the same way as fb messenger bot works
+Ah, I see. I don't think Slack does that. Maybe you could do something similar with reaction emoji?
+Most things like this that I've seen have people replying to the bot with "1", "2", "3", etc, but I'm not a huge fan tbh
+yes exactly
+thats not a structured messaging then from slack bot
+i am new to slack world. have been working on messenger bots before
+<@U19J7PF7T>: bots do not get added to any channels by default
+they have to be invited
+like vampires
+<@U1EG97KUY> <@U0CS6NSF5> FWIW we handle RTM connection scheduling and autoscaling across multiple botkit processes on Beep Boop :slightly_smiling_face:
+we've got it sorted in our case already :slightly_smiling_face:
+Link: `<http://goo.gl/forms/DTc6B2oV6bZ29OJv1>`
+Hello all, anyone familiar with Botkit ?
+Best try the <#C0AV5N8NA> channel mate
+thanks, will try
+Hello there, does someone know what `invalid_auth` means?
+<@U0GT29N3A>: it means the token is incorrect
+the API has sometimes had bugs where `invalid_auth` was returned instead of the actual error like `token_revoked`
+Hum. I have the other situation. I sometimes get `invalid_auth` for a perfectly valid token.
+probably a bug
+In fact since yesterday evening, issuing a request with "fresh" bot token (just when coming back from the Oauth workflow) *always* returns an `invalid_auth` for us...
+This is quite annoying
+<@U07VCKRUK>: :point_up:  is that a known issue already?
+No — I'm not aware of any widespread issue.  Can you please open a help case by emailing us at <mailto:feedback@slack.com|feedback@slack.com> ?
+<@U07VCKRUK>: already did that, just got a response, I'm replying to acknowledge the problem.
+Zendesk issue is 1031297 [NZK379-YD6N]
+I'm having the same issue as <@U0GT29N3A> , on first install of the bot, it appears the token is invalid (getting invalid_auth message and bot is offline) ... but if i uninstall and re-install the bot, everything's good... it's just that first auth... happening since about yesterday at 12pm Eastern Time
+we saw that yesterday too, had to restart the websocket connection to get the bot working after our first attempts gave us `invalid_auth`
+Can you share any code on how to do that?  I haven't dug too deep into the inners of BotKit, aside from some tweaks to suit my needs
+we're not using botkit actually, using <https://github.com/zerobotlabs/relax> right now
+I'll take a look, thanks!!!
+I'm getting the “invalid_auth” bug too.. I just tried installing our bot, <@U1ESKE8HW> here, and had to uninstall &amp; reinstall to get a valid auth. I'm seeing this error occur for any installs in the past 24 hours.
+That's at least 4 of us now! Glad to see we're not alone :slightly_smiling_face:
+uhoh!
+Our engineering and ops teams have been looking into this — it sounds like we're close to figuring it out.  Sorry for the bother!
+You have no idea how much trouble this has done for us. We were wrongly (our bad) considering this invalid_auth as a revoked token, so basically it was almost impossible to install our app, since the teams were revoked as soon as they connected.
+I understand, I'm sorry.  We're working to fix the problem as soon as possible.
+YAY!!! :smile:
+<@U0GT29N3A>: is it happening with all installs, or only sporadically?
+<@U0CS6NSF5>: all installs, but the delay may vary between 1-5 seconds
+I just checked and it seems we've hit the issue too
+So does this mean that anyone who has joined using the slackbutton _today_ is basically dead in the water?
+Only if you don't retry the connection some time later after first receiving the `invalid_auth` error.
+not everybody
+hi everyone
+And only for bots (user tokens were not affected for us)
+hrmm
+ok
+It happened for all installs for us too and when I tried adding other bots (to make sure it wasn't us), the same thing happened. Some bots would show up, but not be online and a few (e.g. polly) would send the first message, then bomb
+oof
+ok
+i'm sure folks at Slack are ON IT
+<@U07VCKRUK>: can something go up here? <https://status.slack.com/>
+the frustrating part is that the bot user gets added, but is then not online, so it feels like your bot is just zombied.
+Sory for the noob question but, is there a way to implement an onboarding message when the bot is added to the group¿?
+<https://blog.mixpanel.com/2016/06/07/bots-for-slack/>
+<@U19J7PF7T>: <https://api.slack.com/methods/chat.postMessage>
+<@U19J7PF7T>: You mean when the bot is invited to a private group?
+got it! thanks!
+oooh like when i add the bot to a <#C04SM6TAK> group
+you will also need to use `im.open` if its a new conversation.
+<@U19J7PF7T>: also maybe listen for the bot_channel_join event
+ok, great, thank you!
+Just to let y'all know that we're aware of the bot token issue, and we're working on it now!
+<@U0D7LHNTX> if the fix isn't quick +1 on getting the thing reported on the status page asap.
+How's it looking now, y'all?
+We've put out a potential fix…any reports since about 12:30PM PDT?
+Working for <http://obie.ai|obie.ai>!
+what is human?
+What are the ramifications for tokens that were granted during the period where there were issues?  Do we need to take retroactive steps to refresh / prompt people to re-authorize OAuth2 scopes during a certain window? <@U0D7LHNTX> thanks for the updates!
+Tokens are valid. If you have them somewhere, you can use them to connect the teams now.
+Thanks <@U0D7LHNTX> and <@U07VCKRUK> and everyone!
+Hi everyone 
+How do i add or join to another slack channel again here in mobile app? 
+I wanted to join Google's dartlang slack channel 
+Thanks! 
+Do you mean another channel on this team? Or do you mean another team?
+I can't find any channel about dart on this team...
+Android? iOS? Windows?
+Got it already. 
+Im referring to another team
+Found their invite page over the net
+hi everynoe

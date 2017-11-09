@@ -1,0 +1,63 @@
+```
+<@U23SA861Y> There's nothing that looks like that at: <https://guide.elm-lang.org/types/union_types.html>…
+<@U23SA861Y> <@U5W6LPGTE> I don't think those are union/algebraic types, though. At least the aspect <@U5W6LPGTE> seems to be asking about
+Those are all parametrized types
+the parameterization in part of the algebra of algebraic data types
+`Cmd Msg` means a command which, when it returns a response, has the "shape" of a `Msg`
+<@U57KYFW67> For example, where can I find the "definition" of "Program Never Model Msg"?
+You can kind of ignore the parameters when working in your code. For instance, just think of `Cmd Msg` as just.... a command.
+<http://package.elm-lang.org/packages/elm-lang/core/latest/Platform>
+<@U5W6LPGTE> <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Platform#Program> &lt;-- this has the declaration. The definition is not available, though, since it is a primitive in the langauge
+for `Program Never Model Msg`, it means you want to create a program (basically a "main()") which has model type `Model`, message type `Msg`, and has no flags (`Never`)
+but again, you can safely ignore the parameters when you read it aloud to yourself and just think this is a "Program"
+Is there an explanation of this "concept" anywhere?
+<@U3SJEDR96> Oh I see. Thanks. The problem I have is that I have a list of things I want to edit and when I switch the one I'm editing it doesn't update the `textarea`. I guess I'll find a way around it.
+read further down the page on the document
+the description is there
+The Elm docs won't have any good explanation of the idea. It's a very basic idea from functional programming. Your best bet would probably be to google "parametric type" or "parametrized type" and look for tutorials on Haskell
+it's in there on the union_types page
+(good explanation as in a thorough explanation. The docs will just kind of touch on the idea)
+you need to read to the bottom though
+There's nothing about "parameterized types" at <https://guide.elm-lang.org/types/union_types.html>
+it's under the heading "Generic Data Structures"
+Yeah. "Generic" type is another term (although less precise, imo). It's what Java calls the concept.
+a more basic example would like `List Int`
+It's a list type... a list of what, though? A list of integers.
+I understand "List Int"… a container holding ints.  Some of the other ones are still baffling to me.
+`Program Never Model Msg` is a program type.... "a program of what, though?" (meaning what is the associated type for its flags, model, and messages?)
+the list `[]` has type `List Int` but it doesn't contain any integers :slightly_smiling_face:
+if you are a C++ guy maybe you would recognize that as `Program&lt;Never,Model,Msg&gt;`
+Is it hierarchical or combinatorial?  It sounds like it's maybe the latter… that the order doesn't matter?  In other words, would "Program Never Model Msg" be the same as "Program Model Msg Never"?
+They are positional parameters
+no, the position matters
+I'm more of Python, C and Go guy.
+Just like `foo(x, y)` is not the same as `foo(y, x)` in C
+(or Python)
+Hmmm… ok…
+hmm, one has no type, one has weak typing and one doesn't have generics
+crap
+The first position is the flags parameter. `Never` is a special type that signals there are no flags
+But that sounds like you're straying into "Program -&gt; Never -&gt; etc.".
+The second is the model, the third is the message, ofc.
+I would say, don't fret too much over them. You'll inevitably run into situations where you need them. And in time, it will just kind of click and make sense.
+I'll keep at it.  It's confusing to me…
+the documentation is a double-edged sword, and while sometimes the types are very helpful, sometimes an example is more helpful, and it just depends on the situation.
+I like the language a lot so far… but that one's throwing me I have to say.
+Thanks all.
+make sure you read through the entire page
+like <@U23SA861Y> said, your language background carefully avoids any language that uses this notion ^^
+But it appears in C++, Java, Haskell, and Rust, etc.
+I should know more Haskell.  No relation as far as I know.
+Honestly elm is strictly easier than haskell. It's a gentle entry into FP but there are going to be concepts that are foreign to you.
+nod
+FYI, looking up "parameterized types", found this: <https://stackoverflow.com/questions/38558964/understanding-generic-union-types-in-elm>.
+still read through the page to the bottom as it does go over it
+Yep.  Thanks <@U23SA861Y>!
+Can anyone help me find an example of working with Task values? I'd like to use Window.width in an update calculation. The Task section of Elm guide is empty.
+<@U3SJEDR96> Is there a specific way to force refresh (specifically when the `textarea` is repurposed and in no way should retain the same information)?
+<@U46JV6X3K> so `Window.width` is a task which you use `Task.perform` on to get a `Cmd msg` which you return from update and later receive the message you requested containing the width
+you can also subscribe to `Window.resizes` and you will receive a message every time the windows width or height changes
+<@U59AF21LJ> Html.keyed is the thing you want I believe
+<@U23SA861Y> gotcha. In this case I'm trying to do (Window.width - Mouse.Position.x). In order to get the messages at the same time, do I need to batch them?
+You can chain with `andthen`
+In essence you construct a task which sends you that difference.

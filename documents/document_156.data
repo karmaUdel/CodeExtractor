@@ -1,0 +1,20 @@
+```
+oh, that's interesting
+I've noticed my bots not responding after I leave them overnight
+but I hadn't tried to debug it yet
+Hm, that is actually using the ws module's `ping()` which sends a WebSocket-level ping, and doesn't actually seem to expect/fail if it doesn't get a proper socket-level pong response.
+I'm going to work on adding application-level ping/pong response to Botkit, see if I can get this working.
+<@U0HKDKHD4> Orlando, as in Orlando, FL?? is there is a Slack Dev Meet up here? I am out of Orlando, my office is at the UCF's research park, been looking for a meetup here.
+heck yeah bro
+<http://www.meetup.com/Orlando-Slack-Developers-Meetup/>
+<@U0U9DQ4TH> I'd be interested to see what you discover
+damn dude, i had no idea, I will be seeing you there then :simple_smile:
+<@U0T6UC25P>: <@U0HKDKHD4>  See you guys Wednesday
+Does anyone know if the Slack RTM API endpoint's WebSocket implementation IS supposed to respond to WS-level ping (0x09) messages?
+<@U0U9DQ4TH>, according to the docs, it is supposed to
+Well, I get no PONG responses back (0x0A).
+Note, I'm talking about the WebSocket-level protocol ping/pong messages, not application layer.  I'm specifically asking if anyone here who works for Slack and can look at the WS code that's in use on their servers can tell me if this has been implemented or not.
+&gt; Not all web browsers support the WebSocket ping spec, so the RTM protocol *also* supports ping/pong messages.
+<@U0D7LHNTX> can probably check with the team whether it's actually implemented
+Have you tried using our own special PING message?
+I know that the message servers didn't used to respond to WS pings, but should do so now.

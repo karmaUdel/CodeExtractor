@@ -1,0 +1,12 @@
+ :program-1 #{:framebuffer-1 :framebuffer-2}}```
+<@U3JURM9B6> I'd think accidentally calling an accessor and constructor would be a lot less likely than accidentally calling assoc on the wrong object
+<@U051SS2EU> : I can make the constructor private, then have a function (which calls the constructor) do checks beforehand
+<@U3JURM9B6> For accessing object properties (as opposed to array elements), consider `goog.object/get` instead of `aget`.
+<@U3JURM9B6> creating custom types that have their own field accessors completely negates the value of generic data access from the clojure std library
+your code will essentially be a non-reusable DSL
+I firmly believe you are going down the wrong path, and that the advice you're getting about specific implementation is misguided
+you should test against invalid / incorrect data (even from your own code).  Have you considered writing generative tests for your datastructures?  (either from test.check or from spec)
+test against bad data while allowing bad data to exist
+Lots of things that are common in other languages (e.g. privileged data) are the exact wrong approach in Clojure.
+when I say 'generic data access' here is an example of what I mean:
+If you make a custom type, you'll need to do:

@@ -1,0 +1,25 @@
+and use ``` (set/rename-keys a {:a :aa, :b :bb} ```
+but nothing changes
+Am I doing something wrong?
+nice
+Try `(def a {:a "A", :b "B"})`
+well for one, `a` and `b` are both unquote symbols which evaluate to some value where `:a` and `:b` are keywords that evaluate to themselves
+the problem is that I receive the Json as it is
+I can not change the a variable
+it was just an example; But i need to modify the names of the keys
+sounds like your real problem is that you aren't using the return value of rename-keys
+nothing in clojure actually modifies the built in maps, vectors, lists, etc. - they return new ones you can use
+I did a println
+You're probably getting string keys.
+but it printed the same a
+don't use println to look at data, use prn
+If you are working with JSON, you're likely getting the map as `{"a" "A", "b" "B"}`
+I bet a is actually "a" yeah
+so you need rename-keys {"a" :aa} etc.
+mmm I tried but I got this error :
+java.lang.ClassCastException: clojure.core$map$fn__4781 cannot be cast to clojure.lang.IPersistentMap
+that means you used `(map f)` where it expected a hash-map
+wait, yes!!!!
+I was doing it to another functionality
+now it is working
+rename-keys with "a" as key

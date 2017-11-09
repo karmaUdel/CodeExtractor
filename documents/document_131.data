@@ -1,0 +1,13 @@
+```
+Basically, if a function returns true, then return nil, otherwise return the original value. So, kinda nil checking.
+<@U1WL8TSPM> I think it can't be too trivial because there are a few SNAFUs around infinity and NaN, but I think this will get you on the right track: <https://gist.github.com/camdez/108968382449b7c3a957daecb1aa500a>
+write a macro?
+The real problem is parsing a float then NaN checking it.
+yeah, i'm not aware of anything in core for this, but someone else might be
+actually
+does <https://clojuredocs.org/clojure.core/some-&gt;> work?
+or cond-&gt;
+Neither of those is quite right. `cond-&gt;` doesn't pass `val` to `function`, and `some-&gt;` just bails if the value becomes nil.
+Yeah, I'd looked at those, but not quite right.
+You don't really need to jump straight to a macro unless you're worried about default getting evaluated ahead of time.
+I've settled on consecutive entries in a let with the same name.

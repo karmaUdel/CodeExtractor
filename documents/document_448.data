@@ -1,0 +1,24 @@
+Task.sequence [ Process.sleep (2 * Time.second) ]```
+<@U4RR7KX45> it should, and it does. It would return a `Task x (List ())`
+The compiler complains that mapCurrent wants a `Zipper.Zipper Player` but got `Players`. `Players` _is_ `Zipper.Zipper Player` though.
+<@U2SR9DL7Q> `Players` is a type alias for `Zipper Player`?
+<@U153UK3FA> yup
+I'm not sure what `(\x -&gt; player)` does, tho?
+(or is supposed to do)
+mapCurrent applies a function to the 'current' element in the zipper. So `(\x -&gt; player)` just updates the current player to a new player.
+ah, alright, gotcha. hm. In that case, ¯\_(?)_/¯
+<@U2SR9DL7Q> so you've got `type alias Players = Zipper.Zipper Player` somewhere?
+<@U153UK3FA> yup
+What happens if you change the type declarations of `updatePlayers` to take a `Zipper Players`?
+fixed it! Everything compiles. And that's terrifying.
+I'd triple check you had a `type alias` rather than a `type`, and that the type alias was accessible at that point, and not overriden elsewhere, etc
+<@U3SJEDR96> <@U153UK3FA> an override was the problem. I'd accidentally defined Players twice.
+And... it all seems to work. After a pretty big refactor.
+Elm: 1000 runtime errors: 0
+<@U64FYS317> you need to pass `Debug=true` to the elm-loader options.
+<@U1AN4JRFV> tyvm
+Is there anyway to define a type as an integer between 0-10? Ie. throw compiler error if I try to set a value of 12
+Guess I could do something like `type BetweenOneAndTen = 0 | 1 | 2 | 3...`
+<@U45C5R6QP>, not in any really practical way, however you can hide your type in a module and have functions that check the values when setting it.
+depends on what operations you want on your integer too
+but then that's going to be a pain down the road… No, this is a rabbit hole I'm not going to jump down into. Thanks for the feedback though :slightly_smiling_face:

@@ -1,0 +1,17 @@
+{1 2, 3 4}```
+<@U0NCTKEV8> ahh, so you need this? `(binding [*data-readers* {'foo #'user/foo}] (read-string "#foo [1 2 3 4]"))`
+haha, timing :smile:
+yes
+while on the topic of tagged literals: is there anything special you need to do to get it to work with `tools.namespace`?
+I've placed a `data_readers.clj` in my classpath root, but when I try to use it in the REPL I get something like "Can't call unbound Var"
+lemme dig up the exact exception
+you need to require the namespace before you can use the reader
+data_readers.clj sets up the tag, but doesn't actually cause the namespace where the function is defined to load
+I'm pretty sure I did that, but let me double check
+ok, so my `data_readers.clj` contains `{foo kleinheit.pg.impl/foo}`
+`(defn foo [vs] (apply hash-map vs))`
+wait a minute!
+and every place where you read something using that tag, before that does a require of that namespace execute?
+okay, I see the problem: if I use `(require 'kleinheit.pg.impl :reload)` first thing in the REPL, it works
+but if I do `clojure.tools.namespace.repl/refresh`, it doesn't
+yep, `tool.namespace` clobbers it somehow

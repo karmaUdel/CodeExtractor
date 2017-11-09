@@ -1,0 +1,72 @@
+```
+When `new-lambda` is used as `lambda` in some importing module, the expressions written inside that `lambda` will also be from the importing module – and so an open parentheses there will see `myapp` instead of `#%app` from `racket/base`. You may be thinking that the body of a`new-lambda` use is treated as being from the `new-lambda` place, but it's not; the body is treated as being from wherever it is written (i.e., lexical scope).
+thank you Matthew! that really helps
+ok, now  i need to think a bit harder about what I'm trying to do here
+fwiw I'm just amazed at how much introspection macro-debugger/stepper offers. Like I'm no longer blind
+<@U3NJS8H7C> Just a sanity check, environment variables that are set using `putenv` are also going to be set in FFI calls, correct?
+Oh wait, no, it uses current-environment-variables, never mind.
+If `(current-environment-variables)` returns its original value, then `putenv` affects OS-level environment variables
+That makes sense. Thanks.
+So basically don't change the parameter and it works. Thanks. :slightly_smiling_face:
+<@U3VGR2S7Q> <@U3QF0EM0E> do either of you have more comments on <https://github.com/racket/rackunit/pull/59> ?
+Does anyone know how to be more specific when requesting an opengl context than just core/compatibility?
+Namely, I want core3.3
+If I can get it anyway.
+<http://docs.racket-lang.org/draw/gl-config_.html?q=gl-config>
+<@U0G0JDQGZ> You might now?
+hmm…looks like not. At least not yet. :slightly_smiling_face:
+It looks like when you request core, it starts at 4.x and goes down to 3.0
+WAIT!!! No. Grr….despite asking for a core context, its still giving me a legacy one. That absolutely should be in the docs.
+That, and you should absolutely be able to find out what kind of context you got after the fact.
+Hmm…I guess in get-legacy? it says that it is only supported on mac 10.7+ and _some_ linux variants.
+But there still doesn't seem to be a way to check which version you ended up getting once you go it.
+<@U08JL5H89> I'm no GL expert, but I thought there were GL-level functions that will tell you
+There are some.
+Namely, glGetString
+<@U3NJS8H7C> Btw, its the line `(force lazy-GLX_ARB_create_context?)` that is causing it to create a compatibility context.
+When I comment out that line a compatibility context gets created. (Version 3.3)
+You get a *non-*compatibility context when it's commented out? Neil wrote that code, and I don't know the right answer in this case, but I'm happy to accept patches from people who do.
+leif: it is not common for OpenGL apis to give you the ability to ask for a specific version, because drivers typically don't support multiple options anyways. OpenGL versions never change the meaning of old stuff (i.e. it is forward compatible) and when you write GLSL you have to specify the version always... so what exactly is the problem that yo
+u are trying to solve?
+I mean, newer versions _do_ remove deprecated stuff. Although the only instance I can think of this happening in a major way was 3.0 to 3.1
+I have a GLSL shader, it is not doing anything fancy, just drawing a quad to the screen, and drawing a texture to that quad.
+(aka, its a media player)
+The shader is written in GLSL 330
+On my mac, I get 3.3 when I ask for the core profile.
+But on linux, despite asking for core, I got compatibility. Which corresponded to version OpenGL 3.0, so GLSL 130.
+<@U0G0JDQGZ> ^
+Oh, also, glx (which is what the linux opengl bindings use), does let you request a specific version. Of course you are limited to what your hardware can support. :slightly_smiling_face:
+<@U3NJS8H7C> Kind of. When you request a core profile, Racket's opengl library tries a few tests to see if its compatible. If it is, and you requested a core profile, it gives you a context using the core profile. However, if it can't, it ignores what you requested and silently gives you  a compatibility context.
+The only real way to test after the fact (as far as I can tell), which one you got is using the glGetString function and checking your opengl version.
+Anyway, I commented out one of the checks that was failing, to see what would happen, and the opengl context worked just fine. Which makes me think we are potentially checking more stuff than we need to.
+(Obviously I haven't tested that thoroughly yet.)
+Anyway, thanks.
+leif: 3.0 to later is basically a totally new API, which what the whole core vs compatibility thing is about
+it sounds like either something wrong with Racket checking of the version (which you said) or your driver doesn't really support new stuff, which is common on Linux software implementations
+<@U0G0JDQGZ> yup. Or at least thats when they dropped the fixed pipeline in favor of the shaders from opengl 2. But how would I test if it doesn't ‘really' support newer stuff?
+Like, I'm able to open up a window, and build and run a GLSL 330 program.
+Apropos OpenGL and shaders: Is it possible to get GLSL version 130 version on mac? If not, how do I get a newer version?
+(I can't get Ruckus to run mac)
+To see which versions of GLSL that were supported I tried different values for the version in: <https://github.com/cbiffle/ruckus/blob/master/viz/preamble.glsl>
+Version 120 seems to exist - but the preamble uses more recent features.
+yo
+hey!
+morning
+<@U044GA9BR>: you're a full day ahead of me almost haha
+morning... i am going to bed and he says morning... its so frustrating
+had the same thought <@U044HMK7S>
+<@U044G404Z>: i know its crazy
+some atom users here?
+#vim4lyfe
+Has anyone used `react-router` with ES6 classes in 0.13
+<@U044JU5CA>: not yet
+i like vim but not as my full time editor
+I really need to write a newsletter. It's up to 450 subscribers and I haven't sent anything in a while.
+<@U044JU5CA>: <https://github.com/pheuter/essential-react/tree/master/src/routers>
+a react starter kit, very minimal and they use react-router with es6 classes
+Nice. My main problem with it is that I think putting the router object on `this.context` feels strange and awkward
+and you need to define `Foo.contextTypes` everywhere as well
+<@U044JU5CA>: I use a flux implementation that passes a flux object through the context and I'm actually really liking it
+do you need to use contextTypes with that?
+yeah, for anything with context you do, that's the only annoying part
+and in ES6 classes it seems you can only write them after you've defined your class

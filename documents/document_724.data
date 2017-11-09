@@ -1,0 +1,64 @@
+Please use code formatting (either triple ticks on both sides ` ``` `, or the snippet feature which is available with the little plus to the left of the code input box)!
+But `"{'user-type': 'user', 'username':'john', 'password':'john2', 'email': '<mailto:john@email.com|john@email.com>', 'first-name':'john', 'last-name':'smith'}"` is invalid json
+You need to swap the quotes you use
+`'{"user-type": "user", "username": "john", ...}'`
+awesome it worked
+thanks <@U1BP42MRS>
+sure thing
+How would you handle this issue?
+`sphinx by default won't add the docstrings of private functions` there should be an option to activate it for all functions
+Is that reasonable though? Maybe it's me who should rethink what the documentation should be used for.
+<@U1G9D6PSQ> it's unusual to write a non-api documentation in the source code
+<@U13L8J76J> Why? If I write valid rst docstrings for private functions they can be used by other tools
+I suppose that one of the reasons I care about this is that sphinx won't pass over my private functions by default, and thus I won't get any indication of rst syntax warnings/errors in my private functions, so they'll likely be broken and not noticed
+well in this case they shouldn't be private
+But sometimes the gritty details needs an explanation/overview, and that might as well be in rst, right? That doesn't mean that they shouldn't be private. Equating private with "doesn't need docstring" seems weird to me
+I agree with <@U1G9D6PSQ> . Documentation isn't just for end-users; it's for coworkers. Or myself, in future.
+In my case, my sphinx documentation is 100% for co-workers that can code, and that will probably continue to be the case for some time.
+But the thing is, my coworker might as well read the code to begin with, so maybe it makes sense to only declare the interfaces, given how readable raw rst is and python's readability in general...
+I disagree; "read the source" is a poor substitute for good documentation
+I don't understand what do you want <@U1G9D6PSQ> ? sphinx to generate doc for private method that have docstrings ?
+That is what people *say*, but in reality, do people work like that? It's one thing to use a library, but when you're adding functionality to a codebase?
+The reason I'm saying this is that my coworkers seem to be the people that prefers to read the source code directly, but maybe they're just used to an environment without documentation... sigh.
+<@U29163YQH> I suppose I want a general discussion on how documentation is to be used, which I suppose would fit better in random. Oh well.
+<@U1G9D6PSQ> because api changes, but general ideas and core functionality often doesn't change
+Source code and documentation go hand in hand. If I have documentation, I'll go there first. It also helps to communicate intent _far_ quicker than reading code does.
+Because when you try to express everything in __doc__, `help(obj)` becomes unreadable
+<@U13L8J76J> , so you leave off private functions entirely in your fancy-looking documentation? (e.g. sphinx)
+Yes. That's why they're private
+I can include them into a "how to read the source code" guide though
+<@U13L8J76J> that certainly seems like a sensible approach, and probably the most applicable to my use case. But it does push other developers towards "read the source" fairly quickly. Which I suppose is what is happening in my organization anyways.
+So, defining __all__ in every python file is a reasonable idea, I presume? Any places where I shouldn't be doing that?
+Well, you can't cover everything with docs. Sometimes you have to hijack the library and do dirty stuff. That's why I often write "how to read the source code" guides
+But still, `__all__` is a must
+Seems reasonable. Any pointers (blog posts, whatever) on how to write such guides? At what level should they be?
+I usually use the top-level docstring to explain intent, and that usually includes mentions of both public and private functions. Though should I consider the top-level docstring to be public or private?
+I put them in docs, not in `__doc__`. I try to explain the flow of a single successful request, how it goes from the entry point to the handler. And how you can hijack various parts of the handler if they aren't specified as the public api
+If the intent of the library isn't clear, or the module names aren't obvious for a novice reader, I often document where's the entry point and if there is some private stuff that gets overridden by children classes
+Hi
+Could anyone advise me how to scrape the data from the Javascript Webpages?
+I'm trying to scrape the data from from this website but im unable to scrape any field:unamused:
+The website i'm trying to scrape the data is <https://munchery.com/menus/sf/#/0/dinner>
+Thanks for the advise:slightly_smiling_face:
+<#C5PHT9EGK|webscraping>
+<@U6ETHP4JD> also, can you show a page you're scraping?
+<@U5NMSURAQ> The Website i'm trying to scrape is <https://munchery.com/menus/sf/#/0/dinner>
+Not the website, but a page.
+Sorry couldn't get you
+i have no idea about JS
+If the data is all being served up by Javascript then you can't scrape it. You'll want to watch which calls are being made to get the JSON data (or equivalent), and replicate those to get the data
+Or ask Munchery if they have an API you can use
+<@U6ETHP4JD> also please check the terms of service of a site before asking questions about things that could violate TOS like scraping. The sites TOS is pretty clear on that, so your questions are better in <#C68GBADG8|etc_greyhat>
+<@U1NSCAY6R> Ok:+1:
+`db` library doesn't seem to provide support for executing batch statements against a database. I'm trying to initialize and create an in-memory database using a SQL schema file. `query-exec` and its friends only support executing single SQL statements. Reading documentation isn't showing me a way to be able to execute more than one statement at once or allow a SQL text file to be read in and executed. Does anyone know a better method?
+Is there a `match` predicate in the standard libraries? Something that means "if this given value matches this given pattern, then return `#t`, else return `#f`.” I keep finding myself writing this in terms of `match`, and I feel like there should be a better way.
+<@U2Y8JBMUJ> I thought there was one, but cannot find it, so I may have imagined it. There's `check-match` from `rackunit` for tests (it does not return a boolean). Otherwise, seems like you will have to roll your own.
+<@U3ZACTKTP>: Thank you for your answer.
+<@U3ZACTKTP>: I'm doing something about this: <https://github.com/racket/racket/issues/1690> :slightly_smiling_face:
+I read Fortifying Macros by Culpepper and Felleisen, where ports of `loop` and `parser` were made using `syntax-parse`. I can't seem to find the code for those, though. Does anybody know where/if they can be found?
+Answered by Alex Harsanyi on Racket Users listserv.
+<@U0C55P16F>: I'd email <@U3VGR2S7Q> and ask.
+Be sure to post back here if you get an answer from <@U3VGR2S7Q> !
+<@U3ZACTKTP>: <http://planet.racket-lang.org/display.ss?package=loop.plt&amp;owner=jphelps>
+<@U07SCV14J> Sweet, thanks a lot!
+Has anyone used, from `scribble/srcdoc`, any of `parameter-doc`, `thing-doc`, or `struct-doc`? All give me `"illegal use of syntax"` errors.  Whereas `proc-doc` works great.

@@ -1,0 +1,31 @@
+```
+I _believe_ that should still grant you access -- at least I wrote that it should back in November! It's possible I mis-spoke and you're the first to notice though :wink:
+I made a Google Bot for Slack. Check it out @ <https://github.com/MatejMecka/GoogleAssistantSlack>
+I'd like to know how I can improve it, add new features and more.
+Also Forks and Stars are appreciated :slightly_smiling_face:
+last i read bots cannot delete messages that they didn't post
+matejmecka cool :slightly_smiling_face:
+<https://twitter.com/One16th/status/864526254841745408>
+right but the bot can take the identity of an admin (using his token) and then be able to delete every message.
+has anyone run into users.list returning a 500?
+got the error being returned or how are you calling it <@U5FPB0C9G> ?
+usually you get a 200 back regardless of an error being thrown iirc
+<https://github.com/slackapi/hubot-slack/blob/master/src/bot.coffee#L56-L58>
+my org is too big
+<https://github.com/slackapi/node-slack-sdk/issues/343>
+but I'm not really sure what the format of `SLACK_CLIENT_OPTIONS` is
+has anyone used this env variable?
+Trying to use `thread_ts` in a chat.PostMessage. Setting it to the parent ts (which is an interactive message) but it only add the message to the specified channel (<@USLACKBOT>) without adding it in a thread as a reply to the parent message. Any ideas what I am doing wrong here?
+And of course, using the Tester works… Is there special scope to use threads from a Slack App?
+Are threads supported in the Events API?
+Have you tried using a message that doesn't involve using <@USLACKBOT>?
+Yes, there are events about threaded messages available in the events API -- message subtypes `message_replied` being the one you most likely want.
+Yes, the thread_ts is set to the parent ts. When using the same ts in the Tester, it works
+Not sure I understand your last reply. I can't use chat.postMessage in event API?
+What scopes does the token you're using have? It's possible it just doesn't have the scopes needed to write messages with what you're working with.
+I'm using chat.postMessage, and it's working fine. When adding the thread_ts attribute, it just does not change anything, still working like before, still normal message, not threaded replies
+and you're including `thread_ts` as a URL parameter in this case? What's the `channel` field set to and `as_user` value set to? Are you using a bot token or a user token?
+I'm using my Slack App token. as_user is set to false and channel is set to @user (user being whatever user the Slack App is talking too)
+btw, thank you for helping me out here :slightly_smiling_face:.
+It _might_ be a quirk with using a @username in that field -- it's a little bit on the edge of typical behavior.   Normal usage typically will use a specific IM/direct message ID there, a channel ID, a private channel ID, or an MPIM ID.
+Just to be sure, since it sounds like you're using a user token, what are the scopes you asked for when you made it?

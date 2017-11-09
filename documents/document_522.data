@@ -1,0 +1,17 @@
+List (ApiEntity { username : String })```
+Since the type variable in `Entity a` is a row type, your type alias should be `type alias UserEntity = ApiEntity {username : String}`
+I'm not sure to get it
+Ideally I don't want to change my `User` type which contains an uuid already
+and so is an `Entity` no?
+`User == Entity { username : String }`
+The only problem you have is the annotation on fromList. Change it to `fromList : List a -&gt; List (ApiState a)` and it compiles.
+<https://ellie-app.com/3BBdsVGkq6da1/0>
+ok but that's weird
+the type shouldn't be constrained on `a` ?
+The more specific version `fromList : List User -&gt; List UserEntity` works too
+ah I didn't see you changed ApiEntity to ApiState
+of course it compiles
+but that's not what I want
+what do you want?
+<@U5Q42DDMJ> `type alias ApiEntity a = ApiState (Entity a)` if `a` _is_ an `Entity something` means you have `Entity (Entity something)`, no?
+ah yes brilliant <@U3SJEDR96>

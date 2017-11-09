@@ -1,0 +1,17 @@
+```
+Ah, I wasn't sure if I needed to add this in my update function, or some other way. Thanks, <@U5MKS6L80>.
+yeah, my understanding is that basically you can emit `Cmd`s in two places: either in your `update` or in your `init` function. If it's in your `update` then that has to be a reaction to a message that your application can receive, and and if it's in `init` then it will run once at the beginning
+in your case if would be a reaction to the message sent when the button was clicked
+<@U5MKS6L80> That worked! Thanks so much.  Next, I need to work on reading the string back from JS into Elm. I guess I need to do that in my init function.
+<@U5HM74BD0> <https://guide.elm-lang.org/interop/javascript.html> gives more information about ports and interop with JS
+yup, what jessta said. the part that applies to this question is the `suggestions` example on that page
+Any idea if there are more straightforward examples of pure component api design other than elm-sortable-table? Specifically, I am interested in how one folds in Cmds to the design, given the lack of an update function in the table api?
+I assume that you could store them in the component model and pull them out in the parent update…
+or not.. actually I don't really see how to handle Cmds…
+<@U1XL8FMAA> there are no components
+any updating you want to do to the model and any `Cmd`s you want to emit are done in the top level `update`
+that `update` can call any functions it wants to produce those `Cmd` and do those model changes
+<@U153UK3FA> - you can obviously follow nested TEA and map child update to parent… sitll works
+by component i am not talking about a stateful component but a pure component.
+you're taking about a function
+the rest of the world calls them components… and they serve the same purpose

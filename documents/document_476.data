@@ -1,0 +1,19 @@
+```
+<@U48AEBJQ3> can you tell me why you used ``Validate.eager`` and in what case I should use it? Is there any documentation about ``ifInvalid`` function? Also, my input already has a message as it is a field of my record. How can I add the validation and still keep my message?
+`case msg of UpdateQuery query -&gt; ( model, if length query &gt;= 3 then (fetchPeople query) else Cmd.none )`
+where `fetchPeople : String -&gt; Cmd Msg` is your http request
+so its sth like `fetchPeople = Http.send LoadPeople (Http.get ("yourbackend/fetch/" ++ query) decodePeopleList)`
+<@U5ABF3BH7> `Validate.eager`stops at the first error it gets. Sometimes multiple errors aren't useful because later errors are dependent upon earlier ones. In this case, I don't want it to even check if the input is a valid integer if it is blank.
+The documentation for `isInvalid` is pretty sparse <http://package.elm-lang.org/packages/rtfeldman/elm-validate/1.1.3/Validate#ifInvalid> but it is a helper for making your own `Validator`s.
+and `LoadPeople` is the msg which handles the incoming list of people, i.e. your msg look like `type Msg = UpdateQuery String | LoadPeople (Result Http.Error (List People))`
+i hope thats understandable? :slightly_smiling_face:
+Store the output of the validation as an extra field in the model would be the easiest way.
+Is there any way to get the response header and decode the response body when using `Http` package?
+I was looking into the snippet <https://ellie-app.com/3prFNXVLfdSa1/0> which is extracting header
+Can someone help to decode the json along with the request?
+Hmm, I think? Would I be sending `fetchPeople` in parallel with handling `SetAutocompleteState`, from the elm-autocomplete example?
+no, the setautocomplete msg is just the necessary boilerplate to hook up the autocomplete messages into your main update function
+Right, but I have to update my local state while I'm waiting for my remote request to come back, though. I guess I'm just not understanding the sequencing.
+<@U48AEBJQ3> Thanks, I get it now. That was super helpful!
+let me write an ellie :slightly_smiling_face:
+<@U2Z0RF6CW>: do you mean to combine getting the header and the json body, or do you just need to decode the json response? (the body)

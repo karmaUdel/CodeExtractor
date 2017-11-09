@@ -1,0 +1,21 @@
+```
+Yeah, I was just thinking, I wonder if you just set `subcriptions model = Sub.none` before you destroy it would work.
+yeah
+me too :slightly_smiling_face:
+I think it would
+for subscriptions that would help
+But for `Navigation.program` and this that would work(if my assumption is correct that is listens to urlchanges and keeps the handlers)
+I should take a look into the code for the navigation package. Having elm apps on a page and them doing stuff even when they shouldn't anymore is a little scary.
+<@U1EQAULH2> Here's an article I wrote <http://futurice.com/blog/elm-in-the-real-world>
+So, what's the more correct way to do this? Thank you.
+3. make a function `hidePopup : Model -&gt; Model` and call it from both branches
+<@U3SJEDR96> I thought about this but that's not the third option because it's just refactoring and can be done in both cases. 
+well, I say 3. too even if it’s “just refactoring” :slightly_smiling_face:
+Ok then. Just to clarify - preferred option is not to use commands?
+yes, commands are for asynchronous stuff
+potentially you will have some other message come in between
+maybe it matters, maybe it doesn’t
+Ah, now I see. Thank you for explanation))
+Using a `EmailSent` state type is not always possible, because in android your application can be terminated and restarted at any time (for example when you rotate your phone to horizontal) and re-rendering the `EmailSent` state (since the `view` function would be called with the last state) when the app is restarted would lead to showing the toast again any time you rotate your phone.
+Well, in Elm even things like toasts are part of the app state. There can't be anything like calling `Toast.make("email sent", disappearDelay);` and having the toast appear and disappear on its own in Elm. That's a profoundly imperative API, and effectively you give a piece of state outside the main program at that point. Neither of these are possible in Elm.
+However, what would be sort of similar is sending stuff out through ports. Anything that happens outside of the Elm application can be imperative, so things like toasts can also happen in the imperative manner in that situation. Maybe that would be a nice analogy?

@@ -1,0 +1,36 @@
+```
+this is called "point free style" and is probably less readable in this case
+I must admit I often do the `case` even though I know about the `Maybe` helpers
+yeah, sometimes getting all fancy doesn't really help
+It's nice in pipelines
+My code is getting really messy really fast, so I must discuss this with someone who has had a similar situation, because I might be getting tunnel syndrome.
+I am going to pull my ""masterpage"" logic from `Views\Page.elm` into `Main.elm` and see if that helps
+<@U4G7CC18U> Maybe think about using <http://package.elm-lang.org/packages/justgage/tachyons-elm/latest>, which itself is of functional nature.
+or <#C4F9NBLR1|style-elements> :slightly_smiling_face:
+<@U3L8MM10T> <@U4872964V> thank you for the suggestions. :+1: :+1:
+exciting times in styling right now
+from <https://github.com/elm-lang/core/blob/master/src/Set.elm>
+&gt; Insert, remove, and query operations all take *O(log n)* time.
+not seeing benchmarks for List at <https://github.com/elm-lang/core/blob/master/src/List.elm>
+list is going to be `O(n)` for most things
+Dict has the same characteristics as Set it seems
+<https://github.com/elm-lang/core/blob/master/src/Dict.elm>
+&gt; Insert, remove, and query operations all take *O(log n)* time.
+yeah, dict and set are implemented as sorted trees
+I believe `type Set comparable = Dict comparable comparable`
+basically just a special case of it
+helpful! thanks
+just remember to benchmark, because rendering is likely going to be your bottleneck anyway
+`type Set comparable = Set (Dict comparable ())` indeed
+ahh right unit
+close enough :smile:
+I am trying to use webpack [hash] for the compiled elm bundle, but I am not sure how I would wire this up with the including html file. Any recommendations or hints?
+Hi guys! I have the need to generate a tuple that has the current timestamp as first element, and a random integer as the second. I can solve this generating first a Time.now message, and when it succeeds a Random.generate message (code: <https://pastebin.com/v7DCp2Lc>). This solves the problem but it is annonying to have two different messages. I would like to do it in an unique message, like with this example that has two side effects (get the now timestamp and do an HTTP request): <https://pastebin.com/SuRG42J3>. The problem is that this is done with tasks, and the Random module directly generates commands instead of tasks, so I'm not sure how to do this
+TL;DR: I need Random.generate to return a Task instead of a Cmd so I can use Task.andThen
+Hello everyone! Thanks <@USLACKBOT>!
+<@U5Y72K57X> I don't think that can be done
+for now anyways
+- Second option, use the timestamp you got to create an initial seed, and use that to create a random number
+solution you choose should depend on how many of these you need, whether there's time between those steps, etc
+Oh, nice thinking <@U3SJEDR96> :thumbsup:
+Ever since they changed `Random.generate` to return commands, I've always used that instead of dealing with seeds myself. Forgot about `Random.step` :smile:

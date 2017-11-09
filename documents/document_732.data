@@ -1,0 +1,19 @@
+```
+it looks like it isn't loading `lexer.rkt` from a `.zo`, so it would need to load rackunit to compile `lexer.rkt`
+try precompiling the lexer?
+ah
+compiling the lexer and expander count for .6-.7s… but it's still a lot more than it feels like it should be
+nice to see just how much is loading… I'll write a post-processor for that tracer output to report the expensive bits nicely
+hey. I made a thing to make profiling load times easier to figure out: <https://gist.github.com/d31e7d54e8350370b141393f4afc24d6>
+I'll port to racket later
+is there anyway to catch a `(values x y ...)` as a whole when passing it to a function?
+<@U60J15S1Y> ? can you explain?
+for example, I have a function `f` and it takes one argument, when applying `(values ...)` to `f`, I would like to use `(values ...)` as a single variable inside of `f`
+Something like <https://docs.racket-lang.org/reference/values.html#%28def._%28%28quote._~23~25kernel%29._call-with-values%29%29> , or maybe <https://docs.racket-lang.org/sugar/index.html?q=values-%3E#(form._((lib._sugar%2Flist..rkt)._values-~3elist))> ?
+(call-with-values (thunk (values 1 2 3)) list) ; ‘(1 2 3)
+but… I don't think you can make a function that takes a variable number of values… hence the thunk
+I do found `call-with-values` but it restricts me to put values inside of lambda, I'm just looking for a more elegant way to do this
+<@U60J15S1Y> why do you want to apply `values` as an arg? can you explain what you're trying to do?
+Might want to check out mu/nu from 86
+they look interesting
+Well, I have a function that returns `values`, I would like to compare the results of two applications of that function. Probably macro could do that?

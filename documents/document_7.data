@@ -1,0 +1,151 @@
+```
+specifically the call to proxy-super reflects
+and I'm wondering why
+it seems like it should be possible to resolve .close()
+And yes, I try to use concurrency mostly for background web requests.
+Thanks to your ideas on this topic, I propably should just put more brains on the `core.async/pipeline-blocking` idea and think of some error-passing messaging or channel.
+Thank you very much for your ideas and inspiration!
+:thumbsup:
+proxy doesn't type hint `this`
+Thank you very much, guys! Your help is very much appreciated. This community is so cool!
+<@U087U9YG3> I was about to make a PR with a fix for that.
+Assuming you're in ring; looks like it to me.
+beat you to it =)
+Did you get the rest? :smile:
+ring-servlet no longer reflects, didn't check the other subprojects
+<https://github.com/ring-clojure/ring/pull/295/files>
+<https://gist.github.com/jeaye/3b650b3b584056d6440aaf161832247e>
+That's what I had locally.
+hmm, lein check runs cleanly for me with just what I have
+Did for me, too, but I see the reflection in my project using ring.
+ah, yeah
+So I chose not to trust `lein check`, since I can see in the source how it would be reflecting. :slightly_smiling_face:
+huh
+Interested in applying the other changes, as shown in my gist, to your PR?
+I'll look into it =)
+Cheers.
+oh, you're in the jetty adapter, I see
+ah, yeah, lein check reports problems
+Ah, fair enough. Sanity is restored.
+My approach to fixing the `proxy-super` is different, but the effect is the same.
+<@U4986ECDQ> I also added a return type hint so my code wouldn't reflect
+<https://github.com/ring-clojure/ring/pull/294>
+Yep, saw that before I started on the reflection work.
+That PR looks good; thanks for beating me to it and updating it for ring-jetty-adapter. :slightly_smiling_face:
+=)
+can you use environ when making a war file and deploying via tomcat? for example when i run ` lein with-profile dev ring uberwar... ` does that do anything?
+very occasionally, 'clojure.core doesn't appear in the list returned by `(loaded-libs)`. that would be a bug right?
+hard to say
+loaded-libs only contains namespaces loaded via require or use, if I recall
+mmmm that's not really what the docstring implies
+So I am using an exception tracker that has mediocre clojure support (Sentry), but I'm working to improve it. Exception "rollup" (grouping of exceptions based on their similarity) relies on the hash of "in-app" stack frames (frames that begin with com.myapp for instance) being equal to a previously seen exception's stack frames. I believe rollup is not working across runs of my application due to anonymous function names differing. So, for instance: `com.myapp$fn__12345` is the name right now, but on the next run it may be `com.myapp$fn__99999`. Are there other patterns in clojure stack traces beyond `foo.bar$fn__12345` that I should let the maintainers know about which are specific to clojure, so exception rollup works as intended?
+<@U06DQC6MA> check <https://github.com/hcarvalhoalves/raven-clj>
+the way its sending the tracebacks seems to make Sentry happy (it manages to group by Exception type nicely)
+<@U1LCB75M2> I'm kind of meh on manually reading source files from disk with no cache and parsing the exception object by hand. This is something that can be accomplished on the server side.
+As of a week ago or so, the `getsentry` folks picked up coda hale's wrapper around `raven-java`.
+One other thing to add in case you're interested: I skipped the need to have `in-app` by simply setting the package names of my app as a param on the `DSN`
+Finally, I spoke with the sentry maintainers and they said it would be no problem to just fix the hashing of the problematic frames.
+Here's the "official" sentry-clj lib now -- PRs as I understand it, are welcome: <https://github.com/getsentry/sentry-clj>
+IMO the killer feature is having source code context around the error
+without that Sentry is just an expensive log aggregator
+Would it be possible to arrange things so that `(when (instance? Foo x) (.fooMethod x))` wouldn't reflect?
+ie special-case compilation of (if (instance? …) …) so that the then branch was automatically hinted?
+…I guess this belongs in <#C06E3HYPR|clojure-dev>
+<@U1LCB75M2> I was talking to the sentry folks and it sounds like the source code context will be something that's pulled from github in the near future. All of the data required to do it is there, just hasn't been plumbed into the product. I think it's better than a log aggregator, but I'm using an on-premises install which affords some extra flexibility you don't really get in the SaaS product.
+<@U06DQC6MA> interesting to see that the sentry folks picked up maintaining a clojure client. I'll have to give theirs a spin to see how it compares to the fork of raven-clj (which currently works very well for me).
+Anyone got any ideas as to why the atom is not being correctly deref'd here?
+The gist of the question is - I want to access mutable storage from within a macro, how do I do that?
+<@U067BPAB1> the branches on your if are the wrong way around
+also there's no need for that to be a macro
+This is just a contrived example, not real production code which is what this question is really about - and I want that one to be a macro for various reasons.
+Thanks for pointing out the ordering, I knew it had to be my morning idiocy. :facepalm:
+in which ns is the tatom ? the same as defmacro, or the same as its usage?
+<@U067BPAB1> I can't repro. The first call to `(tmacro)` causes it to print `"tatom has value"` and after the `reset!` it causes it to print `"tatom is nil"`
+Thanks guys, but as I mention above, this was just a morning brainfart on my part, with the branches reversed. This was just a contrived example that I quickly put together to verify that I can deref atoms (from the same ns, but it doesn't really matter if they're fully ns-qualified) and screwed up in the process.
+<@U067BPAB1> Right, understood that the branches are reversed. I still can't repro what you pasted above.
+This has stirred quite a conversation here. I wonder if I should just remove the question but the sharper minds will at least get a good laugh out of it if I leave it hanging here.
+_Sometimes, rubber-ducking makes one look like an idiot if he uses the whole community for it._
+OK cool. I thought you might have a bad REPL environment or something exhibiting a low-level bug.
+I had a few things mixed up together as I was re-defing things.
+Then add to that me being half asleep and this is the result. Still thanks for all the help!
+for a hobby project, i'd like to implement some kind of extension system. the "modules" (or whatever they'll be called) should be able to extend the system in various predefined ways depending on their type (think "themes", "content elements", …). my question relates to being able to add them "dynamically" somehow, if that's the right word, without me having to recompile the app (but maybe the individual module?)
+i'd be thankful for any pointers
+<@U15MJHWRX> `load-file` should do the trick :slightly_smiling_face:
+i'm aware of the added complexities; is this maybe a bad idea in general for reasons i'm unaware of?
+uh neat! thanks. with clojure it's always those functions you find after months … :wink:
+I think Lisp is well suited to this, it was designed to receive code over sockets &amp; such. In fact Clojure has made decisions to ensure that this is the case.
+my thoughts exactly, but coming from OOP it seems so… daring
+:'D
+Well, this isn't OO vs functional. Smalltalk could do this too.
+More about live programming I guess :slightly_smiling_face:
+i wasn't referring to the technical aspects, more the mindset. in my experience this idea would be considered "hacky stuff"
+Hey all, compujure-api throws an exception "No such var: compojure.response/send" when I try to import it in my namespace. I'm using [org.clojure/clojure "1.9.0-alpha17"]. Anyone exprienced this issue?
+what compojure version are you using?
+   No such var: compojure.response/Sendable
+That means the version of the compojure 1.6
+what compojure version does `lein deps :tree` report?
+Ok another dependency overrides it I will try with an explicit dep
+Ok it did work thanks!
+Be slightly careful when adding an overriding dep like that as the final result depends on the order of the dependencies vector; it's safer to add explicit `:exclude`s in addition to pinning the version.
+if I have an initial value `100`, and I want to apply successive arbitrary functions to it which will result in a final value, what's a good way to do so? I'm looking for something that would allow me to do this: `(some-fn 100 [:inc :dec :set-50 …])`
+or something in the spirit of that at least :wink:
+could be a really elegant reduce in there
+`(reduce (fn [val fn] (fn val) 100 [functions go here])`
+Why in Clojure we are encouraged to use `recur` instead of making self-calls? I imagine is for performance reasons but couldn't find much information about it.
+`(reduce (fn [val fn] (fn val) 100 [dec dec dec])` gives an error: `Wrong number of args (1) passed to: core/reduce`
+your parents are off
+ah because mine were
+`(reduce (fn [val fn] (fn val)) 100 [functions ...])`
+&gt; your parents are off
+:joy:
+<@U4SKJCP3K> <https://clojure.org/about/functional_programming#_recursive_looping>
+haha
+that works beautifully, thank you
+that's some deep stuff
+&gt; Since Clojure uses the Java calling conventions, it cannot, and does not, make the same tail call optimization guarantees. Instead, it provides the recur special operator, which does constant-space recursive looping
+didn't mean to get so personal :slightly_smiling_face:
+oh, they are, trust me :wink:
+hcarvalhoaves: Awesome, that makes sense. Thank you Henrique.
+`((apply comp [dec dec dec]) 100)`
+you could also just apply compose
+which is very much the mathematical definition of what you want to do. really conveys the intention
+"compose these functions and apply them"
+ah, I like that solution
+dpsutton: a goofy version of this `((apply comp (repeat 3 dec)) 100)`
+he wanted for arbitrary functions. the three `dec`s are just placeholders
+right, I called it goofy for a reason
+I'm curious how you all configure your web services? There seem to be a large number of libraries out there to do this. Is there one that is generally considered "the Clojure way"?
+juxt/aero is nice. Or just env vars (with or without environ)
+Hi! Is anyone familiar with Datomic here?
+there is dedicated <#C03RZMDSH|datomic> room <@U5ZAJ15P0>
+<@U050ECB92> oh sorry, I hadn't noticed. Thanks
+np.  lots of helpful cognitect people seem to hang there
+<@U5MVBAJUU> I usually see people pull config out of the environment ("12 factor"), a properties file, or (more rarely) an edn config. There is a commonly used library called `environ` that does this, but you could just use `System/getProperties` or `System/getenv` without needing a dependency. I feed certain values like an HTTP_PORT to my web server. I use immutant.web, which uses Undertow under the hood, but a lot of people use http-kit or Jetty. My web server knows how to serve a Ring handler (which is a spec for http handlers in the vein of Python's WSGI or Ruby's Rack), and I use a library for mapping http routes to handlers called compojure-api.
+<@U5MVBAJUU> I usually suggest people take a look at Luminus (<http://www.luminusweb.net/>) which is a curated collection of libraries and docs until they form their own opinions on library choices.
+<@U5MVBAJUU> I don't know if there is a "Clojure way" but try cprop <https://github.com/tolitius/cprop>  or juxt/aero <https://github.com/juxt/aero>
+Thanks dorab and bja!
+Hi! I am having a little issue setting up Datomic Starter. I posted this message in <#C03RZMDSH|datomic> but I suspect it might be a more general clojure/jvm question. Here is the error I am getting: <https://gist.github.com/hmaurer/b9d303055c7a9b7c4e4827b5b79e2acc>
+<@U5ZAJ15P0> I can't help you, but would you mind updating us with the solution when you find it?
+Also, I like to open these kinds of questions on StackOverflow and then answer them when I find a solution. Helps everyone!
+<@U5MVBAJUU> sure thing, although I suspect it's an issue due to my own ignorance and not a problem with Datomic's tutorial
+Well, I'm also ignorant, so your answer will help me. :slightly_smiling_face:
+:smile:
+<@U5MVBAJUU> it's odd, the jar doesn't seem to contain any "peer server"
+That *is* odd. It sounds like maybe you have an invalid installation or something.
+What version of Datomic did you download?
+The latest one, but I also tried `0.9.5561` (the one mentioned in the "Getting Started" guide, and I downloaded an earlier version just to check they didn't rename the peer server
+Hm. I haven't messed with Datomic at all, but I'm planning on doing it soon. So... yeah... definitely let us know what you find, if you ever resolve it.
+What do Clojurists use to send emails? A bit of searching turned up this: <https://clojars.org/org.clojars.sethtrain/postal> Which looks nice and Clojurey, but it only has 250ish downloads...
+Ah... to answer my own question: <https://clojars.org/com.draines/postal>
+That seems pretty popular... I wonder, is there a way to sort clojar search results by popularity?
+<@U5MVBAJUU> I didn't realise there was  difference between "datomic free" and "datomic starter"
+c.f. <https://groups.google.com/forum/#!topic/datomic/P69c3q__5gw>
+datomic free does not include the peer server
+Ah! I see. What's the point of "datomic free", I wonder?
+Thanks for posting the solution!
+<@U5MVBAJUU> I have expanded on the topic in <#C03RZMDSH|datomic>
+quoting this google group:
+&gt; The primary use case for Free is not new users, but rather people who need a license that includes redistribution rights.
+I think `(-&gt; 100 inc dec set-50 ...)` is the most idiomatic way to do this.
+`(fn [value fn-list] ((apply comp (reverse fn-list)) value))`
+^ that's the one we settled on. i always forget the order of comp so i left off the reverse earlier
