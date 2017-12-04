@@ -1,4 +1,89 @@
-<@U64D26Q95> Have you seen RemoteData? It helps you keep track of the "download-state" of your data. It even forces you to do so. So, as soon as everything is ```Success a``` you're there. <http://package.elm-lang.org/packages/krisajenkins/remotedata/latest>
-`fetch` lives in Commands, fetches the info and triggers `FetchResult` in `update`
-Yes, RemoteData seems a good option.
-And have a look at the docs for `RemoteData.andMap` for a neat way to merge data-loads into a single result. 
+U0LPMPL2U : One option would be to pass the model
+U0J1M0F32 : I would pass the whole model into `htmlNote`, or the one other object you need.
+U0LPMPL2U : So the signature would now be `htmlNote : Model -&gt; Note -&gt; Html Msg`
+U0LPMPL2U : In your `map`, you'd do something like `List.map (htmlNote model) model.notes`
+U0LPMPL2U : Passing a just the first argument to `htmlNote` here is a trick called "partial application". I'm glad to explain more if you haven't encountered that yet :slightly_smiling_face:
+U5Z3Y472L : Hi!
+U5KEJPXHP : <@U0LPMPL2U> I attempted something like this before and couldn't get it to work. I'm going to attempt again and see what happens. Thanks!
+U3SQ42JJW : Hi everyone. I have a question, maybe someone can help. I am writing a module that I would like to publish one day. 
+I am struggling with the elm package documentation.
+I have a type Catalogue which looks like this:
+
+U3SQ42JJW : ```type Catalogue    = Catalogue
+        { previous : List Question
+        , current : Question
+        , remaining : List Question
+        }
+```
+
+U3SQ42JJW : I want to hide the implementation details in the documentation. I only want to mention type Catalogue, not the whole type
+U3SQ42JJW : Problem is, when I mention ```
+@docs Catalogue
+```
+I get the whole type. But that should be hidden in the Documentation…
+
+U3SQ42JJW : Don't know if its cleared what i want…. :confused:
+U5Z3Y472L : I was looking at Richard Feldman's SPA example. In some file he uses a =&gt; operator. Unless I missed something, I haven't encountered this yet, although I followed a bunch of tutos and read Richard's Book. By example in <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Page/Login.elm> there is:
+U5Z3Y472L : SetEmail email -&gt;            { model | email = email }
+                =&gt; Cmd.none
+=&gt; NoOp
+
+U14Q8S4EM : Yeah <@U5Z3Y472L> , did you have a question about that? Making your own operators is almost always a bad idea.
+U14Q8S4EM : I think Richards use is maybe one of the exceptions where its handy. Maybe not tho.
+U14Q8S4EM : Personally I do something just like Richards `=&gt;` but I do `:=` instead. I dont really understand how an arrow conveys what `(,)` does.
+U5Z3Y472L : ok, I thought it was something I did not know yet about elm, but it's a user defined operator
+U5Z3Y472L : thanks <@U14Q8S4EM>
+U14Q8S4EM : Sure thing!
+U1L4GLFJ6 : hello guys I need help writing a decoder
+U1L4GLFJ6 : is there any way to break that process up into small steps
+U1L4GLFJ6 : JSON decoder
+U0LPMPL2U : yes!
+U0LPMPL2U : in fact, that's the easiest way to build a decoder
+U0LPMPL2U : start with the smallest parts of your decoder
+U1L4GLFJ6 : my JSON file is thousands of lines long there's really no way to understand it completely the first time
+U0LPMPL2U : then combine them into more complex parts
+U0LPMPL2U : Also, there are automated tools like <https://eeue56.github.io/json-to-elm/> that might be helpful
+U1L4GLFJ6 : In JSON they are written `List [Int, Int]` but in Elm they could be `List (Int, Int)`
+U1L4GLFJ6 : your website returned me a very simmple answer
+U1L4GLFJ6 : ```import Json.Encodeimport Json.Decode exposing (field)
+
+type alias Something =
+    { municipios : List ComplexType
+    }
+
+decodeSomething : Json.Decode.Decoder Something
+decodeSomething =
+    Json.Decode.map Something
+        (field "municipios" Json.Decode.list decodeComplexType)
+
+encodeSomething : Something -&gt; Json.Encode.Value
+encodeSomething record =
+    Json.Encode.object
+        [ ("municipios",  Json.Encode.list &lt;| List.map encodeComplexType &lt;| record.municipios)
+        ]```
+
+U1L4GLFJ6 : looks like we may have to keep iterating... ?
+U0LPMPL2U : yeah, looks like it didn't define `decodeComplexType`
+U0LPMPL2U : I could have sworn there was a tuple decoder
+U0EUHKVGB : There is
+U0EUHKVGB : Or, sort of
+U0EUHKVGB : You'll need to combine other decoders to decode a tuple
+U23SA861Y : tuples don't exist in json, so you would use map2 with a tuple constructor
+U0EUHKVGB : <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#index>
+U1L4GLFJ6 : at least your app decodes my file-part way... is there any way to see that intermediate result and keep doing from there?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

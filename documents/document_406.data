@@ -1,3 +1,62 @@
+U3SJEDR96 : twice? :smile: Good job :slightly_smiling_face:
+U4JT89FGB : ha, yes twice. you put in all that work for me, i figured i'd try to get as much as i could out of it :smile:
+U3SJEDR96 : That's awesome, I'm really happy to hear you found it useful! (Or _so_ mystifying you had to do it twice. :sweat_smile: )
+U4JT89FGB : no no, it actually didn't take long even the first time.. but it did help me grok a lot of what i'd been copy-pasta for a while now
+U3SJEDR96 : Cool! If you want a challenge, you could always try implementing `at` without using `at` :slightly_smiling_face:
+U5FC7BE0G : I have an API that returns either
 ```
-Correct - trying to that _usually_ means your data can be structured differently
-how can i share with you my structure for better understanding?
+{ "data": {...} }
+```
+
+... or in case of an error:
+
+```
+{ "error": "..." }
+```
+
+The status is 200 in both cases. What would be a good approach to decode this?
+
+U1CHKCKBR : <@U48AEBJQ3>  nice one, there's an odd behaviour at combo input (click and key press)
+U4JT89FGB : <@U5FC7BE0G> I think `Decode.oneOf` is what you're looking for
+U3SJEDR96 : <@U5FC7BE0G> What's your end-goal? Do you want to handle the `error`, do you want to get an `Err` when you get that, ..?
+U1CHKCKBR : <@U48AEBJQ3> a nice one done in vue <http://vue-keyboard.martywallace.com/>
+U5FC7BE0G : but what would the type look like? 
+I know I could do something like 
+
+```
+type alias MyResult = { data: Maybe MyData, error: Maybe String }
+```
+
+U5FC7BE0G : <@U3SJEDR96> yes an Err would be preferable
+U0LPMPL2U : Could you do something like:```
+JD.oneOf
+  [ JD.field "data" myDataDecoder
+  , JD.field "error" (JD.string |&gt; JD.andThen JD.fail)
+  ]
+```
+
+U3SJEDR96 : Yeah, that would work.. You would get a `I ran into a failure decoder: ` thing in the Err case, but eh
+U3SJEDR96 : I suppose, if that's unacceptable, you could take that a little further and make a custom response handler - <https://ellie-app.com/3GPkxJJjHQna1/0>
+U3SJEDR96 : Though you'd still have a String in the error case
+U641LDZFU : Evening (or whatever time of day it is where you are) all, I am having problems with union types (again)... is it possible to have a list filled with different types and then run a filter on that list? here is a demo of what I am trying to achieve:
+U641LDZFU : <https://gist.github.com/allansideas/9a2c513d1b4add499b1605abe5d69ed4>
+U3SJEDR96 : Right, so you need to be explicit about the types of entries in a List. Doing that would yield something like this: <https://ellie-app.com/3GPpVLz2wdRa1/0>
+U3SJEDR96 : Oh, `Record` is actually defined, missed that: <https://ellie-app.com/3GPpVLz2wdRa1/1>
+U641LDZFU : heh :slightly_smiling_face:
+U641LDZFU : I believe you taught me that bit last time :smile:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

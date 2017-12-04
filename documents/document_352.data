@@ -1,19 +1,75 @@
-        (Json.Decode.field "connectionStatus" Json.Decode.string)```
-as you can see I have to use `Json.Decode.map7`
-yep, that's what I been doing so far.  Because I am a n00b.
-which is not ideal as it only goes up to `map8`
-yeah definitely use pipeline, it's really nice :stuck_out_tongue:
-Anyone used keystonejs together with elm?
-I havent personally, but in my experience the choice of backend doesnt really matter when using elm
-everything has to go through elm decoders anyway
-anyone else encounter an issue with fontawesome when setting up webpack in the elm tutorial?
-Are records immutable in Elm? I have been doing `(Model x y z)` for now, when updating the model. `{ model | x = y }` just feels so wrong to me. What am I missing? :confused:
-To be clear, your `model` is left untouched after `{ model | x = y }`
-Right, so it is basically `(Model x y z)` with Elm taking care of the values that did not change, while I handle the changes?
-Absolutely :slightly_smiling_face: You could never use `{ | }` syntax your code would just be more verbose and less readable
-Nice, good to know, because manually creating a new model was becoming... tedious at best!
-Thank you for clearing that up, <@U2GPAEU1L> :slightly_smiling_face:
-No problem
-I'll be making *a lot* of Elm tutorials this next little while, so if you ever are confused with something and want a full tutorial to explain it, please ping me, I'd happily make a custom tutorial just for you, especially because a lot of things you struggle with a lot of other people likely struggle with as well! Don't be shy to ping me and ask for help or ask me to make a tutorial for you :slightly_smiling_face:
-Elm really is simple :slightly_smiling_face: And I'm happy to convince you of that by explaining _anything and everything_ you find not simple
-I'd be grateful for any tips/help/whatever, as I am just starting out.
+U3LT1UTPF : <@U5XHTBFS6> I'm writing an app with leaflet as the main character. I tried using ports, but after watching richard feldman's talk, I opted for writing a custom element. Not sure if that's convinient for all cases, though.
+U3LT1UTPF : <https://m.youtube.com/watch?v=ar3TakwE8o0>
+U3LT1UTPF : I pass the layers I want as a property
+U3LT1UTPF : I plan to extract an example from my code some time in the following weeks.
+U3LT1UTPF : And publish it
+U0J8D9M2P : What is the purpose of `radians` function. It returns the given value.
+U3SJEDR96 : Using the `turns`/`radians`/`degrees` functions consistently means that "standard Elm angles" could theoretically be changed without further impact. In practice, there isn't that much values except being explicit about things. `radians 12` says more than `12`
+U0J8D9M2P : Is there any packages for Julian Day Numbers?
+U0J8D9M2P : <http://package.elm-lang.org/packages/justinmimbs/elm-date-extra/1.0.1> this package had it, but now API for Julian days is removed.
+U3SJEDR96 : I think elm-date-extra has that
+U3SJEDR96 : ```toJulianDate : Date -&gt; Float
+toJulianDate date =
+  toTime date / toFloat msPerDay + 2440587.5
+```
+
+U3SJEDR96 : (`msPerDay` is part of `Date.Facts` in that package)
+U3DQT3ZGC : Hi! How come ```Html.div [] [ text "foo \n bar" ]``` doesn't put bar on a new line but does remove the `\n`
+U3DQT3ZGC : I'd like it to but bar on a new line
+U3SJEDR96 : That's how it works in regular HTML too. you'll want `Html.div [] [ text "foo", <http://Html.br|Html.br> [] [], text "bar" ]`
+U3DQT3ZGC : Ok right. In my case I get a string of css from elm-css that I'd like to render on the page, but with the linebreaks
+U3SJEDR96 : Oh. You might want to use `Html.pre [] [ text yourStuff ]` then, which will render it into a "pre"formatted block
+U3DQT3ZGC : Ah! Nice :slightly_smiling_face:
+U3DQT3ZGC : Thanks!
+U5Z3Y472L : Hello
+U5Z3Y472L : I'm trying to implement a login form. My view code looks like this :
+U5Z3Y472L : view : Model -&gt; Html Msgview model =
+     form [ class "w70 center", onSubmit Login ]
+          [ label [ for "email", class "row mts" ] [ text "Adresse email"]
+          , input [ name "email", type_ "email", class "row", onInput ChangeEmail ][]
+          , label [ for "password", class "row mts" ] [ text "Mot de passe"]
+          , input [ name "password", class "mbs w70", type_ model.passwordFieldType, onInput ChangePassword, value "" ]
+                  [ div
+                      [ class "passwordShow" ]
+                      [ input
+                          [ checked model.isPasswordVisible, type_ "checkbox", onClick TogglePasswordVisibility ]
+                          [ text "Afficher"]
+                      , a [ onClick Login, class "row btn primary-btn" ]
+                          [ div [ class "grid-3-1" ]
+                                [ div [ class "txtcenter" ] [ text "Me connecter"]
+                                , viewSpinner model.isWaitingConnect
+                                ]
+                          ]
+                      , div [ class "w50 center" ]
+                          [ a [ href "#", onClick SendResetLink ] [ text "J'ai oublié mon mot de passe"]
+                          , viewSpinner model.isWaitingReset
+                          ]
+                      ]
+                  ]
+          ]
+
+viewSpinner : Bool -&gt; Html Msg
+viewSpinner isWaiting =
+    if isWaiting then
+        div []
+            [ i [ class "fa fa-spinner fa-pulse fa-lg" ] []
+            ]
+    else
+        div [][]
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

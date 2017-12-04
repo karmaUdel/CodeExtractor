@@ -1,1 +1,77 @@
+U48AEBJQ3 : Which would have you change `transition ArticleLoaded (Article.init model.session slug)` to `transition (Article.init ArticleLoaded model.session slug)`
+U48AEBJQ3 : And `transition` would look like:
 ```
+transition cmd =
+    { model | pageState = TransitioningFrom (getPage model.pageState) }
+        =&gt; cmd
+```
+
+U39DE7RQ9 : <@U48AEBJQ3> thanks, I will try that!
+U39DE7RQ9 : <@U48AEBJQ3>, now that code seems to compile. The next problem is that in my subscriptions I need to point to messages that resides in my HomePage module. The compiler says:```
+23:08:12 client.1   |  The type annotation for `subscriptions` says it always returns:
+23:08:12 client.1   |      Sub Msg
+23:08:12 client.1   |  But the returned value (shown above) is a:
+23:08:12 client.1   |      Sub HomePage.Msg
+```
+
+U39DE7RQ9 : I know it is possible to map messages some how but I cant find how.
+U48AEBJQ3 : <@U39DE7RQ9> <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Platform-Sub#map>
+U48AEBJQ3 : You need something of `HomePage.Msg -&gt; Msg`
+U48AEBJQ3 : Usually a constructor of `Msg`
+U39DE7RQ9 : <@U48AEBJQ3> a function that encapsulates HomePage.Msg in a Msg?
+U48AEBJQ3 : Right, usually a tag of `Msg`
+```
+type Msg
+   ...
+   | SubscriptionEvent HomePage.Msg
+```
+
+U39DE7RQ9 : Im sorry <@U48AEBJQ3> but I cannot seem to puzzle this out by my self. I have added `SubscriptionEvent HomePage.Msg` message but my subscriptions look like this tight now and it does not compile.```
+subscriptions : Model -&gt; Sub Msg
+subscriptions model =
+    Sub.batch
+        [ gotAllPublicForms (SubscriptionEvent (HomePage.GotAllPublicFormsMsg &lt;&lt; decodeValue jsonFormListDecoder))
+        , gotForm (SubscriptionEvent (HomePage.GotFormMsg &lt;&lt; decodeValue jsonFormDecoder))
+        ]
+```
+
+U39DE7RQ9 : My ports look like this:``` 
+port getAllPublicForms : () -&gt; Cmd msg
+port gotAllPublicForms : (Json.Decode.Value -&gt; msg) -&gt; Sub msg
+port getForm : FormId -&gt; Cmd msg
+port gotForm : (Json.Decode.Value -&gt; msg) -&gt; Sub msg
+```
+
+U39DE7RQ9 : The compiler says:``` 
+23:44:13 client.1   |  267|           gotAllPublicForms (SubscriptionEvent (HomePage.GotAllPublicFormsMsg &lt;&lt; decodeValue jsonFormListDecoder)
+23:44:13 client.1   |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+23:44:13 client.1   |  Function `gotAllPublicForms` is expecting the argument to be:
+23:44:13 client.1   |      Value -&gt; Msg
+23:44:13 client.1   |  But it is:
+23:44:13 client.1   |      Msg
+```
+
+U48AEBJQ3 : <@U39DE7RQ9> There are different places to tackle this from. I think from how you are doing it here, you need `gotAllPublicForms (SubscriptionEvent &lt;&lt; HomePage.GotAllPublicFormsMsg &lt;&lt; decodeValue jsonFormListDecoder)`
+U69D8R59S : Good way to call a function N times? In my specific case, I'm trying to simulate a dice roll by updating my model with random values for a few seconds.
+U153UK3FA : <@U69D8R59S> calling a function N times really depends on what you want to do with the N results
+U153UK3FA : do you want a list of these results?
+U69D8R59S : I want to replace a property on my model N times
+U153UK3FA : ah, wanting to animate a die face by having it transition between numbers?
+U69D8R59S : Yes, exactly! :slightly_smiling_face:
+U153UK3FA : <http://package.elm-lang.org/packages/mdgriffith/elm-style-animation/latest> is nice for doing animation
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,4 +1,47 @@
+U0FP80EKB : Yeah, that's no fun. It makes it confusing (to me) about whether it is loaded, or not, whether there was an error, etc.
+U0FP80EKB : I tend to not use `Maybe` hardly at all. It often masks what is going on.
+U23SA861Y : you will have to do the same with `RemoteData` but you need to leverage the functions available
+U0FP80EKB : I try to build more types that describe the situation, like `RemoteData`
+U23SA861Y : such as map and andThen
+U26LR8F4H : I'm trying to figure out how to chain a task.  I'm basically using this: <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L245> and I can't seem to figure out how to add a Task.andThen (Dom.Scroll.toTop "body")
+U1X5ZRJUX : right, cool I'll give that a read then
+U23SA861Y : speaking of `andThen`
+U153UK3FA : <@U26LR8F4H> `andThen : (a -&gt; Task x b) -&gt; Task x a -&gt; Task x b` so you need to pass `andThen` a function that produces a Task
+U153UK3FA : `(Dom.Scroll.toTop "body")` isn't a function, it's a Task
+U26LR8F4H : ```scrollToTop : Task x ()scrollToTop =
+    Dom.Scroll.toTop "body"
+        |&gt; Task.onError (\_ -&gt; Task.succeed ())
 ```
-rather then type be a property of person
-<@U23SA861Y> I see what you mean.
-Thanks
+
+U153UK3FA : you want `Task.andThen \_-&gt; Dom.Scroll.toTop "body"`
+U23SA861Y : is suspect you want to transistion the page `andThen` scroll to the top?
+U26LR8F4H : Yeah, basically make an http request for content and then scroll to the top once it's completed.
+U23SA861Y : in which case you probably want something more like```
+Task.andThen (\x -&gt; Task.map (\_-&gt; x) (Dom.Scroll.toTop "body"))
+```
+
+U23SA861Y : or something of that ilk
+U153UK3FA : <@U26LR8F4H> do you want to re-render before scrolling to the top?
+U26LR8F4H : that would be a nice touch :slightly_smiling_face:
+U23SA861Y : mm, also a good question. It might make sense to bounce through an update
+U23SA861Y : and just have a `Pageupdate` message
+U23SA861Y : which then issues a scroll
+U26LR8F4H : thanks, i think  i have some fiddling todo.
+U153UK3FA : <@U26LR8F4H> if you want to re-render then you need to go through `update` which you can't do by chaining Tasks
+U26LR8F4H : So the first task issues an http request then the andThen will run before the update function is called?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

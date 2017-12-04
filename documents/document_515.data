@@ -1,39 +1,47 @@
+U2SR9DL7Q : Domino is used everywhere in the code base...
+U2SR9DL7Q : <@U236M9FH9> Anyway, we got it to not complain ^^ . Thanks very much. That repl idea was great.
+U236M9FH9 : Yup, REPL is an OK scratchpad, but an awesome type inspector :stuck_out_tongue:
+U2SR9DL7Q : I never thought to use it for that, but it makes a lot of sense.
+U2SR9DL7Q : Elm-mdl has been good but a bit strange at times. I need to try other elm styling libraries and see what I like best.
+U635238TG : can someone please give me an eli5 explanation of the Msg type? So it's a type like Int and String, etc right? But it's a special kind of Type or no?
+U0J1M0F32 : A `Msg` type is really like any other user defined type within the system, but its one we use in the Elm Architecture to represent the very actions that take place in our application.
+U0J1M0F32 : `type Msg = PreviousSlide | NextSlide | NoOp` could be used to represent the various "messages" of a basic slide deck elm app.
+U635238TG : user defined like when we make a Type alias using a record?
+U0J1M0F32 : like when we use the `type` keyword.
+U0J1M0F32 : If I was making a Tic Tac Toe game in Elm I might have a type for Piece:
 ```
-yep, correct. but problem is with nested update
-so as I thought it should be recursion like a -&gt; b -&gt; insert c to b.children -&gt; b -&gt; a
-Imagine that `Tree.map` visits all children recursively, just like `List.map` can do for a list
-ok, done :smile:
-This discusses `Tree.map` and an implementation for a binary tree <https://evancz.gitbooks.io/functional-programming-in-elm/recursion/binary-trees.html>
-&gt; A binary tree is either empty or it is a node with a value and *two subtrees*
-yes, either one of which could be empty
-Notice that node 9 has two children: 7 and "empty"
-hmm, yeah. just read again Insert section and got idea. will try to implement it now for my case :thumbsup:
-no, I don't :smile:
-bwa?
-what is it? I am still not sure how to update it in nested list even on the paper...
-will try to draw it step-by step for each foldl callback now
-if you want/can post some example code to ellie then there are plenty of *folks* that can help you out
-I am going outside right now, but absolutely will post it within next hour, thank you :thumbsup:
-*pfft* outside, such a mythical place doesn't actually exist
-<http://i1.kym-cdn.com/photos/images/facebook/000/915/472/13e.jpg>
-Hi everyone! Does anyone have a very basic example of searchable. What I mean by searchable  is I have a list of records listed by name and the list shows the results according to what is typed in the box (showing the number of records that match what is entered).
-`List.filter (\record -&gt; String.contains (String.toUpper model.searchString) (String.toUpper .name record)) recordList`
-This would return a new `recordList` where the `name` contains a substring of `model.searchString`
-Just populate `model.searchString` from an `onInput` of the searchbox
-<@U5ABF3BH7>  in terms of UI, this is basically an autocomplete control, isn't it?
-Yes, I am looking for something similar to elm-searchable-menu, but looking for a straight forward example
-<@U5ABF3BH7>: You'd want to store a `recordList` and the `searchString` in your model and then apply the `List.filter ...` line above at some point in your view before displaying the list of records.  If you're familiar with the Elm Architecture, this would really only require a single `Msg` to update the search string in the model
-I have one (<http://package.elm-lang.org/packages/ericgj/elm-autoinput/latest>), I can't make any claims to it being extremely polished though.  Example code here: <https://github.com/ericgj/elm-autoinput/blob/1.0.0/examples/Demo.elm>
-Thanks a lot <@U2UGVS24E>  and <@U0JFGGZS6>
-What does Attribute Never really mean?
-you can't return messages
-Anyone tried composing? <https://www.elm-tutorial.org/en-v01/02-elm-arch/06-composing.html>
-Hey everyone I'm having an issue importing modules in my project, in my source tree I have a `src` folder with my Main.elm, but I have a `src/Players/Model.elm` does seem to work when I import it with `import Player.Model exposing(..)`
-does or does not seem to work with 'import Player.Model'?
-is the folder in your elm-projectfile
-no it doesn't work
-in elm-package.json
-<@U5ABF3BH7> here's a super simple example built from scratch <https://ellie-app.com/3zTWfXHQpDwa1/0>
-I set my source directories to `"./src"`
-What error message you get?
-<@U23SA861Y> <https://gist.github.com/JosephShering/5bf2ad4ffaab16ac26c3438359ad6cb6>
+type Piece = X | O | Empty
+```
+
+U635238TG : ahhh!
+U635238TG : but instead of Piece, sometimes people just say Msg as an Elm common practice?
+U0J1M0F32 : Kinda, so in an Elm app that was Tic Tac Toe. I may have that type Piece I just defined, but also have a Msg type like this:
+```
+type Msg = MakeMove Piece | EndTurn | GameOver | NoOp
+```
+
+U0J1M0F32 : but correct, using the word `Msg` is kind of an Elm community standard.
+U0J1M0F32 : I remember when it used to be `Action` for awhile.
+U635238TG : this tic tac toe example really helped me wrap my head around some of this. thank you. some true eli5 right there! haha
+U0J1M0F32 : I've had lots of practice :smile: (Taught at a code school for along time)
+U6AU4N1HR : hello, according to this <http://package.elm-lang.org/packages/evancz/elm-http/3.0.1/Http> theres a url function which can format url with query string, but when i try to use it I get "`Http` does not expose `url`." Any idea why?
+U2Q5GJNTB : <@U6AU4N1HR> might be a silly suggestion, but are you sure you you that version of http?
+U2Q5GJNTB : os evancz/elm-http an not elm-lang/http ?
+U6AU4N1HR : <@U2Q5GJNTB> actualy that's a good question :slightly_smiling_face:
+U6AU4N1HR : import Http
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

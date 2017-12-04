@@ -1,8 +1,115 @@
+U23SA861Y : my pleasure :smile:
+U23SA861Y : also, if it didn't have a toList function you could use fold to implement it
+U23SA861Y : `toList dict = Dict.foldr (\k v l -&gt; (k,v)::l) [] dict`
+U3SQ42JJW : jonf: uh… I have to study this. I still lack of some functional concepts. Thanks so much…  I try to understand this foldr-thing :slightly_smiling_face:
+U23SA861Y : I think you should try, fold is the sort of the complement to map.
+U5WS7CJLV : <@U0LPMPL2U> I finally finished your universal pattern article - very nice!
+U0LPMPL2U : thanks!
+U23SA861Y : In fact with fold you can even implement map.`map f in = Dict.foldr (\k v d -&gt; Dict.insert k (f v) d) Dict.empty in`
+
+U2LAL86AY : <@U3SQ42JJW> if you want to prevent the traversing and convert directly - with a single iteration -&gt; maybe this package helps. It's kind of hard for my brain - but i think with time i'll get used to. <http://package.elm-lang.org/packages/avh4/elm-transducers/latest>
+U23SA861Y : I thought the compiler had special optimization for pipe because of exactly this
+U2LAL86AY : you are saing that when doing `|&gt;  |&gt;  |&gt;` the compiler will detect that and make it one single iteration? That would be cool :simple_smile:  seems like is not implemented yet - this wouldn't make sense otherwise : "```
+When using List.map, it is more efficient to compose multiple functions and then map the list with the composed function than to map the list with each function independently because the list will only be traversed once. 
 ```
-How does your view look?
-in terms of types of the generic thingy
-I have no idea yet, could be just an overlay on top of everything if there is something to confirm.
-I would check if there is smth to confirm, then show the overlay on top of the content with Yes and No buttons
-Why do you want to store the message in the model?
-Why not just trigger it when the confirm button is clicked?
-Because then I could reuse this for any confirmation, and I would just have to change `onClick Whatever` to `onClick (Confirm Whatever)`.
+
+U2LAL86AY : <@U0LPMPL2U> that article is awesome :heart:
+U2FJ2D6M7 : Hi! I'm playing around with `react-elm-components` and getting an Elm component embedded into a React app. I have followed the relevant blogs and correctly embedded the counter example by compiling by hand `elm-make Main.elm --output=index.js` and sourcing that in HTML. 
+The next step would to make the developer experience better. We have hot reloading, etc, so I was thinking if `elm-reactor` could output JS or something so if the index.js gets updated, it will reload. But now that I'm asking, perhaps something non-elm related like inotify would be the proper tool. Any thoughts?
+
+Update: my solution was to use `fswatch` and a script wrapper around `elm-make`.
+
+U2FJ2D6M7 : not 100%, but close enough for now
+U1ZFF0E5P : I have a view that can fail of type `Result String (Html Msg)`, how do I send a `Cmd Msg` to handle logging it?
+U1ZFF0E5P : essentially how do I send a `Cmd Msg` from a view without using `onClick` or similar
+U153UK3FA : <@U1ZFF0E5P> you can't
+U153UK3FA : the type of view is `(Model -&gt; Html msg)`, it can't fail
+U23SA861Y : You should be able to render all states
+U23SA861Y : you need to deal with the failure in update
+U1ZFF0E5P : all our backend data is normalised and stored in `Dict`s
+U1ZFF0E5P : if an item can't be found in a `Dict` we do handle it in the view, but additionally we want to log it
+U1ZFF0E5P : so I need a way to send a `Msg` to my `update` function where I can send an `Http` request
+U23SA861Y : how are you selecting the item in the dict, presumably that key is in the model
+U1ZFF0E5P : yeah so I have the key for `StudentCourse`, which I can look up and send to my view
+U1ZFF0E5P : which has a List of keys of other entities (StudentCourseUnit), which I have to loop up again
+U23SA861Y : wait, you don't send it to your view
+U23SA861Y : your view renders your model
+U23SA861Y : nothing gets sent to it
+U1ZFF0E5P : this is my model: ```{?entities = {
+?apprenticeshipProviderFieldOfficers = Dict(0)
+?apprenticeshipProviderRegions = Dict(0)
+?apprenticeshipProviders = Dict(0)
+?changeOfSrtos = Dict(0)
+?courseDescriptors = Dict(0)
+?courseSchemeUnits = Dict(18)
+?courseSchemes = Dict(3)
+?courseUnits = Dict(13)
+?courses = Dict(1)
+?deliveryLocations = Dict(0)
+?employers = Dict(0)
+?fundingSchemes = Dict(0)
+?notifications = Dict(0)
+?referralSources = Dict(0)
+?registeredTrainingOrganisations = Dict(0)
+?studentCourseClasses = Dict(1)
+?studentCourseUnitTasks = Dict(0)
+?studentCourseUnits = Dict(0)
+?studentCourses = Dict(1)
+?tasks = Dict(0)
+?trainerRoles = Dict(1)
+?trainers = Dict(1)
+?trainingContractNumbers = Dict(0)
+?units = Dict(13)
+}
+error = Nothing
+openedDatePicker = Nothing
+route = TrainingPlan "dGYgQa"
+settings = NotAsked
+?trainingPlan = Success {courseScheme…}
+courseScheme = Nothing
+?courseSchemes = List(3)
+date = &lt;Wed Jul 19 2017 18:08:05 GMT+1000 (AEST)&gt;
+modal = Closed
+selectedStudentCourseUnits = Nothing
+studentCourse = "dGYgQa"
+?studentCourseForm = { comment = Nothing, endDate = Nothing, … }
+trainer = "mbk5Xe"
+}```
+
+U1ZFF0E5P : so my main view function is this:
+U1ZFF0E5P : ```view : Model -&gt; Html Msgview model =
+```
+
+U1ZFF0E5P : now if a key can't be found, I show an error
+U23SA861Y : ellie dude
+U23SA861Y : ellie
+U1ZFF0E5P : BUT I also want to log this
+U2SR9DL7Q : <@U1ZFF0E5P> Views can be shown or not shown depending on the state of your model. So you're view code would look like```
+view model = 
+  case model.relevantThing of 
+    everything there -&gt; ViewIfWorking
+
+    somethingMissing -&gt; ViewIfNotWorking
+```
+`ViewIfNotWorking` may be some default or anything you like. 
+
+Error logging would have nothing to do with the view however. It would be triggered or not when your app attempts to read the data from the `dicts` in your backend.
+
+U23SA861Y : You need to handle all of this in your update function when you get the message that changes the selection
+U1ZFF0E5P : we have relational data (8 layers deep) that we normalised and store in `Dict`s
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,5 +1,133 @@
+U2LAL86AY : aha, that makes sense.  And for decoding them back?
 ```
-Alternatively, say I'm using a list to represent a stack of things, I could `type alias Stack a = List a`, where `a` just means it's not constrained to any specific type. If I were to say `type alias Stack = List String`, You don't need a variable because a `Stack` will _always_ be a list of strings.
-Hi folks! is anyone used google maps polymer within Elm?
-<@U0F7JPK36> great. Btw, I am elm newbie so can you update README.md with some example, please?
-<@U1G51S63S> check out <https://www.youtube.com/watch?v=ar3TakwE8o0>
+case constructor of 
+   "IsRootNode" -&gt; IsRootNode  -- But the constructor will generate different function types depending on how many arguments it has,
+```
+Will this play nice with the generic value? The arguments have different types - and there can be any number of arguments.
+
+U2LAL86AY : `{ field : IsRootNode 1 "someString" True }`
+U2LAL86AY : using a ~~list of values can work for encoding~~ - Edit: Only if they are the same type of value i guess.. But is not so clear to me how i use this list of values in the decoding step.
+U1CE9DL9H : you'll need to use `andThen` a lot, but it's possible
+U2LAL86AY : hmm ok, `possible` -&gt;  that's the important part.  :smile: thanks. Guess this is not very recommended.?! - given that is harder to decode.
+U1CE9DL9H : it's the only way really
+U2LAL86AY : no, i mean is not recommended to store stuff inside union constructors?
+U2LAL86AY : seems to be better to keep them in normal records fields if possible.
+U3SJEDR96 : I don't see the difference?
+U3SJEDR96 : In a record, the fields are labeled, in a union tag, they're positional. When decoding, they're positional anyway... Anyway, you could do something like this: <https://ellie-app.com/3zkrBCHtz39a1/0>
+U2LAL86AY : regarding previous question, how can i make this `Decode.andThen` fit with the `Decode.Pipeline`? I have the `geometry` field after the filed with the `union decoder` - and it changes things a bit form what you provided there in ellie. <@U3SJEDR96>```
+(Pipeline.decode (\elementIdAndType geometry -&gt; { elementIdAndType = elementIdAndType, geometry = geometry })
+                    |&gt; Pipeline.required "elementIdAndType" Decode.string
+                            |&gt;  Decode.andThen decodeElement - here decodeElement is the union decoder.
+
+                    |&gt; Pipeline.required "geometry" Decode.string --for now.
+                )
+```
+:thinking_face:
+
+U3SJEDR96 : add some parens, `|&gt; Pipeline.required "elementIdAndType" (Decode.string |&gt; Decode.andThen decodeElement)`
+U2LAL86AY : he he works :smile:
+U5Z8CN2SZ : hi all, has anyone experience with elm-plot?
+U5Z8CN2SZ : I am just wondering if histogram plots are possible with horizontal bars. Could not find hints in the docs.
+U1CE9DL9H : <@U5Z8CN2SZ> there is an <#C2W8GFQF9|elm-plot> channel
+U5Z8CN2SZ : thanks
+U2LAL86AY : <@U5Z8CN2SZ> i'm sure this is a good tutorial <https://elmseeds.thaterikperson.com/elm-plot>
+U38FTJUPP : Does anyone know a good elm-expressjs boilerplate? I was trying to do a small SPA with a small GraphQL server but I was wondering how to best organize my repo
+U2LAL86AY : what is necessary to do for elm to interact with the file system?I just finished configuring `web-pack` for an older project - and i lost like 2-3 hours - jumping form one error to another. And i'm not the only one - i see all over i look in Github - ton of people commenting about this errors and showing different solutions.. it's a phenomena..
+
+Complex  tools like `web-pack` will greatly benefit for being implemented in a language like elm. I know elm can't do that right now - but just want to get a glimpse of what are the major challendges that need to be overcomed for doing stuff like this.
+
+U5YJVL3B7 : hello, can I turn a custom type into a `comparable` type?
+U48AEBJQ3 : <@U5YJVL3B7> No.
+U5YJVL3B7 : thanks!
+U5YJVL3B7 : regarding list
+U5YJVL3B7 : I'm building a `List a`
+U5YJVL3B7 : and I need to upsert items from that list
+U5YJVL3B7 : but in elm you don't update items right?
+U5YJVL3B7 : should I build a new list?
+U5YJVL3B7 : every time/
+U2LAL86AY : <@U5YJVL3B7> everything in elm is imutable - and you can't change that - check this article out : <https://www.sitepoint.com/immutability-javascript/>There is no updating, anywhere in the real sense of the word.
+
+U4F64AKQV : <@U5YJVL3B7> There are helpers for updating items in elm-community/list-extra
+U4F64AKQV : Use them sparingly though because they actually need to create a new copy of your data
+U4F64AKQV : Regarding `comparable`, for most functions that accept a `comparable` there is a variant that accepts a `(a -&gt; comparable)` function that allows you to “treat the elements as comparable” for the purposes of that function.
+U4F64AKQV : In practice, the lack of the ability to make custom types `comparable` is rarely a problem
+U0FP80EKB : As with everything, though, measure to make sure that the data structures are the problem. For example, in our system, we use lists as the underlying collection type for all our stuff, and we do a good amount of updating. We haven’t found the performance to be an issue. The list implementation is done well, so, unless you are holding A LOT of items in it, you probably won’t see a problem.
+U0FP80EKB : Also, it doesn’t actually have to update your data. If it is implemented as a traditional linked list, then it doesn’t even have to update the whole list, only those nodes that are before the updated one, keeping the ones after it the same exact ones.
+U0FP80EKB : For us, the uniformity and ease of working with lists makes it really nice, so we don’t have to think “oh, this is a `Dict`” or “oh, we used an `Array` here”. Of course, as with everything, YMMV
+U0FP80EKB : `List.Extra` has a nice `updateIf` function, that we use. It is also constructable from `List.map` if you don’t want to import `List.Extra`, although I’d recommend it. :slightly_smiling_face:
+U5YJVL3B7 : thanks <@U4F64AKQV>
+U5YJVL3B7 : now, let's say I have a chat app, which displays messages, like slack,
+U5YJVL3B7 : every time a new message comes in, it's appended into the list of messages,
+U5YJVL3B7 : assuming the chat box have millions of messages
+U5YJVL3B7 : how efficient is to copy data each time?
+U4F64AKQV : Appending to the front should be constant time. 
+U4F64AKQV : Or I guess I should just say "prepending"
+U5YJVL3B7 : but it creates a copy anyway
+U4F64AKQV : <@U5YJVL3B7> it is a pretty standard linked list implementation. 
+U4F64AKQV : Copying without modification is pretty fast iirc
+U1CE9DL9H : pretty sure the when you prepend, the tail is actually shared. At least in haskell, there are some further tricks to minimize actual copying
+U5YJVL3B7 : ok, that makes sense
+U3SJEDR96 : Yeah, prepending is constant time
+U48AEBJQ3 : Still, don't worry too much about lists unless you are experiencing actual problems. Refactoring to another data structure might take some time, but the compiler provides so much support that it is surprisingly safe.
+U1CE9DL9H : and updating the dom often takes orders of magnitude more time than data processing if you're not doing anything crazy
+U0FP80EKB : And, don’t mix up “making a copy of the list” with “making a copy of your data.”
+U0FP80EKB : So, if you replace a specific item in the list, nothing is actually copied.
+U0FP80EKB : The beauty of persistent data structures
+U0JFGGZS6 : Upsert is kind of interesting to consider. Obviously Set or Dict would be preferable, but we'd lose the list order. Doing it with a list (List.Extra functions or a custom fold) is less than ideal.
+U0JFGGZS6 : If you have a limited set of functions to do on your list, let's say just upsert and remove, you could write your own data structure that combines the best of both worlds.  I had a play around with doing this:  <https://runelm.io/c/x5m>
+U3YDBDP4Z : How do people deal with authorization? I'm having so much trouble creating Route types where I can combine route with route privacy
+U5YLMAM8X : etected errors in 1 module.
+
+-- NAMING ERROR ----------------------------------------------------------------
+
+Cannot find type `Model`
+
+25| update : Action -&gt; Model -&gt; Model
+                      ^^^^^
+
+
+
+
+-- NAMING ERROR ----------------------------------------------------------------
+
+Cannot find type `Model`
+
+25| update : Action -&gt; Model -&gt; Model
+
+U5YLMAM8X : please, what am i doing wrong...
+U1CE9DL9H : well, you don't define a `Model`
+U1CE9DL9H : at least, not as a type alias
+U1CE9DL9H : so you should add```
+type alias Model = { cat : Int } 
+
+-- model
+model : Model
+model = 
+  { cat = 1 }
+```
+
+U5YLMAM8X : thanks, it works.
+U1G51S63S : what do you think is the better way to store data between outgoing port calls (I will need it in port callbacks at JS side) - global vars or store it on Elm side (`Json.Encode.Value`) and then pass to port?
+U1CE9DL9H : <@U1G51S63S> what are you trying to do exactly?
+U1G51S63S : <@U1CE9DL9H> google maps for example. I have 2 ports `loadMap` and `setMarkers`. second port will need `map` instance from first port
+U1G51S63S : so when map is initializing within `loadMap` callback - I will need to store `map` instance somewhere. I can put it into something like `window.map` or send back to elm side and store inside my model
+U1G51S63S : and I am trying to find more idiomatic way of doing it
+U1CE9DL9H : well that would absolutely be to store it in the model
+U1CE9DL9H : global variables and pure functional languages don't play well together
+U1G51S63S : but js is not functional and I will use it on js side only :smile:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

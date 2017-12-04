@@ -1,71 +1,75 @@
+U0LPMPL2U : Could you have:```
+type Call
+  = HungUp
+  | Active PauseStatus HoldStatus
 ```
-right
-Imagine a box diagram with edges between the boxes, and on each box there are multiple positions where you can start/end the lines you draw between the boxes
-That's pretty much exactly what I'm trying to do
-Is it essentially a directed graph with edges that can be in different states?
-drathier/elm-graph only allows one edge between each pair of nodes, so if I have multiple lines between the same two nodes I'll run into problems. Also, I don't know what position on the box that edge is starting/ending
-Make that a multigraph
-sure, but I still need to encode where on the box each of those edges go, and make sure only one edge goes to/from each position, and that there are no self-edges etc.
-if the graph library supported subgraphs, I could model each box as a graph itself, which would make the other invariants easier to check, but it's still not quite what I need
-Can the edges be in arbitrary positions on the boxes or is it discrete?
-Just a heads up, the API for `List.Extra.setAt` is likely going to change in the next release to get rid of the `Maybe` in the return.
-discrete, but a constant arbitrary number of possible positions per box
-This sounds like you're mixing data structure logic in with view logic
-making a few examples in <http://draw.io|draw.io> right now to illustrate
-Each position on the box should be a node in your graph.
-I was about to say the same thing <@U4F64AKQV>
-how do I model the fact that they are part of the same box?
-there's no subgraph support
-Maybe each node stores some bit of data saying which box it belongs to.
-I’m not sure why you would even need subgraphs?
-most data I need stored is relevant to a box, not the slots on the box
-You can generate the graph of boxes from the graph of connections
-where do I store the view position of the boxes?
-You can have a list of boxes that have a position and some id. And then each node in the graph just references the id of the box it should be attached to and its position on that box.
-It’s tough to model this data structure without knowing exactly how it well be used.
-Is there a particular reason you need to store the actual positions of the boxes? Or is this data calculated
-the position is just for the view, so I know where on the screen I should put them. They are user draggable atm
-I could auto format them somehow, but I still need to store their position somewhere
-`List (Connection,Connection)` where connection contains the box key and the connection point
-?
-`Connection` may be misleading, maybe `Endpoint`?
-sure, endpoint
-to move a box you simply update it's record, to add or remove a connection you append or filter the list
-I think putting the `Box` in a `Dict Boxid Box` and putting the slots in a graph is the best solution so far, with the Boxid of the relevant box in each slot in the graph
-basically the dict/list option, but using the graph lib since I need to check acyclicity, self-edges and do some searches
-Does it's position on the box contain any meaningful information? Or is just for pretty layout
-just for the view
-maybe what you need is a List (Endpoint,Endpoint) -&gt; Graph
-the position of the edge on the box does convey information, though
-to do those checks
-i.e. what slots it connects between the boxes
-hmm, maybe that's a good idea <@U23SA861Y>
-again, it sounds like there is some mixing of view vs logic here
-If they position of the edges on the box is merely for visual purposes it shouldn't be contained within the model, but it sounds like you have slots which actually are meaningful
-yeah, thats where I'm tripping up to
-the position of the edges on the box does matter, but the position of the boxes do not
-How does the data change? Will you be accessing the edges or slots more frequently?
-I'll be adding and removing boxes and edges
-and modifying data on the boxes, but not on the edges
-about the same number of accesses for each, i think
-sounds like you need a `Dict BoxId Box` where `Box` has a set of `Slot`s and a `List(Slot, Slot)`
-for clarity `Box` doesn't have the `List`
-what data do you imagine in a `Slot`?
-Some form of id and whatever is specific to your domain
-`(BoxId, SlotId)` would work fine, I think
-as `Slot` in your example
-just some unique identifier
-I would use elm-community/graph, where each box is a node (maybe with a label for its position) and each edge stores a tuple with the slots of the boxes it is connecting.
-I haven’t worked it out fully, but I think it gives you clean update operations and decent performance.
-I don't think elm-community/graph supports multiple edges between the same pair of nodes?
-I'll just add multigraph and edge label support to drathier/elm-graph and use that then
-My mistake, you are right that elm-community/graph does not support multigraphs.
-Can you export type alias's from modules?  If I want to use the same type alias in several modules what is the correct way to do that?
-yes
-it works just like types
-so `module yyy exposing (SomeTypeAlias)` and `import yyy exposing (SomeTypeAlias)`
-I am doing something silly then.  My code says the type alias is not defined.
-}
-Sorry, this should be in beginners
-it should be `module ModelDef exposing (Model)`, the `(..)` exposes the constructors for types, but a type alias doesn't have any, so that doesn't work
-Thank you, on to the next error.
+
+U23SA861Y : also works
+U23SA861Y : you can limit impossible states, but impossible state transitions need to be encoded into the update
+U37HUSJ4R : interesting
+U37HUSJ4R : so what would `PauseStatus`?
+U0LPMPL2U : ```type PauseStatus = Paused | Unpaused
+type HoldStatus = OnHold | Live
+```
+
+U23SA861Y : bools would also work there with type aliases
+U23SA861Y : the named constructors are a bit more descriptive however
+U0LPMPL2U : The type gives you extra safety though
+U0LPMPL2U : because you can't accidentally pass the hold boolean when you meant to pass the paused boolean
+U0LPMPL2U : You might also model this as:```
+type RecordingStatus = Paused | Recording
+
+type Call
+  = HungUp
+  | OnHold RecordingStatus
+  | Active RecordingStatus
+```
+
+U0LPMPL2U : That way the tags on `Call` represent all the call states, each of which may or may not have an associated `RecordingStatus`
+U37HUSJ4R : very interesting!
+U37HUSJ4R : guess to make it more confusing though :wink: what happens if I need the statues to be `Maybe`?
+U37HUSJ4R : because we don't always know the state of the call
+U37HUSJ4R : eg its loading
+U37HUSJ4R : or maybe just add a constructor for `Loading`?
+U0LPMPL2U : yup
+U37HUSJ4R : is there a point you'd think this is getting silly though? for example:`  | Active PhoneNumber PauseStatus HoldStatus TransferStatus SomethingElse More`
+
+U23SA861Y : at some point I might drop to a record instead of a list
+U0LPMPL2U : `HoldStatus` and `TransferStatus` are both tied to call state, not an active call right?
+U23SA861Y : probably at anything more than two
+U37HUSJ4R : no, it's an active call
+U0LPMPL2U : Hmmmm, I was thinking something like:
+```
+type Call
+  = HungUp
+  | Loading
+  | OnHold RecordingStatus
+  | Transfer
+  | Active RecordingStatus
+```
+
+U0LPMPL2U : All of these are different states that a call could be in
+U37HUSJ4R : yes
+U0LPMPL2U : I'm thinking `RecordingStatus` only makes sense for `Active` calls
+U37HUSJ4R : I'd agree
+U37HUSJ4R : I think that last type is pretty much spot on
+U0LPMPL2U : You can think of it as "a call can be in one of N states, some of which have extra data associated (such as recording status)"
+U37HUSJ4R : thank you for the help
+U37HUSJ4R : great to be able to chat through these questions
+U0LPMPL2U : I'm glad we found a nice solution :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

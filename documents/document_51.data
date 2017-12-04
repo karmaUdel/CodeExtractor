@@ -1,32 +1,45 @@
-(let [cc (read-line), startswith (first cc), credit-card (case ...)] (println "credit card:" credit-card))```
-(of course you shouldn't type it all in a single line, I was too lazy to use an editor)
-<@U06F82LES>  thanks for that. I'm stuck on a my chromebook using an online  repl So I think I'll have to try it on an editor later. I appreciate the insight
-ah nice, which online repl do you use?
-<http://repl.it|repl.it>
-It has its limitations but is sufficient enough to play a bit with clojure
-nice!
-it's quite fast
-It's the best I've found
-It's been a bit rough learning clojure. Probably because it's new enough that there aren't as many resources available compared to other languages
-a lot of what I find seems to be targeted at more advanced users
-anyway, thanks again. I'll have to pop in some more
-<@U51QL32TT> did you look at <http://www.braveclojure.com/> ?
-<https://www.reddit.com/r/Clojure/> also has a nice list of resources
-Tnx, that did the trick
-3) … ?
-the problem i'm trying to model is a hierarchy-tree with directories, files, drives, etc.
-What's a good lightweight way of managing configurations in a clojure project? Like environment type stuff? Urls, user/passwords, etc?
-" Expresso makes great use of clojure's abstraction mechanism like protocols and multimethods and uses a datadriven approach where possible." what does "datadriven" mean in this context? :slightly_smiling_face:
-<@U5QCSK76C> <https://github.com/juxt/aero> is pretty good
-+1 for aero
-<https://github.com/tolitius/cprop> is another option
-n/p
-Thanks guys! I'll check them out
-<http://blog.cognitect.com/blog/2016/6/28/the-new-normal-data-leverage>
-you could say that datascript and datomic are data-driven databases, compared to something like MariaDB
-there's also this interview with Rich - <https://gist.github.com/rduplain/c474a80d173e6ae78980b91bc92f43d1> (ctrl-f for "information")
-lwhorton: 2) map and multimethod dispatch on some key.   any code can consume nested maps and mutate it conforming to the spec. I would avoid the 1) OO trap
-what's the issue with using records and protocols in #1?
-unnecessary bundling data + behaviour.
-Anything more idomatic?
-aside from "I hope this isn't a real system" the clojure looks good
+U051SS2EU : <@U3JURM9B6> I'd think accidentally calling an accessor and constructor would be a lot less likely than accidentally calling assoc on the wrong object
+U3JURM9B6 : <@U051SS2EU> : I can make the constructor private, then have a function (which calls the constructor) do checks beforehand
+U04VDQDDY : <@U3JURM9B6> For accessing object properties (as opposed to array elements), consider `goog.object/get` instead of `aget`.
+U050ECB92 : <@U3JURM9B6> creating custom types that have their own field accessors completely negates the value of generic data access from the clojure std library
+U050ECB92 : your code will essentially be a non-reusable DSL
+U050ECB92 : I firmly believe you are going down the wrong path, and that the advice you're getting about specific implementation is misguided
+U050ECB92 : you should test against invalid / incorrect data (even from your own code).  Have you considered writing generative tests for your datastructures?  (either from test.check or from spec)
+U050ECB92 : test against bad data while allowing bad data to exist
+U050ECB92 : Lots of things that are common in other languages (e.g. privileged data) are the exact wrong approach in Clojure.
+U050ECB92 : when I say 'generic data access' here is an example of what I mean:
+U050ECB92 : ```(get-in order [:line-items 2 :product :picture :url])
+```
+If you make a custom type, you'll need to do:
+
+U050ECB92 : ```(-&gt; order
+  (get-in [:line-items 2 :product])
+  (.-picture)
+  (get :url))
+```
+
+U050ECB92 : You will infect the codebase with specificity
+U050ECB92 : and negate a whole lot of the benefits of "the clojure way"
+U1WMPA45U : is it possible to tell if you're already in a `clojure.core.async/go` block inside a `defmacro`?
+U11BV7MTK : you could call `&lt;!`
+U11BV7MTK : the code of that is literally throw an error
+U11BV7MTK : the go macro totally rewrites everything in it. so if that throws an error then you are not in a go block. otherwise have it take from a channel that has a single value ready to give
+U11BV7MTK : super hacky
+U1WMPA45U : our devs went a bit bonkers with nested `go`s
+U0NCTKEV8 : the go macro actually macro expands everything before it does its thing, and the way it macro expands has some differences from the way the compiler does it
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

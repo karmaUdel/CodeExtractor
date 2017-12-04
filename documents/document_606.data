@@ -1,4 +1,154 @@
-    tHexToColor tHexString__purple```  I want to take the string `"purple"` and use that directly for the Tachyons, and then for the graphics prepend with `"tColor__"`, and then call programatically. This way the colors are synched automatically.
-<@U3L8MM10T> I see, then a Dict is probably the best
-or, since they are just class strings, use the `class` attribute directly.
-I don't follow how `Dict` helps.
+U6D3ERLA1 : ```toText : List (Int, Float) -&gt; List ( Html msg )
+toText list =
+        [
+            Html.ul []
+                (List.map (\(num, mod) -&gt; <http://Html.li|Html.li> [] [text (toString num) ++ "_" ++ (toString mod)]) list)
+
+        ]
+```
+
+U3SJEDR96 : you miss parens around all the args of `text` or a `&lt;|` between `text` and everything that follows
+U6D3ERLA1 : <https://ellie-app.com/3VKDbRwbP8Ka1/4>
+U6D3ERLA1 : this one works…
+U6D3ERLA1 : A little bit lost in braces
+U3SJEDR96 : replacing some by `&lt;|` and removing those you don't need might clear things up a little. Unwrapping `toText` so it returns a single Html msg might help, too
+U6D3ERLA1 : templating is always a bit messy - still learning the idiom
+U3SJEDR96 : <https://ellie-app.com/3VLfsnW2HQsa1/0> something like that, perhaps
+U3SJEDR96 : I made that `tuple to li` lambda into a helper function, I find it also helps with readability
+U48AEBJQ3 : I was just looking at some other bits of that code and wondering why the type checker is allowing both `x % 3` and `x / 3`.
+U5ABF3BH7 : Hello! I am working on decoders that are not straight forward. For example, I get a string and need to change it to a union type. I am getting an error I don't understand. Would anyone be willing to see what I am missing? Here is the context and what I wrote```import Json.Encode as Jsonimport Json.Decode.Pipeline exposing (hardcoded, required, optional, decode)
+import Json.Decode exposing (Decoder, bool, dict, int, list, string, andThen, float, nullable, succeed)
+
+type alias AddressModel =
+    { id : Maybe Int
+    , address1 : String
+    , address2 : String
+    , address3 : String
+    , address4 : String
+    , canadianPostalCodeFsa : String
+    , canadianPostalCodeLdu : String
+    , community_name : String
+    , community_type : CommunityType
+    , stateOrProvince : String
+    , postal_code : String
+    , country : String
+    , otherCountry : String
+    , latitude : Float
+    , longitude : Float
+    , county : String
+    , insideCityLimits : InsideCityLimits
+    , other_country : String
+    , borough : String
+    }
+
+
+type CommunityType
+    = City
+    | Village
+    | Township
+
+
+type InsideCityLimits
+    = Yes
+    | No
+    | Unknown
+    
+addressDecoder : Decoder AddressModel
+addressDecoder =
+     decode AddressModel
+         |&gt; Json.Decode.Pipeline.required "id"  (nullable int)
+         |&gt; Json.Decode.Pipeline.optional "address1" string
+         |&gt; Json.Decode.Pipeline.optional "address2" string
+         |&gt; Json.Decode.Pipeline.optional "address3" string
+         |&gt; Json.Decode.Pipeline.optional "address4" string
+         |&gt; Json.Decode.Pipeline.optional "canadianPostalCodeFsa" string
+         |&gt; Json.Decode.Pipeline.optional "canadianPostalCodeLdu " string
+         |&gt; Json.Decode.Pipeline.optional "community_name" string
+         |&gt; Json.Decode.Pipeline.optional "community_tyoe" (string |&gt; andThen decodeCommunityType)
+         |&gt; Json.Decode.Pipeline.optional "stateOrProvince" string
+         |&gt; Json.Decode.Pipeline.optional "postal_code" string
+         |&gt; Json.Decode.Pipeline.optional "country" string
+         |&gt; Json.Decode.Pipeline.optional "otherCountry" string
+         |&gt; Json.Decode.Pipeline.optional "latitude" float
+         |&gt; Json.Decode.Pipeline.optional "longitude" float
+         |&gt; Json.Decode.Pipeline.optional "county" string
+         |&gt; Json.Decode.Pipeline.optional "insideCityLimits" ( string |&gt; andThen decodeInsideCityLimits)
+         |&gt; Json.Decode.Pipeline.optional "other_country" string
+         |&gt; Json.Decode.Pipeline.optional "borough" string
+
+
+decodeCommunityType : String -&gt; Decoder CommunityType
+decodeCommunityType cType  =
+    succeed (toCommunityType cType)
+
+toCommunityType : String -&gt; CommunityType
+toCommunityType str =
+  case str of
+       "City" -&gt;
+                City
+
+       "Village" -&gt;
+                Village
+
+       "Township" -&gt;
+                Township
+
+       _ -&gt;
+                City
+
+
+decodeInsideCityLimits : String -&gt; Decoder InsideCityLimits
+decodeInsideCityLimits str =
+   succeed (toInsideCityLimits str)
+
+toInsideCityLimits : String -&gt; InsideCityLimits
+toInsideCityLimits str =
+ case str of
+   "true" -&gt; Yes
+   "false" -&gt; No
+   ""      -&gt; Unknown```
+
+U5ABF3BH7 : Here is one of the errors I am getting ```The right side of (|&gt;) is causing a type mismatch.
+132|      decode AddressModel
+133|          |&gt; Json.Decode.Pipeline.required "id"  (nullable int)
+134|          |&gt; Json.Decode.Pipeline.optional "address1" string
+135|          |&gt; Json.Decode.Pipeline.optional "address2" string
+136|&gt;         |&gt; Json.Decode.Pipeline.optional "address3" string
+
+(|&gt;) is expecting the right side to be a:
+
+    (Decoder (String -&gt; b) -&gt; Decoder (b)) -&gt; a
+
+But the right side is:
+
+    String -&gt; (Decoder (String -&gt; b)) -&gt; Decoder b
+
+Hint: It looks like a function needs 1 more argument.```
+
+U5ABF3BH7 : I am a bit confused
+U0L27J3N0 : huntforacause: `ents` is shorter
+U0J8D9M2P : Are there elm-europe videos available already?
+U21NY95C6 : I'm looking for a UI savvy elm dev to do a prototype for a tool idea I have. It's somewhat a blend of mindmap and chat:wink: Pretty visual as you can imagine and I myself dont yet feel ready to tackle such an application in elm:face_with_rolling_eyes:
+If you are interested, pls dm me.
+
+U5W7KT69L : ents wowowow
+U5W7KT69L : Do you have a timeline for this prototype?
+U21NY95C6 : <@U5W7KT69L> It's not urgent, but I"d like to start soon. Small steps are ok.
+U21NY95C6 : <@U5W7KT69L> If you dm me I can tell you details including my budget:grinning:
+U3SJEDR96 : <@U21NY95C6> might want to post that in <#C0LUAGWRK|jobs> :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

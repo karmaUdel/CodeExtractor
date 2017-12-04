@@ -1,27 +1,101 @@
+U48AEBJQ3 : <@U6531GSTW> <https://ellie-app.com/3HGvc3fZgc5a1/0>
+U48AEBJQ3 : I fixed the Json.Decode imports so that they referenced the correct thing, then I reworked the building of the Aufgabe record. When you do a bunch of `andMap` like that, you have to match the structure of the record precisely. I am just presuming the names in the JSON are the same as in the Elm record.
+U48AEBJQ3 : Now you have two decoders to write. `dayDecoder : Decoder Day` and `monthDecoder : Decoder Month`
+U6531GSTW : dayFromString : String -&gt; Result String Date.DaydayFromString day = case day of
+    "Mon" -&gt; Ok Mon
+    "Tue" -&gt; Ok Tue
+    "Wed" -&gt; Ok Wed
+    "Thu" -&gt; Ok Thu
+    "Fri" -&gt; Ok Fri
+    "Sat" -&gt; Ok Sat
+    "Sun" -&gt; Ok Sun
+    _ -&gt; Err "not a valid day"
+
+U48AEBJQ3 : Looks solid.
+U0JFEBK6F : a bit late compiling example with some holes to fill in: <https://ellie-app.com/3GpdHFztdsta1/11>
+U6531GSTW : umm its looks like this <https://ellie-app.com/3HGC3s98j2xa1/1>
+U6531GSTW : what argument am i missing?
+U48AEBJQ3 : You need to convert your `String -&gt; Result String Day` into a `Decoder Day` by having an extra function which has `JD.string |&gt; JD.andThen (JDE.fromResult &lt;&lt; dayFromString)`
+U6531GSTW : uhh how would that look like, i am a bit clueless right now
+U48AEBJQ3 : ```dayDecode : Decoder Day
+dayDecode =
+    JD.string
+        |&gt; JD.andThen (JDE.fromResult &lt;&lt; dayFromString)
+
+dayFromString : String -&gt; Result String Date.Day
+dayFromString day =
+  case day of
+    "Mon" -&gt; Ok Mon
+    "Tue" -&gt; Ok Tue
+    "Wed" -&gt; Ok Wed
+    "Thu" -&gt; Ok Thu
+    "Fri" -&gt; Ok Fri
+    "Sat" -&gt; Ok Sat
+    "Sun" -&gt; Ok Sun
+    _ -&gt; Err "not a valid day"
 ```
-Oh, you're probably missing parenthesis in your `Msg` declaration
-Oh yes!
-`BoidsGenerated List Boid` &lt;-&gt; `BoidsGenerated (List Boid)`
-I spent half an hour + on this :disappointed: :stuck_out_tongue: Heh Thanks <@U3SJEDR96>
-I started working on Elm a couple of days ago and i havent got used to the syntax fully yet
-Yeah, to be honest, it's a little surprising that `type alias Foo = List` is even valid, but we'll get there, eventually :slightly_smiling_face:
-Yeap :slightly_smiling_face:
-Is there a way to combine messages from different files? For instance I have a Seed file which includes a message ‘BoidsGenerated' and I want to include that as a case as part of my main ‘update' function in my Mail.elm file. I could of course defined it in the Main.elm file (or to a Messages.elm file).
-`type Msg = BoidsMessage Boids.Msg`, though it might be easier to pass the message to use to `generateBoids : (List Boid -&gt; msg) -&gt; Cmd msg`
-which would make `generateBoids tagger = generate tagger (list 5 boidGenerator)`
-Yeah, but the second option means that I will have to define the msg type in say the Main.elm right?
-In all cases you will need a message type in Main.elm
-and that will have all the types for the whole application?
-In the Elm architecture, there is only one message type, the one that the update function from the `Html.program` accepts
-you may of course choose to subdivide that type in whatever way you like, but it's still only one type
-<@U4872964V> Got it, so the main update function that retrieves the message and handles the different cases has all the cases of the application right?
-yes, the update function handles all messages, but the same applies here, you may subdivide it into smaller functions in any way you like
-Yeap, its what I do now actually. What I was trying to do is somehow combine different messages from different files into the main update function. But that is not really possible.
-well, that's what you do when you make sub-types to the main Msg type
-but you are right that the `Main` module conceptually needs to know everything there is in your application
-Yes, thanks for you help <@U3SJEDR96> <@U4872964V>
-    c /= ','`
-    : Result.Result Parser.Error (List String)`
-the terms beetween comma could be a string with any char except commas of course
-Yeah, that `sem` doesn't look correct; it's consuming the `)` at the end and then failing because it misses the end
-try something like
+
+U6531GSTW : for month also?
+U6531GSTW : yeah guess so..
+U48AEBJQ3 : Yep.
+U23SA861Y : If it is encoded as a time stamp you should be able to use some the libraries for that?
+U6531GSTW : done, and now there is this a mismatch? <https://ellie-app.com/3HGC3s98j2xa1/2>
+U3BTVEFQU : hey folks, hopefully you enjoyed your weekends :slightly_smiling_face:
+U6531GSTW : worket it out, it had to be int instead of string
+U48AEBJQ3 : Yep, I used the wrong decoder for one of the fields.
+U3BTVEFQU : another beginner question: how do reuse the same component multiple times on the same page
+U3BTVEFQU : the problem is, somehow a msg comming from a command is send to all identical components at once, so all of them are updated instead just of the one creating the command
+U48AEBJQ3 : A message just causes your model to be updated. If you want to use different data in different places, you have to store the data for each one in your model, then use that in your view to render each one.
+U48AEBJQ3 : You will need different messages for each of them. Depending on how things are structured, that can take a couple of different forms.
+U5J0H2NS2 : Use some kind of id. Eg. index if the components are in a list or dict. Pass that id around as a parameter of the Msg.
+U6531GSTW : the code is working now: <https://ellie-app.com/3HGC3s98j2xa1/3>
+U6531GSTW : however none of the elements are being read in
+U6531GSTW : LoadJson -&gt;            ( model
+            , Http.send JsonLoaded
+                (Http.get "<https://jsonblob.com/6ecd993e-6290-11e7-ae4c-e793fe90c432>"
+                    (JD.field "Aufgaben" (JD.list aufgabe))
+                )
+            )
+
+U5W86UED6 : ream88: The elm guide has a great section about this <https://guide.elm-lang.org/reuse/>
+U6531GSTW : this should read the url but im not sure if such a jsonblob link works fine
+U48AEBJQ3 : I don't see the `LoadJson` message being used anywhere. That code probably never runs.
+U6531GSTW : its in the update part
+U48AEBJQ3 : NM, big files in Ellie can be difficult to search.
+U48AEBJQ3 : Sorry, life intervenes. I'll check in later.
+U6531GSTW : ..
+U6531GSTW : but thanks for everything
+U6531GSTW : it was a lot of help
+U6531GSTW : Error: BadPayload "Given an invalid JSON: Unexpected token &lt; in JSON at position 16" { status = { code = 200, message = "" }, headers = Dict.fromList [("content-type","application/octet-stream")
+U604S603Y : can one pass in a "value changer function" into another function?
+U6531GSTW : does this mean the json file is shit?
+U604S603Y : as in ```let                    updatedModel =
+                        updateInnerValue model (\innerModel = { innerModel | rechenergebnis = RemoteData.toMaybe (received) })
+                in
+                    ( updatedModel, Cmd.none )```
+
+U604S603Y : because I have a large code block to update the nested model for every "SomeValueChanged" message, and only the line actually assigning the new value ever changes
+U604S603Y : actually I'm just stupid
+U604S603Y : I had a `=` in the lambda function that should be a `-&gt;`
+U23SA861Y : <@U6531GSTW> yeah it seems like thats malformed json
+U6531GSTW : <@U23SA861Y> <https://jsonblob.com/6ecd993e-6290-11e7-ae4c-e793fe90c432>
+U6531GSTW : used on this code <https://ellie-app.com/3HGC3s98j2xa1/4>
+U23SA861Y : looks alright, but I think you might be reading the wrong file maybe?
+U6531GSTW : can i link this url to the elm code?
+U6531GSTW : or what do you mean by "wrong file"
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

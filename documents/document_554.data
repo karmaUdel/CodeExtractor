@@ -1,12 +1,84 @@
+U6EAT2Z37 : Oh. Sorry I'm not sure about that. I think that that (the thing you're referring to that has list then an element, then a list) is called a Zipper, not a ZipList, by the way. A ZipList is something else.
+U3LUC6SNS : I have the code```
+renderedContent model =
+  Html.div [ (HA.property  "innerHTML" &lt;| Json.Encode.string "This is a &lt;strong&gt;Test!&lt;/strong&gt;")  ] []
 ```
-This is how it should work
-I don’t want to subscribe to Model. It contains more things. I only want to load from JS some data.
-Hi. I need a dropdown select. I've seen several examples, but I don't know which one to take. Do you think this one is a good example to base mine on?: <https://github.com/wintvelt/elm-dropdown/blob/master/examples/Single/Main.elm>
-<@U17R1GD96> you don't subscribe to model, but the `subscriptions` call that you have to `program` takes your `model` as the first argument by default, so you can decide _what_ to subscribe to based on the state of your model
-so basically, you could have `subscriptions _ = payload Payload`
-and then whenever you calll `ports.payload.send(whatever);`, your update will be called with a `Payload` message
-OK. I understand. Thanks.
-I have related question to that. I want to pass more complex JSON object from JS to Elm. The full init data for the Model. Do I need  to create some decoder for that? I did not need to create any decoder for passing simple JSON object  `{message:'HI!'}`.
-the automatic conversion can handle a decent amount of things (with a notable lack of support for union types). Also, the automatic conversion doesn't let you handle errors gracefully. As such, it _is_ generally recommended that you make your `port payload : (Json.Encode.Value -&gt; msg) -&gt; Sub msg`
-which means that, indeed, you would write a JSON decoder in Elm. For example, if you had a `payloadDecoder : Decoder Data` and a `type Msg = Payload (Result String Data)`, you could set up a subscription `subscriptions model = Json.Decode.decodeValue payloadDecoder &gt;&gt; Payload`
-So, I have a Hugo generated static website and I want to use Elm for small interactive pieces here and there in it. I have a separate prototype of these small apps boilerplated with create-elm-app. Now I want to merge it all together in a nice way, but not sure how to set up the whole assets pipeline in a reasonable way. If you have any related experience or suggestions, let’s start a thread!
+which is called in the (`style-elements`) view by
+```
+named "content" (html (Debug.log "renderedContent" (renderedContent model)))
+```
+Oddly, it leads to a stack overflow.  Where should I look to find the trouble?
+
+U6DQCTZT2 : <@U6EAT2Z37> <https://www.youtube.com/watch?v=IcgmSRJHu_8&amp;t=894s> using Zip List here, but he might be wrong.
+U6FFMA51S : I'm reducing a commutative function (application order doesn't matter). Should I use `foldl` or `foldr`?
+U2J1FUQTZ : How do I insert a `&lt;br&gt;` tag in a text? Something like `text "one&lt;br&gt;two&gt;` does not work
+U6FFMA51S : (Beginner myself) but I think maybe something like `Html.div [Html.text "one", <http://Html.br|Html.br>, Html.text "two"]` would work
+U6FFMA51S : I don't see `br` defined, so maybe that should be modified to `Html.div [Html.text "one", Html.node "br" [] [], Html.text "two"]`
+U6FFMA51S : Scratch that, I found it <http://package.elm-lang.org/packages/elm-lang/html/latest/Html#br>
+U6GGSMDFZ : (also beginner) A little more defined that will compile would be ```Html.div [] [ Html.text "one" <http://Html.br|Html.br> [][] Html.text "two"]```
+U6GGSMDFZ : or drop the Html bit if you are ```import Html exposing (..)``` (all)
+U6GGSMDFZ : <@U6FFMA51S> in your examples the first list passed to div is for is attributes, the second list is it's contents - ie ```div [attrs][contents]```
+U3SJEDR96 : <@U6FFMA51S> `foldl`
+U3SJEDR96 : <https://ellie-app.com/3SwJD9vjQ59a1/0> &lt;- though you should only bother if you're writing library code; it's unlikely to matter much compared to the overhead of rendering stuff. If it might matter, benchmark. :slightly_smiling_face:
+U6FFMA51S : I didn't know about the benchmark package.
+I was just asking to develop "good habits"
+
+U3SJEDR96 : :thumbsup: 
+U6GB56346 : ```neverText : Html Never
+neverText = text "never dispatch message"
+```
+
+This can be compiled.
+
+```
+htmlNever : Html msg -&gt; Html Never
+htmlNever elem = elem
+```
+
+But this cannot. Both `Html msg` to `Html Never`.
+Why?
+
+U2ABT6UKF : I am a beginner. I understand basic programming concepts. I am having trouble finding a resource to learn elm. One that will in the end show practicle examples to use moving forward.
+U6FFMA51S : <@U6GB56346> I note that the following also compiles: ```htmlNever : Html msg -&gt; Html Never
+htmlNever elem = text "never dispatch message"
+```
+
+U6GB56346 : <@U6FFMA51S> Yep. My understanding is that `text` is `Html msg` which contains placeholder type, so it is inferred to `Html Never`. But why `elem` is not inferred to the final type?
+U4ZK5BVK6 : <@U2ABT6UKF> <https://guide.elm-lang.org/> helped me get a good grasp on the basics. Have you tried it?
+U4ZK5BVK6 : hi folks, do you know if there is a way in elm to split the return of a view function? example:```
+view : Model -&gt; Html.Html Msg
+view model =
+  div [onClick IClicked] [ text "example"]
+
+-- extracting HTML and Msg separately
+extract Model -&gt; (Html.Html, Msg)
+extract model =
+  case view model of
+    Html.Html Msg (html, msg) -&gt;
+      (html, msg)
+    _ -&gt;
+      (div [] [], IClicked)
+```
+
+Reason i want to do something like this, is that I have a view method that returns a "LoginMsg" and i need to translate the into a "Msg" but I see no way to access the LoginMsg returned by the view function :disappointed:. Thoughts?
+
+U3FJSB596 : <@U4ZK5BVK6> Have you tried using `Html.map`
+U4ZK5BVK6 : never heard of it, digging into the docs now :smile:
+U3FJSB596 : <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html#map>
+U4ZK5BVK6 : <@U3FJSB596> definitely cleaner, can you see any way to make it a bit more dynamic? Aka, dropping the mandatory case statement for msg inside transformLoginMsg? My original implementation was making use of `onInput LoginMsg &lt;&lt; OnPassInput` but i doubt this is applicable here
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

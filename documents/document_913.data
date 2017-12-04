@@ -1,0 +1,97 @@
+U07JGLLKF : is there anything in the returning body of your 400?
+U5VNFM6HF : Hi all,I want to write a program to get the MySQL status through the command line.
+E.g The command what I am doing is 
+`msqladmin -u username -p password status`
+(there is no space between -p and password.)
+But I don't want to provide password through the command line. But give the input as password to the command line on asking password. Like 
+```
+msqladmin -u username -p status
+
+password ******
+
+```
+Is there a way to do it?
+
+U4JJH96TS : oh, thanks <@U07JGLLKF> , just checked the returned `text` from the request. my machine's IP is blacklisted, oops
+U07JGLLKF : that'd do it!
+U07JGLLKF : <@U5VNFM6HF> technically `subprocess.Popen` has a `communicate` method to do this
+U07JGLLKF : but after 10 years of python i still can never get any subprocess thing to handle input properly and i hate it
+U07JGLLKF : ooh cool i found a handy library called `sh` that isn't awful
+U07JGLLKF : <@U5VNFM6HF> you can use `sh` to easily get this result:```import sh
+result = sh.mysqladmin('-h', '127.0.0.1', '-u', 'root', '-p', 'status', _in='password')
+print(result.stdout)```
+
+U29163YQH : is it just a subprocess with some helpers ?
+U07JGLLKF : its like subprocess for humans
+U07JGLLKF : from the documentation, stuff like this:```from subprocess import Popen, PIPE, STDOUT
+
+mysql_check = Popen(['mysqladmin', '-h', '127.0.0.1', '-u', 'root', '-p', 'status'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+out, err = mysql_check.communicate(input=b'password')
+print(out)```
+
+U07JGLLKF : should work, but never does
+U29163YQH : yeah i'm looking through the doc
+U29163YQH : seems nice
+U5VNFM6HF : <@U07JGLLKF> I tried it already. But it's asking for password.
+U07JGLLKF : <@U5VNFM6HF> yeah i couldn't get the `subprocess.Popen` version working without asking for a password either
+U07JGLLKF : the `sh` version works though
+U5VNFM6HF : <@U07JGLLKF> Sorry subprocess is not working, But sh is working fine.
+U5VNFM6HF : Correct. But documentation saying like that subprocess will work.
+U5VNFM6HF : <@U07JGLLKF> Thank you. One problem is that will work for linux versions only. I want to work it for windows also.
+U4BMZ90T0 : Hey guys, working in tkinter and having an issue with the Frames I am instantiating are going in the wrong order. Maybe it's something stupid, but I'm not too sure.
+U4BMZ90T0 : I need to attach a command to a button in tkinter, and it has to be able to attach to another widget/Frame which does not yet exist. So without using `lambda` I get an error because the key does not exist within the dictionary
+U4BMZ90T0 : But I also need to run more than one single expression
+U4BMZ90T0 : How can I reference something that does not exist?
+U4BMZ90T0 : It sucks because it works with `command=lambda: ` but with a `command=func` which I sort of need because I need to grab some data from the fields when the button is clicked.
+U1BP42MRS : Look at `functools.partial`
+U1BP42MRS : You can make a partially applied function and delay the execution
+U1BP42MRS : Is the function invoked right away though? Either one seems like it should fail
+U4BMZ90T0 : Well here's what happens
+U4BMZ90T0 : So I have a main root for my application
+U5NMSURAQ : &gt; It sucks because it works with `command=lambda: ` but with a `command=func` which I sort of need because I need to grab some data from the fields when the button is clicked.
+U4BMZ90T0 : and I have 3 classes, one for each different "page" which are all `Tk.Frame` objects
+U5NMSURAQ : `lambda: func(button1.text, button2.text)`?
+U4BMZ90T0 : Now in order to show the next frame after a submit button I have to have the next Frame available and already initialized. However in order to initialize the Frame which I want to show I have to also create that function that runs on click which requires the next Frame to also be initializied, but it hasn't been initialized yet because the first one is still being initializied lol
+U4BMZ90T0 : Slightly confusing I will show code
+U5NMSURAQ : wait, lambdas "execute" when you access them
+U5NMSURAQ : i.e. `lambda: func(x)` - `func` won't be called until you click the button
+U4BMZ90T0 : There is basically a `dict` with `Frame: Frame obj`
+U4BMZ90T0 : When it hit's the Repos Frame, it gets to this function
+U4BMZ90T0 : `self.submit = Button(self, text="Submit", command=submit(self, controller))`
+U1BP42MRS : Neither will a function though
+U4BMZ90T0 : which breaks at the last line
+U4BMZ90T0 : With a key_error
+U5NMSURAQ : `Button(self, text="Submit", command=submit(self, controller))`
+U5NMSURAQ : here you're not saying "call `submit` when clicked"
+U4BMZ90T0 : let me try `lambda: func()`
+U5NMSURAQ : you call `submit` and return a value, and assign this value to `command`
+U5NMSURAQ : wut
+U5NMSURAQ : here's a piece of code from a project of mine which uses Tk:```
+self.master.after(timeout, lambda: self.update_treeview(treeview, data, timeout))
+```
+
+U5NMSURAQ : the same principle
+U4BMZ90T0 : It works
+U5NMSURAQ : :slightly_smiling_face:
+U4BMZ90T0 : also `lambda: func()` works. Should have just done that....
+U4BMZ90T0 : <@U5NMSURAQ> since it seems you've used tkinter, what's the best way to go about passing data to another Frame. I'm trying to grab a selection and place it inside a label to show a user what they selected, but in the same way as before it places the default value into the label instead of grabbing the updated one.
+U1BP42MRS : If `lambda: func()` works just `func` should also work...
+U4BMZ90T0 : But it doesn't that's the thing lol
+U1BP42MRS : Lambda is just a function reference, without a name. so setting `lambda: func()` is the same as `func`
+U1BP42MRS : Sounds like some other error, but if it works that's good :smile: ¯\_(?)_/¯
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

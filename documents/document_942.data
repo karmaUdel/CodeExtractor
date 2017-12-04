@@ -1,0 +1,123 @@
+U3VT0L7C5 : will do, thanks
+U3VT0L7C5 : done
+U6F1KCK6Y : Hi I'd like to improve my Racket programming and abstraction/algorithm design in general. Can anyone suggest a good place to post Racket scripts and discuss how to improve it, other than Code Review on StackExchange? Thanks
+U086VDRBK : <@U6F1KCK6Y> Here would be ok. Use <http://pasterack.org|pasterack.org> then post url here.
+U08JL5H89 : <@U3VT0L7C5> Alternatively, he probably is on the <#C088CK7J6|irc> channel.
+U3VT0L7C5 : thanks <@U08JL5H89>
+U5KU1HNKY : I just had to rebuild a machine and things seem a bit wonky with my packages… is `raco setup --clean` sufficient to sanitize and sanity check everything?
+U6F1KCK6Y : <@U086VDRBK> thanks
+U6F1KCK6Y : <@U086VDRBK> pasted my code into paste <http://rack.org|rack.org>. The url is:  <http://pasterack.org/pastes/72152>. Thanks. Your feedback would be great.
+U3QF0EM0E : hi, here's a few comments:- `(let (....) (define ....))` can be `(define ....) (define ....)`, saves an indentation
+- `(eq? b #f)` is the same as `(not b)`
+- I'd use a helper function for the `(number-&gt;string ....)` 
+- I'd also put all the defines "within" the define for dialog, so overall structure is:
+```
+(define dialog
+  (let ()
+    (define ....)
+    ....))
+(send dialog show #t)
+```
+
+U08JL5H89 : <@U3NJS8H7C> The FFI docs have the following pseudocode for malloc:```
+(let ([p (malloc from-type)])
+  (ptr-set! p from-type v)
+  (ptr-ref p to-type))
+```
+
+U08JL5H89 : Errr….cast, they have the pseudocode for cast.
+U08JL5H89 : But in this example, shouldn't the `malloc` be apointer, given tht `ptr-set!` and `ptr-ref` are happening to it?
+U08JL5H89 : As shown here:
+U08JL5H89 : <http://docs.racket-lang.org/foreign/Miscellaneous_Support.html?q=cast#%28def._%28%28lib._ffi%2Funsafe..rkt%29._cast%29%29>
+U08JL5H89 : If so I'd be happy to fix that.
+U3NJS8H7C : <@U08JL5H89> I'm not sure what you mean, and I think that code is right. (It's the actual implementation in the simple case, as reflected by the `convert` helper function.) `malloc` does return a pointer, but the pointer refers to `from-type` content, where `from-type` isn't isn't necessarily a pointer type. Similarly, `pre-set!` and `ptr-ref` want a pointer to a `from-type`/`to-type` to cast between those.
+U08JL5H89 : <@U3NJS8H7C> Ah, right, okay, that makes sense. Thanks.
+U3PQ6GW3U : Which package provides `raco exe`?
+U3PQ6GW3U : Answering my own question: `compiler-lib`
+U0MAQ22G5 : trying to make my Racket macro-writing experience a bit saner. I'm defining a simple module lang and was hoping `(expand-module/step mod)` would let me expand modules that use DSLs, but getting an error, e.g.
+test.rkt
+```
+#lang racket
+(require macro-debugger/stepper)
+(expand-module/step "./scratch.rkt")
+```
+
+scratch.rkt
+```
+#lang racket
+(module test racket
+  (let ([x 1] [y 2]) (or (even? x) (even? y))))
+
+```
+Produces:
+&gt;derivation-parser: error on token #2: &lt;local-value, #&lt;syntax:/Users/ze/Code/racket/racket/share/pkgs/gui-lib/framework/private/sig.rkt:8:20 number-snip-class^&gt;&gt;
+
+U0MAQ22G5 : A more general question is how do I debug my #lang DSLs? Say, I prepare a file in such a language as in ```
+#lang rogue
+(some rogue forms defined in ~/rogue/main.rkt)
+```
+
+Language is defined using syntax/module-reader and the collection is properly linked with `raco link rogue`, so Rogue script runs fine. How would go about stepping through its expansions steps? I'm trying to figure if I my transformations use bindings  i expect, e.g. the redefined #%app etc. Sadly, the above-mentioned `(expand-module/step mod)` didn't work for me out of the box. How do people debug such things?
+
+U0MAQ22G5 : One more question is about redefining kernel forms like `#%app` and friends in my #lang implementation, something like this
+rogue/main.rkt has
+```
+(provide #%datum
+         #%top-interaction
+         #%top
+         (all-defined-out)
+         (rename-out [app #%app]
+                               [module-begin #%module-begin]))
+
+(define-syntax (app stx)
+      ... my implentation of #%app)
+
+(define-simple-macro (some-rogue-form pattern)
+    (f a)) ;; &lt;-- which binding of #%app will be used when this form is expanded inside a file written in #lang rogue? How do I confirm this using Racket tools?
+
+(racket-module reader syntax/module-reader
+  rogue)
+```
+
+U0MAQ22G5 : omg Macro Debugger tools are awesome!
+U0MAQ22G5 : re the above #%app binding question syntax object browser in the stepper shows the binding comes from racket/base and not from my `(rename-out [app #%app])`, which is a bit confusing. I suspect I misunderstand scoping rules here, i.e. I expect #%app to be dynamically scope inside a file that uses my DSL `#lang rogue` when really macros defined in `rogue` end up expanding into forms that use lexically bound #%app, that is inside the module defining `rogue` the language. Could you guys correct my thinking here please?
+U3NJS8H7C : The implicit `#%app` form in `(f a)` takes its context from the open parenthesis. (More precisely, `(f a)` is a syntax list and there's a context attached to the list as a whole, in addition to contexts on the individual `f` and `a` tokens.) Since the `#%app` in the environment of `(f a)` is the one from `racket/base`, that's the one used when `(f a)` is treated as `(#%app f a)`.
+U0MAQ22G5 : ah I think I get it. I'm beginning to wonder how we ever managed to redefine kernel forms like #%app and #%module-begin then. I've seen things like this being used
+```
+(provide (except-out (all-from-out racket)
+                     lambda
+                     ?
+                     define
+                     eval
+                     require
+                     modulo
+                     remainder
+                     /
+                     #%app)
+         (rename-out [new-lambda lambda]
+                     [new-lambda ?]
+                     [new-define define]
+                     [divide /]
+                     [myapp #%app]
+                     ))
+```
+
+U3NJS8H7C : When `new-lambda` is used as `lambda` in some importing module, the expressions written inside that `lambda` will also be from the importing module – and so an open parentheses there will see `myapp` instead of `#%app` from `racket/base`. You may be thinking that the body of a`new-lambda` use is treated as being from the `new-lambda` place, but it's not; the body is treated as being from wherever it is written (i.e., lexical scope).
+U0MAQ22G5 : thank you Matthew! that really helps
+U0MAQ22G5 : ok, now  i need to think a bit harder about what I'm trying to do here
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

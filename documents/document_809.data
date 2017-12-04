@@ -1,0 +1,66 @@
+U3SJEDR96 : <http://package.elm-lang.org/packages/lukewestby/elm-http-builder/5.1.0/HttpBuilder#withExpect> + <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#expectStringResponse>
+U0S6BNVNY : <https://twitter.com/dailydripcom/status/892740546208440320> today I decided to try to proselytize for elm a bit so I'm answering anyone's questions I can. Retweets and/or hop-ons welcome! :slightly_smiling_face:
+U0S6BNVNY : ahh I just saw Franzé shared that sorry
+U62KVQVD1 : <@U3SJEDR96> Thanks a lot!
+U0F7JPK36 : <@U62KVQVD1> i made a package just now for stuff like this: <http://package.elm-lang.org/packages/lukewestby/http-extra/1.0.0/Http-Extra#expectJsonResponse>
+U0F7JPK36 : y'all feel free to submit PRs with whatever you want, i'm not so concerned with how stuff will fit into the http-builder API this way
+U3SJEDR96 : dope!
+U0UKSE1SP : Can someone help me understand some syntax? `type alias Thing` makes sense to me at first glance, but I'm having a hard time wrapping my brain around the meaning of `type alias Thing msg`? (The appended ` msg`, as in `type alias Html msg`)
+U0J1M0F32 : The `msg` part could be `a` or `t`, its a stand-in for a generic "other" type.
+U0J1M0F32 : At least, that is my understanding of it.
+U0J1M0F32 : ```type alias Post = { title: String, body: String }
+
+type alias Comment thing = { on : thing, content: String }
+
+somePost = { title = "Amazing!", body = "etc etc etc..." }
+
+postComment = { content = "Cool Post!", on = somePost }
+
+commentComment = { content = " I disagree!", on = postComment }
+
+```
+
+U3SJEDR96 : Alternatively, say I'm using a list to represent a stack of things, I could `type alias Stack a = List a`, where `a` just means it's not constrained to any specific type. If I were to say `type alias Stack = List String`, You don't need a variable because a `Stack` will _always_ be a list of strings.
+U1G51S63S : Hi folks! is anyone used google maps polymer within Elm?
+U62KVQVD1 : <@U0F7JPK36> great. Btw, I am elm newbie so can you update README.md with some example, please?
+U0LPMPL2U : <@U1G51S63S> check out <https://www.youtube.com/watch?v=ar3TakwE8o0>
+U1G51S63S : <@U0LPMPL2U> yep, I saw it. I have strange problem - just tried to use polymer within server-side rendered template (Elixir/Phoenix) and it works. Then added a map to my view and it don't :disappointed:
+Got this errors ```No Google Maps API Key or Client ID specified. See <https://developers.google.com/maps/documentation/javascript/get-api-key> for instructions to get started with a key or client id.
+You have included the Google Maps API multiple times on this page. This may cause unexpected errors.```
+
+U1G51S63S : and code looks like ```googleMap                    [ attribute "api-key" "..."
+                    , attribute "latitude" "37.790"
+                    , attribute "longitude" "-122.390"
+                    , class "listing-neighborhood__map"
+                    ]
+                    []
+
+
+googleMap : List (Html.Attribute msg) -&gt; List (Html msg) -&gt; Html msg
+googleMap =
+    Html.node "google-map"```
+
+U1G51S63S : so everything looks the same as html version or rtfeldman one
+U0LPMPL2U : Are you sure the attributes are named correctly?
+U0LPMPL2U : it sounds like it's not able to read the api key
+U1G51S63S : yes, I am sure, it's just copied from the same html `&lt;google-map api-key="..." latitude="37.790" longitude="-122.390" style="height: 400px; width: 600px;"&gt;&lt;/google-map&gt;`
+U0LPMPL2U : That's copied from the talk?
+U1G51S63S : no, this code is from my webpage where I tested it (w/o elm, within the same template where Elm is embedded)
+U0LPMPL2U : ah, I see
+U4872964V : “You have included the Google Maps API multiple times on this page. This may cause unexpected errors.”
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

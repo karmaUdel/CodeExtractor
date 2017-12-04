@@ -1,171 +1,96 @@
+U3R7CKQRX : But the subscriptions stay :confused:
+U3R7CKQRX : As a workaround I guess one could have a js-to-elm port which will do something like this:```{model | destroy = True}
+-- and then ...
+subscriptions model = if model.destroy then Sub.none else ...(some subscription)
 ```
-Or you could define `f` in a module that is another  file like `f.rkt`, and `(require "f.rkt" (for-syntax "f.rkt"))`. Same difference.
-gotcha, thanks <@U462H29AR>
-<@U6580B1UM> You're welcome.  The TL;DR is define things once in a module. Then, how/when they're available is a function of how you `require` their module.
-<@U3NJS8H7C> How often do we update the versions of various native packages?
-As listed here: <https://github.com/racket/racket/tree/master/racket/src/native-libs>
-I ask because I would like to know if I can rely on Racket coming with libpng16. (Except on Linux obviously.)
-Rarely, and on no particular schedule
-That makes sense. Do we have any announcement when we do?
-I mean, I would be happy to have racket install libpng16 when its needed. But I'm worried about that conflicting with the one Racket comes with.
-I guess, since its not going to update in the middle of a Racket version, I can just make a libpng16 package, and have an exception to not install libpng16 for versions that already have it installed.
-We provide libpng16 right now on Windows and Mac OS, right?
-That is correct.
-And on linux it needs to be installed (which it is on basically every distro….)
-Any help would be much appreciated! I have absolutely no idea why this is happening.
-<@U6580B1UM> It looks like the `q` class matches a string, but the last subform provided to select is a list containing a string.
-Right; I explain that I still think the error is unexpected... Can you explain why it does what it does?
-In the gist, rather, I explain in a comment (on the gist, not in the code)
-I think you'll get the behavior you expect if you add the `#:commit` option to the `q` syntax class.
-Unfortunately, I have to run—maybe someone else can explain in more detail (or I can once I get back).
-that works -- thanks <@U07SCV14J>
-I don't know why, but it works
-I have another minute or two… basically, without `#:commit`, syntax-parse can backtrack back _into_ a syntax class even if the syntax class originally succeeded if a later parse fails.
-So your `q` pattern successfully matches `"hello"` against the first pattern, then continues matching the top-level pattern, and that fails. So it backtracks into `q` and tries to match `"hello"` against the second pattern, which always fails.
-And specifically, it fails by throwing an exception, not by using `~fail` or something like that, so that failure is unrecoverable, and parsing halts.
-oh, interesting -- so if the first syntax class pattern matches, but then after moving on, the next form in the overall syntax object doesn't match, it'll go back to the most recently tested syntax class and try other patterns?
-Why is that?
-You probably want to use `~fail` instead of `(~do (raise-syntax-error ...))`. Of course, in this case, you probably don't want the second case at all, and instead might just want to add `#:description "question"` to `q` and just let syntax-parse generate its own error message.
-But yes, generally, syntax-parse tries _everything_. It backtracks to try every possible solution unless you explicitly add cuts/commits.
-It's possible to construct a situation in which that backtracking behavior is desirable, but it often isn't, so `#:commit` is a useful option for a lot of syntax classes.
-Unfortunately, I don't have time to construct such an example, though.
-No, you've been plenty helpful even without! Thanks <@U07SCV14J>
-<@U6580B1UM> The "try everything" approach is also paired with a notion of "progress" - syntax-parse orders possible parses based on how early they fail. When parsing fails, this lets syntax-parse choose the parse that failed the latest and uses that parse for an error message, since that's likely what you want. The "Introduction" section of the syntax parse docs describes this and other aspects of syntax-parse in a friendly manner, I recommend reading it: <http://docs.racket-lang.org/syntax/stxparse-intro.html?q=syntax%20parse>
-You can use the #:version keyword to specify a min version. Is there any easy way to specify a max version?
-Not only is there not an easy way, there is no way at all.
-<@U07SCV14J> Hmm…welp lol
-Looks like I'll have to catch that at runtime instead then. That sucs.
-sucks*
-(And is also _really_ bad. :confused: )
-The correct policy, according to the current package system policies, is to never break backwards compatibility. That way, there's never any reason to have a max version.
-I make no comment on whether or not I find that policy reasonable.
-Ya….that's not ganna fly.
-FFmpeg, for example, WILL break backwards compatibility, on major version updates.
-(Minor ones will only add functionality, not breaking anything.)
-As such, the only thing I can think of is to make a ffmpeg package for every version.
-Then, according to the current package system policy, you should make a new (Racket) package for each breaking version of FFmpeg.
-Well fun.
-See section 10.5 of the package documentation. <http://docs.racket-lang.org/pkg/FAQ.html#%28part._.How_can_.I_specify_which_version_of_a_package_.I_depend_on_if_its_interface_has_changed_and_.I_need_an_old_version_%29>
-Welp great.
-So basically the official policy is to flood the package server with slightly different versions of ffmpeg.
-(whenever they break compatibility anyway.)
-I guess at worst, it'll be ~200 packages.
-I'd been thinking about the current package policy, I was wondering if it would be feasible to layer a protocol on top of the current package system. Create a package of packages, a "meta-package", give it a canonical name, and each package in the meta-package would represent a major version with minor versions being kept within each package.
-I'm not sure how feasible that idea would be and whether the current system can be hacked in that fashion.
-I mean, as _users_ of packages I think everyone agrees we want them to act like persistent data structures -- only add new capabilities, never take away old ones?
-As _developers_ of packages: There's no shame in saying, well, after making Thing, I realize it should have had a whole other design -- and going on to make Other Thing.
-I think there's some shame in saying, Thing is now a shadow of its former self, and will suddenly break things. And transitively break things.
-I'd love to see us stick with this idea(l) as long as we can?
-But I don't know what to do about situations like <@U08JL5H89> trying to wrap or use something that is rampantly mutating its interface with contract-busting major versions.
-Have thing1, thing2, ..., thingN  and then have a bonus package named thing that just reexports  thingN ?
-<@U462H29AR>, I'm sympathetic to that idea, it is frustrating to manage compatibility breaking issues and I'm interested in seeing how far we can go with one package per compatibility-respecting code , but on the other hand, it would be nice to have some notion of namespace management to handle various versions
-I strongly believe that Racket would benefit from a more ordinary language package management solution, with version bounds and a constraint solver.
-<@U086VDRBK> yeah that pretty much sums up what I am talking about.
-I've discussed a little bit about what that would take to do right with… <@U3NJS8H7C> and <@U0702F2CE>, IIRC?
-But it's been a little while.
-Would that be possible to reexport packages through one package?
-<@U3SEVDPJT>  If I recall correctly, there were a discussion on the mailing list (about the time the new package system arrived)
-yes, I do recall that as well, I read all of correspondence that got generated when the new system was released, I'd have to go back and review to see if any viable ideas were proposed
-FWIW, I thought about adding a metaprotocol of sorts on top of the existing package system, but since then I've realized it would probably be easier to just extend the package system to add more metadata to packages and features to `raco pkg`.
-yeah, I'm in agreement, it seems it'd be easier to just extend the system, most of the ideas to date can be categorized as "adding more metadata" and have better metadata aware tools.
-So, my current understanding is that there would need to be four changes to get the package system to where I want it to be. (1) Packages need to become a mapping from package name *+* version to package sources, instead of just package name. This can be added by adding more metadata to the existing package protocol. (2) Packages need to be able to specify version ranges in their `info.rkt` files. (3) `raco pkg` needs to be extended to do constraint solving when installing packages. (4) Racket needs support for package "sandboxes” a la Cabal sandboxes, Bundler environments, or Python virtualenv, so that multiple versions of a package can be installed on the same machine without breaking everything.
-None of those things are anywhere near new research, but they are still a lot of work.
-Should there also be Scribble enhancements -- so that as well as "added in version x" you can say "taken away in version x" or "gratuitously changed in version x"?  I am mostly but not entirely joking. :slightly_smiling_face:
-I think so! Having better tooling support for deprecations would be good, too.
-or available in #lang version4.5
-though that probably would be an abuse of the lang system!
-Well, to be clear, my vision does _not_ involve installing multiple versions of a package at the same time, or specifying versions in imports a la PLaneT. There are various reasons why you want to decouple version specification from module imports.
-Are these versions a new dimension by which we multiply the `{-lib -doc -test}` packages, too?
-<@U07SCV14J> your understanding seems spot-on and is what I was thinking too. The package sources are already uniquely identified by the package checksum so it would be a simple mapping from name to the checksum.
-<@U462H29AR> No, not in the sense that they would take up multiple spots in the package index. Think closer to a generalization of version exceptions.
-<@U462H29AR> I would consider those packages to be "satellite packages" and grouped together
-There are a lot of other changes I would ideally make to Racket's package system if we could start from scratch, including a way to subsume the lib/doc/test split, but those things are far harder than anything I mentioned so far, since they would involve more fundamental changes to how Racket internally treats modules and module loading.
-The package system is currently designed in such a way that the core of Racket knows effectively nothing about packages. Packages just extend collections, and Racket only knows about collections.
-There are downsides to this, though, such as the fact that it's impossible to resolve conflicts in the case where multiple packages provide modules at the same path.
-(And that includes multiple versions of the same package, in the proposed system.)
-If the pkg mgr could handle modules (for the lib/doc/test purpose), it could handle modules like api1, api2 ... and _that_ feels better to me than arbitrary version numbers and disappearing interfaces.
-I don't think you want multiple versions to be distinct packages because you really want to be able to depend on version ranges.
-But I don't care about version ranges. Those are a proxy for capabilities, which I do care about. :slightly_smiling_face:
-I'd rather say, "I need api-that-gives-me-foo, and the docs, but not the tests", for example..
-lib/tests/docs don't necessarily need to be handled specially at the module level.
-Indeed, I feel would rather have a capability that points to specified set of interfaces and dependencies, instead of harder to understand version numbers.
-hmmm, that does seem like a potentially fruitful direction, but I fear it likely need a lot more research before it'd be viable for general community use.
-<@U462H29AR> You could certainly try and design something much more elaborate than version numbers, but generally some notion of semantic versioning tends to be a good set of compromises to solve that problem.
-Especially since often you want to break compatibility in a small way, and you want some dependent packages to use conditional compilation to pave over the differences.
-Than to have a level of indirection looking at hopefully correct docs and change logs.
-If the desired function turns out not to exist, and the pkg versioning theory is "only add", then I can give the user an error message like "Please update to the latest ___", and that's it.  [Edit: Or, maybe gracefully downgrade something.]
-Maybe that's impractical but I stubbornly want to live in a world like that :slightly_smiling_face:
-For what it's worth, I abandoned the idea of using Racket at work because of the lack of versioning. And I've sort of drifted away from Racket development _in general_ because of it. The burden on package authors to divine a perfect architecture in the first version is far, far too much in a field that strongly benefits from rapid iteration on incremental changes.
-The strategy of adding an entirely new package for breaking changes isn't good enough, since often the change in question is actually quite small, and you don't want to completely fragment your own ecosystem just to change a small thing that likely won't impact 90% of users.
-Those are great points. And to be clear, I'm definitely in favor of a boolean "I'm ready/willing for other packages to depend on mine" flag, and having the option not to set that until you're ready!
-The current package policy works okay with very small teams, but I now work in a large organization that needs the ability to move asynchronously and update at their own pace.
-JS's and Haskell's package systems have supported our needs there quite nicely.
-for open source racket the problem is somewhat mitigated by the package-wide continuous build system
-but if you're not using that and you write a lot of packages the pain will magnify
-We have a number of internal packages that break compatibility on a monthly basis, and that's okay, because we publish detailed changelogs and let people upgrade whenever they get the chance.
-CI can't change the fundamental problem of backwards incompatible changes retroactively breaking code that worked before without changing anything, which is unacceptable.
-I didn't say it changed the fundamental problem, I said it somewhat mitigated it
-I didn't claim you did, but I'm mostly just expressing that these problems are not imaginary, since _I_ have basically ditched Racket for anything "real” because the tooling doesn't support my needs.
-<@U07SCV14J> it's concerning that you weren't able to accommodate the current package system to your organization's needs, that says to me the system needs at least a review. It's been in use for how long as it been? 3-4 years? That's long enough to reassess how successful the system has been and what improvements would be needed.
-I don't think the changes I mentioned would be terribly controversial; they were formed in a discussion between me and a few other people. Someone just needs to implement them.
-But that takes time and effort, and currently nobody has enough of that to spare.
-I'm in a position where I'm using Racket at work for small-scale projects, I've yet had the opportunity to seriously use the package system to manage my needs, so it'll be interesting to see how far I'm able to go.
-One example of something we've done at my organization that has been extremely successful is a Haskell DSL we use for writing deployment scripts. We use Haskell's package versioning system to write self-executing scripts in Haskell (with a relevant shebang), which is pretty cool. Since the scripts express the version they depend on, we can judiciously break backwards compatibility whenever it makes sense, which has let us rapidly iterate without feeling a need for BDUF.
-I couldn't really do that in Racket, even if it would be a good tool for the job.
-How well would a two stage solution work that first added everything except the ability to install multiple versions at the same time? The other three pieces are much easier to implement and might work as a temporary solution.
-They're mostly independent, but the sandboxing is pretty necessary to avoid inventing Cabal Hell in the Racket ecosystem. Sandboxing is actually mostly implemented, too, so it's actually probably not that much effort to add.
-If it were a huge amount of work, I would agree with you, but I don't think it makes a ton of sense to skip if you're also going to do the comparatively monumental amount of work to implement the other parts.
-may you point me to where the sandbox environment has been implemented? Is it a raco feature?
-There isn't really user-facing tooling for it, so the work would basically just be to integrate it with raco, but the infrastructure exists. I can't remember exactly where the relevant features are documented, but the feature is called "tethering”.
-ooh I do remember coming across that term
-It's alluded to here: <http://docs.racket-lang.org/raco/dirs.html#%28def._%28%28lib._setup%2Fdirs..rkt%29._find-addon-tethered-console-bin-dir%29%29>
-An important question is whether implementing it would require help from mflatt, since he likely won't have time to focus on stuff other than racket7
-I think it could be done with minimal knowledge of Racket internals. A few questions here and there maybe, but I don't see why much of it would involve anything complicated.
-I would bet the majority of the work would be extending `raco pkg install` to do constraint solving and handle the notion of version conflicts.
-Suppose the four main items are designed and made available in a side-branch of the racket mainline. Would it be able to accommodate the current style of additive changes. Suppose one package favors the additive style and other one takes the version numbering approach. How do we manage users experience so they don't get confused by two different styles?
-A package could easily just only make additive changes by only ever bumping the minor version.
-But there would certainly be some tricky migration/compat issues to work out.
-I don't think any of them are super hard, though.
-and by setting max version to #f indefinitely really
-IIRC, the proposed compatibility solution was to basically (for now) treat packages specified without bounds as `&gt;=1 &amp;&amp; &lt;2`.
-The version constraint solving doesn't sound like the hard part, especially if it's implemented with the aid of a logic programming dsl
-I don't really mean the constraint solving algorithm itself, but I mean plumbing the inputs and outputs of that algorithm through the rest of the system.
-You need to set up the infrastructure to make the version information available to the solver and configurable by users. You need to handle all the corner cases of version conflicts and solver failures. You need to present meaningful error messages when the solver doesn't come up with a solution. And you need to implement all of this while maintaining backwards compatibility with the old system.
-indeed oof that sums up the problem.
-Doing package management right is really hard! I don't know of any programming language that got it right from the beginning, most added it on only after it became obvious how necessary it was. :p
-(And many langs still have awful package management. Go comes to mind…)
-we just need to find that magic wand everybody keeps talking about.
-I agree with <@U07SCV14J> Saying ‘make a new package' whenever you make a breaking change seems fine, until you realize that what is going to happen is that your going to get a package catalog with hundreds of packages per actual package.
-<@U3SEVDPJT>  Oh, its in the cellar, let me go grab it.
-Plus different users have different ideas of what a breaking change is
-and the current package index is not easy to parse so your own study case is only going to exacerbate it.
-<@U07SJGB4H> That too. So….this is why I make a new package for every git commit.
-(Or at least every commit I push.)
-_Plus_ you can't even tell ahead of time whether a change is going to break any dependents with perfect accuracy!
-in a large enough ecosystem someone's always using your thing in a way you never could have anticipated
-Tbh that's one of the reasons why I think Hackage's ability to edit constraints after publishing a package is a good feature.
-A lot of tools get unhappy with the notion that releases are not immutable. But otherwise, if you don't have that option, those bad constraints stick around and mess up the solver forever.
-a release's content being immutable while its declared relationships to other releases being mutable doesn't sound so bad to me either
-But yeah. All of Maven, Bundler, NPM/Yarn, Cabal, etc. are tools added long after the lang was invented to solve this problem.
-I guess maybe Cargo gets this right from the beginning? But Rust is unique in a lot of different ways. :)
-so we have several notions at work here, some set of release source files, versions, canonical names, bundling variants with or without docs, constraints. Need to figure out how to stir all of them into a workable backwards compatible solution.
-the idea of dependency relationships being modified after the release doesn't sound too bad to me either.
-Racket's package model is more mutable than many, anyway, since the package system doesn't even host the package sources.
-The obvious next step for me is to study other package solutions, see what ideas they overlap in and what work and doesn't work.
-So a bad actor could just nuke a git repo or push a change to a release tag and cause a lot of problems. But I would not recommend addressing that problem with all of this.
-there's a really good blog post about package systems that's helpful for this
-<https://medium.com/@sdboyer/so-you-want-to-write-a-package-manager-4ae9c17d9527>
-That reminds me of that time when someone blew away their npm contributions and crashed the npm network which had been depending on one small packages released by that author departing with all of his toys.
-wasn't that the "leftpad" package?
-yeah that sounds right
-IMO, the Bundler/Cabal models are a really good set of tools to study. Yarn is good, too, but its model is different from Racket's, so it's not really relevant.
-thanks <@U07SJGB4H> and <@U07SCV14J> it's probably foolish of me to contemplate coming up with something that makes an impact but this is definitely a problem area that deserves a closer look.
-at the very least a tracking issue in the racket repo with some sort of plan and a breakdown of the work to do would be a big step forward
-ha, <#C06V96CKX|general> anybody wants to join in?
-maybe after I finish working on stuff for racketcon :p
-and a few other projects, or next year...
-I'd be interested in working on it if I had about 40 more hours per week. ;)
-more seriously, is the general management interested in entertaining a significant update to the package system? Or would we need to do some lobbying?
-I do realize this likely may need changes to be made to DrRacket's package manager, and the package index site, so that'll be nontrivial to coordinate.
-the package site probably wouldn't _have_ to change to support this
-The package server would. But not necessarily the frontend, I suppose.
+
+U14Q8S4EM : Yeah, I was just thinking, I wonder if you just set `subcriptions model = Sub.none` before you destroy it would work.
+U3R7CKQRX : yeah
+U3R7CKQRX : me too :slightly_smiling_face:
+U3R7CKQRX : I think it would
+U3R7CKQRX : for subscriptions that would help
+U3R7CKQRX : But for `Navigation.program` and this that would work(if my assumption is correct that is listens to urlchanges and keeps the handlers)
+U3R7CKQRX : I should take a look into the code for the navigation package. Having elm apps on a page and them doing stuff even when they shouldn't anymore is a little scary.
+U0CLDU8UB : <@U1EQAULH2> Here's an article I wrote <http://futurice.com/blog/elm-in-the-real-world>
+U3VH7AN30 : Hi there! I have a question about the update architecture. Let's say I have such code:```
+type alias Model = {
+    popup : Popup
+}
+type alias Popup = {
+    isActive : Bool
+}
+type Msg 
+    = PopupMsg Bool
+    | SomeOtherMsg
+```
+When I handle `SomeOtherMsg` with my update function I then want to hide my popup. And now I have 2 ways of doing this:
+1. Directly change my models popup in `SomePtherMsg` case branch like this:
+```
+let
+    popup = model.popup
+    updPopup = { popup | isActive = False }
+in
+    { model | popup = updPopup } ! []
+```
+2. Send a command with `Task.perform` like this:
+```
+model ! Task.perform PopupMsg (Task.succeed False)
+```
+So, what's the more correct way to do this? Thank you.
+
+U3SJEDR96 : 3. make a function `hidePopup : Model -&gt; Model` and call it from both branches
+U3VH7AN30 : <@U3SJEDR96> I thought about this but that's not the third option because it's just refactoring and can be done in both cases. 
+U4872964V : well, I say 3. too even if it’s “just refactoring” :slightly_smiling_face:
+U3VH7AN30 : Ok then. Just to clarify - preferred option is not to use commands?
+U4872964V : yes, commands are for asynchronous stuff
+U4872964V : potentially you will have some other message come in between
+U4872964V : maybe it matters, maybe it doesn’t
+U3VH7AN30 : Ah, now I see. Thank you for explanation))
+U6AH7SUH5 : I'm an android developer and very intrigued by the elm architecture. I want to structure my apps similarly, unfortunately we don't have as much control over the view as web devs. 
+My question is how to model things in the UI that don't really change the permanent app state. As an example, we have things called toasts (<http://www.materialdoc.com/content/images/2015/12/toast-1-1.png>) which is a small popup notification that disappears automatically. You would show it like this: `Toast.make("email sent", disappearDelay);`
+
+Using a `EmailSent` state type is not always possible, because in android your application can be terminated and restarted at any time (for example when you rotate your phone to horizontal) and re-rendering the `EmailSent` state (since the `view` function would be called with the last state) when the app is restarted would lead to showing the toast again any time you rotate your phone.
+
+U0CLDU8UB : Well, in Elm even things like toasts are part of the app state. There can't be anything like calling `Toast.make("email sent", disappearDelay);` and having the toast appear and disappear on its own in Elm. That's a profoundly imperative API, and effectively you give a piece of state outside the main program at that point. Neither of these are possible in Elm.
+U0CLDU8UB : However, what would be sort of similar is sending stuff out through ports. Anything that happens outside of the Elm application can be imperative, so things like toasts can also happen in the imperative manner in that situation. Maybe that would be a nice analogy?
+U6AH7SUH5 : how do you mean? I have been thinking about treating toasts somewhat similar to side effects. My state reducer/update function might look somewhat like this then:
+```
+fun reduce(view: View, state: State, event: Event) = when(event) {
+		is Event.EmailSent -&gt; {
+			view.showEmailSent()
+			state
+		}
+		
+		is Event.EmailReceived -&gt; {
+			state.copy(emails = state.email + event.newEmail)
+		}
+
+                // ...
+	}
+```
+
+U6AH7SUH5 : but it just feels so wrong to call functions on the view directly
+U4872964V : If you are to have the Elm architecture, your reducer would also return something like the Elm Cmd
+U4872964V : which could be “show the toast” for instance
+U6AH7SUH5 : that would at least make it pure, but at the same time introduce even more boilerplate event classes
+U4872964V : well, it’s hard to take “half” the architecture I suppose :slightly_smiling_face:
+U4872964V : how do you handle fetching data for instance
+U4872964V : let’s say i want to click something and then it should fetch me some data
+U0CLDU8UB : I suppose you're looking for something more like the Redux side-effect libraries, and not really the Elm way?
+U0CLDU8UB : (This is not a criticism, mind you, it might work out better in an OO language like Kotlin)
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

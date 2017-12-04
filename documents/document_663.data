@@ -1,6 +1,118 @@
+U5YDC1YUW : but that's missing the footer section still
+U0EUHKVGB : You’ll probably want to do something like this:```
+let
+  header = ...
+  sections =  List.map viewSection model.sections
+  footer = ...
+in
+  header :: sections ++ [ footer ]
 ```
-I have a feeling there are some built in's I can use...
-<@U1BP42MRS> they needed an offset in months (see thread)
-Using seconds is just wrong :confused:
-<@U5NMSURAQ> then convert back
-you can't count how many months passed if you only have unix timestamp 1 and unix timestamp 2
+
+U5YDC1YUW : yeah just ends up looking a bit gnarly... wondering if I shouldn't just wrap the sections in another div then the function returning a list can just be the function call to `renderSections`
+U0EUHKVGB : sure, that’s a valid option
+U5YDC1YUW : ```view : Model -&gt; Html Msg
+view model =
+    div [ class "Quiz" ]
+        [ div [ class "Quiz__header" ] [ h3 [] [ text model.heading ] ]
+        , div [] (renderSections model)
+        , div [ class "Quiz__footer" ] []
+        ]
+```
+
+U5YDC1YUW : Look's a bit nicer I think?
+U0EUHKVGB : Looks great
+U0EUHKVGB : That’s how I would’ve done it :slightly_smiling_face:
+U5YDC1YUW : sweet! just trying to figure out best practices here, fairly new to Elm
+U5YDC1YUW : Any good examples out there of POST'ing a JSON payload to an endpoint using HTTP basic auth?
+U5YDC1YUW : Anyone know what the heck is going on here?
+```
+The 2nd argument to function `send` is causing a mismatch.
+
+19|     Http.send ServerResult
+20|&gt;        (Http.request
+21|&gt;            { method = "POST"
+22|&gt;            , headers = []
+23|&gt;            , url = "<http://example.com>"
+24|&gt;            , body = Http.emptyBody
+25|&gt;            , expect = Http.expectString
+26|&gt;            , timeout = Nothing
+27|&gt;            , withCredentials = False
+28|&gt;            }
+
+Function `send` is expecting the 2nd argument to be:
+
+    Request Msg
+
+But it is:
+
+    Request String
+```
+
+U17R26VR8 : here is send: <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#send>
+it’s expecting a `Request a` which is the same as your `Result Error a`
+
+U17R26VR8 : your `ServerResult : Result Error Msg` …. actually i’m confused
+U5YDC1YUW : you and me both
+U17R26VR8 : what’s your ServerResult sig?
+U5YDC1YUW : `ServerResult (Result Http.Error Msg)`
+U5YDC1YUW : honestly I don't even know if that's what it's supposed to be?
+U5YDC1YUW : first time trying to do any kind of HTTP request and it's properly rustling my jimmies
+U17R26VR8 : crap, gtg… soz will help later if anyone else hasn’t jumped in
+U236M9FH9 : <@U5YDC1YUW> Should be `ServerResult (Result Http.Error String)`
+U236M9FH9 : Compiler assumes first type is correct(`ServerResult (Result Error Msg)`), so it complains when you give it a `Request String`, even though `Request String` is actually what you want.
+U5YDC1YUW : hmmm true that, found the error really cryptic
+U1FCZNA7R : Hello. I'm trying to setup elm-test in my project using these steps (on Fedora 25): <https://github.com/elm-community/elm-test#running-tests-locally>But I'm getting the following error after running step 5 (run elm-test):
+`Error extracting <https://dl.bintray.com/elmlang/elm-test/0.18.6/linux-x64.tar.gz> - Error: EACCES: permission denied, open '/usr/lib/node_modules/elm-test/bin/elm-interface-to-json'`
+
+U1FCZNA7R : Anyone has seen/resolved this? Looking at the dir mentioned I see it doesn't exist. Also looking at  `elm-test --help` output suggests that it has been installed
+U1FCZNA7R : Additional info: I had to run `npm install -g elm-test` using `sudo` (otherwise I was getting errors). Another observation: It seems to work when I run the tests using `sudo elm-test` but this doesn't seem desirable
+U236M9FH9 : <@U1FCZNA7R> I used to do `npm i -g --prefix ~/.node_modules elm-test` along w/ `PATH="~/.node_modules/bin:$PATH"`, but now I either use NVM or if I have a `package.json` I do `npm i -S elm-test` &amp; add a `"test": "elm-test"`script to `package.json`.
+U0D4VR7BP : I don't know if anybody here plans to visit *Colours of Ostrava* (music festival in Czech Republic), but we're going to do an Elm meetup right before the festival starts! So feel free to come, and/or ping me with any questions :slightly_smiling_face:<http://blog.newired.com/2017/06/27/3rd-javascript-meetup-ostrava-19-7-2017/>
+
+U2LAL86AY : if i have a union case with many constructors. and inside a function i do:```
+case union of
+    Constructor 1 -&gt; 
+    Constructor2 -&gt; 
+    ...
+```
+If my `Constructor 1` is the most `frequent case` for this union. Meaning 95% of the time a value of this type (`union`) will be `Constructor 1`
+
+Does it matter form a performance standpoint to put`Consructor 1` first in the case statement. or is more preformant to add it to the back? - or it doesn't matter? 
+
+So doing this is less performant:
+```
+case union of
+  Constructor2 -&gt; 
+  Constructor 1 -&gt;  -- or course i'm talking about 10 -13 constructors here. not just 2. 
+  ...
+```
+
+U4SM7ECAG : julianjelfs: I am! I come from the ember world so I tend to split everything into small bits like I did with Ember out of habits :slightly_smiling_face:
+U0EUHKVGB : Benchmark.
+U17MHJ12N : OK I'm just averaging some baseline build times now and then will try to incrementally squash things up and see how I can improve it
+U4SM7ECAG : Ok, that will be an interesting "study", I'm curious of how it turns out :slightly_smiling_face:
+U3SJEDR96 : And once you've done that, figure out if it really matters. If you're writing application code, it seems unlikely that this would make a perceptible difference, and will most likely be completely dwarfed by the cost of rendering..
+U17MHJ12N : Gaaa it's a fine line between consolidating modules and entering into circular reference hell
+U5GSVKPJS : ```The 1st branch has this type:
+
+    elm-make: Type applications without concrete names should not get here.
+```
+
+U5GSVKPJS : amazing.
+U0EUHKVGB : If you want help, you’re going to have to share code :wink:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

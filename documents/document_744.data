@@ -1,4 +1,74 @@
-jimmynanuan: First at all i would suggest you to format your code using ```. Please see <https://get.slack.help/hc/en-us/articles/202288908-Format-your-messages>. Then i think your function named `getSampleText` should be called on `componentDidMount`.
-The error Maximun call stack usually is throwed when you are trying to do `setState` inside a render function.
-thanks kenji
-what are the BASIC THINGS in ReactJS that we should remember before making any big project.. Plz tell me in detail
+U4H406NET : Different one.  Sorry, didn't specify.  it's base-dev/elm-graphql.  I had a look at James's, I am going to talk to him about it when he resurfaces.
+U3SJEDR96 : Ah, no experience with that one
+U4H406NET : It seems to have made the corr3ect design decision to start with the schema and the query, but it has not been touched for a few months.
+U3SJEDR96 : (not being updated doesn't mean much when it does what it's supposed to do)
+U3L8MM10T : I have function ```digitCount : Int -&gt; IntdigitCount i =
+    abs i
+        |&gt; toString
+        |&gt; String.length``` and get `8` for `digitCount (1000^1000)` because that's the length of `"Infinity"`.  I can't imagine that this is correct behavior.
+
+U0J1M0F32 : :thinking_face:
+U0LPMPL2U : `floor &lt;&lt; logBase 10`
+U0LPMPL2U : this will give you the power of 10 of your number
+U0LPMPL2U : which is the same as n-1 digits
+U60SXAF96 : ...and it's faster, and more accurate, and an implementation that is actually what you mean.
+U0LPMPL2U : so maybe```
+digitCount : Int -&gt; Int
+digitCount i =
+  abs i
+    |&gt; logBase 10
+    |&gt; floor
+    |&gt; (+) 1
+```
+
+U3L8MM10T : Cool. Thanks all.
+U60SXAF96 : Just watch out for 0.
+U60SXAF96 : You'll need to special case that in any case.
+U3L8MM10T : Not in my version
+U60SXAF96 : Uh, okay. As long as you don't mind negative infinity values floating around your runtime....
+U0LPMPL2U : `String.length &lt;&lt; toString` works with 0
+U60SXAF96 : ...or you just special case it to 1.
+U0LPMPL2U : but doesn't work for infinity
+U0LPMPL2U : the `logBase 10` approach works for infinity but returns `-Infinity` for 0
+U60SXAF96 : Oh, I see what y'all are saying.
+U60SXAF96 : Yes, you don't have to special case `0` in the `String.length &lt;&lt; toString` version.  Sorry, I thought when <@U3L8MM10T> said "Not in my version", he meant, "Not in the codebase where I will be implementing this function". I've been misreading things.
+U60SXAF96 : Ignore my comments as attempts to correct errors that people weren't making. :stuck_out_tongue:
+U3L8MM10T : Actually, my version is correct -- all you have to do is turn `8` sideways. :slightly_smiling_face:
+U60SXAF96 : The number of digits in 1000 * 1000 is not infinity.
+U60SXAF96 : There's a very finite number of digits there, thankyouverymuch. :smile:
+U0LPMPL2U : ```&gt; 1000 ^ 1000
+Infinity : number
+```
+
+U0LPMPL2U : this number is bigger than Elm can handle
+U0LPMPL2U : The number of digits in `Infinity` is `Infinity` :smile:
+U0LPMPL2U : ```&gt; (((+) 1) &lt;&lt; floor &lt;&lt; logBase 10 &lt;&lt; abs) 1000 ^ 1000
+Infinity : Int
+```
+
+U3SJEDR96 : we have JS to thank for that ¯\_(?)_/¯
+U5X2ZRFDF : And IEEE
+U23SA861Y : be thankful it is IEEE754 compliant, because JSON is not
+U3L8MM10T : Interestingly, my elm-repl (Windows10 64bit) insists I use `toFloat`: ```abs i    |&gt; toFloat
+    |&gt; logBase 10
+    |&gt; floor
+    |&gt; (+) 1```
+
+U0LPMPL2U : So apparently `logBase : Float -&gt; Float -&gt; Float`
+U0LPMPL2U : that would be why
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

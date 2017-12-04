@@ -1,35 +1,68 @@
+U52GHJJTU : Is it possible to move the common parts of two elm apps to a separate js file during compilation?
+U52GHJJTU : <@U3SJEDR96> I guess that's what you're proposing 
+U3SJEDR96 : not possible, but _maaaaybe_ in 0.19, or at least a first step towards it. But yeah, no, not quite what I'm proposing.
+U3SJEDR96 : I'm just proposing to work around the naming conflict in a predictable, future-proof way
+U52GHJJTU : Ok, that's what I thought 
+U2NGTHTTR : Summary:There is page about we _generally_ do not know nothing.
+Page can contains _generally_ anything incl. legacy versions of our Elm applications.
+
+Now we want to _inject_ into this page another Elm application and avoid merging through common global `Elm` variable because we don't have any control above content of page.
+
+U3SJEDR96 : Well, how do you _know_ any other variable isn't already used?
+U3SJEDR96 : - use predictable, versioned name for your app- check if `Elm.MyModule_0_1_1` exists. If it does, it's your app, no question about it
+- if it doesn't, fetch your elm app and let it merge
+
+U2NGTHTTR : &gt; how do you _know_ any other variable isn't already used?I don't know of course I still can choose name which is already used but for this glob. variable I can use something like `Elm_5325173517` - this name is used in one line. Just to call `.embed()`. It's easy to change and without any impact on rest of application.
+
+Thank you for your help and ideas
+
+U2D5SAEMN : I have two date ranges (start date, end date) that depend on each other, with a number of constraints:1. range2 can only exist if range1 exists
+2. range2 start date is optional
+3. range2 end date is optional
+4. range2 start date &gt;= range1 start date
+5. range2 start date &lt;= range1 end date
+6. range2 end date &gt;= range1 start date
+7. range2 end date &lt;= range 1 end date
+8. range2 end date &gt; range2 start date
+
+So basically range1 is the boundary for range2. I'm figuring out what the best data structure would be:
+- union type: `NotSet | BoundedDateRange (Date, Date) (Maybe Date, Maybe Date)`
+- record: `{ range1: (Date, Date), range2: (Maybe Date, Maybe Date)}`
+
+Any ideas/remarks?
+
+U3LUC6SNS : Hi all!  I am running into performance problems and am thinking of using one of Elm's debouncers.  Does anyone have experience on these or advice to offer?
+At the moment, each character of user input results in an update to the current document and also the document list.  In addition, there is processing in JS-land of the content via ports.
+
+Nothing goes "wrong" but both the source and rendered text windows get very "laggy".  Also, I see lots of messages
+
 ```
-are you calling that `handleHttpError` function from anywhere else? You first attempt looks correct to me...
-yes, check the location of the error
-oumph, thx <@U3SJEDR96> <@U4872964V>. I was searching at the wrong place. There was another call which caused the error... This took me 30 min to realise xD
-so new 'beginner' may be overstating it ... been trying to wrap my head around the concepts in Elm vs JavaScript.  I have some basic framework (object ... record, some similarities, many differences ...that kind of thing).  At a high level I understand subscriptions in the time clock sense or even keyboard input.  The one area I can't seem to figure out is the equivalent approach/style to deal with observables.
-Can someone point me in the right direction.  In the past I would have used Flyd observable streams.
-in Elm, the concept of observable corresponds to a Msg
-there is only one stream of Msg, they go into your update function
-maybe that confuses you more, and now I have to go, sorry
-All the examples I have seen have been ... not sure how to say it... external.  Does anyone know of an example where one variable impact another.  For example, if game variable of "health" changes, a number of dependent variables also updates.
-I would say there is no concept of observable in Elm. The entire program is a reaction to a "stream" of messages, like norpan said, but you can't really see it from the perspective of the developer
-You're on the right track. You cannot do dependent streams in Elm. The concept just doesn't exist.
-Yeah, I kind of get that.  So now I am looking for an example of the pattern I would use to do it in an Elm way. Have not found it yet.
-well, when the health changes, a message must have been triggered
-then in update, you can do whatever you need to move the model to a new, valid state, say `{ model | health = model.health - 5, durability = model.durability - 10}`
-This is very abstract without a concrete example, I'm afraid.
-Yeah, your right. I guess I just need to dive in.  <@U1CE9DL9H> that makes sense. I guess this model in my head where you assign relationships and move on needs rework.
-I don't know if this helps or just confuses more, but here's an update with plenty of interdependent things from a game I'm building for fun: <https://github.com/ohanhi/bike-wars/blob/master/src/Bike.elm#L53>
-oh thanks, yeah, looking at examples for me is a great way to learn.  Appreciate it.
-Essentially there are just multiple calls to functions and some case expressions in the let block. They are interdependent too: figuring out the collisionPoint needs the nextPosition to be calculated etc.
-But the thing is, in Elm you need to store _everything_ in the model. There is no other source of state in a program. If you think about it, every single Observable can be a source of state. This is why the two mindsets are a little hard to combine.
-In some ways that is how I ended up here.  In JS I had just moved my world state to Baobab (immutable structure) and was struggling with 1. Changing my mindset 2. All the options and tools and what was right.  Hence, Elm offers (I think) someone with entry to mid level skills (kind of new to this in general) ... structure.
-II will follow your code example through.  Thanks for the help.  Off to work.
-<@U62R599PU> if you look at something like debouncing, which you'd use an observable for, this can be handled by explicit state, like done in the various debounce packages for Elm
-pzolla: I'm doing an RPG in Elm and your observations resonate a lot. Coming from imperative language we need to reframe a lot fo things :slightly_smiling_face:
-Any idea of how I could listen to onkey on a single touch? or have something better than `App.Action.NoOp` for the case that doesn't interest me and that would not interfere with the user inputs?
-Could you filter the signal in the part of the code that handles signals rather than having a conditional in the event handler?
-Alternatively, write a custom decoder instead of using `keyCode` and make sure it returns `Json.Decode.fail` for non-ESC characters
-For reference, see how the `onEnter` handler is implemented here: <https://github.com/elm-community/html-extra/blob/2.2.0/src/Html/Events/Extra.elm#L267>
-oh that's a neat idea!
-`escDecoder tagger = keyCode |&gt; andThen (\k -&gt; if k == 27 then succeed tagger else  fail "not esc")`
-or, indeed, go all the way and make it a custom `onEsc` :slightly_smiling_face:
-I'll try that :slightly_smiling_face:
-Awesome that works !
-Thanks a lot <@U3SJEDR96> and <@U0LPMPL2U>
+149:1 GET <http://localhost:3000/149> 404 (Not found)
+150:1 GET <http://localhost:3000/150> 404 (Not found)
+
+U3LUC6SNS : ```
+U3LUC6SNS : in the console.  I am using webpack and think they must come from it.
+U3LUC6SNS : However, I don't understand what they mean.
+U3LUC6SNS : in the JS console
+U3SJEDR96 : hm, is the code available somewhere? <@U3LUC6SNS>
+U3LUC6SNS : <@U3SJEDR96>, here it is: <https://github.com/jxxcarlson/koko_elm_client>  Should I point you to a specific place?  Keyboard input is processed in `Main` at <https://github.com/jxxcarlson/koko_elm_client/blob/master/src/Main.elm#L233>
+U3SJEDR96 : cool, I'll have a look shortly
+U3SJEDR96 : <@U3LUC6SNS> I'm not seeing where the random GET's come from... As for the puts, you may indeed want to batch these (either with a debouncer of a little more manually by keeping a dirty flag and checking that every second or so), _or_, if you're not really all that interested in whether the PUT succeeds or not, you could make these run in an isolated process which should help with "snappiness"
+U3SJEDR96 : (by using `Http.toTask`, `Process.spawn` and `Task.perform`)
+U3SJEDR96 : then finally, the rendering - I'm not entirely sure if that currently blocks the main thread (i.e. does an outbound port run its callback synchronously?), but I think I can check that quite quickly
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

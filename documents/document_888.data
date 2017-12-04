@@ -1,0 +1,100 @@
+U1BP42MRS : Yes, <@U60KNBMPX> is right - it's best to walk DOWN instead of up this one
+U60KNBMPX : <@U6944D5GU> : no idea! :smile: your code should give you the right answer :smile:
+U6944D5GU : yea the standard answer i saw is:
+U6944D5GU : it indeed gets the right answer for num1 and num2's HCF which is 6
+U60KNBMPX : I think that this loop will work, but it might be suboptimal for large numbers.
+U60KNBMPX : but that is a topic for discussion
+U60KNBMPX : because you have no way of softcoding a break point in the if-then clause. Whereas if you start high you can jump out as soon as the clause is fulfilled
+U6944D5GU : may i ask how did you determine when to loop up or down
+U60KNBMPX : it just "made sense"
+U60KNBMPX : can't explain how
+U1BP42MRS : If you want it a little more terse, combining what I had earlier and what you have:
+```
+def compute_hcf(x, y):
+    smaller = min(x, y)
+    for i in range(1, smaller + 1):
+        if x % 1 == 0 and y % i == 0:
+            hcf = i
+    return hcf
+```
+
+But this can be simplified even more going backwards instead of brute forcing it:
+
+```
+def compute_hcf(x, y):
+    smaller = min(x, y)
+    for i in range(smaller + 1, 1, -1):
+        if x % 1 == 0 and y % i == 0:
+            return i
+    return 1
+```
+
+U60KNBMPX : yes, version 2 is better
+U1BP42MRS : The _when_ is usually a trade-off of how many operations are required until I meet my condition. So when stepping up, you *have to* evaluate every number in the range for the condition. However if you step down, the *first found* number is the answer
+U60KNBMPX : simplification means reducing the time complexity. Because those two snippets contain basically identical code structures.
+U1BP42MRS : So for v1 above: your complexity is `O(n)` (or that for the size of the range, every number must be evaluated)
+U60KNBMPX : it is always `O(n)` in version one, where v. 2 is `O(n)` in the worst case
+U1BP42MRS : But for v2 the complexity could be at the best case `O(1)` (for any size of the range, only 1 operation is needed) and at the worst case `O(n)`
+U60KNBMPX : hehe
+U1BP42MRS : Does that make sense <@U6944D5GU> ?
+U6944D5GU : woo well explained <@U1BP42MRS> may i ask if we can leave out the last “-1” in the second version's range ( for i in range(smaller + 1, 1, -1):)
+U6944D5GU : shouldnt it count down one by one already by default
+U60KNBMPX : <@U6944D5GU> I think the best way to do these things is to experiment. You get intuition that way.
+U6944D5GU : <@U1BP42MRS> <@U60KNBMPX> :taco:
+U6944D5GU : thanks teachers
+U1BP42MRS : Here's a link for your reading :smile: : <https://docs.python.org/3/library/functions.html#func-range>
+U60KNBMPX : it's a bit like math: a technical skill rather than a pure talent. That is, until you get to the higher levels. But looping limits, aligning indices, all that painful stuff has to be done a few dozen times before you stop thinking about it.
+U6829S5NZ : <@U6944D5GU> You should also checkout Asymptotic Notations and complexity.
+U60KNBMPX : great point. This is a fundamental theme in programming
+U6944D5GU : <@U60KNBMPX> so deep!!haha thanks
+U2UP91YLE : help me setting elasticsearch-dsl for n-gram!
+U2UP91YLE : done!
+U5W7MEVHR : hi, all! I have dict with oldstring as key and newstring as value. I need replace strings in file according to that dict. What is the best way to do that?
+U1BP42MRS : What have you tried <@U5W7MEVHR> ?
+U5W7MEVHR : <@U1BP42MRS> Well, I think to do it like this:```
+for key, value in dict.items():
+    with open(filename, 'r+'):
+        for line in f:
+            line = re.sub(key,value, line)
+            f.write(line) # &lt;-- possible mistake
+     f.close()
+```
+
+U1BP42MRS : Does that work?
+U1BP42MRS : you could probably simplify it a little for yourself if you can fit the whole file in memory and then re-write it
+U5W7MEVHR : I thought there is more simple way...
+U1NSCAY6R : Also, if you use `with open` it handles closing the file for you. For those newer pythonistas, these are called context managers and are awesome
+U5W7MEVHR : <@U1NSCAY6R> cool)
+U1BP42MRS : Yeah, the simplest:
+```
+with open(my_file) as f:
+    content = f.read()
+
+for k, v in dict.items():
+    content = re.sub(k, v, content)
+
+with open(my_file, 'w') as f:
+    f.write(content)
+```
+
+Though there probably is a "better" way.
+
+U5W7MEVHR : <@U1BP42MRS> oh! that's really simple) thanks a lot, forget that it's possible to replace in the whole text not just in line
+U1BP42MRS : It saves a few iterations, but it will load the whole file in - so be aware of how large the file is!
+U5W7MEVHR : Oh, it's just hundreds of lines, it will be ok.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

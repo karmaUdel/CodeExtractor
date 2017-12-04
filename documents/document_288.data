@@ -1,18 +1,122 @@
-``` but it seems pretty silly given there only one constructor. Is there another way? Or is my approach wrong?
-<@U3SQ42JJW> you can only write pure functions in Elm, if it compiles then it's a pure function
-Well… `type alias Locality = String` <@U2D7NUGS1>  It is not the same thing, though
-<@U2D7NUGS1> `listItem (Locality foo) = ...`
-Dang, pattern matching to the rescue :slightly_smiling_face:
-<@U153UK3FA> Thanks… Maybe I have to study this whole purity thing a bit more. Feel like I still did not get it.  :slightly_smiling_face:
-Awesome. Thank you.
-<@U3SQ42JJW> "A pure function is a function where the return value is only determined by its input values, without observable side effects"
-It's all there, really
-Even we you do an HTTP request inside a function you are writing a pure function. Go figure! :slightly_smiling_face:
-are you sure?
-Of course. Because you return a *description* of what to do and pass that the Elm runtime.
-A description cannot fail or return something different each time.
-A decription is "Hey Elm runtime, grab that URL and return to me the payload". Elm does the job and call your `update` function.
-sure, that makes sense
-I thought you meant that literally making http requests still gives you a pure function
-Ah sorry. Indeed "you do an HTTP request" is not precise :slightly_smiling_face:
-(hence why you can only trigger side-effects by returning them from `init` or `update`; both which "happen" to be called by the runtime)
+U5QPUBDQR : ({ model | captions = List.map updateVideo model.captions, debug = b },
+U5QPUBDQR : ie update the model, from the model?
+U3SJEDR96 : I'm not sure what you mean by that. `update` returns a _new_ model, and _usually_ that's based on your previous state
+U3SJEDR96 : so using your previous model to build a new one makes perfect sense
+U5QPUBDQR : <@U3SJEDR96> a yes: immutabilty takes some getting used to
+U3SJEDR96 : yeah, it's important to realize that `{ foo | v = "val" }` creates a _new_ record )
+U5QPUBDQR : <@U3SJEDR96> thanks. I'm very happy with this slack channel, good help available :slightly_smiling_face:
+U57KYFW67 : It's not possible to include two .js files created by Elm on one page, is it?
+U50SABLHE : How would I Json.Encode an array of objects to be used in a request body? Below is an example of what I need to send.
+```
+[
+    {
+        "request-id": 1,
+        "action-name": "checkZipCode",
+        "zip-code": "41501"
+    }
+]
+```
+
+I'm using the following code to Encode the object, but I'm not sure how to add the surrounding array brackets
+```
+encodeZipCode : Encode.Value
+encodeZipCode =
+    Encode.object
+        [ ( "request-id", <http://Encode.int|Encode.int> 1 )
+        , ( "action-name", Encode.string "checkZipCode" )
+        , ( "zip-code", Encode.string "41501" )
+        ]
+```
+
+U3SJEDR96 : ```encodeZipCode : Encode.Value
+encodeZipCode =
+    Json.Encode.list 
+        [ Encode.object
+            [ ( "request-id", <http://Encode.int|Encode.int> 1 )
+            , ( "action-name", Encode.string "checkZipCode" )
+            , ( "zip-code", Encode.string "41501" )
+            ]
+        ]
+```
+
+U3SJEDR96 : that should work. Alternatively, this should also work: ```
+encodeZipCode : Encode.Value
+encodeZipCode =
+    Encode.object
+        [ ( "request-id", <http://Encode.int|Encode.int> 1 )
+        , ( "action-name", Encode.string "checkZipCode" )
+        , ( "zip-code", Encode.string "41501" )
+        ]
+        |&gt; List.singleton
+        |&gt; Json.Encode.list
+```
+
+U3SJEDR96 : so basically, wrap it in a list, and encode that with `Json.Encode.list`
+U50SABLHE : <@U3SJEDR96> Thanks, that was exactly what I needed.
+U59AF21LJ : <@U3SJEDR96> Sorry for the late reply. I actually see that as a problem, because sometimes it doesn't refresh with the value the model provides and just keeps the one the user wrote instead.
+U5WD40ZA9 : Anyone know any recent examples of someone creating a dropdown so that when you click outside of it, it closes? Would be really helpful, thanks in advance :slightly_smiling_face:!
+U4PT7NG4V : I've always just put an invisible overlay over the background behind popups and handled the click there and dismiss the popup. But maybe I'm old school and there's a better way
+U0K92QFST : <@U5WD40ZA9> there was *just* a discussion about exactly this in <#C13L7S5GR|elm-dev>!
+U0K92QFST : <https://ellie-app.com/3tm2WSV9JTza1/0>
+U0K92QFST : credit where due: <https://elmlang.slack.com/archives/C13L7S5GR/p1498165749675291>
+U5WD40ZA9 : <@U0K92QFST> I'll take a look! Thank you very much :+1:
+U4PT7NG4V : That's really neat :slightly_smiling_face:
+U2W8J47KQ : I'm curious how that's listening for the "outside" clicks, it's not super obvious to me
+U2W8J47KQ : oh it's looking for focus change events, neat
+U4PT7NG4V : Kinda neat code wise, makes it difficult to inspect the popup in dev tools though
+U2W8J47KQ : I always have that problem with styling popups/dropdown/etc, chrome hover/focus toggle helps some
+U3SJEDR96 : <@U59AF21LJ> that's a problem if the part of your model that should match the input field is modified in any way _other_ than through the input field. One reason to do it the way it's done in the guide, is to prevent the cursor from jumping if you type faster than your (`update` loop can process + a render can be queued through requestanimationframe, and your updated model is finally rendered), which takes about ~16ms at most. Especially noticeable if your cursor isn't at the end of the input :wink:
+U3LUC6SNS : Is there a way of putting user-defined modules in Ellie?
+U23SA861Y : publishing them first?
+U3LUC6SNS : I would say that mathematics is more about manipulating structures, of which the integers, the real numbers, etc., are particular examples.
+U3LUC6SNS : I suppose so, but the modules I have in mind are of little value outside of the example.  Seems like littering :slightly_smiling_face:
+U23SA861Y : well it looks like it can install things which the elm package manager can find
+U23SA861Y : well it's either big enough to be a package (which you maybe can publish) or its small enough to inline into a single page
+U3LUC6SNS : Where is `Msg` defined?
+U3LUC6SNS : <@U23SA861Y> can I inline a module, that is, include its text in the "Main.elm" file?
+U23SA861Y : Msg is defined wherever you defined it...
+U23SA861Y : its just code, the import prefixes might need to be rewritten but there is nothing that stops you from moving that code around. (with the exception of circular imports)
+U3LUC6SNS : Got it! :slightly_smiling_face:
+U23SA861Y : The only think that actually needs to be a seperate modules is ports I believe
+U236M9FH9 : ports don't have to be in a separate module, but it's best as every port has the same namespace so a single module can help prevent name collisions.
+U23SA861Y : umm I thought you needed a special `port module` declaration
+U236M9FH9 : You do, but you can have multiple modules with that declaration
+U236M9FH9 : And other elm code can live in that module
+U23SA861Y : It can but I don't think that module can be toplevel
+U23SA861Y : I don't think your main module can be a port module
+U23SA861Y : huh, nvm that works in ellie
+U23SA861Y : stand corrected
+U3LUC6SNS : I posted the following in the `style-elements` channel, but it concerns a general Elm bug, so I am posting it here as well:
+I made a small project that demonstrates the textarea bug.  See the README for details.  To run the project, do `git clone <https://github.com/jxxcarlson/nanoedit>`, bring up `elm-reactor`, and select `Main.elm`.  I'm very interested in finding a solution or workaround for this. :slightly_smiling_face:
+
+U5Y4ERBU0 : hello! I'm trying to use a guard with the code below, but the compiler tells me it can't find the "|=" or "=&gt;" variables. Anyone know why?
+```getValidationMessage : Model -&gt; String
+getValidationMessage { password, passwordAgain } 
+  = password /= passwordAgain =&gt; "Passwords don't match."
+  |= "OK"```
+
+U2FGMAQ5R : Does anybody know how I can use a Set with a custom type? I'd like a collection that only contains unique entries but Set only works with primitives
+U0LPMPL2U : <@U5Y4ERBU0> it sounds like you're trying to write Haskell. Elm doesn't have "guards". :slightly_smiling_face:
+U0LPMPL2U : You can write this as an if/else statement or a case statement
+U5Y4ERBU0 : i tried to emulate this <http://package.elm-lang.org/packages/Fresheyeball/elm-guards/1.0.1/Guards>
+U5Y4ERBU0 : do I need to import something?
+U0LPMPL2U : Are you trying to use that package?
+U5Y4ERBU0 : <http://package.elm-lang.org/packages/Fresheyeball/elm-guards/latest>
+U5Y4ERBU0 : i guess so
+U0LPMPL2U : if so, you will need to install the package: `elm package install Fresheyeball/elm-guards` on the command line
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,14 +1,52 @@
+U3JSGAK7B : thanks, <@U0LPMPL2U>! I guess <https://klaftertief.github.io/elm-search/> is exactly what I was looking for
+U3JSGAK7B : here is the search I want, for instance: <https://klaftertief.github.io/elm-search/?q=lazy2>
+U31FGNWCT : <@U0LPMPL2U> Thank you! Found drop and take functions, they are awesome for the issue.
+U45C5R6QP : I have a view in another file that has a submit button in it. When that button is clicked I need to deal with it in the parent file. I guess I need to listen to a msg from the child file somehow, right?
+U5ABF3BH7 : Hi! Does anyone have examples on how to use elm-validate, or other validation examples (like phone number length, social security numbers, email format, etc..?
+U5ABF3BH7 : are there any tutorials?
+U5E3DU81K : each day, elm makes less sense to me
+U48AEBJQ3 : <@U5E3DU81K> That is probably because you are coming with a lot of ideas that work for other paradigms, but don't hold up here and you are just discovering that.
+U48AEBJQ3 : <@U45C5R6QP> You either need the function which makes that submit button take a `Msg` as a parameter or you need to wrap the data type the submit button is using via `Html.map`
+U45C5R6QP : got it
+U65B9414J : Hi folks. Anyone knows what's wrong here .```        UrlMsg (Err error) -&gt;            let
+              { model | error = error }
+            in
+            ( model, Cmd.none )
+
 ```
-This decoder will fail if any of these indices aren't present
-ah that needs to be wrapped in a maybe
-`        (Decode.maybe &lt;| Decode.index 2 Decode.string)`
-right
-the maybe needs to be around the `Decode.index`, not the `Decode.string` :thumbsup:
-I thought it was :stuck_out_tongue:
-it seems to work
-can’t work out if I love elm or think its crazy!!
-maybe it’s wrong to compare to JS
-but with JSON decoding seems so much code :confused:
-this slack so so helpful though :heart:
-for decoding yes, but all thats doing is pulling to the surface bugs that would be in your javascript code
-how would your javascript respond if the data didn't match
+
+U45C5R6QP : Actually, the more I think about it the less I think I absolutely need to do this. I've run into this problem a couple of times before (Parent/child communication) but it usually turns out I'm going down a road that'll lead to trouble in the future
+U65B9414J : Error I'm getting is ```I ran into something unexpected when parsing your code!
+61|               { model | error = error }
+                          ^
+I am looking for one of the following things:
+
+    a closing bracket '}'
+    whitespace
+`
+
+U48AEBJQ3 : <@U65B9414J> You aren't assigning your updated model to a name in the `let`, you need `newModel = {model | error = error}`
+U65B9414J : I see. Thanks.
+U3SJEDR96 : <@U65B9414J> `{ record | .. }` doesn't update anything in-place, as everything in Elm is immutable. Rather it returns a new record, so in order to use that in a `let..in`, you need to assign it to a variable. I'm not sure if this makes it more or less confusing, but I figured I'd give you the background-info anyway
+U65B9414J : <@U3SJEDR96> thanks that helps. The moment I got reply from <@U48AEBJQ3> I knew what I was doing wrong.
+U65B9414J : However I was confused by the error message. Heard good things about compiler. Can compiler help in this area.
+U65B9414J : I'm sure it would be added work for compiler.
+U3SJEDR96 : Every `let` expression contains variable assignment, and this error-message assumes you made a typo when you meant to write something like `let { field } = record in` to destructure a record. So yeah, it's a little vague when that is completely _not_ what you intended to do
+U48AEBJQ3 : If it isn't already there, sounds like a decent suggestion for <https://github.com/elm-lang/error-message-catalog>
+U3SJEDR96 : was looking through that, too, but it's pretty hard to search for
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

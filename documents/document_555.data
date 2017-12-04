@@ -1,2 +1,73 @@
+U6FFMA51S : Scratch that, I found it <http://package.elm-lang.org/packages/elm-lang/html/latest/Html#br>
+U6GGSMDFZ : (also beginner) A little more defined that will compile would be ```Html.div [] [ Html.text "one" <http://Html.br|Html.br> [][] Html.text "two"]```
+U6GGSMDFZ : or drop the Html bit if you are ```import Html exposing (..)``` (all)
+U6GGSMDFZ : <@U6FFMA51S> in your examples the first list passed to div is for is attributes, the second list is it's contents - ie ```div [attrs][contents]```
+U3SJEDR96 : <@U6FFMA51S> `foldl`
+U3SJEDR96 : <https://ellie-app.com/3SwJD9vjQ59a1/0> &lt;- though you should only bother if you're writing library code; it's unlikely to matter much compared to the overhead of rendering stuff. If it might matter, benchmark. :slightly_smiling_face:
+U6FFMA51S : I didn't know about the benchmark package.
+I was just asking to develop "good habits"
+
+U3SJEDR96 : :thumbsup: 
+U6GB56346 : ```neverText : Html Never
+neverText = text "never dispatch message"
 ```
-either way, your json representation doesn't need to match the elm structure word for word
+
+This can be compiled.
+
+```
+htmlNever : Html msg -&gt; Html Never
+htmlNever elem = elem
+```
+
+But this cannot. Both `Html msg` to `Html Never`.
+Why?
+
+U2ABT6UKF : I am a beginner. I understand basic programming concepts. I am having trouble finding a resource to learn elm. One that will in the end show practicle examples to use moving forward.
+U6FFMA51S : <@U6GB56346> I note that the following also compiles: ```htmlNever : Html msg -&gt; Html Never
+htmlNever elem = text "never dispatch message"
+```
+
+U6GB56346 : <@U6FFMA51S> Yep. My understanding is that `text` is `Html msg` which contains placeholder type, so it is inferred to `Html Never`. But why `elem` is not inferred to the final type?
+U4ZK5BVK6 : <@U2ABT6UKF> <https://guide.elm-lang.org/> helped me get a good grasp on the basics. Have you tried it?
+U4ZK5BVK6 : hi folks, do you know if there is a way in elm to split the return of a view function? example:```
+view : Model -&gt; Html.Html Msg
+view model =
+  div [onClick IClicked] [ text "example"]
+
+-- extracting HTML and Msg separately
+extract Model -&gt; (Html.Html, Msg)
+extract model =
+  case view model of
+    Html.Html Msg (html, msg) -&gt;
+      (html, msg)
+    _ -&gt;
+      (div [] [], IClicked)
+```
+
+Reason i want to do something like this, is that I have a view method that returns a "LoginMsg" and i need to translate the into a "Msg" but I see no way to access the LoginMsg returned by the view function :disappointed:. Thoughts?
+
+U3FJSB596 : <@U4ZK5BVK6> Have you tried using `Html.map`
+U4ZK5BVK6 : never heard of it, digging into the docs now :smile:
+U3FJSB596 : <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html#map>
+U4ZK5BVK6 : <@U3FJSB596> definitely cleaner, can you see any way to make it a bit more dynamic? Aka, dropping the mandatory case statement for msg inside transformLoginMsg? My original implementation was making use of `onInput LoginMsg &lt;&lt; OnPassInput` but i doubt this is applicable here
+U4ZK5BVK6 : <@U3FJSB596> regardless, thanks a lot for pointing to Html.map, that's definitely handy for cases like this. Also if you think my approach is not "Elm enough" let me know, I am still trying to shed my procedural ways lol
+U3FJSB596 : `LoginMsg` is already a function of type `Login -&gt; Msg` so no need to create another one.
+U4ZK5BVK6 : wait a second, LoginMsg is a function??? wat... lol
+U3FJSB596 : Yeah
+U4ZK5BVK6 : thats so cool
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

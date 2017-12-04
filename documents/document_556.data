@@ -1,4 +1,103 @@
+U4ZK5BVK6 : <@U3FJSB596> regardless, thanks a lot for pointing to Html.map, that's definitely handy for cases like this. Also if you think my approach is not "Elm enough" let me know, I am still trying to shed my procedural ways lol
+U3FJSB596 : `LoginMsg` is already a function of type `Login -&gt; Msg` so no need to create another one.
+U4ZK5BVK6 : wait a second, LoginMsg is a function??? wat... lol
+U3FJSB596 : Yeah
+U4ZK5BVK6 : thats so cool
+U4ZK5BVK6 : so types defined with `type Abc` are functions that construct their own type by passing their bodies to it
+U3FJSB596 : `Authenticate`, `OnUserInput`, and `OnPassInput` are also functions of type `Login`, `String -&gt; Login`, and `String -&gt; Login` respectively
+U4ZK5BVK6 : huh, awesome, this actually explains a lot
+U4ZK5BVK6 : time to rewrite most of my code now that i understand this a bit better lol
+U3FJSB596 : That why you are able to use them in the `onInput` function (which has a function as its first argument)
+U3LUC6SNS : I am getting this error (in javascript console).  No doubt my use of ports is responsible.  How to track down the trouble? (I know how to reproduce the error).```
+app.js:15240 Uncaught TypeError: Cannot read property 'childNodes' of undefined
+    at addDomNodesHelp (app.js:15240)
+    at addDomNodesHelp (app.js:15248)
+    at addDomNodesHelp (app.js:15248)
+    at addDomNodesHelp (app.js:15248)
+    at addDomNodesHelp (app.js:15248)
+    at addDomNodesHelp (app.js:15248)
+    at addDomNodesHelp (app.js:15248)
+    at addDomNodesHelp (app.js:15248)
+    at addDomNodesHelp (app.js:15236)
+    at addDomNodes (app.js:15167)
 ```
-`payload (Json.Decode.decodeValue payloadDecoder  &gt;&gt; Payload)`
-you could alternatively write that like so: `payload (\json -&gt; Json.Decode.decodeValue payloadDecoder json |&gt; Payload)` if that makes more sense to you :slightly_smiling_face:
-and also, `subscriptions : Model -&gt; Sub Msg`
+
+U4ZK5BVK6 : it makes sense, but given they were capitalized i never thought of considering them functions, guess i was making one too many assumptions
+U4ZK5BVK6 : <@U3LUC6SNS> maybe there are better methods out there, but I'd start by sprinkling Debug.crash around the area you think the problem is to pinpoint the location that is causing the issue
+U4ZK5BVK6 : <@U3LUC6SNS> then once you know for sure what bit of code is causing the issue, maybe do a tiny example that reproduces it with minimal code so we can take a peek and try to understand how to help better?
+U3LUC6SNS : Thanks, I will give that a try
+U3LUC6SNS : Re the `childNodes` error above, it occurs in this code at `X MARKS THE SPOT`:```
+switch (vNode.type)
+	{
+		case 'tagger':
+			var subNode = vNode.node;
+
+			while (subNode.type === "tagger")
+			{
+				subNode = subNode.node;
+			}
+
+			return addDomNodesHelp(domNode, subNode, patches, i, low + 1, high, domNode.elm_event_node_ref);
+
+		case 'node':
+			var vChildren = vNode.children;
+			var childNodes = domNode.childNodes; /* X MARKS THE SPOT */
+			for (var j = 0; j &lt; vChildren.length; j++)
+			{
+				low++;
+				var vChild = vChildren[j];
+				var nextLow = low + (vChild.descendantsCount || 0);
+				if (low &lt;= index &amp;&amp; index &lt;= nextLow)
+				{
+					i = addDomNodesHelp(childNodes[j], vChild, patches, i, low, nextLow, eventNode);
+					if (!(patch = patches[i]) || (index = patch.index) &gt; high)
+					{
+						return i;
+					}
+				}
+				low = nextLow;
+			}
+```
+
+U635238TG : hey, <@U2ABT6UKF>, check out <https://github.com/isRuslan/awesome-elm> for a lot of resources. I think the <http://courses.knowthen.com/> free Elm intor course might be a good place to start.
+U2ABT6UKF : Will do thank you.
+U6FFMA51S : <@U6GB56346> I still don't know why it is not inferred, but ran into this in the documentation when I was looking for something else:&gt; Generally speaking, you do not want Never in your return types though.
+
+<http://package.elm-lang.org/packages/elm-lang/core/latest/Basics>
+
+U4ZK5BVK6 : <@U3LUC6SNS> i am not familiar enough with what you are trying to accomplish here, but my best guess is trying to set a breakpoint using developer tools and follow the stack trace to find why `domNode` is undefined. Seems like this method doesn't have access to the variables you are expecting. Is this code you are showing inside your project or an ELM library? If ELM library, what is the name of it? I think I'd need more context to help properly.
+U2ABT6UKF : If I need to use version .17 of elm would I just edit the package file or is there an nvm like tool for elm?
+U3FJSB596 : <@U2ABT6UKF> <https://www.npmjs.com/package/elm-version-manager>
+U6FFMA51S : Where do I put files so elm-reactor's web-server will serve them?
+U635238TG : do you mean just like the normal Elm files and such? You just want to be in the directory containing your files before you run elm-reactor. for things like external css and such I don't think elm-reactor can actually handle that and you would want to use elm-make. i could easily be wrong on that though
+U3VCFFH1S : Hi folks, I have some questions about multiple effects. My goal is to run N commands (eg Random or Http) in parallel, then merge the results and kick off an update.
+I understand you can do this in `Task.map` or `Task.sequence`, but I'm looking for parallel execution.
+
+`Cmd.batch` sounds like the parallel part I want, but I can't figure out how to merge the results of the executions.
+
+Here's what I'm working with
+<https://github.com/mLuby/cats-elm/blob/cd15226a4892b9d79de91cdb139060ce5bb6cf49/Dice.elm>
+and my guess as to what to do.
+<https://github.com/mLuby/cats-elm/compare/cd15226...b6a4838>
+Any advice?
+
+For what it's worth, I'd accomplish this with `Promise.all([request1, request2, …]).then(resultsList =&gt; …)` in JS.
+
+Can't find anything on this topic online except this, which sidesteps the question: <https://stackoverflow.com/q/39392469/1862046> Here's this same question on Stack Overflow <https://stackoverflow.com/questions/45395712/how-to-merge-multiple-effects-in-elm>
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

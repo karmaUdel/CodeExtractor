@@ -1,1 +1,84 @@
+U153UK3FA : the general strategy is to write a function that returns the `Cmd` you want and put that function in your module.
+U1XL8FMAA : <@U3SJEDR96> that seems completely reasonable to me.
+U1XL8FMAA : <@U153UK3FA> i believe that i am not articulating the question sufficiently. I understand how to write a general function which returns a command. I don't however see in the specific case of the pattern in elm-sortable-table how to extend the pattern to handle commands. Perhaps it is just staring me in the face and i don't see it….
+U1XL8FMAA : <@U3SJEDR96> - I would have hoped that the literature teaching elm would have avoided scrubbing the pattern, as opposed to simply providing a number of different patterns… a la GOF
+U153UK3FA : that's it, you just add a function that the caller can call. You might want to have the caller pass in the `Config` and `State` to help construct the `Cmd`
+U153UK3FA : that's all a `Table.update` would be doing anyway
+U0CLDU8UB : The original "A list of counters example" in the Elm Architecture tutorial was where people got the idea of components from. I liked the idea too, and I still think it makes sense for certain things. But I completely agree with Ilias (and Evan's Elm Europe talk) here: there's no one-size-fits-all and especially as a package author you are responsible for creating the least complicated API for the user to get things done. 
+As a personal example of learning these things the hard way, here's a PR that turned the state inside out for one of my packages, making it much more flexible for the users: <https://github.com/ohanhi/keyboard-extra/pull/20>
+
+U41NK9BM4 : <@U0CLDU8UB> Ah, now I see it. I'm using an older version of your package and I was wondering why you were using a internal `State` for that :slightly_smiling_face:
+U41NK9BM4 : Now it turns out that app `Model` is responsible to hold the keyboard state
+U5W4G2SQ5 : <@U3LGUAF54> Thanks for all the info, I'd be really interested to look at what you've build. I use F# for most of my work now, but not a huge fan of WPF/MVVM. So looking for something nicer for the front end dev, and I prefer the OS Javascript  widget ecosystem.
+U5L2XPH54 : How can I have case condition something like this :
 ```
+                    case error of
+                        Http.BadStatus {status = {code = 422}, body = body} -&gt;
+                            body
+                                |&gt; decodeString (field "errors" errorsDecoder)
+                                |&gt; Result.withDefault []
+```
+
+U5L2XPH54 : :smile:
+U5L2XPH54 : I want to pattern match with code of error and extract body at the same time
+U4872964V : <@U5L2XPH54> you can't, you need to make an inner `case` or `if` expression
+U5WD40ZA9 : Hello, I'm trying to create a search input field with a dropdown of results which you can then chose from. Anyone know a fancy package for this? So far I've been using: <http://package.elm-lang.org/packages/rundis/elm-bootstrap/3.0.0> for other input variants but this package doesn't seem to have support for it.
+U5WD40ZA9 : Found something that I will try: <http://package.elm-lang.org/packages/thebritican/elm-autocomplete/3.3.0> Coming back with result later :slightly_smiling_face:
+
+U0CLDU8UB : That's what I was about to suggest
+U5WEK2T4J : Hi, I'm new to Elm and I have some question about elm-test
+U5WEK2T4J : I try to have multiple expect in the same test, but didn't find how
+U5WEK2T4J : so here is what I've done for now but it's not really expressive
+U5WEK2T4J : ```suite : Test
+suite =
+    describe "2048-elm"
+        [ test "moveLeftWithZero" &lt;|
+            \_ -&gt;
+                let
+                    expectedCases =
+                        [ ( [ 2, 0, 0, 2 ], [ 4, 0, 0, 0 ] )
+                        , ( [ 2, 2, 0, 4 ], [ 4, 4, 0, 0 ] )
+                        , ( [ 0, 0, 0, 4 ], [ 4, 0, 0, 0 ] )
+                        , ( [ 0, 0, 2, 4 ], [ 2, 4, 0, 0 ] )
+                        , ( [ 2, 4, 2, 4 ], [ 2, 4, 2, 4 ] )
+                        , ( [ 2, 2, 2, 2 ], [ 4, 4, 0, 0 ] )
+                        ]
+
+                    toTest =
+                        List.map
+                            (\expected -&gt;
+                                ( (Tuple.first expected), (Main.moveLeftWithZero (Tuple.first expected)) )
+                            )
+                            expectedCases
+                in
+                    Expect.equal expectedCases toTest
+        ]
+```
+
+U5WEK2T4J : I tried with `Expect.all` but it does not seems to do what I want
+U3SJEDR96 : seems like those should be multiple tests, actually?
+U5WEK2T4J : for me it's the same test but with different data
+U5WEK2T4J : so it's not worth having multiple tests
+U5WEK2T4J : anyway it's working like that but I wanted to do something more "datadriven"
+U48AEBJQ3 : <@U5WEK2T4J> I don't think this is how the `elm-test` authors want to construct tests. if you want to run a lot of cases through tests, it's generally better to write `Fuzz` tests.
+If you are set on doing this, however, I think you will need to roll your own helper function to handle it.
+
+U0JL9RPC4 : <@U48AEBJQ3> : right, but fuzzing supposes to know how to compute the result of the function you want to test and independantely of your original implementation
+U0JL9RPC4 : with fuzzing, you have no control of the data your test generates, so you cannot challenge your test function result against a predefined computation
+U48AEBJQ3 : I'm not going to argue the merits of `elm-test`, that is probably better left for <#C0CLGCMMF|testing>.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,11 +1,81 @@
+U66RFDZ8F : <@U3SJEDR96> `withCredentials` should only have an effect on `cors` requests
+U3SJEDR96 : Yeah, and cookies are automatically sent on same-origin requests
+U3SJEDR96 : Since cookies weren't sent, that implies it was a cross-origin request
+U3SJEDR96 : Unless I'm confusing the issue here, which is super-possible because I was mostly reacting to the "setting cookie headers yourself" comment
+U66RFDZ8F : ok
+U66RFDZ8F : I haven't tried setting cookie headers, but just wanted to point out the possibility was there
+U3SJEDR96 : That's the thing, you actually can't. Cookie headers are under exclusive control of the UA, can't be directly set through XHR. Same with `Content-Length` and a few others :slightly_smiling_face:
+U5ABF3BH7 : Hi again Gilbert! When I look a the following method in
+U5ABF3BH7 : ```    validateInput : Int -&gt; Int -&gt; String -&gt; Maybe String
+validateInput low high =
+    Validate.eager
+        [Validate.ifBlank ("Please type a number from " ++ toString low ++ " to " ++ toString high ++ ".")
+        , validateResult (\_ -&gt; "Entered value is not an integer.") (validateInRange low high) &lt;&lt; String.toInt
+        ]```
+
+U5ABF3BH7 : Is the result a Maybe String, or a function (String -&gt; Maybe String)?
+U6E5PS83X : I started my app with this in my `index.html`:
 ```
-`RemoteData.map (\foo -&gt; { foo | bar = List.map (\l -&gt; l) foo.bar })`
-or split that lambda of into a proper `Foo.mapBar : (List String -&gt; List String) -&gt; Foo -&gt; Foo`  function
-To sort these things out, try to make a function to update a Bar, then make a function using that to update a Foo, then make a function using that to update the whole shebang
-Any ideas?
-<@U6B9DCP28> There is no exposed constructor for `Cmd` you can't create them like that.
-If all you want is to have the runtime invoke `update` with a particular message, the simplest way is to just call `update` where you want it, but you are usually better off splitting off the shared functionality to its own function and then calling that from multiple places.
-<@U6B9DCP28> here is more info about `Cmd` <https://guide.elm-lang.org/architecture/effects/>
-Cmds are not for sending messages, cmds are for doing effects that return messages
-<@U4872964V> I took your advice
-so I have:
+var main = document.getElementById('my-elm-app');
+Elm.Main.embed(main);
+```
+
+now i've got
+
+```
+var app = Elm.Main.fullscreen(localStorage.session || null);
+app.ports.storeSession.subscribe(function(session) {
+    localStorage.session = session;
+});
+window.addEventListener("storage", function(event) {
+    if (event.storageArea === localStorage &amp;&amp; event.key === "session") {
+        app.ports.onSessionChange.send(event.newValue);
+    }
+}, false);
+```
+
+Is there a way I can use session storage while still using `embed` instead of `fullscreen`?
+
+U6E5PS83X : actually, does `embed` still return an object i can assign to `var app`?
+U6E5PS83X : though i'm not sure how to pass `localStorage.session || null` to `embed`
+U6E5PS83X : Aha, I've figured it out:
+```
+var main = document.getElementById('friday-calls');
+var app = Elm.Main.embed(main, localStorage.session || null); // &lt;-- the magic
+
+app.ports.storeSession.subscribe(function(session) {
+    localStorage.session = session;
+});
+
+window.addEventListener("storage", function(event) {
+    if (event.storageArea === localStorage &amp;&amp; event.key === "session") {
+        app.ports.onSessionChange.send(event.newValue);
+    }
+}, false);
+```
+
+U5ABF3BH7 : Hi again! I have an input field, I want to show an error if the character entered is different from a digit or '-'. How can I accomplish that in Elm?
+U23SA861Y : presumably you have a field in your model that has the string you want to validate
+U23SA861Y : then you would need to construct a function `valid: String-&gt;Bool`
+U23SA861Y : then in your view check the string and display or not display your warning
+U5ABF3BH7 : Right <@U23SA861Y>, I want to show a warning when the user enters an invalid character. It is for a social number. My issue is how to build that function.
+U4JT89FGB : untested: `Regex.contains (Regex.regex "(\\d|-)*") inputString`
+U23SA861Y : regex would be the correct tool, although becareful as they can cause runtime errors
+U4JT89FGB : i think you just need to make sure your user isn't inputting the string to get converted to a regex, correct <@U23SA861Y>?
+U23SA861Y : yeah, I believe the RTE occurs when it parses the regex itself so if its a compile time constant you should be safe
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

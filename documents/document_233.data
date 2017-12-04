@@ -1,26 +1,104 @@
-I also get the data with ```Cmd.batch [ ..., ..., getRolodexLists]
-<@U5ABF3BH7> are you sure the http request isn't erroring?
-what does the json from the response look like?
-Could someone provide me with an example of `uniqueBy : (a -&gt; comparable) -&gt; List a -&gt; List a`?
-Like `unique [1,1,2] == [1,2]`
-`unique ?? [1,1,2] == [1,2]`
-from List.Extra
-<@U3HQVHERX> I don't know if this is right, but my guess would be something like unique (\p  -&gt; p.age) personList
-or to be a bit more concrete, unique (\x -&gt; abs x) [-1, 2, -3, 4, 1, -2]
-:point_up:
-thanks!
-},---
-Could it be that it takes too long to load ( about 3 to 5 seconds)
-?
-I  am getting an empty like instead
-<@U5ABF3BH7> what do you see in the web Dev console when Elm makes that request?
-Does the request actually succeed?
-You should add some code to your Err case to display something if the request fails so it doesn't silently fail
-I get 404 in the console
-I don't know why it is failing.
-Lots of context the web server can use to give a different response
-Do you control the server?
-I stupidly forgot to add .json on the url!
-Sadly, it is still not worker. <@U153UK3FA>, I am not sure what you mean by if I control the server. I control the json url (through frontend controller)
-^ not working
-<@U5ABF3BH7> Open up the network tab of devtools &amp; look at the differences of each request, might be some headers you need to add
+U3U7G58P6 : damn
+U3U7G58P6 : <http://api.ai|api.ai>'s cs is bad
+U4KTWEHQC : Hey developers! :wave:
+Have you ever chosen between NLP and Buttons?
+At Statsbot, we did :smiley:
+And have made a bet on both approaches.
+Happy to share our experience via Slack Developers: <https://medium.com/slack-developer-blog/why-bots-should-use-buttons-5f729df17c0#.4d7m8fa1s>
+
+U4KVBQMU0 : <https://medium.com/@diewubbel/we-still-have-a-long-way-to-go-with-chatbots-208c36fa73ee#.j2bhp26ac>
+U37C5V3HT : Need some help how to end an existing convo in case of different keyword inputs by user. 
+The corebot.js has the following
+
+botkit.utterances = {
+        yes: new RegExp(/^(yes|yea|yup|yep|ya|sure|ok|y|yeah|yah)/i),
+        no: new RegExp(/^(no|nah|nope|n)/i),
+        quit: new RegExp(/^(quit|cancel|end|stop|done|exit|nevermind|never mind)/i)
+    };
+
+But how will I QUIT an active conversation let's say if user has enter... "Kdjdjkss" or "la la la" etc that doesn't match with the predefined keywords :thinking_face:
+
+U4LH15MNY : what is the difference between bots and bot user?
+U4NSHGFPT : Anyone have experience with nodeJS and Slack's WebAPI ?
+U4MQSDJSD : <@U4NSHGFPT>  I have experience with it
+U0FQHMRU3 : Hi everybody,
+We currently have an issue with rtm.start request for a team: we receive a `org_login_required` error. Someone have seen this error before?
+
+U0FQHMRU3 : For someone that have this error: the team is in migration to enterprise plan. 
+U4FSUJLLU : i'm getting an error `cannot find module 'botkit' `when adding  this code:
+  ```var Botkit = require('botkit'),
+    mongoStorage = require('botkit-storage-mongo')({mongoUri: '...'}),
+    controller = Botkit.slackbot({
+        storage: mongoStorage
+    });  ```
+```
+module.js:328
+    throw err;
+    ^
+
+Error: Cannot find module 'botkit'
+    at Function.Module._resolveFilename (module.js:326:15)
+    at Function.Module._load (module.js:277:25)
+    at Module.require (module.js:354:17)
+    at require (internal/module.js:12:17)
+    at Object.&lt;anonymous&gt; (/opt/lampp/htdocs/bot/Dropbox/botkit/my.js:1:76)
+    at Module._compile (module.js:410:26)
+    at Object.Module._extensions..js (module.js:417:10)
+    at Module.load (module.js:344:32)
+    at Function.Module._load (module.js:301:12)
+    at Function.Module.runMain (module.js:442:10)
+```
+
+U4FSUJLLU : help
+U4N0U55PX : <@U4FSUJLLU> try "npm add botkit"  or "npm install" if already referenced in package.json
+U4FSUJLLU : <@U4QCW0MPZ> by 'botkit' in the require does it refer to the howdy's botkit or just a module of it ?
+U0AFABJAJ : gilles.mailclark: Did you find documentation somewhere on this error? We are now seeing it too.
+U37C5V3HT : Can anyone share live examples of slack interactive buttons that cal from external url? 
+U4FSUJLLU : <@U4QCW0MPZ> no add option .. and install doesn't solve the problem
+U0V93GE5R : You probably need to reauth after the migration. 
+U4N0U55PX : <@U4FSUJLLU> this error means that the botkit node module is not installed. Just install it with the npm add command.
+U0CT32R88 : How's everyone's weekend going so far? anyone working today? :nerd_face::heart_eyes:
+U37C5V3HT : Hello Everyone! 
+need some help. Can you tell me why `team_join` gives the following error wherein `user_channel_join` works 100% error free. This is the error for `team_join` _TypeError: Cannot read property 'say' of undefined_
+
+U37C5V3HT : Okay, another question. How can I validate if my current channel is <#C04SM6TAK|general> ? In botkit. 
+U4FK1HA49 : abinash_mohanty: In the payload object is the list of channels, one will be general
+```
+{ id: ‘CHANNELID',
+       name: 'general',
+       is_channel: true,
+       created: 1459633882,
+       creator: ‘USERID',
+       is_archived: false,
+       is_general: true,
+       has_pins: false,
+       is_member: false },
+```
+You can check for is_general: true and record the channel id somewhere to check against
+
+U37C5V3HT : Thanks <@U4FK1HA49> let me try this out!
+U0FQHMRU3 : No. I've don't find any documentation. I've ask at slack support. Btw, we currently still have the error. It seems that migration could be very long. 
+
+U0FQHMRU3 : The migration has ended. The bot is reconnected. :rocket:
+U0GT29N3A : <@U0V93GE5R> and we didn't need to re-auth :wink:
+U0V93GE5R : Cool so it was some weird in-progress issue from the migration, or support fixed you?
+U0GT29N3A : Basically we can't connect to the websocket while the team is being migrated
+U4Q4HTAD9 : Is there an absolute beginner room?
+U0V93GE5R : <#C0J61PA31|botkit-basics> is one
+U0LLUCLP3 : <https://twitter.com/jay_bee12345/status/846549007459540993>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,73 +1,117 @@
-but ```(if (nil? maybe-nil-thing) default-value maybe-nil-thing)```
-is clear
-if you specifically want to exclude nil and not false, there's `if-some`
-`(if-some [u (:username foo)] u default)`
-there-s also (some-&gt;
-if-let
-which short circuits when nil
-<@U1NGX4Z6F> I usually use some? when checking for nil. <https://clojuredocs.org/clojure.core/some_q>
-I think points for brevity go to `(or value fall-back)`
-but yeah, some? is nice
-There is always when-some and if-some as well if you need to bind the value or branch accordingly when nil
-<@U1NGX4Z6F> For your particular case, `(:username response fallback-value)` will work as you want.
-not if username is set but nil
-ah, yes
-true ! good catch
-this might be a dumb question but how do i get org.clojure/algo.graph on lein?
-i have `[org.clojure/algo.graph "0.1.0"]`
-the repl complains that it doesn't exist in clojars or maven
-i believe the github page <https://github.com/clojure/algo.graph> is out of date so i looked inside clojure contrib and it seems the namespace is actually `clojure.contrib.graph` here <https://github.com/richhickey/clojure-contrib> though the project name is 'algo.graph' from here <https://github.com/clojure/algo.graph/blob/master/project.clj>
-but unfortunately that isn't working for me either
-<@U1ACUMJKX> The `clojure.contrib` stuff was for Clojure 1.2. It was discontinued when Clojure 1.3 came out.
-`clojure.algo.graph` is as recent as it gets in the "modern contrib" libs. Let me check Maven Central for a version.
-Confirmed -- no releases have been made to Maven Central. I'll bring it up in the dev channel...
-<@U1ACUMJKX> I haven't done enough graphs work to be sure this is related, but I remembered seeing a recent announcement about <https://github.com/Engelberg/ubergraph>, perhaps that might have some of what you're looking for in algo.graph?
-i considered loom and ubergraph, but i really don't need to pull in all of that
-i really just need a topological sort, preferably one that partitions appropriately into sets
-Fair enough.
-right now i'm just ripping out algo's source
-if sean comes back with any info on it being added to maven
-<https://gist.github.com/hiredman/075b45eaeb01e4b526ce6f8854685487#file-ur-component-clj-L1-L13>
-i'll depend on that instead
-<@U1ACUMJKX> toposort? <https://github.com/stuartsierra/dependency> :tada:
-thanks for the link i haven't' seen this before
-thats not exactly what i wanted but its nice to keep in mind in case i need transitive dependencies
-~~(2) in that case, how would you work around the restriction that `clojure.spec`'s map validation works by using namespaced keywords for key&amp;spec names?~~
-just found an answer to (2); only (1) remains :slightly_smiling_face:
-bcbradley: Just make sure you respect the EPL license and copyright!
-if i got the gist of it, the EPL basically says i have to EPL my library if i have any EPL protected code in my library, right?
-IANAL (I Am Not A Lawyer) so I'd have to go research it. At a bare minimum, with all OSS, you must retain the copyright notice (along with any additional copyright you add).
-Several OSS licenses are incompatible with other licenses so, yes, you are often "forced" to release your modified version of the code under the same license.
-Unless you are doing this totally for an internal project and not planning to release it outside your company in any form.
-(I had several, depressingly long meetings with the Legal Team when I worked at Adobe about OSS license compliance and compatibility... and the upshot of one of those meetings was that we had to ask one OSS project to re-license their code under a more friendly license for us to be able to continue to use it!)
-another toposort <@U1ACUMJKX> - can't remember where it was originally homed - <https://github.com/employeerepublic/deferst/blob/master/src/deferst/kahn.cljc>
-Hi. I am getting the follow error when trying to run `lein repl` with Clojure 1.9.0-alpha17. Could anyone please tell me what's going on? <https://gist.github.com/hmaurer/47dfa107025f51ec71966170c537a578>
-&gt; Caused by: java.lang.IllegalStateException: Attempting to call unbound fn: #'clojure.future/ident?
-<@U06A9614K> maybe?
-oh - here's a fun one <@U1ACUMJKX> - stuartsierra/component comes with a toposort (used for figuring out which order to start components in)
-oh wait someone mentioned that already
-I fixed the issue by reverting to Clojure 1.8.0 and adding `[clojure-future-spec "1.9.0-alpha17"]` in my dependencies, which is what `lacinia` specified as a dependency (a library I rely upon). However I would still like to know exactly what the issue was if possible :slightly_smiling_face:
-at a certain point spec was taken out of the clojure 1.9 alphas so that it could be updated independently of the clojure code
-code that was made for a different 1.9 alpha version prior to the split, won't have that dep
-so if you are using the newer alpha17 or later, you need to provide that dep
-Oh I see. How are deps resolved by Lein by the way? If a library I rely upon has for dependency a different version of a library that I also use?
-you can see the actual versions used via `lein deps :tree`
-Will it just pick the most recent version? Or both?
-eariler in the list beats later in the list
-oh, so it flattens all dependencies and sub-dependencies in a list, and the first one wins?
-also you can use `:exclusions` to say "don't use this dep to get this other dep" and avoid versions it asks for
-<@U5ZAJ15P0> it's more complicated than that - it's an ordered tree
-`lein deps :tree` is awesome, thank you :slightly_smiling_face:
-but it does use the first one it finds
-how does the ordered tree behaviour differs from what I was saying, if you don't mind elaborating?
-because it's not flattened anywhere afaik - it traverses the tree and adds items to a set of deps if you don't have a version already
-oh right, ok, but the behaviour is similar
-I guess conceptually that difference doesn't matter - it's as if you flattened and took the first you found
-Will lein report if dependencies conflict? e.g. if I try to use a version of a dependency that introduced breaking changes, and a library I later require uses an old version of that dependency?
-no, lein will not complain, but `lein deps :tree` will report the conflict and tell you which it picked
-great, thank you :slightly_smiling_face: that clarifies some things
-you can use `lein pedantic` (a plugin) to make it bail out with an error <https://github.com/xeqi/lein-pedantic>
-oh wait that's depricated and lein has the pedantic feature… never mind!
-<@U5ZAJ15P0> see also `lein help deps`
-Is there some way via deftype / defrecord to create something where (1) I have a constructor and (2) it can't be updated via assoc (or if it is updated, it becomes a plain map and is no longer a type / record)
-sounds like you want deftype - you can't assoc or conj etc. a deftype (unless you extend to those protocols of course)
+U1YTUBH53 : any spectacular clojure alternative to <https://github.com/Raynes/conch>?
+U1YTUBH53 : clojure's built-in `sh` is limited (no support for processing stdout/stderr as streams)
+U1C72J3J4 : Hi clojurians! I'm trying to pattern-match a hashmap, but this is what I get:```(m/match [{:arst false}]
+  [{:qwfp #"stuff.*"}] 1
+  [{:arst false}] 2)
+ClassCastException clojure.lang.Keyword cannot be cast to java.lang.CharSequence  clojure.core/re-matcher (core.clj:4775)```
+What's going on here?
+
+U07S8JGF7 : <@U1C72J3J4> I pasted exactly what you have into the repl and got `2`.
+U1CD720KB : <@U1C72J3J4> Looks like that error message indicates a problem with the regex
+U07S8JGF7 : Just to double check, what version of core.match are you using?
+U1C72J3J4 : <@U07S8JGF7> `[org.clojure/core.match "0.3.0-alpha4"]`, with `(:require  [clojure.core.match :as m][clojure.core.match.regex])` in my ns
+U1C72J3J4 : <@U1CD720KB> `(re-matches #"stuff.*" "stuff123")` works, so no regex issues as well
+U1C72J3J4 : clojure version: `org.clojure/clojure "1.9.0-alpha15`
+U07S8JGF7 : I'm not sure what the design of this is, but it looks like it might be a boog.
+U07S8JGF7 : macroexpanding the above yields:```
+(try
+ (clojure.core/cond
+  (clojure.core/instance? clojure.lang.ILookup x)
+  (try
+   (clojure.core/let
+    [x_qwfp__6982
+     (if
+      (clojure.core/instance? clojure.lang.ILookup x)
+      (clojure.core/get x :qwfp :clojure.core.match/not-found)
+      (clojure.core.match/val-at* x :qwfp :clojure.core.match/not-found))]
+    (clojure.core/cond
+     (clojure.core/re-matches #"stuff.*" x_qwfp__6982)
+     1
+     :else
+     (throw clojure.core.match/backtrack)))
+   (catch
+    Exception
+    e__6002__auto__
+    (if
+     (clojure.core/identical? e__6002__auto__ clojure.core.match/backtrack)
+     (do
+      (try
+       (clojure.core/let
+        [x_arst__6983
+         (if
+          (clojure.core/instance? clojure.lang.ILookup x)
+          (clojure.core/get x :arst :clojure.core.match/not-found)
+          (clojure.core.match/val-at* x :arst :clojure.core.match/not-found))]
+        (clojure.core/cond
+         (clojure.core/= x_arst__6983 false)
+         2
+         :else
+         (throw clojure.core.match/backtrack)))
+       (catch
+        Exception
+        e__6002__auto__
+        (if
+         (clojure.core/identical? e__6002__auto__ clojure.core.match/backtrack)
+         (do (throw clojure.core.match/backtrack))
+         (throw e__6002__auto__)))))
+     (throw e__6002__auto__))))
+  :else
+  (throw clojure.core.match/backtrack))
+ (catch
+  Exception
+  e__6002__auto__
+  (if
+   (clojure.core/identical? e__6002__auto__ clojure.core.match/backtrack)
+   (do
+    (throw
+     (java.lang.IllegalArgumentException.
+      (clojure.core/str "No matching clause: " x))))
+   (throw e__6002__auto__))))
+```
+
+U07S8JGF7 : woof that was a lot, sorry ya'll
+U07S8JGF7 : Anyways it looks like it's probably calling `re-matches` with `:clojure.core.match/not-found`.
+U07S8JGF7 : There should probably be a guard there in `to-source ::m/regex`.
+U07S8JGF7 : <https://dev.clojure.org/jira/browse/MATCH-123>
+U1C72J3J4 : <@U07S8JGF7> thank you, following the report...
+U07S8JGF7 : <@U1C72J3J4> Be sure to upvote it if you want attention paid.
+U297WCSHK : is there a formatter for clojure code that I can adapt progressively without converting the whole codebase at one? I tried parinfer for Atom, but it is too intrusive for me
+U5XMV6DQT : emacs
+U051SS2EU : `cljfmt` is a good plugin and unlike editor based options every collaborator can easily have the same rules
+U051SS2EU : <https://github.com/weavejester/cljfmt>
+U0B4ZBBKM : Is there an obvious way to write the following without repeating `x`? `(if (some-pred? x) y x)`Meaning if `x` is ok, just use it, otherwise use the alternative `y`
+
+U5XMV6DQT : it could be written like ```(or (somefn x) y)```, but inside somefn there definitely would be repetitions of x or % argument
+U1CTH1TUY : you have three values you care about, `x,` `y`, and `(some-pred? x)`, so you will need those three elements. if x is truthy, you could write the pred to return x or false and use `(or (some-pred? x) y)`, though that means custom predicates.
+U1CTH1TUY : Doesn't work if you need pred to succeed on x being false / nil though
+U5XMV6DQT : ```complement```
+U11SJ6Q0K : I think `(if (foo? x) y x)` is readable and repeating one name, once as a parameter to the predicate, isn't bad
+U056QFNM5 : <@U0B4ZBBKM> You can do that with a macro if you so desire. Something like this:
+```
+(defmacro pass-or-alternative [pred-expr value-expr alternative-expr]
+  `(let [value# ~value-expr]
+     (if (~pred-expr value#)
+       value#
+       ~alternative-expr)))
+```
+
+U1CTH1TUY : you don't need a macro, just `(fn [pred x y] (if (pred x) x y)`, then you'd just use it like `(my-fn pred x y)`
+U0DJC1V3R : you do need a macro, you don't always want to evaluate `y`
+U051SS2EU : if y has side effects the macro version is better
+U08TWB99B : although the original question did not mention any lazy evaluation requirements
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

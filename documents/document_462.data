@@ -1,4 +1,90 @@
-    Attribute (String -&gt; Msg)```
-If I remove the first input field it throws errors all the way down the view. So I'm a little stuck on the types.
-Yeah, accepting a string is what I had in mind.
-So.. `type Msg = HandleField String | ...`
+U3LUC6SNS : What is the meaning of `|-` in <https://github.com/elm-tools/parser/blob/2.0.1/src/Parser/LanguageKit.elm#L252>
+U3LUC6SNS : <@U601ELFEG> could you share code on your `localStorage` facility?
+U4872964V : <@U3LUC6SNS> seems to be an internal function
+U2LAL86AY : actually before i made a mistake - when js comes back inside subscriptions - there can only be 2 messages not more. - one is for when the decoder fails - and another for when it succeeds.
+But this Succeed message will not carry just a simple value. 
+It will carry an ADT - and inside, you can place whatever info you need from js.
+
+U65GZU4MR : Hi folks, AFAIK there is a shortcut function to get property:```
+.prop
+-- the same as:
+\a -&gt; a.prop
+```
+
+Is there a shortcut to write property? Something like this:
+```
+\a b -&gt; { b | prop = a }
+```
+
+U4872964V : <@U65GZU4MR> no there is no such shortcut
+U5XC2FJ1Y : <@U3LUC6SNS> looks like it's defined a few lines further down
+U3LUC6SNS : <@U5XC2FJ1Y> thanks, should have been more observant!
+U3LUC6SNS : Is there an Elm function for determining whether a character is either in a given string or a given list of characters?
+U4872964V : <@U3LUC6SNS> there is `String.contains` and there is also the `Regex` module for more advanced stuff
+U3LUC6SNS : <@U4872964V> I tried ```
+String.contains (toString '.') ".abc"
+False : Bool
+```
+Unfortunately I need to check whether a character is in a string (or, alternatively, an array of characters)
+
+U4872964V : use `String.fromChar` instead of `toString`
+U4872964V : `toString '.'` will give you the string `"'.'"`
+U4872964V : …many quotes there… :slightly_smiling_face:
+U3LUC6SNS : Oi vey!  Still having parser issues after many changes.  I am getting this error:```
+&gt; run latexList "a b\nc d"
+Err { row = 1, col = 4, source = "a b\nc d", problem = BadRepeat, context = [{ row = 1, col = 1, description = "latexList" }] }
+    : Result.Result Parser.Error LatexParser.Parser.LatexList
+```
+Note the `BadRepeat` at column 4, which is `\n`.  Relevant abbreviated code is
+```
+latexList : Parser LatexList
+latexList =
+    inContext "latexList" &lt;|
+        succeed LatexList
+            |= repeat zeroOrMore latex
+```
+where
+```
+latex : Parser Latex
+latex =
+    inContext "latex" &lt;|
+        oneOf
+            [ map Environment environment
+            , map Macro macro
+            , map DisplayMath displayMath
+            , map InlineMath inlineMath
+            , map Words words
+            ]
+```
+The components of the `latexList` parser have been tested, e.g.,
+```
+&gt; run latex "a b\nc d"
+Ok (Words { value = ["a","b"] })
+    : Result.Result Parser.Error LatexParser.Parser.Latex
+```
+
+U3LUC6SNS : I am assuming (but don't know) that the parser has consumed the `\n` and so should be ready to repeat and parse some more `words`.
+U3LUC6SNS : However, this issue: at `\n` could be what I am not understanding.
+U62UFEG4D : Hello Elm people, can someone please explain me the meaning of `(,)` in `map2 (,) genA genB` ?
+U23SA861Y : what are the types of genA and genB
+U62UFEG4D : <http://Random.int|Random.int>
+U23SA861Y : so map two is constructing a random tuples of ints
+U62UFEG4D : why is `map3 (,) genA genB genC` not working then ?
+U23SA861Y : because (,) takes two parameters
+U23SA861Y : you want (,,)
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

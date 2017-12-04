@@ -1,12 +1,70 @@
+U3SJEDR96 : Oh, you can, if you replace `|&gt;` with `&gt;&gt;` to compose the functions
+U6D41LX7Y : hello, I am new to elm and was wondering how stable to syntax is going to be moving forward?
+U3SJEDR96 : Things aren't set in stone, but I don't expect _huge_ changes anytime soon. Good to know: new versions of the language usually come with tooling to convert old code; both in terms of syntax as well as the core libraries changing
+U2Q5GJNTB : I want to have html links and lists embedded in a string/text block and elm-markdown seems to be a solution. However it generates a &lt;code&gt;&lt;pre&gt; block around my text and unfortunately the marked native implementation is not understandable for me. Did anybody so something similar in the past and knows the reason? I just want to convert the text into regular html in a div or something similar.
+U3SJEDR96 : Your string is probably indented by 3 or more spaces
+U2Q5GJNTB : I will check that, because for simple test string it worked as expected. Give me a sec
+U2Q5GJNTB : that would be a really shameful outcome …
+U2Q5GJNTB : <@U3SJEDR96> thanks that was it. Sorry, I should have considered that… However thanks for your help, I can continue now :slightly_smiling_face:
+U3SJEDR96 : That's really nothing to feel ashamed or sorry over - it's easy to spot once you know what to look for; but knowing what to look for is not that obvious :slightly_smiling_face:
+U1ZCL9GAX : <@U3SJEDR96> your definition of ptint works perfectly, thanks!
+U27KX9MEJ : Hello! Can anyone help me with understanding of how to reduce boilerplate code of this 
+ ```
+changeLoadingState : WidgetState -&gt; WidgetState
+changeLoadingState widgetState =
+    case widgetState of
+        TableState rec -&gt;
+            TableState { rec | loadingState = Loading }
+
+        ListState rec -&gt;
+            ListState { rec | loadingState = Loading }
+
+        _ -&gt;
+            widgetState
+ ```
+
+I have a WidgetState union type that can be any type of widget, Any widget type contains its own state record. Some of widget records contains loadingState boolean. 
+I want to change loadingState if it exists in the record without defining all of the types like condition
+Can anyone help with this?  i have lots of widgets that contains loadingState and it seems such not as good solution to make definitions of changings loadingState for all of it
+
+U27KX9MEJ : i need to find a way to write something like this ```
+changeLoadingState :WidgetState -&gt; WidgetState 
+changeLoadingState widgetState = 
+    case widgetState of 
+        ANY_TYPE_OF_WIDGET {record | loadingState : Bool} -&gt; ANY_TYPE_OF_WIDGET  {record |loadingState = Loading} 
+        _ -&gt; widgetState 
 ```
-hmm, right
-so, <https://github.com/elm-lang/html/blob/2.0.0/src/Html/Attributes.elm#L177> has a `boolProperty` function
-I think that is what you want to replicate that using <http://package.elm-lang.org/packages/elm-lang/virtual-dom/2.0.4/VirtualDom#property>
-Mhm... it's not exposed and looks like an internal helper. How would I use it?
-replicate it
-But I think it will still output quoted value, wouldn't it?
-I think it wouldn't
-Ok, let me try.
-wait, this is for something else, like things that are present or not
-like `hidden` or `selected`, that's not what you want right?
-Actually this would work too.
+
+U0JBSEGHY : Can someone show an example of how Dict.filter works? I can't get anything to compile.
+U3SJEDR96 : `Dict.fromList [ ( "1", "pizza", ) ( "2", "beer" ) ] |&gt; Dict.filter (\key value -&gt; value == "pizza")`
+U3SJEDR96 : (I didn't do anything with the `key` there, but the point is that you could
+U27KX9MEJ : For better understanding of my problem that is how i will solve my problem in JS way```
+function changeWidgetLoadingState(widgetState) {
+    if (typeof widgetState.loadingState !== "undefined") {
+        return widgetState.loadingState = true;
+    }
+    return widgetState;
+}
+```
+
+U0JBSEGHY : In particular I am trying to figure out how I can get the metas value here. I want the list from metas ```Dict.fromList [("Wade",{ metas = [{ phx_ref = "9/h8FB43bsE=", payload = { online_at = "1500723777", device = "browser" } }] })]```
+U3SJEDR96 : <@U27KX9MEJ> so you have a union type where the "content" is always the same?
+U27KX9MEJ : no, some of my content records does not have "loadingState" bool
+U3SJEDR96 : Ah. Then you'll need to be explicit about it :slightly_smiling_face:
+U3SJEDR96 : <@U0JBSEGHY> and what do you have to _do_ with those metas?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,40 +1,65 @@
+U3SJEDR96 : and stuff like css animation would get messed up if you swapped the contents of two nodes with the same key
+U2GPAEU1L : Ah I see. Ya if every key is the same then it'll make every key different, and if every key is different it's doing the overhead of checking if anything moved without success because there are no same-keys
+U2LAL86AY : i will explain what i was thinking `map` means . there was this nice picture once done on `maybe` - which maybe is a container - the mapper - is an action of opening up the container - grabbing the value - give it to a function - take the result - put it inside the container - and close the cap. :smile: - this is me a couple months ago understanding `Maybe.map`. Then you say - this exact pattern is applied to a function. Inside my mind this analogy is broken now - or at least is confusing for now. But i guess i'm learning something. Here is a similar picture - i can't find that exact one..
+U3SJEDR96 : And that's the _effect_ it has, if you consider a function as data, I like that drawing :slightly_smiling_face:
+U48AEBJQ3 : <@U2LAL86AY> That is not a bad way to think of things, but I like to think of it a bit differently. `map` is a function which transforms functions. If you have a function `a -&gt; b` lying around, `Maybe.map` will transform it for you to a function of `Maybe a -&gt; Maybe b`.
+U0K92QFST : <@U3SJEDR96> I do consider functions to be data! This is how you can tell I know a bit of Haskell :stuck_out_tongue:
+U0K92QFST : <@U2LAL86AY> I remember reading the same blog post; that's a very good way to think about it
+U23SA861Y : If you consider mapping to be "apply this function to this boxed data and return to me a box of the same shape", then you can expand this to functions where is the "data" is the algorithm and the box is the abstraction of a function. So now you apply a function to a function shaped box to get another function which just so happens to be composition.
+U0K92QFST : :point_up: great summary!
+U23SA861Y : ```type Function a b = Function (a-&gt;b) 
+
+map: (b-&gt;c) -&gt; Function a b -&gt; Function a c
+map f (Function g) = 
+  Function (\x -&gt; f (g x))
 ```
-i'll read the article. but the code seems to be one step away from being as smooth at the json code - i would prefer to pass model only once
-You mean you'd rather not have to call `value &lt;| .username model` ?
-yes. i'd rather have a Decode.string
-hmmm
-i'm not sure if that chaining tricks works that decoders do, to get more than the predefined number of items as well
-the tricky thing is that we're switching from the `Field` context to the `Maybe` context
-What you're doing is the equivalent of calling `Json.Decode.fromString` a couple times and combining the results
-so `Decoder` is _basically_ `type alias Decoder a = Json.Value -&gt; Result String a`, and the `Json.Value` is only passed in when you do the actual decoding, by `decodeValue`
-if you were doing that you _would_ have to pass the json string multiple times
-so in your case, you'd need something other than `Maybe` to do such a thing, but what you have right now is much more Elm-ish, and that's a good thing
-being explicit is less confusing, mostly
-<@U3SJEDR96> how do i handle the missing map9 though, for example?
-`andMap = Maybe.map2 (|&gt;)`
-and now you can use it `pipeline` style
-`Just MyModel |&gt; andMap (value &lt;| .username model) |&gt; andMap (value &lt;| .password model)`
-*scribbles down everything*
-i still want to build the decoder out of curiosity though
-<https://ellie-app.com/3Qmd44kZhjja1/0> you'd have something like that
-basically you end up with a bunch of partially applied functions, and then run them against some input, but they're all bundled up in a little box
-i see, the trick is in defining a new map2 that passes the model in
-Shouldn't `extractModel : MyForm -&gt; Maybe MyModel` be `extractModel : Extractor a -&gt;  MyForm -&gt; Maybe a` ?
-Yeah, sorry, forgot to remove that one, it should actually be `extractModel : Extractor MyForm MyModel`
-let me rework that a little..
-basically, all the "decoders" are combining partially applied functions and `extract` runs the function against a model and returns a Maybe
-<https://ellie-app.com/3Qmd44kZhjja1/1> there
-<@U3SJEDR96> that does look much nicer. is there any harm in using that variant instead of the Maybe one?
-No harm, though it's another layer of abstraction, which you need to write, and anyone using your code has to "grasp" :slightly_smiling_face:
-i'll take it
-thanks guys
-please quit trolling the slackbot, he only wants to help :slightly_smiling_face:
-eh, i'll stay clear of that
-If do end up using the "extractor" approach, I'd probably wrap it in a type and provide an explicit `extract` function so you don't leak the internals
-don't i have wrappers already?
-`FieldValue` and `Extractor` ?
-or should Extractor not be an alias, but a newtype?
-right, make Extractor it's own type, not an alias
-right now, `main` is: `text &lt;| toString &lt;| extractModel myForm`
-it's treating `extractModel` like a function
-which it is
+
+U23SA861Y : In this case there are two types so there is an equally valid map of```
+map_: (a-&gt;c) -&gt; Function a b -&gt; Function c b
+map_ f (Function g) = 
+  Function (\x -&gt; g (f x))
+```
+
+U23SA861Y : maybe call the first one `andThen` and the second `map`
+U3SJEDR96 : `andThen` would _probably_ be something like `andThen : (a -&gt; Function c b) -&gt; Function c a -&gt; Function c b` (i.e. `bind` in other languages)
+U3SJEDR96 : in Elm, I think your second version of `map` would be something like `mapInput`, and you first one would be just `map`
+U37HUSJ4R : If my model looks like:```
+type alias Application =
+    { id : Int
+    , term : Int
+    , amount : Int
+    }
+
+
+type alias Model =
+    { application : Application
+    }
+```
+
+and I am trying to update the `term` value, I have `onInput UpdateTerm` on an input
+
+U37HUSJ4R : inside my update case statement how do I update this value?
+U23SA861Y : sure...
+U23SA861Y : pretends to know what he's talking about
+U2GPAEU1L : btw was still reading, forgot to say thanks, thanks <@U3SJEDR96> and <@U0EUHKVGB>
+U0EUHKVGB : jonf: Can you clarify what you mean by this? Comes across a little hostile
+U23SA861Y : as in I pretend to know what what I'm talking about
+U0EUHKVGB : <@U37HUSJ4R> Try asking in <#C192T0Q1E|beginners> :slightly_smiling_face:
+U3SJEDR96 : <@U23SA861Y> I don't mean anything by it, just pointing out how those names tend to be used in common Elm libraries :slightly_smiling_face:
+U3SJEDR96 : good call that there are two valid ways to define a `map` for a `Function a b`, tho - in which case one usually guesses which one would be the most commonly used (like `Result.map` maps the `Ok`, not the `Err`), and defining an alternative for the other one (like `Result.mapError`)
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

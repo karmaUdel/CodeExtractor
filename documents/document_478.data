@@ -1,5 +1,55 @@
-        ]```
-Is the result a Maybe String, or a function (String -&gt; Maybe String)?
-Is there a way I can use session storage while still using `embed` instead of `fullscreen`?
-actually, does `embed` still return an object i can assign to `var app`?
-though i'm not sure how to pass `localStorage.session || null` to `embed`
+U4872964V : Just use the doc-comments, i suppose you are documenting your functions, right?
+U2D07QZN3 : I need to use csv data.  I see elm-csv for parsing, but can someone point me to an example of getting the data from a server?
+U4872964V : <@U2D07QZN3> is it the basics of getting data from a server you're after, or specifically how to treat it as CSV?
+U4872964V : the parser expects a `String`, so `Http.getString` should do the job
+U4872964V : <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#send>
+U2D07QZN3 : Thanks, that should to it (I'm very new at this_)
+U4TG1J2KA : hey, I'm trying to encode a Maybe Int to send to the back end. It's easy to decode a field that may be nullable, using something like Json.Decode.nullable or Json.Decode.oneOf, but I don't see any similar function on the encoding side. What's the best practice way of doing this?
+U1UGYHGCA : ```maybeInt
+|&gt; Maybe.map <http://Json.Encode.int|Json.Encode.int>
+|&gt; Maybe.withDefault Json.Encode.null
+```
+
+U2SR9DL7Q : say you've defined a type `FunType = type FunType Int Int`. How would you extract just the `Ints` later? Or would you just do `type alias FunType = { firstInt : Int, secondInt: Int }` ?
+U1UGYHGCA : Pattern matching
+U1UGYHGCA : ```extractor: FunType -&gt; (Int, Int)
+extractor value =
+  case value of
+    FunType i1 i2 -&gt; (i1, i2)
+```
+
+U1UGYHGCA : Or maybe even
+U1UGYHGCA : ```extractor FunType -&gt; (Int, Int)
+extractor (FunType i1 i2) =
+  (i1, i2)
+```
+
+U1UGYHGCA : Since your type can only have one value
+U2SR9DL7Q : <@U1UGYHGCA> brilliant. Thanks. I'm thinking the type alias with the named fields might be better for this example then. Avoids a whole new function on my end.
+U1UGYHGCA : That was just an example, you would do the pattern matching directly when using the type, you wouldn't need such function in real code
+U1UGYHGCA : But yeah, depends on your need, the type alias might be more readable if you assign names to both int
+U1UGYHGCA : You can do the same pattern matching directly inside the function args
+U1UGYHGCA : ```extractor FunType -&gt; (Int, Int)
+extractor { firstInt, secondInt } =
+  (firstInt, secondInt)
+```
+
+U2SR9DL7Q : I'll try both, and see which looks better
+U39DE7RQ9 : I need help. Im creating a SPA and using a butchered version of rtfeldmans SPA example. Now my pages does not load unless I click enter in the url. So the URL is updated when I click a link (a href...) but there is nothing listening for OnLocationChange. Anybody?
+U39DE7RQ9 : In <@U0CL0AS3V> code he does not use the OnLocationChange message like in the elm tutorial. The update function is triggered though but not the SetRoute function that should be called for the page to be changed. I cannot find the code that I am missing.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

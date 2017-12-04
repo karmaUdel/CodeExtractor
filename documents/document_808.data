@@ -1,0 +1,109 @@
+U4872964V : what could you not figure out? It would be exactly the same using a record (though you can’t define recursive records of course)
+U4872964V : <@U2LC0U8JY> first, what is the difference between `elements = Just []` and `elements = Nothing`?
+U2LC0U8JY : with a record i would write it like this:```
+elDecoder : Decode.Decoder Element
+elDecoder =
+    Decode.map2 Element
+        (Decode.field "uuid" <http://Decode.int|Decode.int>)
+        (Decode.field "elements" (Decode.list (Decode.lazy (\_ -&gt; elDecoder))))
+```
+
+U3SJEDR96 : `Decode.map2 (\uuid elements -&gt; Element { uuid = uuid, elements = elements } )` would be the "opaque" translation of that
+U2LC0U8JY : thx <@U3SJEDR96>
+U1G7E1P9S : hello
+U1G7E1P9S : I need some help with this error. ```The 3rd argument to function `foldr` is causing a mismatch.
+166|                     List.foldr insertPermit [] fimps
+                                                    ^^^^^
+Function `foldr` is expecting the 3rd argument to be:
+
+    List
+        { building : String
+        , elevation : String
+        , location : String
+        , permitNumber : String
+        , room : String
+        , roomDescription : String
+        }
+
+But it is:
+
+    List FIMP```
+
+U1G7E1P9S : ```type alias FIMP =    { permitNumber : String
+    , watchType : String
+    , room : String
+    , roomDescription : String
+    , building : String
+    , elevation : String
+    , routeChanges : String
+    , permitStatus : String
+    , location : String
+    }```
+
+U1G7E1P9S : insertPermit should work on two types of permits having some common fields, but I get this error and I don't understand why.
+U6EV3H0N7 : what’s the type signature of insertPermit?
+U1G7E1P9S : ```insertPermit :    { permitNumber : String
+    , room : String
+    , roomDescription : String
+    , building : String
+    , elevation : String
+    , location : String
+    }
+    -&gt;
+        List
+            { room : String
+            , building : String
+            , roomDescription : String
+            , elevation : String
+            , permits : List String
+            }
+    -&gt;
+        List
+            { room : String
+            , building : String
+            , roomDescription : String
+            , elevation : String
+            , permits : List String
+            }```
+
+U6EV3H0N7 : ah, so that doesn’t let the first argument have any extra fields in it
+U6EV3H0N7 : you want `{ a | permitNumber : String, ... }` to allow “any record including these fields”
+U6EV3H0N7 : (rather than “this exact record”)
+U1G7E1P9S : ah.
+U6EV3H0N7 : it’s a super useful feature I didn’t discover for ages
+U1G7E1P9S : This is how you make a function work on similar types?
+U3SJEDR96 : It's how you say a function works on "any record with at least these fields", while also restricting that function so it can _only_ access those fields and no others
+U1G7E1P9S : Thanks much!
+U1G7E1P9S : Does this work on return types? or should I give the exact field names for returns?
+U6EV3H0N7 : you’ll want the same in the return types
+U6EV3H0N7 : so something like:```
+changePartOfRecord : { a | field1 : String } -&gt; { a | field1 : String }
+changePartOfRecord record = 
+     { record | field1 = field1 ++ " changed!" }
+```
+
+U0HCQALRH : <https://twitter.com/dailydripcom/status/892740546208440320>
+U62KVQVD1 : Hi, I am using HttpBuilder and my question is: “Can I get response headers somehow?“.
+U3SJEDR96 : yeah, you can use `expectStringResponse` which will give you the entire response, with the body as a string (so you need to do any json decoding yourself using `Json.Decode.decodeString`
+U3SJEDR96 : <http://package.elm-lang.org/packages/lukewestby/elm-http-builder/5.1.0/HttpBuilder#withExpect> + <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#expectStringResponse>
+U0S6BNVNY : <https://twitter.com/dailydripcom/status/892740546208440320> today I decided to try to proselytize for elm a bit so I'm answering anyone's questions I can. Retweets and/or hop-ons welcome! :slightly_smiling_face:
+U0S6BNVNY : ahh I just saw Franzé shared that sorry
+U62KVQVD1 : <@U3SJEDR96> Thanks a lot!
+U0F7JPK36 : <@U62KVQVD1> i made a package just now for stuff like this: <http://package.elm-lang.org/packages/lukewestby/http-extra/1.0.0/Http-Extra#expectJsonResponse>
+U0F7JPK36 : y'all feel free to submit PRs with whatever you want, i'm not so concerned with how stuff will fit into the http-builder API this way
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

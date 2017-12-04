@@ -1,4 +1,478 @@
-```
-<@U5SJJD85B> I've seen both used. Maybe a slight preference for `&lt;&lt;` ?
-`&lt;&lt;` can often read better such as `not &lt;&lt; .isActive`
-<@U3LUC6SNS> you could break out a function `toggleAppStateMenu`
+U21U8SZ2P : at some point, gonna rework it so the user picks which channel they want to broadcast to. but we're also talking about allowing people to put the bot's daily updates in a channel too, so i'd probably wanna do those things together
+U04SM6T2H : ah cool
+U04SM6T2H : good idea
+U0HBN0L9M : yeah, that's the trick I used with <http://Skillz.io|Skillz.io> and Stop Breathe Think : you don't need to ask your user any input other than "is it ok to post in <#C04SM6TAK|general>?"
+U0HBN0L9M : you can circle through public channels, there'll be always one and only one with is_general:true
+U0HBN0L9M : this reduce friction
+U0HBN0L9M : anything that reduces friction makes onboarding better
+U0HBN0L9M : but I guess this work mostly for intro/onboarding/discovery only. in most cases, the user won't want to have notifications broadcasted in <#C04SM6TAK|general>. So the next step is usually to give her the option to choose another channel
+U3AJTK54G : with my chat bot, is there a way to see who did an @ at it for my response?
+U3AJTK54G : user returns the user id it looks like
+U3AJTK54G : ```def parse_slack_output(slack_rtm_output):    """
+        The Slack Real Time Messaging API is an events firehose.
+        this parsing function returns None unless a message is
+        directed at the Bot, based on its ID.
+    """
+    output_list = slack_rtm_output
+    if output_list and len(output_list) &gt; 0:
+        for output in output_list:
+            if output and 'text' in output and AT_BOT in output['text']:
+                # return text after the @ mention, whitespace removed
+                return output['text'].split(AT_BOT)[1].strip().lower(), \
+                       output['channel'], output['user']
+    return None, None, None```
+
+U1DDKQPGB : Some great ideas here for bCRM. Appreciate the insight 
+U28PHTLLB : anyone looking for a job in the Raleigh Durham, Triangle area?
+U0HT1NBLH : might want to post in <#C0DC1BM24|jobs>
+U0HBN0L9M : BTW <@U1DDKQPGB> just read your piece on cross platforms chatbots
+U0HBN0L9M : good insight too :slightly_smiling_face:
+U1DDKQPGB : Thanks <@U0HBN0L9M> more an open question than my usual "opinion" pieces
+U3AUDGX19 : hi
+U3AUDGX19 : I am looking to define a Chatbot for passing on Shift handover information
+U3AUDGX19 : (i) Design a bot and define different labels depending on the category of information that needs to be passed on to next shift as part of Shift Handover.For Example: Labels can be "#Incidentfollowup" , "#KeyThingsToNote#, "#Changealert".
+
+(ii) So, any admin types the information in Slack, which he needs to handover to next shift, and suffix that with one the labels, as defined in example above, plus with a Flag ON or OFF, depending on the validity of that information
+.The Labels will help Bot program to segregate the information into those categories. So, Whenever admin in the next Shift queries,  for example, "@bot which incidents I need to followup on? ", Bot will present the admin with all the information that is tagged under label "#Incidentfollowup" and with Flag ON. 
+Once the task is completed and information is no longer valid , the last admin who completed the task, can set the Flag OFF for that information.
+
+U3AUDGX19 : is there anyone that can help me with coding?
+U0T1G849W : Looking for Python developers to help test our Chatbot Live Take Over.  We just added a Python connector today.  Without leaving Slack you can pause and take over your chatbot and engage your users directly, then resume your bot.  Just drop in the Python SDK into your bot code, and add Wordhop to Slack.   Here's an example of the integration.   <https://www.youtube.com/watch?v=TAcwr3s9l4o>
+U2VMTE1FD : this is really cool, but how does it know when you dont have a response?
+U2VMTE1FD : typically when i build a chatbot it always has SOME kind of response
+U2VMTE1FD : even if its just i dont know what youre talking about
+U2VMTE1FD : for example, how did it know that the smiley was a non response?
+U37C5V3HT : Is this middleware functioning that was uploaded 8 months ago? <https://github.com/howdyai/botkit/blob/master/examples/middleware_example.js>
+U04SM6T2H : Abinash I answered your questions over in <#C0AV5N8NA|botkit>
+U37C5V3HT : Just read <@U04SM6T2H> thanks :simple_smile: 
+U372J18DA : i require invite code to sign up for the botkit, how do i get started with botkit meanwhile? or do i need to wait for the confirmation ?
+U37C5V3HT : <@U372J18DA> the invite is only for botkit studio. In order to use botkit, you just have follow its setup instructions under howdy/botkit readme.md file. Set up using node.js 
+U372J18DA : ok, and what is included in the botkit studio?
+U3236DR4Z : Hi all, my app/bot shows inactive account  when i try to send message. How can i fix it
+U04SM6T2H : <@U372J18DA> Botkit Studio is a set of APIs and hosted tools for authoring content, setting triggers, measuring use
+U04SM6T2H : If you'd like early access I'm happy to grant you!
+U04SM6T2H : that goes for anyone here :slightly_smiling_face:
+U3C6HV20G : Hi I am new here, I want to create a bot here, but I don't know how to start
+U3C6HV20G : Can anybody help me?
+U38K8F4ER : I think this page is a good starting point: <https://github.com/howdyai/botkit/blob/master/readme-slack.md>
+U38K8F4ER : here is the example bot: <https://github.com/howdyai/botkit/blob/master/slack_bot.js>
+U38K8F4ER : <@U3C6HV20G>
+U272P5K71 : We also recently put these together if you're looking for Python or Ruby: <https://github.com/slackapi/Slack-Python-Onboarding-Tutorial>
+
+U272P5K71 : <https://github.com/slackapi/Slack-Ruby-Onboarding-Tutorial>
+U272P5K71 : They give a pretty good overview of what's involved building Events API handlers and Event responders
+U3C6HV20G : Thanks very much
+U1DDKQPGB : In case you don't see this on the FB Bots Group... I just published the presentation I gave at the Slack Meetup NY "How Can We Trust Chatbots?" <http://www.slideshare.net/PaulWalsh11/slack-meetup-new-york-how-can-we-trust-chatbots>
+U0HUZ214H : Nice deck <@U1DDKQPGB>! Before choosing to build a bot building platform (I know, right?), our other option was to try something with bot to bot communications. I'm still always thinking about that. Is your team or anyone else you know doing something in that sub-space?
+Also, your title made me think the talk was more about bot infosec. Who's "killing it" in that space, if you know? Or anyone else?
+
+U1DDKQPGB : <@U0HUZ214H>: MetaCert is killing it in the infosec space. And I know what you mean re title. I think I might need to change it in the future. 
+Nobody is doing bot to bot yet but it's absolutely coming... 
+
+U0HBN0L9M : <@U0D7LHNTX> had a funky experiment re bot to bot. Nobody did a serious proof of concept of a working product, as far as I know
+U0D7LHNTX : <@U0HBN0L9M>: you can't just leave me hanging like this! Tell me more :sweat_smile:
+U1DDKQPGB : bCRM allowed you to see every bot installed by your teams and then message them - but seemed creep and couldn't think of a reason for people to do it. So we removed it. Should we add it back?
+U0HUZ214H : Thanks <@U1DDKQPGB> and haha, I KNEW <@U0D7LHNTX> would be summoned by any talk of B2B (Bot to Bot)!
+U0HUZ214H : <@U1DDKQPGB> yes! I have a lot of thoughts in this area but I also want to build some of of it too :slightly_smiling_face:. The general thought is "chaining".
+U1DDKQPGB : Slack doesn't permit it but it will come. Think of installing bestbuy bot which then introduces the Samsung, [supplier name here] without the need to install those bots. 
+U0D7LHNTX : Actually I was summoned by someone mentioning me ;) I see the context for the convo now. 
+U0D7LHNTX : Hrm wrapping one Bot inside another Bot, there's an interesting idea… :bulb: 
+U1DDKQPGB : <@U0D7LHNTX> I see it more scalable if a bot has the ability to invite other bots to a conversation/channel without having to be "wrapped". Imagine if Walmart had thousands of suppliers it might want to invite different ones as they are built over time and without having to build and release a new bot themselves. Thoughts?
+U0D7LHNTX : A) it sounds amazing. B) it sounds like an IT security nightmare. Question is: how to find the balance. 
+U1DDKQPGB : I agree with bot. I've started a conversation with a big bot making platform about adding a layer of security - it would be something like 'Verified by MetaCert' so only trusted bot sources with specific unique IDs would be permitted access via the bot - to prevent phishing bots before they start.
+U3DTR7TE3 : Hello!
+U3DTR7TE3 : coding a bot to bot framework
+U3DTR7TE3 : weee
+U0HUZ214H : Dang. Now I really have FOMO.
+U0D7LHNTX : <@U3DTR7TE3>: tell us more!
+U37C5V3HT : Don't you think moving the entire readme.md files from github's botkit's repo and host them somewhere under <https://howdy.ai/botkit/> woukd be nice? Because right now, there are so many readme files and it's not intuitive to follow them by clicking related links and scrolling up and down multiple times. By hosting them under <https://howdy.ai/botkit/> where we can structure the content from getting started guide, knowing its functions, events, and steps in sequence that can help even a novice user to an expert developer. What do you think? :thinking_face:
+U0V93GE5R : <@U37C5V3HT>: working on it :) major refactor of the docs for reference and readability are in progress. 
+U3DHFP43W : Hi guys! Can you help me? I need to connect Slack API with my Ruby app.  I need when I push the button slack sending me some request tu mi request URL. Maybe someone know how to do it? or have some tutorial or manual?
+U3C6UAKDY : Hi all, We are now launching our closed beta for slack bots!
+To trust your bot, Dimon uses AI to generate and execute thousands of scenarios, before and after going live, to continuously test and increase the quality of your bot.
+
+If you're interested please ping me via slack
+Eran
+
+U3DHFK13M : Hi Guys! I'm working with a FB messenger bot and <http://LUIS.ai|LUIS.ai>, having trouble recognising different intents coming through and it's defaulting to "hi" all the time... Can anyone point me to somewhere I could get some more info on this than just the middleware github?
+U3DRPC9QT : Hey yall
+U3DRPC9QT : About how long does it take for the invite code to be approved for botkit studio
+U0V93GE5R : We aren't in an approval process right now but let me invite you to our preview room
+U0Y7H2F3M : Hey all! This is Vikesh, I have worked at Slack as a Test Infrastructure Intern and previously at <http://Directi.com|Directi.com> twice as a Software engineering Intern.  I'm free for the next 8 months and ready to help/contribute or work remotely. I have built couple of bots for Slack and Fb. 
+You can see all my projects here : <https://www.github.com/vicky002>. 
+
+You can also view my LinkedIn profile: <https://www.linkedin.com/in/vikeshtiwari>.  
+
+My website: <http://eulercoder.me> 
+
+lemme know if you want me in your team :p - <mailto:hi@eulercoder.me|hi@eulercoder.me> 
+
+U3EFK8UES : <@U0Y7H2F3M> I see you use sqlite3 in your projects, what advantages do you find using that over say shelve?(I'm currently working on a bot and looking into what sort of data storage system to use, and am currently using shelve)
+U3ESHDMPH : can someone help me out with a snippet of a  question inside a question using botkit in  nodejs
+U3ESHDMPH : ?
+U0HUZ214H : <@U3ESHDMPH> you'll probably have better luck posting in <#C0AV5N8NA|botkit> or similar. Just ask your question there and someone should be able to help, possibly even me!
+U3ESHDMPH : thanks done
+U3EFK8UES : also <@U0Y7H2F3M> do you happen to know if there is a way to check a db for a version flag that can be altered to check if updats need to be made to the schemea
+U3EFK8UES : Or anybody
+U322K0W57 : Do you guys know anyone here: <https://www.designerhangout.co/> that can help with an invite to their Slack channel?
+U3EBZKDDK : Hello! I'm not sure if this is right channel for this, but does anyone know how to handle direct message with bot without needing need to call out @botname
+U3EFK8UES : Direct messages with come from a cahnnel starting with a D
+U3EFK8UES : Does your token have access to other DM's or is it a nomrla bot token?
+U3EFK8UES : <@U3EBZKDDK>
+U3EBZKDDK : OH! I see it, didn't notice that that direct message starts with a d. I forgot to mention, I'm using the python slack client.
+U3EBZKDDK : what do u mean by : Does your token have access to other DM's or is it a nomrla bot token?
+U3EFK8UES : Me too!
+U3EFK8UES : Python
+U3EFK8UES : So did you just make a bot and use that token?
+U3EFK8UES : For example, if your using an testing api token it has admin and cna read messages from anywhere
+U3EFK8UES : so it will receive private messages from other poeple
+U3EFK8UES : *poeple
+U3EFK8UES : so if bob messages jim and you have admin token
+U3EFK8UES : you'll see that message the the rtm_read
+U3EFK8UES : but if its just a bot token you will only see it if bob messages the bot
+U3EBZKDDK : yea, i created a custom bot user and use that token
+U3EFK8UES : Yep
+U3EFK8UES : so then you can just wait for channel to start with d
+U3EFK8UES : and then know that this is going ot be a private message
+U3EBZKDDK : Thanks! That was a big help.
+U3EFK8UES : Yep yep! :smile:
+U3EDTU85A : Hi guys! What are you using to automatic testing your bots?
+U322K0W57 : <@U3EDTU85A> can you be more specific with your question please. Try and give us a few more details
+U3DRPC9QT : <http://prntscr.com/dj3sgz>
+U3DRPC9QT : But when I try to do it how its suppose to do it
+U3DRPC9QT : It says "Token is unkown"
+U3DRPC9QT : <http://prntscr.com/dj3snh>
+U3DRPC9QT : Like
+U3DRPC9QT : Am I doing something wrong?
+U3EDTU85A : <@U322K0W57> I wondering how you write integration tests for your bots. Running your bot in a test environment without connecting it to an external server (like slack) , feed the bot with some inputs and make assertions for the outputs.
+
+U3DRPC9QT : Nevermind - stupid as hell
+U3DRPC9QT : Anyone know how I can pull from a SQL server?
+U3EFK8UES : What framework and language?
+U3DRPC9QT : Uhm
+U3DRPC9QT : Webhook and js? <@U3EFK8UES>
+U3DRPC9QT : But I can switch?
+U3DRPC9QT : Never really made a bot or anything for slack
+U3DRPC9QT : Open to anything
+U3EFK8UES : Oh, wow aren't there a TON of js librarys for SQL server?
+U3DRPC9QT : ¯\_(?)_/¯
+U3DRPC9QT : Again - New to this
+U3DRPC9QT : Do you know of any <@U3EFK8UES> ?
+U0V93GE5R : what are you looking to do with botkit?
+U3DRPC9QT : basically I was like - oi! Thats a nice way to make this webhook
+U3DRPC9QT : I basically just need to pull recently added items to a sql server on like a 5 minute refresher.
+U3DRPC9QT : but then - I didn't really understand studio
+U3DRPC9QT : So I was like "Is there a better way"?
+U3DRPC9QT : So yea <@U0V93GE5R>
+U0V93GE5R : Recently added from where? Just trying to envision where botkit comes in here. 
+U0V93GE5R : Fwiw we do have outgoing webhooks example here <https://github.com/howdyai/botkit/tree/master/examples>
+U3DRPC9QT : <http://prntscr.com/dj514n>
+U3DRPC9QT : well...
+U3DRPC9QT : I mean - not much help
+U3DRPC9QT : Is that suppose to be like that?
+U3DRPC9QT : And recently added to the sql server in a specific table.
+U0V93GE5R : Yea we need add some more examples, that's why I was trying to understand your use case for consideration 
+U3DRPC9QT : Oh.
+U3DRPC9QT : I just want to pull recently added items to a specific table.
+U0V93GE5R : I have to run but I'd encourage you to search this slack and read some of the examples posted here for tips. You might want to go through the starter kit to get a handle on how botkit works in general
+U3DRPC9QT : ok
+U3DRPC9QT : Thanks
+U3DRPC9QT : hold up
+U3DRPC9QT : I've changed to mySQL will that change anything?
+U3DRPC9QT : I just need to query it tho
+U3DRPC9QT : For the webhook - what would I put as the link if Im connecting to a SQL database?
+U3DRPC9QT : It wouldn't be clickable.
+U3DRPC9QT : Would anyone mind helping me code the complete project as a contributor? 
+U3DRPC9QT : I'll give credit
+U3DPX9V1N : Sorry for the n00b question but... about to submit my botkit enabled bot to the directory and can't find which scope will allow me to ask the installer which channel to post my onboarding welcome message to
+U3DPX9V1N : tried channel:write but not getting prompted
+U04SX1L23 : Hello. :slightly_smiling_face: I'm looking into building a slack app.. I'm wondering how some apps have extra config options on their app pages e.g. trello/github. Do I need to talk to the platform team at slack to get this level of customisation?
+U0Y7H2F3M : <@U04SX1L23> Extra config options are available upon request.  You must have read this : <https://api.slack.com/slack-apps> 
+for further questions related to Apps/App Directory, please post in <#C0K8617D5|slack-api> . :) :+1: 
+
+U04SX1L23 : ah thank you!
+U0Y7H2F3M : <@U3EFK8UES> Shelve is very slow compared to Sqlite3. I use shelve for testing purpose but not in production. 
+Sqlite3 is very powerful and advanced. 
+Read this [1] :  <http://eliang.blogspot.in/2011/07/python-shelve-vs-sqlite3.html> 
+
+[2] <https://www.digitalocean.com/community/tutorials/sqlite-vs-mysql-vs-postgresql-a-comparison-of-relational-database-management-systems>
+
+U322K0W57 : guys, im trying to get the chatbot to say something the second someone clicks on the m.me link and messenger opens
+U322K0W57 : i know botkit has access to 2 events
+U322K0W57 : facebook_optin and message_referral
+U322K0W57 : but none seem to be triggered
+U322K0W57 : does anyone know why and how to make this work?
+U0HBN0L9M : do you have a get started screen?
+U1T7VHTKP : Has anyone used <http://XOR.ai|XOR.ai>?
+U322K0W57 : <@U0HBN0L9M> What do you mean?
+U322K0W57 : where do i set that up?
+U322K0W57 : because i want to have an image and a button underneath
+U322K0W57 : i basically want this
+U322K0W57 : <https://developers.facebook.com/docs/messenger-platform/send-api-reference/generic-template>
+U322K0W57 : to come up when they first get on the bot
+U0HBN0L9M : your bot doesn't know about the user unless either the user sends a message, or, if you have a get started button, the user clicks on get started
+U0HBN0L9M : just opening the dialog doesn't fire any event
+U322K0W57 : i was afraid of that
+U322K0W57 : so if someone comes from a m.me link it wont do anything
+U322K0W57 : its weird that facebook has not included an event for that
+U322K0W57 : what about if i use the facebook start message option, that shows the user an intro message when they first come in
+U322K0W57 : because they have that
+U322K0W57 : do you think botkit would detect anything there?
+U322K0W57 : or it might just be the case where i tell the user to type something
+U0HBN0L9M : with the Get Started option, you get the optin event
+U0HBN0L9M : that's the point
+U0HBN0L9M : then you can react
+U0HBN0L9M : it does not leave the user with the blank page or the dreaded "hi"
+U0HBN0L9M : but the user still does give you the permission to talk to him
+U0HBN0L9M : it's made for your need. Just use it :slightly_smiling_face:
+U322K0W57 : <@U0HBN0L9M>  can you send me a link on the Get Started option please?
+U322K0W57 : <@U0HBN0L9M> So i found this: <https://developers.facebook.com/docs/messenger-platform/thread-settings/get-started-button>
+U322K0W57 : but how do i set it up to have that appear
+U322K0W57 : oh, i got it
+U322K0W57 : i need to run that cURL
+U322K0W57 : interesting
+U3EPYH5MG : Hi o/
+U3EFK8UES : I'm assuming lack of answer is a no
+U3ER5UTL2 : Hello, I've got a question about `files.sharedPublicURL`.  I want my bot to be able to make certain images that users share public (i.e., accessible by a public link), however, when I call `files.sharedPublicURL` for an image that somebody uploaded, I get back a `user_is_bot` error.  Is there any way around this, say by specifying a particular OAuth scope?  My bot is built on <http://Howdy.ai|Howdy.ai>'s botkit and running as part of a Slack app btw.  Thank you!!
+U0HBN0L9M : <@U0HUTFBHS> "would you like to uninstall me" | "YES"
+U21U8SZ2P : haha
+U21U8SZ2P : agreed that it needs a “no” button, even if not answering it means a default “no” — enough users would go :thinking_face: at the current setup that providing that peace of mind with a “no” button seems like a no brainer
+U0KNN1SBV : Anyone have a idea if you can active calls (soon with video) via deeplink from browser or slack message ?
+U0V93GE5R : afaik its still no, but you could ask for an update in <#C0K8617D5|slack-api>
+U0KNN1SBV : <@U0V93GE5R> thanks!
+U3ES7AM6X : well hello!
+U04S3JCH2 : :wave:
+U3DRPC9QT : anyone good with web hooks?
+U322K0W57 : guys, im working on a fcebook chatbot that uses a lot of gifs
+U322K0W57 : can you give some tips on using gifs in facebook chatbots
+U322K0W57 : for example, ive noticed that some gifs dont come trough
+U322K0W57 : usually the ones that are more than 4MB
+U322K0W57 : or around that
+U322K0W57 : and we are talking about a resolution of 300x300
+U322K0W57 : with 64 colors
+U322K0W57 : any tips or ideas on this?
+U322K0W57 : im hosting them on amazon S3
+U3DRPC9QT : How would I use a webhook for a sql server?
+U0Y7H2F3M : <@U322K0W57> You can compress all the gif and then host on AWS
+U0Y7H2F3M : gifs more than 4 mb will take a lot of time to upload and I feel like gifs need not be of very high quality
+U322K0W57 : <@U0Y7H2F3M> I do have them on S3 and then proxying trough Cloudflare
+U322K0W57 : seems that facebook messenger usually lets gifs bigger than 3.6mb to timeout
+U322K0W57 : its good to know
+U0Y7H2F3M : yes
+U322K0W57 : but thanks <@U0Y7H2F3M> I ended up resolving the issue in the end. Also resized the gifs to be a bit smaller and optimized them even more :wink:
+U04SM6T2H : This looks interesting: <https://rasa.ai/>
+U3ES7AM6X : So I am inviting discussion and critique on my latest story about bots. I am hoping that this group has some insights that might improve my perspective. I just published “Independent together (a Christmas bot metaphor)” <https://medium.com/dronzebot/independent-together-a-christmas-bot-metaphor-cbe5548d0096#.asdjue7u4>
+U3DRPC9QT : For a webhook
+U3DRPC9QT : What should I put as the url if I am trying to query a SQL server
+U1ZMN2FD1 : anyone else getting a lot of 500s from slack in the last 10 minutes?
+U3DRPC9QT : No? Because I dont know what URL to put
+U1ZMN2FD1 : <@U3DRPC9QT> are you saying that you want an outgoing webhook to query a SQL server?
+U3DRPC9QT : Incoming.
+U3DRPC9QT : I want it to query every 5 minutes and get recently added items to a DB
+U3DRPC9QT : Should it be outgoing <@U1ZMN2FD1> ?
+U1ZMN2FD1 : every 5 minutes you want to post something into Slack?
+U3DRPC9QT : Yea.
+U3DRPC9QT : If possible <@U1ZMN2FD1>
+U3ES7AM6X : does anyone here know how to get an ai domain?
+U0Y7H2F3M : <@U3ES7AM6X> <https://www.eurodns.com/domain-extensions/ai-domain-registration> 
+U3ES7AM6X : <@U0Y7H2F3M> danke!
+U3ES7AM6X : <@U0Y7H2F3M> do you know if it can be transferred like other domains?
+U0Y7H2F3M : <@U3ES7AM6X> Use <https://www.onlydomains.com> 
+
+U3FGRUSLT : <http://hover.com|hover.com> is my fav domain place these days
+U0HBN0L9M : how the hell installed localsdata everywhere
+U0HBN0L9M : it's like all your kid's friends from kindergarten, getting in your house on a rainy day, running everywhere with their muddy shoes
+U322K0W57 : :))
+U322K0W57 : welcome <@U3GSQMA4W>  :slightly_smiling_face:
+U3GSQMA4W : Thanks <@U322K0W57>  for the invite. :slightly_smiling_face:
+U3G3MHYAF : Hi friends :slightly_smiling_face:WE ARE ON PRODUCT HUNT  and really need your help &amp; support as your friend to make our dream come true :slightly_smiling_face: If you can upvote it on producthunt i would be so happy :slightly_smiling_face: 
+
+here is the producthunt link: <https://www.producthunt.com/posts/local-guddy>
+
+Let me shortly tell you what we do:
+<http://www.localguddy.com|www.localguddy.com> is a travel marketplace which connects travelers and locals through unique experiences/tours hosted by locals of the city.
+
+As a local, you can simply create your tour and make money &amp; new friends by showing travelers your city.
+
+We have 4 type of gudd that you can select while creating a tour:
+
+1) Local Guddy: Shows the hidden places of the city like museums, gardens, views etc.
+2) Food Walker: Shows the best places in the city to taste local foods in walking distance.
+3) Pub Crawler: Shows the night life of the city with the best pubs/clubs.
+4) Hommy Chef: Cooks local homemade foods and hosts travelers for a dinner or breakfast.
+
+we have now tours in more than 25 countries! And If you would like to be a guddy as well, you can create your tour on the website :slightly_smiling_face:
+
+Looking forward to your support and feedback! 
+Thank you so much in advance :slightly_smiling_face:
+Emre
+
+U0F9T9KPH : Anyone from Slack around that can possibly help me? I'm account owner of a Slack team and someone, somehow, disabled my account.
+U3G9W54HH : Is there a good resource on why some of the non-common standards for message types? I am not at all suggesting they are wrong, but they are unique - things like needing to stringify the "actions" but urlencode the rest of the body.
+I ask to understand, not question the design decision :slightly_smiling_face:
+
+U3G9W54HH : I haven't really liked the java libs out there, so I have been playing with a new one - it ends up needing a few work-arounds. So I figure if I understand it better, the workaround may start to make more sense and be cleaner :slightly_smiling_face:
+U322K0W57 : <@U3G9W54HH> What are you talking about exactly? I dont really understand your question and what platforms are you talking about. You mention something about Java, but that has nothing to do with botkit. Can you be more specific?
+U3G9W54HH : Maybe I am in the wrong spot! I wasn't referencing botkit - I am specifically referencing the Slack API
+U3G9W54HH : Someone elsewhere linked me here - so figured I would ask in an effort to understand
+U0Y7H2F3M : <@U3G9W54HH> <#C0K8617D5|slack-api> is the place :)
+U3G9W54HH : thank you <@U0Y7H2F3M> - wasn't aware this was botkit specific in <#C04SM6TAK|general> - thank you!
+U0Y7H2F3M : No in general we talk about everything. There is <#C0AV5N8NA|botkit> channel as well! :smile: 
+U3G9W54HH : Thanks :wink:
+U3G9W54HH : I didn't look around first, my bad
+U1DM2B4SY : <@U3DRLK1AP> - please refrain from testing bots in the general channel
+U3EFK8UES : <@U0FSRDKHN> are there some sort of "rules" here? In regards to this bot posting in here
+U0V93GE5R : its just general convention
+U0V93GE5R : general is for human discussion, if you need a test channel its best to do it privately since everyone is auto-added to <#C04SM6TAK|general>
+U3DRLK1AP : Apology by mistake my bot posted message on general channel.
+U0Y7H2F3M : <@U3DRLK1AP> there are few channels here for testing bots. <#C0AQ7F5B6|testing_something>  <#C2R7BEJV8|testingbot> .Please use them. :slightly_smiling_face: :+1: 
+
+U3DRLK1AP : <@U0Y7H2F3M> Thanks
+U3ES7AM6X : Just wrote this post. I dont know that it will help alot of people here because so many of you are building way better bots. This is better suited for the startup that wants a support bot on their website. Hope it helps anyway. I just published “Deploy a website support chatbot with <http://API.ai|API.ai> &amp; <http://smooch.io|smooch.io> in the cloud for $5/m” <https://medium.com/dronzebot/deploy-a-website-support-chatbot-with-api-ai-smooch-io-in-the-cloud-for-5-m-7d39510380ca#.h0xditb2y>
+U3GP1C613 : Hello everyone, I'm looking for information on how to interact with a user using python-slackclient (asking questions, getting answers and using them) can anyone help or refer to some docs that could help? thanks!
+U3EFK8UES : I'm currently using the python apio
+U3EFK8UES : *api
+U3EFK8UES : So current I am using a testing token to be able to delete messages
+U3EFK8UES : Anybody have any better suggestins
+U3EFK8UES : *suggestions
+U3EFK8UES : Without getting a doman with ssl
+U3G9W54HH : <@U3EFK8UES> - I am not sure you need SSL for that part of using the api?  But that said, if you need SSL for testing your slack app - you could look into using `ngrok`: <https://ngrok.com/> . That is what I use
+U3EFK8UES : I can't delete messages with a bot token
+U3G9W54HH : Oh, with the bot token - sorry. Missed that part
+U36JH8YTW : guys, a simple question, for subscribe a event for a bot app, I've the Request URL Configuration &amp; Verification part. How do I receive a msg? What url should I setup for receive the call from slack?
+U272P5K71 : <@U36JH8YTW> it's up to you, I usually use `/events` on my server. What language/SDK are you using?
+U36JH8YTW : I'm using Java
+U36JH8YTW : I can't find the doc tell me how the actual response url I should setup <@U272P5K71>
+U272P5K71 : <@U36JH8YTW> you'll need a publicly accessible endpoint for Slack to hit. That endpoint can be whatever you want it to be. Here's an example: <https://github.com/slackapi/Slack-Ruby-Onboarding-Tutorial/blob/master/Section-3.md>
+U36JH8YTW : <@U272P5K71> thanks
+U36PZJHQQ : i'm trying to read the timestamp using `channels.history` but coming up with typerrors. anyone able to see if i'm doing something wrong here?
+U36PZJHQQ : i'm using `response.messages[0].ts`
+U36PZJHQQ : and its coming back `TypeError: Cannot read property '0' of undefined`
+U322K0W57 : <@U36PZJHQQ> Can you add some code snippets, seems like response.messages is undefined thus you cannot access response.messages[0]
+U36PZJHQQ : right now just trying to get it to return in console, here's what i'm using
+U36PZJHQQ : I'm confused because what i get back in the tester on <http://api.slack.com/methods/channel.history|api.slack.com/methods/channel.history> is different than what i get back when I run that
+U322K0W57 : can you jsu try and do a console.log(response.messages) instead of the JSON stringify line
+U322K0W57 : because i think its undefined
+U322K0W57 : also do a console.log(response.messages[0]) and console.log(response.messages[0].ts)
+U36PZJHQQ : yeah, `console.log(response.messages)` comes back `undefined`
+U322K0W57 : so you need to solve that
+U322K0W57 : can you do a console.log(response)
+U322K0W57 : see if there is anything in there
+U36PZJHQQ : yeah, that comes back
+U322K0W57 : yeah, but can you add it here please
+U322K0W57 : so we can see whats in there
+U36PZJHQQ : yeah, let me pull out my tokens from it really quick
+U322K0W57 : so as you can see
+U322K0W57 : your messages are inthe body
+U322K0W57 : of course
+U322K0W57 : not in the response
+U36PZJHQQ : ah
+U322K0W57 : :wink:
+U322K0W57 : so
+U322K0W57 : oh
+U322K0W57 : sorry
+U322K0W57 : so do a console.log(response.body)
+U322K0W57 : thats what you will have to turn into an object
+U322K0W57 : with JSON.parse
+U322K0W57 : and then access it
+U322K0W57 : makes sense ? :slightly_smiling_face:
+U36PZJHQQ : i think so!
+U322K0W57 : your object is in response.body
+U36PZJHQQ : the json i was expecting to come back is definitely coming back now.
+U36PZJHQQ : but i guess i thought that `response.body.messages[0].ts` would do it
+U36PZJHQQ : but i think im on the right track now at least :smiley:
+U322K0W57 : no because you have it in text format
+U322K0W57 : you need to do var myData = JSON.parse(response.body)
+U322K0W57 : and then you can access stuff like: myData.messages[0].ts
+U322K0W57 : :wink:
+U36PZJHQQ : ah
+U36PZJHQQ : okay
+U36PZJHQQ : thanks <@U322K0W57> !!
+U322K0W57 : no worries. of course JSON.parse will work only if you have a valid json object :slightly_smiling_face: but by the looks of it, it seems to be
+U322K0W57 : let me know if it works
+U36PZJHQQ : yep i think so now!
+U36PZJHQQ : will do
+U36PZJHQQ : that did it :smiley:
+U36PZJHQQ : much appreciated!
+U3C1KGJDD : <@U322K0W57>  I 'm using gif as well and noticed the thumbnail usually doesn't display, sometimes the Gif doesn't even load in Messenger (even &lt; 3mb). I 've asked Facebook and they are working on it right now, will let you know as soon as I get an answer. btw my Gif are hosted on Giphy
+U322K0W57 : yeah, ive seen the same thing
+U322K0W57 : i dont want to use giphy as they are very bad at organizing them and updating
+U322K0W57 : its good when you are working with a 10-20 gifs
+U322K0W57 : but when you are dealing with 400 :slightly_smiling_face:
+U322K0W57 : keeping track of so many and updating any
+U322K0W57 : would be impossible :slightly_smiling_face:
+U322K0W57 : as im not using the API
+U322K0W57 : but it would be nice to see Facebook fix their GIF issues :slightly_smiling_face:
+U3C1KGJDD : Their developer is talking to my bot right trying to reproduce the issue, i ll let you know
+U3C1KGJDD : Guys, did anyone manage to have typing on with convo in Messenger? It's like the issuehas been pending for 6 months. Anyone has a fix?
+U322K0W57 : at the moment thats not implemented in Botkit
+U322K0W57 : its not an issue
+U322K0W57 : do you guys know if i need ot submit for approval the facebook app that contains the chatbot as well, on top of the submission for the chatbot review?
+U322K0W57 : i really need help with this please
+U322K0W57 : as its the first time im submitting a chatbot to facebook
+U1DDKQPGB : <@U322K0W57> didn't realize you had to build an app too
+U1DDKQPGB : you'll need to submit
+U322K0W57 : well, the chatbot is actually a facebook app
+U322K0W57 : that has some webhooks and some Messenger properties
+U322K0W57 : but you dont need to get the app approved if you dont use special permission stuff
+U3EFK8UES : Anybody aware of how to delete a message using a BOT users
+U3EFK8UES : *user
+U322K0W57 : if you only use the basic permissions you dont need any approval for that
+U3EFK8UES : rather than creating an integration
+U1DDKQPGB : <@U322K0W57> ask <@U3020AK8U>
+U3FGRUSLT : up to 2 people in <#C3GGFEL49|command_line_slack> channel amazing!
+U322K0W57 : <@U1DDKQPGB> I will be writing a medium article about the chatbot approval process, from the development stage to the users phone :wink:
+U322K0W57 : the 5 stages of grief - will be the title
+U322K0W57 : :)))
+U1DDKQPGB : actually don't do that just yet <@U322K0W57> as i just connected you with the gods of FB Messenger and you'd rather be on their good side - so hold off for now :slightly_smiling_face:
+U322K0W57 : oooh
+U322K0W57 : no man
+U322K0W57 : i was kidding
+U322K0W57 : i would not complain in the article
+U322K0W57 : we dont want to anger the gods :)))
+U0YB2C09Y : <@U1DDKQPGB>: I agree with your sentiment, which is exactly why Im less than stoked about developing for facebook :pensive:
+U0YB2C09Y : It seems several times per week, people join this slack team looking for a specific answer and post in general with a topic that would be better suited elsewhere, like <#C0DC1BM24|jobs>, <#C0J61PA31|botkit-basics>, <#C0K8617D5|slack-api>, or <#C0J3CL5V1|language-python>. Also to make clear the rules about using @ channel, bots posting to non-testing channels, etcTo help onboard people to this team, we should have a slackbot welcome people as soon as they join and direct them to some of the most commonly used channels for people looking for help.
+As people who have likely come here under similar circumstances, what would y'all want to see in an onboarding message?
+Would be a chance to reduce off topic postings, and give a lil taste of cutting edge bot design and best practives to devs coming in
+
+U0YB2C09Y : Im imagining something similar to the example the slackapi folks put out<https://github.com/slackapi/onboarding-example>
+
+U0YB2C09Y : <https://cloud.githubusercontent.com/assets/35968/17162650/5703766c-537d-11e6-9c36-3e780d06f77c.gif>
+U272P5K71 : While building these, we also discussed using them for a Code of Conduct type of thing.
+Here's the updated Python version using Share instead of Star, because Star has some weird scope issues: <https://github.com/slackapi/Slack-Python-Onboarding-Tutorial>
+
+U272P5K71 : and Ruby, if that's anyone's strong suite: <https://github.com/slackapi/Slack-Ruby-Onboarding-Tutorial>
+U36PZJHQQ : any thoughts on why something would be working fine locally but give me a `TypeError: Cannot read property '0' of undefined` when running on Heroku?
+U36PZJHQQ : im just trying to get the `ts` of the latest message in a slack channel, the code is pretty simple
+U0YB2C09Y : <@U36PZJHQQ>: Hmmm the same code works locally? Not sure, can you successfully log `time.messages` from heroku?
+U3FGRUSLT : dhulser: look at the raw json, it's trying to do foo[0] on something that's not even an object
+U3GQ14BRP : hi everyone :slightly_smiling_face:
+U0GPKTHQ9 : Who else is feeling the holiday dip right now? Numbers down 50% across the board :no_mouth:
+U3EBZKDDK : Hi! Does anyone knows if I can make a simple button without needing to go to an endpoint? I'm using python client
+U3EFK8UES : <@U3EBZKDDK> pretty sure slack api requires a full on integration for buttons
+U3EFK8UES : ```Posting messages with buttons requires registering a Slack app. Interactive messages cannot be posted using a custom integration. Create an app if you don't already have one.```
+U3EFK8UES : Actually an app
+U3EBZKDDK : Okay. I was just wondering if there's another way around it. hehe :stuck_out_tongue:
+U3EBZKDDK : I've got a slack app setup already, and I did read that I need a request url. Just wondering if I could do so without that. Thanks!
+U36JH8YTW : when we design a the event type base bot, is there a way to make a sequential conversion?
+U3FGRUSLT : sure just call <https://api.slack.com/methods/chat.postMessage> in the right order u want the conversation to flow rite?
+U36JH8YTW : <@U3FGRUSLT> yes~
+U36JH8YTW : is there a good way to tell the conversion finished? I know this is a silly question~:relieved:
+U3FGRUSLT : unless the human types "/end" or something
+U3FGRUSLT : it would have to be AI to know when the human is done
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

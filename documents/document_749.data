@@ -1,0 +1,110 @@
+U23SA861Y : the pairs are the same type (String, List Int)
+U23SA861Y : or at least that's what you have written
+U23SA861Y : you then need to appropriately decode the date and times
+U0LPMPL2U : If you said `keyValuePairs timeDecoder` you would have a `Decoder (List (String, Time))`
+U0LPMPL2U : assuming you've already created a `timeDecoder`
+U0LPMPL2U : that can be turned into a `Decoder (List Date)` with something like `map (uncurry Date)`
+U37HUSJ4R : I have a timeDecoder, ```
+timeDecoder : Decoder Time
+timeDecoder = 
+    Decode.map2 Time
+        (Decode.index 0 <http://Decode.int|Decode.int>)
+        (Decode.index 1 <http://Decode.int|Decode.int>)
+```
+
+U0LPMPL2U : ```datesDecoder : Decoder (List Date)
+datesDecoder =
+  Decode.keyValuePairs (Decode.maybe timeDecoder)
+    |&gt; Decode.map (uncurry Date)
+```
+
+U0LPMPL2U : I think this should work
+U0LPMPL2U : this can then be turned into a `Decoder Custom` using `Decode.map`
+U0LPMPL2U : ```customDecoder : Decoder Custom
+customDecoder =
+  Decode.map Custom datesDecoder
+```
+
+U37HUSJ4R : ```module Main exposing (..)
+
+import Html exposing (Html, text)
+import Json.Decode as Decode exposing (keyValuePairs, string, Decoder)
+
+
+main : Html a
+main =
+    text &lt;| toString &lt;| Decode.decodeString customDecoder input
+
+customDecoder : Decoder Custom
+customDecoder =
+  Decode.map Custom datesDecoder
+
+datesDecoder : Decoder (List Date)
+datesDecoder =
+  Decode.keyValuePairs (Decode.maybe timeDecoder)
+    |&gt; Decode.map (uncurry Date)
+
+timeDecoder : Decoder Time
+timeDecoder = 
+    Decode.map2 Time
+        (Decode.index 0 <http://Decode.int|Decode.int>)
+        (Decode.index 1 <http://Decode.int|Decode.int>)
+
+
+type alias Custom = {
+    data: List Date
+}
+
+type alias Date =
+    { date : String, extra : Maybe Time }
+
+
+type alias Time = { start: Int, end: Int} 
+
+input : String
+input =
+    """
+{"custom":{"20170414":[900, 1300],"20170415":[],"20170417":[],"20170429":[],"20170501":[],"20170527":[],"20170529":[],"20170828":[],"20171225":[],"20171226":[]}}
+"""
+```
+
+U37HUSJ4R : ```The right side of (|&gt;) is causing a type mismatch.
+(|&gt;) is expecting the right side to be a:
+
+Decoder (List ( String, Maybe Time )) -&gt; a
+
+But the right side is:
+
+Decoder ( String, Maybe Time ) -&gt; Decoder Date
+```
+
+U37HUSJ4R : can’t save it in ellie with errors :disappointed:
+U0LPMPL2U : oh, I forgot a `List.map` in there somewhere
+U0LPMPL2U : We've got a `Decoder (List (String, Maybe Time))` so to do stuff with that tuple we need to map both the decoder and the list
+U23SA861Y : wait, you can't save on ellie with errors :confounded:
+U0LPMPL2U : ```datesDecoder : Decoder (List Date)
+datesDecoder =
+  Decode.keyValuePairs (Decode.maybe timeDecoder)
+    |&gt; Decode.map (List.map (uncurry Date))
+```
+
+U0LPMPL2U : I think that should fix it
+U0F7JPK36 : <@U23SA861Y> <@U37HUSJ4R> you should be able to, let me see what's going on
+U0F7JPK36 : seems to work fine<https://ellie-app.com/3MKkcL4YYhYa1/0>
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

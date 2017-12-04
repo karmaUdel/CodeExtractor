@@ -1,1 +1,113 @@
-Hi!  I am writing a Json.Encode function to create an object in the back end, in my database.  I have a Kase. ```type alias kase =  { name : String, organization : Maybe Organization.Model, ...} ```. The field organization is a Maybe.  If there is no organization entered, I don't want that field passed in my Json object.  as it will give me some validation errors. How can I do that?  I can only think of doing List.append. This is how the code looks like if an organization exists
+U6303RTK7 : Basically the main is aggregating events from websockets
+U62V8HFJR : and `superView : SuperModel -&gt; Html SuperMsg`
+U6303RTK7 : and then a bunch of different little views exist on the page displaying different information from that new aggregated state
+U6303RTK7 : ohh
+U6303RTK7 : so just the view could be composed of that larger message type?
+U62V8HFJR : yep!
+U6303RTK7 : I don't want the Main module to have to prepare to receive all the kinds of messages that it normally would just pass down into the smaller views
+U6303RTK7 : so the `update` could still keep its signature?
+U62V8HFJR : `update` is one I'm still having difficulties with, I'll confess. :confused:
+U62V8HFJR : this is how I've got my `view` setup:
+U62V8HFJR : ```  6 mainView: Model -&gt; Html Msg
+  7 mainView model =
+  8     case model of
+  9     ¦   Star starModel -&gt;
+ 10     ¦   ¦   map StarMsg (Star.View.view starModel)
+ 11     ¦   Points pointsModel -&gt;
+ 12     ¦   ¦   div [] [ text "Incomplete!" ]
+```
+
+U62V8HFJR : (pardon the vim garbage)
+U62V8HFJR : basically I'm just pattern-matching on which type of model I'm dealing with to let the children do all their work
+U6303RTK7 : why does the `Html` type need to take a type parameter?
+U6303RTK7 : like why `Html Msg` and not just `Html`?
+U153UK3FA : <@U6303RTK7> start by having a single Msg type and import it in to all your modules, you'll have a much easier time.
+U153UK3FA : Html produces events, the type parameter says what type those events will be
+U6303RTK7 : ah, because of things like onClick and onInput
+U6303RTK7 : okay, I had originally imported the Msg type, but I ended up with a circular dependency because I was using types defined in Main
+U6303RTK7 : but I think I've since solved that by defining types elsewhere
+U6303RTK7 : so I could probably do it that way
+U62V8HFJR : blog post you mind find useful: <http://blog.jenkster.com/2016/04/how-i-structure-elm-apps.html>
+U6303RTK7 : oh, but then I can't call into a view function defined in the other module from main
+U6303RTK7 : because that would still be a circular dependency
+U6303RTK7 : if Main depends on the child to define the view, and the view depends on main to define the message type
+U62V8HFJR : you can pull `Msg` and `Model` out into other files than `Main`
+U6303RTK7 : oh, duh.
+U6303RTK7 : yeah, thanks :slightly_smiling_face:
+U153UK3FA : <@U6303RTK7> put the Msg type in it's own module
+U62V8HFJR : &gt; start by having a single Msg type and import it in to all your modules, you'll have a much easier time.^ <@U153UK3FA>: so are you recommending to _not_ have sub-Msg types for sub-modules?
+
+U153UK3FA : <@U62V8HFJR> not until your app in large enough to need it
+U62V8HFJR : I mean, that's totally fair
+U62V8HFJR : but I'm honestly at a bit of a loss for how to accomplish it at all
+U153UK3FA : Especially not until you have a few pages
+U62V8HFJR : I'm kind of interested in toying around with it on a smaller app so I can wrap my head around the idea
+U62V8HFJR : so that when I _am_ in the situation that breaking it apart would be appropriate, I could understand how to do that
+U62V8HFJR : (but maybe straying from beginner topics, here, haha)
+U153UK3FA : <@U62V8HFJR> not a lot to it, just a lot of boilerplate.
+U153UK3FA : But it's definitely something to look at once you're more familiar with Elm, as it requires being comfortable with a bunch of aspects of Elm
+U153UK3FA : The many ways of breaking up your app become obvious once you understand enough of the basics
+U2D7NUGS1 : <@U3SJEDR96> Thanks again for your tremendous help. Here's my yield of today: <https://github.com/lzrski/elm-polymer-scaffolder>
+U2D7NUGS1 : As mentioned before the goal is to reimplement `scripts/scaffold` from `elm-polymer` in Elm. Sorry for lack of README or any other docs. I'm in a hurry.
+U2D7NUGS1 : Good night to you and all other mighty folks of Elm :waning_crescent_moon:
+U5D4VHEN7 : I am trying to write a JSON decoder for a record that has  a field `status` who's type is `Status` where the possible values are `Past, Present, Future, None`. The JSON response with the status data will be structures like `{ "status" : "past", ...other_fields }`. I am confused as to how I go about decoding `"past"` to `Past`. So far I have```
+dayBreakdownDecoder : Decoder DayBreakdown
+dayBreakdownDecoder =
+  decode DayBreakdown
+  |&gt; required "grade" dayGradeDecoder
+  |&gt; required "status" dayStatusDecoder
+
+
+dayStatusDecoder : Decoder DayStatus
+dayStatusDecoder =
+  Decode.string `andThen` decodeDayStatus
+
+
+decodeDayStatus : String -&gt; DayStatus
+decodeDayStatus dayStatus =
+  case dayStatus of
+    "past" -&gt; Past
+    "present" -&gt; Present
+    "future" -&gt; Future
+    other -&gt; None
+```
+
+which is obviously wrong. Anyone able to point me in the right direction?
+
+U0CLDU8UB : That's not obviously wrong in my opinion
+U0CLDU8UB : The only problem is the "error" case, where `status` is none of those strings.
+U0CLDU8UB : You'll have to decide if you want that to be a success or a failure
+U5D4VHEN7 : Thanks for the reply <@U0CLDU8UB>. I apologize, because I have actually just left that part out. I'll edit it
+U0CLDU8UB : Okay. That to me seems like it should work. What is your error message?
+U5D4VHEN7 : And from this I get:```
+I ran into something unexpected when parsing your code!
+
+206|   Decode.string `andThen` decodeDayGrade
+                     ^
+I am looking for one of the following things:
+
+    end of input
+    whitespace
+
+Detected errors in 1 module.
+```
+
+U0CLDU8UB : Oh right, the backtick syntax of course
+U0CLDU8UB : That was removed in 0.18
+U5D4VHEN7 : ahhhhhh, got it. Let me try it without. Is there an alternative, or must I just place the args in order?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

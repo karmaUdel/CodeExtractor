@@ -1,3 +1,82 @@
-I'm using python. I have a column of time series in formate of ( ```pattern = '%Y-%m-%d %H:%M:%S' ``` The datatype is Series and I need to convert it to string. I searched and I found out I need to use ```Data .astype(str) ``` to convert it to String. I used it but still that column is Series and not string. .astype() didn't convert. What's the solution. How may I do it?
-for example. You can find innumerable examples if you search "stringify python" on google
-Knit pick, you should probably consider `from __future__ import print_function` to be writing code that's compatible with the future of the language if you're writing python2
+U5LFUHH19 : I'm trying to modify the "elm-spa-template" to create a SPA (<https://github.com/hurwitzlab/elm-imicrobe-spa>).  I basically decided to jump into the deep end and see if I could swim.  I'm merging in code from <https://github.com/rtfeldman/elm-spa-example> to fetch my data, and I'm getting a compile error when I try to expand my Page.Investigator (<https://github.com/hurwitzlab/elm-imicrobe-spa/blob/master/src/Page/Investigator.elm>) to include the (currently commented-out) "investigators"/"loadInvestigators."  I have it down to this one change, so I'm hoping maybe someone can look at this and see my problem because I'm totes stuck.
+U0CLDU8UB : boons: `elm-lang/navigation` and `evancz/url-parser`
+U1CE9DL9H : <@U5LFUHH19> what is the error?
+U5LFUHH19 : <https://gist.github.com/kyclark/f4fbac36c207880ef3871ad0a456916b>
+U5LFUHH19 : Errors are coming from Main.elm, but I can't find how it's connected to what I'm doing in Page.Investigator.
+U1CE9DL9H : is this intented `| InvestigatorLoaded (Result PageLoadError About.Model)`?
+U1CE9DL9H : because you treat this record later on as if it is a `Investigator.Model`
+U2GPX0EKC : <@U40QW928G> ? You mean like Navigation?
+U1CE9DL9H : at line 132
+U40QW928G : yes navigation for a spa
+U285A8S8H : I'm trying to generate a random exercise```
+type alias Exercise =
+    { note : Note
+    , scale : Scale
+    , kind : ExerciseKind
+    }
+```
+I have defined lists of all Notes, Scales and ExerciseKinds - now I need to pick a random item from each list. Any tips where to start?
+
+U2GPX0EKC : <@U40QW928G> Well i use that that elm-navigation
+U40QW928G : nice thanks, I just saw those two in the elm tutorial
+U0LPMPL2U : <@U285A8S8H> have you used random generators yet?
+U40QW928G : I'll check it out
+U285A8S8H : <@U0LPMPL2U> nah
+U5LFUHH19 : Gah!  That's it, <@U1CE9DL9H> !
+U3SJEDR96 : <@U285A8S8H> I think random.pcg and random.extra have nice options for picking a random item from a list
+U0LPMPL2U : They work a bit like JSON decoders. You build simple generators and combine them into a more complex one
+U285A8S8H : that's cool
+U5LFUHH19 : Mind you, I'm still pretty lost, but I just could not see that bug.  Thanks!  I'll go back to figuring this out, now.
+U285A8S8H : so is it going to look like`generate notes |&gt; andThen (generate scales) |&gt; ...`?
+
+U0LPMPL2U : more like `Random.map3 Exercise randomNote randomScale randomKind`
+U285A8S8H : oh right
+U0LPMPL2U : you only need `andThen` if the rolls are dependent on each other
+U285A8S8H : thanks, I'll play with that :slightly_smiling_face:
+U0CLDU8UB : If you've worked with Tasks before, that's also a helpful frame of reference.
+U0LPMPL2U : In your case you probably want something like:```
+randomNote : Generator Note
+randomNote =
+  Random.Extra.sample [Note1, Note2, Note3]
+    |&gt; Random.map (Maybe.withDefault Note1)
+
+randomScale : Generator Scale
+randomScale =
+  Random.Extra.sample [Scale1, Scale2, Scale3]
+    |&gt; Random.map (Maybe.withDefault Scale1)
+
+randomScale : Generator Kind
+randomScale =
+  Random.Extra.sample [Kind1, Kind2, Kind3]
+    |&gt; Random.map (Maybe.withDefault Kind1)
+
+randomExercise : Generator Exercise
+randomExercise =
+  Random.map3 Exercise randomNote randomScale randomKind
+```
+
+U0LPMPL2U : You need that `Maybe.withDefault` because picking a random element from a list returns a `Maybe` since the list might be empty
+U285A8S8H : well I _can_ get these to work but I'm not 100% clear how to use them yet :sweat_smile:
+U285A8S8H : <@U0LPMPL2U> thanks! I didn't actually need a ready-to-go example :smile:
+U0LPMPL2U : I hope I didn't spoil the fun of figuring it out for you :disappointed:
+U285A8S8H : don't worry!
+U285A8S8H : btw I was _this_ close to getting Elm at work but the CTO decided to use vue + vuex instead. Why? because that's what they're using at his other job
+U0LPMPL2U : If you're interested in digging more into Random, I gave a talk about it at ElmConf last year: <https://www.youtube.com/watch?v=YxGWQdFo2Yc>
+U285A8S8H : oh, I remember watching some of that! I enjoyed it, though it was difficult to grasp two new concepts (roman names and random in elm) at the same time. Nevertheless it was helpful
+U0CLDU8UB : That was one of my favorite talks last year! :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

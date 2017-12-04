@@ -1,13 +1,60 @@
+U61KCTX8S : whether with sh or conch
+U61KCTX8S : and i'd like to know whether it's finished or not
+U064X3EF3 : I'll put some stuff out early next week - slides, code, and some more info
+U1WMJ5CQ2 : <@U61KCTX8S> `sh` is a blocking call:```
+(sh "ls")
+(prn "finished")
 ```
-Still throwing ` :cause "Can't let qualified name: wef-backend.test-util/conn# "` though
-is d/db a macro?
-no
-but I get the same error even if I deleted the whole ~ctx-binding line
-I never got that error with uri# or datomic# by the way, it only occured when I added conn#
-It's probably something silly
-do you have a var named conn# in that namespace?
-<@U5ZAJ15P0> What does macroexpand give you?
-<@U0NCTKEV8> no, I checked. Let me check again just to make sure..
-`java.lang.RuntimeException: No such var: wef-backend.test-util/conn#`
-you could fix it immediately by replacing most of the macro with a function that returns the context, and have the macro expand in to invoking that and then deleting it
-but that wouldn't tell you what is wrong
+
+U064X3EF3 : want to have a little more context than just dumping the slides. haven't had a chance to do all that stuff due to the conf and today's travel home.
+U61KCTX8S : i did it like:
+U61KCTX8S : (defmacro try-noooo  "Returns the result of evaluating e, or :noooo if it throws an exception."  [e]  `(try ~e (catch java.lang.Exception _# :noooo)))(defn is-proc-running[p] (if (= (try-noooo (.exitValue  p ) )   :noooo) true false))
+U61KCTX8S : sorry about the formatting, havent figured this out yet on slack
+U61KCTX8S : the .exit-Value call throws an exception if the process is still running
+U61KCTX8S : that's the trick
+U1WMJ5CQ2 : <@U61KCTX8S> If you use the built-in future to handle async, you can do this:
+```
+(def process-future
+  (future (sh "./my-script.sh")))
+
+(when-not (future-done? process-future)
+  (prn "still running...."))
+```
+
+U0BKWMG5B : hmaurer: A lot of the time stubbing isn't necessary; only for keys that connect to an external I/O source. Also, polymorphism is more convenient than a lookup table, and it encourages using the same key for the same behaviour.
+U0BKWMG5B : It's important for Duct/Integrant's design around the idea of a vocabulary that keywords have the same meaning.
+U0BKWMG5B : Also, it's more useful to stub the I/O source you're passing around than the multimethod. e.g. you might pass your database to another function as an argument. You need to be able to stub that directly.
+U0BKWMG5B : Hence records and protocols.
+U61KCTX8S : <@U1WMJ5CQ2> that would do the trick, but i also need a timeout
+U1WMJ5CQ2 : <@U61KCTX8S> ```
+(let [result (deref (future (sh "./my-script.sh")) 100 :timeout)]
+  (if (= result :timeout)
+    (prn "time limit exceeded.")
+    (prn "process exited with: " result)))
+```
+
+U1WMJ5CQ2 : <https://clojuredocs.org/clojure.core/deref>
+U5ZAJ15P0 : <@U0BKWMG5B> I see; I think I am misunderstanding something. Let's put it into context. In some cases I might want to use a different config during testing, which is very easy to do with Integrant (just load a different edn or merge some keys in the loaded config before calling `ig/init`). However, in other cases I might want to stub the implementation. For example, I might be using Redis as a kv store, but during testing I might want to stub it for my own in-memory version.
+U5ZAJ15P0 : In that case, I wouldn't have a `:redis` key in my configuration, but likely a `:cache` key, or `:kv-store` key, which obeys a kv-store protocol
+U5ZAJ15P0 : In my default, production implementation, the multimethod would return a Redis connector wrapped inside a record obeying the kv-store protocol
+U5ZAJ15P0 : Which I think is what you're describing as "boundaries" in Duct
+U5ZAJ15P0 : However I am still unclear as to how I would swap that implementation for my own in-memory version during testing
+U5ZAJ15P0 : I suspect this is due to my lack of knowledge on Clojure itself, rather than Integrant/Duct…
+U61KCTX8S : you're the master!
+U61KCTX8S : that's far more elegant than my solution
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

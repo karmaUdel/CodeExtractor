@@ -1,45 +1,57 @@
+U62UFEG4D : I have shared in this snippet my second attempt...
+U48AEBJQ3 : <@U62UFEG4D> `Random.map2`
+U48AEBJQ3 : `Random.map2 (,) (<http://Random.int|Random.int> 1 6) (<http://Random.int|Random.int> 1 6) |&gt; Random.generate (uncurry NewFace)`
+U62UFEG4D : <@U48AEBJQ3> it works now, thanks a lot!
+U604S603Y : is there a way with elm-package to "restore" packages that are already mentioned as dependencies in my elm-package.json?
+U604S603Y : to download all dependencies after cloning a repository for the first time
+U3SJEDR96 : <@U604S603Y> just `elm-package install --yes` should handle that :slightly_smiling_face:
+U604S603Y : perfect! thanks <@U3SJEDR96>
+U5XHTBFS6 : I need very little interaction with leaflet for now, so ports are working ok. But I'll definitely watch the video. Thanks <@U3LT1UTPF> .
+U2D7NUGS1 : I'm trying to wrap my head around JSON decoding. How do I implement a function from `Json.Decode.Value` to `String`. Sample JSON would look like that: ```{ value: "The string I want" }
 ```
-(you can use `inContext "macro1" &lt;| succeed Macro1 |= something |. something else` to add contextual information to your parsers, btw)
-so error messages allow you to track how and where things went wrong
-Ah .. to have good error messages?
-Yay!
-my guess it's committing to stuff before bailing out. You'd need to delay that commit - <https://github.com/elm-tools/parser/blob/master/README.md#delayed-commits>
-That sounds right and is consistent with the information given about the column of the error.  I'll read up on delayed commits.  Thanks!
-And using context to provide better error messages I can confirm that premature commit is the problem.
-in your case, on those statements, you could consider using something like mentioned here: <https://github.com/elm-tools/parser/blob/2f9c3370fe82211b5b4a37166f795face6801326/comparison.md#expressiveness>
-Is there a package for generating the ordinal value of a char? (like ruby's String::ord method)
-elm-ordinal just gives the th/st/nd suffix
-elm-char-codepoint does almost the correct thing.
-`Char.toCode`
-keyCodes are three digit?
-no, but neither are ordinals
-I'm a little unsure what you're really after, tbh
-will test, thanks <@U3SJEDR96>
-I'll give it a test and get back to you
-`toCode` gives the UTF-16 code unit as a decimal
-I need a replicatable key in elm and in rails so that I don't have top pass keys around
-perfect
-`elm-char-codepoint` gives that as a utf-32 decimal, basically
-(oddly, I just implemented `utf-16 &lt;-&gt; utf-8` which involves a side-step through utf-32. In elm. It was painful.)
-your pointer is perfect for my use, thank you. I wasn't aware the keyCodes were exactly the same operation that I was looking for.
-<@U3SJEDR96>, Yes, `delayedCommit` works quite nicely!  Thanks again.
-Ie. Allow within innerCard not only eject its own InnerCard.Msg messages but also the ones from outerCard?
-Is there a way to have `String`?
-You lose the constructor function when not using a record
-however, you sure can
-`succeed identity`
-i.e. `Arg` is a `String -&gt; Arg` function, and you'd rather have a `String -&gt; String` function so you end up with a `String`
-`identity` fits the bill :wink:
-is there any syntax for { model | x = y } with nested models? I guess the Focus library is one, but is there anything I am missing here?
-I'm afraid not
-I've generally found that when I need to update nested models, I'm looking at some sort of abstraction that wants to come out with some helper functions around it. Not always, but a good indication. In a way, you can look at updating nested records as a good time to think about how the law of demeter applies in your case.
-<@U3SJEDR96>, thanks again!  Got it working like I want with `identity`
-Okay, thank you guys. So nesting is not a recommended representation of data in Elm?
-Nested records are fine as long as the data isn't updated often.
-When you do want to update a nested record, it's nice to make that into a function: `{ model | favoriteCat = updateCat "meow" model.favoriteCat }`
-Right, this is data that is updated pretty much constantly though.
-But only certain parts of it, so I guess a function that updates the stuff I want to update, makes sense
-are different cases of a discriminated union interchangeable, like base class and derived class in OOP?
-I'm trying to have only one field in the top-level model of my SPA which then "contains" the page data of the currently active page. So I tried making a DU with all the different page data types I have, one case for every page. But then I have problems calling the different pages' update functions, because they expect the correct data and not the top-level DU
-Then I tried pattern matching on the DU and only calling the update function when the case is the right one - but that results in problems with the overall return value of the top-level update function branch
-you'd need to "rewrap" that return value with the correct tag
+
+U2D7NUGS1 : It can be either with `Json.Decode` or `Json.Decode.Pipeline`. Here is my starting point using Pipeline: ```decodeData : Decode.Value -&gt; String
+decodeData json =
+    Pipeline.requiredAt [ "value" ] Decode.string
+``` It obviously doesn't work.
+
+U3SJEDR96 : Right; so you can think of a `Decoder a` as a function `Value -&gt; Result String a`. The only ways of calling that function is by using `decodeString` or `decodeValue`  on a string representing some json, or an actual json value. The result it returns a result is because decoding can fail, if the json is malformed or doesn't match the structure you describe in Elm
+U2D7NUGS1 : Makes sense.
+U3SJEDR96 : so how you generally handle this, is by writing a decoder that matches the structure you expect. In this case, `myDecoder = Decode.field "value"  Decode.string`. You'd then use that like `decodeString myDecoder """ { "value": "The string I want" } """`
+U3SJEDR96 : the above should actually work in the repl, too :slightly_smiling_face:
+U2D7NUGS1 : Ok, thanks. I think the missing part on my side was `decodeValue`. I'll try and probably get back when I hit another wall :slightly_smiling_face:
+U2D7NUGS1 : Yup, I got it. For reference, here is my initial implementation: ```decodeData : Decode.Value -&gt; String
+decodeData json =
+    case Decode.decodeValue (<http://Decode.at|Decode.at> [ "statuz" ] Decode.string) json of
+        Ok value -&gt;
+            value
+
+        Err message -&gt;
+            message
+```
+
+U2D7NUGS1 : Error case handling is not perfect, but it's a good starting point.
+U3SJEDR96 : So for what it's worth, I'm trying to gain more insight into how people learn writing JSON decoders, and I've set up a project where I aim to introduce the required concepts one by one. If you're interested, I've _love_ if you could fork <https://github.com/zwilias/elm-demystify-decoders> and commit your solutions :slightly_smiling_face:
+U2D7NUGS1 : Oh, that is super awesome!
+U2D7NUGS1 : The thing is that on Thursday I'm giving a presentation about Elm for local meetup group and now I'm frantically preparing. So can't promise anything. I'll put a reminder for that in my calendar and get back to, probably later next week.
+U3SJEDR96 : No rush, really, but I'd massively appreciate it :slightly_smiling_face:
+U2D7NUGS1 : I really think it's a great initiative. I'm one of those who learn by experimenting, so I'll gladly help you.
+U2D7NUGS1 : Just coming two weeks will be very intensive for me.
+U2D7NUGS1 : I really appreciate your help.
+U2D7NUGS1 : Are you Dutch?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

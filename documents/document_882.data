@@ -1,0 +1,151 @@
+U5NMSURAQ : yeah, how does it work?
+U5NMSURAQ : it's like milk in a plastic bag
+U5NMSURAQ : wait, those exist :open_mouth:
+U1PCHFXMH : Whenever I travel to Poland and go get milk from the store it throws me off 'cause they have it sitting on the shelves in one of those juice cardboard-y containers. Weird.
+U5CGPBF0U : Yes, it's the greatest thing since sliced bread!
+U1PCHFXMH : wow
+U1PCHFXMH : i've never seen that before
+U5CGPBF0U : Well if you think that's weird, I hear in some places bread comes in a bag!
+U5CGPBF0U : Milk I get, but _bread_?!
+U5CRANMFV : `view-source:<https://www.betfair.com/exchange/plus/politics>`why is there no data site?
+
+U5CGPBF0U : So, I have an import error that I've been trying to solve (with help from here) for the past two days and still haven't been able to solve. I'm building a REST API and I've put my source into its own module titled `broadway`. I'm implementing an app factory pattern. In `__main__.py` I have `from broadway import create_app, models, util`, and `create_app` is defined in `__init__.py`. These are the entire contents of `__init__.py`:```from flask import Flask
+from . import config
+from .external import init_app
+
+# App factory function
+def create_app(config_data):
+    app = Flask('broadway')
+    app.config.from_object(config.DevelopmentConfig)
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    external.init_app(app)
+    return app```
+When running my application locally with `python -m broadway` the application returns the following error: `from broadway import create_app, models, util - ModuleNotFoundError: No module named 'broadway'`
+
+U5CGPBF0U : Strangely commenting out `app.config.from_object(config.DevelopmentConfig)` in `__init__.py` fixes the error. This is not a real solution of course since then my app is missing vital configuration info. Also, in this example the parameter (`config.DevelopmentConfig`) is hard-coded as originally `config_data` was passed to it but I changed it to make sure the data being passed wasn't the actual issue.
+U5CGPBF0U : I just don't get how the line in `__init__.py` relates to the import error at all.
+U5CGPBF0U : Also, I put a bunch of `print()`s throughout my code to see what was going on. They _all_ printed, even the ones after the actual `create_app` function runs in `__main__.py`.
+U5CGPBF0U : It was suggested that this was a problem with the Flask development server. After running my app with the Flask CLI it launched without errors. Then the problem was that all the endpoints of my API returned 404s, even though there were no errors in the actual Python reported (Flask's debug mode was on).
+U69DL1B0D : `python -m unittest discover`   What this command do?
+U6A6GFPD4 : hi,
+U5VGKQ2SY : :open_mouth: Same. I thought <@U5CGPBF0U> was kidding this whole time. Looks like something I'd try, though, TBH.
+U68L8RAG0 : Hi is anyone active ?
+U5A8Y8E15 : Does sitting down class as active?
+U68L8RAG0 : That all depends on the class. :slightly_smiling_face:
+U68L8RAG0 : I have a code challenge that I'm working on from Google.. they give it to you when you do certain searches. It's a recruiting tool to get candidates for interviews.
+U68L8RAG0 : I've found a few solutions but they don't seem to be scaling up for some reason.
+U68L8RAG0 : I have to find the largest number that can be divided by 3.
+U1UFZTD4J : &gt; dont seem to be scaling upCan you explain?
+
+U68L8RAG0 : They give a number 954311and the largest number that is divisible is 94311
+
+U68L8RAG0 : The length of the number can be up 10 digits long.
+U68L8RAG0 : Mine works perfectly up to 6 but beyond that I think there is an error
+U68L8RAG0 : My latest attempt was the fastest to execute but failed 4 of 5 tests. I don't get the error from them so I dont know why it failed.
+U68L8RAG0 : In other attempts it ran slower (I built a set of permutations) and passed 4 out 5 tests.
+U68L8RAG0 : Knowing that the number of digits in the list can grow up to 10.. my guess is it's not scaling up properly.
+U1UFZTD4J : Tell me what your code does when the number isnt divisible  by 3
+U1UFZTD4J : In your own words
+U68L8RAG0 : If the number is not divisible by three it increments down one and checks the next one if that is divisible by three.
+U1UFZTD4J : Ok. What if the number "decrement by one" cant be made with the numbers in the list?
+U68L8RAG0 : Let me explain more. First I take the list of numbers and I sort them high to low. 
+I join the values together, appending one to the other.
+
+U68L8RAG0 : So 5,3,4,1,2becomes 5,4,3,2,1
+then 54321
+
+U68L8RAG0 : I then iterate down from the 54321 until I find the first number divisible by 3.
+U68L8RAG0 : then I return that
+U1UFZTD4J : Yes. So your list is [5,4,3,2,1] but 54320 wouldnt be possible because 0 isnt in your list
+U68L8RAG0 : The range gives me the iteratable. At that point the list is gone.
+U1UFZTD4J : Exactly
+U68L8RAG0 : I do see the number increment down and I do get a return result that is divisible by 3.
+U1UFZTD4J : Ok walk me through the problem in just words and you doing it by hand. Dont use your code. 
+U1UFZTD4J : If i give you the list [2,2,2,2,7], what is your process?
+U68L8RAG0 : let's use [8,7,2,6,4] as the 2's will hide some steps
+U68L8RAG0 : so I need to turn that in to 87642
+U68L8RAG0 : then find the largest number that is equal to or less then that number and is divisible by 3
+U1UFZTD4J : Lets use [8,7,3,6,2] since the largest num isnt divisible by 3
+U68L8RAG0 : That's the point.
+U1UFZTD4J : Exactly
+U68L8RAG0 : It has to be closest to or equal.
+U1UFZTD4J : So, whats the next number you try?
+U1UFZTD4J : After 87643 fails, then what?
+U68L8RAG0 : my code is stepping down to 87641, then 87640, etc..
+U68L8RAG0 : checking each for % 3 == 0
+U68L8RAG0 : AH!
+U1UFZTD4J : Ok, is 87642 a valid answer to the problem where the input is [8,7,6,4,3]?
+U68L8RAG0 : I realize where I made one mistake..
+U68L8RAG0 : OK the number has to use all numbers in the set..
+U68L8RAG0 : Let me show you my other approach if you don't mind.
+U1UFZTD4J : &gt; finds the largest number that can be made from some or all of these digits 
+U68L8RAG0 : In this approach. I take all the numbers in the set and create every permutation from them. Then increment through the new list in descending order.
+U68L8RAG0 : In this one, I filter the list to remove duplicates.
+U68L8RAG0 : I also break up the sets by length because I hit a memory limit error on submission. In that case the first hit for 954311 is 94311.
+U1UFZTD4J : Good. Your on the right track. 
+U68L8RAG0 : l = [3, 1, 4, 1, 5, 9]
+U1UFZTD4J : Large numbers will have a LOT of permutations. So it's probably best to load them lazily rather than making a set
+U68L8RAG0 : it could be a memory error.. they don't specially say..
+U1UFZTD4J : It could also be an issue with string sorting vs number sorting :)
+U68L8RAG0 : when I created one big set for all permutations that's when i got the memory error. but this code runs it just fails test 4 and I get no error
+U1UFZTD4J : You might want to try converting every sting into an int before sorting
+U68L8RAG0 : That makes sense.
+U68L8RAG0 : data_set = map(int, data_set) should take of that?
+
+U1UFZTD4J : Ya, i think so
+U68L8RAG0 : thanks i really appreciate you talking me through the problem.
+U68L8RAG0 : I'm a product manger.. it's been a loooooong time since I had to worry about code challenges. :smile:
+U68L8RAG0 : I prefer to be explicit in the code but I don't want to look like a Jr. Do you think there is a better approach?
+U653RFLBD : for one it doesn't look like your code handles the condition: `If it is not possible to make such a number, return 0 as the answer`
+U68L8RAG0 : This code also timed out..
+U653RFLBD : two, i like nhumrich's idea to lazily evaluate, which you could do with generators
+U68L8RAG0 : Correction.. I'm trying it with iterator on the permutation and that timed out
+U68L8RAG0 : I think building the list and then sorting it is the problem.
+U68L8RAG0 : returning 0 is something I missed. I'll try that too
+U6829S5NZ : <@U68L8RAG0> why are you using set in line 10?
+U653RFLBD : what about something like (note: you'd have to re-write to get it to work with a list of numbers as input)```
+from itertools import permutations
+
+def permutation_gen(x):
+     for r in sorted([i for i in range(len(str(x)) + 1)], reverse=True):
+         for p in permutations([i for i in sorted([i for i in str(x)], reverse=True)], r=r):
+             s = sum([int(i) for i in p])
+             if s % 3 == 0:
+                 yield(int(''.join(p)))
+
+def get_largest_3_modulo(x):
+    try:
+        y = next(permutation_gen(x))
+    except StopIteration:
+        y = 0
+    return y
+
+get_largest_3_modulo(954311)
+```
+
+U68L8RAG0 : I had started with a similar approach but their verification tool was not reporting errors properly.
+U6829S5NZ : <@U68L8RAG0> sorry, didnt see the new one.
+U68L8RAG0 : code that ran perfectly in my Jupyter was failing.. So split it up and simplified it .
+U68L8RAG0 : This approach looks much better then what I was doing.
+U68L8RAG0 : This is what I originally tried but I hit memory errors.
+U68L8RAG0 : In case anyone is interested in triggering the Google code challenge. I've been spending a lot of time searching for Python, crawlers, NLP, analytics, algorithms, etc... This is the second time it came up for me in the last 2 months.. I  was on vacation last time it came up so time ran out.
+U68L8RAG0 : <@U6829S5NZ> I have a quick question about your example. One line 6 there is SUM of the permutation and then you are checking if it is divisible by 3. Then on line 8 your yield is the joined integer. Is this a faster way or an error?
+U5VGKQ2SY : any number that is divisible by three has the sum of its digits = to a small multiple of 3, 6, 9, ...So 33333, if added together equal 15, which in turn equals 6
+
+U5VGKQ2SY : so I would add all elements of list and see if that sum is % 3
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

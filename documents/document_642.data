@@ -1,21 +1,169 @@
-    Html.node "google-map"```
-so everything looks the same as html version or rtfeldman one
-Are you sure the attributes are named correctly?
-it sounds like it's not able to read the api key
-yes, I am sure, it's just copied from the same html `&lt;google-map api-key="..." latitude="37.790" longitude="-122.390" style="height: 400px; width: 600px;"&gt;&lt;/google-map&gt;`
-That's copied from the talk?
-no, this code is from my webpage where I tested it (w/o elm, within the same template where Elm is embedded)
-ah, I see
-“You have included the Google Maps API multiple times on this page. This may cause unexpected errors.”
-so I am just disabled elm app at all, tested this html. then embedded Elm app again and converted this code to Elm
-yep, but they isn't
-just looking at webpack config - maybe because of HMR or something like this
-I'm still not understanding what passing that generic all the way down allows for?
-<@U0F7JPK36> I made it working, thanks for writing this.
-what event am I looking for to capture a selected option in a drop down?
-<@U1S70NKFF> “changed” is the on, but “input” should also work in most browsers
-thx!
-sorry, “change”
-roger that
-if you are talking about the &lt;select&gt; element, that is
-They're special in that they are actually implemented in native code, which is why you see the generic suddenly being "swallowed". Nevertheless, they are useful in that they make sure that, at the end of the day, the `view` in your main can send out a consistent message-type, and that this can be guaranteed at compile time
+U3YDBDP4Z : And where to keep this shared function
+U0EUHKVGB : `init` rarely looks like update
+U0EUHKVGB : It’s hard to say where things should go without knowing in what way they look similar :slightly_smiling_face:
+U37HUSJ4R : is there a simple way in Elm to tell if a date is today in elm?
+U36C7SUAX : <@U37HUSJ4R> Storing the current date in the model and comparing it in some function?
+U2D7NUGS1 : Quick question: `import Polymer.Paper.IconButton as Paper.IconButton` gives me syntax error. Does it mean that I cannot have dot in a qualified import name?
+U1CE9DL9H : yes
+U57KYFW67 : Do `Cmd` ports have any access to which embedded Elm application called them?
+U57KYFW67 : That is, if I have more than one Elm app embedded on the page (likely, two copies of the same Elm app), and the app makes use of a port, can I somehow find out which instance (ie, which DOM node is associated) sent a command to the port?
+U2D7NUGS1 : Thanks <@U1CE9DL9H>.
+U0FP80EKB : <@U57KYFW67> I would do that on the js side. When you subscribe to a port, you can build a function that contains an identifier of which elm app, something like (pseudo-code)```
+Elm.App1.subscribe("myPort1", buildHandler("App1"));
+Elm.App2.subscribe("myPort2", buildHandler("App2"));
+
+function buildHandler(appId) {
+    return function(portData) { process(appId, portData); }
+}
+```
+Definitely pseudo-code, but you can do something like that.
+
+U57KYFW67 : I guess I could do that
+U0FP80EKB : As always, this could be an instance of the XY problem, so perhaps if you talked a bit more about what your problem is, there might be a different solution.
+U57KYFW67 : I don't have any immediate problem to solve, but for my blog, I imagine having multiple elm applets running on a single page. Likely all close variants of each other, even being the same module with different parameters passed, as to build up to an idea I want to illustrate and talk about.
+U0FP80EKB : <http://xyproblem.info/>
+U0FP80EKB : I would probably build my initial idea if I was looking for a way to specify which app’s port was firing.
+U57KYFW67 : Yes, I know what the phrase means. I just think it's a bad term for the notion.
+U0FP80EKB : Alas, it is the term we have. :slightly_smiling_face:
+U0FP80EKB : But, since the ports aren’t shared across apps, and you have to subscribe to them on the js side independently, I’d probably use my original idea
+U0FP80EKB : If I wanted to have a single function that handled them the same.
+U57KYFW67 : Ahh. I forgot you have to wire them up manually anyway. Ack.
+U57KYFW67 : Yeah. That's something I need to take into account with my design.
+U0FP80EKB : Alternatively, you could pass an identifier into the init function, have that includes in all port calls.
+U0FP80EKB : That strikes me as a bit over-complicated, though.
+U0FP80EKB : Also asks the elm app to be responsible for something that isn’t really relevant to itself
+U57KYFW67 : Well, to be a little more concrete, I currently have a rough draft of a system where my blog posts are structured as xml files which specify which parts are Markdown and which parts are Elm, leaving me plenty of room to add things like LaTeX support, images, or other fun things
+U57KYFW67 : It looks like `&lt;elm module="Main"/&gt;` right now, which pulls in `Main.js` (compiled from `Main.elm`) and `Main.ports.js` if it exists
+U57KYFW67 : But it looks like I might need to actually try building something with multiple apps and non-trivial ports to see how I need to change my design.
+U57KYFW67 : and the one really important use case I know I'm going to need is the ability to track mouse movement and mouse clicks relative to each app
+U57KYFW67 : I got some suggestions on how to do this the other day, but it's finally time for me to code it.
+U0FP80EKB : sounds interesting.
+U0EUHKVGB : My advice is to not overthink it.
+U0EUHKVGB : Just dive in and you’ll find something that works.
+U57KYFW67 : Indeed.
+U57KYFW67 : But at the same time, I want to get to a point where I can just drag&amp;drop my folder with the XML and the .js files (or ideally, the .elm files) and have it just kind of appear on my site
+U57KYFW67 : The old way I was doing things made it so tedious to actually upload anything that I never bothered :stuck_out_tongue:
+U57KYFW67 : What would you name a callback that subscribes to all the necessary ports... `subscribeToPorts()`? `installApplet()`? `wireItAllTogether()`?
+U0EUHKVGB : This counts as over-thinking it
+U0EUHKVGB : Go for whatever name makes best sense to you :slightly_smiling_face:
+U0EUHKVGB : I would personally go for `subscribeToPorts` if it’s only subscribing to ports, since the other two names don’t make it clear what’s happening.
+U0EUHKVGB : But naming is very subjective
+U0EUHKVGB : names can be changed later :slightly_smiling_face:
+U57KYFW67 : it looks like app.ports will be undefined unless the module has at least one port. That seems like it should be useful.
+U57KYFW67 : Well, I got the local mouse coordinates working pretty well. I just can't shake the nagging feeling that, ideally, this should all be expressible in pure elm code.
+U57KYFW67 : It looks like the `elm-lang/mouse` library does it using the `Dom` module... but the `Dom` module looks a bit underdeveloped currently. At the very least, the embedded elm instance doesn't get a reference to the very DOM element it has been embedded in.
+U0EUHKVGB : Use a `mousemove` event.
+U0EUHKVGB : The mouse package is intended to be used for mouse position relative to the window.
+U2SR9DL7Q : hey everyone, does anyone have experience deploying an elm project on github pages?
+U0EUHKVGB : Yes
+U0FP80EKB : <@U2SR9DL7Q> I’ve done it once. Since an Elm app is compiled into javascript, you can host both your html page and the js file and just include it as normal.
+U0FP80EKB : Are you running into issues?
+U0EUHKVGB : That’s how <http://json2elm.com> is hosted
+U2SR9DL7Q : yes. i made a small one pager with elm-mdl that holds a crude sample resume. i've been using elm reactor up till now. I followed these intructions <https://jasonneylon.wordpress.com/2015/11/08/quickly-create-github-io-pages-for-your-elm-projects/> to try it out on github pages but when i visit the site, I just get the default readme
+U0FP80EKB : If you are getting the default readme, then this is probably an issue with your configuration for github pages, rather than an elm issue.
+U0FP80EKB : I would recommend making a static index.html and have it just say “Hello, world”
+U0FP80EKB : Get that working first
+U0FP80EKB : Then, once you have that, you’ll know that you configuration is good. Then you can include the js file
+U0EUHKVGB : Follow this: <https://pages.github.com/>
+U2SR9DL7Q : <https://github.com/tkshill/tkshill.github.io> is my repo. It's a bit raw. I threw everything up there (dont even have a proper gitignore yet)
+U2SR9DL7Q : i followed that for the github process i think. I'll take another look though.
+U0EUHKVGB : <https://tkshill.github.io/>
+U0FP80EKB : You’ll need to compile the js file
+U0EUHKVGB : works for me
+U0EUHKVGB : Yeah. You need to check in the compiled JS
+U0FP80EKB : Oh, this is the index.html that elm make generates
+U0EUHKVGB : You are deploying the _end_ result of your build process
+U0FP80EKB : That explains it
+U0FP80EKB : So, looking at it, you did an `elm make` and checked in the index.html
+U0FP80EKB : It is there and appears to be working fine
+U0EUHKVGB : Oh, I see
+U2SR9DL7Q : actually... yeah, it's working now. strange,
+U0EUHKVGB : <@U2SR9DL7Q> The readme will always be the README
+U0EUHKVGB : On the github repo page - it will never show index.html, it will show the README
+U0FP80EKB : Although I’d highly recommend switching to something like `elm make Main.elm --out elm.js` and then include that in a static html page
+U2SR9DL7Q : I... normally dislike when things start working and I don't know why.
+U0EUHKVGB : You have to go to <https://tkshill.github.io/> to see the index.html
+U0EUHKVGB : <https://github.com/tkshill/tkshill.github.io> -&gt; README.md<https://tkshill.github.io/> -&gt; index.html
+
+U2SR9DL7Q : So... next I should compile to elm.js, and refer to that in my index.html file?
+U0FP80EKB : I’d recommend that
+U0EUHKVGB : Eh, you don’t really need to
+U0FP80EKB : Yeah, you don’t have to
+U0FP80EKB : If this is just a resume site like this, could be simpler to just keep index.html
+U0FP80EKB : But, if you are building something larger, could be good to separate them out.
+U0EUHKVGB : You can if you want to. It can be handy if you want to do some fancy html things like put stuff in the head.
+U0FP80EKB : But, of course, context
+U2SR9DL7Q : Cool. Thank you both. I've come to elm from a few years in python. And a few months dabbling in haskell but never managing to be very useful.
+U0EUHKVGB : But it’s not needed, and I personally avoid it unless I really need a seperate index.html :slightly_smiling_face:
+U2SR9DL7Q : the project will eventually expand.
+U0FP80EKB : Opengraph stuff, etc, in the head (as <@U0EUHKVGB> mentions) would need to have your own index.html that references the js
+U0FP80EKB : If you are just learning, I’d probably recommend it just as a next step.
+U0FP80EKB : Get used to that.
+U2SR9DL7Q : Elm is pretty brilliant (I've never enjoyed debugging before), but I'm new to serious web dev and front end design.
+U0FP80EKB : Welcome!
+U0FP80EKB : Elm is a great way to get into it.
+U0FP80EKB : I’ve been working in Elm for a little over a year now. Loving it.
+U2SR9DL7Q : My brief experience with javascript... gave me VBA flashbacks. elm reminds me of python from the practicality standpoint, but you know... delightfully static.
+U0FP80EKB : :slightly_smiling_face:
+U0FP80EKB : One of my first contracts was building an app in Excel in VBA :slightly_smiling_face:
+U0FP80EKB : Back in about 94. Built a small relational database. :slightly_smiling_face: (of course, we are getting into <#C0CJ671HU|random> channel territory here, so I’ll pause)
+U2SR9DL7Q : indeed, thank you again <@U0FP80EKB> and <@U0EUHKVGB>
+U0FP80EKB : Oh, looking at your repo, might I recommend you pull everything into `Main.elm` for now. Don’t prematurely pull things out into `Types.elm` and `Views.elm`
+U2SR9DL7Q : I kind of really like pulling it apart though... it forced me to get used to the import system. and there's quite a bit on the way.
+U2SR9DL7Q : I originally wanted the resume to be a json file that i would decode, but i wasnt sure how to configure the http request when working locally
+U2SR9DL7Q : I figured out the decoders, but I typically work locally, and wasnt how the http requests would work to get to the file.
+U0FP80EKB : My one recommendation is to wait until things force you separate them out, so you get a sense of how you want to extract things. For example, I’m not a fan of the `Types.elm` `Views.elm` etc extractions. I prefer to extract modules around data structures.
+U0EUHKVGB : Use `python3 -m http.server` and serve the json locally.
+U0FP80EKB : So, prematurely picking an extraction style might calcify before developing the feeling for yourself.
+U0FP80EKB : But, as with everything, when you are learning, it is probably one of the lesser of important things. :slightly_smiling_face:
+U2SR9DL7Q : I see your point. I read as many docs as I could on abstraction style before I started, and checked through some of the popular repos. In the end, this one seemed to make sense for this small project, but I'm not committed to keeping if if it grows a bit more.
+U2SR9DL7Q : <@U0FP80EKB> do you have an example of the structure that you mentioned?
+U2SR9DL7Q : <@U0EUHKVGB> I'll look into that.
+U2SR9DL7Q : for now, the elm type mimics the structure I'd like, but json will let me be a lot more flexible with the data (next step is looking into exporting a pdf from the site)
+U0FP80EKB : I don’t really have an example to show. But, I generally start with a file, then, start grouping the types and records and functions together that seem to work on a similar thing, then, eventually those move into a module with a name around the domain concept.
+U0FP80EKB : Let me look at your repo for a second
+U0FP80EKB : Just a cursory glance, i wouldn’t be surprised if I ended up with a `Resume.elm` that contained the type alias. That module would then contain the views associated with displaying it. It would also potentially include the decoders for pulling it out of the json.
+U0FP80EKB : That would be the start
+U0FP80EKB : Then, as it grew, I would start noticing other structures.
+U0FP80EKB : In this case, since it is a read-only thing, nothing too interactive, then you aren’t going to have a lot of functions associated with manipulating the resume. If there were, they would go there.
+U0FP80EKB : I like to group things together based on how related they are in the domain, rather than how related they are by programming language feature
+U0FP80EKB : When I’m going into the system to work on it, I’m usually thinking “I want to work on things around the Resume” rather than “I want to work on something with Types”
+U0FP80EKB : So, I like things related to Resume to be together
+U2SR9DL7Q : hmm. I'm so used to MVC architecture... so I immediately thought Model (core types), Views (views) with 'controller' facilitated by elm itself.
+U0FP80EKB : Understandable totally
+U0FP80EKB : This is why I mentioned pulling everything back into a single file until you feel the pressure to pull some stuff out into a module. It helps break out of other architectural mindsets.
+U0FP80EKB : If you think “I want to extract some modules” then old habits come in when there isn’t much guidance
+U0FP80EKB : I try to only extract a module when I am doing it as a form of refactoring.
+U2SR9DL7Q : Yeah. I think most of my mental resistance is just me considering the sunk costs of the time i spent figuring out how to pull it all out... which rationally, shouldn't weigh on my decision to pull back.
+U0FP80EKB : So, I have a bunch of functions that like ```
+resumeX
+resumeY
+doSomethingelseToResume
+```
+and I say to myself “that’s duplicate code, the knowledge that these work on Resume” so I eliminate that duplication by grouping them in `Resume.elm` and removing `Resume` from their name
+
+U0FP80EKB : Consider it that you’ve learned a lot about building modules and importing them. That skill will come in VERY handy when you extract something out for real
+U0FP80EKB : One of the great things about deleting learning stuff is that it almost always is less than optimal. If you delete it, then you don’t have to live with it later.
+U0FP80EKB : And who knows, you might end up liking that structure. It seems like there are people who do structure their stuff that way.
+U0FP80EKB : I’m a big fan of deleting things I’ve done and starting over
+U0FP80EKB : I even wrote a blog post about it. #shamelessplug <http://articles.coreyhaines.com/posts/short-lived-branches>
+U2SR9DL7Q : that... gets easier with practice. one of the hang ups of the beginner life is that every line seems so much more precious. I spent hours understanding some of the pipes... I don't want to lose them. But what you're saying is exactly what I told my interns learning python for the first time.
+U0FP80EKB : :slightly_smiling_face: definitely
+U0FP80EKB : Well, I’m off to get a porter-infused milkshake. Welcome to Elm, <@U2SR9DL7Q> ! It is a wonderful way to write software!
+U2SR9DL7Q : for the first time, i dont feel like i'm stepping in a mine field learning web development <@U0FP80EKB> my brain is glad, my heart rejoices. have a good night.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

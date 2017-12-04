@@ -1,1 +1,127 @@
-    List FIMP```
+U3YDBDP4Z : Thanks <@U0F01KLV6>
+U2LAL86AY : how can i read DOM information about an element - immediately after it has been created - but with no interaction form the user? 
+I'm showing text inside some boxes - and this boxes are layd out in 2d plane - and i need to detect if they collide or not - - for that i need their dimension - width height- and absolute positioning.
+
+I use <http://package.elm-lang.org/packages/MichaelCombs28/elm-dom/1.0.0/DOM#boundingClientRect>
+But how can i get this info without no user interaction? How do i know how to lay out this boxes - up front? Calculating their future dimensions in pure elm is not an option. 
+
+I need to render them first, then get their dimensions and positions. all this without the user doing anything... hmm any ideas? :thinking_face:
+
+U2LAL86AY : i need to go, but please if you have any ideas on how this can be done - let me know :smile:
+U0GPGFQQY : <@U2LAL86AY> there is no way to do this without ports
+U0JFGGZS6 : you can't use CSS for this somehow?
+U0GPGFQQY : <@U2LAL86AY> if you explain layout, maybe we can come up with a different solution
+U2LAL86AY : hey i'm back
+U2LAL86AY : yes, i'll show you a picture.
+U2LAL86AY : <@U0GPGFQQY> loading..
+U2LAL86AY : for generating what i have here - i only rely on the relative/absolute positioning - and i only need to know the height of the orange box - and the width of the blue box - and using this alternation of relative/absolute positioning i generate this.The orange boxes contain blue boxes and the blue boxes contain orange boxes. And what i'm trying to solve is:
+1. when adding a new box - i need to make sure it doesn't collide with an already expanded column or row.
+2. when expanding a row - i need to make sure it doesn't collide with an already expanded row or column.
+
+And this can be at any level of nesting.. So that's why i need all this dom info - because this boxes will contain UI stuff inside - like text - that can;t be calculated up front - only after i render them - i get their widths and heights- and the absolute positioning related to the the viewport / document.
+
+U2LAL86AY : so just to explain some more.```
+type BlueBox = { id: Int, width: Int, orangeBoxes : List Int }
+type OrangeBox = { id: Int, height: Int, blueBoxes: List Int } 
+```
+So i only keep a reference &gt; i don't store them literally  inside one another. It's a flat data structure. In a dict. 
+
+Now i want this to be transformed into:
+```
+type BlueBox = { id: Int, width: Int, orangeBoxes : List Int, geometryStuff: Dom.BoundingClientStuff }
+type OrangeBox = { id: Int, height: Int, blueBoxes: List Int,  geometryStuff: Dom.BoundingClientStuff } 
+```
+And load this geometry in - somehow - after everything is rendered using this absolute/relative stuff i have.
+
+U0JFGGZS6 : it seems like you could trigger the port cmd to update the dimensions on those 2 actions you mention (adding a new box and expanding a row).
+U0JFGGZS6 : If the dimensions of the new box are fixed, and expanding a row is a pixel at a time etc., you could check for collisions ahead of time - no?
+U2LAL86AY : ok. i need to go for a few minutes, but i'm back real soon - that souds interesting - not sure if i got it yet.
+U0JFGGZS6 : interesting looking project...
+U0F01KLV6 : Reducing code size even without minifying.
+U0GPGFQQY : is it an option to fix the dimensions and then calculate the positioning?
+U0GPGFQQY : you seem to keep the size somewhere because you allow resizing
+U0GPGFQQY : what if everything was positioned absolutely?
+U2LAL86AY : ok, i think i partially underestand what you say -when having any action for creatiing stuff - you say to command a port to get the rendered stuff back.
+So it goes like this: -&gt;` i receive the message createBlueBox` -&gt; `i add it to the model in a "not ready yet state" AND then send the port command.` -&gt;` then in the view this new box get's rendered` - and `js listens for when this is rendered`. When this render happens - the `js sends me back the geometry info` -&gt; `and i move the model in "ready/complete state"`
+
+So the hole point is to have this intermediary step - where i render - and wait for js to give me back what i need.
+
+What  was confusing at first - is that the first time the app loads -  i have many boxes not just one. 
+
+But i will solve that by storing all this geometry information in firebase or something - and when it comes all at once - i already have all this info from before. So the problem then becomes - making sure that each box that i add - will get the the geometry information individually. And this is not that bad. I only need 2 ports i think. Hmm we will see - thanks so much for now :smiley: .
+
+And no, - positioning everything absolutely i try to avoid that - because will require even more manual computation. I want to let the browser do as much as i can.
+But maybe i will be forced to do that. I'm in experimenting phase now - not sure about anything yet.
+
+U2LAL86AY : <@U0JFGGZS6> i'll keep you in the loop :smile:
+U0GPGFQQY : aion: good luck! ps you mentioned a wrong person
+U2LAL86AY : very true :smile: you too.
+U5XQNLRLP : Hello Everyone :smile:
+U5XQNLRLP : So I have a quick question for you folks. I am creating a game with elm and I am trying to figure out something. So i am creating an Hacking simulation game where my main app is an OS. I want to put buttons in where it allows me to open a small window within the page. I am not sure where to start with that.
+U2LAL86AY : how can i receive a `Result Error Success` type - inside my inbound port - instead of a normal type `string / list` . I mean i want js to tell me if i got a succes or error. And not use 2 different ports for that.
+U2LAL86AY : <@U5XQNLRLP> so this `small window within the page` - is just a normal div - that is styled to look like a window?
+U0JFGGZS6 : what I was thinking was you might not need a "not ready" state for individual boxes, if the boxes are initialized to a fixed size, and you have the geometry of the rest of the boxes.
+U5XQNLRLP : So essential it will be like this.....You are in windows and you click on the chrome icon and chrome browser pops up. I will be able to do things within that window.
+U5XQNLRLP : I haven't officially started coding it yet. I am kind of making small plans and seeing if my ideas can actually work.
+U0JFGGZS6 : `I receive the message CreateBlueBox` -&gt;`I check if it would collide with any existing box based on its default geometry` -&gt;
+`If so, handle the error case; if not, render the new box and send out a port request to re-fetch geometry`
+
+U0JFGGZS6 : you'd just need a global "not ready" state for when you fetch the geometry of the first box
+U2LAL86AY : hmm - i made a mistake when i mention that i know the length of the orange boxes. I know it here - in this demo - i generated randomly as you can see  - but in reality will be calculated based on the text it contains. So there is no inititial/default geometry. 
+A `Global not ready state` sounds like an interesting idea.  :smiley:
+
+U0JFGGZS6 : <@U2LAL86AY> Elm can automatically handle Maybe's coming from javascript (`null` turns into `Nothing`)
+U0JFGGZS6 : <https://guide.elm-lang.org/interop/javascript.html>
+U0JFGGZS6 : if that helps
+U2LAL86AY : Result allows for a string to be passed in, in the case of Error.. Maybe is just Nothing -&gt; that's why i'm interested in Result type..
+U0JFGGZS6 : ah ok
+U0FP80EKB : <@U2LAL86AY> you could pass in an `Decode.Value` and then decode it into a `Result`
+U0JFGGZS6 : right, sometimes you don't care about the error message so Maybe would work.. if you need a Result yes exactly what coreyhaines said
+U14Q8S4EM : <@U5XQNLRLP> , I recently made this in Elm :  <http://www.ct-os.us|www.ct-os.us>
+U14Q8S4EM : Sounds similar to what you are going for. I would be happy to share the code or tell you about it.
+U5XQNLRLP : <@U14Q8S4EM> That is exactly what I am looking for :smile:
+U55CZT6T1 : Still wondering about measuring performance: a variant of Debug.log that would log a timestamp with each message would let me collect timings for critical parts of my program. Is something like this possible?
+U1CE9DL9H : <@U55CZT6T1> no, but there is <http://package.elm-lang.org/packages/BrianHicks/elm-benchmark/latest> if you suspect something is slow
+U55CZT6T1 : <@U1CE9DL9H> : Thanks!
+U2D7NUGS1 : Hello, good folks! Is there a way of setting custom HTML attribute to a boolean value (i.e. `true` or `false` instead of string `"true"` or `"false"`)? I'm fighting with Polymer custom elements and their attributes and string doesn't do the trick.
+U1CE9DL9H : <@U2D7NUGS1> what are you using now?
+U1CE9DL9H : because `property "x" "false"` will produce `x=false` (so no qoutes)
+U2D7NUGS1 : Hmm... let me check it. Maybe the problem is elsewhere.
+U5Z6J0VNJ : Three problem might be that the HTML spec only allows strings for attribute values. I believe the previous elm diff patch was vdom and there are issues reported against the vdom library asking for the same.
+<https://www.w3.org/TR/html51/syntax.html#elements-attributes>
+
+U5Z6J0VNJ : Im not being definitive here wrt elm... Just trying to add some hopefully helpful context I've seen in other libraries
+U2D7NUGS1 : <@U1CE9DL9H> are you sure? I'm trying it on standard `main` like that: ```view : Model -&gt; Html Msg
+view model =
+    main_
+        [ attribute "test" "true" ]
+        []
+``` and in chrome I see: ```
+&lt;main test="true"&gt;&lt;/main&gt;
+```
+
+U1CE9DL9H : hmm, right
+U1CE9DL9H : so, <https://github.com/elm-lang/html/blob/2.0.0/src/Html/Attributes.elm#L177> has a `boolProperty` function
+U1CE9DL9H : I think that is what you want to replicate that using <http://package.elm-lang.org/packages/elm-lang/virtual-dom/2.0.4/VirtualDom#property>
+U2D7NUGS1 : Mhm... it's not exposed and looks like an internal helper. How would I use it?
+U1CE9DL9H : replicate it
+U2D7NUGS1 : But I think it will still output quoted value, wouldn't it?
+U1CE9DL9H : I think it wouldn't
+U2D7NUGS1 : Ok, let me try.
+U1CE9DL9H : wait, this is for something else, like things that are present or not
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

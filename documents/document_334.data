@@ -1,138 +1,99 @@
-used as a Cmd like ```( nextModel, delay 999 (NewStoryNode newNode) )```
-To pass a random number instead of 999
-Do I need somehow store it in the model, and go through setting up new Msg types
-<@U5QJW0DDE> I assume you have tried Elm debugger?
-or am I missing something?
-<@U0P088J1L> no, but i will now! i'm quite green on Elm at the moment
-doing more high-level research of the lang and its ecosystem
-just started writing some code today
-aka is there a way to generate a random number without Msg (s)
-... "You cannot just get random values willy-nilly. You create a command, and Elm will go do some work behind the scenes to provide it for you. In fact, any time our program needs to get unreliable values (randomness, HTTP, file I/O, database reads, etc.) you have to go through Elm."
-so to answer myself... No
-<@U641LDZFU> There are a few ways you could do something like this. One way is to hold onto a random seed in your model and then call `Random.step` whenever you needed it.
-Elm has a terrific time traveling debugger. I believe it's activated by default when you run elm reactor.
-i just noticed that "updating" a value in a record respects the type so far as if the record has a key of the same name you are updating, but otherwise does not respect the type of the key itself.
-that seems peculiar to me
-<@U5QJW0DDE> Can you provide an example? Not sure if I understand your comment.
-consider this record: g = {a=5}
-this expectedly fails: {g|b=3}
-this does not fail: {g|a="hi"}
-<@U5QJW0DDE> take a look at the description of "extensible records" <http://elm-lang.org/docs/records>
-but g={g|a="hi"} fails, right?
-thanks <@U48AEBJQ3> I will give that a go
-<@U0P088J1L> no it does not fail, that's why i find it peculiar, but will look at the link <@U5J0H2NS2>  sent
-oh, i misread your line <@U0P088J1L>
-g= {g | a = "hi" } will fail, as you can not modify the value of an already existing one.
-<@U0P088J1L> no  g={a="hi"} does not fail
-if you evaluate `g` after {g|a="hi"}, it still evaluates to {a = 5} : {a : number} which indicates g wasn't "updated".
-right
-immutability
-<@U5QJW0DDE> that's correct; you can indeed change the types of values in the record update syntax
-I've actually written about that <https://blog.ilias.xyz/5-things-you-didnt-know-about-elm-7bdb67b1b3cd>
-i just noticed that the Elm logo is *not* the generic Slack placeholder assigned as a default avatar.
-quick question, I have a function that receives a Msg as an argument. In different modules that call this function, one passes a `Msg a` and the other passes `NoOp`. This causes an issue because NoOp doesn't have an argument. What's the common way to handle this type of case?
-<@U5QJW0DDE> :smile: It's a tangram! Making complex shapes out of simple elements and all that
-<@U0P088J1L> so what's the type signature of that function?
-<@U3SJEDR96> i saw your blog and I thought, he's using the Slack icon for Elm as his favico. then I thought, that can't be right
-how realistic has the guarantee of zero runtime errors in Elm, in practicew?
-its a bold ambition, works out on large apps?
-We have two apps in production and haven't seen a runtime exception, yet.
-Actually, I guess you could say 3 apps, when I think about it.
-i suppose one source of exceptions would be on the js side when sending things through ports, since Elm throws exceptions there, yeah?
-One consists of a set of widgets that are embedded on third-party sites. One is an administrative backend for our customers to manage those widgets. The third is a sort of CMS/Blog/Newsletter product.
-<@U3SJEDR96> I didn't have a type annotation for this function, but I guess something like `a-&gt; msg` for the part where `Msg a` is the argument?
-<@U0FP80EKB> regarding your embedeed third-party widgets, they are basically elm applications that get embedded on third-party sites inside a div on those external pages?
-<@U5QJW0DDE> Anything outside of Elm is unsafe. So, just like your server might have an error at the other end of an http request, the js might have an error at the other end of a port request
-<@U5QJW0DDE> yup. You can see an example here. The "What do you wonder?" and "Help us out" widgets <https://www.wuft.org/findoutflorida/>
-<@U5QJW0DDE> as for sending things through ports; most (but not all) production apps end up using ports that work with `Json.Encode.Value` so the conversion to and from JS values happens within Elm, rather than being managed by the runtime
-it's less magic, and more control over how to handle bad input :slightly_smiling_face:
-We have a small js bootstrap that loads up the elm app and initializes it on a div
-I'm planning to have a React-controlled div from JS (actually clojurescript) load an Elm app. When React gets rid of the div and removes it from the DOM, the Elm app should just automatically quit, yeah?
-actually i suppose i'd need to set the var holding onto the Elm app to nil
-<@U0P088J1L> Your `Msg` type has a bunch of constructors, right? `NoOp` `Foo String` and such. These are the types of the constructors `NoOp : Msg` `Foo : (String -&gt; Msg)`. If the function you wrote really takes a `Msg` as an argument, it can't take both just `NoOp` or `Foo`, because those are different types.
-If your function is of type `myFun : Msg -&gt; Something` then you can call `myFun NoOp` or `myFun (Foo "string")`
-If your function is of type `myFun : (String -&gt; Msg) -&gt; Something` then yo ucan call `myFun (\_ -&gt; NoOp)` or `myFun Foo`
-<@U48AEBJQ3> That makes sense. Thanks!
-<@U3SJEDR96> i'm curious, does the compiler have a similar optimization for point-free composition with &lt;&lt; as it does for pipelines?
-most of the time so far in elm i find myself programming pointfully but i'm just wondering :slightly_smiling_face:
-It does, though it's harder to predict the result in terms of performance impact
-But yeah, `&gt;&gt;`, `&lt;&lt;`, `|&gt;` and `&lt;|` are all special cased in the compiler to "inline" the result
-cool!
-<@U5XC2FJ1Y> <https://gist.github.com/zwilias/45cf39cf83f6f4dbdfc4c10707270051> this might illustrate why the impact is harder to predict :slightly_smiling_face:
-hm, you have c3 defined twice in the elm
-Refresh, noticed that after posting :slightly_smiling_face:
-i am trying to understand this, so (.&gt;) is just a synonym for (&gt;&gt;) that doesn't have the compiler optimization, right?
-yeah, it's just how `&gt;&gt;` would be implemented _without_ the compiler optimization :slightly_smiling_face:
-and c2 compiles to something that needs to execute another function before getting back x =&gt; b(a(x))
-Yep, essentially :slightly_smiling_face:
-compared to c1 which compiles to x =&gt; b(a(x))
-i'm not clear what's going on with c3 and c4? it looks the same but wrapped in a constant function of 3 arguments
-oh wait but those functions are passed to a function called F3, hm
-is there a way to manipulate `WebData` as received via the `RemoteData` package? I'm loading predefined vaues for a form from the server but then I want the user to be able to change them and later on send the possibly changed values back to the server.
-<@U604S603Y> look at `RemoteData.map` that will allow you to update what is contained
-thanks <@U0FP80EKB>, that was exactly what I was looking for
-Hello everybody! Can someone point me to the good explanation of tasks (0.18), please? I've been waiting for the official documentation for a thousand years.
-What about them are you trying to understand?
-How and when to use them, actually. How do they simplify my life as a developer.
-Tasks come as a consequence of having no side effects in the language
-if the language has no sideeffects, then you needs a way to interact with the world and so tasks are how you do that.
-Instead of having any arbitrary function fire the missles, you have a function return a description of what it wants to have happen and then the runtime performs that.
-As long as I understand you describe commands in general
-plausible deniability if you will
-you are right that at some point it gets dispatched as a command, but a task provides a nice wrapper for chaining different things and support for what to do when things fail
-Okay. Let's assume I need to perfom a get request. I have a hammer for that nail: Http.get and all the Decode stuff. When should I use Task in my situation?
-So it's a bit like Promises?
-Kinda
-With Tasks you can perform 2 get requests in the same command, for example
-Where the second depends on the result of the first
-Aha! That's something.
-If there is a need for me to check on every request if user's auth token is up to date, I will use Task (check cmd andThen if ok fire second one). Am I right? Or, maybe, you can think of some little programming exercise (like the ones in the official documentation) [for someone like me to do] which can expose Tasks better?
-I think that sounds about right yeah
-You could try to define a function like `Request a -&gt; (a -&gt; Request b) -&gt; Task Err b`
-And partially applying to a check auth request would mean you have a function that always does the check auth for you
-Yeah, if you need to execute two (or more) tasks in a row where the second depends on the first. Then `andThen` is the way to do it
-But, can't I just fire my second task in my update function when the first one is executed (I mean, when one defines an Http request he or she also supplies a message, which can fire second command)?
-if you want, yep you can do that
-each task is going to go through a message though and so strict sequencing can be difficult
-I meant - why do I need to use Task if I can "schedule" everything that is going on with just simple elm-flow (msg -&gt; cmd -&gt; msg -&gt; cmd)?
-so theres two things there, tasks make it easier to handle errors
-and the other thing is, you can wind up with race conditions if you are going through message
-4) And there is no risk of one, second, "event" happening before the other one, which should be first by design.
-Is everything correct?
-more or less
-best I can say is try using them for things like web requests and see how things compose
-Its possible to go overboard and try to do too much in  a task, but they are a nice abstraction when the use case fits
-actually come to think of it, I don't think you can use just commands if there is the potential for the command to fail
-Thank you <@U23SA861Y>! May the force be with you.
-What are the most popular editors most of you are using for Elm?
-well I use vscode for it
-I use vim
-I use atom
-A lot of the beginner tutorials use atom, because of three very useful packages in language-elm, elm-format and linter-elm-make which work pretty well if you're just starting out. Of course, I'm sure the other editors have their own version of these things.
-does atom also do autocomplete?
-Can someone help with json decoding?
+U0LPMPL2U : string keys pointing to values of a known data type?
+U3SJEDR96 : <@U17PWHU4D> you could do that with a Dict, where the keys are those strings and the values... If they're all the same type, that would work just like that, if not you'd have to make a union type to represent the different possibilities
+U17PWHU4D : thanks <@U0LPMPL2U> and <@U3SJEDR96> , going to look into `Dict`.  and yes.  example: 
+```
+{
+  "1234": {
+    id: 1
+  },
+  "1235": {
+    id: 2
+  }
 }
-i cant figure out after numerous attempts how to decode date.day, date.date and date.month
-<@U6531GSTW> What does the incoming data look like for those fields?
-i can write the incoming data as i like
-but its gonna have all these attributes in them
-<https://jsonblob.com/6ecd993e-6290-11e7-ae4c-e793fe90c432>
-something like this
-Well, for `Date` you should first look at <http://package.elm-lang.org/packages/elm-community/json-extra/2.3.0/Json-Decode-Extra#date>
-and what about month and day?
-There you have options. You could just use a format which converts to a `Date` and then use the `Date.dayOfWeek` and `Date.month` to extract them.
-month I already posted earlier today, actually
-Or you could use strings or integers or something. You would then write a function `stringToDay : String -&gt; Result String Day` and then you could turn it into a decoder by going `Decode.string |&gt; Decode.andThen (Json.Decode.Extra.fromResult &lt;&lt; stringToDay)`
-for reference, this is what I made this morning: <https://ellie-app.com/3HvJVvLtnyWa1/0>
-<https://ellie-app.com/3GpdHFztdsta1/11> this is how it looks like now
-everything besides the decoding is working fine
-<@U6531GSTW> <https://ellie-app.com/3HGvc3fZgc5a1/0>
-I fixed the Json.Decode imports so that they referenced the correct thing, then I reworked the building of the Aufgabe record. When you do a bunch of `andMap` like that, you have to match the structure of the record precisely. I am just presuming the names in the JSON are the same as in the Elm record.
-Now you have two decoders to write. `dayDecoder : Decoder Day` and `monthDecoder : Decoder Month`
-    _ -&gt; Err "not a valid day"
-Looks solid.
-a bit late compiling example with some holes to fill in: <https://ellie-app.com/3GpdHFztdsta1/11>
-umm its looks like this <https://ellie-app.com/3HGC3s98j2xa1/1>
-what argument am i missing?
-You need to convert your `String -&gt; Result String Day` into a `Decoder Day` by having an extra function which has `JD.string |&gt; JD.andThen (JDE.fromResult &lt;&lt; dayFromString)`
-uhh how would that look like, i am a bit clueless right now
+```
+
+U17PWHU4D : assuming that's the way to do it.  thanks again!
+U0LPMPL2U : Is this JSON you're trying to convert to an Elm structure?
+U0CLDU8UB : <@U601ELFEG> What do you mean by "don't want to author [..] in elm"? Do you mean that you don't want to write that in Elm or that you want to keep it in your codebase as plain HTML?
+U601ELFEG : meaning I want to keep things like the content of the help panels authored in HTML - probably in a file apart from the elm code -
+U17PWHU4D : in the example there <@U0LPMPL2U>, but i also have the same issue for types.  so i think Dict should get me on the right path.
+U601ELFEG : ditto the control panel (it has some meticulously laid out and styled buttons)
+U0LPMPL2U : The structure of your types doesn't have to mirror the structure of your JSON
+U0LPMPL2U : for example, you could have:
+```
+type alias Thing = 
+  { number : String
+  , id : Int
+  }
+```
+
+U0LPMPL2U : and convert the JSON into this type
+U0CLDU8UB : I don't think too many people have done something like that. The only thing I can think of is using Custom Elements (Web Components).
+U601ELFEG : hrm... that sounds "heavy" - perhaps I'll just keep these things in the "outer" HTML file that I use to load the elm app into a &lt;div&gt; --- though these things will be outside elm's &lt;div&gt; -- and use ports and some javascript to plumb to/from the elm code
+U601ELFEG : does that sound crazy? Like imagine I have 40 or so help panels in the left hand margin, and I want to hide/show them based on the current state of the model - I'd just plumb like some ID strings into a port have JS do the hide/show
+U0CLDU8UB : Honestly, in our production app we used that exact idea for a few dialogs.
+U0CLDU8UB : Then again 40 panels does sound like a lot of added DOM.
+U601ELFEG : right - which is why I don't want to be re-building this essentially static DOM sub-tree inside elm - also authoring the styled text will be much easier if I just do it in HTML
+U0CLDU8UB : Just as a side note, did you know this exists: <https://mbylstra.github.io/html-to-elm/>
+U601ELFEG : yes - I did - but I'd rather not have the extra build step - and it still means I'd be pushing this giant DOM tree from elm all the time
+U0CLDU8UB : Or a silly idea: you could put a string of HTML through a port and in the Elm app use the `innerHTML` trick to drop it in its place :slightly_smiling_face:
+U601ELFEG : okay - seems like a little JS and ports will be the easiest path
+U601ELFEG : I don't mind, I'm not a purist - and elm has made the "meat" of my app *so much nicer* and come up so quickly, that this isn't really a detraction from elm
+U23SA861Y : just remember, languages separate technologies, not concerns. You shouldn't use a seperate language simply because you feel there needs to a be a division in the code base.
+U601ELFEG : yeah - this is separate technologies: extensive help (or rather, think lessons) need extensive text styling and presentation - and so HTML is the right language.... ... I guess I just need to build a set of Cmd things that does _hide/show this node "out there" on the rest of the page_
+U23SA861Y : I don't know if these are moving about, but if the "lessons" appear in the same place you can almost just use an iframe and be done
+U3SJEDR96 : One option to consider is using elm-markdown..
+U0CLDU8UB : Oh wow, thinking outside of the box :smile:
+U3SJEDR96 : I mean, it can handle html, too, so doing the meat of it in markdown and some more advanced ad-hoc markup in html could work out nicely for those lessons
+U17PWHU4D : <@U0LPMPL2U> - if its ok to follow up on the `Dict` for types.  I'm struggling a bit.  how would I type `placement` here if `a` is the unknown and could be unlimited amount of them.
+```
+type alias Node =
+    { id : Int
+    , name : String
+    , placement :
+        { a : NodeLocation
+        }
+    }
+```
+
+U0LPMPL2U : Could your break it into two keys?
+U0LPMPL2U : ```type alias Node =
+    { id : Int
+    , name : String
+    , placement :
+        { id : String,
+        , location : NodeLocation
+        }
+    }
+```
+
+U17PWHU4D : ah, i see what you're saying.  so then i'm just making it a list and denormalizing?  is that correct?
+U17PWHU4D : i mean, i've always had responses this way because it was optimized to grab by key rather than array/list.
+U17PWHU4D : if you imagine there's 1000 placements, and they all have an ID.  our structures have always been to have the data normalized.
+U17PWHU4D : in FlowType, I can use `[key: String]: NodeLocation`.  wondering if there's a similar usecase for elm.
+U0LPMPL2U : So Elm records need to know the name of the keys at _compile_ time
+U0LPMPL2U : A Dict might be the best use case for you here
+U0LPMPL2U : So you'd have:```
+type alias Node =
+    { id : Int
+    , name : String
+    , placement : Dict String NodeLocation
+    }
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

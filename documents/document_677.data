@@ -1,10 +1,63 @@
+U3SJEDR96 : `=&gt;` is also great when working with inline styles or `Dict.fromList` for example
+U3R7CKQRX : I agree about the expressiveness
+U3R7CKQRX : is there some general agreement to do this? i've seen this quite a bit. will this maybe even be changed in 0.19?
+U3SJEDR96 : Quite likely!
+U3R7CKQRX : ok good to know :slightly_smiling_face:
+U3R7CKQRX : thanks <@U3SJEDR96>
+U3SJEDR96 : Though there will likely be tools to convert code, so sticking to `!` for now is actually a good idea :)
+U5XC2FJ1Y : thanks! i really like the compiler messages 99% of the time so I figured there was probably a story here, good to know my intuition was right and good to know this is something y'all have thought about :slightly_smiling_face:
+U601ELFEG : I have the following:    `case Array.get i someArray of      Just x -&gt; x       Nothing
+U601ELFEG : er
+U601ELFEG : ```case Array.get i someArray of    Just x -&gt; x
+    Nothing -&gt; Debug.crash "never gonna happen"
 ```
-Thank you! Unfortunately, it doesn't work :disappointed:
-wait.. so in your code snipet, it's supposed to return F, T, T, F?
-I tried to add valid ones.
-I'm confused also :smile:
-All day working at one task, and finally done 90%, but this thing get me mad :smile:
-haven't forgotten about you, milo.
-I think I'm going to get banned for this but the problem is that it needs some way of determining what is being passed (string, or list)
-so if list, and first element exists and that first element is 'None', then it is empty
-also, if val does not exist (None or empty), it is also True (is_empty)
+
+U601ELFEG : but I see this crash anyway - does Elm evaluate the Nothing case anyway?
+U0CLDU8UB : Yes, it's an eager language
+U601ELFEG : even for `case`?
+U1CE9DL9H : no, case is lazy
+U601ELFEG : that is what I thought
+U601ELFEG : though I'm wondering if the `Nothing` branch is handled differently
+U1CE9DL9H : what is your actual code? the thing you typed will never evaluate the `Nothing` branch for a just
+U1CE9DL9H : but ```
+x = Debug.crash ""
+
+v = case ... of   
+    Just _ -&gt; ...
+   Nothing -&gt; x
+```
+
+U1CE9DL9H : will
+U1CE9DL9H : crash
+U601ELFEG : ```arrayMap2 : (a -&gt; b -&gt; c) -&gt; Array a -&gt; Array b -&gt; Array carrayMap2 f aArray bArray =
+  let
+    l = min (Array.length aArray) (Array.length bArray)
+    gen i = case Maybe.map2 f (Array.get i aArray) (Array.get i bArray) of
+      Just c -&gt; c
+      Nothing -&gt; shouldNeverHappen
+  in
+      Array.initialize 1 gen
+```
+
+U601ELFEG : oopps
+U601ELFEG : and yes - now I see it - `shouldNeverHappen` is a syn. for `Debug.crash` with a message
+U601ELFEG : and that is going to kill it
+U601ELFEG : Oy - miss my lazy language!
+U1CE9DL9H : just make it take unit as an argument
+U601ELFEG : TY - that worked - the app runs again.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

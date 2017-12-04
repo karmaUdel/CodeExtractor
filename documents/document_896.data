@@ -1,0 +1,131 @@
+U2BS4M1RV : lxml should really be in the standard library.
+U5NMSURAQ : well, `xml` already is and they share an interface (I think)
+U42LCHFD2 : all you have to do is ```import requestsimport lxml
+from lxml import html
+
+def xpathScraper(url,tag):
+        page = requests.get(url)
+        tree = html.fromstring(page.content)
+        web_content = tree.xpath(tag)
+        return web_content```
+
+U4BMZ90T0 : Yeah I think that the Etree class is shared
+U4L4AH15L : Why no `BeautifulSoup`? it supports `lxml` as well
+U5NMSURAQ : BeautifulSoup's interface is bizarre
+U5NMSURAQ : like really strange
+U5NMSURAQ : And it's an abstraction over lxml either way
+U42LCHFD2 : im not a fan of bsoup
+U42LCHFD2 : and everything i have ever tried/wanted to do i was able to solve with lxml in one way or another
+U2BS4M1RV : I just installed lxml and I noticed I get an import error as well. ```
+Traceback (most recent call last):
+  File "&lt;input&gt;", line 1, in &lt;module&gt;
+  File "C:\Users\AB14925\Desktop\Viewfinity\PyCharm Community Edition 2017.1.3\helpers\pydev\_pydev_bundle\pydev_import_hook.py", line 21, in do_import
+    module = self._system_import(name, *args, **kwargs)
+ImportError: DLL load failed: The specified procedure could not be found.
+```
+
+U5NMSURAQ : lxml has cssselect, which is a godsend
+U2BS4M1RV : I'm not concerned about that, to be clear, I'm not using it in this environment, just wanted to see if <@U4BMZ90T0> was doing something wrong.
+U4BMZ90T0 : I can try and deleting it real quick
+U4BMZ90T0 : then reinstall
+U4BMZ90T0 : one sec
+U2BS4M1RV : MS Windows
+For MS Windows, recent lxml releases feature community donated binary distributions, although you might still want to take a look at the related FAQ entry. If you fail to build lxml on your MS Windows system from the signed and tested sources that we release, consider using the binary builds from PyPI or the unofficial Windows binaries that Christoph Gohlke generously provides.
+
+<http://lxml.de/installation.html>
+
+U4BMZ90T0 : im using the pypi ones though
+U2BS4M1RV : Yeah, I just tried updating setuptools and pip and it didn't work for me. May want to try those other binaries if you need it.
+U5NMSURAQ : #JustWindowsThings
+U4BMZ90T0 : How is a date supposed to be formatted through a GET?
+U4BMZ90T0 : should it be a date object?
+U4BMZ90T0 : such as using `datetime.datetime`
+U653RFLBD : That's what I suspected when I saw the token in the url didn't match the token in the INFO log. I hope it turns out to be an easy fix for you!
+U4BMZ90T0 : holy... there's legitimately no easy way to just grab every element with a tag inside an xml
+U5NMSURAQ : xpath?
+U4BMZ90T0 : I figured it out had to use `.//{tag}` to grab all subelements of the root
+U4BMZ90T0 : I've got this whole thing figured out now I think. A bit of a larger project than I imagined because I have to make like 4 different requests to get all the information/keys I need to be completely automated so I'm trying to skeleton out a small class to do everything in the end.
+U4JJH96TS : Hello, a design question for a slackbot. I'm using slack's RTM APIs to establish a websocket connection with slack. Code is deployed on a single instance/machine and everything is working well. Now, I want one more production instance to ensure availability in case one is down. How can I replicate the deployment on two machines?
+U1BP42MRS : You really can't with a slackbot <@U4JJH96TS> - otherwise what would happen is you'd have two bots listening and responding to all events. You may need a fail-over instead where another machine starts up and starts the bot if the main machine fails (of course you would likely have a period of downtime during that failover)
+U4JJH96TS : &gt; you'd have two bots listening and responding to all events.Yeah, that was the problem even I had in mind. Should I explore on message queues?
+
+U1BP42MRS : I guess you could, I haven't checked for any that de-duplicate repeat messages though
+U4JJH96TS : I have never worked with message queues before. Can we have a configuration where event is consumed only by _one_ consumer at a time? Or, is it replicated to all of them?
+U4JJH96TS : But all this sounds too complicated, I think. We only have about 800 users using out bot
+U1BP42MRS : I am not aware of a way to only have one consumer listening at a time, but you could use a distributed lock for who is the "active" listener - but those are somewhat complicated.
+U1BP42MRS : consul has a mechanism to do this
+U07JGLLKF : i'd just keep all the state in a database
+U07JGLLKF : messaging queues and consul in this would make things overly complicated in what's basically a feed consumption mechanism
+U4JJH96TS : &gt; `i'd just keep all the state in a database`Could you please elaborate more on this?
+
+U07JGLLKF : <@U4JJH96TS> you have two services:  service a: talks to Slack RTM, receives messages and puts them in incoming database, reads outgoing database, sends event to slack
+  service b: consumes messages from incoming database, does logic to generate response, puts outgoing message onto database
+
+U1BP42MRS : That doesn't really solve the issue of service a going down though, which is the desire, from my understanding
+U1BP42MRS : e.g. HA consumer
+U07JGLLKF : service b can run as many instances as you'd like
+U07JGLLKF : and you could run multiple service a as well if you wanted
+U07JGLLKF : you'd just have a constraint on message ID uniqueness in the DB
+U4JJH96TS : so, basically, we are using database as an alternative to a message queue here?
+U1BP42MRS : <@U4JJH96TS> the difference with a DB is the unique constraint if you get message IDs
+U1BP42MRS : so you could have any number of consumers from the RTM api
+U07JGLLKF : alternative isn't quite the right phrase i think
+U4JJH96TS : I see
+U1BP42MRS : But depending on your load, you may get some DB locking issues. With 800 users, you are probably OK
+U1BP42MRS : even our chat at its busiest wouldn't cause any trouble (that I can think of)
+U07JGLLKF : message queues are really good for service discovery but not as good for reliable storage
+U1BP42MRS : If you wanted the distributed systems approach for load:
+1. N consumers -&gt; Rabbitmq Excahnge
+2. RabbitMQ Exchange to any bound queues
+  *  One queue subscribed for saving to a DB
+  * Another for processing
+
+You can do different routing mechanisms so the same work goes to the same worker, but instead just allow dupes and test for dupes on the consumer side
+
+U1BP42MRS : But that's way overly complicated for the current need, it sounds
+U4JJH96TS : Yes, I would agree. I am more inclined towards <@U07JGLLKF> suggestion.One more question, I am using `crontab` as a kind of “automated restart” setup for my bot's running service and other scheduled events. Few days ago, there was a problem with `crontab`. Not sure about the cause. Any suggestions on improving this setup? Alternatives to `crontab`?
+
+U4JJH96TS : Can we have notifications setup to know if `cron` didn't run?
+U1BP42MRS : Are you polling for it to be up or something?
+U1BP42MRS : A `systemd` service would be better, IMO
+U4JJH96TS : Well, I'm using `cron` to poll and monitor for my bot's running process. So, to poll cron, we need another monitor?
+U1BP42MRS : No, systemd would replace that need
+U13L8J76J : RabbitMQ with HA queues and publisher confirms is a pretty good reliable storage for temporary data
+U1BP42MRS : basically the OS has a construct to ensure a process is always running at a certain "runlevel"
+U1BP42MRS : Look into `systemctl` or `systemd` <@U4JJH96TS>
+U1BP42MRS : they should be synonymous
+U4JJH96TS : Thank you <@U1BP42MRS> , you are a great help. Will read on those<@U1BP42MRS> :taco:
+<@U07JGLLKF> :taco:
+
+U07JGLLKF : :toot:
+U1BP42MRS : <@U4JJH96TS> :thumbsup::skin-tone-4: here is an example from the <#C2FMLUBEU|community_projects> bot (<@U56EV8LAJ> ) <https://github.com/pyslackers/ansible/blob/master/roles/system_service/templates/etc/systemd/system/service.j2>
+U1BP42MRS : It's using ansible, so slightly obfuscated, but should give a good example if you can read through that
+U5CGPBF0U : <@U5UKKT0EP> Unfortunately after changing `from . import config` in `__init__.py` to `from broadway import config` I still receive the error:```from broadway import create_app, models, util
+ModuleNotFoundError: No module named 'broadway'```
+Thanks anyway though. It was worth a shot. :slightly_smiling_face:
+
+U5CGPBF0U : `latitude = db.Column(db.Float, nullable=False, asdecimal=True)` gives me `Unknown arguements passed to Clumn: ['asdecimal']`...am I doing something wrong here?
+U5NMSURAQ : not sure how to pass an argument to `db.Float` when constructing a Column with ORM
+U5NMSURAQ : but you can achieve the same with:
+U5NMSURAQ : `latitute = db.Column(db.Decimal, nullable=False)`
+U5NMSURAQ : `db.Decimal` (or `db.Numeric`, which is the same) is basically `db.Float` with `asdecimal=True`
+U5CGPBF0U : <@U5NMSURAQ> `db.Decimal` didn't work but `db.Numeric` did. Thanks! :smile:
+U5NMSURAQ : :slightly_smiling_face:
+U5CGPBF0U : Is it better to have a local Postgres database for local testing of my app, or just have Postgres connect to the remote database on the staging server? :thinking_face:
+U5CGPBF0U : I can think of pros and cons to both, but I think that it's likely one of them is considered best practice...
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

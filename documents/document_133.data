@@ -1,53 +1,84 @@
-(false 1)```
-<@U04V70XH6> I took it to mean they wanted to filter out both nil and false (which (filter identity ...) does)
-So `some?` should work.
-no, some? passes false through
-just use identity if that's the semantics you want
-Right, use `some?` if you only want to filter `nil` but keep `false`.
-"support false" sounded like you wanted to allow it through and `identity` wasn't doing that for you...
-`(filter identity coll)` works perfectly fine. :thumbsup:
-Words. What do words mean? :slightly_smiling_face:
-<@U04V70XH6> Not what I indend them to mean normally. :wink:
-`(defmulti DWIM identity)`
-is there a convenient way to disable implicit binding conveyance ?
-<@U053XQP4S> In jvm clojure the simplest thing is to start a thread via interop instead of using one of clojure's utility functions for creating threads `(.start (Thread. (fn [] (println "hello"))))`
-any zero arg clojure function is a valid argument to the thread constructor, and will be the thing the thread does when started
-this method of running a function only sees global bindings, and won't convey any local dynamic bindings
-ok so I guess it is somehow against the language to try to use dynamic vars as thread locals ?
-well - they are thread local, they just get conveyed to other threads if you use things like future or send-off
-or core.async stuff
-I thought what you were asking for was how to avoid the inheritance of those thread local bindings
-(or to create a new context without them at least)
-what I'm trying to achieve is a mechanism for detecting if a function call has been made out of a synchronous context
-what is a "synchronous context" - synchronous with what?
-that is, I can easily start code inside core.async go that is synchronous within itself but async with the caller - and it's easy to end up with an app where almost everything is "async" if you go far enough up the call stack, but in practice nearly all of the logic is sync
-it's hard to find a minimal example, but basically I create event queues, I have functions that must be "bound" to a single event queue, so I need a way to test if I'm currently running this queue, if so it's ok to run synchronously, else you have to post an event
-a threadlocal is a good way to achieve this, but if I use dynamic vars, the event queue context will be conveyed
-sounds like instead of avoiding binding conveyance, you could just rely on it, and set a dynamic var `*in-queue*` to true and get the right behavior?
-oh, so children of the queue shouldn't inherit that context, only the queue worker itself should have it?
-yes, if I use `future` while I'm the queue, I don't want the thread running the future to believe that it's still in the queue
-you could create a global set at the ns level with the queue Thread instances in it, and check if `(Thread/currentThread)` returns something in that set
-that's cheap and the logic is simple
-Does anyone have an invite to Screenhero they could throw my way?
-it's similar to using a threadlocal, isn't it ?
-slack has now integrated screensharing into slack directly
-in the `/call` stuff ...
-(pardon, misread)
-Huh, I'll try it out.
-Thanks
-kind of - but the emphasis is different - instead of setting a threadLocal in each thread, you add each thread to a container that keeps track of them
-one is global, explicit, and visible, the other is hidden and implicit
-Hm, looks like it's paid teams only. Not useful in this case.
-<@U051SS2EU> ok I will think about that - thanks anyway, but I'm still a bit confused about the dynamic var philosophy
-it's meant for things that would be visible to this thread and all the ones it creates
-eg. think about how `with-out-str` works - it overrides the destination for printing for the caller and all child threads
-the implicit aspect looks a bit dangerous to me, and the only benefit I see is to save a few characters when you write your functions
-Question: How would I extend a protocol to all array types? I seem to only be able to do it for a specific array, like say "[Ljava.lang.Object". But I want "[L?"
-there is no such thing
-:disappointed: Its strange that "[Ljava.lang.Object" doesn't even work for subtypes of Object. It only works if I have actual array of Objects
-that is how array types work on the jvm
-array types don't have that kind of type relation
-if A is an array of X and B is an array of Y, and Y is a subtype of X, B is not a subtype of A
-I'm not convinced, since instanceof can tell the relation
-<@U0NCTKEV8> java array are covariant, it's generics that aren't
-Oh
+U3JURM9B6 : <@U06B8J0AJ>: have you used Haskell? the haskell solution to this would be the 'state' monad, then an external sequence_
+U06B8J0AJ : <@U3JURM9B6> Unfortunately I haven't used it beyond the tutorial on the home page (which is quite nice)
+U06B8J0AJ : `map` does seem to be easier to visualize than `reduce` though. I think `map` corresponds more to everyday patterns of life. You can imagine walking along a row of potted plants and watering each for example, getting a row of watered plants.
+U06B8J0AJ : But what would be the `reduce` version of that? Repot them in one large pot, one plant at a time?
+U06B8J0AJ : But also, the order in which they were repotted would somehow matter. I don't know, it's not _as_ straightforward.
+U66SFLTPT : <@U3JURM9B6> in Haskell how would you solve the problem?
+U66SFLTPT : `foldr` over a sequence?
+U66SFLTPT : (I'm just curious)
+U3JURM9B6 : <@U66SFLTPT> : I would write the code "imperatively" with putState / getState, then  put it on a do block + use sequence_ if there's a list
+U050MP39D : I find it easier to go `write using loop/recur` -&gt; `refactor to reduce`
+U3JURM9B6 : the point is that the code goes something like:```
+s &lt;- getState
+... do some processing ...
+putState s'
+```
+
+but then the reduce somehow causes me to "invert" the state manipulation
+
+U050MP39D : generally, than doseq. because that way you just delete a bunch of code and change some keywords. refactoring doseq and atom updates is annoying
+U3JURM9B6 : <@U050MP39D> : loop/recur is definitely closer to reduce than doseq/atom
+U3JURM9B6 : nevertheless, it seems that in an otherwise clean language, there's this mismatch between "mental thought" and "how code has to be written"
+U3JURM9B6 : or maybe I just haven't mastered reduce idioms
+U050MP39D : mmmmmm my assumption is that that mismatch is just a result of spending so much time in imperative languages. I definitely find myself having to go through that interim step a lot less than I did 4 years ago when I moved ruby-&gt;clojure. could be wrong though
+U3JURM9B6 : haskell is not exactly '
+U3JURM9B6 : imperative' -- some would say it's even more 'functional' :slightly_smiling_face:
+U06B8J0AJ : <@U3JURM9B6> Is there no notion of `reduce` in Haskell though?
+U051SS2EU : that's foldl
+U050MP39D : there is, and it would be considered *way* more idiomatic than using the state monad
+U3JURM9B6 : haskell definitely has foldl / foldr, but it also has state monads + sequence_
+U051SS2EU : and it's provable that everything you can do via state manipulation you can do in a left fold / reduce, it's just a different code pattern to do it
+U3JURM9B6 : I would say, any time you're bashing state, state monad is more idiomatic than folds
+U3JURM9B6 : and with reduce, the initial value is basically your 'local state'
+U050MP39D : the state monad is a "purely functional statically typed" math trick around writing an imperative looking thing and still keeping it pure
+U3JURM9B6 : yeah, I guess 99% of the problems I have with clojure is: it doesn't have haskell's type system :slightly_smiling_face:
+U050MP39D : funny, that's my favourite thing about clojure :laughing:
+U051SS2EU : <@U3JURM9B6> frege is haskell for the jvm, and it would even be usable except it is too hard to use interfaces or extend java types (because it really does implement haskell's type system - which is better but also alien to the platform)
+U3JURM9B6 : I tried using frege once; I found neither the documentation nor the community helpful.
+U051SS2EU : I would have totally used it for some things in my codebase but not being able to define or implement interfaces (not to mention concrete inheritence, which clojure taught me how to do without), it was a no go
+U1KK3BW3W : Is there a way that others are using tools like `eastwood` with files that contain namespaced keywords?
+U051SS2EU : <@U3JURM9B6> I think their assumption is "just do it the way you would in haskell"
+U050MP39D : thing is clojure just has no need for a state monad, because if imperative code is what's appropriate there *are* mutable options
+U06B8J0AJ : Well, cognitively, our problem solving is very pattern based. A problem occurs-&gt;go fetch the nearest solution from memory that approximately fits problem-&gt;apply to problem. Certain mismatch is bound to happen when encountering a somewhat different paradigm.
+U06B8J0AJ : Personally, I find macros to be some of the most intractable marshlands of the language. The parser in my head doesn't predict the output of a macro well at all.
+U04V70XH6 : <@U051SS2EU> I really liked the promise of Frege and spent quite a bit of time working with it -- I wrote a Leiningen plugin for it and put out some mixed Clojure / Frege code examples. But, ultimately, I just found it too frustrating to use and kept going back to Clojure... which kinda fits in with the love/hate relationship I've had with Haskell ever since it appeared (I always hoped Haskell would rule the world but it seemed like the team behind it tried very hard to make sure that didn't happen!).
+U051SS2EU : yeah I think I might have first heard of frege from you - and if I could have just defined / implemented interfaces I could have used it for my project…
+U04V70XH6 : I just watched Prof Turner's talk about "Some History of Functional Programming Languages" from the Poland FP conference this year. Great to hear how everything came together (he was going to be my external examiner for my PhD thesis back in '86... if I'd actually completed it!).
+U04V70XH6 : We used Miranda at my university and I was familiar with ML and SASL and a bunch of the other FP languages that all merged into Haskell. I created my own (SURE), just like all the other FP researchers in England at the time! :slightly_smiling_face:
+U5ZAJ15P0 : Whereabout did you study?
+U051SS2EU : I remember checking out CLEAN shortly after I got into software (by reading "tech yourself C++ in 21 days")
+U051SS2EU : in retrospect I'm amazed I got turned to such an interesting direction so early on
+U04V70XH6 : <https://www.youtube.com/watch?v=QVwm9jlBTik&amp;__s=csfyzpydsvfikkqz5bvw> (for those who missed the link in Eric's <http://PurelyFunctional.tv|PurelyFunctional.tv> newsletter)
+U04V70XH6 : University of Surrey (Guildford).
+U04V70XH6 : SURE was Surrey University Recursive Evaluator :slightly_smiling_face:
+U5ZAJ15P0 : ooh, makes sense!
+U5ZAJ15P0 : Hi! I have the following in a Datalog query:```
+'[:find ... :where [(wef-backend.app.identity/past-expiry? ?expiry)]]]
+```
+
+U5ZAJ15P0 : Due to how Datomic/Datalog works I must fully qualify the past-expiry? function, even though it is available in the namespace where I wrote this query
+U5ZAJ15P0 : is there some clever trick that would let me omit the full qualifier?
+U5ZAJ15P0 : I tried syntax quoting on the query but that doesn't work, as it fully qualifies the `?expiry, etc` variables too
+U5ZAJ15P0 : Essentially I would like to fully qualify some symbols in that quoted expression
+U5ZAJ15P0 : but not others
+U2H58V4P2 : I don't recall any problems with namespaced keywords, but I seem to remember I had problems with namespaced maps. As these were limited to my test classes, I added these namespaces to the ignore list I think. Also, I think there were some fixes on the master branch that remain unreleased. A bit vague I realise, but if you're still stuck tomorrow (unlikely) then I'll check when I'm back in front of a computer...
+U051SS2EU : <@U5ZAJ15P0> you can use ` for this, and selectively use ~ for the symbols you want to namespace qualify
+U5ZAJ15P0 : <@U051SS2EU> how so? I tried variations on your suggestion but didn't manage to get it to work
+U051SS2EU : ```peregrine.circle=&gt; `[:find ... :where [identity ~'?foo]][:find ... :where [clojure.core/identity ?foo]]```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

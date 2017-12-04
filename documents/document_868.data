@@ -1,0 +1,88 @@
+U5ZPMJA06 : Your script should terminate when it is done. If you make it loop forever, you have a problem.
+U64MJCDNH : yes, loop forever, because export some data for monitoring over API
+U5ZPMJA06 : Maybe it's better to use the Timer-based solutions suggested above, and use `supervisord` to make sure the script always runs (and is restarted if it ends for whatever reason). In that case you don't have to use a cron job.
+U5ZPMJA06 : Also, do the API keys expire on certain fixed times, or exactly two hours after they have been generated?
+U64MJCDNH : API expires after 2 hours of starting script
+U5ZPMJA06 : How does the API provider know when you start your script? Does the script ask for keys when it starts for the first time?
+U64MJCDNH : Yes, script do first get request and then give some code which I use in params when doing new request to API. After 2 hours this code expires and my export of data stop.
+U1NSCAY6R : are you continually hitting an API and just need the re-register of the API key to run every 2 hours?
+U64MJCDNH : Yes, but I have while loop forever !
+U1NSCAY6R : <@U64MJCDNH> but between getting the new API keys you are running other requests, correct? Also, what site is this? There may be a way to get longer API keys
+U64MJCDNH : Joe, I get this code from api and then I request one api every 15 seconds in ```while True: ``` loop  and parsing response. After 2 hours code expires and my loop don't have response. This is proxmox KVM virtualization.
+U1NSCAY6R : ah okay, yeah then the previous mentions of daemonizing the process is probably your best bet
+U4KHDHLG2 : Hey, versioning and giving my commits build numbers is something I've neglected for a while. How should I go about it? I'm using Mercurial + Kiln currently, and I know there is a tag system which can help out with that but I'm just not sure where to begin. Isn't the best practice to have something like `&lt;major&gt;.&lt;minor&gt;.&lt;hotfix&gt;.&lt;build&gt;`? Also, is there a way to make this automatically generated?
+U5LNXQHN3 : I prefer to make my versioning explicit... at least the major/minor/hotfix slots. It's not usually practical for an automated system to know whether a given change is API-breaking or not, after all
+U1BP42MRS : It really depends on what you're making. If it's a web app or API, then build numbers should be fine. However for a library you do want explicit versioning. Some ci solutions allow you to have a manual intervention point
+U673BSS76 : Hey guys, I'm trying to run Docker (with a Debian image) on a Mac. My Python installation on Mac has case-sensitive imports but not in Docker, and this is breaking the `queue` module which has both `queue` and `Queue`. I'm guessing the Python build on Mac deals with Mac having case-insensitive file system but in Docker it's a Debian build so it doesn't, but because Docker is using case-insensitive file system, it causes issue. Is there any way around this?
+U2BS4M1RV : <@U1PCHFXMH> <@U1BP42MRS> The issue is that I want to pass the field name to a generic function so it can be used to filter on any field name. <https://github.com/TomFaulkner/pypihole/blob/master/pypihole/pypihole.py> See the counts_client and _counts_generic functions. (line 62 and 69-70 in particular)
+I do access the namedtuple with the entry.client and such wherever possible, of course. But, I don't think that is possible here.
+
+U4KHDHLG2 : <@U5LNXQHN3> <@U1BP42MRS> Thanks, I'll think about what exactly it is I'm doing. I think manual versioning is the way to go for now, and ignore tagging commits.
+U5LNXQHN3 : I do tag commits... it's just a manual process for me, or facilitated with git-flow or whatever
+U1BP42MRS : General question, that came up in the TestPodcast slack group: what preferred docstring format do people use? reStructuredText, Google, etc?
+U0NRYQNAZ : reStructeredText here but i have used google and numpy before
+U0NRYQNAZ : numpy is really nice to use when having to make ML researchers document their code.
+U0NRYQNAZ : <https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt>
+U1BP42MRS : interesting
+U1BP42MRS : I do the default pycharm (reStructuredText) too
+U5LNXQHN3 : Shouldn't the math.pow arguments be the other way around?
+U5LNXQHN3 : Also: <https://pypi.python.org/pypi/backoff/1.4.0>
+U1BP42MRS : That packaged didn't work for me because I am yielding a generator and need the state vs just re-calling the function
+U5LNXQHN3 : aha
+U1BP42MRS : the short is I am hitting a few APIs with `requests` that do pagination, and sometimes they give random 502s because their SLA isn't great
+U5EK8MU6P : for a second i thought that was a joke class telling people to leave you alone when you were coding
+U1BP42MRS : I think the `pow` is right <@U5LNXQHN3> - the retry count^backoff-factor
+U1BP42MRS : is that not the normal way to do it?
+U1BP42MRS : for my case, it goes from 10s, 21s, 33s
+U5LNXQHN3 : hmm, I guess
+U1BP42MRS : Nah, I think you are right. 1.1^1, 1.1^2, etc makes sense
+U1BP42MRS : <@U5LNXQHN3> :taco:
+U1UFZTD4J : <@U5U4MSHC1> :taco:
+U47HK8BS8 : <@U673BSS76> did you get your problem figured out?  could you share how you tried to import things?  This shouldn't be a problem
+U5NMSURAQ : <https://github.com/h2non/riprova>
+U5NMSURAQ : <@U1BP42MRS>
+U47HK8BS8 : ooh, that's neat
+U1BP42MRS : Thanks <@U5NMSURAQ> - I'll take a gander. Looks pretty neat, and likely that I could just define a nested function to make sure the state is kept correctly across paged requests
+U1BP42MRS : Oh man, that lib showed me `pook`, which looks pretty awesome for testing
+U673BSS76 : <@U47HK8BS8> I did more research on my problem. It seems on Mac/Windows, Python enforces case-sensitivity with import at compilation. Because I run Debian in Docker on Mac, Python does not enforce case-sensitivity (it's Debian) but the filesystem is not case sensitive, so import does not distinguish cases. One of my dependencies uses `queue`, which internally imports `Queue`. Without case-sensitivity, it causes circular import, where `queue` imports itself. There are others reporting this type of issue: <https://forums.docker.com/t/python-import-source-files-from-docker-volumns-can-not-distinct-upper-lower-cases-in-lib-name/20527> . I worked around this with a very ugly hack, by appending the path of `Queue` at the front of `sys.path` right before a call that results in `queue` getting imported, and then I delete the path from `sys.path` after. I only need this for development so it seems to be OK.
+U47HK8BS8 : I'd be shocked if there's a case mistake in the python standard library.  It was Queue in Python 2, and is queue in Python 3 - are you sure perhaps it's not an issue of the python version?
+U5LNXQHN3 : Looks like there is some platform-specific case-handling behavior (PEP 235) and it predates things like Docker, so maybe it's not surprising it gets confused
+U47HK8BS8 : Right but the general issue for people using Docker on Mac is that it's “Linux” so the file system isn't case-sensitive.  This isn't so much a Docker issue as an issue of people being exposed to a case-sensitive file-system
+U673BSS76 : I think the `queue` is for backwards compatibility for 3 to 2
+U673BSS76 : ```from __future__ import absolute_import
+import sys
+__future_module__ = True
+
+if sys.version_info[0] &lt; 3:
+    from Queue import *
+else:
+    raise ImportError('This package should not be accessible on Python 3. '
+                      'Either you are trying to run from the python-future src folder '
+                      'or your installation of python-future is corrupted.')
+```
+
+U673BSS76 : The import on line 6 is circular without case-sensitivity
+U47HK8BS8 : Well there is a class Queue in the Queue module, maybe that's messing it up?   What happens if you do `from Queue import Queue`?
+U673BSS76 : The issue was, that small piece of code tries to import `Queue`, while it itself is `queue`, which effectively allows code to import python2 `Queue` even though they refer to python3 `queue`
+U673BSS76 : But it broke without case-sensitivity
+U673BSS76 : The actualy implementation of `Queue` is perfectly fine
+U47HK8BS8 : oh - is your python file itself named queue.py?
+U673BSS76 : There is a queue module (basically the code I pasted), I think it's a dependency from another package
+U673BSS76 : Probably just to bridge python 3 and 2
+U4EEBC4SJ : Following instructions from <https://docs.pytest.org/en/latest/getting-started.html>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

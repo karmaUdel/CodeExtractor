@@ -1,46 +1,94 @@
+U5QJW0DDE : if essentially every single action a user can take on a page is an option of the same type
+U604S603Y : I'm dealing with a challenge concerning nested models again: I have a `Record a`, containing a `Record b`, containing a `Maybe c`, containing a `Maybe Float` of which I want the string representation of the inner value in the Just case. When I'm using ugly nested `case ... of ...` to match the `Maybe`s I get the `Float` as `String` in the end just fine, let's say "42". 
+But when making it look nicer using `Maybe.map` I end up with "Just 42" in the end. 
+And using `|&gt; Maybe.withDefault ""` does not work, because Float and String don't match. And `toString`ing the Float beforehand gets me "Just 42" again.
+The complete helper methond in the let block is:
+```getErgebnisZahl schnellcheckData =
+            case schnellcheckData.rechenergebnis of
+                Just re -&gt;
+                    case re.ergebnis of
+                        Just ergebnis -&gt;
+                            ergebnis |&gt; toString
+
+                        Nothing -&gt;
+                            ""
+
+                Nothing -&gt;
+                    ""```
+
+U0FP80EKB : Yeah
+U0FP80EKB : <@U5QJW0DDE> so, you have one top-level `type Msg = ....` that contains all the messages that can be triggered.
+U0FP80EKB : <@U5QJW0DDE> Here's a sample of my top-level `Msg` on one of my apps (this is an editor for customizing our embed modules) ```
+type Msg
+    = UpdateEmbed FieldHelpers.FieldInfo
+    | Save
+    | SaveResult (Api.ApiResult Embed)
+    | EmbedMsg Embed.Msg
+    | ImageSelected ImagePicker.ImageControl FieldHelpers.FieldInfo
+    | ImageControlClicked ImagePicker.ImageControl
+    | ImageStateChange { id : String, state : String, data : String, bytes : Int, totalBytes : Int }
+    | ToggleEmbedCodeVisibility
+    | IgnoreEmbedMsg Embed.Msg
 ```
-I know how to write decoder if the schema is always the same
-`field "event" string |&gt; andThen (\eventString -&gt; case eventString of "snapshot" -&gt; snapshotDecoder [...])`
-oh, you already have that
-well, sort of
-currently you're just succeeding with a message, rather than decoding the data
-Yes, I think you just need to write the decoder for the snapshot tracks and the decoder for the track-position track.
-but you could do `Json.map Msgs.OnPlayerSnapshot playerSnapshotDecoder` instead
-exactly
-Sorry sorting out kids bath at the same time :slightly_smiling_face:
-But my exact problem is how to instruct elm to pick up the right decoder depending on the value of "event" field?
-andThen in <@U3SJEDR96> example does not have access to another top-level fields from the JSON
-it does, depending on if you did `field "foo" (string |&gt; andThen ..)` or  `field "foo" string |&gt; andThen ..` - the first runs within `field "foo"`, the other runs at the same level as `field "foo"`. You can't go "up", but you can definitely stay in that same context
-<https://ellie-app.com/3Qm3MMZJFgba1/0> for a _very_ q'n'd example
-now you'd "simply" need to write proper decoders for snapshot and trackPosition, and you're all set
-hmm i'll check it now
-Your solution is like 90% there, hence my being confused :slightly_smiling_face:
-hmm seems to work
-why that parentheses matter?
-in that particular case?
-guys i am programming for years but elm syntax is not readable at all at the beginning
-<@U3SARGL7Q> In Elm, arguments are separated by spaces, not commas. Thus if you are nesting functions, you need to wrap the sub-functions in parens
-<@U3SARGL7Q> it is just a matter of getting used to it.
-unlike C-style languages, parens go around both the function name _and_ the function arguments
-so `(sum 1 2)`, not `sum(1, 2)`
-anyway you're awesome, thanks for help!
-You were really 90% there, just needed a nudge :slightly_smiling_face:
-Ok one more question: how to detect that websocket connection is down? :slightly_smiling_face: seems that it is hidden and there's no way to access it easily without using WebSocket.LowLevel?
-Yeah, it's a design decision that was made in that library that you can't actually know it. It implements incremental backoff and builds up a queue of outgoing messages, but you can't actually know whether you're connected. It's a little controversial, I think there are some github issues about it
-I have a maybe odd question. I have a type made from four of the same type, like `type FunType = Other Other Other Other` I'm trying to create a map2 essentially for `FunType` where the function would look like `map2 : (Other -&gt; a -&gt; Other) -&gt; FunType -&gt; List a -&gt; Funtype` ... it should essentially take the first four from any list, with a default if the list doesn't have at least four things.
-<@U3SJEDR96> I need to inform the user if the connection went down, so indeed I will consider this controversial.
-<@U2SR9DL7Q> you can't use `Other` in a type signature. `Other` is a value / constructor, not a type :slightly_smiling_face:
-It seems to be a type, too
-oh I see :smile:
-though that type only has 3 `Other` values, and 1 serving as the tag :stuck_out_tongue:
-so you can do `case list of a :: b :: c :: d :: _` to see if there are 4 entries _and_ get them out at the same time
-sorry... I wanted unambiguous names for the example but it didn't work. In production, I have a `type Players = FourPlayers Player Player Player Player`
-which I suppose is what you're actually asking :slightly_smiling_face:
-That's still only 3 players, though :smile:
-The first one is the tag of your type, the next 3 are the values it holds
-like `type MyType = String String` can only hold a single `String`
-<@U3SJEDR96> fixed it. it's really four. and that case statement solves the issue of more than four but not less than four in the list
-well less than four is `_ -&gt;` :wink:
-or `a :: b :: c :: _` and so on if you want to be explicit about it. Or even `[ a, b, c]` so the order doesn't matter as much
-(the order of your case-statements, that is)
-Hmmm... so when you say `case list of a :: b :: c :: _`, elm interprets that as _"name as many values in this list as you can up to the first three values?"_
+
+U5QJW0DDE : <@U0FP80EKB> would be nice if elm-format allowed you to put empty lines between parts of that long list, for annotating different categories of related messages
+U0FP80EKB : As you start noticing groupinng of messages (such as ones that update the data for our `Embed`), you can pull them into a new one and collapse them, such as `EmbedMsg Embed.Msg`
+U0FP80EKB : If you start wanting to annotate, you might be at a point where you want to start grouping them.
+U5QJW0DDE : oh i see. so EmbedMsg is itself a union
+U0FP80EKB : Yeah, notice `FieldHelpers.FieldInfo`, as well. This is how we collapsed editing form fields
+U0FP80EKB : We have `FieldInfo` further collapse```
+type FieldInfo
+    = ContentField ContentFieldInfo
+    | AppearanceField AppearanceFieldInfo
+    | GeneralField GeneralFieldInfo
+```
+
+U5QJW0DDE : that's' nice
+U0FP80EKB : So, over time, there are techniques to keep your top-level `Msg` from being too cluttered. At some point, I always end up collapsing my form field update messages.
+U5QJW0DDE : i dig it
+U0FP80EKB : Oh, here is one of the bottom types, `AppearanceFieldInfo````
+type AppearanceFieldInfo
+    = BackgroundColor ColorPicker.ColorControl
+    | SubmitButtonColor ColorPicker.ColorControl
+    | AccentColor ColorPicker.ColorControl
+    | QuestionBackgroundColor ColorPicker.ColorControl
+    | HeaderTextColor ColorPicker.ColorControl
+    | PrimaryTextColor ColorPicker.ColorControl
+    | SecondaryTextColor ColorPicker.ColorControl
+    | HeaderImage ImagePicker.ImageControl
+    | FontFamily String
+    | FontSize Int
+```
+
+U0FP80EKB : There you can see all the possible things that can be updated. So, when `FontSize` is edited, the message comes up like `FontSize 16` or something
+U0FP80EKB : So, the payload has the new value
+U0FP80EKB : Our situation has a bit of complexity because we used the same editor customizing 3 different types of embeds, so there are general fields and type-specific fields that need to be edited.
+U5QJW0DDE : i suppose that sending a Msg then means wrapping the FontSize in an FieldInfo and then in another, etc
+U0FP80EKB : Yup
+U0FP80EKB : For example```
+        generalControls =
+            Html.map UpdateEmbed &lt;|
+                div [ class "control-group" ]
+                    [ CommonControls.textControl "Name" embed.displayName (FieldHelpers.GeneralField &lt;&lt; FieldHelpers.DisplayName)
+                    ]
+```
+
+U0FP80EKB : This edits the "Name" field, so the message ends up something like `UpdateEmbed (FieldHelpers.GeneralField (FieldHelpers.DisplayName "Corey"))`
+U0FP80EKB : Luckily the constructors for a union type are composable, since they are just ordinary functions, so we can do `FieldsHelpers.GeneralField &lt;&lt; FieldHelpers.DisplaName` as the event handler
+U5QJW0DDE : I like it
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

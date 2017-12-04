@@ -1,35 +1,294 @@
+U0JQWAETG : Hi! Do you have a better way of expressing something like this:```
+encoder_value =
+    case record.logo_ref of
+        Just value -&gt;
+            Json.Encode.string value
+
+        Nothing -&gt;
+            Json.Encode.null
 ```
-<@U4WG0KTNJ> moving our convo as comments/thread into your last code snippet
-You want a substring, right? So I'm not sure a `!=` makes sense 
-Try `in`
-I have that as well
-just ensures it doesn't check the same element
-<@U4WG0KTNJ>  here, actually
-Also any returns a Boolean, aren't you trying to remove from the list?
-from zipfile import ZipFile doesn't work actually. I'm using Python 2.7
-Or filter it down, rather 
-So make these changes. Also, what are you trying to do w/ i counter/index in lines 12 and 19?
-yeah that would just be a filter and I would add it to a list
-So is it working, or are you trying to make it faster/more efficient?
-make it more efficient
-I wanted to make it so that the filename would increment, file_a_1, file_a_2, file_b_1, file_b_2
-so there is a conflict w/ i here.
-on line 13, i takes values 0 to len(zip_ref.filelist)-1 (automatically incrementing it's value as f gets a new element value from zip_ref.filelist
-i=2;f=bird
-just to be clear, this happens automatically when you `for i, f in enumerate(pet_list):`
-ah makes sense didn't notice it
-getting a KeyError: “There is no item named “cat_0.csv” in the archive”
-yeah. So basically what you are trying to do is change the name of the file inside the zip and then unzip, right?
-yeap!
-right. so what is happening is you are only updating the name of the list, now the name of the file, inside the zip, on the HD.
-Check this out: <https://stackoverflow.com/questions/3982034/how-can-i-extract-files-using-custom-names-with-zipfile-module-from-python>
-looks like unziping to a tmp folder might be the way to go.
-What I said here, is wrong. Zip file is one that is getting overwritten. NOT the files inside the zip.
-so if there are existing files of `file_a`, it should create `file_a_0` and then `file_a_1`, and so on? It just keeps adding to file_a_watever-count and file_b_whatever-count, depending on the files that have already been extracted?
-anytime i open a file in pycharm it says loading ... arggg. why does this happen when i have something really important to fix.
-are all acceptable!
-yes... I saw that.
-                name, ext = os.path.splitext(f.filename)
-<@U4WG0KTNJ>
-line 7 counts the number of files that start the same and end the same... this assumes that file_a_1, file_a_2... is sequential. If you get file_a_1, file_a_4, file_a_7 then just play w/ this. Also, had line 11 one indentation back so it was trying to unzip/extract file from previous iteration, that were the file not found error coming from
-hmm it still only opens the first 2 zipped folders and line 10 is giving me RunTimeError: Attempt to read ZIP archive that was already closed
+
+U3LUC6SNS : <@U0CL0AS3V> , <@U0FP80EKB> Excellent advice on starting an Elm user group -- I will definitely go for the coding nights format.  Thanks!
+U0U6ML22H : <@U0JQWAETG> Maybe.map |&gt; Maybe.withDefault
+U0U6ML22H : ```encoder_value =
+    record.log |&gt; Maybe.map Json.Encode.string |&gt; Maybe.withDefault Json.Encode.null
+```
+
+U0JQWAETG : <@U0U6ML22H> yes, I think that would work, it looks better
+U0JQWAETG : thanks!
+U0U6ML22H : sure :smiley:
+U0JQWAETG : <@U0U6ML22H> Maybe.map is passing the `Maybe String` to `Json.Encode.string` when it expects a string
+U0U6ML22H : nope
+U0U6ML22H : `Maybe.map f v` means if `v` is `Just x` it returns `Just (f x)` otherwise it returns `Nothing`
+U0JQWAETG : I get this:```
+The right side of (|&gt;) is causing a type mismatch.
+
+30|             record.logo
+31|&gt;                |&gt; Maybe.map Json.Encode.string
+
+(|&gt;) is expecting the right side to be a:
+
+    String -&gt; a
+
+But the right side is:
+
+    Maybe String -&gt; Maybe Json.Encode.Value
+```
+
+U0U6ML22H : did you write the `Maybe.withDefault` part?
+U0JQWAETG : yes
+U0JQWAETG : logo_ref =            record.logo
+                |&gt; Maybe.map Json.Encode.string
+                |&gt; Maybe.withDefault Json.Encode.null
+
+U0U6ML22H : lemme make an Ellie
+U0U6ML22H : <https://ellie-app.com/3HX5XfnXZjsa1/0> this compiles
+U0U6ML22H : what's your function's signature?
+U0JQWAETG : let me check
+U0U6ML22H : the compiler believes the signature over the code, so if you tell it it returns something else, it'll tell you your code is wrong (while it may be that you simply didn't update your sig)
+U0JQWAETG : I can't find the problem in my code, is the same as yours
+U0U6ML22H : can you show me? in private if you'd rather not make it public?
+U0JQWAETG : sure
+U0JQWAETG : I'm modifying your code on ellie to make it like mine
+U0U6ML22H : OK, let me know :smiley:
+U0JQWAETG : ok, it works on ellie :slightly_smiling_face: <https://ellie-app.com/3HX5XfnXZjsa1/0>
+U0JQWAETG : sorry! stupid typo on my side
+U0U6ML22H : which one?
+U0JQWAETG : I had logo (String) and logo_ref (Maybe String) and I was using logo instead of logo_ref
+U0JQWAETG : sorry about that!
+U0U6ML22H : it's OK :smiley: it's a good reflex to have: when the compiler tells you that it expects a different "right side", make sure it's not the "left side" that's causing the mismatch
+U0U6ML22H : maybe (!) this should be changed to something like "the right side is x and the left side is y"
+U0JQWAETG : yes, it would be helpful. I find myself struggling with messages like those
+U0U6ML22H : me too, but it's getting better if you keep that in mind (which is why I'm insisting on it =P)
+U0JQWAETG : :slightly_smiling_face: ok, thank you very much! my code is nicer now :wink:
+U0U6ML22H : you're welcome!
+U0U6ML22H : Anyone knows if it's possible, from an Elm program, to get the current time offset from a given timezone?Use case is this: in my Elm code, I'm using Date.Extra.Format.formatOffset to display dates using a timezone offset. However, that offset varies depending on Daylight Saving Time. I'd need to be able to request if "now" for the given timezone, DST is on or not. That way I could adjust the offset I use.
+
+U0U6ML22H : or should I just use a port or a flag?
+U17R1GD96 : What should I return in the view to render nothing? I want something like `return null` in React.  The React component returning null will not be added to the Virtual DOM at all.
+U2M0V559P : I think `Html.text ""` is what’s suggested.
+U2M0V559P : See <https://stackoverflow.com/questions/38616289/is-there-a-way-to-generate-an-empty-html-node-in-elm-html>
+U17R1GD96 : I do not want to render any Html node. It’s not the same as &lt;div/&gt;. It should be nothing at all.
+U1CE9DL9H : an empty text node does not render anything
+U1CE9DL9H : but it does in the current vdom implementation still get added to the dom
+U1CE9DL9H : no idea whether the dom actually optimizes it away, anyway there is no visual difference
+U17R1GD96 : The problem is I use Elm in React, and it always needs &lt;div&gt; as root node. So maybe in this case its not possible. I have to exclude the component in the parent component
+U2M0V559P : It’s also the way suggested in the unofficial FAQ: <http://faq.elm-community.org/#how-does-one-render-an-html-node-conditionally>
+U17R1GD96 : For pure Elm it may work but not for wrapping Elm in React.
+U17R1GD96 : That’s the problem: <https://github.com/evancz/react-elm-components/blob/master/index.js#L18>
+U2M0V559P : Hmm. Ok. I have no experience with wrapping Elm in React.
+U17R1GD96 : React cannot return text node. It always need a root tag.
+U17R1GD96 : This happens when my React component returns a string: ” A valid React element (or null) must be returned. You may have returned undefined, an array or some other invalid object.”
+U17R1GD96 : OK, so the problem is in React. I need to change the way I am adding the Elm component.
+U0FP80EKB : Yeah, I remember that article. Very great. That really influenced my thinking, too. I’m glad we took that to heart here in Chicago.
+U1QDHAF61 : Hello, what would be right approach to implement json decoding on top of websocket client when packets are fragmented?
+U2L33RRR8 : Hi, how would one implement custom context menu in elm? is there a way to get rightClick events in elm?
+U0FP80EKB : <@U2L33RRR8> check out `Html.Events.on` <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html-Events#on>
+U2L33RRR8 : <@U0FP80EKB> thanks!
+U5LFUHH19 : If a user makes a request that my app/JSON server can't find (e.g., an ID that doesn't exist in the db), what should the JSON return?  An empty object `{}`?  Do I change my `Model` to a `Maybe Model`?
+U0FP80EKB : It depends on what you want to do with it. I would look at `RemoteData`, though, rather than `Maybe Model`
+U0FP80EKB : You can then respond to a 404 from your server with an appropriate message to the user
+U5QJW0DDE : What are the most popular ways people use to minify their Elm JavaScript?
+U5QJW0DDE : I suppose the big no no is any minification tool that automatically renames variables
+U0GPGFQQY : I'm using `uglify-js`
+U5QJW0DDE : Aside from removing white space, what are the safest techniques that we could use?
+U0GPGFQQY : kfairwink: why not?
+U0GPGFQQY : renaming local vars is safe
+U5QJW0DDE : That is not correct. There's a thread on the Elm mailing list about this, because sometimes elm refers to constructors by name as text
+U0GPGFQQY : can you provide a link to the thread?
+U0GPGFQQY : if smth is linked as text, it must be a key of an object. you can't link to a variable in local scope as a text
+U5QJW0DDE : It's in a thread and also an issue on github, with regards to making Elm more compatible with googles closure compiler. Not at my computer at the moment, but a quick search for Google closure Elm should reveal it. 
+U5QJW0DDE : I suppose private local variables could be renamed, but most of these tools also rename top level objects throughout the program, which happens at the same time. And you cannot do that with Elm
+U0GPGFQQY : yes, Elm is not compatible with advanced optimisations of the Closure compiler. But it works just fine with uglify-js
+U5QJW0DDE : It would be great to get the advantages of automatic inlining in a minification also, I'll have to read up if babel does this
+U0GPGFQQY : Why do you think it's a big deal? If an object key is a long string, `gzip` should minify it just fine.
+U0GPGFQQY : kfairwink: how big is your compiled Elm file?
+U5QJW0DDE : It's not about size for download, it's about runtime performance
+U0GPGFQQY : do you have perf issues in your app?
+U5QJW0DDE : Compiled Elm files always start at around 8000 lines, and then go up from there.
+U5QJW0DDE : I'm porting some stuff from react, where advanced optimizations definitely made a difference, so I'm trying to predict my situation a little bit down the road
+U0GPGFQQY : I meant the size of JS artifact.
+U5QJW0DDE : Streaming many dozens of large objects from the websocket get every second and processing them, that can definitely be a situation where you want to squeeze every last optimization that is available to you
+U0GPGFQQY : I see, in this case, you could maybe structure the app in such a way, so that constant things are evaluated and cached prior to any dynamic processing
+U0GPGFQQY : But maybe you're worrying too much about this and should just code an experiment and see how it performs.
+U5QJW0DDE : Certainly sounds like a very smart idea, but I am not quite sure what you mean
+U0GPGFQQY : I mean if some computation doesn't depend on this high frequency socket data, then you could run it once and save the result in your model.
+U0GPGFQQY : Instead of evaluating each time
+U0GPGFQQY : It's just a general idea, because I don't know the details of your app.
+U5QJW0DDE : In my case, it's financial data that is streaming in in real time, and it must get processed upon each update
+U5W86UED6 : the restrictions that the Closure compiler makes are pretty reasonable <https://developers.google.com/closure/compiler/docs/limitations>
+U5QJW0DDE : <@U5W86UED6> this is one of the restrictions that elm cannot comply with: Using string names to refer to object properties:
+U5W86UED6 : I’m very curious to know why Elm can’t comply with that! do you have a link to the mailing list thread or know of prior discussion around this topic?
+U5QJW0DDE : It's because elm directly refers to object properties as a piece of text, exactly what the restriction talks about. I will go try to dig up the github issue that discuss this, which was also mentioned last week on the Elm mailing list
+U5QJW0DDE : <https://github.com/elm-lang/core/pull/734> unfortunately the issue has been closed, it's really not seen as a priority, which is a shame in my view. Seems like it would be a really great project for the Google summer of code to make the language compatible with the best optimizations
+U0GPGFQQY : How renaming the keys will make the code run faster?
+U5QJW0DDE : What I mean, is that minifiers who do full program renaming tend to also do other things, like auto inline and other optimizations.
+U0GPGFQQY : Are they configurable? Can you disable things that break code?
+U0GPGFQQY : You may check these experiments based on prepack: <https://github.com/SkaterDad/elm-prepack-experiments>
+U5QJW0DDE : In the case of googles industry-leading optimizer, it has three or four different levels of optimization, but the only one that really matters is the advanced, I  think it's all or nothing
+U0GPGFQQY : Did you use it with React codebase?
+U2GPAEU1L : I mean, aren't those _different events_?! 
+Perhaps my vocab is off, but I don't consider a hackathon to be the same as a workshop to be the same as a lunch group...so wouldn't you have to name it according to what the event actually is...
+
+But that is interesting.
+
+U2GPAEU1L : Also I couldn't dig up the actual data, if anyone has a link to the data this was based on, I'd love to take a look
+U5W86UED6 : one advantage of google closure completely separate from optimizing code and minification/elimination are the primitives it has around modules and code splitting
+U5W86UED6 : as Elm begins to take on these features, it may be a good source of inspiration, or possibly a piece to build on top of by generating code more compatible with it
+U0GPGFQQY : I thought this discussion was about possible perf problems in the app
+U0GPGFQQY : That is why I wondered, if google closure compiler was used in the original React app
+U5QJW0DDE : Indeed, the react codebase, as well as most major modern JavaScript libraries, are fully compliant with advanced optimizations
+U5W86UED6 : I don’t intend to hijack, but my impression was this conversation was about how Elm integrates with other build systems and the larger front-end ecosystem
+U5W86UED6 : a necessary side effect for many people :^)
+U5QJW0DDE : One of the things that the optimizer does is actually take all JavaScript files used anywhere in the project, including libraries, and combine them into one file with all of these optimizations added.
+U5QJW0DDE : <@U5W86UED6> The thread basically started about techniques for minification in elm
+U0CL0AS3V : &gt; I'm porting some stuff from react, where advanced optimizations definitely made a difference, so I'm trying to predict my situation a little bit down the road
+I wouldn't take this premise as a given; there are a *lot* of things that are true in JS that are not true in Elm :wink:
+
+U0CL0AS3V : broadly, I wouldn't assume any technique that made a difference in React will be predictive of a technique that will make a difference in Elm
+U0CL0AS3V : things are different in Elm! :smile:
+U5QJW0DDE : <@U0CL0AS3V> while I can appreciate your enthusiasm, in the end we are still talking about Javascript. I don't know why automatic inlining, for example, couldn't benefit output Elm code. If you make a call to foldl and the Closure optimizer determines that it should just inline this in a particular case to provide a speedup, then why not?
+U5QJW0DDE : as another example, in some cases you might reach deep into a nested call stack, and Closure will not just inline but also flatten the entire stack to turn half a dozen function calls into just one function call. this would happen in Elm as in any JS code. I'd be surprised that Elm was immune to this kinds of optimizations
+U5QJW0DDE : I've seen demonstrations of heavy-weight browser games that improved the FPS after going through advanced optimizations for these reasons
+U0CL0AS3V : sure, to clarify - I'm not saying advanced optimization is useless
+U0CL0AS3V : I'm saying that if I were rewriting a React app in Elm, and the React app benefited noticeably from advanced optimizations, I wouldn't assume the same would be true for the resulting Elm app
+U0CL0AS3V : e.g. it might be fast enough already that advanced optimizations would not make a noticeable difference, making the whole discussion moot for your use case :wink:
+U5QJW0DDE : well, i am rather hoping that is the case, because I have no choice since such optimizations are not available :slightly_smiling_face:
+U0F7JPK36 : yeah i also think of a hackathon as like a 2 day thing where you don't sleep and stuff, but without the context of the whole presentation i took it to mean that names that are more hackathon-adjacent would be less welcoming
+U14Q8S4EM : Some conversation in elm-community/list-extra made me aware that in Haskell there are infinite lists.
+U14Q8S4EM : It made me think that you could make an `infinite-list` or `infinite-array` package, that just modulos the index number. Or a package that has a `CircularList` or `CircularArray` type.
+U14Q8S4EM : Would that be useful?
+U14Q8S4EM : Heres an implementation of an `InfiniteArray.get` function. <https://gist.github.com/Chadtech/701dd43df050612b81f2bbc8b3b7a95a>
+U14Q8S4EM : Im tempted to implement a whole package.
+U14Q8S4EM : As far as I can tell a non-empty circular array always returns something, the only way to get `Nothing` would be if the array is empty.
+U1CE9DL9H : lazy lists are infinite lists, the only reason elm lists cannot be infinite is that they would be immediately evaluated, which would not terminate
+U1CE9DL9H : you might also be interested in <https://en.wikipedia.org/wiki/Circular_buffer>
+U3ZNWN526 : "lazy lists are infinite lists" ... oh, cool! <http://package.elm-lang.org/packages/TheSeamau5/elm-lazy-list/1.1.0/Lazy-List>
+U14Q8S4EM : Ah, cool. I did not know that. Seems like a there are a few similarly implemented packages, and not a clear use case. So Ill hold off. Thanks for the link.
+U23SA861Y : there are some fun things you can do with infinite lists, but a lot of it is somewhat academic.
+U0J1M0F32 : You could implement Conway's Game Of Life and have it be a truly infinite board.
+U23SA861Y : you can concoct a list of all the primes
+U64MK7215 : how to a define a  custom function in elm and call it inside update?
+U3SJEDR96 : <@U64MK7215> if you could show us what you have tried and where you are getting stuck, I'm sure we could help you out :)
+U23NCSN86 : You know what would be good - if the package search page had 'elm package install foo/bar' snippets that you can cut and paste right from the result page
+U23NCSN86 : maybe that's already there somewhere, not obvious to me though. WOuld be handy for beginners
+U3SJEDR96 : It's been suggested a few times, but hasn't been picked up yet. Eventually, I suppose... I wonder if a userscript type thing would be worth exploring
+U0U6ML22H : yeah, copypasting from the URL is yuk, compared to the high-level of polish that the rest of the tooling has
+U0U6ML22H : you can use Fancy Search to find the function you need by its signature! when you install a package, the tooling talks to you and asks if it should do stuff, and does it! but between those two, you need to know the name of the package to install ^^
+U16AT5E7L : Hi all !!I will love to get some reviews about my elm project
+<https://github.com/puemos/elm-hangman>
+Thnx!!!
+
+U41NK9BM4 : It was the first thing I’ve asked when I landed here on Slack.  :slightly_smiling_face:  Relevant issue:  <https://github.com/elm-lang/package.elm-lang.org/issues/27>
+U5QJW0DDE : I think it's pretty cute!
+U0M4M5EM7 : me too :smile: if you want to make it even better, try to add keyboard input ^^
+U16AT5E7L : <@U0M4M5EM7> nice idea!
+U67P08N0N : Good day everyone. Today I tried Elm and foud a bug '_'. The docs of the package Html clearly say (<http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html#text>) that HTML should be escaped, right? But then this boke everything... <http://prntscr.com/fuahjf>
+U17P7CBFB : <@U67P08N0N> works just fine for me <https://ellie-app.com/3JskLBrvnr3a1/0>
+U1CE9DL9H : not on <http://elm-lang.org/try|elm-lang.org/try> though
+U2LC0U8JY : probably an error in <http://elm-lang.org/try|elm-lang.org/try>
+U1CE9DL9H : seems that is very broken at this point, should link to ellie
+U2LC0U8JY : not directly elm related
+U17P7CBFB : true, report it as a bug on <https://github.com/elm-lang/elm-lang.org>
+U67P08N0N : ok, I'll do that. thanks!
+U3SJEDR96 : Eh, that's not an try-elm specific thing, really. It's an "_inline JS in an html document cannot contain a closing html tag in a string literal because browsers_" thing.
+U3SJEDR96 : you can reproduce <@U67P08N0N>'s example locally, too, just `elm-make It.elm` and open that index.html. Or just have a document with `&lt;script&gt;var test = 'foo... &lt;/script&gt; bar.....';&lt;/script&gt;` in it
+U67P08N0N : <@U3SJEDR96> But the Html.text function should "escape" the script-tag, right? At least thats what the documentation says.
+U3SJEDR96 : Yes, in the sense that if would assign it to a `TextNode` as is, which means your browser cannot interpret it as HTML. The issue here is completely unrelated to that - here it's the browser giving special treatment to inline JS
+U3SJEDR96 : (which is why it works on ellie, and in most any production-like environment)
+U67P08N0N : <@U3SJEDR96> Could further explain where the fault is happening? Is it a mistake somewhere on <http://elm-lang.org|elm-lang.org> and its frontend or its compilation or do I have to treat the script-Tag differently in elm itself? What do you mean by inline JS?
+U3SJEDR96 : Alright, so, Elm can compile to either a JS file or an HTML file with the generated JS inlined in a &lt;script&gt; tag. This first "mode" is the one you'll most commonly used, because realistically, you'll want to include some extra stuff like a &lt;title&gt; for your page, some tracking script, etc. The second mode, which creates an HTML file, works by wrapping the generated JS file in some static HTML.
+U3SJEDR96 : Now, when you have javascript in an HTML file, you cannot have a string literal that includes a closing html tag; because the browser will pick that up and close the DOM node there. You can test this by creating a `foo.html` with the following code: `&lt;script&gt;var test = 'foo... &lt;/script&gt; bar.....';&lt;/script&gt;`.
+U3SJEDR96 : Note that this can only happen when you have a string literal containing a closing HTML tag, and the generated Elm code is inlined in an HTML document. This isn't a very common scenario, and probably why it hadn't come up yet. This could likely be fixed by post-processing the generated HTML to replace such occurences with `&lt;/scri' + 'pt&gt;`, tho
+U3SJEDR96 : note that this isn't particular to the `Html.text` function. Having a string literal in your code, no matter where, and compiling to an HTML file would trigger this behavior. The catch being that you generally don't have HTML code in string literals, and usually don't compile to HTML
+U67P08N0N : but in general the solution for this is escaping rather than splitting "unwanted" strings: &lt;html&gt;&lt;head&gt;&lt;script&gt;var text_with_closing_html = "&lt;/html&gt;";&lt;/script&gt;&lt;/head&gt;&lt;/html&gt;I just noticed that you even do not need any escaping here, html is aware of js-code-sections in a way that a closing html tag inside a string inside js wont close html
+
+U3SJEDR96 : Yes, but having `&lt;/script&gt;` there rather than `&lt;/html&gt;` would make it blow up
+U3SJEDR96 : Additionally, escaping isn't very relevant here
+U3SJEDR96 : I think?
+U3SJEDR96 : either way, I've logged this as an issue with `elm-make`: <https://github.com/elm-lang/elm-make/issues/174>
+U67P08N0N : Thanks for this very valuable information about inline script-tags! I will further inform myself about this although I cannot understand this non-intuitive behaviour right now. But as it has nothing to do directly with elm I'll stop here. Have a nice day!
+U3SJEDR96 : Yeah, it's (rather surprising) browser behaviour - having to write JS for external use differently than JS for inline use is a little disappointing. Thanks for sticking through this!
+U5FU80S06 : How do I launch a webpage from Elm?
+U3SJEDR96 : Can you describe what you're actually trying to do? I'm guessing the answer you're looking for is *not* `a [ href "<http://google.com>" ] [ text "Launch google!" ]`
+U5FU80S06 : Actually, I think that's what I need, just doing it from a button click.
+U3SJEDR96 : :smile: happy to help
+U5FU80S06 : I thought though that I need to fire a button `onclick` action and go via update and some cmd...
+U5FU80S06 : Isn't that proper Elm architecture?
+U3SJEDR96 : If you need a link, you need a link.
+U4872964V : <@U5FFVDC4W> that’s the proper Elm architecture if you’re going to change the state of your application. Is the webpage you’re launching part of the state of your application (i.e. do you need to keep track of it, if it’s open or not etc)
+U2GPAEU1L : Ya, I'd still like to see the data though, it's not the easiest data to acquire, both getting the numbers and also having solid control variables across locations. How many events did they look at? Were they hack-adjacent words or were they actually "hackathon" and "workshop" etc...
+I really want more women in software as well, I don't mean to kill that buzz....
+
+U0JFGGZS6 : is <https://github.com/eeue56/elm-flat-matrix>  still active/being maintained?  anyone use it here?
+U0EUHKVGB : Yes
+U58EMTHRN : norpan: A link can change the state by using elm-lang/navigation
+U0JFGGZS6 : ok good, looks useful
+U2GPAEU1L : Lol in the tweet they're getting upset with people for asking for the data...
+Oh man, the world we live in...
+
+U4872964V : sure, but that’s not the question here, is it?
+U0F7JPK36 : i don't feel like i need to consider the p value of their measurements or whatever to decide what to name a programming meetup though
+U58EMTHRN : Just a precision about your answer, as it is a "proper Elm architecture" unless the link is used to change the state.
+U0JFGGZS6 : curious if anyone has thought about wrapping some js ndarray implementation, e.g. <https://github.com/scijs/ndarray>
+U0JFGGZS6 : not that I know much about them
+U0CL0AS3V : &gt; wrapping some js ndarray implementation
+I think it's best to avoid "wrapping a js implementation" - better to look at a problem a JS library solves, and think about what a good Elm solution would look like :slightly_smiling_face:
+
+U0JFGGZS6 : well elm-flat-matrix is basically as close as you could get I think... it's more of a performance question. Same kind of reason elm-linear-algebra wraps a JS library.
+U0JFGGZS6 : asking more out of curiousity than real need :slightly_smiling_face:
+U0FP80EKB : “Show me the data” is a classic derailing technique.
+U5FU80S06 : I'm using `href` for a `button` attribute, but nothing happens.   But if I switch to `a`, all is fine. Kindly advise.
+U23SA861Y : because the html spec doesn't recognize href on buttons?
+U5FU80S06 : Ah, makes sense.
+U4872964V : you can put the `&lt;button&gt;` inside an `&lt;a&gt;` tag if you like
+U4872964V : not sure if it’s correct html though :slightly_smiling_face:
+U4872964V : you can also put the button in a `&lt;form&gt;` element, and have the url in the `action` attribute of the form
+U4872964V : or you can apply css to the `&lt;a&gt;` tag so that it looks like a button
+U4872964V : or you can write an explicit javascript handler using `attribute "onClick" "location.href='yoururl'"` on the button
+U5FU80S06 : Perhaps the Elm compiler should give an error for an incompatible html attribute?
+U23SA861Y : While that would be awesome behaviour, the html spec can be a bit inconsistent at times.
+U23SA861Y : I think the reasoning was to keep Html fairly light weight and solve these sorts of things at a higher level.
+U5W50TZ6C : Hi all! I could use some help with decoders. I need to decode some structured json, and I came up with this: <https://ellie-app.com/3JxxvQXDwkLa1/8>It includes a few examples of the JSON (`json1`, `json2`, `json3`). Any suggestions on how I could improve the decoder? (Or the types?)
+
+U1CE9DL9H : <@U5W50TZ6C> looks pretty good overall. I can recommend <http://package.elm-lang.org/packages/NoRedInk/elm-decode-pipeline/latest>
+U1CE9DL9H : also a small nitpick: I think the `decodeResultByStatus` function is better when less work is shared between the branches, for example```
+decodeResultByStatus : Bool -&gt; Decoder SubmissionResult
+decodeResultByStatus status =
+    let
+        decodeErrorField =
+            if status then
+                Decode.succeed None
+            else
+                Decode.field "error" errorDecoder
+    in
+        Decode.succeed SubmissionResult
+            |: Decode.field "messages" (Decode.list Decode.string)
+            |: decodeErrorField
+```
+
+U5W50TZ6C : Good idea, <@U1CE9DL9H>!
+U17P7CBFB : I need to use Dict.update to set a field in a record using an `a -&gt; Maybe a` function, how do I do this without going insane?
+U17P7CBFB : That is, the record is the data in the Dict
+U23SA861Y : umm how do you mean?
+U0LPMPL2U : `Dict.update` uses `(Maybe v -&gt; Maybe v)`
+U0LPMPL2U : `Maybe.map` is convenient to avoid unwrapping/rewrapping
+U0LPMPL2U : If you're just overwriting the old value, you can use `Dict.insert`
+U17P7CBFB : I've got a `Dict Int {field:List a}` and I want to set a specific position in that list using `List.Extra.setAt`, which returns a maybe, in case the index is outside the list
+U23SA861Y : you might just want to use insert
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

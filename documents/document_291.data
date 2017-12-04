@@ -1,11 +1,106 @@
+U2SR9DL7Q : i've pretty much drank the  elm koolaid at this point... i tried getting into javascript but the language feels... messy. i also toyed with haskell for a bit but never got to the point of being useful. elm possess that mixture of practicality and correctness. and a magical compiler.
+U0JL9RPC4 : This page seems to indicate that you can manually load your own material CSS files (and by consequence, some locale css files if you need to) <http://package.elm-lang.org/packages/debois/elm-mdl/latest/Material-Scheme>
+U0JL9RPC4 : `topWithScheme` always loads the styles files externally: <https://github.com/debois/elm-mdl/blob/v8/src/Material/Scheme.elm#L42>
+U2SR9DL7Q : ahhh... i was using topWithScheme
+U3HQVHERX : integrating elm into django, csrf_token is a flag, any gotchyas? currently passing it along with POST requests as `csrfmiddlewaretoken` but still getting `{"detail":"CSRF Failed: CSRF token missing or incorrect."}`
+U3YDBDP4Z : I'm trying to debug but I'm not getting anything to consoleFor instance, `let _ = Debug.log "OnLocationChange " location`
+
+U3YDBDP4Z : Is that the correct way?
+U3HQVHERX : that's correct
+U3HQVHERX : <@U3YDBDP4Z> could you post the surrounding code? are you sure `OnLocationChange` is happening?
+U3YDBDP4Z : I'm pretty sure since I can change the url and get a different view.But it's not the view I want, so that's what I'm trying to debug
+
+U3YDBDP4Z : ```userRequired : Model -&gt; Navigation.Location -&gt; Models.Route
+userRequired model location =
+    case model.user of
+        Nothing -&gt;
+            let
+                _ =
+                    Debug.log "Nothing: " toString model.user
+            in
+                Models.SignInRoute
+
+        Just user -&gt;
+            let
+                _ =
+                    Debug.log "User " model.user
+            in
+                parseLocation location
+
+
+update : Msg -&gt; Model -&gt; ( Model, Cmd a )
+update msg model =
+    case msg of
+        ChangeLocation path -&gt;
+            ( model, Navigation.newUrl path )
+
+        OnLocationChange location -&gt;
+            let
+                _ =
+                    Debug.log "OnLocationChange " location
+            in
+                ( { model | route = userRequired model location }, Cmd.none )
 ```
-:boom: :smile:
-Ah, too bad I can't make it there, I'd have loved to see that :slightly_smiling_face:
-I hope it will be recorded.
-You may take a look at <https://github.com/lzrski/elm-polymer/tree/pre-publish>
-It's work in progress. Unpublished and very poorly documented.
-What I'm trying to do now is reimplement the scaffolding script in Elm. It's getting too hairy for shell scripting.
-Basically I'm trying to generate Elm code with Elm program :slightly_smiling_face:
-But for the first kind I keep desctructuring the type and "rebuilding" it from scratch every time..
-If it's recorded, please share (I also speak Dutch)
-<@U2D7NUGS1> ^^
+
+U3HQVHERX : Can you show me the code that that sends the `OnLocationChange` message?
+U3YDBDP4Z : ```
+init : Location -&gt; ( Model, Cmd Msg )
+init location =
+    let
+        currentRoute =
+            Routing.parseLocation location
+    in
+        ( Models.initialModel currentRoute, Cmd.none )
+
+
+main : Program Never Model Msg
+main =
+    Navigation.program Msgs.OnLocationChange
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
+
+```
+?
+
+U3HQVHERX : so, i've got something like this in my code (I'm using that same navigation package)
+U3HQVHERX : ```onLinkClick : msg -&gt; Attribute msg
+onLinkClick message =
+    let
+        options =
+            { stopPropagation = False
+            , preventDefault = True
+            }
+    in
+        onWithOptions "click" options (Decode.succeed message)
+```
+
+U3YDBDP4Z : Right.
+U3HQVHERX : ```linkAttrs : String -&gt; List (Attribute Msg)
+linkAttrs path =
+    [ href &lt;| path, R.onLinkClick &lt;| UpdateLocation path ]
+```
+
+U3YDBDP4Z : I'm not clicking any links. This is on page load
+U3YDBDP4Z : I get the "correct" views if I change the url, as if it doesn't even care about the `userRequired` function
+U3YDBDP4Z : But none of the debug logs are being logged :confused:
+U3YDBDP4Z : So I don't know what's going on!? :smile:
+U3HQVHERX : oh, none of them are being logged??
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

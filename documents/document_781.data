@@ -1,0 +1,136 @@
+U2BCXMGKW : `{ previous : List Player, active : Player, remaining : List Player }`, that way you don't have duplicated values and you can still focus on the active player easily
+U2BCXMGKW : there might be better solutions though, haven't thought too much about it!
+U2BCXMGKW : but getting the data model right first normally helps a LOT when writing code later
+U0JFGGZS6 : <@U153UK3FA> <@U2SR9DL7Q>  looks like this updates the hand -&gt; <https://gist.github.com/tkshill/2c6f27b26938631f0028e210a8ffda8e#file-update-elm-L21-L22>
+U2SR9DL7Q : Yeah. I managed to get it pretty clean in the python version. I think with the "activeplayer" though I made it worse. it doesnt need to exist in addition to my players.
+U2SR9DL7Q : cuz now I technically have Five players
+U2BCXMGKW : yes, but even if you save the name of the active player like before, you can have weird issues if the name doesn't really belong to any player, etc.
+U2SR9DL7Q : <@U2BCXMGKW> thats the magic of FP though. The names are a union type, with a proper function for cycling through them. It's impossible to make or pass an invalid name.`Type PlayerName  = One | Two | Three | Four`
+
+U2BCXMGKW : what if a player has a duplicated name then?
+U2BCXMGKW : what if the player with that name is not in the list of players?
+U2SR9DL7Q : this function used to return the new names```
+nextPlayer : Player -&gt; Players -&gt; Player
+nextPlayer player (FourPlayers p1 p2 p3 p4) =
+    case player.name of
+        One -&gt;
+            p2
+
+        Two -&gt;
+            p3
+
+        Three -&gt;
+            p4
+
+        Four -&gt;
+            p1
+``` 
+The names are assigned once, during set up, from a list with the unique values.
+
+U2SR9DL7Q : It's the one thing I couldnt do in pythn easily, where I had to track an Int
+U2BCXMGKW : all I'm saying is that you can get more guarantees with a different data model
+U153UK3FA : <@U0JFGGZS6> but you can see that value is never applied to model.activeplayer
+U153UK3FA : <@U0JFGGZS6> it’s passed to `updatePlayerMsg` (<https://gist.github.com/tkshill/2c6f27b26938631f0028e210a8ffda8e#file-update-elm-L149>) which only updates `model.players`
+U0JFGGZS6 : oh, yes I see
+U2SR9DL7Q : <@U2BCXMGKW> I don't disagree. I'm going to have a nice rethink of the whole thing. But just referencing that this update issue occurred after I moved away from tracking just the name.
+U0JFGGZS6 : duplicate state indeed
+U2SR9DL7Q : When we talk about this again, lets just say that I introduced this error so we could have a fun evening of rousing, thought-provoking discussion.
+U153UK3FA : in javascript, model.activeplayer would just be a reference to an object in model.players. References and mutable state make it much easier to have a single source of truth. But they make it hard to keep it from getting out of control.
+U0JFGGZS6 : haha
+U0JFGGZS6 : you could use something like a zipper list that cycles.
+U0JFGGZS6 : ah, someone has made it already looks like.  <http://package.elm-lang.org/packages/maorleger/elm-infinite-zipper/latest>
+U2SR9DL7Q : I watched <@U3SJEDR96> I think? implementation of zipper lists. It seems interesting but I'd have to sit and map out how everything would have to change to accomodate it
+U2SR9DL7Q : _sigh_ ... today was supposed to be making the interface not garbage and posting it up for the slack and reddit folks to play. :disappointed:
+U2SR9DL7Q : then some json work for the resume... then maybe a smarter selection algorithm for the AI, which currently play like 6 yr olds.
+U0JFGGZS6 : best laid plans...
+U2SR9DL7Q : estimating time of completion...
+U2SR9DL7Q : <@U0JFGGZS6> <@U23SA861Y> <@U2BCXMGKW> <@U153UK3FA>  you've all been wonderful, as always. I am in your debt.
+U0JFGGZS6 : my experience so far, coming from dynamic languages, is that data modelling takes a ... _lot_ more time than you'd expect
+U2SR9DL7Q : in FP, you don't have to use ints and strings everywhere anymore. But the blessing of choice is the curse of having to figure out _good_ choices.
+U14Q8S4EM : Anyone ever use Reason?
+U14Q8S4EM : I kind of realized I forgot about it.
+U14Q8S4EM : Its kind of like an Elm substitute isnt it?
+U14Q8S4EM : Must not be doing well if I was able to forget about it. I wonder why they developed it in the first place.
+U0CL0AS3V : <@U0EUHKVGB> tried it pretty recently
+U0CL0AS3V : it didn't sound like it went well
+U0CL0AS3V : but I hope they are successful someday...more ML family languages succeeding in the browser is good for all of us imo :slightly_smiling_face:
+U0CL0AS3V : a big part of why people shy away from even trying a language like elm is that it's so different from what's popular (js, coffeescript, typescript)
+U0CL0AS3V : more ML variants succeeding is the social proof some people need (or maybe their bosses need) to justify investing time to try it
+U0CL0AS3V : we early adopters don't have that high a barrier, evidently, but I get that others have different risk tolerances for how they spend their time
+U153UK3FA : The fact that ReasonML can take advantage of an existing set of Ocaml libraries is pretty nice.
+U5W5F6QGP : I actually moved to elm from Reason as my hobby language
+It had issues with installation on my various linux machines 
+
+Outside of that, the documentation was quite lax at that time (they've recently redone it) and I just found things to be a little bit unstable for my tastes
+
+I will probably try it out in another ~6 months
+
+U5W5F6QGP : while I was researching some of the aforementioned issues I saw someone say "Elm is so easy to set up compared to this" so I gave elm a shot
+U5W5F6QGP : They get a lot for free because of their Ocaml interop story, but I also found their extensions to Ocaml tools like merlin to be where a lot of my environment pain came from
+U23SA861Y : <@U2SR9DL7Q> hofstader's law states that a project will always take 3 times longer than expected, even if you account for hofstadter's law.
+U2SR9DL7Q : <@U23SA861Y> can we just blame it on kuthrapali?
+U2SR9DL7Q : Also, the recursive nature of that statement is vaguely unsettling.
+U14Q8S4EM : Just account for it -1 times and you are good.
+U0H3A9XLN : I have a form which gets several selection options from the backend. What is the best way to model it?
+U0H3A9XLN : The problem is that because of this multiple `RemoteData` stuff it’s super painful to do any field updates or other logic
+U4872964V : <@U0H3A9XLN> what’s the pain? do you have an example of it?
+U0H3A9XLN : having impossible branches because I have to pattern match monad
+U4872964V : i’m not sure I understand, do you have a simple code example?
+U0H3A9XLN : unfortunately I can’t just copy paste my code and it won’t be trivial to make it now
+U0H3A9XLN : maybe you can better point me to some advanced form examples?
+U4872964V : it’s hard when I don’t know what your pain is, or what your forms are, unfortunately
+U4872964V : but if you have multiple `RemoteData` it may help to use one of the `map` functions, or `andMap` on them
+U0H3A9XLN : ok, thanks
+U2LAL86AY : <@U0H3A9XLN> are you using the `_ -&gt;` pattern  in `case of` ?```
+case remoteData  of 
+   Success .. -&gt; 
+               showSomeHtml
+   _ -&gt; 
+        text "" 
+```
+
+U2LAL86AY : actually it's better to use <http://package.elm-lang.org/packages/bloom/remotedata/1.0.1/RemoteData#map> - for success and<http://package.elm-lang.org/packages/bloom/remotedata/1.0.1/RemoteData#mapFailure> -&gt; for failure
+
+U0H3A9XLN : no, I do not use wildcard
+U0H3A9XLN : That was not about `map`, I should have formed question better. I know about the libraries API, I was really looking into different way of data modelling, not into suggestions for methods to use :slightly_smiling_face:
+U4872964V : <@U0H3A9XLN> a different way than _what_ is the obvious question. If you can't provide an example on how your code looks now it's extremely hard to suggest improvements.
+U2LAL86AY : hmm i'm curious to understand why this is not considered a compile error: ```
+import Style.Color as Color
+import Color
+
+....
+someBackground = Color.background Color.red 
+```
+ where in fact is: 
+```
+someBackground = Style.Color.background Color.red 
+```
+Gets confusing to know if `red` is from `Style.Color` or from `Color` - elmjutsu shows intelisense for both combined. - i mean not so confusing for red - but i'm worried about the implications for other function names if this is allowed
+
+U3SJEDR96 : If there is real confusion possible, I think you do get a compiler error:```
+This usage of variable map is ambiguous.
+Maybe you want one of the following?
+
+List.map
+String.map
+```
+
+U2LAL86AY : aa ok. So only if `red` is defined in both packages... then i get that error.. hmm
+U3SJEDR96 : indeed
+U3SJEDR96 : aliasing multiple modules to the same name is intentional; and allows things like `import List.Extra as List` to "combine" modules
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,1 +1,67 @@
+U3L6TFEJF : (thanks for the preview Slack….)
+U1ACUMJKX : woot i just made a graphics library for clojure! if anyone interested in that kind of thing could run some of the examples, i'd be thrilled to know if they work for you or not.
+U1ACUMJKX : <https://github.com/bcbradle/gl>
+U6902JG68 : <@U1ALMRBLL> Hi Josh, actually the problem was in my mac, prev I ran this func with long running async task in map,  it was like fetch 6k items and insert into db values for each one, so seems like it was running all this time consuming all available threads, that's why it didn't work, once it has finished I got my code working as expected.
+U6902JG68 : The strange thing is that I ran this in REPL and I am sure I have cancelled this task, but somehow it was still running in background consuming all available threads
+U15MJHWRX : hello everybody, is there a way to get the namespace of a map with uniformly namespaced keys?
+U15MJHWRX : e.g. `(map-ns {:some/key :val :some/other :val ,,,}) ;; =&gt; "some")`
+U071CG4QY : ```user=&gt; (map namespace [::a ::b ::c])("user" "user" "user")```
+
+U051SS2EU : the bot is kind of weird, the original hash-map was `{::a 0 ::b 1 ::c 2}`
+U6ADT74FR : can anyone let me know why this doesnt work```
+(defn what-is [x]
+  (cond
+    (identical? x 42) "everything"
+    (identical? x (* 42 42)) "everything squared"
+    :else "nothing"))
+
+(what-is (* 42 42)) ; "nothing"
 ```
+
+U051SS2EU : <@U6ADT74FR> ```+user=&gt; (identical? 127 127)true
++user=&gt; (identical? 128 128)
+false
+```
+
+U051SS2EU : there's a cache for the Longs, but only between -128 and 127, they aren't all cached
+U051SS2EU : identical? isn't just an equality check, it checks if the data is stored in the same location on hardware
+U051SS2EU : when you type in 127, clojure asks for an instance of Long, and java uses a cached set of Longs to look up the value, when you type in 128 clojure once again asks for a Long, but this time java makes a new one
+U6ADT74FR : Thanks a lot, i was using the wrong function. This worked ```
+(defn what-is [x]
+  (cond
+    (= x 42) "everything"
+    (= x (* 42 42)) "everything squared"
+    :else "nothing"))
+```
+
+U051SS2EU : there's also `==` for numeric equality
+U051SS2EU : eg. it would match 42.0 but = will not
+U6ADT74FR : Thank you for the help
+U15MJHWRX : <@U071CG4QY> <@U051SS2EU> thank you, i was looking for something preferably in core that behaves kind of like `namespace` does, returning the namespace when all keys have the same, `nil` when not all keys are namespaced, and a set of namespaces when multiple. i'll write my own then :slightly_smiling_face:
+U051SS2EU : returning a set or a string from one function is probably less than ideal - that kind of thing tends to increase the complexity of everything around it for no benefit
+U15MJHWRX : you are correct, although it's just for display purposes in a cli statement, so … :wink:
+U2J4FRT2T : <@U15MJHWRX> <https://github.com/clojure/clojurescript/blob/797e247fbef676544060a57da995f058db061f37/src/main/cljs/cljs/core.cljs#L9803>
+on cljs, this function "detect" the NS of the map to print `{:a/b 33}` as `#:a{:b 33}` (reader 1.9 feature)
+It may be usefull.
+
+U3JURM9B6 : In haskell, there is something called <https://hackage.haskell.org/package/threepenny-gui>where there is a thin js layer, and you can write your entire app in haskell (when on localhost)
+
+Is there something similar to clojure? where when on localhost, you can write webapps in clj because the 'client' side is just a very thin cljs code that sends events back to the clj side to be processed
+
+U04V70XH6 : I've read all the stuff about Threepenny and I still have no idea what it actually is/does...
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

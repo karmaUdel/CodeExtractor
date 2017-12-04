@@ -1,0 +1,135 @@
+U5MV460AG : In the same line?
+U42LCHFD2 : I usually separate them
+U42LCHFD2 : ```title = pagehtml.xpath('//*[@class='nuEeue hzdq5d ME7ew']/text()')website = pagehtml.xpath('//*[@class='nuEeue hzdq5d ME7ew']/@href')
+return (title,website)
+```
+
+or you can do a list or whatever you want - if your writing it to csv then out put it to a list as a row
+
+U5MV460AG : BTW, the code that worked was `//c-wiz/div/div/c-wiz/a/text()` :slightly_smiling_face:
+U42LCHFD2 : if you change the last part to `/@href` that will give you the url
+U42LCHFD2 : `/text()` gives you linked text , in this case the title
+U42LCHFD2 : if you wanted the class name you would to `/@class` at the end - ( just to give you an idea how its grabbing pieces of data when you look at the raw html)
+U5MV460AG : This is awesome, thanks again! Returned two lists, ready to work with them... THANKS!
+U5MV460AG : :taco: <@U42LCHFD2>
+U42LCHFD2 : thanks :slightly_smiling_face:
+U663SK5K2 : ```nums = [1,2,3,4,5,6,7,8,9,10]
+# Using map + lambda
+my_list3 = map(lambda n: n*n,nums)
+print(my_list3)
+
+Output ---&gt; &lt;map object at 0x000000E8107DF0B8&gt;
+instead of 
+[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+```
+
+U663SK5K2 : why ?
+U5NMSURAQ : `map` returns an iterator (lazily)
+U5NMSURAQ : i.e. if you have a million objects and apply a function with `map`, the `map object` will be returned right away and the actual result of a function will be applied when you iterate over the values
+U5NMSURAQ : `my_list3 = list(map(lambda n: n*n, nums))` is one way to "fix" this
+U663SK5K2 : ok got it
+U5CGPBF0U : I'm trying to wrap my head around GeoAlchemy but I'm having a really hard time. I have a lat and lon column in my table...should I be using a geometry column instead?
+U5LNXQHN3 : yes
+U5CGPBF0U : Ok...but I'm not sure if I should be using geography or geometry...If I wanted to show points over the size of, say, the continental US, would that be a problem with geometry?
+U5LNXQHN3 : Are you showing points over that sort of area within a single query? And what are your accuracy requirements?
+U5LNXQHN3 : PostGIS is definitely awkward to work with, I'll give you that. And understanding the geom/geog stuff, and converting between them, is fiddly. But stick at it.
+U5LNXQHN3 : I have a geography column in my DB (specifically, `geography(Point,4326) NOT NULL`), and it works for me. I only need to find places near other places, and each place is represented with a point, so I don't have rigorous requirements on accuracy, or the need for it to be correct over long distances
+U5LNXQHN3 : So I could probably have been okay with a geometry object
+U5CGPBF0U : The accuracy doesn't have to be particularly high at that distance, just good enough that if the user zooms in on that point on the map it doesn't drift so much that it appears to be flying across the map. HahaThank you for your encouragement! I am determined to figure it out. :slightly_smiling_face:
+I suppose that the important part is showing points within a much smaller scale (say a few city blocks in each direction) within about 5 meters of accuracy. I'm just thinking though that even if the large scale stuff isn't important, why not use geography anyway?
+
+U5LNXQHN3 : Geography has fewer functions available on it, so you need to convert to geometry to perform various tasks
+U5LNXQHN3 : I mostly just compare distances, so geography is fine. The geography type basically exists to allow for accurate distance comparisons
+U5LNXQHN3 : But trying to perform complex perimeter or area calculations on the surface of a not-quite-sphere is complex, so for that sort of thing, I think that is where they require you to project to geometry and suck up some error
+U5CGPBF0U : Ah I see. Makes sense. The only thing that's important is that I'm able to get everything within a box (which will be the area the user is viewing in the app). Distance between points, perimeters, and areas, aren't important
+U5LNXQHN3 : Sounds like you want the ST_Contains test. It operates on geometry. Make a polygon of your box, test it against the points.
+U5LNXQHN3 : There's also ST_Covers for geography, but it appears less used.
+U0LSCQQNR : <https://www.amazon.com/PostGIS-Action-2nd-Regina-Obe/dp/1617291390/ref=sr_1_1?ie=UTF8&amp;qid=1500718692&amp;sr=8-1&amp;keywords=postgis+in+action>
+U0LSCQQNR : <@U5CGPBF0U> if you're going to do more work in this regard, I would suggest you buy that book and review it carefully.
+U5CGPBF0U : <@U0LSCQQNR> Thanks! This looks like it would be very helpful for me. If I need to do much more PostGIS stuff after this I think I should strongly consider buying it
+U5CGPBF0U : <@U5LNXQHN3> Oh ok, I'll take a look at ST_Contains
+U0LSCQQNR : well, considering your project is very reliant on GIS, I would get it regardless
+U5CGPBF0U : Well, I would but I'm super duper tight on money at the moment so unfortunately I need to try to hold off for the time being. I'll definitely take a look when I have a bit more money to spend though :slightly_smiling_face:
+U0LSCQQNR : :thumbsup:
+U5CGPBF0U : My Alembic or more specifically SqlAlchemy-Migrate keeps trying to drop the spatial_ref_sys table required by PostGIS. Is there a way to make it ignore it?
+U5NMSURAQ : <@U5CGPBF0U> <http://dev.utek.pl/2013/ignoring-tables-in-alembic/>
+U5NMSURAQ : &gt; While working on spatial enabled application I came up to a problem with spatial table in my postgres database (spatial_ref_sys). Alembic insisted on deleting this table as it wasn't declared in my models.py.
+U5NMSURAQ : I think it's your situation described
+U5CGPBF0U : <@U5NMSURAQ> Yep, exactly. :smile: Thanks!
+U5NMSURAQ : :slightly_smiling_face:
+U5CGPBF0U : One thing that confuses me a bit is that his `run_migrations_online` function is _completely_ different from mine. :thinking_face:
+U5CGPBF0U : It makes me wonder if this is built on an older version of the function and if replacing mine with this could lead to problems
+U5NMSURAQ : You can probably adapt it somehow
+U5NMSURAQ : BTW, Alemic docs states that migrations should not be committed without human inspection first, so a really simple solution is to manually remove the "drop table" bits
+U5NMSURAQ : Not really a beautiful solution, but still
+U5CGPBF0U : <@U5NMSURAQ> Oddly removing the `drop`s manually fixes the error _but_ none of the model tables were created in the database... :facepalm:
+U5NMSURAQ : :open_mouth:
+U5CGPBF0U : So just dropped the alembic table, deleted the migrations folder and did the whole process over but still no tables? Not sure what I'm doing wrong.
+U5CGPBF0U : Then again the migration script has nothing in it for creating the relevant tables. :thinking_face:
+U5CGPBF0U : Only code for dropping the PostGIS table which I removed
+U5NMSURAQ : it means that it can't detect your models for whatever reason :confused:
+U5CGPBF0U : Oh! Yes, I just changed my models from subclassing `Model` to subclassing `Base` from `declarative_base`. Guess that's why.
+U5CGPBF0U : I'm not sure if that was a good idea but I couldn't help but notice that subclassing `Model` wasn't something done much outside of tutorials.
+U5NMSURAQ : :cry:
+U5CGPBF0U : :upside_down_face: :question:
+U5NMSURAQ : This is from a real-life product
+U5LNXQHN3 : Isn't it necessary to derive from Model if you use flask-sqlalchemy, and Base if you just use bare sqlalchemy? There is a difference, as I found out
+U5CGPBF0U : Why with most SQLAlchemy extensions do they show a couple examples - usually ORM and core - and neither one of them look like this?
+U5CGPBF0U : <@U5LNXQHN3> Good to know. :sweat_smile:
+U5CGPBF0U : I may be but a novice Python dev, but someday I aspire to be a mediocre intermediate dev!
+U5NMSURAQ : You most definitely will be
+U5NMSURAQ : &gt; and neither one of them look like this?Eh, I asked myself the same question. Turns out, writing a tutorial based on real-world applications isn't fun for anyone
+
+U5NMSURAQ : Novices will 100% be confused
+U5NMSURAQ : it's way easier to show the first 2-3 steps with Core or ORM, and move on to the first steps in anything else :slightly_smiling_face:
+U5CGPBF0U : To be completely honest I found machine-learning less confusing :smile:
+U5CGPBF0U : I have a sort of love-hate relationship with it
+U5NMSURAQ : you must be good with maths
+U5CGPBF0U : Not that great, but I do enjoy learning math. Honestly read about calculus and all sorts of things for fun. I wasn't really crazy about math as a kid so I'm not sure why that changed.
+U5CGPBF0U : I was doing the Stanford ML course from Coursera but had to stop at one point once things became a bit too complex. I still intend to go back to it after studying more though.
+U63VCB8AH : What is an pythonic way to specify class dependencies?
+U13L8J76J : ```class Foo:
+    def __init__(self, dependency_a, dependency_b):
+        ...
+```
+
+U63VCB8AH : How would I inject those dependencies? Are there any good DI package?'
+U63VCB8AH : <@U13L8J76J>
+U13L8J76J : <@U63VCB8AH> `foo = Foo(dependency_a, dependency_b)`
+U13L8J76J : You don't need DI framework in python, really
+U63VCB8AH : I'm used to strictly typed languages
+U63VCB8AH : haha
+U63VCB8AH : So I just need to rely on duck typing?
+U13L8J76J : Yep, just pass arguments around
+U63VCB8AH : ```class User():
+    name = ''
+    email = ''
+
+    def __init__(self, name, email, json):
+        self.name = name
+        self.email = email
+        self.json = json
+
+    def toJson(self):
+        return self.json.dumps({
+            'name': self.name,
+            'email': self.email,   
+        })
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

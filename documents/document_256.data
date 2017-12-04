@@ -1,9 +1,78 @@
+U1XL8FMAA : Any idea if there are more straightforward examples of pure component api design other than elm-sortable-table? Specifically, I am interested in how one folds in Cmds to the design, given the lack of an update function in the table api?
+U1XL8FMAA : I assume that you could store them in the component model and pull them out in the parent update…
+U1XL8FMAA : or not.. actually I don't really see how to handle Cmds…
+U153UK3FA : <@U1XL8FMAA> there are no components
+U153UK3FA : any updating you want to do to the model and any `Cmd`s you want to emit are done in the top level `update`
+U153UK3FA : that `update` can call any functions it wants to produce those `Cmd` and do those model changes
+U1XL8FMAA : <@U153UK3FA> - you can obviously follow nested TEA and map child update to parent… sitll works
+U1XL8FMAA : by component i am not talking about a stateful component but a pure component.
+U153UK3FA : you're taking about a function
+U1XL8FMAA : the rest of the world calls them components… and they serve the same purpose
+U5MKS6L80 : i'm thinking something like this:```
+Component.elm:
+
+type ComponentMsgType = ...
+
+update : ComponentModel -&gt; ComponentMsgType -&gt; (ComponentModel, Cmd ComponentMsgType)
+update model msg = ...
+
+Main.elm:
+
+type Msg = ... | ComponentMsg ComponentMsgType
+
+update model msg = case msg of
+    ComponentMsg componentMsg -&gt;
+        let
+            (newComponentModel, componentCmd) = Component.update model.componentModel componentMsg
+        in
+            ({model | componentModel = newComponentModel}, Cmd.map ComponentMsg componentCmd)
 ```
-how thats pretty genius to destructuring with ::
-:slightly_smiling_face:
-gj
-i will explain a bit more tell me if i am wrong <@U4F64AKQV>.
-div [] [] the last one is a list
-its the same if you write so 1 :: [2, 3, 4]
-so that's why it should work
-It also becomes easier to see when you write type annotations.
+
+U3LGUAF54 : <@U5W4G2SQ5> <@U3SJEDR96> I'd say electron is a great fit for that, looks like the npm package already handles the hard part for cross platform there. Of course it's worth understanding that electron is a memory hog and may not be ideal for every use case. I made an open source electron/Elm app and it's been an awesome experience for me and my users! More than happy to share more if you have more if you have any questions.
+U153UK3FA : <@U1XL8FMAA> you can call the function a ‘component' if you want, but it's confusing and leads to misunderstandings
+U1XL8FMAA : <@U5MKS6L80> interesting
+U1XL8FMAA : <@U153UK3FA> - I would argue that the opposite is actually true
+U153UK3FA : eg. the above common pattern is obvious when you think of it as a function
+U1XL8FMAA : <@U153UK3FA> try selling elm at work and getting into semantic nit picking when coworkers ask about how rich a set of library components there are…
+U153UK3FA : the question ‘how do I return `Cmd`s from a function?' is a weird question to ask
+U153UK3FA : ‘how do I emit `Cmd`s from a child component?' makes it sound much more complicated
+U1XL8FMAA : that isn't the question. the question was how to adapt the pattern in elm-sortable-table to handle Cmds
+U3LGUAF54 : <@U5W4G2SQ5> <@U3SJEDR96> I've been using a union type for my ipc messages, and setting up just a single port for all ipc messages. That's worked great for me actually. <https://github.com/dillonkearns/mobster/blob/master/src/Ipc.elm> <https://github.com/dillonkearns/mobster/blob/master/setup.html#L161>
+U1XL8FMAA : <@U5MKS6L80> your example looks like the .17 nested TEA pattern
+U1XL8FMAA : I thought that the advice was to move away from this pattern
+U5MKS6L80 : oh, this is just something i came up with as a first guess
+U5MKS6L80 : didn't know that this was an anti-pattern
+U5MKS6L80 : do you have any links about it?
+U1XL8FMAA : @weiszman the pattern was completely scrubbed from "An Introduction To Elm" for .18. It was in the .17 version if i remember correctly
+U153UK3FA : <@U1XL8FMAA> elm-sortable-table has a bunch of functions that modify it's `State` type and a `view` function to display it as Html. If you want it to produce `Cmd`s then write a function that takes a Msg you want to `Cmd` to produce and have it return the `Cmd`
+U1XL8FMAA : sorry <@U5MKS6L80> i mean
+U5MKS6L80 : ah i see. i started with .18 so guess that's why i never encountered that
+U153UK3FA : ```getTheTime: (a -&gt; msg) -&gt; Cmd msg
+getTheTime msg = Task.perform msg Time.now
+```
+
+U153UK3FA : if your Cmd needs data from a `State` value, then pass that in too
+U1XL8FMAA : <@U153UK3FA> elm-sortable-table does away with the table.update and Table.Msg . You configure  a function to transform State -&gt; Msg right? That gets called in the table view… the role of table.update seems to be baked in to the table.view
+U153UK3FA : `view : Config data msg -&gt; State -&gt; List data -&gt; Html msg` view is a function that takes a `Config` and a `State` and some data and returns some Html to display
+U153UK3FA : elm-sortable-table exposes functions to operate on the `Config` and `State` values instead of hiding those functions behind `Table.Msg` values being passed to a single `Table.update` function
+U1XL8FMAA : <@U153UK3FA> yes. I see that. However, I don't really see how you extend the pattern to account for the desire to produce a Cmd from the table. IE Lets say i am creating random-sortable-table which i want to handle from within the table… I don't see where as the author of random-sortable-table i would orchestrate this….
+U1XL8FMAA : <@U153UK3FA> and i know that i am being sloppy with my terminology. because i understand that the table isnt actually producing the random value….
+U153UK3FA : in response to a user action?
+U1XL8FMAA : <@U153UK3FA> in response to an event defined in the table's view and without having to define another Msg on the part of the consumer (other than the single Msg handling table state )
+U153UK3FA : a user action produces a `Msg` which the Elm runtime passes on to your `update` function, from there you can call any function you want to.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

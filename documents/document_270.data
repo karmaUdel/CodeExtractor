@@ -1,8 +1,59 @@
-```
-assuming that's the way to do it.  thanks again!
-Is this JSON you're trying to convert to an Elm structure?
-<@U601ELFEG> What do you mean by "don't want to author [..] in elm"? Do you mean that you don't want to write that in Elm or that you want to keep it in your codebase as plain HTML?
-meaning I want to keep things like the content of the help panels authored in HTML - probably in a file apart from the elm code -
-in the example there <@U0LPMPL2U>, but i also have the same issue for types.  so i think Dict should get me on the right path.
-ditto the control panel (it has some meticulously laid out and styled buttons)
-The structure of your types doesn't have to mirror the structure of your JSON
+U5V0HVAKB : using toString ?
+U1AN4JRFV : `String.toInt` ?
+U23SA861Y : right and its going to give you a Result which is either a valid Int or an error
+U1AN4JRFV : <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/String#toInt>
+U23SA861Y : you need to handle both the case where it succeeds as well as when it fails.
+U1AN4JRFV : <https://guide.elm-lang.org/error_handling/result.html>
+U5V0HVAKB : wow not really clear
+U5V0HVAKB : how to get the Err value
+U23SA861Y : it's an algebraic data type or union type, the link <@U1AN4JRFV>  gave shows how you extract the types with a case statement
+U23SA861Y : well, one way to extract the info
+U1AN4JRFV : ``` case String.toInt userInputAge of    Err thisIsTheErrorValue -&gt;
+      span [class "error"] [text thisIsTheErrorValue]
+
+    Ok age -&gt;
+       ... more html ```
+
+U5XHTBFS6 : Hi, y'all!I'm having some trouble with the Http package, it seems it is not sending the headers i'm passing to the `request` function. I'm very new to frontend development, so I don't know if it's something I did, or if it's something with Elm itself, or some CORS constraint...
+
+Any help on how to send headers would be appreciated!
+
+Here's a simple program that reproduces my problem:
+
+U5V0HVAKB : ``` isConvertible : String -&gt; Html msgisConvertible t =
+ let
+    (color, message) =
+      case String.toInt t of
+        Err msg -&gt;
+          ("red", "not a number")
+
+        Ok age -&gt;
+          ("green", "OK")
+   in
+     div [ style [("color", color)] ] [ text message ] ```
+
+U5V0HVAKB : its working but maybe its better to do a function ?
+U5V0HVAKB : that return true or false?
+U23SA861Y : <@U5V0HVAKB> I would put either the result in your model or convert it to a maybe type and store that.
+U1AN4JRFV : <@U5V0HVAKB> rather one that returns `(String,String)`
+U23SA861Y : <@U5XHTBFS6> what kind of error is the browser console showing?
+U23SA861Y : <@U5V0HVAKB> err, nvm you need to set the field with the string value. Yeah you could probably refactor that code into something that returns a list of validation errors and then renders the list or shows ok if now validation errors are present
+U5XHTBFS6 : <@U23SA861Y> No errors. When I open the the network tab on the inspector, I can see that the request is sent, but my headers are missing from the "request headers section"
+U5XHTBFS6 : And I did a simple server that prints the headers received, and it prints the samething as the browser
+U5XHTBFS6 : just general accept, user-agent etc., but with my headers missing
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

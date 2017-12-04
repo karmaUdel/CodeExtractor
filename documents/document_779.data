@@ -1,0 +1,106 @@
+U0EUHKVGB : <@U2LAL86AY>, hey, if you've written something up then please put it in a gist.
+U0EUHKVGB : Long form posts like that are not well suited to Slack.
+U0EUHKVGB : It makes it very hard to give feedback to you.
+U2LAL86AY : yep i created that repo
+U2LAL86AY : will make a gist soon
+U0EUHKVGB : That repo is fine, I didn't click on it yet cause I was still reading your post :wink:
+U2LAL86AY : ah and i forgot to mention - when calling the same function multiple times in the same update step - clicking on it in the second pannel - will show every instance of it's calling in order. So nothing is hidden
+U170TNSTZ : Anyone using IntelliJ? Am I assuming correctly that it does not support showing type errors (eg missing cases), only syntax errors?
+U2LAL86AY : i need to go because here is late - regarding my request, please leave your feedback here instead of slack: <https://github.com/AionDev/xray-time-traveling-debugger/issues/1>]
+
+U4872964V : <@U2LAL86AY> will read it tomorrow! interesting
+U2U94G0QG : <@U2SR9DL7Q> I was catching up on unread history yesterday and saw your convo. about shuffling - it reminded me of this which is my current fav way to do that:```
+shuffle : List comparable -&gt; List a -&gt; List a
+shuffle random list =
+    List.map2 (,) list random
+        |&gt; List.sortBy Tuple.second
+        |&gt; List.unzip
+        |&gt; Tuple.first
+```
+
+U2SR9DL7Q : <@U2U94G0QG> First off, I'm just pleased that I've reached the level where I can understand what that does. This implementation is pretty neat.
+U2U94G0QG : credit where it's due - it came from a tutorial I ran through a while back so it's not mine
+U2U94G0QG : but I love when Elm code reads like this
+U2SR9DL7Q : <@U2U94G0QG> I just ended up using the `Random.shuffle` function in the random extra library. This function seems way less messy than that one. I have completely fallen in love with the `|&gt;` operator.
+U2SR9DL7Q : today I ended up converting
+U2U94G0QG : haha very nice
+U2SR9DL7Q : whoops... tried to make it smaller. But I think you saw it
+U2U94G0QG : you can add it as a reply to one of our messages to put it in a thread so it doesn't spam the channel
+U2U94G0QG : (for future ref)
+U2SR9DL7Q : ```calculateHumanMatch : Domino -&gt; BoardSide -&gt; Maybe Board -&gt; Maybe ( Domino, BoardSide )
+calculateHumanMatch domino side board =
+    case board of
+        Nothing -&gt;
+            let
+                newDom =
+                    domino
+            in
+            Maybe.Just ( newDom, Left )
+
+        Just board -&gt;
+            case side of
+                Left -&gt;
+                    let
+                        ( lefty, _ ) =
+                            getBoardEnds board
+
+                        matched =
+                            matchHands [ domino ] lefty 7
+                    in
+                    case matched of
+                        Nothing -&gt;
+                            Nothing
+
+                        Maybe.Just ( _, _, newDoms ) -&gt;
+                            Maybe.Just ( newDoms, Left )
+
+                Right -&gt;
+                    let
+                        ( _, righty ) =
+                            getBoardEnds board
+
+                        matched =
+                            matchHands [ domino ] 7 righty
+                    in
+                    case matched of
+                        Nothing -&gt;
+                            Nothing
+
+                        Maybe.Just ( _, _, newDoms ) -&gt;
+                            Maybe.Just ( newDoms, Right )
+```
+to 
+```
+calculateHumanMatch : Domino -&gt; BoardSide -&gt; Board -&gt; Maybe ( Domino, BoardSide )
+calculateHumanMatch domino side board =
+    getBoardEnd side board
+        |&gt; matchDominoToInt domino
+        |&gt; Maybe.map (alignToBoardEnd side)
+        |&gt; Maybe.map (\domino -&gt; ( domino, side ))
+```
+
+U2SR9DL7Q : The day the pipe structure clicked my life changed forever
+U2SR9DL7Q : also, my update Msgs are way more sane.
+U2U94G0QG : same, I wonder how I lived without it
+U2U94G0QG : currently trying to sell my team on the benefits of Elm
+U2SR9DL7Q : I'm trying to do the same thing I did here with the calculations for the AI player, but it's trickier
+U2SR9DL7Q : My old boss would never have let me elm if I just asked. But if I'd built something awesome with it first and showed her the no runtime error thing... she'd probably get on board.
+U2U94G0QG : I'm building a little thing to show off, it's still early but I have gotten some positive feedback already - we just shipped a React/Redux app and are now planning what will be used in a rewrite of an old flash app
+U2U94G0QG : it looks like it will be about the same + TypeScript, but I want to use Elm :smile:
+U2SR9DL7Q : i'm avoiding everything 'script'
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,0 +1,118 @@
+U5XS8U2QN : So I should store data in both, ES and RDBMS if I want to access it frequently?
+U0NRYQNAZ : i don't know what you should do b/c i don't know the requirements i was just letting you know what you could do :wink:
+U0NRYQNAZ : &gt; i suggested saving to a rdbms in the process mainly so you can take advantage of an rdbms at the same time. this won't be needed for every application.
+U5XS8U2QN : Hmm. By storing document in RDBMS, did you mean creating schema based on keys in document?
+U0NRYQNAZ : yea, you can save the data to the db and get back from the database the inserted record. That would look like this maybe `{"id": 1, "name": "a1gupta", "role": "1", "created_on": "2017-10-11 343434"}`. once you get what the database has you send it to ES.
+U0NRYQNAZ : that's how you would make a search engine with ES btw. which is what i did recently. you can take those same values in the dict and pass them as query params to a search endpoint.
+U5XS8U2QN : Thanks <@U0NRYQNAZ> . I think I should start now to understand it better. :upside_down_face:
+U0NRYQNAZ : code it the way you see it :smiley: it looks like there may be a few problems to solve before getting to ES like getting the events you want.
+U0NRYQNAZ : i'm sure there are some django plugins that can help you with that.
+U0NRYQNAZ : ppl in the <#C0LMFRMB5|django> channel would know.
+U24HARUCQ : I have something seemingly complex and puzzling. I'm trying to add dynamic localization to my library which also powers a REST API. I was able to add the gettext _() function by running this at my root before importing the other modules
+```
+LOCALE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'locale')
+gettext.install('app, LOCALE)
+
+from app import foo, bar
+```
+
+That works great. However, I want to add dynamic localization for certain functions. Ex:
+
+```
+# Using system
+foo()
+# Using given locale
+foo(lang='es')
+# Goes back to system
+foo()
+```
+
+I'm trying to do this by running within a context switcher:
+
+```
+@contextmanager
+def set_language(lang: str=None):
+    # Set language
+    if not lang is None:
+        gettext.translation('app', LOCALE, languages=[lang], fallback=True).install()
+    yield
+    # Revert to system default
+    gettext.install('app', LOCALE)
+
+def foo(lang: str=None):
+    with set_language(lang):
+        print(_('Foo the bar'))
+```
+
+But I'm getting this opaque error and can't figure out how to isolate it
+
+```
+print(_('Foo the Bar'))
+TypeError: 'bool' object is not callable
+```
+
+The interesting part is that it works on the first call to foo but not the second. My guess is that something is going on after the `yield` which screws the system up, but I'm not sure where, why, or how to ask the right question
+
+U24HARUCQ : OH MY GOD. I've been testing this in the REPL. I have a function which returns a boolean that gets “thrown away”, but the REPL assigns it to `_` which overwrites the global `_` set by `gettext.install()`
+U24HARUCQ : Thoughts on how to make gettext REPL-safe?
+U13L8J76J : <@U24HARUCQ> don't use `install`?
+U5CRANMFV : Hey, everyone. In <#C5PHT9EGK|webscraping> I asked the question. I think it's more appropriate. Who is not difficult, come in, please.
+U5CRANMFV : ```    d["Jan. 5, 2017"]    Out[43]:
+    {'issue': u'importmant',
+     'url': '<http://www.roga.html>'}
+```
+if in the dictionary I want the date to add another `issue` and the `url` how to do it properly?
+
+U5CRANMFV : ```    d["Jan. 5, 2017"]    Out[43]:
+    {'issue': [u'importmant', u"very importmant"],
+     'url': ['<http://www.roga.html>', "<http://www.kopita.com|www.kopita.com>"]}```
+I think that this kind of suit me, but I don't know how to do it...
+
+U5NMSURAQ : ```&gt;&gt;&gt; from collections import defaultdict
+&gt;&gt;&gt; d = defaultdict(list)
+&gt;&gt;&gt; d['issue'].append('important')
+&gt;&gt;&gt; d['issue'].append('very important')
+&gt;&gt;&gt; d['url'].append('<http://google.com>')
+&gt;&gt;&gt; d['url'].append('<http://yahoo.com>')
+&gt;&gt;&gt; d
+defaultdict(&lt;class 'list'&gt;, {'issue': ['important', 'very important'], 'url': ['<http://google.com>', '<http://yahoo.com>']})
+&gt;&gt;&gt; dict(d)
+{'issue': ['important', 'very important'], 'url': ['<http://google.com>', '<http://yahoo.com>']}
+```
+
+U5CRANMFV : Thank you :clap::blush: 
+U5CRANMFV : Did not understand until the end. I hope to help.```z = {u'Jan. 5, 2017': {'url__result': ['<http://www.something.htm>'], 'issue': [u'something_issue']}}
+```
+For example I have the following date is the same.
+I want to add to `z` - 
+```url__result = "<http://www.google.com|www.google.com>"
+issue = "import"
+```
+
+What should I use?
+
+U5VGKQ2SY : and the date stay the same? So Jan 5, 2017 would have two {url_result, issue} sets?
+U5CRANMFV : <@U5VGKQ2SY> I want this ```    d["Jan. 5, 2017"]    Out[43]:
+    {'issue': [u'importmant', u"very importmant"],
+     'url': ['<http://www.roga.html>', "<http://www.kopita.com|www.kopita.com>"]}```
+
+U5CRANMFV : I have a few lists with these dates, I need a dictionary, the Date can be the same as each other, so I need to get my dictionary are not overwritten as I have now, and added new values.
+U5VGKQ2SY : actually, take another look at leovp's solution.
+U5CRANMFV : The decision is good, but I can't figure out how to make the key "10.01.2007" was {'issue': ['important'], 'url': ['<http://google.com>']} .And what if the next date goes "10.01.2007" the data was added to the list to "important" to "<http://google.com|google.com>". I have overwritten now.
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

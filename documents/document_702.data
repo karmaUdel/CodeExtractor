@@ -1,1 +1,110 @@
+U23SA861Y : hmmm also seems to unwrap
+U23SA861Y : it is a foldl and the native implementation is a foldr
+U0FP80EKB : oh, let me think for a second
+U0FP80EKB : I bet it is nesting the calls to collapse, evaluating them at the end maybe?
+U0FP80EKB : now how to prove it
+U0FP80EKB : hmm… Would have to jump more into the js debugging. But, gotta get some dinner. This is super interesting.
+U0FP80EKB : Would definitely be worth calling someone like <@U0EUHKVGB> on this :slightly_smiling_face:
+U23SA861Y : yeah I gotta run, but this seems like escalation time
+U1ZFF0E5P : Hi all, I'm running into a weird bug where my stuff is mutated (???), can someone run a sanity check over it to make sure I'm not tripping: <https://gist.github.com/ryan-senn/9bd84cc4479a14556a186b3169f43566>. Here is the output: <http://imgur.com/a/hIIsD>
+U1ZFF0E5P : the first run fails, but after commenting out the "notUnique" test, it passes
+U1ZFF0E5P : so somehow this part is mutating (??) the TestArray function: ```    let        notUniqueArray =
+            ["entry4"]
+                |&gt; Array.fromList
+                |&gt; Array.append array```
+
+U153UK3FA : <@U1ZFF0E5P>: the current implementation of Array in Core has some issues
+U1ZFF0E5P : oh
+U153UK3FA : it’s kind of broken, the next Elm release will include a rewrite
+U153UK3FA : you can use that version now by using <http://package.elm-lang.org/packages/Skinney/elm-array-exploration/latest>
+U1ZFF0E5P : should I still add this to an existing github issue or just ignore it
+U153UK3FA : try using `Skinney/elm-array-exploration` and see if it solves your problem
+U1ZFF0E5P : ok that fixed it, thanks <@U153UK3FA>
+U1ZFF0E5P : got really confused there for a bit lol
+U153UK3FA : yeah, it’s been broken for a while, it’s tripped up a few people
+U1ZFF0E5P : just out of interest, it's the native implementation in js that has bugs?
+U153UK3FA : yep
+U153UK3FA : Yep, lots of JS in that Array module
+U153UK3FA : It’s now only 150 lines of JS rather than the 1000 lines it was.
+U0EUHKVGB : <@U0FP80EKB> <@U23SA861Y> what was the question?
+U23SA861Y : There was a string permutation problem that was popping the stack even though it didn't explictly use recursion, only maps
+U23SA861Y : we couldn't figure out where it was recursing so deep as to pop the stack
+U23SA861Y : <https://ellie-app.com/3FY8YRHcqvka1/1> this one
+U23SA861Y : it seemed like when the list was approaching 6k or so it was causing the issues
+U23SA861Y : and an early riser I see
+U0EUHKVGB : It's because your model is too big for the debugger to play nicely
+U23SA861Y : he, so it is the debugger causing issues, interesting
+U0EUHKVGB : The debugger uses a bunch of customized thing for the virtual-dom in order to display things usefully
+U0EUHKVGB : If you disable the debugger, or just compile it locally, then your file works
+U0EUHKVGB : <https://github.com/elm-lang/virtual-dom/blob/master/src/VirtualDom/Expando.elm#L130>
+U0EUHKVGB : this function does not seem to be TCO'd.
+U23SA861Y : that'll do it
+U0EUHKVGB : <https://github.com/elm-lang/virtual-dom/issues/98>
+U23SA861Y : <@U64A0BYHH> ^
+U0NGNUH4J : Hello, community! :smile:
+I’m building a simple product library to experiment with “making impossible states impossible”.
+
+As the model suggests products can be simple one-off things or a group of products.
+
+*Question*: I have a problem with naming collisions and feel like I’m running out of names. Any ideas about what could be done with the types here?
+
 ```
+type alias Model =
+    { products : List ProductType }
+
+
+type ProductType
+    = Product
+    | ProductGroup
+
+
+type alias Product =
+    { name : String
+    , price : Float
+    }
+
+
+type alias ProductGroup =
+    { name : String
+    , firstProduct : Product
+    , otherProducts : List Product
+    }
+```
+
+U5J0H2NS2 : I used to name the type aliases (constructors) like ProductConstructor
+U5J0H2NS2 : your type should be something like
+U5J0H2NS2 : ```type ProductType
+  = Product ProductConstructor
+  | ProductGroup ProductGroupConstructor
+```
+
+U3SJEDR96 : I think I'd actually go for something like
+U3SJEDR96 : ```type ProductInfo = { name : String, price : Float }
+
+type Product
+  = Product ProductInfo
+  | Group String (NonEmptyList Product)
+
+type alias Model = List Product
+```
+
+U0NGNUH4J : ahaa
+U5J0H2NS2 : your original ProductType is only an "Enum"
+U3SJEDR96 : well, `NonEmpty` actually, using mgold/elm-nonempty-list
+U0NGNUH4J : I see
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

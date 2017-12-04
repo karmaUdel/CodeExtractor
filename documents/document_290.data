@@ -1,6 +1,64 @@
-``` It obviously doesn't work.
-Right; so you can think of a `Decoder a` as a function `Value -&gt; Result String a`. The only ways of calling that function is by using `decodeString` or `decodeValue`  on a string representing some json, or an actual json value. The result it returns a result is because decoding can fail, if the json is malformed or doesn't match the structure you describe in Elm
-Makes sense.
-so how you generally handle this, is by writing a decoder that matches the structure you expect. In this case, `myDecoder = Decode.field "value"  Decode.string`. You'd then use that like `decodeString myDecoder """ { "value": "The string I want" } """`
-the above should actually work in the repl, too :slightly_smiling_face:
-Ok, thanks. I think the missing part on my side was `decodeValue`. I'll try and probably get back when I hit another wall :slightly_smiling_face:
+U23SA861Y : still read through the page to the bottom as it does go over it
+U5W6LPGTE : Yep.  Thanks <@U23SA861Y>!
+U46JV6X3K : Can anyone help me find an example of working with Task values? I'd like to use Window.width in an update calculation. The Task section of Elm guide is empty.
+U59AF21LJ : <@U3SJEDR96> Is there a specific way to force refresh (specifically when the `textarea` is repurposed and in no way should retain the same information)?
+U23SA861Y : <@U46JV6X3K> so `Window.width` is a task which you use `Task.perform` on to get a `Cmd msg` which you return from update and later receive the message you requested containing the width
+U23SA861Y : you can also subscribe to `Window.resizes` and you will receive a message every time the windows width or height changes
+U23SA861Y : <@U59AF21LJ> Html.keyed is the thing you want I believe
+U46JV6X3K : <@U23SA861Y> gotcha. In this case I'm trying to do (Window.width - Mouse.Position.x). In order to get the messages at the same time, do I need to batch them?
+U23SA861Y : You can chain with `andthen`
+U23SA861Y : In essence you construct a task which sends you that difference.
+U4E8RTDPF : ```&gt; (12, 32)
+(12,32) : ( number, number1 )
+```
+
+U4E8RTDPF : why does type annotation says `number` and `number1` ?
+U48AEBJQ3 : <@U4E8RTDPF> Because 12 could be an `Int` or a `Float`, but since you haven't used any functions on it which force it one way or the other, so it's ambiguous.
+U4E8RTDPF : <@U48AEBJQ3> yes I know that, I'm just curious about number1
+U48AEBJQ3 : 32 is also a `number`, but it doesn't need to be the same as what 12 is.
+U4E8RTDPF : ah, I see
+U4E8RTDPF : makes sense
+U59AF21LJ : <@U23SA861Y> Oh I see, I completely overlooked this module. I guess I should indeed have a keyed form for each of my editables. I'm not risking any performance issue with a large number of id am I?
+U59AF21LJ : <@U23SA861Y> I'm actually not sure because I want only want at a time, should I still use a Keyed container with only one `form` as it child?
+U59AF21LJ : Thanks.
+U59AF21LJ : Anyway it works with only one element even though it looks a bit overkill thanks.
+U3YDBDP4Z : Does anyone know why using `Elm.Main.embed` works but `Elm.Main.fullscreen` gives me the following error,"Oops! Something went wrong when starting your Elm program.
+The `Main` module does not need flags.
+Initialize it with no arguments and you should be all set!"
+
+U3YDBDP4Z : I'm not using program with flags
+U1AN4JRFV : <@U3YDBDP4Z> hmm. could you show the entire line in question (from your index.js, I assume)?
+U3YDBDP4Z : ```var Elm = require('./Main.elm')
+var mount = document.getElementById('root')
+var app = Elm.Main.fullscreen(mount)
+```
+
+U1AN4JRFV : that indeed looks correct (besides the missing `;`, but that's just me, I guess). And do you have any ports that send garbage?
+U3YDBDP4Z : Not using ports
+U3YDBDP4Z : Just setting up an application
+U1AN4JRFV : hard to remote debug. as a workaround, you could use a tool llike create-elm-app.
+U3LUC6SNS : I've been trying to work around the jumping cursor bug as it appears in my context and am having a devil of a time with it.  I've posted an Ellie, <https://ellie-app.com/3yQr7JP82BPa1/7>, which isolates and illustrates the problem.  I'd be most grateful if anyone could set me straight on this.
+*Please note* that in the Ellie, the cursor does not jump.  That bad behavior of `textarea` is somehow corrected by the `style-elements` package.  However, a new bug is introduced: once a textarea is edited, it can no longer be updated programmatically.  In the Ellie, you see this when you try to switch documents.
+
+*Added note.* The standard way of avoiding the Jumping Cursor bug is to use `defaultValue` instead of `value`. If you do this, then you see exactly the behavior that you see in the Ellie: after editing the text field, it becomes unresponsive to changes to its value that occur programmatically.
+
+U3LUC6SNS : In Ellie: TextArea Bug, I am using the style-elements package
+U1AN4JRFV : <@U3YDBDP4Z>: try `fullscreen` without anything. since its fullscreen, it doesnt need a mount node
+U1AN4JRFV : <@U3LUC6SNS> nothing jumps for me. how to reproduce?
+U1AN4JRFV : oh. thats not lorem impsum :slightly_smiling_face: still, no jumping.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

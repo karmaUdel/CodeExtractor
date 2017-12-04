@@ -1,0 +1,67 @@
+U0G0JDQGZ : the same error is here --- <https://github.com/racket/racket/issues/1222>
+U0G0JDQGZ : so the problem is that back then we used a different compiler, so there wasn't a problem. very weird!
+U0702F2CE : <@U3VGR2S7Q> would it be reasonable to disable the 4 failing tests here: <http://drdr.racket-lang.org/40417/racket/share/pkgs/macro-debugger/tests/macro-debugger/all-tests.rkt>
+U3NJS8H7C : <@U0G0JDQGZ> the xform step works by knowing that various functions are predefined and won't trigger a GC; that approach interacts badly with C headers that expand things that look like functions in different ways, since xform is looking at preprocessed input
+U0G0JDQGZ : Ya, I think I understand the problem. I'm thinking about how to effectively warn users that old versions are broken because GCC isn't backwards compatible. It's a weird problem.
+U3NJS8H7C : probably you just want to annotate the definitions of `mz_long_double_eqv` and `double_eqv` with `XFORM_SKIP_PROC`, which goes after the argument list and before the function's opening `{`
+U3NJS8H7C : Oh – you're not just looking for a way to make the compile go through?
+U0G0JDQGZ : mflatt: correct, i know how to make it work. i'm thinking about what to do about people that email saying all the old versions are broken because they are trying to build on a modern linux distribution.
+U3NJS8H7C : I think we don't get those requests because old software generally doesn't build
+U07SCV14J : I have a sort of diabolical abuse of the macroexpander that produces an unbound identifier error, and I don't understand why. Here's a pasterack link, though pasterack produces a different error: <http://pasterack.org/pastes/92495>
+U07SCV14J : The actual error I get when really running the program is this:```
+the-binding2: unbound identifier;
+ also, no #%top syntax transformer is bound
+```
+
+U07SCV14J : I don't understand why the identifier is unbound, though. I think I must be missing something about how scopes get introduced in this sort of situation, but I don't know how to debug this problem.
+U07SCV14J : <@U3NJS8H7C> or <@U0702F2CE>, might either of you be able to help me with this? I realize this program is pretty bizarre, but yes, it is a reduction of a real (admittedly quite evil ;)) thing I am trying to do in Hackett.
+U0702F2CE : <@U07SCV14J> you seem to have `#@plain-app` where you mean `#%plain-app`
+U07SCV14J : Yeah, I noticed that, but it doesn't affect the program.
+U07SCV14J : Here's a fixed paste: <http://pasterack.org/pastes/48560>
+U0702F2CE : I don't really understand what's going on there, but it looks like the usual issue where you communicate the identifier behind the back of the macro expander and thus it doesn't have the right scope
+U07SCV14J : Yeah. I'm just not sure in this case how to arrange for the right scope, or even what scope is getting added or removed.
+U07SCV14J : I think that to do this "right” might require some additional cooperation from the macroexpander, so right now it's pretty hacky. :)
+U0702F2CE : the problem is that when you expand the `lambda` that `bind` generates, it adds a scope to the binder and to the body
+U0702F2CE : but that isn't there on the reference, since the reference is hidden from the expander in a parameter
+U07SCV14J : that makes sense. so I might be able to expand the `lambda`, then stash the identifier with the extra scope on it.
+U0702F2CE : yes
+U07SCV14J : hmm, that gives me an `identifier used out of context` error, though I could be doing something else wrong.
+U0702F2CE : really you want to put the identifier in some macro in the body of the lambda, and arrange for that macro to put it in the parameter
+U07SCV14J : yeah. I should probably explain the actual motivation behind this whole thing, since it's pretty gross and there might be a better way.
+U3NJS8H7C : <@U07SCV14J> Like this?```
+      [(#%plain-app @%bind-id ~! e:expr)
+       (let ([id-to-bind (generate-temporary 'the-binding)])
+         (exp #`(? (#,id-to-bind)
+                  (let-syntax ([result-transformer
+                                (make-variable-like-transformer
+                                 (parameterize ([current-id #'#,id-to-bind])
+                                   (exp (walk+expand #'e))))])
+                    result-transformer))))]
+
+```
+
+U07SCV14J : <@U3NJS8H7C>: Thanks, that works in that case, but it doesn't seem to work in my real situation. I'll fiddle with it a bit and see if I can make it work.
+U07SCV14J : All this is actually part of typeclass dictionary elaboration. I need to perform a sort of "delimited expansion” where I leave placeholders in the expansion where typeclass dictionaries will be inserted later. However, I can't call `local-expand` with a stop-list, since that won't recursively expand.
+U0702F2CE : right, what <@U3NJS8H7C> said, although I have often wrapped that pattern in a macro called something like `(put-in-parameter id-to-bind expr)`
+U07SCV14J : Yep, that seems to have worked. Thanks <@U0702F2CE> and <@U3NJS8H7C>. I think this `local-expand` abuse is probably not the best solution to what I'm doing, but I admit I am not 100% sure what I'm doing, and it seems to sort of work so far. :stuck_out_tongue:
+U07SCV14J : I think, with those changes, I have working typeclasses in Racket. :)
+U0G0JDQGZ : mflatt: I have a process that uses a lot of memory (more than system has) and I would expect it to give me an out of memory error. Instead, I get ```unmap failed: 7fda46834000, 16384, 12 [x100]
+U0G0JDQGZ : mprotect failed: 7fdb09ea0000, 16384, 1, 12
+U0G0JDQGZ : Seg fault (internal error during gc) at 0x7fdb09ea16c0
+U0G0JDQGZ : SIGSEGV SEGV_ACCERR SI_CODE 2 fault on 0x7fdb09ea16c0```
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

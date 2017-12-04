@@ -1,33 +1,104 @@
+U0JL9RPC4 : maybe you could take a look at something like `<https://github.com/etaque/elm-form>`
+U0JL9RPC4 : it could avoid some boilerplate code for complex forms
+U604S603Y : wow, there really is a package for everything in elm already oO
+U0JL9RPC4 : I already use it and I love it
+U41NK9BM4 : <@U604S603Y> Sort of :slightly_smiling_face:
+U41NK9BM4 : …and when there isn't there are ports.  But I tend to think to those as a last resort
+U5LHS71SM : At first I was going to use socketio library for elm but it does not support elm 0.18 :confused:
+U0PBSF05S : <@U5LHS71SM> For what it is worth, I am successfully using SocketIO with Elm by using a thin comm layer, written in JS, that talks to Elm via ports. NodeJS on the server. Working well.
+U5LHS71SM : I was doing that, but I'm trying to get rid of that layer. Not for a special reason but I think without that js layer it would be more elegant actually.
+U0PBSF05S : True, it would be, but Elm does not support SocketIO directly. I opted for the benefits of SocketIO over straight websockets, but it will depend how you see things in your project. I am not finding that extra layer much of an issue to manage though since I am keeping it thin.
+U5P4FLYLE : Hi, I try to manage complexity as my Elm project gets bigger and I split up central Msg. So I have:`Msg.elm`
+ ```
+   import View.Table as Table
+    type Msg                                                                                                                                                                                   
+     = Mdl (Material.Msg Msg)  
+     | TableMsg Table.Msg
 ```
-I've obviously missed something, but don't see what it is
-Indeed there is no `api.js`, but I don't know what to do to create it.
-Do you have this app on github?
-<@U5D4VHEN7> Yes, here it is: <https://github.com/jxxcarlson/koko_elm_client>
-Taking a look :eyes:
-:slightly_smiling_face:
- `{ a | name : String } -&gt; String`
-I'm trying to pass `.name` into a function of my own, and I thought it would be a `String` but I think this is saying it's a function of some kind?
-I'm wondering if there's a simpler way to get a random int than by using the core random module?
-<@U62PV9CPN> `foo.bar` and `.bar foo` are equivalent
-<@U3LUC6SNS> from a bit of poking around, it looks like there are some bits missing from this application? It seems to want to call `api.js`, which I think might be `server.js`, and it looks like it also is trying to talk to a Phoenix Websocket channel. I can get you part of the way there: just running `./node_modules/.bin/webpack-dev-server` will at least get the frontend to run
-<https://github.com/rtfeldman/elm-validate/blob/1.1.3/src/Validate.elm>
-oh wait, are those args for the Validator type? (args is probably the wrong word…)
-so they're kinda arbitrary?
-I'm rebuilding the app and my development environment on my wife's computer from a working repo .. my computer no longer recognizes the keyboard and we are far from civilization for a week. :rage:
-Yes, the app talks to a Phoenix server using both http and websockets.
-Did you get the app to run?
-My last message from webpack was `failed to compile`
-Of course, "working repo" means that the app was working on the other machine and the github repo represents it except for .gitignored files :angry:
-<@U62PV9CPN>, not sure what you are referring to.
-And I see on line 24 the type alias for `Validator` and was trying to figure out what `error` and `subject` were, but I realized now that they are types supplied by the app, not some native elm thing.
-So I'm slowly grocking the dark magicks at work here
-On line 94 I see that `ifNotInt` is the only function which does not appear to return a call to `ifInvalid` with a bool argument, and it's the only function that takes both a `subject` and an `error` as it's args, so that means the other functions are leveraging some currying since they use the `ifInvalid` function but only provide an `error` arg?
-<@U62PV9CPN> yep, other functions are ‘partially applying' the first argument of the `ifInvalid` function
-If I modify the source of the package in `elm-stuff` will it be compiled when I reload the page? Or will my changes be wiped?
-`subject` and `error` are type parameters, they can be any type
-Instead of messing around in my app, maybe I can contribute something when I figure this out… would be kinda neat
-any lowercase identifier in a type signature is a ‘type parameter'
-Good morning! (It's morning here :)
-Any hints how to implement a custom Json Decoder?
-I have a `Decode.Decoder String` and want to turn it into `Decode.Decoder MyCustomType`
-Let's say I have a Json.Decode.Value that holds only a string, like `"a"` or `"b"` or `"c"`. I also have a type `MyCustomType = A | B | C`.
+Also in update function I have something like:
+```        TableMsg a -&gt;                                                                                                                                                                     
+             lift .tableModel (\m x -&gt; { m | tableModel = x }) TableMsg Table.update a model
+```
+In view function:
+```
+....
+      div [class "content"] 
+       [ table model record ]
+....```
+
+In `Table.elm`
+```
+table : Model -&gt; Html.Html Msg                                                                                                                                              
+table model  = 
+    Table.table [                                                                                                                                                                         
+          Elevation.e8                                                                                                                                                                     
+         , css "width" "386px"                                                                                                                                                             
+         , Elevation.transition 300                                                                                                                                                        
+         ]                                                                                                                                                                                 
+     [ Table.thead []                                                                                                                                                                      
+           [ Table.thead []                                                                                                                                                                
+                 [ <http://Table.tr|Table.tr> [] ( List.map addTableHead model.dims )                                                                                                                              
+                 ]                                                                                                                                                                         
+           , Table.tbody []                                                                                                                                                                
+               ( List.map (\items -&gt;  <http://Table.tr|Table.tr> []                                                                                                                                          
+                           (List.map addBodyHead items) ) model.data                                                                                                                             
+               )                                                                           
+```
+`Problem`: After this trick I get error:
+```The 3rd branch has this type:     Html Msg 
+But the 4th is:     Html View.Table.Msg```
+Question: How to make Msg out of View.Table.Msg?                                                                                                 
+           ]                                                                                                                                                                               
+     ]
+
+U3SJEDR96 : `|&gt; Html.map TableMsg`
+U3SJEDR96 : in your view, that is
+U5P4FLYLE : <@U3SJEDR96>  thanks!!!
+U5P4FLYLE : Hi, I want to check against specific string value in a function:```   addTableHeadSortable xdim input =                                                                                                                                                   
+      case input of                                                                                                                                                                         
+          xdim -&gt;                                                                                                                                                                           
+            doSomething                                                                                                                                                          
+          _ -&gt;                                                                                                                                                                              
+            doSomethingElse  ```
+So if input equals xdim I want one branch to return, if not otherwise. It is obvious that input as a String can get also different values than `xdim`. But I got compilation error:
+```The following pattern is redundant. Remove it. 
+79|         _ -&gt;             ^ 
+Any value with this shape will be handled by a previous pattern.```
+Am I missing something?
+
+U3SJEDR96 : yeah, when you do `case foo of bar -&gt; ` you're essentially asking "can I describe this variable with this pattern", not "with this value". You can use a literal in a pattern, but not a variable, then it will just go "sure, I can put your `foo` in a variable named `bar`", and inside that branch, `xdim` is now your `input` :slightly_smiling_face:
+U5P4FLYLE : ok, so how to enforce xdim to be interpreted like pattern? Just use: if else construct?
+U3SJEDR96 : <@U5P4FLYLE> exactly :slightly_smiling_face:
+U5P4FLYLE : ok, so my last question in this problem would be how to `return` what is in { } in something like that:```      if (input == xdim) {                                                                                                                                                                  
+            <http://Table.th|Table.th> [                                                                                                                                                                      
+                 model.order                                                                                                                                                                
+                |&gt; Maybe.map Table.sorted                                                                                                                                                   
+                |&gt; Maybe.withDefault nop                                                                                                                                                    
+                , Options.onClick Reorder                                                                                                                                                   
+                ] [ text input ]                                                                                                                                                            
+      } else {                                                                                                                                                                              
+            <http://Table.th|Table.th> [] [ text input ]                                                                                                                                                      
+      }    ```
+
+U0JL9RPC4 : hmm just remove your braces? I don't really get the issue here
+U5P4FLYLE : sure in Elm we have `if *then* else`. thanx
+U3SJEDR96 : yeah, `if condition then *expression* else *expression`
+U3SJEDR96 : remove the braces, add a `then`, and you're all set
+U37HUSJ4R : can a port send multiple values back to JS land? `port fooBar : String -&gt; String -&gt; Cmd msg`
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

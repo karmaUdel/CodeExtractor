@@ -1,0 +1,118 @@
+U1BP42MRS : I would presume it needs to be a string
+U5VGKQ2SY : comma after `today }`
+U5VGKQ2SY : ?
+U1BP42MRS : That's valid
+U1BP42MRS : <@U0PKTUWKH> what's the other end of the stack say?
+U1BP42MRS : You could try `today.isoformat()`
+U0PKTUWKH : <@U1BP42MRS> <https://gist.github.com/pleegor/f82958c0755b33d96fe286d79bab8bbe>
+U1BP42MRS : Yeah, on line 35
+U1BP42MRS : A Date object isn't valid, you need to choose a date format as a string (isoformat is a standard)
+U0PKTUWKH : something like that?
+U0PKTUWKH : ```Tags=[
+                {'Key': 'DeleteOn', 'Value': del_snap },
+                {'Key': 'Created', 'Value': today.isoformat() },
+```
+
+U1BP42MRS : yeah, should work
+U0PKTUWKH : thanks <@U1BP42MRS> !!!! works as expected!!!
+U1BP42MRS : :thumbsup::skin-tone-4:
+U1BP42MRS : AWS has pretty good errors, they're just awkward to read in that format :smile:
+U0PKTUWKH : yeah awkward errors + python noob = :see_no_evil:
+U0PKTUWKH : thanks again <@U1BP42MRS> !
+U1BP42MRS : Any time!
+U5RJNFFGX : Anyone ever use the slack api? Is it possible to remove a user from the group??I see like channel remove but not group remove
+
+U1BP42MRS : <@U5RJNFFGX> I forgot I found out about this a bit ago - I think this is what you want (the undocumented APIs): <https://github.com/ErikKalkoken/slackApiDoc/blob/master/users.admin.setInactive.md>
+U5RJNFFGX : Yes thank you! I found this before too, an undocumented api to invite someone to a group<https://stackoverflow.com/questions/30955818/slack-api-team-invitation>
+
+U1BP42MRS : Yeah we use the invitation for the <http://pyslackers.com|pyslackers.com> site :smile:
+U4HT35P34 : does anyone know of a way to fetch and update a user with a single db trip in django?
+U13L8J76J : <@U4HT35P34> why?
+U4HT35P34 : i'm looking for a way to optimise my db calls
+U4HT35P34 : <@U13L8J76J>
+U13L8J76J : <@U4HT35P34> have you profiled your views? Are you sure fetching and updating users is the most expensive operation?
+U4HT35P34 : well for large data sets it sure is <@U13L8J76J>. how do you mean 'profiled your views '?
+U13L8J76J : I mean what makes you think that this is the most expensive operation? Do you _think_ so or you have profiled your code so you _know_ it's the most expensive operation?
+U5ZPMJA06 : Looking up one record in your user table, and updating that record, is really the bottleneck? That sounds quite suprising to me, too.
+U13L8J76J : That may be the bottleneck, for sure. Which is likely to be fixed by creating a proper index.
+U29163YQH : anyways in sql you are able to retrieve data from an `update` query
+U4HT35P34 : <@U5ZPMJA06> <@U13L8J76J> won't it be performant to have one db trip to fetch and update rather than have two trips?
+U13L8J76J : <@U4HT35P34> please, google about premature optimization
+U5ZPMJA06 : Your remark smells like premature optimisation
+U13L8J76J : Ha
+U4HT35P34 : i like this <@U29163YQH>
+U5ZPMJA06 : <@U29163YQH> Some DBMSses indeed can, see RETURNING clause in PostgreSQL's UPDATE. <https://www.postgresql.org/docs/9.1/static/sql-update.html>
+U29163YQH : yeah that's what I was referring to
+U5ZPMJA06 : ...but don't expect such things to work in MySQL or Oracle.
+U5ZPMJA06 : I never found the need to return something from an UPDATE (except maybe the nr. of records that were changed) because what I put into the UPDATE I have available in my program anyway.
+U5ZPMJA06 : <@U29163YQH> So I'm curious about for what you want such a feature.
+U29163YQH : we use it from time to time when we need to return ids for some processing (for example)
+U5NMSURAQ : &gt; what I put into the UPDATE I have available in my program anywayNot when there is an SQL function / expression in an UPDATE clause
+
+U29163YQH : you have available what you put in the update but you might not have all the row
+U29163YQH : if you have read only data for example
+U5ZPMJA06 : Ah ok, I see. That might be handy indeed.
+U5NMSURAQ : I have to add: I don't think `UPDATE ... RETURNING ...` will increase performance substantially for a typical web app
+U5NMSURAQ : even the fastest ORM (something like Peewee) is still quite slow
+U29163YQH : if your db is on the network you gain a bit
+U29163YQH : but otherwise not really. It's just a nice to have
+U5NMSURAQ : plus if I can get an empty page in 30 ms and a heavy page in 40 ms, then there is no point in optimizing just yet
+U4HT35P34 : Thanks guys <@U29163YQH>  <@U5ZPMJA06>  <@U13L8J76J>  <@U5NMSURAQ> :taco:
+U5NMSURAQ : yum yum!
+U634E1Y22 : any pandas people in here?
+U625UT9E0 : I've used it a little
+U634E1Y22 : I'm trying to do a groupby on a df
+U634E1Y22 : and the field I'm trying to group on needs to be preprocessed
+U634E1Y22 : I'm trying to figure out how to offload the preprocessing of that field to C so its not slow as crap
+U634E1Y22 : it seems like `df.groupby(by=func_to_preprocess, df.ColumnToGroup)` should work, but the `by=` field seem to want the column header
+U634E1Y22 : or a function
+U634E1Y22 : but not both
+U486CN4VD : <@U634E1Y22>, what is the function doing?
+U634E1Y22 : preprocessing the string, I'm just going to use `apply` to manipulate the column, then pass the column into groupby
+U634E1Y22 : I was overthinking it :slightly_smiling_face:
+U486CN4VD : lol, definitely
+U634E1Y22 : thanks <@U486CN4VD>
+U486CN4VD : if it's 1 “column”, use `.map`
+U486CN4VD : In general, take a look at `.applymap`, `.map` and `.apply`. All very useful when you learn how they operate on the dataframe.
+U4BMZ90T0 : <https://pythondev.slack.com/archives/C07EYDP25/p1498837563310648>
+U4BMZ90T0 : <https://gyazo.com/c534d09b18e44c51e407a16605c992c3.png>
+U2UP91YLE : Hi guys ,is there something like django-restframework or flask-restplus for tornado?
+U3JGK19NV : Hey!
+U3JGK19NV : I can't seem to import the slackclient correctly
+U3JGK19NV : I keep getting an import error. I tried googling around and their fixes didn't really work
+U3JGK19NV : it's installed for sure, so I don't know why I can't import
+U29163YQH : can you do a `pip freeze`
+U29163YQH : or `pip3 freeze`
+U1BP42MRS : The issue is your `pip3` is from `python 3.6` but your `python3` command is running `python 3.5`
+U1BP42MRS : ```# from pip3 install slackclient...
+Requirement already satisfied: slackclient in /usr/local/lib/python3.6/site-packages
+
+# and from the python3 command
+Python 3.5.1 (v3.5.1:37a07cee5969, Dec  5 2015, 21:12:44) 
+```
+
+U1BP42MRS : Execute the script with `python3.6`
+U29163YQH : nice spot
+U1BP42MRS : <@U3JGK19NV> - consider using some virtualenvs to avoid this in the future :slightly_smiling_face:
+U1BP42MRS : I will work on a video for that, it's been coming up a lot recently
+U0NRYQNAZ : ooo we can add it to the learning resources.
+U3JGK19NV : ahh i figured it out, i used pip3.5, which i've never used before
+U3JGK19NV : I'm getting a new computer in a few days, how can I prevent myself from having 7 different python versions?
+U3JGK19NV : and yes, I was setting up the virtualenv wrapper but ran into an error doing so
+U0NRYQNAZ : what model mac, windows, etc.?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

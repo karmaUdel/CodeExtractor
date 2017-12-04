@@ -1,42 +1,83 @@
-    Json.Decode.map stringsToUpper (list decodeString)```
-ok can't work out what i'm doing wrong :confused:
-<@U3KSN5MAL> `up = (\t -&gt; toUpper t)` ?
-i know that
-i just write verbose and compress later as it's easier for me
-`up` and `toUpper` are the same right?
-`decodeString` isn't a `Decoder`, you want just `string`
-doh
-that was it
-thanks
-and yes you are correct joel just silly mistakes
-thanks
-God i'd hate to think about how messy my code base would be for anyone else to look at -_-
-Might have to go through and do a big semantic compression pass once i get this update out
-<@U3KSN5MAL> One nice thing about Elm is that it feels so much safer to do major refactors, so one *can* write a bunch of messy, ugly code, then go back and clean it up and have few problems.
-Oh yeah of course
-i've already refactored a lot of things before
-Like i did a total overhaul of the colour system which everything relies on halfway through
-The biggest thing that will take work to refactor is the monolithic update loop
-That is something which gets easier with experience.
-I've gone to do that and given up 3 times so far -_-
-and i just keep adding features making the eventuallity worse
-Is there a good, pure URL validation library for Elm?
-what do you mean by url validation?
-Just something so that I can refer to a `URL` type and have confidence that it's sane, as oppose to an arbitrary `String`.
-take a look at the url-parser and navigation libraries
-Equivalent to the `URL` class in Java, or `URI.js`.
-it gives you a record from `window.location`
-Not quite what I was looking for, but very useful for my next problem. :smile:
-does elm have support for pattern matching with conditionals?
-<@U5XC2FJ1Y> No. At least not for now.
-so, if I install via NPM i get platform version 15, anyone know whats up with that?
-Gotta admit that's a feature I would love too.
-what's the best alternative, just moving the conditional inside the matched pattern?
-Yup. Although it can lead to duplicated code in your `else` case, that's basically the only way to go right now.
-But now I'm in type un/wrapping hell
-I believe you want something like `type Cell = Cell {}`
-instead of a type alias
-There is still some unwrapping, but remember you can unwrap in the function arguments
-something like `link (Cell cell) = --do stuff`
-The compiler suggests something like that to you when you make a recursive type alias! :slightly_smiling_face:
-Yeah, I've read <https://github.com/elm-lang/elm-compiler/blob/0.18.0/hints/recursive-alias.md> but still confused
+U23SA861Y : or have it be accumulateWithStride and have the 16 come in as a parameter
+U23SA861Y : The only thing not specified would be what happens to the empty list
+U48AEBJQ3 : I think I would like `sumDigits : Int -&gt; List Int -&gt; Int` better.
+U48AEBJQ3 : But names are hard.
+U29JSAR9S : just trying to test it out as I'm not convinced it does actually solve it (I think it might miss the case when you don't multiply by a power at all for the first hex digit) - getting: 
+```
+the argument to function `length` is causing a mismatch.
+
+120|            List.length mapped 
+                            ^^^^^^
+Function `length` is expecting the argument to be:
+
+    List b
+
+But it is:
+
+    List (Maybe b) -&gt; List b
+```
+
+for the maybeList function - and I'm too tired to figure out whats up myself :slightly_smiling_face:
+
+U23SA861Y : ahh the line should be `List.filterMap identity l`
+U23SA861Y : my bad
+U23SA861Y : well the first digit should be multplied by one, the second by 16 and so on
+U29JSAR9S : ah, of course
+U23SA861Y : the one thing it does to would be return 0 for an empty list as opposed to say Nothing
+U48AEBJQ3 : How about```
+maybeList : List (Maybe a) -&gt; Maybe (List a)
+maybeList =
+    List.foldr (Maybe.map2 (::)) (Just [])
+```
+
+U23SA861Y : hmm, yes I think that would do what you want
+U29JSAR9S : cheers guys, been interesting working through this with you - my understanding of how to handle Maybe's has definitely come along this evening!
+U23SA861Y : no problem, and good luck
+U23SA861Y : in your further learnins for great profit
+U29JSAR9S : last one for you, for the road:```
+maybeTuple3 : ( Maybe a, Maybe b, Maybe c ) -&gt; Maybe ( a, b, c )
+maybeTuple3 tuple =
+    case tuple of
+        ( Just a, Just b, Just c ) -&gt;
+            Just ( a, b, c )
+
+        _ -&gt;
+            Nothing
+```
+
+Trying to figure out how to do this with a Maybe.mapX
+
+U23SA861Y : I think you probably want curry3 or something like that
+U23SA861Y : mmm there is only curry and uncurry no uncurry 3
+U23SA861Y : but perhaps you could write it```
+uncurry3 : (a -&gt; b -&gt; c -&gt; d) -&gt; (a,b,c) -&gt; d
+uncurry3 f (a,b,c) = f a b c
+```
+
+U23SA861Y : then it would go together something like `maybeTuple3 = uncurry3 (Maybe.map3 (,,))`
+U23SA861Y : I think, this is me coding without checking if it compiles
+U29JSAR9S : this works :```
+maybeTuple3 : ( Maybe a, Maybe b, Maybe c ) -&gt; Maybe ( a, b, c )
+maybeTuple3 ( a, b, c ) =
+    Maybe.map3 (,,) a b c
+```
+
+U29JSAR9S : I didn't realise you could do the (,,) thing
+U23SA861Y : well there you go
+U29JSAR9S : cheers :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

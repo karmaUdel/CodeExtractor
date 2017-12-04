@@ -1,0 +1,55 @@
+U08JL5H89 : Either way, thank you.
+U3NJS8H7C : <@U08JL5H89> You be able to achieve the effect you want by declaring `#:alignment`
+U08JL5H89 : Okay cool. In which cstruct?
+U08JL5H89 : Like, it seems like I'd need to set it in the outer one, and then manually calculate the allignment for the rest of the struct, is tht correct <@U3NJS8H7C> ?
+U3NJS8H7C : I was thinking that you'd set it for the inner one
+U08JL5H89 : Oh, okay. In that case the docs kind of confused me what it does. As I thought you attached it to specific fields?
+U08JL5H89 : (I mean, I know you can attach it to the whole struct, but in this case, I only want one field to be alligned differently.)
+U08JL5H89 : Oh, I see what you mean, `#:alignment 1` worked, thank you <@U3NJS8H7C>
+U08JL5H89 : <@U3NJS8H7C> Actually, after thinking about it a bit more, I don't think `#:alignment 1` would work, or any ‘alignment' on the inside struct would be good enough.
+U08JL5H89 : Because this is going to be context sensitive on the placement of the outside struct and its alignment.
+U08JL5H89 : Like, if I had:```
+struct{
+char prefix,
+char count,
+void *data
+}
+```,
+I would want it to be compacted (on 32-bit x86 for simplicity) as:
+```
+[prefix][count][padding][padding][padding][data][data][data][data]
+```
+
+U08JL5H89 : (Where I have specified each byte in `[...]`)
+U08JL5H89 : But when I do `#:alignment 1` on the inner struct, the layout is going to be:
+```
+[prefix][count][data][data][data][data]
+```
+
+which removes the padding.
+
+U08JL5H89 : Any thoughts <@U3NJS8H7C> ?
+U3NJS8H7C : <@U08JL5H89> I think you'd have to add the padding back manually in that case. There's not much in between "do the default thing" and "let me control layout completely".
+U08JL5H89 : <@U3NJS8H7C> Ah fair. Well thank you.
+U07SJGB4H : It looks like the slack irc bridge is down again
+U0702F2CE : <@U0G0JDQGZ> pkgd appears to be down
+U07SCV14J : <@U3WFKLLHM>: ping
+U0702F2CE : hi <@U5L5JLWAG>
+U5KU1HNKY : ,doc fails with (in a plain repl in OSX's terminal.app): 0:131: execution error: "file:///MyApplications/dev/lisp/Racket/doc/reference/strings.html#(def._((lib._racket%2Fstring..rkt)._string-trim))” doesn't understand the "open location” message. (-1708)
+U5KU1HNKY : running `open $ABOVE_URL` opens just fine
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

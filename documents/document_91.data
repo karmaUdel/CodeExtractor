@@ -1,6 +1,94 @@
+U0D33A4JF : question: In Clojurescript it seems that the `&amp;env` passed to macros contains the `def` vars as well as locals. How do I get the same in Clojure?
+U3CKJQW81 : I need to filter this out by matching the inner vector for example this [[:x [3 2]] [:y [1 1]] [:z [3 2]] [:i [3 1]] should be [[:x [3 2]] [:y [1 1]] [:z [3 2]]]
+U3CKJQW81 : [:i [3 1]]  will be removed because the first element of the inner vector appeared before with a different value of the last element
+U4VDXB2TU : is there a clojure naming convention preference for a function which returns a predicate? Assumption here is that some extra data is required to create the predicate and we need a separate function taking that extra data and returning the predicate function
+U050SC7SV : I think `foo-fn`is quite common
+U050SC7SV : at least in clj.core
+U61KCTX8S : did anyone try to call an external program with clojure with timeout? none of the examples (conch), (clojure.contrib.shell-out with java.util.concurrent.TimeUni) did work... stuff runs forever
+U61KCTX8S : i mean a seperate process
+U61KCTX8S : like call a windows exe and kill it after 10 seconds if it still runs
+U050SC7SV : I think you need to do the bookeeping yourself and call destroy on the Process instance if not completed
+U050SC7SV : ```(let [x (.exec (Runtime/getRuntime) "htop")]
+  (try
+    (Thread/sleep 10)
+    (.exitValue x) ;; check value possibly
+    (catch java.lang.IllegalThreadStateException e
+      (.destroy x))))
 ```
-I just want to make sure I dont get this very subtle bug by implementing a protocol that's using a field versus a lookup on this, when self-referencing(?) a protocol
-`field` and (:field this) will always be the same thing
-i've been stabbed in the foot by javascript so many times I'm very paranoid
-okay, good to know the context stays the same no matter how it's invoked
-thanks <@U0NCTKEV8> <@U050MP39D>  <@U051SS2EU> :thumbsup:
+
+U050SC7SV : something a bit like that
+U61KCTX8S : <@U050SC7SV>  you've seen a good working code example i can copy paste?
+U61KCTX8S : thanks!
+U61KCTX8S : this example will not wait 10 secs if the procs dies before?
+U050SC7SV : 10ms
+U050SC7SV : it's not a complete example, but you should be able to take it from here
+U61KCTX8S : how about getting stdout, stderr from this example?
+U050SC7SV : -&gt; <https://docs.oracle.com/javase/7/docs/api/java/lang/Process.html>
+U61KCTX8S : the problem wit conch was that stdot/err was flushed at the end, which would never happen when process was destroyed earlier
+U61KCTX8S : should it be possible to do stuff like (let [x (.exec (Runtime/getRuntime) "htop &gt; mylogfile")] with mentioed example?
+U050TNB9F : I have a seq like `[:a :b :c]` and want to get a lazy seq like `[:a :b :c :a :b :c :a :b ....]` — any suggestions?
+U3L6TFEJF : <@U050TNB9F> `(cycle [:a :b :c])`
+U050TNB9F : <@U3L6TFEJF> thanks, that's what I missed! :slightly_smiling_face:
+U6AKZKQVC : Hello. I'm looking at <https://dev.clojure.org/display/community/Maven+Settings+and+Repositories> and wondering about SNAPSHOT releases. In the example, is 1.1.0-SNAPSHOT before or after the 1.1.0 release? In other words, is it supposed to be a pre-release snapshot or a post-release patch?
+U051SS2EU : I don't think any of the process stuff uses sh, and `&gt;` is sh syntax, so you need to wrap up your call into a string passed to `/bin/sh` to make that work
+U051SS2EU : or you can create the redirection using the file handles Process gives you if you want to do it the hard/portable way, of course
+U053032QC : `1.1.0-SNAPSHOT` means "the version that will eventually be released as `1.1.0`"
+U053032QC : i.e., `*-SNAPSHOT` comes before `*`
+U053032QC : under the hood, every time you `lein install` a snapshot version, a timestamped artifact is added to your maven repo, and the SNAPSHOT name just points to the latest of these
+U053032QC : if you use the `lein-release` plugin then when you're ready to release it, you run `lein release` and it'll transition your `1.1.0-SNAPSHOT` to `1.1.0`, commit, tag and deploy that to your maven repo, and then bump the version to `1.1.1-SNAPSHOT`, so you're ready to start working on the future `1.1.1` release.
+U6AKZKQVC : <@U053032QC> Thanks!
+U0ALQHJRF : <http://github.com/degree9/meta|github.com/degree9/meta> has a fully open ended UI solution
+U0ALQHJRF : uses edn and a template to generate a default UI or you can provide an alternate template or final cljs file for the ui
+U5Z4ECHCM : Hate to interrupt, but I'm having trouble splitting up the middleware for my different routes in Compojure
+U5Z4ECHCM : Anyone have information / a blog post / etc on the topic?
+U46LFMYTD : I have a question about structural sharing in nested maps. Suppose I have a map called mymap that looks like this```
+mymap
+=&gt; {:mykey [{:A 1, :B 2} {:A 2, :B 2} {:A 3, :B 2}]}
+```
+I want to write a function that goes down and increments each value for :A
+I can do this with
+```
+(assoc mymap :mykey (map #(assoc % :A (inc (:A %))) (:mykey mymap)))
+{:mykey ({:A 2, :B 2} {:A 3, :B 2} {:A 4, :B 2})}
+```
+do the keys :B "point to the same place in memory" after this modification as the original maps? That is, is there structural sharing going on between the maps in the vector before and after this modification?
+
+U0CHY4VNW : Asymmetry in `string/split` and `string/join` makes me sad : ( ```        parts (string/split kafka #":")        host (string/join ":" (butlast parts))
+```
+
+U5NAUMCAD : Hi all, I am trying to write some test in clojure and I need to do some Mocks and proxies, however I cannot figure out how to proxy some java objects and methods
+I have this function
+
+U5NAUMCAD : ``` (defn singletest  [cert]
+  (let [x500principal (.getSubjectX500Principal cert)
+        dn (.getName x500principal)]
+    (apply str "abcdefg"))) ```
+
+U5NAUMCAD : cert is a java object of type X509CertImpl
+U5NAUMCAD : I know that I am not using x500principal and dn; but it is an example
+U5NAUMCAD : However I am having a hard time trying to do the test
+U5NAUMCAD : ``` (deftest singletest  (let [cert (.X509CertImpl)
+        x500principal (proxy [X509CertImpl] []
+                       (getSubjectX500Principal [] nil))
+        dn (proxy [X500Principal] []
+                       (getName [] "works"))]
+       (is (= "" (c/singletest cert))))) ```
+
+U5NAUMCAD : throws me java.lang.IllegalArgumentException: Malformed member expression, expecting (.member target ...)
+U5NAUMCAD : any idea??
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

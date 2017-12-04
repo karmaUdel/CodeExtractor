@@ -1,6 +1,70 @@
-  (list 'new 'clojure.lang.LazySeq (list* '^{:once true} fn* [] body)))```
-why is fn* preferred here~? is it some performance concern, as fn* is the basic one?
-right, destructuring is defined in terms of lazy-seq
-so lazy-seq can't use fn, which destructures
-source of fn shows you how it builds the form for fn*  - it does many things, some of which are lazy seq generating
-I will try to read the source of fn~ I probably digged too deep of the dark magics, as I just started learning Clojure~
+U5ZAJ15P0 : why wouldn't this work:```
+'[:find ... :where [~`identity ?foo]]
+```
+?
+
+U051SS2EU : ~ doesn't make sense outside `
+U5ZAJ15P0 : why does it make sense here:```
+`[:find ... :where [identity ~'?foo]]
+```
+?
+
+U051SS2EU : it's inside the ` at the beginning of the vector
+U051HUZLD : thanks
+U5ZAJ15P0 : right, but why does swapping out the use of syntax quoting vs normal quoting makes it different in use?
+U5ZAJ15P0 : (I'm not familiar enough with quoting yet)
+U051SS2EU : because ~ is only valid in syntax quote
+U5ZAJ15P0 : oh
+U051SS2EU : it's a special operation that is only defined in that context
+U5ZAJ15P0 : using it outside throws ```java.lang.IllegalStateException: Attempting to call unbound fn: #'clojure.core/unquote```
+U5ZAJ15P0 : does this only get bound within a syntax quote?
+U5ZAJ15P0 : or is that a different error?
+U051SS2EU : right, it exapands to unquote, that is undefined outside `
+U051SS2EU : this is all stuff implemented in the java code of the reader
+U051SS2EU : it isn't built on the normal machinery, it's the basis for it
+U5ZAJ15P0 : is unquote a special form?
+U051SS2EU : syntax-quote ` is special, and it handles unquote
+U5ZAJ15P0 : so unquote will get evaluate somehow within a syntax quote
+U5ZAJ15P0 : but outside of it it has no meaning
+U5ZAJ15P0 : and even inside, it's not a function
+U5ZAJ15P0 : it's just a symbol that ` interprets
+U5ZAJ15P0 : correct?
+U051SS2EU : right, it's a parser machinery basically
+U051SS2EU : we're at the point in this convo where I'd probably have to read more code to answer more questions though
+U5ZAJ15P0 : Luckily for you I don't have more questions at the moment :smile:
+U051SS2EU : like whether there's an actual unquote method somewhere in Compiler.java or if it's entirely a figment of syntax-quote
+U5ZAJ15P0 : For now I think I am contempt with the answer that clojure.core/unquote is not a function, but something that has a special interpretation within a syntax quote
+U051SS2EU : there's this, but I am not totally sure what it means - UNQUOTE used to be defined as a special symbol but now it is commented out <https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/Compiler.java#L70>
+U1KK3BW3W : Ah, to be more specific, I am using `lein eastwood '{:add-linters [:unused-namespaces] :namespaces [:source-paths] :exclude-linters [:unlimited-use]}'` as my command, and I get an error for a namespaced spec (so you might be right that a namespaced keyword would not create problems, sorry!).
+U060FKQPN : unquote never makes it to the compiler
+U1KK3BW3W : ```== Eastwood 0.2.4 Clojure 1.9.0-alpha17 JVM 1.8.0_121Exception in thread "main" clojure.lang.ExceptionInfo: Invalid token: ::spec-ns/spec-name {:type :reader-exception}```
+
+U060FKQPN : it's handled by the reader earlier than that
+U1KK3BW3W : ```(ns acme.spec-ns  (:require [clojure.spec.alpha :as s]))
+
+(s/def ::spec-name string?)
+```
+
+U5ZAJ15P0 : <@U060FKQPN> could you point at where exactly it is handled?
+U060FKQPN : <https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/LispReader.java#L986-L990>
+U060FKQPN : <https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/LispReader.java#L1040-L1044>
+U060FKQPN : from within the implementation of syntax quote
+U060FKQPN : the tl;dr is that when the compiler sees `~foo` it expands into `(clojure.core/unquote foo)`
+U5ZAJ15P0 : <@U060FKQPN> ah, so if it's an unquote form it simply gets rid of the "unquote" and "quote" bits at reading time?
+U060FKQPN : then syntax-quote walks its expression and expands all the unquoted forms
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

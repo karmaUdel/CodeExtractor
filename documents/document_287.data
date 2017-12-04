@@ -1,22 +1,79 @@
+U3SJEDR96 : if I managed to read your question before it disappeared
+U5QPUBDQR : <@U3SJEDR96> it works too. Is'n this a bit sily tho?
+U5QPUBDQR : ({ model | captions = List.map updateVideo model.captions, debug = b },
+U5QPUBDQR : ie update the model, from the model?
+U3SJEDR96 : I'm not sure what you mean by that. `update` returns a _new_ model, and _usually_ that's based on your previous state
+U3SJEDR96 : so using your previous model to build a new one makes perfect sense
+U5QPUBDQR : <@U3SJEDR96> a yes: immutabilty takes some getting used to
+U3SJEDR96 : yeah, it's important to realize that `{ foo | v = "val" }` creates a _new_ record )
+U5QPUBDQR : <@U3SJEDR96> thanks. I'm very happy with this slack channel, good help available :slightly_smiling_face:
+U57KYFW67 : It's not possible to include two .js files created by Elm on one page, is it?
+U50SABLHE : How would I Json.Encode an array of objects to be used in a request body? Below is an example of what I need to send.
 ```
-<@U41NK9BM4> I am afraid if I will be able to migrate my code to 0.19
-getUsers doesn't work, though
-beacause I reference a function that is not in scope…
-<@U62KVQVD1> Usually there are tools to help with that, which should make it a breeze
-<@U3SJEDR96> Ok, so there is hope …
-korczis: Languages changes in 0.19 will be really minor. The changes in the library might affect your SPA though.
-`
-<@U41NK9BM4> it just doesn fell pure. I use a function in a function that i did not pass via an argument… I can just magically access this function
-AFAIK routing will be simplified.
-*feel
-But you can't. `getUsers` can only work if you have a constant `model` function
-But really, there's no need to upgrade to 0.19 the day after it will be released. Or there is?
-oh, wait, you changed things :smile:
-yes, sorry. It was jus aquick example. I updated this
-(too quick ;-))
-Of course there is not
-If model changes, you get a different results. If model doesn't change you get the same results. :slightly_smiling_face:
-So it's pure :slightly_smiling_face:
-Calling a pure function is pure. If you only _ever_ need to get the usernames of all users in your model, use the funciton you wrote. If you suddenly need the names of an arbitrary list of users, write `usernames : List User -&gt; List String`
-Thanks <@U3SJEDR96> 
-Write the functions and abstractions you _need_ - refactoring is so easy in Elm anyway. Abstracting before you need it could quickly become counter-productive, and make it more difficult to change things when they no longer fit your previous model
+[
+    {
+        "request-id": 1,
+        "action-name": "checkZipCode",
+        "zip-code": "41501"
+    }
+]
+```
+
+I'm using the following code to Encode the object, but I'm not sure how to add the surrounding array brackets
+```
+encodeZipCode : Encode.Value
+encodeZipCode =
+    Encode.object
+        [ ( "request-id", <http://Encode.int|Encode.int> 1 )
+        , ( "action-name", Encode.string "checkZipCode" )
+        , ( "zip-code", Encode.string "41501" )
+        ]
+```
+
+U3SJEDR96 : ```encodeZipCode : Encode.Value
+encodeZipCode =
+    Json.Encode.list 
+        [ Encode.object
+            [ ( "request-id", <http://Encode.int|Encode.int> 1 )
+            , ( "action-name", Encode.string "checkZipCode" )
+            , ( "zip-code", Encode.string "41501" )
+            ]
+        ]
+```
+
+U3SJEDR96 : that should work. Alternatively, this should also work: ```
+encodeZipCode : Encode.Value
+encodeZipCode =
+    Encode.object
+        [ ( "request-id", <http://Encode.int|Encode.int> 1 )
+        , ( "action-name", Encode.string "checkZipCode" )
+        , ( "zip-code", Encode.string "41501" )
+        ]
+        |&gt; List.singleton
+        |&gt; Json.Encode.list
+```
+
+U3SJEDR96 : so basically, wrap it in a list, and encode that with `Json.Encode.list`
+U50SABLHE : <@U3SJEDR96> Thanks, that was exactly what I needed.
+U59AF21LJ : <@U3SJEDR96> Sorry for the late reply. I actually see that as a problem, because sometimes it doesn't refresh with the value the model provides and just keeps the one the user wrote instead.
+U5WD40ZA9 : Anyone know any recent examples of someone creating a dropdown so that when you click outside of it, it closes? Would be really helpful, thanks in advance :slightly_smiling_face:!
+U4PT7NG4V : I've always just put an invisible overlay over the background behind popups and handled the click there and dismiss the popup. But maybe I'm old school and there's a better way
+U0K92QFST : <@U5WD40ZA9> there was *just* a discussion about exactly this in <#C13L7S5GR|elm-dev>!
+U0K92QFST : <https://ellie-app.com/3tm2WSV9JTza1/0>
+U0K92QFST : credit where due: <https://elmlang.slack.com/archives/C13L7S5GR/p1498165749675291>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

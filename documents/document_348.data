@@ -1,25 +1,138 @@
+U3YDBDP4Z : I'm not sure where they come from.
+U3YDBDP4Z : I would have assumed the Navigation package but it doesn't mention them
+U3YDBDP4Z : And the only other package I have is url-parser, which doesn't have them either
+U3YDBDP4Z : Which is confusing, since I use them in Update.elm but they are not imported from anything
+U48AEBJQ3 : If you are using them somewhere, they are either defined there or they are imported. This is a reason to not import `exposing (..)`, since it makes it more difficult to know where things come from. The navigation package doesn't define any constructors by those names.
+U3YDBDP4Z : Haha, you are absolutely correct
+U3YDBDP4Z : I was having a brain fart
+U4872964V : <@U5FC7BE0G> `if model.something == Nothing then Cmd.none else someCmd` perhaps. If you're not interested in the actual contents of the `Just`
+U5FC7BE0G : <@U4872964V> my example was actually a bit wrong. What I actually needed was this:
 ```
-or alternatively, you can use a `let...in` block like chadtech showed above
-Yeah, I would delcare it top level way before I would declare it in the `let` statement like I did in the example.
-Sad that I finished it! Who knew writing JSON decoders in Elm would be such a nice bit o respite
-<@U2U94G0QG> Don't worry, now you can use your new found parser combinator powers to parser things other than json.
-<@U153UK3FA>, <@U2U94G0QG>, where can I learn about parser combinators?
-<@U5QJW0DDE> Types help with the problems you're describing. Watch this talk: <https://www.youtube.com/watch?v=DoA4Txr4GUs>
-((In fact I am using <@U0JFXEUCT> 's `style-elements`, so I want to display it in one of those))
-<@U48AEBJQ3> I noticed you mentioned  ways of building apps other than passing `model` around. That is what I have been doing, and it has worked for me so far.  However, I'm very interested in learning about alternatives.
-<@U3LUC6SNS> for more general parsing you can use <http://package.elm-lang.org/packages/Bogdanp/elm-combine/3.1.1/Combine> you'll notice that the concepts there are very similar to those used in Json.Decode
-Personally, I'm partial to `elm-tools/parser` which is... super nice, and really quite performant
-- `maybe : Decoder a -&gt; Decoder (Maybe a)`
-can someone tell me how this is useful? `type Something a = Something`
-Kind of depends on where you saw that. If it's in something that has native behind it, that may actually hold data (examples: virtual-dom, elm-benchmark, ..). If you saw that elsewhere, that's a phantom type and it can be pretty useful to enforce constraints at compile-time, though it will generally hold some data. You can read about that a bit more here: <http://package.elm-lang.org/packages/joneshf/elm-tagged/latest>
-thanks <@U3SJEDR96>
-the reason that, for virtual-dom, it isn't just `type Node = Node` is so you can enforce a consistent msg type at compile-time.
-Thanks I will be watching that this morning 
-What is the best way to find the size of the DOM/view. My elm application runs inside an iframe (cross-domain) and I want to make sure the iframe resizes after load
-<@U61FZV5EK> I think you can use Window module, use subscriptions to check/listen on resizes: <http://package.elm-lang.org/packages/elm-lang/window/1.0.1/Window>
-someone correct me if I'm pointing in the wrong direction :stuck_out_tongue:
-what is this syntax: `SetEmail email -&gt; { model | email = email}` it's not an annotation (no colon) and it's not a function definition (no equal sign)
-Where did that come from? Context would help :slightly_smiling_face:
-around 19:20 at <https://www.youtube.com/watch?v=DoA4Txr4GUs&amp;app=desktop>
-oooh, that's just a branch from an `update`
-oh ok
+case model.something of
+                Just x -&gt;
+                    doSomething model.something
+
+                Nothing -&gt;
+                    Cmd.none
+```
+
+I ended up creating this helper:
+
+```
+maybeRunCmd : (a -&gt; Cmd msg) -&gt; Maybe a -&gt; Cmd msg
+maybeRunCmd f maybe =
+    maybe
+        |&gt; Maybe.map f
+        |&gt; Maybe.withDefault Cmd.none
+```
+... which works like a charm :slightly_smiling_face:
+
+U4872964V : great
+U0J8D9M2P : ```But the returned value (shown above) is a:
+
+    { altitude : number, azimuth : number1 }
+```
+
+Why does it says `number1`?
+
+U41NK9BM4 : IIRC it is a way to say: could be a different type than the other `number`
+U41NK9BM4 : (Int vs. float  - for example)
+U635238TG : i'm doing the intro guide and it had me clone over the code examples. however, i want to write these programs myself while I go along. Can I just open up an example.elm file in my text editor, write the code with the tutorial and then...what. Run elm-make to make an html file? and then I can just throw that in the browser to see if it worked?
+U0J8D9M2P : you can do it with elm-reactor as well
+U0J8D9M2P : which will compile elm files and serve them for you
+U635238TG : i see. i guess the examples in the tutorial also happen to be in the directory i installed so I can just open up those exact files with my text editor
+U2SR9DL7Q : <@U635238TG> i typically use elm reactor for every meaningful change to quickly test functionality in localhost. elm-make I save for when I'm pushing to remote repo. But I know a lot of folks use automated build tools that run elm-make on every save sometimes.
+U0J8D9M2P : You can use `elm-reactor` when you working only with Elm files. If you working with custom setup, e.g. you integrate Elm into html page, then e.g. `webpack` can help with automated compilation.
+U2SR9DL7Q : <@U0J8D9M2P> elm-reactor wont work with js interop right?
+U60ERSLUQ : I cannot install elm on redhat:
+U60ERSLUQ : root@m4sxvmvsm6h4 APP ~$ uname -aLinux m4sxvmvsm6h4 2.6.32-642.4.2.el6.x86_64 #1 SMP Mon Aug 15 02:06:41 EDT 2016 x86_64 x86_64 x86_64 GNU/Linux
+root@m4sxvmvsm6h4 APP ~$ node --version
+v8.1.3
+root@m4sxvmvsm6h4 APP ~$ npm --version
+5.0.4
+root@m4sxvmvsm6h4 APP ~$ npm install -g elm
+npm WARN deprecated node-uuid@1.4.8: Use uuid module instead
+/usr/bin/elm -&gt; /usr/lib/node_modules/elm/binwrappers/elm
+/usr/bin/elm-make -&gt; /usr/lib/node_modules/elm/binwrappers/elm-make
+/usr/bin/elm-reactor -&gt; /usr/lib/node_modules/elm/binwrappers/elm-reactor
+/usr/bin/elm-repl -&gt; /usr/lib/node_modules/elm/binwrappers/elm-repl
+/usr/bin/elm-package -&gt; /usr/lib/node_modules/elm/binwrappers/elm-package
+
+&gt; elm@0.18.0 install /usr/lib/node_modules/elm
+&gt; node install.js
+
+Error extracting linux-x64.tar.gz - Error: EACCES: permission denied, mkdir '/usr/lib/node_modules/elm/Elm-Platform'
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! elm@0.18.0 install: `node install.js`
+npm ERR! Exit status 1
+npm ERR!
+npm ERR! Failed at the elm@0.18.0 install script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+
+U60ERSLUQ : Any idea ? If I create the /usr../elm directory manually it will be deleted during installation.
+U0J8D9M2P : <@U2SR9DL7Q> It can serve files but it will not automatically compile elm files into specific output file for you (which you can specify with elm-make command). So with `webpack` can handle this work.
+U0J8D9M2P : <@U60ERSLUQ> it says `permission denied` are you sure you have correct rights to write into that directory?
+U60ERSLUQ : I have run it as root. Permissions of /..../node_modules are 755, owner root:root.
+U60ERSLUQ : I could run 'node install bower'
+U0J8D9M2P : It's not recommended but have you tried to run that with `sudo` ?
+U60ERSLUQ : <@U0J8D9M2P> : Same behaviour with sudo
+U0J8D9M2P : <https://www.npmjs.com/package/elm> It has Troubleshooting section
+U0CLDU8UB : How about not running as root?
+U60ERSLUQ : <@U0J8D9M2P>: I check the troubleshooting section: npm has the latest version, npm cache is ok.
+U0CLDU8UB : Anyway, here's a troubleshooting page for npm permission issues: <https://docs.npmjs.com/getting-started/fixing-npm-permissions>
+U60ERSLUQ : <@U0CLDU8UB> <@U0J8D9M2P> setting npm config prefix (It was /usr) to a local non-root directory as described in <https://docs.npmjs.com/getting-started/fixing-npm-permissions> finally worked. Many thanks for your help.
+U604S603Y : is there a way to decode a "naked" JSON array into an Elm List? I have a type alias "Foo" with a field "x", and I'm trying to decode an array like this:[{ x: 5}, {x: 3}]
+I got it working for one "Foo" {x:5}, but not for many.
+
+U1AN4JRFV : <@U604S603Y>: Json.Decode.list does that
+U1AN4JRFV : `Json.Decode.list decodeItem`
+U1AN4JRFV : <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#list>
+U604S603Y : ah okay, I tried to call succeed (Json.Decode.list decodeItem)
+U604S603Y : thank you <@U1AN4JRFV>
+U3SJEDR96 : <@U2SR9DL7Q> <@U0J8D9M2P> <https://blog.ilias.xyz/elm-reactor-and-custom-html-9e7143553807> fyi :slightly_smiling_face:
+U2SR9DL7Q : <@U3SJEDR96> knowledge is power :+1:
+U601ELFEG : Is equality for records value equality or entity identity?
+U601ELFEG : `{ item: "wheel", size: 3.5 } == { item: "wheel", size: 3.5 }`
+U601ELFEG : tested it (with the correct syntax) - value equality!
+U3SJEDR96 : <@U601ELFEG> everything is or should be, with a few exceptions where it's not really defined
+U62KVQVD1 : Can somebody share link to some example how to properly do SPA routing with elm-bootstrap, please?
+U17PWHU4D : hi all, quick question, I'm sure its been asked before, but struggling to find the right answer.  
+what's the best pattern for requiring ternary values in a view?
+
+ie.
+
+```
+    rect
+            [ x "0"
+            , y "0"
+            , fillOpacity (model.isActive ? "1" : "0.5")   &lt;--- here
+            ]
+            []
+```
+
+U17PWHU4D : if i try to create the value inside the let, the compiler says i'm trying to assign a value to `if`.
+U17PWHU4D : same with case.
+U601ELFEG : I seem to have made the Elm go into an infinite loop by introducing a helper function
+U601ELFEG : anyone will to lend a second pair of eyes?
+U601ELFEG : (It's about 30 lines of example - post here? or a github gist?)
+U5AR0LDQA : <@U17PWHU4D> `fillOpacity if model.isActive then "1" else "0.5"`
+U601ELFEG : (I know, it says Haskell, but there is no Elm format for Slack snippets...)
+U601ELFEG : So if my Html sends back a Msg of  NoHover --- it works... If it sends back NoHoverCrashes --- it hangs
+U601ELFEG : and yet they look the same to me
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

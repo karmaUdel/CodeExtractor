@@ -1,4 +1,98 @@
-How to integrate ```time_elapsed = time.time() - start_time``` in my while loop ?
-How do you think? That tells you how long has passed. When a certain time has passed, you'll want to break out of the loop (if you want to restart the script), or get a new token/key (if you don't)
-sorry I'm newbie in python. Can I add this in while loope whith if, and when certain time has passed to call my function for new key ?
-Before the loop, when you get the token for the first time: `start_time = time.time()`
+U5MEJDV34 : Just created a new Atom package that lets you run Elm Tests on Save and show the result in the Linter window. Might still be unstable so feedback is very welcome: <https://atom.io/packages/atom-elm-test>
+U0H3A9XLN : Let’s say I have a union type which represent tabs: `type Tab = TabOne | TabTwo`. Then in my view code I do render them. Is there a way to ensure that once I add a new tab I won’t forget to add view piece for it?
+U41NK9BM4 : If you use a case/of Elm will complain it misses the new one.
+U1P6FFJ64 : Yep, and be sure not to use `_ -&gt;` in your case/of :smile:
+U41NK9BM4 : AKA: the lazy coder :slightly_smiling_face:
+U2CUK7KQA : Does anybody have experience with debugging while using `elm-style-animation`? The large amount of Messages sent by `requestAnimationFrame` is making this basically impossible :disappointed:
+U41NK9BM4 : When doing games, animation etc. debugging is difficult. However, I believe the next *release* will bring message grouping in the debugger
+U2CUK7KQA : Awesome. For now I'm thinking about just disabling animations when debugging
+U0H3A9XLN : <@U41NK9BM4> how `case .. of` is applicable here exactly?
+U3SJEDR96 : <@U0H3A9XLN> if you're working with a list of them, it's not. Tagged union types aren't enumerable so you can't really have the compiler ensure that _all_ tags appear in some given list
+U41NK9BM4 : Also. ```
+renderTab model tab =
+    case tab of 
+        TabOne -&gt; 
+            renderOne model
+        TabTwo -&gt; 
+            renderTwo model            
+```
+
+U0H3A9XLN : hm, is there some way to do it differently then?
+U0H3A9XLN : <@U41NK9BM4> that is not what I was asking for
+U3SJEDR96 : I suppose "adding a new tab" in your original question could mean either "add a new tag to my tab type" or "add a new instance of type Tab to some list"
+U41NK9BM4 : I as looking at your `type Tab = TabOne | TabTwo` above
+U41NK9BM4 : So if you add `TabThree` Elm will complain. This is the meaning I was extracting from your example :slightly_smiling_face:
+U41NK9BM4 : It seems your tabs are a closed set so it makes sense to use a union type.
+U3SJEDR96 : <@U0H3A9XLN> can you point out which part you feel like you might forget?
+U0H3A9XLN : <@U3SJEDR96> I guess I am more afraid about “add new instance of type Tab to some list”
+U41NK9BM4 : So you are modeling a row of tabs like in a browser, maybe?
+U3SJEDR96 : so basically, you're afraid that when you add a new entry to your `type Tab`, you won't add it to your list of possible tabs, right?.. Hm, I'm not sure if there is a very clean "compiler will make sure you have all option in there" solution, though that also means that you can easily disable tabs by removing them from the list without removing the supporting code; so it has advantages, too. Then again, it's likely to be very clear what you forgot when you see a page missing a tab :wink:
+U0H3A9XLN : Yeah, that’s true. Unfortunately in my case I have many pages which are dependant on these “tabs”. I can’t really tell the exact thing because it’s under NDA. So if I add one more “tab” I need to go and make subsequent changes to a lot of different parts of my application. That’s why I am so keen to delegate search for these places to compiler.
+U2JA29EKF : do you always use all the tabs? if you do, can you just define an `allTabs = [Tab1, Tab2]` and then,  you only have one place you need to keep updated
+U3SJEDR96 : actually, even if you don't, you could make an exhaustive list, and loop through them in your view with some sort of `List.filter shouldUseTabForView tabs` function. If you make sure to use exhaustive matches in those `shouldUseTabForView` functions, you only need to update the one "masterlist" and the compiler will make sure you add cases to those filters
+U0H3A9XLN : ok, thanks!
+U0CLDU8UB : So nice to see real world friends get answers here :heart_eyes_cat:
+U3R7CKQRX : I have attached a scroll handler in Elm, which triggers a port. Now I found out that the commands are only being sent when the scrolling stops (in a batch). I kinda need the scroll events to happen synconously to update other stuff. Does anyone know why this happens and if there is a way around that?
+U1CE9DL9H : I think it has something to do with animation frames, but not quite sure how it would work for you
+U0CLDU8UB : Are you testing on an Apple OS?
+U0CLDU8UB : Scroll events are tricky, and especially Apple seems to want delay sending them until the last possible moment.
+U0CLDU8UB : (this is because if you naïvely listen for scroll events, it very likely becomes a performance bottleneck and Apple wants to enforce smooth scrolling rather than trust web developers)
+U1P6FFJ64 : When working on a team, has anyone found a way to enforce the version of elm-format being used? We are a small team (3 people) but each of us is currently using a different version, causing a lot of changes that are just reformatting things back and forth
+U3SJEDR96 : One option is to "enforce" it through a combination of `package.json` and pre-commit hooks... Another is good communication :wink:
+U1P6FFJ64 : Well, package.json and pre-commit hooks will require more job, as we use elm-format on our IDEs / editors. Communication is what we use when a new version appears. Still, I think is better to automate things, right?
+U1P6FFJ64 : Seems like the solution we are adopting is adding an Elm format check on CI
+U1KES8JGK : we do that (run `elm-format` on CI) :slightly_smiling_face:
+U1KES8JGK : `yarn run elm-format -- --validate src/ tests/`
+U3SJEDR96 : Or you can do a post-receive hook on the server to check that code adheres to the correct elm-format version
+U3SJEDR96 : so a `git push` can be "denied"
+U17R26VR8 : &gt; team (3 people)&gt; enforce the version of elm-format
+
+sounds like you’ve got bigger problems…
+
+U3R7CKQRX : <@U0CLDU8UB> yeah I am developing on a mac. So do you know if there is a way around that? And are you basically saying this isn't Elm's fault but the OS's?
+U0CLDU8UB : It is possible that the browser simply isn't sending the events. Try `document.body.addEventListener('scroll', ev =&gt; console.log("now"))` and see how often that gets triggered
+U3R7CKQRX : I did that, I clear the console =&gt; no events. I scroll =&gt; still no events. I stop scrolling =&gt; now all the events arrive on the console.
+U0CLDU8UB : Then I'm afraid there's very little we can help with. :disappointed:
+U3SJEDR96 : then it's just the browser. Weird, I thought it only did that on IOS
+U3R7CKQRX : Then I guess this a problem that everybody is facing right? Elm or not.
+U0CLDU8UB : That's right. I suppose googling for stackoverflow answers for workarounds might yield something.
+U2W22AHNU : <@U3R7CKQRX> not sure about your usecase of course but CSS might be able to help you positioning stuff in the right place while scrolling.
+U0CLDU8UB : Yeah, `position: sticky` also exists, even though its browser support is not that great.
+U3R7CKQRX : <@U2W22AHNU> I don't really need to position things rather update some content as you scroll.
+U3R7CKQRX : Anyway thank you for the help everyone.
+U3R7CKQRX : I am just happy this isn't caused by Elm :smile:
+U2W22AHNU : <@U3R7CKQRX> Just thought of something, what I do in an other case is to have a loop and requestAnimationFrame```
+function loop() {
+    _scrollOffset = window.pageYOffset || window.scrollTop;
+
+
+    requestAnimationFrame(loop);
+}
+loop();
+```
+
+U2W22AHNU : This works well for me in showing and hiding elements based on scroll position.
+U2W22AHNU : I develop on a Mac and I can't remember seeing the issue you mentioned
+U2W22AHNU : <@U3R7CKQRX> run this: ```var loop = function() {var s = window.pageYOffset || window.scrollTop; console.log(s); requestAnimationFrame(loop);} ``` and then call ```loop();``` in your console and start scrolling
+U1P6FFJ64 : <@U17R26VR8> what do you think we have bigger problems?
+U0FP80EKB : <@U1P6FFJ64> I’m not mordraw, but I would ask about the term “enforce” which feels like there might be communication issues amongst the 3 people. Do you mean “force” or just “check” ? On my team (also 3), when we upgrade like that, we’ll all chat and do it together.
+U0FP80EKB : Especially the first time we notice that in a PR. We’ll say “hey, did someone upgrade their elm-format” and then we’ll all do it.
+U1P6FFJ64 : Oh, sorry if that's the case. English is not my native language.
+U0FP80EKB : No worries. “enforce” can mean a lot of different things.
+U0FP80EKB : It isn’t the wrong word, but can be misunderstood. :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

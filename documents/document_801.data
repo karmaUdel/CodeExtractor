@@ -1,0 +1,167 @@
+U2PTZFKFX : somehow, let me read what is posted first,
+U0Z9TPK7S : <@U23SA861Y> I stand corrected. I see now that your suggestion of making a more generic view does make sense. Again thank you for your input.
+U0J8D9M2P : Exactly
+U0J8D9M2P : <@U635238TG> Thank you
+U5ZC6V535 : Hi i am trying to separate my top level messages to sub messages and hence i did: 
+```
+type GeneratorMsg
+    = BoidsGenerated (List Boid)
+    | ColoursGenerated (List Color)
+
+
+type Msg
+    = Tick Time.Time
+    | UpdateWorld Window.Size
+    | GeneratorMsg
+```
+
+However, in my  main update function when I use the *BoidsGenerated* message Elm thinks that it is of type *GeneratorMsg* which is correct. In the same time though - in my mind -, it is of type *Msg*. 
+
+Is there a way to be able to handle *Msg* and *GeneratorMsg* interchangeably? Basically, i want to split my update function to smaller functions but I want everything that has to do with generated stuff to be handled by 1 separate function. Then that function will have cases for *BoidsGenerated* and *ColoursGenerated* msgs. --- thanks
+
+U0Z9TPK7S : <@U5ZC6V535> You should declare those as```
+type Msg
+    = Tick Time.Time
+    | UpdateWorld Window.Size
+    | GeneratorMsg GeneratorMsg
+```
+
+U0Z9TPK7S : But this is going to be confusing; I would recommend to change `type GeneratorMsg` into `type GeneratorOutcome`.Then your update function can be
+```
+type GeneratorOutcome
+ = BoidsGenerated (List Boid)
+ | ColoursGenerated (List Color)
+
+type Msg
+ = GeneratorMsg GeneratorOutcome
+  | ...
+
+update msg model =
+  case msg of
+    GeneratorMsg generatorOutcome -&gt;
+      generatorUpdate generatorOutcome model
+
+    ...
+```
+
+U0Z9TPK7S : Does it make sense?
+U5ZC6V535 : <@U0Z9TPK7S> Yeah, that actually makes sense :slightly_smiling_face: Thanks.
+U0Z9TPK7S : :smiley:
+U2LAL86AY : <@U5ZC6V535> i use a `word pattern` for delegating messages to sub modules:```
+type Msg = 
+  | MsgFor_Generator GeneratorMsg
+  | MsgFor_SomethingElse SomethingElseMsg
+  | Click  
+
+type GeneratorMsg =  -- no need for GeneratorOutcome, or other variations  - because sometimes "outcome" si a word that doesn't work semantically, and you waste time thinking : "what would be a better naming ?!"
+    BoidsGenerated (List Boid)    
+    |  ColoursGenerated (List Color)
+```
+It's how i keep my mind and msgs consistent. :smile:
+
+U2LAL86AY : and in your elm debugger will look like:`MsgFor_Generator ( GenerateSomething { seed: 1112112 })`
+
+U24HQ3RJ7 : hi.. i am new to CSS and have to make a web / mobile app .. I am using Elm for it. :slightly_smiling_face:
+Has the community converged on some particular css library ? elm-css vs elm-style-elements vs something_else ..
+
+U0Z9TPK7S : <@U24HQ3RJ7> Hi! Welcome!
+U0Z9TPK7S : elm-style-element is still in its infancy, the only complete and solid CSS option right now is elm-css
+U24HQ3RJ7 : <@U0Z9TPK7S> thanks.. since this is side project, i will give style-elments a try.. :slightly_smiling_face:
+U6EQ9E3EC : Hi there, people
+U2MRDAK6U : Hello! :smile: Are there any resources about how to create an Elm library online? I have already made a few standalone projects in Elm, now I would like to make my own library. I know how to use libraries available on <http://package.elm-lang.org|package.elm-lang.org> but I have no idea how to use a local library. Any pointers?
+U3SJEDR96 : There's no official way, but there are tools like elm-github-install and elm_self_publish that support installing a local package into another package. Though if it's worth making into a package, you might as well publish is :)
+U2MRDAK6U : Great thanks for the tools! `elm_self_publish` seems to do what I want. Are there any plans for a more official method to do this?
+U2MRDAK6U : Actually `elm-github-install` seems to do relative paths as well as github repos
+U3SJEDR96 : Self publish is useful for testing local modifications and whatnot, elm-github-install is a more comprehensive tool, at the cost of actually replacing most of `elm-package install`'s functionality :slightly_smiling_face:
+U6D3ERLA1 : The link from <http://package.elm-lang.org/packages/elm-lang/core/1.1.0/Signal> -&gt; <http://package.elm-lang.org/packages/elm-lang/core/latest/Signal> appears to be broken in the docs
+U3SJEDR96 : They're also long deprecated..
+U1AN4JRFV : <@U6D3ERLA1>: Signals are not longer a thing in 0.18 (latest)
+U3SJEDR96 : Pre-0.17 even :D
+U6D3ERLA1 : Gotcha - the link is a little misleading...
+U3FJSB596 : Hello everyone!
+I was recently introduced to Purescript, and it seems to be a nice way to guarantee safety and correctness to my code outside of Elm. I went online to look for articles and tutorials on how to integrate Purescript and Elm but I only found articles pitting these two tools against each other.
+
+So I have the following questions:
+
+1)  What do you think of this? (Using mostly Elm in your FE, and use Purescript beyond your ports)
+2) Any suggestions, articles, or tutorials on how to implement this?
+3) If you do not use Purescript outside of Elm, what do you do to gain most of Elm’s guarantee’s outside of Elm?
+
+Thanks for your time!
+
+U0LL6NC1K : <@U3FJSB596> i think you might ask this in a more general chat too, like the FPChat Slack (<https://fpchat-invite.herokuapp.com>). i've written a post about integrating and doing codegen for an elm app inside a purescript one
+U3FJSB596 : <@U0LL6NC1K> Thanks for the tip. Where can I find the post you’ve written?
+U0LL6NC1K : i think someone posted it here the other week on <#C0CJ671HU|random>? it's here: <http://qiita.com/kimagure/items/d12525d42516f95dd541>
+U0LL6NC1K : i'm usually in that other slack, feel free to ping me on <#C0CJ3SBBM|general> or #purescript there :slightly_smiling_face:
+U5ZC6V535 : Thanks this looks interesting. I may give that a try.
+U170TNSTZ : In React, I can get a reference to a dom element by implementing a `ref` function for a virtual dom node. Is something similar possible in Elm?
+U170TNSTZ : I am looking at an example of setting focus, and it seems it’s using the `id` attributes for identification, which is brittle, since it’s a global id
+U170TNSTZ : (Example is here: <https://embed.ellie-app.com/vsvWQMXjQqa1/0>)
+U0Z9TPK7S : <@U2MRDAK6U> you want `elm package publish`. That's the official way of publishing a library :smiley:
+U153UK3FA : <@U170TNSTZ> there isn't a way. 
+U2PTZFKFX : Using models seems to be confusing at times analog to the MVC pattern for back end development. won't it be nice to use pattern instead?
+U0JFGGZS6 : <@U170TNSTZ> for focus there's <http://package.elm-lang.org/packages/elm-lang/dom/1.1.1/Dom#focus>
+U2PTZFKFX : Hello, anyone sucessfully implemented bulk actions using ELM?
+U0Z9TPK7S : "bulk actions"?
+U2PTZFKFX : <@U0Z9TPK7S> yes
+U2PTZFKFX : let's say, table with 3 columns`
+Actions: update column  newmae: 'mynewname'
+
+id, name, newname
+1, testnae, mynewname
+2, anothername, mynewname
+
+and so on...
+`
+
+
+[3:03] 
+so action update column, supposed to add a bulk action and send the updated result to the server
+
+U0Z9TPK7S : I'm sorry, I'm still missing the context. It might be an API I don't know about. Is this a request going from the browser to a remote server?
+U2PTZFKFX : ok
+U2PTZFKFX : ok, to further explain, i m loading set of data via api from remote server, which will be contained in a row, later, i want to modify part of all of the record and update back, just like how gmail functionality works, were a user can mark set of messages to be send to trash, or apply some labels to some specific messages,
+U0Z9TPK7S : Ok, one thing at the time.Do you need to modify the copy of the records that is in the browser, or the one that's on the server?
+
+U2PTZFKFX : that's on the server, but it will be done from the client side,
+U0Z9TPK7S : What part of it will be done on the client side?
+U0Z9TPK7S : I assume that within Elm, you are modelling that information as a `List Something`.
+U2PTZFKFX : the actions
+U0Z9TPK7S : So, you need to create a list of actions that the server will need to perform?
+U2PTZFKFX : yes,
+U0Z9TPK7S : How you want to model those actions?
+U2PTZFKFX : ok, let me start with sample examples
+U3L8MM10T : It seems that `Float` has similar limitations as `Int` regarding _maxSafeInt_, as shown here: ```&gt; maxSafeInt = (2 ^ 53) - 19007199254740991 : number
+&gt; fmaxSafeInt = toFloat maxSafeInt
+9007199254740991 : Float
+&gt; fmaxSafeInt + 2.0 - 3.0
+9007199254740989 : Float
+&gt; fmaxSafeInt - 3.0 + 2.0
+9007199254740990 : Float
+``` Kindly advise.
+
+U23SA861Y : its backed by js, what were you expecting in large numbers?
+U3L8MM10T : I'm not sure myself, but would like to know what max safe upper limit is for `Float`.
+U3L8MM10T : Floats to my understanding are inherently imprecise at a certain point.
+U3SJEDR96 : Floats are inherently imprecise at any point. `0.1 + 0.2 == 0.3` is  `False`
+U3SJEDR96 : An integer is a float without decimals, basically, so for floats that end in `.0`, the limits are the same as for integers
+U3SJEDR96 : when comparing floats for equality, you should generally allow for a margin of error (`epsilon`) relative to the inputs
+U3L8MM10T : yes, thanks
+U3L8MM10T : But I would expect `Basics` to have such an equality function for `Float`.
+U4872964V : <@U3L8MM10T> floats are as defined by IEEE 754 double precision floating-point numbers
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

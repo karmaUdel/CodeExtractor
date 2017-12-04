@@ -1,1 +1,124 @@
+U0BKWMG5B : First, if you're testing a single key, then you can use `init-key` directly and pass the stubbed/mocked connections.
+U0BKWMG5B : For example, say you have a key `:foo.handler/user` that takes a database option. You could test it with:```
+(ig/init-key :foo.handler/user {:db (-&gt;StubbedDatabase)})
 ```
+
+U0BKWMG5B : Because the database isn't accessed directly, but via protocol methods, we can create a stubbed or mocked version with the same interface. Shrubbery is a test tool that streamlines this process.
+U0BKWMG5B : If you're testing the configuration in a wider context, then you can take advantage of keyword inheritance.
+U0BKWMG5B : For example, say you had a configuration like:```
+{:duct.database.sql/hikaricp
+ {:jdbc-url ...}
+ :foo.handler/user
+ {:db #ig/ref :duct.database.sql/hikaricp}}
+```
+
+U0BKWMG5B : One feature of Integrant is that you can reference *derived* keys, so you could write the above as:
+U0BKWMG5B : ```{:duct.database.sql/hikaricp
+ {:jdbc-url ...}
+ :foo.handler/user
+ {:db #ig/ref :duct.database/sql}}
+```
+
+U5ZAJ15P0 : <@U0BKWMG5B> oh, so in that case you wouldn't swap any implementation, you would simply instruct the system to use a different implementation based on the config (different derived key)
+U0BKWMG5B : So if you want to stub out the key directly, then change the database key to a fake one that derives from the same base:```
+(derive :duct.database.sql/fake :duct.database/sql)
+```
+
+U5ZAJ15P0 : Thank you, I'll try both of those approaches :slightly_smiling_face: I had a follow up question but you answered it. It was going to be: "in your talk you mention how you can instantiate two systems with different configurations, but how can I instantiate two systems with different implementations?"
+U0BKWMG5B : Right: you could update the configuration to replace the real database with a fake one:```
+{:duct.database.sql/fake
+ {:jdbc-url ...}
+ :foo.handler/user
+ {:db #ig/ref :duct.database/sql}}
+```
+
+U5ZAJ15P0 : From what I gather the answer to this would be "you only have one implementation per keyword; you just use a different config"
+U0BKWMG5B : Right. Just take the base config and alter it with `assoc`. Or use `duct.core/merge-configs` to merge in new options.
+U0BKWMG5B : It effectively amounts to the same thing.
+U0BKWMG5B : You *could* also use `with-redefs` to redefine the `init-key` multimethod, but since that's not thread-safe I'd advise avoiding that route.
+U5ZAJ15P0 : Thanks for the explanation! So the gist is that I was finding it annoying to swap implementation due to multimethods, but that's intentional because under your design you *should not* swap implementations
+U0BKWMG5B : Right. I mean, in theory it might be good for testing, but in practice I think it makes more sense to substitute keys in the configuration, rather than make the config-&gt;implementation bridge dynamic in some fashion
+U0BKWMG5B : It also makes it explicit where you're stubbing/mocking.
+U5ZAJ15P0 : <@U0BKWMG5B> thanks for taking the time to explain this out. Once I understand Integrant/Duct better I'll try to give back by writing some doc :slightly_smiling_face:
+U0BKWMG5B : Thanks! But if you like, just some feedback once you've gotten to use it a little would be  useful. The more use-cases I know about, the more useful I can make the library.
+U5ZAJ15P0 : Certainly
+U5ZAJ15P0 : Hi! What is the preferred way to do input payload validation for a json api in Clojure? If possible a solution that offers both input validation and machine-readable errors to be consumed by the client. Hopefully I won't start a 40min heated debate like yesterday :smile:
+U3L6TFEJF : Just adding stuff from this conversation to the readme / wiki would be helpful, because as far as I could see the questions are not addressed on Github at the moment
+U3L6TFEJF : sort of "Best practices" for stubbing / mocking with Integrant
+U5ZAJ15P0 : <@U3L6TFEJF> yep that would be great
+U051HUZLD : I'd read one, though :opieop: 
+U0BKWMG5B : Point taken, I'll put together something for the Duct docs.
+U5ZAJ15P0 : <@U0BKWMG5B> are you using Duct in production?
+U0BKWMG5B : The Integrant version? Not yet, or at least it's not *running* in production. I am working on an app that will be running in production in a couple of months, though.
+U5ZAJ15P0 : <@U0BKWMG5B> Another question… What would be the preferred way to reference some environment variables in the config? It seems to be like an EDN tag would be neat, e.g. `#ig/env "DATABASE_PASSWORD"`. Do you have an existing option? I guess I could merge in the relevant config from env vars
+U0BKWMG5B : An edn tag would be neat, and in Duct it's called `#duct/env`.
+U0BKWMG5B : If you put that in your main `config.edn`, then you can always override them in `dev.edn` or `local.edn`.
+U5ZAJ15P0 : Oh I hadn't even realised Duct had this functionality; I am focussing on Integrant's doc atm. Brilliant
+U0BKWMG5B : Certain modules also have defaults, e.g. `:duct.module/sql` uses `JDBC_DATABASE_URL` and `DATABASE_URL` automatically, and `:duct.module/web` uses `PORT` for the port number.
+U0BKWMG5B : <@U5ZAJ15P0> There are a few solutions. Compojure-API can use Schema or Spec. My own Ataraxy has spec validation in the latest version. There are also various validation and coercion libraries, but I think the most common approaches are Schema or Spec.
+U0BKWMG5B : Spec isn't designed around coercion so much, so I'm not sure how well it could handle that.
+U5ZAJ15P0 : <@U0BKWMG5B> on the topic of loading env vars, maybe it would be neat if one was allowed to extended integrant with custom readers?
+U5ZAJ15P0 : oh hang on; I just looked at Integrant's code and it's already the case
+U0BKWMG5B : Take a look at read-config
+U0BKWMG5B : Yep :slightly_smiling_face:
+U5ZAJ15P0 : <https://github.com/weavejester/integrant/blob/master/src/integrant/core.cljc#L85>
+U0BKWMG5B : Though in duct someone pointed out that the readers don't persist though includes, so that needs to be fixed.
+U5ZAJ15P0 : <@U0BKWMG5B> what do you mean by that?
+U0BKWMG5B : Duct adds a :duct.core/include key that allows a config to pull in other configs from the classpath in the "prep" stage
+U0BKWMG5B : But prep doesn't know about the custom readers.
+U0BKWMG5B : I'm also considering better ways of performing an include.
+U055NJ5CC : <@U5ZAJ15P0> wrote a post about the coercion &amp; error messages some time ago: <http://www.metosin.fi/blog/clojure-spec-with-ring-and-swagger/>.
+U5ZAJ15P0 : thanks!
+U5ZAJ15P0 : <@U0BKWMG5B> another question… Is there a way to "inherit" from a config? For example, let's say I have a "database" config, and I want to create two services whose configs are slight twist over the general "database" config
+U5ZAJ15P0 : a bit like your `:adapter/jetty` example on the Integrant readme
+U5ZAJ15P0 : except that you replicate the config (port and handle) under both keys, whereas I would like to share a config block and override some bits
+U5ZAJ15P0 : if that makes any sense
+U5ZAJ15P0 : (theoretical question anyway, I don't have a specific usecase)
+U0BKWMG5B : Not currently, unless you modify the config with either a module or directly after it's loaded.
+U5ZAJ15P0 : So I would need a module that knows about those keys and performs a merge?
+U1B0DFD25 : I'm using integrant-repl and reading config from `resources` folder in my preparer function (`(read-config (io/resource "config.edn"))`) and yet it won't pick up new values for mongodb host when I change them, forcing me to stop and start the REPL. Does this ring a bell to anyone? Any common gotchas?
+U5ZAJ15P0 : <@U0BKWMG5B> ^
+U5ZAJ15P0 : Quick question: how can I pass a static function around? E.g. if I try to pass `System/getenv` around I get `Unable to find static field: getenv in class java.lang.System`
+U5ZAJ15P0 : (but `(System/getenv "foobar")` works)
+U5ZAJ15P0 : I could pass `#(System/getenv %)` around, but I assume there is a simpler way
+U051SS2EU : that's a static method, methods unlike functions are not first class objects supported by the vm
+U051SS2EU : you can't pass something as an argument that can't be put on the stack
+U051SS2EU : that's why you need to create a function, which is an object (with a static method that gets called if you apply it)
+U051SS2EU : so tl;dr there isn't a simpler way, that's the way you do it
+U053XQP4S : <@U5ZAJ15P0> you could check `memfn` as well <https://clojuredocs.org/clojure.core/memfn>
+U051SS2EU : <@U053XQP4S> that doesn't work with static methods
+U051SS2EU : and it's not any more succinct or efficient than creating a lambda in most cases
+U051SS2EU : (that's what it actually does, it creates a function)
+U053XQP4S : oh right, my bad
+U5ZAJ15P0 : <@U051SS2EU> ah I see; I thought there might be something like that going on
+U6DBQRAHM : hi all, i am trying to understand how `reduce` works in the following example:```
+user=&gt; (reduce str (repeat 3 "str"))
+"strstrstr"
+```
+i don't understand why this returns what it does. can someone break down what `reduce` is doing here?
+
+U11BV7MTK : <@U6DBQRAHM> head to <#C053AK3F9|beginners> and I'll walk you through it
+U6DBQRAHM : <@U11BV7MTK> ok thanks!
+U0BKWMG5B : I'd need to see more of your setup. If you're performing a reset, your prep function will be hit
+U0BKWMG5B : Yes, though depending on your use case, it may or may not be a good idea
+U5ZAJ15P0 : <@U0BKWMG5B> yet another question on Integrant… Why is `ig/suspend!` necessary? Couldn't you do all the logic in `ig/resume`? (naming it `ig/swap` or similar). It seems to only be used when hot-swapping for dev
+U5ZAJ15P0 : There are two steps: suspending the system then resuming it with a different config
+U5ZAJ15P0 : To do essentially one thing: hot-swap some parts of the running system
+U5ZAJ15P0 : (at least that's the only use of suspend!/resume I have seen yet)
+U0BKWMG5B : Consider the case of a web server. Suspend can tell the server to buffer connections until resume is called. After suspend we reload namespaces which can take several seconds.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

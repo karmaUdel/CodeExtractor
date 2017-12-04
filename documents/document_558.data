@@ -1,5 +1,81 @@
+U2PTZFKFX : Hello, anyone sucessfully implemented bulk actions using ELM?
+U3VCFFH1S : <@U2PTZFKFX> what do you mean by bulk actions? Sounds similar to what I'm asking about. I found a sequential solution using `Task.sequence` and am working on a parallel solution using `Cmd.batch`…
+U2PTZFKFX : <@U3VCFFH1S> Bulk actions, i.e in a table, we can have the sorting functionalities, or in an external table, we can Apply functions to selected rows, i.e delete, update, or anything else,
+U3VCFFH1S : I don't quite follow, but there's this sortable table by the BDFL himself <https://github.com/evancz/elm-sortable-table>
+U2PTZFKFX : well, aside the sortable, i m looking for additional functionality, i.e i m loading list of items in a table. i want to bulk update existing cells,
+U2PTZFKFX : let's say, table with 3 columns`
+Actions: update column  newmae: 'mynewname'
+
+id, name, newname
+1, testnae, mynewname
+2, anothername, mynewname 
+
+and so on...
+`
+
+U2PTZFKFX : so action update column, supposed to add a bulk action and send the updated result to the server
+U3VCFFH1S : Having a hard time understanding what you're getting at. Do you have any code to share, or can you post a minimal example? eg```
+type alias Model = {columns: List String}
+type Msg 
+  = UpdateColumn String
+  | SendToServer 
+update msg model = case msg of
+  UpdateColumn updatedColumns -&gt;
+    ({model | columns: updatedColumns }, sendToServer updatedColumns)
+  SendToServer response -&gt;
+    (model, Cmd.node)
 ```
-or something along those lines
-Almost working. My model is not changing. I have init with some initial fake data. My  model should be overwritten by update, right? It looks like the model is keeping only that init data values.
-I would imagine that the model is not _actually_ being updated then for some reason. Either the wrong action is firing or there is some sort of issue in the `update` function.
-Maybe I missed it, where is the code that kicks off the Ajax request?
+
+U2PTZFKFX : sorry for my late reply
+U2PTZFKFX : ok, to further explain, i m loading set of data via api from remote server, which will be contained in a row, later, i want to modify part of all of the record and update back, just like how gmail functionality works, were a user can mark set of messages to be send to trash, or apply some labels to some specific messages,
+U3VCFFH1S : IMO simplest way code-wise would be separately firing off one request per row. But it sounds like you want one request that contains what, row/record IDs and maybe a list of key/value pairs that were changed?
+```
+request JSON {rowsModified: [
+  {rowId: 1, changes: {name: "alice", age: 50}},
+  {rowId: 3, changes: {age: 30}} 
+]
+```
+If that's right, then I'd store those changes in your model on the row as it happens, probably in a "changes" key with a `Dict` value so you can add changes.
+
+That way you can construct the above JSON by iterating through the rows and grabbing the data you want.
+
+U153UK3FA : <@U3VCFFH1S> there isn't currently a way to run Tasks in parallel. It's a limitation of the current Tasks API.
+U153UK3FA : Cmds can run in paralllel, but they can't be sequenced. So you need to handle that yourself in your `update`
+U3SJEDR96 : <@U2PTZFKFX> please don't ask _every_ question in multiple channels :)
+U3SJEDR96 : <@U6FFMA51S> start elm-reactor at the same path you have `elm-package.json`. Files are resolved relative to that root. So `localhost:8000/src/Main.elm` will compile and load that file. `localhost:8000/static/foo.css` will load `static/foo.css`. There's a magical `/_compile/` "prefix" that compiles and returns the compiled file as JS, rather than the default `compile to HTML`, too - <https://blog.ilias.xyz/elm-reactor-and-custom-html-9e7143553807>
+U3SJEDR96 : <@U3LUC6SNS> it does sound as if an Elm-controlled dom node was changed or replaced somehow.. Hard to say exactly what goes wrong, but does feel like a bad JS interaction..
+U4872964V : <@U3VCFFH1S> If all your random values are in a list like that, you can use the `Random.list` function to generate all of them at the same time though. But I'm guessing your question is more general.
+U3SJEDR96 : <@U6GB56346> it's not being inferred to be `Never`, but rather, since its a free type variable, it can be anything, including `Never`. If the type signature says "it _is_ `Never`", then the compiler will happily comply and say "sure, that's a `Never`"
+U2PTZFKFX : ok, thanks let me look into it
+U24HQ3RJ7 : hi.. i am following example in readme of <https://github.com/rtfeldman/elm-css> but i do not see any css applied in UI.i have MyCss.elm and using it in view.elm.. everything compiles..
+grep in index.html gives :
+```
+?? $ ? grep FF0000 index.html 
+							_rtfeldman$elm_css$Css$hex('FF0000')),
+```
+
+U24HQ3RJ7 : Is this ok ?
+U6GFNSEPR : quick question: is there named unpacking/pattern matching, like Haskell's `xs@(x:xss)`
+U6EAT2Z37 : <@U6GFNSEPR> yeah, it's "as" `(x::xss) as xs` in that case, IIRC
+U6GFNSEPR : oh, excellent, thanks :slightly_smiling_face:
+U6GFNSEPR : can't seem to manage to do it with a record though
+U3SJEDR96 : <@U6GFNSEPR> `foo ({ bar, baz } as whatever) = ` should work
+U6GFNSEPR : it does! I always forget the brackets
+U6GFNSEPR : thank you very much, this makes some things nicely readable
+U6GFNSEPR : on a related note, I noticed a bit of magic when you forget to name the record. in my `view : Model -&gt; Html Msg`, the compiler doesn't throw an error if I forget to name my argument `model`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

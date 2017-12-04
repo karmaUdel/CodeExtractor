@@ -1,49 +1,52 @@
+U153UK3FA : <@U26LR8F4H> do you want to re-render before scrolling to the top?
+U26LR8F4H : that would be a nice touch :slightly_smiling_face:
+U23SA861Y : mm, also a good question. It might make sense to bounce through an update
+U23SA861Y : and just have a `Pageupdate` message
+U23SA861Y : which then issues a scroll
+U26LR8F4H : thanks, i think  i have some fiddling todo.
+U153UK3FA : <@U26LR8F4H> if you want to re-render then you need to go through `update` which you can't do by chaining Tasks
+U26LR8F4H : So the first task issues an http request then the andThen will run before the update function is called?
+U23SA861Y : yes, when you chain with `andThen` the tasks are carried out in sequence behind the scene
+U23SA861Y : only dispatching a message when the chain is complete and returning early if any issues an error
+U26LR8F4H : hmm, in my update function the task doesn't seem to run ```            ( IndexLoaded (Ok index), _ ) -&gt;                ( { model | pageState = Loaded (Index index) }, Task.perform (\_ -&gt; Noop) scrollToTop )
 ```
-hello, can anyone give me a good tutorial on using ELM with REST? specially, fetching and posting contents, as well as authentication
-<@U2PTZFKFX> I did a tiny bit of googling and found this <https://github.com/andrewsuzuki/elm-todo-rest-api> did you see that already?
-<@U2PTZFKFX> it probably won't help you with authentication, but that's probably a separate issue and you can treat them individually.
-this is not fully descriptive
-<@U2PTZFKFX> well, do you know elm enough to build yourself a small app from the beginning, say the counter app example? if not, it's a good idea to learn how to do that first.
-<@U6EAT2Z37>  I have read the basic of it, and i want to integrate into a real application development,  a flask application i m building
-unrelated to current convo but thanks for that link, composed. one of the better documented github projects i've seen actually. very helpful for me.
-If you follow this through, it should hopefully give you enough insight into being able to understand what you need to know to proceed.
-ok
-<@U6EAT2Z37> thanks,
-yes, thanks again! This one looks really good too
-<@U6EAT2Z37>  do you have any idea bout http request and saving the json data?
-<@U2PTZFKFX> not sure what you mean by "save" :slightly_smiling_face: (or, actually, for that matter, what context you're talking about http requests in)
-i mean pulling the data and using it
-That's exactly what that last tutorial helps you with, doesn't it?
-i thought it's for json decoding only, let me read further,
-<@U6D3ERLA1> <@U6EAT2Z37> when working with `Array`, I find it feels like to make an `Array.update : Int -&gt; ( a -&gt; a ) -&gt; Array a -&gt; Array a` on top of `set` and `get`. Or use <http://package.elm-lang.org/packages/elm-community/array-extra/1.0.2/Array-Extra#update>
-Using an `indexedMap` feels like you don't really need an Array in the first place
-<@U3SJEDR96> sure. it makes me wish lenses existed, but oh well, not a beginner topic, apparently :slightly_smiling_face:
-<@U3SJEDR96> a much better solution, of course, because indexedMap is O(n) (ie it takes the size of the array to do its work)
-<@U3SJEDR96> I was more referring to the compositional style than anything else. Doing indexedMap is not good.
-this might sound like a dumb question, but does anyone know a boilerplate for an Elm app that uses an express server to serve the index.html?
-I was looking for something more integrated than having to run two commands (one to start the server, and another to start the elm-reactor/live/webpack/wtv)
-Huh? elm-reactor and elm-live also serve the static files. 
-And so does webpack, given it's configured to do so 
-hi everybody
-I'm looking for help with sort of a recursion problem
-I want to draw the edges of a polygon. So I wrote a function `polygonLines : List Point -&gt; List Line`
-where `Point` is of course `(FLoat, FLoat)` and `Line` is `(Point, Point)`
-so the easy part is  `x1 :: x2 :: xs -&gt; Line x1 x2 :: polygonLines (x2 :: xs)`
-but I can't figure out an elegant way to close the polygon, because the last point will not be connected to the first point. Does anyone have a good idea that doesn't involve just appending the first point to the end of the list of points in my polygon list of points?
-<@U6GFNSEPR> consider to convert your code to tail recursion and implement the zero condition accordingly to include the correct last point
-<@U6GFNSEPR> have a look at the polygon element in the svg package, you just need to provide list of point
-<https://github.com/sdia/Shapelm/blob/master/src/Geometry.elm#L20>
-<https://github.com/sdia/Shapelm/blob/master/src/Main.elm#L194>
-Has the community converged on some particular css library ? elm-css vs elm-style-elements vs something_else ..
-Is there a general name for `type alias Something a = { current : Maybe a, others : List a }`
-<@U6DQCTZT2> parameterized record type, I suppose. Depending on what part in particular you're trying to name.
-I generally call it a parameterized type
-<@U6EAT2Z37> I meant the pattern of using current and other, I know there's ziplists but they are prev, curr, remaining
-Oh. Sorry I'm not sure about that. I think that that (the thing you're referring to that has list then an element, then a list) is called a Zipper, not a ZipList, by the way. A ZipList is something else.
-Oddly, it leads to a stack overflow.  Where should I look to find the trouble?
-<@U6EAT2Z37> <https://www.youtube.com/watch?v=IcgmSRJHu_8&amp;t=894s> using Zip List here, but he might be wrong.
-I'm reducing a commutative function (application order doesn't matter). Should I use `foldl` or `foldr`?
-How do I insert a `&lt;br&gt;` tag in a text? Something like `text "one&lt;br&gt;two&gt;` does not work
-(Beginner myself) but I think maybe something like `Html.div [Html.text "one", <http://Html.br|Html.br>, Html.text "two"]` would work
-I don't see `br` defined, so maybe that should be modified to `Html.div [Html.text "one", Html.node "br" [] [], Html.text "two"]`
-Scratch that, I found it <http://package.elm-lang.org/packages/elm-lang/html/latest/Html#br>
+
+U26LR8F4H : it runs when the first update i called though, i shoved a console.log in the native module to check it :stuck_out_tongue:
+U23SA861Y : it should be issued for every IndexLoaded message
+U23SA861Y : as you have written it there any who
+U26LR8F4H : well, if I use a port then all is well.  I'm not sure if this is an elm bug or my bug.  I'm going to guess it's mine somehow :stuck_out_tongue:
+U23SA861Y : I have yet to encounter an elm bug, short of a known compiler error
+U26LR8F4H : hmmm strange ```scrollToTop : Task x ()scrollToTop =
+    let
+        _ =
+            Debug.log "scrollToTop" "called"
+    in
+        Dom.Scroll.toTop "body"
+            |&gt; Task.onError (\_ -&gt; Task.succeed ())
+```
+
+U26LR8F4H : that is getting called even after i removed the task from the update
+U23SA861Y : yeah it would get called on load
+U23SA861Y : elm is eager
+U23SA861Y : so it will be called when the let is evaluated and thats when the program loads
+U26LR8F4H : oh, interesting
+U23SA861Y : scrollToTop is  a value not  a function
+U23SA861Y : it gets constructed on program start
+U26LR8F4H : well, that is super helpful to know, thank you.
+U3SJEDR96 : This sounds remarkably close to what I did with elm-demystifyin-decoders :grin: excited to see what you come up with!
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

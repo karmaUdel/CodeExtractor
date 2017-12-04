@@ -1,4 +1,60 @@
+U17J54S2U : <@U0EUHKVGB> You’re on an answering spree :slightly_smiling_face: I once asked a question during a Q&amp;A stream with Luke. It was about hot reloading code. And you mentioned you had hooked up Elm to Firebase to sync the app model to Firebase so it would retain the state through refreshes. Do you have this available somewhere?
+U60SXAF96 : We build our iOS apps on old mac in the corner; otherwise, our development team is all adamantly Linux FOSS.
+U0EUHKVGB : <@U17J54S2U> I’ll see if I can find it when I get home
+U0EUHKVGB : But it was like 30 lines of code or something
+U3L8MM10T : Maybe.Extra.unwrap (<http://package.elm-lang.org/packages/elm-community/maybe-extra/4.0.0/Maybe-Extra#unwrap>) takes a default value.  Is there a way to lazily calc the default value? Most times it may not be needed altogether, and the default value may be expensive to derive.
+U0EUHKVGB : <@U3L8MM10T> You will have to write your own function which takes `() -&gt; b` as an arg
+U0EUHKVGB : <@U3L8MM10T> `() -&gt; b` is known as a thunk
+U3L8MM10T : I see.
+U0EUHKVGB : this is a function which will produce an value, but is unevaluated until you call it
+U3L8MM10T : cool
+U0EUHKVGB : so for example, 
 ```
-Are you able to display this tag in your AWS console?
-yes
-hmm
+unwrap : (() -&gt; b) -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+unwrap thunk fn maybe =
+  case maybe of 
+    Just thing -&gt; fn thing
+    Nothing -&gt; thunk ()
+```
+
+U0EUHKVGB : which you can now use like this:
+```
+unwrap (\() -&gt; someExpensiveDefault 5 6) fn maybeThing
+```
+
+U0EUHKVGB : Now `someExpensiveDefault 5 6` will only be evaluated when there is a `Nothing` called.
+U0EUHKVGB : Note, this may not solve your performance issues. You might better off doing:```
+ourDefault = someExpensiveDefault 5 6
+
+unwrap ourDefault fn MaybeThing
+```
+
+U0EUHKVGB : this way the expensive calculation is run only once, and on startup.
+U0EUHKVGB : If it is a static default, then this is probably your best bet for performance.
+U3L8MM10T : Thanks. This should be added to FAQ.
+U3SJEDR96 : It's not exactly frequently asked, tho :smile:
+U0J1M0F32 : IFAQ (`InFrequently Asked Questions`)
+U2SR9DL7Q : "thunk" is a great name for what this is and what it does.
+U2D0V2SAC : Hey everyone.Lets say i add a BIG MODULE (Say a List.Extra module) in my elm app.
+If, within my elm app i only import one or two functions of this module, will the build step cut the useless weight? Or will i carry over ALL the List.Extra module at runtime?
+
+This would be a deciding factor for us between importing helper libraries, versus only copying or implementing our own 2-3 functions that we use.
+
+Thanks!
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

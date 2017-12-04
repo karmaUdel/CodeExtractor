@@ -1,0 +1,118 @@
+U57KYFW67 : That's a possibility, but not a requirement! It's very common to throw a lambda in there `(\bool -&gt; .... { code that constructs a Msg })`
+U650CUWGM : Hi,I am supposed to make quite a simple web app which exposes some advanced charts (by highcharts.js <http://www.highcharts.com|www.highcharts.com>) and tables/spreadsheets (by ag-grid <http://www.ag-grid.com|www.ag-grid.com>).
+Since I have no experience of embedding such a visual components in Elm apps could somebody help me out and describe 
+1. the easiest way 
+2. the right way 
+of using that components in Elm SPA app context?
+
+For now I have the following ideas:
+
+1. wrap the js library in elm wrapper and write some "native" js code involving virtual dom and stuff like that like they do it here: <https://github.com/nmk/elm-highcharts-demo> or here <https://github.com/sgillis/elm-highcharts> (elm 0.16) and no examples for ag-grid.
+
+2. creating the js components next to the embedded Elm SPA and sending and receiving messages throungh ports like they do it here: <https://github.com/fbonetti/great_lakes_data/blob/master/app/assets/javascripts/readings.js> (elm 0.16). In this case it seems to be an issue of having an Elm SPA with its own navigation/routing and need for placing the component in the middle of some Elm pageView.
+
+3. Since it should be a web app with simple logic and extensive usage of native js libs, maybe write it not in Elm but in TypeScript.
+
+Any thoughts/ideas?
+
+U23SA861Y : Writing native code is probably not a good idea. If its an absolute requirement that you use those js dependencies then using elm with it is going to be a slog.
+U23SA861Y : umm it seems like regular old elm would handle the grid stuff fairly well
+U23SA861Y : there are some native elm modules for charting but they can be a bit feature poor.
+U650CUWGM : I'm afraid it would be too much to implement such features as column reordering, multiple column sorting and grouping just to reproduce the existing and supported library.
+U0CL0AS3V : I'd check out `elm-plot` for the charts and use ports otherwise
+U3LUC6SNS : <@U5WS7CJLV> The `f : a -&gt; a` pattern is very common when, for example, you repeatedly apply a function to something.  Imagine that `a` represents the current state of a physical system (real, or modeled by computer).  Imagine that `f a` is the state one tick later, where a tick might be a second or a hundredth of a second or  whatever.  Thus `f` is the tool by which you evolve the system forward in time.  Great for simulations.
+U23SA861Y : hamiltonian
+U3SJEDR96 : Nah, it's only for ports, iirc
+U61FZV5EK : What is the reasoning behind `case of` expressions being unable to handle constant functions? This works just fine:
+```case of 
+   1 -&gt; ...
+   2 -&gt; ...
+  otherwise _&gt; ...
+```
+but this does not.
+
+```constant1 = 1
+constant2 = 2
+
+case of
+   constant1 -&gt; ...
+   constant2 -&gt; ...
+   otherwise -&gt; ...
+```
+
+I get that it is hard for the compiler to reason about the possible return values of a function at compile time, but wouldn't it be better to just force the use of an otherwise case when functions are used to  pattern match?
+
+U153UK3FA : <@U61FZV5EK> the compiler would need some way to distinguish between ‘match this pattern and assign values to these variables’ and ‘match this pattern where part of the pattern is the value of these variables’
+U3SJEDR96 : a pattern in a `case of` asks the question "can this value be described with this pattern". In the case of a variable, that is always "yes". Making a difference there between a "constant" function and an unknown variable would either mean special syntax for "assign to this variable", or "if you rename some function, your case suddenly behaves differently"
+U4872964V : Also, the compiler wants to statically analyze the case options to see if any is missing etc. That's hard to do if variable case constants are allowed.
+U61FZV5EK : But I don't get why it is a concern for the compiler. When it sees the numbers it says "cool, an int can match to these". When it sees the function it could just go "cool, this returns some int too". In both cases it can't know if the cases are exhaustive, so an otherwise is needed.
+U3SJEDR96 : also true; you'd have an arbitrary cut-off of what the compiler can and cannot check
+U3SJEDR96 : what if you make a function `otherwise : Int`?
+U61FZV5EK : Hm, what then?
+U3SJEDR96 : that would have to (magically) behave differently
+U3SJEDR96 : or what if `constant1 == constant2`? It can't warn you about it, as it would now. What if you remove `constant1` as a function? Now it's just a free variable, and you'd always end up in that branch
+U61FZV5EK : Nothing would break, but I see your point. It is a tradeoff
+U3SJEDR96 : the behaviour is fairly non-obvious, for all but the most straightforward cases
+U61FZV5EK : Some syntax to declare functions to be constants would be nice then :grin:
+U3SJEDR96 : besides, we do have `if..then..else` for a reason
+U4872964V : Well you could have special syntax, like @constant but I'd rather have pattern guards then
+U61FZV5EK : <@U3SJEDR96> Yeah sure, butI feel like if you have 10 cases the `case of` syntax is cleaner
+U4872964V : I've never had that many cases though. I think it says something about how you model complex data types.
+U3SJEDR96 : if I have 10 constants that express something, I tend to make them a union-type, rather than variables ¯\_(?)_/¯
+U4872964V : Yes exactly
+U61FZV5EK : I should probably do that, but I'm just using them once
+U3SJEDR96 : then why are they in variables?
+U4872964V : Using them twice, once when created and once when matched?
+U61FZV5EK : It's pretty complex business logic. Lots of different cases that needs to be handled differently. In the other parts of the system the numbers are used to identify the different cases. So I get it as numbers, and pass it along as numbers.
+U4872964V : Even more reason to convert to a union type in the decoder
+U61FZV5EK : But I agree its probably better to just represent them as union types anyway.
+U61FZV5EK : ye
+U61FZV5EK : well. Ty for input
+U4872964V : Clear up the logic using better types
+U3SJEDR96 : I think this was a pretty interesting discussion, tbh, didn't figure we'd go from "what's the rationale" to "union types ftw" :smile:
+U4872964V : You never know with these things :)
+U3SJEDR96 : True, it's nice to be surprised, tho :elm:
+U650CUWGM : <@U0CL0AS3V> ok, in case of using ports how is it possible to embed native js UI component in the middle of my pageview?
+U153UK3FA : <@U650CUWGM> The JS called via the port can find a DOM node that was created by Elm and attach arbitrary child nodes and event handlers to it.
+U153UK3FA : It’s not pretty but you trade that against the cost of reimplementing it in Elm
+U4872964V : The following method works pretty well to embed js ui components in Elm, without ports. <https://ellie-app.com/qyNKkTsrNRa1/2>
+U4872964V : basically you set up a `MutationObserver` to catch the DOM node being created and then send back info to Elm through custom events
+U153UK3FA : <https://github.com/terezka/elm-jquery-datepicker> gives an example of using ports to attach a jquery datepicker
+U4872964V : yes, that’s another option, problem is if your node is rerendered etc
+U4872964V : with the MutationObserver, it works almost like any other Html element
+U37HUSJ4R : I am using the `RemoteData` package:
+```
+type alias Model =
+    { data : WebData Data}
+
+type alias Data = { foo: List Baz }
+
+```
+
+I am trying to update a field in the `foo` property
+
+U37HUSJ4R : so I am passing the index in the list when I want to update
+U37HUSJ4R : do I need to use `RemoteData.map` and then also `List.indexedMap`to update a record?
+U37HUSJ4R : or is there a 'better' way?
+U153UK3FA : <@U37HUSJ4R> yep, that’s how you’ll need to do it.
+U37HUSJ4R : `RemoteData.map (List.indexedMap f) model.data`?
+U37HUSJ4R : I see the package has `update`
+U37HUSJ4R : <http://package.elm-lang.org/packages/krisajenkins/remotedata/4.3.0/RemoteData#update>
+U37HUSJ4R : <@U0FBZ4J5V> do you have an example of how to use this? I assume this is meant for updating a record?
+U153UK3FA : Sure
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

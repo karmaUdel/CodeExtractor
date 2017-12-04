@@ -1,241 +1,167 @@
-but i think ```/tomato fixing the login page``` would work
-<@U0LN607T5>: old school. Diggin the name.
-<@U0K72V3E2>: Thanks :simple_smile:
-I think I will stay a while...
-and listen.
-Well in that case, hello my friend :simple_smile:
-Nice to meet you!
-You as well! Unlike (one of) my namesake(s), I will try to not talk people's ears off.
-lol. no worries. this group is quite understanding and responsive.
-That's good to hear :simple_smile: I'm not very good at this stuff, I think I'll like it here.
-You are in the right place! Im not particularly good stuff either.
-Let us know if you need any resources.
-*Cain
-Just Sayin
-Much appreciated, I will!
-<@U0K7Y2SK0>: You are correct! The reason I chose Kane instead was in reference to the character John Hurt plays in Alien.
-(Diablo and Alien are not particularly related, I just love both :simple_smile: )
-haha I love it
-Well as long as it's intentional, then I'm OK with it. :stuck_out_tongue:
-Even better.
-Keep in mind…. they mostly come at night… mostly.
-<@U0K7Y2SK0>: is that a cthulhu icon you have there?
-Yes. Yes I think we're all nerds here.
-:stuck_out_tongue:
-takes one to know one!
-(It's Cthulhu as the Hydra logo)
-(Because I mix up my nerd too)
-<@U0F9T9KPH>: re: group standups, we found the same the same thing with Tatsu although there are a few customers who want private. We have an idea we are working on that will help solve both
-Some people want faster meetings (private DM) and some want the “social pressure"
-Very cool. I can't wait to see what you guys do!
-For us it was very much about scratching our own itch. We like the benefit of having our group get together every morning.
-What's the best practice to use Slack user ids as keys? Are they globally unique or scoped per team? Should we always pair them with the Slack team id they're coming from?
-<https://dev4slack.slack.com/archives/general/p1453404384002630>
-awesome, that's what I thought, thanks for digging that up <@U07060PG9> :tophat:
-Hey guys, just wondering if it would be possible for a bot to say the name of a channel? Using Slack Client, I was able to create a bot to say the name of a person (ex: hello &lt;username&gt;!). So is it possible for this to happen (ex: hello &lt;username&gt;! you are now talking in the &lt;channel name&gt;.)
-Hey guys, Ive been trying to send a post request to upload a file using a stream but dont really know whats going on.  It says "no file data" even when the file exists and data is in it?  Can anyone take a look or know how to solve it?  Thanks
-<@U0L4DR2V7> check this out <https://api.slack.com/methods/channels.info>
-you should be able to get lots of information using the web api
-<@U0LPETY3F>: hmm Ive been through that.  I think my problem lies more in the actual uploading of the multi part form data for the files.upload API call
-<@U0KJL73T3> mine was directed to the guy asking about the channel name. i haven't done the upload yet
-<@U0LPETY3F>: gotcha haha my bad.
-<@U0L4DR2V7>: you just need to do `hello &lt;@USERID&gt;! you are now talking in the &lt;#CHANNELID&gt;`
-What are the most interesting Slackbots you've seen thus far?
-I tend to enjoy the silly more than the practical. There was a really cool one that set up poker games in private channels and issued hands via DM that I really liked.
-Could barely read it though, I don't JSX
-<https://github.com/CharlieHess/slack-poker-bot>
-This one's pretty fun as well: <https://botwiki.org/bots/slackbots/MeMoji/>
-Good morning. I am with Drift <http://www.drift.com/> and recently began integrating our product with Slack. Does anyone have a good pointer/document on hook endpoint/access_token management for providers like us? For example, we're getting a 404 on a previously working endpoint but it doesn't look like the app access was removed.
-When you say endpoint, you mean webhook I guess? If you app is webhook only, there is no other way to my knowledge 
-Than pinging and getting a 404
-Can you double check if the integration has not been removed? 
-just had an idea.
-:bulb:
-wondering about using either AWS Lambda or the new Google Cloud functions for slack webhooks …
-serverless bot
-<http://www.forbes.com/sites/janakirammsv/2016/02/09/google-brings-serverless-computing-to-its-cloud-platform/#12a0778525b8>
-i've done a little work with AWS API Gateway and Lambda but not for slack
-:+1: 
-That's a cool idea 
-I've never used it. How easy is it? 
-it's not bad at all
-i write the lambda functions in Go
-so you have to cross-compile them and wrap it in a little JS
-the whole idea of not having to deploy a server is just amazing
-Yes 
-You'd still need a page to serve the add to slack button though 
-does your cross compiler bundle all deps?
-Unless slack moves forward with direct install from the directory 
-well, Go produces statically compiled binaries
-you could stick the add to slack button on an html page in S3 and use cloudfront though maybe
-i thot google cloud only supported JS?
-i dunno
-<@U0GPSB7V1>: some people are doing bots with lambda already :simple_smile:
-awesome sauce
-and amazon actually bought the `.bot` TLD
-<http://nic.bot>
-i'm really curious about these new google cloud functions and their pub/sub connections
-<https://cloudnative.io/blog/2015/05/lambda-chat/>
-<https://github.com/garnaat/kappa>
-Jeremy gave a talk about that at the <#C0LDY2E2X> last night
-<@U0HH00DS7>: the integration hadn't been removed
-Good morning everyone! Anyone knows if there's an actual max length on channel names? Doc says 21 characters for user created channels, but in practice MPDMs have just blown up our DB column :)
-<@U0K176R8A>: MPDMs are special beast
-they certainly are
-they don't have an actual name, but the name is based on the nicks of the connected users, so it doesn't follow the name limits
-Still, Slack APIs (e.g.incoming webhooks) return us with one and it blows up. Any higher known internal limit somewhere? <@U0D7LHNTX>
-<@U0K176R8A>: sounds like it, but that's your app
-you might have setup the “channel name” (however you called it) column with a 21 character limit
-Of course I have, according to the doc. Now I'm merely asking if there's any known value I should bump it up to or whether we should start detecting when our users pick MPIM channels and have special logic to handle them.
-<@U0K176R8A>: what DB are you using?
-He's asking if _Slack_ has an upper bound we can count on, since the documented 21 char limit doesn't apply to MPDMs
-<@U0L15UHQV>: I know, but if they are using postgress they can just set the column to TEXT which has variable unlimited lenght
-As far as I know—there is no upper bound.
-and in postgres there's no performance hit in using TEXT vs VARCHAR
-and whatever the current limit is, it might change in the future
-You should anticipate that those names will blow up, unfortunately.
-in general, I would expect changes like names getting longer, user IDs not being unique across teams, receiving undocumented events via the RTM API (already happens), receiving undocumented fields within RTM events (this happens too), etc.
-<@U0CS6NSF5>: user IDs are different from team to team ?
-Late reply but thanks for the responses <@U0CS6NSF5> and <@U0LPETY3F>.
-<@U0JPS3SHX>: right now IDs are unique across teams, but it's recommended to always store users based on their user and team ID
-good to know, thanks <@U0CS6NSF5>
-people Analytics over slack <http://youtu.be/RRLcMhDEW4k>
-<@U0LPCSXA5> ^ ?
-<@U07HXFWUD>: it's not Slack, they have just copied the UI
-doh!
-I've seen several people copying the sidebar style to make it look like Slack already
-at 1:14 you can see their Slack command and the graphs they post to Slack are just an image
-Also in "Borrows heavily from Slack UI": <https://discordapp.com/>
-(Example extracted from site:) <https://discordapp.com/assets/7a8f095edaae359508629bd44abe1b70.png>
-<https://blog.discordapp.com/the-robot-revolution-has-unofficially-begun/>
-Fair enough, yeah
-<@U07HXFWUD>: it's exactly that. Thanks, <@U0CS6NSF5> (sorry my delay)
-well, looks nice. looks like you guys really know pentaho…
-i'd be keen to apply it on a channel here and see the results. be fun to compare “sentiment analysis” to see who's the most grumpy (or not)
-Sure! We're changing some stuffs, but as soon as it's available, I'll do the analysis here! :wink:
-not sure how scatterdot works, I think you click on the image outside of slack
-<https://scatterdot.com/add_to_slack>
-and it brings a snapshot into the conversation
-Hi folks, we at <http://Clubble.io|Clubble.io> / <http://MailClark.ai|MailClark.ai> have just released Bot2Hook <https://github.com/Mailclark/bot2hook>
-You can join <#C0LVB65JS> to discuss the project with us. We hope you'll find Bot2Hook useful :grin:
-Cool. :simple_smile:
-Hey folks, if you love bots as much as we do, you should come and work for Howdy. We are now officially hiring.
-<http://howdy.ai/jobs/>
-Hi! Where can I post a few words about a new bot I've coded? I'm looking for some people to get feedback :simple_smile:
-Hi folks, I just added holly ,it a fun project I am working on. lookup the <#C0LVDEBEH>  channel and check out Holly. You can see how to interact from the history of conversation, Its very simplistic and may not work as expected. But do try it out. you need to use #holly to get it to respond
-would love  to get some feedback
-this is not meant to be a business, I am  just having fun
-sounds cool!
-It's a small side project, but any feedback is welcome :simple_smile:
-cool will chk it out <@U0J6HQJQL>
-<https://github.com/IzumiSy/chat-frontend>
-awesome <@U0LKJFBJT> ! how was your experience using vue.js? I've wanted to test it in a project, still not able to
-Only a couple of months. I actually think if you can use Angular, it would be better. Vue.js itself is not bad, but it takes time to use that well. I recommend you to use some flux plugins like Vuex
-I really felt how great service module in Angular is. It makes code structure really clear. Too heavy though.
-hi all, been checking out <https://github.com/howdyai/botkit> and trying to wrap my head around it
-the way I understand it, you can controll multiple bot instances from the same process
-<@U0M0UPJ3W>: yup.  you should join <#C0AV5N8NA> to discuss
-ah, sorry, only saw 4 channles, missed the (114) :stuck_out_tongue:
-no worries :simple_smile:
-Or is that possible? (A general question for everyone.)
-I didn't find any way to reach other existing integration, nor to know if there are any other install (via the api)
-What open source alternatives are there to <http://wit.ai|wit.ai> ?
-I know I know... I can totally trust Facebook, why not just use it. They have always done the right thing with security and privacy and never shut down a service lots of people are using :stuck_out_tongue:
-<@U0AQ8GPGR>: I have reached out to Slack for this very thing (sharing integrations)
-I just installed a bot on a slack instance, and the bot wasn't auto-added to any channels.  Previously, I've always seen a bot join <#C04SM6TAK> when installed.  Is this a bug or a new change?
-<@U0C2RGP4P>: Bots no longer auto-join channels
-The common practice is to DM the user and ask them to invite the bot user to the channel
-<@U0AFABJAJ>: It would make sense for Slack to implement this. I mean, it's not just that it would make developers' lives easier, but also for user security.
-<@U0CSRV1TR>: have you checked out <http://converse.ai|converse.ai>?  not open source, but also not facebook :simple_smile:
-<@U0J283T6E>: I have not but I will now, thank you. Still, an open source and easily deployable <http://wit.ai|wit.ai> would be really nice to have. I have to think Python's NLP packages would take a lot of the heavy lifting out of building it. Anyone had experience with them?
-It's a different problem.  You don't want the parts of grammar you want to pull out the intentions from the text.  You could build your own but it's harder than it looks.
-<@U0CSRV1TR>: I have experience with NLP and sentiment analysis.
-It's not as good as you'd like it to be.  :simple_smile:
-^^ spoiler alert
-awwwww
-Mostly, it doesn't really handle sarcasm.  And it turns out that's really, really common in speech.
-It's pretty straightforward to do some trials with say, corenlp and nltk.
-Hi all - having some trouble figuring out how to create private channels and invite specific users to those channels with a bot
-Creates a channel.
-Opens a private channel.
-^ neither of these do the trick
-Basically I need this, but for private channels:
-Opens a direct message channel.
-Hey guys, anyone know how to attach a formatted message to a convo.say() function?
-What're you trying to do specifically?
-<@U0KJL73T3>: you can default to bot.api.chat.postMessage
-Although bot.say() and convo.say() are supposed to be able to handle message objects
-<@U0CSRV1TR>: the creator of <http://converse.ai|converse.ai> is in the channel here <@U0CNYC404>
-depending how much you want to build yourself
-<@U0KJL73T3>: just tested it : I confirm you can use convo.say(formatted_message) as easily as convo.say(« text »)
-<@U04SJBP5Q>: hi
-You don't say!
-you can't leave <#C04SM6TAK> !
-<@U04SJBP5Q>: just wondering, are you the most useful bot or waht
-Instead of spending time talking to a robot, why don't you go design something awesome?
-lol
-thanks for the mention <@U07HXFWUD>
-Can anyone point me in the right direction re: creating private channels via bots? Can't figure out which call to use
-<@U0GMT7VA8>: You can't create private channels with the bot. You can use direct message channels (existing for each user of the team) with `im.open` (to retrieve the channel ID) followed by `chat.postMessage`
-Odd - I've used multiple bots that seem to create private channels
-well, it depends actually, if it's an app or a « private bot »
-see this list
-<https://api.slack.com/bot-users#bot-methods>
-custom bot can call groups.open
-app bots are more restricted
-hrm
-if you want to do that with your app, you'll need to ask for permission
-Github created a new channel as soon as it was added (#github)
-public channel
-you asked for private
-ah
-so bots can create public channels, just not private channels
-well, actually, not by default, no
-the scope channel:write is required
-in the slack button link
-with this additional right, you can use the access token to create a new channel
-ah
-but channel:write is for public channels, correct?
-yes
-check this page
-<https://api.slack.com/docs/oauth-scopes>
-channel = public • group = private • im = direct message
-got it
-and there isn't a groups permission
-well there's this: groups.create
-couldn't I include the groups:write permission which includes groups.create? and that would presumably allow me to create private channels?
-A bot and a user will have different token. You can choose which scope to include for user tokens, but bots permissions are what's listed in the API.
-Hey guys, is it normal that this doesn't display as a formatted URL? &lt;http://google.com|google&gt;
-<@U0KJ5A91V>: I've read that that's not possible
-don't knot why
-it if is still on the official documentation
-<@U0BGYH6G0>: so no formatted URLs?
-no from scripting
-It works if you use the API. But it doesn't work when you post from Slack.
-<@U0GT29N3A>: ok thanks I'll have a shot at that then :wink:
-WOW. do you have issue with RTM right now?
-&gt;&gt;&gt; failed to read response string","stack":[["read_timeout","read of 1 bytes timed out"],["missing_len","failed to read length for string"]
-randomly
-Sweet. Thanks <@U07HXFWUD>
-I can't seem to get &lt;http://url|text&gt; to work as the text of an attachment... I feel like I am missing something
-Yeah… I'm currently struggling with markup
-basis _italics_ or *bold*
-in the text of an attachement, it doesn't show - I guess it's the same issue as yours
-&gt;This is the main text in a message attachment, and can contain standard message markup
-ping <@U0D7LHNTX> ?
-there was a helper app/widget for previewing slack markup i think - did you try that?
-yeah
-it doesn't process markup either
-it's just that docs say the opposite
-so much junk is pinned to this board it's hard to find useful links…
-<http://davestevens.github.io/slack-message-builder/>
-fav it
-Hi!
-DM?
-I can fix your problems.
-:smile:
-I am the Message Formatting King :stuck_out_tongue:
-it's just this - can attachement text be formatted ? Docs says no for title, yes for text. Reality seems to say no, all the time
-damn reality
-<https://www.youtube.com/watch?v=T8mtiFg9mG8>
-The answer is: No for title, yes for text IF YOU SET `mrkdwn_in` to be `[“text”]`
+U5ZAJ15P0 : <@U051SS2EU> sorry, I think I am missing something. Can you give me a code example of what you mean?
+U051SS2EU : hmm
+U5ZAJ15P0 : Just a quick snippet here on Slack
+U051SS2EU : OK - I was just looking at this right now, sorry about the distracting details, but the big picture structure should be illustrative of what I am saying ```(defrecord Transmitter [transmit from user-data creator to journey routing]  IFn
+  (call [this] (.invoke this [nil this]))
+  (run [this] (.invoke this [nil this]))
+  (applyTo [this coll] (.invoke this (first coll)))
+  (invoke [this [routing-override message]]
+    (let [updated (into this message)
+          routing (or routing-override routing (first journey))]
+      (.invoke this routing updated)))
+  (invoke [_ routing-override message]
+    (let [{:keys [transmit generic]} message
+          message (dissoc message :transmit :generic :routing :from :to)
+          {:keys [journey routing message]}
+          (if generic
+            {:journey [routing-override]
+             :routing :generic/reply
+             :message (assoc message :generic-raw [routing-override message])}
+            {:journey (rest journey)
+             :routing routing-override
+             :message message})
+          {:keys [request-id birth-time]} user-data
+          final-message (assoc message :journey journey :mediary to)]
+      (when-let [schema-error (check-schema from routing final-message)]
+        (log/error ::Transmitter
+                   "for routing"
+                   (pr-str routing)
+                   (pr-str {:journey journey})
+                   (pr-str schema-error)))
+      (log/trace ::simple-kafka-transmit routing "to" request-id "from"
+                 birth-time "-" (pull-transmit-info message))
+      (transmit from routing final-message))))```
+
+U051SS2EU : the transmitter has all this incidental data - who is sending? who is the target? what data did the initiator of the request expect to get back with any responses? what is the path the overall task should take through the system?
+U5ZAJ15P0 : But that's basically the approach I was suggesting with a "DatomicWriter" protocol, no?
+U051SS2EU : v1 wrapped this in calls to partial
+U5ZAJ15P0 : that "wraps' transact
+U051SS2EU : the difference is that this returns an object that acts like a function
+U051SS2EU : maybe I misunderstaood what `@(d/transact ...)` is in the transact-wrapper function
+U5ZAJ15P0 : right, but so instead of doing something like```
+(transact transmitter conn tx-data)
+```
+you would do
+```
+(transmitter conn tx-data)
+```
+
+U051SS2EU : right
+U5ZAJ15P0 : <@U051SS2EU> (d/transact returns a promise I think, and @ dereferences it
+U051SS2EU : and if you look at transmitter it shows you all the data it has inside
+U051SS2EU : it acts like a hash-map
+U051SS2EU : that's the key thing to me
+U5ZAJ15P0 : <http://docs.datomic.com/clojure/#datomic.api/transact>
+U051SS2EU : OK
+U5ZAJ15P0 : Ok I see
+U0509NKGK : what was the question :slightly_smiling_face:
+U5ZAJ15P0 : <@U0509NKGK> Hi! 76 messages to read :smile:
+U5ZAJ15P0 : just kidding, let me clarify the question:
+U0509NKGK : lol
+U5ZAJ15P0 : I want to add some attributes to every transaction in my sytem (e.g. for audit purposes; things like the current user ID) and I am wondering how I should do it
+U051SS2EU : your question suddenly sounds very focused and pragmatic
+U5ZAJ15P0 : e.g. should I wrap all access to Datomic behind a protocol that proxies most calls but does some stuff to transact's tx-data before proxying
+U5ZAJ15P0 : should I have an explicit function wrapping d/transact
+U5ZAJ15P0 : etc
+U5ZAJ15P0 : <@U051SS2EU>  sorry :smile:
+U5ZAJ15P0 : I guess that's what talking about something for 80 messages does
+U5ZAJ15P0 : it clarifies things
+U0509NKGK : we use an explicit function wrapping d/transact and d/transact-async
+U5ZAJ15P0 : <@U0509NKGK> do you pass the auth context to all your "business functions" and then pass it explicitly to your function wrapping d/transact every time you call it?
+U0509NKGK : no; we use middleware and `binding` with a dynamic var
+U0509NKGK : and if the var has a value, we annotate
+U5ZAJ15P0 : I was told using dynamic vars will send me straight to hell
+U0509NKGK : we have repl helpers that do the binding so that we also use it when manually altering the db at the repl
+U5ZAJ15P0 : do you somehow ensure that no intern misadvertantly uses d/transact instead of your wrapper?
+U0509NKGK : no. but in 5 years, it's not been a problem. we had ONE case where someone retracted more than they should have. it was easy to fix
+U0509NKGK : i do live i fear of an accidental d/delete-database though
+U5ZAJ15P0 : Ok, thanks a lot. One other thing: how do you handle security? Specifically, do you use d/filter?
+U0509NKGK : we can't use d/filter ; we have too much sharing going on
+U5ZAJ15P0 : yeah, it's a bit odd there is no way to prevent /delete-database tbh
+U5ZAJ15P0 : I guess with backups every 24 hours it eases the fear
+U0509NKGK : d/filter is nice if you have very strict boxes. we don't.
+U0509NKGK : hah. try continuously
+U5ZAJ15P0 : although I wonder what would happen if the db got deleted, re-created, then a backup was run
+U5ZAJ15P0 : would it get rid of the incremental backup?
+U5ZAJ15P0 : how do you do access control them? do you have a nice approach?
+U0509NKGK : we replicate our backups to off-AWS places, so we have some protection against that
+U0509NKGK : access control what, the backups, or the repl access?
+U5ZAJ15P0 : data access control
+U5ZAJ15P0 : e.g. which users can see what
+U5ZAJ15P0 : enforcing it
+U0509NKGK : oh, that's basically normal queries in middleware
+U5ZAJ15P0 : <@U0509NKGK> middleware as in you filter the query after executing it?
+U0509NKGK : no, simpler than that - we explicitly use the viewing user in queries
+U5ZAJ15P0 : oh right.
+U5ZAJ15P0 : what about the entity API?
+U0509NKGK : very often we use datalog to find valid entities, map d/entity, and go from there
+U0509NKGK : sometimes we d/entity on a lookup ref, query to validate access, and continue
+U5ZAJ15P0 : right, what I mean is that d/entity will let you traverse the data tree without access control
+U5ZAJ15P0 : but I assume so long as you control what is traversed, it's fine
+U5ZAJ15P0 : I am using GraphQL on my app and d/entity could cause issues if I tried to use it directly
+U5ZAJ15P0 : and let the graphql query resolvers hit it directly
+U5ZAJ15P0 : as it could potentially go any level deep in the data tree, reaching data that should not be accessible to the current user
+U5ZAJ15P0 : if that makes any sense
+U0509NKGK : oh right, yes. we totally control the query. we don't allow arbitrary query from clientside
+U0509NKGK : in that case, d/filter is a far safer approach
+U5ZAJ15P0 : <@U0509NKGK> ok, thanks. Sorry, my questions are not very clear today
+U0509NKGK : it's ok :slightly_smiling_face: hth
+U0564EGNY : So this is fun: when using postwalk, map entries are just vectors (so map-entry? returns false), so there is no way to distinguish a map entry from a map value that is a vector… Anyone else run into this?
+U0564EGNY : I suppose a map key could also be a vector, which adds a 3rd case of ambiguity
+U04V70XH6 : <@U0564EGNY> It's a known issue in JIRA...
+U0564EGNY : <@U04V70XH6> say no more, and thank you
+U04V70XH6 : <https://dev.clojure.org/jira/browse/CLJ-2031>
+U04V70XH6 : (go vote for it!)
+U0564EGNY : ah, prewalk works for my use case
+U0564EGNY : (and I voted)
+U051SS2EU : if I am implementing something that is meant to be used in place of a function, is it enough to implement IFn or should I implement AFn too?
+U0NCTKEV8 : it sort of depends on how you are implementing it, AFn is an abstract class so dealing with it from clojure is kind of a pain, but from java that is where I would start
+U051SS2EU : OK - this is clojure code, so I hope I'm safe ignoring AFn
+U0NCTKEV8 : AFn provides defaults for a lot of things like the applyTo machinery and such
+U0NCTKEV8 : I often will implement IFn and just particular invoke arity that I expect to be used
+U0NCTKEV8 : but such an object will not always behave like a function
+U0NCTKEV8 : I think apply won't work, and you will get some weird brokeness with more than 20 args, and maybe fn? will return false
+U051SS2EU : yeah - this is a macro implementing generally something you recommended earlier (making a record that can be called like a function but unlike a lexical closure you can also look at the data in its keys) - trying to make it a convenient to use replacement for code that uses partials extensively
+U051SS2EU : I just verified I implemented things properly to make apply work for over 20 args
+U051SS2EU : but returning false for fn? is acceptable
+U0NCTKEV8 : I think you can fix that too, if I recall fn? checks some marker interface
+U051SS2EU : instance? clojure.lang.Fn
+U051SS2EU : easy enough to extend that, it has no methods
+U051SS2EU : sweet!
+U0NCTKEV8 : yep
+U051SS2EU : thanks - I think this will be a handy little one macro lib, just need a snappy marketable name
+U07TDTQNL : <@U051SS2EU> big note: you probably want ifn? if you want to check if something is a function. fn? does something different (and is normally wrong, imo).
+U051SS2EU : <@U07TDTQNL> so if I am making something that is a drop in replacement for a function returned from partial, would it be a bad idea to make fn? return true from someone else's check?
+U051SS2EU : I guess that's a style issue
+U07TDTQNL : nah, just code against IFn, and then `ifn?` will return true, which is what most people should be using
+U051SS2EU : :thumbsup:
+U2J4FRT2T : will be possible with spec :wink:
+U051SS2EU : <@U07TDTQNL> on thing though, in my code, checking ifn? would lead to surprising results here ```=&gt; (ifn? :hi)true```
+
+U051SS2EU : that could be a sign of doing other things wrong I guess…
+U050ECB92 : that doesn't surprise me, a keyword is a function
+U07TDTQNL : (What <@U050ECB92> said)
+U050ECB92 : I suppose the `fn?` stole the good name early, but had the wrong semantics
+U07TDTQNL : yeah fn? really means "something that was created with `(fn ...)`"
+U0NCTKEV8 : fn? was added when trampoline was added
+U0NCTKEV8 : continue-trampolining?
+U051SS2EU : yeah, I guess the answer of `(defmulti foo first)` `(fn? foo)` can be a guide there
+U050ECB92 : -----------------------------------------------Sooooooooo who here has played with `tools.deps.alpha` and what do they think?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

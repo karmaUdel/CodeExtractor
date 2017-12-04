@@ -1,171 +1,146 @@
+U2LAL86AY : i simplified a bit:```
+type alias WithUserFields a =
+    { a | name : String }
+
+
+type alias UserFields =
+    WithUserFields {}
+
+
+userFieldsFrom : String -&gt; UserFields
+userFieldsFrom string =
+    WithUserFields string
+
 ```
-Any preference? I feel this will matter only if/when we decide to make the `Base-Regexp` type "public" (for now it seems to be used internally only).
-<@U3ZACTKTP> sorry for the delay -- I'm not super familiar with typing regexps... my gut is to favor the more general Regexp, but like I said I don't have much experience working with those in practice
-<@U3PUZ2Z5K> Okay, thanks! I'll put Regexp then (I think if we expose Basic-Regexp at some point, the user could always force it with (ann #rx"abc" Basic-Regexp).
-I don't have time to look into this right now, but it could be at some point a compromise between setting up a full-blown chat server (which some of the regulars rightfully expressed concerns about, since it increases the maintenance burden for the Racket team), and having a free-to-use-but-without-logs service like Slack.
-isn't this slack archived in that one public logging service for slack (forget the name)?
-<https://racket.slackarchive.io/>
-I don't know if the logs are exportable
-<@U4L6H669J> Hm. I thought the slackarchive log was also limited, but it seems it goes back further in time (the earliest message I can get in <#C06V96CKX|general> is from march 14th, but slackarchive goes back to November 15th). That's cool :slightly_smiling_face:
-anyone know how to center a `tabular` in a pdf?
-(well, renewing the `bigtabular` environment to `tabular` for the main document --- then back to `pltstabular` for the bibliography --- works as a LaTeX-level fix)
-<@U0A96R8F2> <@U0G0JDQGZ>  I just tried to make a new package and am getting "Save failed."
-<@U3QF0EM0E> Have a look at `tex-addition`. You can use that to inject LaTeX code and renew the environment "by hand", I suppose.
-<@U3QF0EM0E> If I remember correctly, using `@tabular[#:style 'block]` has the same effect as switching to `tabular` at the Latex level, so `@centered` plus `@tabular[#:style 'block]` should work
-I think the problem was my tag `syntax/parse`
-I've tried removing `racket/build/` and `racket/racket/src/build/` and re-running `make base`, and I've tried running `raco setup --clean` and rebuilding everything with `raco setup`, but the problem is still there, and I'm not sure what's causing it or how to fix it.
-I can't seem to trigger the error at all in the REPL. Switching off debugging in the DrRacket Language menu also makes the issue go away, so it has _something_ to do with errortrace, but I don't know what.
-Maybe DrRacket's .zos don't get cleaned out by `raco setup --clean`?
-Yeah, it seems like that may have been the problem. I ran `find racket/collects -type d -name errortrace -exec rm -rf {} \;` and that seemed to fix the issue. I still wonder what caused it, though…
-Hey folks! Our startup <http://Standuply.com|Standuply.com> has partnered with two awesome events for AI, ML and chatbot enthusiasts. One is called Chatbot Summit and will be held in BERLIN on 26th of June. Now can offer you 30% discount. Visit their website at <http://bit.ly/chatbotsummit|bit.ly/chatbotsummit> and use the promo code STANDUPLYBOTS in order to get it.
-The other one is AL ML World 2017 - in LONDON on 13-15 of June, we offer you 20% discount. Same thing - visit their vebsite at <http://bit.ly/aimlworld2017|bit.ly/aimlworld2017> and use promocode STANDUPLY
-Hope this information will be helpful for those who might need it :wink:
-<@U3NJS8H7C> <@U0702F2CE> <@U3NP867S6> <@U3NGSC6AF> or someone else with admin privileges, gleb seems like a spam bot.  (If you are a real person I apologize.)
-<@U08JL5H89> I don't think we need to do anything unless someone spams multiple times
-<@U0702F2CE> okay
-I don't think I have any admin privileges. 
-<@U3NGSC6AF> Oops, sorry.
-Ya, I don't know who manages this slack instance, only the #racket irc channel.
-<@U08JL5H89> I think I'm the person to talk to, or <@U06V8QARY>
-Alright, good to know for future reference, thanks.
-does raco test support just running a single test within a module?
-jamesswaine: It doesn't know anything about the tests in the module. It just runs the test submodule. It might be possible to use the same code that counts the number of tests to quit after a certain number of them
-ah okay, bummer, i sort of figured
-yeah i was looking for something like what rspec gives you (ruby testing framework), where you can run a specific test in a suite by giving either a name or source line number on the command line
-<@U3QFE5KGX> that would be super useful, I agree. Right now the pipe of information isn't very rich, but there is one, so it could probably be extended.  This is the current library: <https://github.com/racket/rackunit/blob/master/testing-util-lib/rackunit/log.rkt>
-I imagine that someone could add something to say "I am interested only in tests with this name” or "on this line in this file” and then rackunit could look there and `raco test` could initialize it.
-(not that that'd be high on your priority list, of course :wink: )
-haha, well, i've been wanting that forever so
-<@U3ZACTKTP> The highlighting change you proposed is super neat and makes me wonder if you could combine `scribble/lp` with cover usefully
-<@U3QFE5KGX> I've found various command line forms like that very useful in python, so consider this another vote :wink:
-raco setup take forever…. and mostly on scribbling docs it seems like? has anyone looked at where the bottlenecks are in that process?
-&gt;1GB of RAM for raco setup also seems a bit surprising.
-<@U0L0F9F2Q> a lot of it is typed racket + plot
-see <http://build-plot.racket-lang.org|build-plot.racket-lang.org> for details
-<@U0702F2CE> what specific part of typed racket causes the speed issues? Is it some weird artifact of how typed racket is implemented or is the type checking process itself just that expensive?
-we believe that the type checking process is expensive
-I eagerly await absolutely abysmal Hackett compile-times
-@jamesswainer <@U0702F2CE> <@U3NGSC6AF> - I think that raco test could do something like "raco test args files -- more" and when it ran an individual test submodule, it could make "more" be (current-command-line-arguments) then we could change rackunit, chk. eli-tester, and other popular testing libraries to look at those arguments to determine whether to run 
-a test. For example, if it was empty, then they'd run everything, otherwise they'd consider it a set of tags to run, etc
-So I think it should be reasonably easy to generate the pattern from the coverage information, but we would have to add line numbers to `hlite` first, though — don't hold your breath, it won't happen overnight :slightly_smiling_face:.
-It seems reasonable to consider a more general solution but there is something to be said (both error messagewise and human convenience wise) for a shorter command line. Maybe we can solve that with some specific shorthands, starting from the ruby experience that <@U3QFE5KGX> enjoyed?
-From my pytest experience, the shorthand I used most was '-k foo' which ran every test whose name included foo
-I am often copying a single test out and running it over and over as I work towards a fix for a bug, and generally in tests suites where I didn't bother to name the tests (like the thousands of tests in the contract system), so an option that took a line number would be great for me.  
-Right, I agree that the exact same thing wouldn't be as effective in Racket
-Just documenting my experience
-The other option I used a lot was "stop on first failure"
-i do agree with robby that shorter is preferable, but support in any form is better than nothing
-in the ruby rspec case, you just have `rspec &lt;file&gt;:&lt;line-number&gt;`
-also, now that I think about it, it would be nice if DrRacket could get in on the fun too, so having the `raco test` command-line be a thin wrapper over a prgorammable interface would be nice
-programmable
-<@U3QFE5KGX> the major issue is that the current way rackunit works/is used is to just run the code, and testing is a side effect
-right
-whereas rspec/pytest/etc collect tests and then run them
-would it be better to roll something totally different as opposed to bolting it onto raco test?
-or worse?
-TL;DR: Maybe tests could be lazily named -- if/as/ever needed.  And that would fit with a run-tests-named-x feature.
-<@U3ZACTKTP> hyper-literate seems pretty interesting
-good point!
-The exciting part is that we can in principle get 90% of the way thanks to the awesomeness of Racket's macros and Scribble, without having to change language's core.
-any good tutorials on using slideshow?
-the documentation is pretty good, but i'm looking for quick helpers to make doing things like background images and font changes quick and easy
-(i assume tutorials would have helpers or something that make that easy...)
-<@U3PRC73C2> I vaguely remember some of last year's racketcon presentations were made with `#lang slideshow`, but the website only hosts the PDFs. And a quick search for `#lang slideshow` on github did not return any code results. Maybe try to ask on the mailing list? I'm sure some people have some code lying around.
-Here's the code for a talk I gave last year, it's not a good example of well written racket code, but it demonstrates some of the things you can do in slideshow <https://github.com/dfeltey/lwc2016/blob/master/talk/slides.rkt>
-<@U3ZACTKTP> ok. thanks!
-<@U3PRC73C2> I turn some of my talks into packages; links here: <http://www.eecs.northwestern.edu/~robby/talks/>
-<@U3PRC73C2> also <@U3NJS8H7C> posted the source for all of his slideshow talks here: <https://github.com/mflatt/talks>
-<@U0702F2CE>: I'm about merge TR PR 540 (from @georges-duperon). I noticed that the merge button seems to default to "squash and merge". Is that a repo setting you set?
-FWIW, it's not what I want here (squash + rebase + merge is what I want), but switching the default to "rebase + merge" on the racket repos would be nice.
-<@U3NP867S6> yes, that's a setting
-I think "squash and merge" means "squash + rebase + merge"
-and "rebase + merge" doesn't squash, but sqaush + merge without rebase doesn't make sense AFAICT
-Ah, found it.
-Disabling merge commits for racket/racket.
-Doesn't seem to be an org-wide setting. Will write a script to do all of them later.
-<@U3NJS8H7C> Is it okay if I merge this: <https://github.com/racket/scribble/pull/111>
-<@U08JL5H89> I left a suggestion (version and `history`) in the PR
-<@U3NJS8H7C>: Could I ask you to take a quick look at this PR? It should be brief; the changeset is very small. <https://github.com/racket/r5rs/pull/2>
-Someone else would probably also be able to review it, but it looks like you're the primary maintainer for that repo?
-<@U07SCV14J> Done. (Does anyone have a guess at why GitHub sends me email alerts only sometimes?)
-Thank you!
-<@U3NJS8H7C>: I have email notifications turned off for watched repos but turned on for threads I've participated in. What do your settings look at for the Notifications section in your GitHub settings?
-<@U3NJS8H7C>: There was a point in time where not all our repos had email integration, but I fixed that a couple (few?) months ago.
-I have everything checked except "Include your own updates"
-I haven't yet tried unchecking "web"; maybe N browser tabs on GitHub confuse it?
-I have no idea what the issue is then. ¯\_(?)_/¯
-<@U07SCV14J>: From the git history, it looks like you've been involved with the homebrew packaging for Racket. Is that correct?
-I think I touched it once to update it
-That's more than I have. :)
-but it was a very easy change, IIRC
-Any idea about <https://github.com/racket/racket/issues/1680>
-?
-ISTR we've had other reports, possibly about similar things, with homebrew before.
-I'm not sure, but I could make guesses. I don't (and never have) run Racket from a Homebrew installation
-Do you know how the main person behind Racket's homebrew package is?
-I'm afraid I have no idea.
-<@U3NP867S6>: It sounds like Homebrew renamed the formula to `minimal-racket`, but whatever the installation is does not properly set the relevant prefix. I'm a bit surprised by this, since the formula appears to pass the right `--prefix` option.
-Hmm, that does sound odd.
-It looks like <@U2Y8JBMUJ> did the initial rename of `racket` to `minimal-racket`, so perhaps he knows more about this issue.
-<@U07SCV14J>: Talking to @florence, it seems like there's a cask for Racket, that uses our installers. So probably best to use that, instead of the recipe.
-So we may be able to just ask for the recipe to be removed. I'll post on the mailing list.
-<@U3NP867S6> I think some people have expressed a preference for formulas over casks
-not that I understand this at all
-I think most people also prefer working things to broken ones. :)
-I think having the `minimal-racket` installation is a good idea if we can get it working. It mentions in the description to use the cask if you want the full installation.
-Yep, would be nice to get it working. But unless you're volunteering, it may be better to remove it. :)
-<@U0702F2CE> <@U3NJS8H7C>: I can take a look at the broken test
-<@U0702F2CE>, <@U3NJS8H7C>: it seems like the relevant file, `psyntax.sch` is generated from `psyntax-input.txt`? is that true? if so, how do I regenerate it?
-I think by running psyntax :wink:
-but we don't want to be breaking that code, do we?
-<@U0702F2CE>: `psyntax-input.txt` has a note that it was modified from the original version, and the offending line is a modified line that uses `[` `]` instead of parens.
-so my guess is that modification was basically a mistake and it should be replaced with parens.
-ah ok
-<@U0702F2CE>: fixing `psyntax-input.txt` makes `raco test -l tests/racket/benchmarks/common/psyntax` pass, but it doesn't change `psyntax.sch`, so I'm not sure if that's a problem or not.
-I believe the problem (based solely on the change and what I think might happen) is that psyntax.sch calls `read` to read in `psyntax-input.sch`
-and your change caused it to fail on the `[]` there
-so we shouldn't need to change `psyntax.sch` at all
-<@U0702F2CE>: what confuses me is that `psyntax.sch` is clearly a generated file, and it also has a single pair of square brackets that appear to correspond to the single pair of square brackets in `psyntax-input.txt`
-those are read by the implementation of `read` inside `include` in `scheme/include` (see `psyntax.rkt`) which will accept them
-right, but I'm still left wondering how `psyntax.sch` was created in the first place
-probably by running psyntax on a system with different treatment of []
-such as racket/r5rs before your change, or chez, or something
-what I'm really getting at is that it seems like maybe `psyntax.sch` ought to be kept in sync with `psyntax-input.txt` and I don't know how to do that
-but if you are okay with just changing `psyntax-input.txt` so that the test passes, I have a patch I can push
-That's my suggestion
-alright, pushed
-<@U3NGSC6AF> <@U0702F2CE> thanks for the links to slideshow talks. I gave a successful talk last night with slideshow (not *on* racket), but wasn't quite happy with the way the slides looked. Was happy with the tool itself though.
-OK, so I guess what I didn't realize about slideshow, but now do, is that it doesn't do much more than create the UI and handle keyboard events, and provide some very naive things. Basically, it gives you the minimal scaffolding in order to build custom slideshows with the whole power of pict.
-now that I have that understanding, it's even better.
-That said, if there's anything I can do to help, I'm here :slightly_smiling_face:
-<@U2Y8JBMUJ>: That's already more maintenance than the non-cask version gets.
-Thanks for your help!
-<@U3NP867S6>: My pleasure :slightly_smiling_face:
-<@U3NJS8H7C> can you look at the "Last,First parsing" PR when you have time: <https://github.com/racket/scribble/pull/92>
-I have a complex situation where I'm stashing an identifier somewhere and then pulling it out somewhere else, and I'm getting an unbound identifier error, but there are too many moving parts for me to figure out what is going on :/
-I've been trying to use <@U3ZACTKTP>'s `debug-scopes` package, but I'm not totally sure how to read its output
-<@U3QF0EM0E> That's <@U0G0JDQGZ>'s code, so he may have an opinion; I have no objections
-ok thank you
-<@U07SCV14J> what does the output look like?
-<@U0702F2CE> I ended up managing to fix it, but tbh I'm not sure why it works
-typeclasses are real complicated :no_mouth:
-<@U07SCV14J> You have to use `(displayln (+scopes id))`, and it indicates the scopes with sub/superscript numbers. Each Racket scope (which normally has a large 7-digit numeric identifier) is given a short and readable number starting with `0`. Ranges are indicated with `³???` (3 till 9). When you are done printing the scopes of one or more ids and stx objects, you'll want to call `(print-full-scopes)`, which prints a table associating short numbers with their long counterpart as well as other info (if it is a macro, use-site or module scope, and the module name for module scopes, i.e. the info that you get in DrRacket's macro stepper).
-I'm not automatically running `(print-full-scopes)`, because it would clutter the output. Also, after executing `(print-full-scopes)` the scope counter is reset (and `+scopes` therefore starts numbering scopes starting from `0` again), so if you want to compare two ids, you have to call `(displayln (+scopes id1)) (displayln (+scopes id2)) (print-full-scopes)`, possibly across several macro invocations (I should probably add a parameter to `print-full-scopes` to ask it to not reset the counter).
-<@U3PC27CUQ> just noticed: <https://plt.eecs.northwestern.edu/pkg-build/server/built/deps/debug.txt>
-<@U3VGR2S7Q> hi Ryan, I would like to contribute a pull request in the near future to improve the `'multiple statements given'` error message being returned from `db` package when working with Sqlite3 databases. My changes involve the `connection.rkt` and `ffi.rkt` files in `collects/db/private/sqlite3` directory in the main racket repository. Since those files aren't in the `db` repository, where would be the appropriate place to put tests in? My guess is the `db` repository but wasn't sure.
-<@U3SEVDPJT>: I'm not ryanc, but I'd assume that would be the place: <https://github.com/racket/db/tree/master/db-test/tests/db>
-that was my first thought, I'd need to submit separate pull requests against the db repo and the racket repo, is that fine?
-<@U3SEVDPJT> yes, that's fine
-ok thank you
-mflatt: I get a really weird error building old versions of Racket on Ubuntu 16.04 --- <https://gist.github.com/jeapostrophe/b8f7256657d490f83f5a453db049bf5a> --- I've got it on 5.92, 5.93, 6.0 and 6.3
-<@U3SEVDPJT>, confirming stamourv's and samth's answers
-the same error is here --- <https://github.com/racket/racket/issues/1222>
-so the problem is that back then we used a different compiler, so there wasn't a problem. very weird!
-<@U3VGR2S7Q> would it be reasonable to disable the 4 failing tests here: <http://drdr.racket-lang.org/40417/racket/share/pkgs/macro-debugger/tests/macro-debugger/all-tests.rkt>
-<@U0G0JDQGZ> the xform step works by knowing that various functions are predefined and won't trigger a GC; that approach interacts badly with C headers that expand things that look like functions in different ways, since xform is looking at preprocessed input
-Ya, I think I understand the problem. I'm thinking about how to effectively warn users that old versions are broken because GCC isn't backwards compatible. It's a weird problem.
-probably you just want to annotate the definitions of `mz_long_double_eqv` and `double_eqv` with `XFORM_SKIP_PROC`, which goes after the argument list and before the function's opening `{`
-Oh – you're not just looking for a way to make the compile go through?
-mflatt: correct, i know how to make it work. i'm thinking about what to do about people that email saying all the old versions are broken because they are trying to build on a modern linux distribution.
-I think we don't get those requests because old software generally doesn't build
-I have a sort of diabolical abuse of the macroexpander that produces an unbound identifier error, and I don't understand why. Here's a pasterack link, though pasterack produces a different error: <http://pasterack.org/pastes/92495>
+error: 
+```
+Cannot find variable `WithUserFields`
+```
+
+U2LAL86AY : so it seems like you can't have parametric types act as constructors
+U3ZNWN526 : Oh, no, I have `UserFields` as the constructor within that last function, not `WithUserFields`
+U2LAL86AY : Maybe is the same thing - since  it gives the same error.
+if you have `type alias Thing = String `
+you get back a function named `Thing : String -&gt; Thing`.
+
+But if you have `type alias Thing a  = String `
+Seems you don't have this `Thing: String -&gt; Thing` anymore. It's how elm works.
+ Let me try a few more things first
+
+U3ZNWN526 : Ooh, so you think even with `type alias Thing = MetaThing {}` maybe wouldn't give you the constructor?  I suppose that's possible... very unexpected though, and doesn't seem to be documented anywhere
+U3ZNWN526 : I would think with a `type alias Thing = ` I could put anything after the `=` and it would give me a constructor.
+U5J0H2NS2 : I think this```
+WithUserFields a = { a | ... }
+```
+means only, that the type has several known fields.
+You did not specify their order. So you can not construct one just like you wanted.
+
+U2LAL86AY : hmm yes, you don't get alias constructors for aliases with parametric values:```
+
+type alias FirstAlias =
+    { name : String }
+
+
+type alias SecondAlias a =
+    { a | name : String }
+
+
+constructAValueOfFirstAlias : String -&gt; FirstAlias
+constructAValueOfFirstAlias string =
+    FirstAlias string 
+         --- works as expected because you have in the global scope a (function/variable) named: FirstAlias : String -&gt; FirstAlias 
+
+
+constructAValueOfSecondAlias : String -&gt; SecondAlias {}
+constructAValueOfSecondAlias string =
+    SecondAlias string 
+         -- error "Cannot find variable `SecondAlias`"
+
+```
+
+U3ZNWN526 : Oh well yes, that does make sense, because SecondAlias is not a type, you would only be able to construct other types using SecondAlias.  But what I'm trying to do is define a second type and then use it!
+U0J1M0F32 : ```
+type SecondAlias a =
+    SecondAlias { a | name : String }
+
+constructAValueOfSecondAlias : String -&gt; SecondAlias {}
+constructAValueOfSecondAlias string =
+    SecondAlias { name = string } 
+```
+
+U5J0H2NS2 : But this works```
+type alias WithUserFields a = { a | name : String, email : String }
+type alias UserFields = WithUserFields {}
+
+change_name : String -&gt; UserFields -&gt; UserFields
+change_name new_name user_fields = { user_fields | name = new_name }
+
+get_user_fields : String -&gt; String -&gt; UserFields
+get_user_fields name email =
+    { name = name, email = email }
+```
+
+U3ZNWN526 : Yeah.  That seems right.  The problem I'm having is that for some reason... there's no `UserFields` constructor? (even though `UserFields` is just a plain old type alias)
+U0CL0AS3V : &gt; all the structural problem i've been discussing started to surface in my company's app after it hit about 8000 lines of clojurescript (which have since doubled). I think none of the issues I present would be that apparent in smaller apps&gt; really the problems i'm talking grow exponentially with the size of your data model
+
+we're at 150,000 lines of Elm code in production and these problems don't exist for us. I don't worry about the Elm Architecture scaling because my experience with it is that it's scaled better than any other front-end system I've ever worked on. :slightly_smiling_face:
+
+U5QJW0DDE : Currently it is 15k lines. Do you find that either a) your data model lines up with your view tree much of the time or b) you pass the whole model state around often?
+U0CL0AS3V : <@U5QJW0DDE> I get why you'd be worried about this, based on your experiences elsewhere, but the people saying "this is not a problem in Elm" are not making it up :wink:
+U5QJW0DDE : <@U0CL0AS3V>  I still haven't seen any examples that demonstrate an Elm solution to, for example, the distant descendant drop down list I mentioned earlier
+U0CL0AS3V : can you link me to that? I'm catching up
+U3ZNWN526 : Aha! <https://groups.google.com/forum/#!topic/elm-discuss/DWrIVjwWzAU>
+U5QJW0DDE : If you have any control over the elm discuss mailing list, I posted my first message there that sums up the issue, with examples, but it is stuck in moderation 
+U5QJW0DDE : For a few days
+U0CL0AS3V : I'm not a moderator there, sorry
+U0CL0AS3V : can you make it a gist and link to it?
+U0CL0AS3V : a) definitely not, b) definitely not :smile:
+U5QJW0DDE : Unfortunately I made the mistake of not copying the message before I sent it to the lis so I will need to write it up again. I will ping you later if I have time. I'm in Europe and must leave work now. 
+U0S6BNVNY : <@U5QJW0DDE> I have a `Store` that I pass around. Actually, views have a `query` function which, when given a store and any params they need from the slug, look up their data in the store.  That way I can pass a single bit of 'state' to represent my local database, which gets updated at the top level from websockets. That might help? This way I'm not sending the whole `Model`, just the 'data' bit
+U0CL0AS3V : ok, happy to talk more when you can!
+U0CL0AS3V : :wave:
+U5QJW0DDE : I frankly don't see how that is possible in TEA so I will send more thoughts your way later. 
+U0CL0AS3V : :thumbsup:
+U0CL0AS3V : it definitely requires a mindset shift coming from OO :smile:
+U0CL0AS3V : it's all good! happy to talk
+U5QJW0DDE : Cool, I will ping you in a few hours. I have dinner plans. I keep hearing remarks from people here saying "it's not a problem in Elm" but yet no one can actually provide simple solutions to common problems in very large apps that my company builds. I watched your keynote conference talk where you discussed this a little bit, but did not come away from it feeling like the issue I'm referring to has an obvious solution in Elm. Will chat with you later!
+U2LAL86AY : what's so wrong about this function? :smile:```
+
+numberToFloat: number -&gt; Float 
+numberToFloat number = 
+    if typeof number == Int then  -- is not valid elm - but not sure how to construct it.
+        toFloat number 
+    else 
+        -- is already float, don't bother.
+        number 
+```
+Why can't i find it anywhere in Basics or using elm search?
+
+U0CL0AS3V : sounds good!
+U2LAL86AY : `toFloat: Int -&gt; Float` <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Basics#toFloat>
+U2LAL86AY : seems i can't have `toFloat: number -&gt; Float`
+U3ZNWN526 : I think you could actually just return number...
+U3ZNWN526 : ```numberToFloat : number -&gt; Float
+numberToFloat n = n
+```
+
+U3ZNWN526 : Maybe not...
+U3ZNWN526 : But certainly you could do something like multiply it by `1.0`
+U4872964V : toFloat could certainly be `number -&gt; Float` but I’d be interested in seing your particular use case
+U3ZNWN526 : Which may illustrate why the function doesn't exist - because in most cases it wouldn't be useful (that I can think of anyway)
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

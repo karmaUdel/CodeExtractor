@@ -1,2 +1,152 @@
+U601ELFEG : thanks!
+U23SA861Y : *hisses*
+U62MXFL9K : Hi everyone! I was a bit puzzled regarding *data structures in Elm* and then I found this very helpful article <http://tech.noredink.com/post/140646140878/data-structures-in-elm> maybe someone else has a similar problem.. :slightly_smiling_face:
+U64MK7215 : hey
+U64MK7215 : what does this mean?
+U153UK3FA : <@U64MK7215> it's a type signature for a function
+U153UK3FA : it says that the function `update` take a `Msg` and a `Model` and returns a `Model`
+U64MK7215 : <@U153UK3FA> Thanks for clearing it up.
+U62UFEG4D : Hi everyone! is there a way to convert a Union type to a list (or array)
+U62UFEG4D : my use-case is the following
+U62UFEG4D : ```type Shape    = Poly
+    | Star5
+    | Image
+    | Ellipse
+    | Circle
+    | Rectangle
+    | Unknown
+
+
+genShape : Random.Generator Shape
+genShape =
+    let
+        availableShape : Array.Array Shape
+        availableShape =
+            Array.fromList [ Poly, Star5, Image, Ellipse, Circle, Rectangle, Unknown ]
+    in
+        (<http://Random.int|Random.int> 0 (Array.length availableShape))
+            |&gt; Random.map
+                (\o -&gt;
+                    case (Array.get o (availableShape)) of
+                        Just shape -&gt;
+                            shape
+
+                        Nothing -&gt;
+                            Unknown
+                )
 ```
-When I run webpack it outputs the same as when I run the dev-server. I need it to include som extra files from the src folder. How do I do that?
+
+U62UFEG4D : I would like to avoid the duplication of the shapes definition
+U3SJEDR96 : There is currently no way to automatically enumerate a union type. Keeping the list of possible shapes as close to your `shape` type should help in making sure you don't get them out of sync by accident :slightly_smiling_face: (i.e. `shapes = [ Poly, Star5, Image, Ellipse, Circle, Rectangle, Unknown ]` and refer to `shapes` whenever you need that enumeration)
+U62UFEG4D : is it worth to spend time on implementing that feature ? Something like
+U62UFEG4D : `List.fromUnion Shape`
+U62UFEG4D : ?
+U62UFEG4D : dont know if I can do it, but I would love to give it a try ...
+U3SJEDR96 : It would need support from the compiler since type-info isn't available at runtime. Additionally, it would only work for enumerations, not unions that actually hold content.. So in reality, it would be of somewhat limited use, and fairly complex to implement in the sense that it requires "magic"
+U3SJEDR96 : i.e. if you decide that a `Poly` shape should also have an Int that defines the number of edges, you can no longer enumerate it
+U62UFEG4D : all right understood, thank you <@U3SJEDR96>
+U5DJNFLUD : I found this comment intriguing <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L25-L26>
+U5DJNFLUD : Anyone know where to read up more on plans for SPA stuff in 0.19?
+U3SJEDR96 : <https://github.com/elm-lang/projects/blob/master/roadmap.md>
+U5DJNFLUD : <@U3SJEDR96> Thanks! I've seen that but didn't quite make the connection to why there won't be anything your Main.elm anymore :stuck_out_tongue:
+U5DJNFLUD : If SPA in 0.19 starts to look more framework-like I will be very happy
+U641LDZFU : Ah! Interesting, and much cleaner :slightly_smiling_face:
+U641LDZFU : Thanks!
+U641LDZFU : Then I can just switch on the nodeType field for different UI behaviour!
+U5WS7CJLV : syntax for Dict literal?
+U5WS7CJLV : I see Dict.fromList in the docs - is that how it's usually done?
+U641LDZFU : Hallo everyone!  I'm back with another question about... you guessed it - Union types!
+U641LDZFU : Basically in a list of records with different types is it possible to filter by a field without using a case for each different type?
+U641LDZFU : here is the code:
+U641LDZFU : <https://ellie-app.com/3H7WyZXf2F7a1/0>
+U641LDZFU : line 88 is what I would like to do
+U641LDZFU : the rest of the function body is what works
+U62MXFL9K : <@U5WS7CJLV> Dict.empty does also the job then you can add and remove elements (does this answer your question?)
+U5WS7CJLV : sure
+U5WS7CJLV : was just wondering if you could do something like list literals
+U5WS7CJLV : but it seems like with Dict you must be function-y
+U5WS7CJLV : <@U641LDZFU> I am a super noob myself, but I have an idea and will do my best to explain it
+U5WS7CJLV : union types can have more than one "constructor" arg
+U5WS7CJLV : what if you passed the common stuff, like id - as the first arg to your different union "constructors"
+U5WS7CJLV : type MyUnion =
+U5WS7CJLV : Cool Int Float
+U641LDZFU : I think I did in the list at the bottom of the file :slightly_smiling_face:
+U5WS7CJLV : AlsoCool Int String
+U641LDZFU : <https://ellie-app.com/3H7WyZXf2F7a1/0>
+U641LDZFU : Is that what you mean?
+U641LDZFU : or do you mean take the ID out of the record?
+U5WS7CJLV : yes, I think that's my idea
+U5WS7CJLV : but now that I'm thinking about it further, maybe it won't work.  I am new to this union stuff myself
+U62MXFL9K : <@U5WS7CJLV> it seems that there is no other syntax
+U5WS7CJLV : taking the ID out of the record, I mean
+U3SJEDR96 : <@U5WS7CJLV> you _could_ have special syntax for Dicts.. and sets, and arrays, and whatever other data structures. But having more syntax wouldn't necessarily make things more legible or easier to understand :slightly_smiling_face:
+U5WS7CJLV : right, I just wanted to make sure there wasn't literal syntax before I started functioning everything
+U5WS7CJLV : for example, I've used List.singleton when [ myItem ] is simpler, I think
+U5WS7CJLV : <@U641LDZFU> what if StoryNode were not a union type?
+U3SJEDR96 : Fair enough :slightly_smiling_face: `Dict.fromList [ ( "key", value" ), ( "other", "value" ) ]` is the most succinct syntax we have for it
+U5WS7CJLV : what if it were a record with an ID property, and some other property that held the union-y stuff?
+U641LDZFU : I think then I couldn't have a list filled with different "StoryNodes"
+U641LDZFU : because the format of the records are all different
+U641LDZFU : ah, interesting
+U5WS7CJLV : I'd like to hangout and talk more Elm, but my children be calllin' - later fellas!
+U48AEBJQ3 : <@U641LDZFU> Here is a fairly light refactor which fixes that particular problem. <https://ellie-app.com/3H8hWdzqWCCa1/0>
+U48AEBJQ3 : The basic changes are merging the two identical record aliases and switch from using a string to represent the different node types to using a union.
+U641LDZFU : Very nice
+U641LDZFU : I think that's what you were hinting at too <@U5WS7CJLV> !
+U641LDZFU : Thanks so much
+U62MXFL9K : <@U641LDZFU> I don't understand where `rawStoryNodes` comes from.. :slightly_smiling_face:
+U62MXFL9K : line 89
+U641LDZFU : it's at the bottom of the file isn't it?
+U641LDZFU : it's just a list to play around with
+U62MXFL9K : saw it later… why don't you pass it to the function?
+U62MXFL9K : if it's just as a quick trial still this makes it error prone
+U641LDZFU : ah, that could be a good tip!
+U641LDZFU : it's basically my "database"
+U62MXFL9K : you want to have pure functions (event though in Elm you cannot mutate at least)
+U641LDZFU : Ah yes
+U641LDZFU : Then would I have to pass it into the view function too?
+U641LDZFU : or would it just be worth attaching it to the initial model?
+U62MXFL9K : you pass the model to the view function usually.. so yes
+U641LDZFU : and if it's 100's of nodes long
+U641LDZFU : it won't have a huge impact?
+U641LDZFU : considering the model gets passed around all over the show
+U641LDZFU : (on performance)
+U48AEBJQ3 : Data rarely gets copied in Elm. Since it is immutable, you just pass or copy references.
+U641LDZFU : btw, Thanks <@U48AEBJQ3> here is a diff with your fixes, incase anyone else ever comes across this :slightly_smiling_face: <https://gist.github.com/allansideas/2360e065c13a48b419fce245d0485a12/revisions>
+U641LDZFU : Ah alright!
+U641LDZFU : Thanks again everyone for all your help!
+U641LDZFU : The door buzzer has geklingelt, so I am off for a bit :slightly_smiling_face:
+U62MXFL9K : ciao
+U5FC7BE0G : is there a function to create a URL query? Something like 
+```
+Http.url "/baseurl" [("somekey": "somevalue")] == "baseurl?somekey=somevalue"
+```
+
+Of course i could create my own but there must already be an implementation somewhere? I saw that in an earlier version this was in Http but seems to have been removed in Http 1.0.0
+
+U5FC7BE0G : just saw that this function exists in ```lukewestby/elm-http-extra``` which does not support elm 0.18 :confused:
+U3SJEDR96 : <https://ellie-app.com/3H9qS8T3znMa1/0> something like that should work
+U3SJEDR96 : which also makes it easy to make an `url` function: <https://ellie-app.com/3H9qS8T3znMa1/1>
+U5FC7BE0G : <@U3SJEDR96> you are the best, thanks!
+U5WJZNEF5 : Hello everyone, first time I write here and as you can easily guess I'm an Elm newby. I'm trying to write some code that takes values from a random element of a JSON array with, of course, no success.I'm able to get values from a specific element with something like `Decode.index 0 (<http://Decode.at|Decode.at> [ "value" ] Decode.string)` but I really don't understand how to take the element randomly.
+
+U3SJEDR96 : Alright, so, while feasible, this is not super-trivial in Elm. Modelling randomness in an environment where every function is pure (and, as such, needs to return the same value every time the function is called) means it needs some extra stuff to pass around. Json decoders are also a somewhat involved topic, as it involves taking a blob of unknown shape with unknown types, and extracting some typed information from it.
+U0FP80EKB : Personally, I would separate this idea out into two steps: decode the list, then work on randomly choosing one. Picking a random one at the point of decoding adds a potentially unnecessary complexity level.
+U0FP80EKB : Especially as <@U3SJEDR96> mentions, these two topics can be complex :slightly_smiling_face:
+U5WJZNEF5 : <@U3SJEDR96> yay :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

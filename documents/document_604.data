@@ -1,2 +1,64 @@
+U6E5PS83X : Aha, I've figured it out:
 ```
-ok then `updateFoo` can be used inside my `update`
+var main = document.getElementById('friday-calls');
+var app = Elm.Main.embed(main, localStorage.session || null); // &lt;-- the magic
+
+app.ports.storeSession.subscribe(function(session) {
+    localStorage.session = session;
+});
+
+window.addEventListener("storage", function(event) {
+    if (event.storageArea === localStorage &amp;&amp; event.key === "session") {
+        app.ports.onSessionChange.send(event.newValue);
+    }
+}, false);
+```
+
+U5ABF3BH7 : Hi again! I have an input field, I want to show an error if the character entered is different from a digit or '-'. How can I accomplish that in Elm?
+U23SA861Y : presumably you have a field in your model that has the string you want to validate
+U23SA861Y : then you would need to construct a function `valid: String-&gt;Bool`
+U23SA861Y : then in your view check the string and display or not display your warning
+U5ABF3BH7 : Right <@U23SA861Y>, I want to show a warning when the user enters an invalid character. It is for a social number. My issue is how to build that function.
+U4JT89FGB : untested: `Regex.contains (Regex.regex "(\\d|-)*") inputString`
+U23SA861Y : regex would be the correct tool, although becareful as they can cause runtime errors
+U4JT89FGB : i think you just need to make sure your user isn't inputting the string to get converted to a regex, correct <@U23SA861Y>?
+U23SA861Y : yeah, I believe the RTE occurs when it parses the regex itself so if its a compile time constant you should be safe
+U5ABF3BH7 : <@U4JT89FGB>, I want my string to be invalid if any value other than a digit or '-' is entered. Right now, I am getting ```&gt; Regex.contains (Regex.regex "(\\[0-9]|-)*") "1234fami"True : Bool```
+
+U5ABF3BH7 : I want it to be false since I have letters
+U23SA861Y : I think you want match instead of contains
+U23SA861Y : and you will have to put start of line and end of line patterns on there
+U23SA861Y : nvm contains is the correct function
+U23SA861Y : but you want to so a full string match
+U23SA861Y : for posix that would be a `^` at the beginning and a `$` at the end
+U23SA861Y : not sure what the JS flavour is
+U23SA861Y : looks like it's the same
+U23SA861Y : `Regex.contains (Regex.regex "^(\\[0-9]|-)*$")`
+U4JT89FGB : Yeah what he said :+1:
+U5ABF3BH7 : <@U23SA861Y> not working yet ```Regex.contains (Regex.regex "^(\\[0-9]|-)*$")  "23"False : Bool```, everything I try gives me false
+
+U5ABF3BH7 : except an empty string
+U23SA861Y : This is where my knowledge of JS regexs is failing
+U5ABF3BH7 : <@U23SA861Y> thanks for pointing my in that direction though, I appreciate your efforts :slightly_smiling_face:
+U0JFGGZS6 : do you need the backslashes?
+U63UF49NH : Something like this? `^(\\[\d-]+)$` <http://rubular.com/r/wjR6i1JFDj>
+U1AN4JRFV : in elm: `ssn =  regex "^([\\d-]+)$"`
+U1AN4JRFV : <https://ellie-app.com/3VqZD6HKxMHa1/1>
+U23SA861Y : <@U5ABF3BH7> if you are trying to match specifically on a pattern of digits and dashes, you can do that with a regex also
+U1AN4JRFV : e.g. `^\\d{3}-?\\d{2}-?\\d{4}$`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

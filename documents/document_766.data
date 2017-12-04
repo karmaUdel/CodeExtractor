@@ -1,0 +1,168 @@
+U14Q8S4EM : Uh Oh
+U14Q8S4EM : I just got a `NaN` in my code.
+U3SJEDR96 : Right, r == g ==  b should be special cased to prevent divide-by-0
+U14Q8S4EM : Ah. I see.
+U14Q8S4EM : Yeah just realized it can come from `0 / 0`
+U14Q8S4EM : Dang! For a second I thought I found some bug in Elm itself.
+U14Q8S4EM : Would have been a real easter egg.
+U0VMVV1DF : <http://fpchat-invite.herokuapp.com|fpchat-invite.herokuapp.com>
+U3SJEDR96 : I had no idea there was a thing like "the FP slack" :smile:
+U57KYFW67 : I found a quirk in the error message reporting. I don't know if it's worth reporting or not:
+U57KYFW67 : ```module Test exposing (..)
+
+f : Int 
+f = ( 
+```
+
+U57KYFW67 : This (broken) program doesn't list the line number of the error. However, removing the `exposing (..)` clause or.... the type annotation(?) causes the line number to be reported properly
+U57KYFW67 : Could potentially be hard to track down in a large file.
+U3SJEDR96 : weird, it actually does _know_ the place (as evidenced by using `--report=json`)
+U2Q5GJNTB : I have a simple form with numeric input  that is allowed to be empty initially. Thus I represented that as “Maybe Float”. However when I added validations add added Result String Float to the mix, to be able to show errors to the user. Now I have “Maybe (Result String Float)“. Is there a simpler more idiomatic way to do this, or is this the common way to have potential absence and validation for one field/value?
+U3RDE7LDP : <@U2Q5GJNTB> I would keep the errors separate from the form fields in your model. Do you want to validate the value incrementally or just when the form is submitted?
+U3RDE7LDP : If the latter, I would just make the field a string and if it fails to parse, add an error to your model. If you want to check it's valid as it's entered, you can do the same when you process the message which corresponds to input for the field. I've generally been following the pattern in the elm-spa-example, like this <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Page/Login.elm#L102>
+U2LAL86AY : i would like to understand how this 2 ideas are influencing one another.Tony Hoare said that `null` was the biggest mistake / the billion dollar mistake - or something.
+Then in elm we don't have optional arguments to functions.. it won't compile.
+
+I'm interested to know if is possible to provide optional arguments to functions - `js style` - without neding this `null` idea. Are `we forced` between either using `null` or having no positility for `optional arguments`?
+
+U2LAL86AY : `null` or `nil`or whatever other equivalent  - the null idea in general i mean
+U153UK3FA : <@U2LAL86AY> 'optional arguments' can mean many things, what are you referring to specifically
+U1CE9DL9H : elm typically uses records (e.g. `defaultOptions`) to handle such cases
+U2LAL86AY : <@U153UK3FA>  say i have a function that can take 4 arguments - but is ok, it works  if i give it only one. It will work because the other 3 have default behavior. in elm you need to put all 4 of them.
+U2LAL86AY : <@U1CE9DL9H> yeah i know but this is more broad. I'm trying to understand if how are they connected. 
+Was null invented because is needed in optional arguments?
+
+U1CE9DL9H : not sure on my history here, but null pointers seem "natural", because you need a default value for a pointer. the languages at the time weren't clever enough to support static checking of validity here (like rust does)
+U153UK3FA : <@U2LAL86AY> so you mean being able to pass Null for the other 3 args?
+U2LAL86AY : hmm maybe i'm wrong about this, but i thing if you don't pass an argument is null by default.
+U1CE9DL9H : in javascript?
+U2LAL86AY : yep
+U153UK3FA : In JS args are undefined by default
+U2LAL86AY : ok then my mistake.
+U3SJEDR96 : The "issue" here is that Elm is curried. Every function takes exactly 1 param.
+U1CE9DL9H : I see no issue, the JS way has always seemed wrong to me
+U4872964V : To me it always feels that you have built to much logic into a single function if you need default arguments
+U3SJEDR96 : Hence the quotation marks. It's not an issue at all; but it sort of prevents to option of having optional arguments. Don't get me wrong, I love my curried functions, and optional params are simply a different paradigm, but I think that currying is more relevant to this discussion than having or not having `null`
+U4872964V : or, maybe not too much logic, but _too general_
+U153UK3FA : Yep, default values for args to a function indicate that you have multiple functions you're trying to pretend are one
+U153UK3FA : Python has a huge number of such APIs and they're really scary
+U3SJEDR96 : <@U2LAL86AY> that literally what they are. They're not `null`, they're `undefined` which is a separate concept.
+U2LAL86AY : true that, was just my confusion -getting the best of me :smile:.
+U4872964V : So, let’s take an example, the `slice` function. In Elm it can’t take default values, so instead we have other functions `left` and `right`.
+U4872964V : and `dropLeft` and `dropRight`
+U0VQB2TC7 : Does anyone know if there are any plans to make"debug" as a browser extension? Since m most of the times we are interested to investigate states that happen in production, where the app is running in production mode.
+U2Q5GJNTB : <@U3RDE7LDP> thanks . I will give it a try 
+U0VQB2TC7 : Does anyone know if there are any plans to make"debug" as a browser extension? Since m most of the times we are interested to investigate states that happen in production, where the app is running in production mode.
+U3SJEDR96 : <@U0VQB2TC7> Not really, and I think your premise isn't really correct either. Have you ran into a situation where you wished you could enable the debugger, in production?
+U3SJEDR96 : - with Elm
+U0VQB2TC7 : No to enable the debugger, but be able to reproduce a state that happened in production
+U52GHJJTU : I guess being able to record the Msgs would be useful in production, to reproduce bugs
+U0VQB2TC7 : The crucial point of time traveling debugger is to be able to reproduce a state. But how can I reproduce a state that happened to a client in production?
+U5J0H2NS2 : <@U2LAL86AY> I think Maybe can be used everywhere where you feel a null would be useful.  At our company we have a custom Maybe in C#, which some of us are using everywhere, where a method can not always return with a valid value. I think in OO languages nullptr could be (should be) replaced by some optional type.
+U3SJEDR96 : It's fairly trivial to push every msg and state into a port and send get access to that. You could build a "report an error" type thing that would simply push that whole tree to a remote server, too
+U0VQB2TC7 : That can be done, of course. What is left is to know the JSON format of the debugger...
+U3SJEDR96 : "debugging in production" is a bit of a last resort, though
+U0VQB2TC7 : I wasn't talking about debugging in production :simple_smile: 
+U0VQB2TC7 : Just to be able to send the states to the support
+U2LAL86AY : <@U5J0H2NS2> yep, i don't feel the need to use null that much. I know about maybes they are better indeed. I thought null is required if you want to have optional arguments as a feature in a programming language - but as <@U153UK3FA> pointed out - they are not related. my mistake..
+U0VQB2TC7 : But again - this seems like reimplementing of what debugger does for us - gathering the state history and saving it in specific fornat
+U3SJEDR96 : Sorry, that was my assumption based on asking for a browser extension :slightly_smiling_face: So yeah, sending states to support is fairly trivial; making something to import that stream of messages and replay them locally is also pretty straightforward. Matching the exact format of the regular debugger is a little tougher, but still doable
+U0VQB2TC7 : But again - this seems like reimplementing of what debugger does for us - gathering the state history and saving it in specific fornat
+U3SJEDR96 : No need to repeat yourself, I read up after posting :slightly_smiling_face:
+U0VQB2TC7 : :relaxed: 
+U0VQB2TC7 : I often miss the messages coming in as I type, sorry
+U3SJEDR96 : And it's perhaps similar; but the debugger is made for debugging, in development mode; in production you need your own solution which can differ wildly depending on what type of support you offer, and how you wish to offer it
+U0VQB2TC7 : Saving the history in the format of the debugger is very helpful, since it can be played locally. Otherwise we should implement replaying ourselves - the question I asked yesterday :wink: 
+U0VQB2TC7 : <@U3SJEDR96> thank you very much for the quick and helpful responses!!!
+U3SJEDR96 : Right, I'm not sure if you actually got a response to that, yesterday? Replaying is pretty easy, though
+U0VQB2TC7 : Another question - do we know the size of the Elm community? In my company one of the main reasons they don't want to try out Elm is the small community
+U0VQB2TC7 : I did get the answer yesterday, thanks! :grinning: 
+U2LAL86AY : <@U0JUBLV8F> made a bunch of interesting studies and shows them here: <https://www.youtube.com/watch?v=BAtql6ZbvpU&amp;t=1519s>He knows more about this i guess
+
+U3SJEDR96 : almost 10k registered slack users,  many many companies using it in production, including a few big-name companies like Adobe, MS and mozilla
+U0VQB2TC7 : Great insight! Can I find about big companies using Elm online?
+U3SJEDR96 : I hope your company isn't basing what to do on "how do big companies do things"... Because it really doesn't matter, as anything but "a datapoint to be aware of". I would recommend watching Brian's State of Elm presentation linked above; and hanging around on Slack :wink:
+U3SJEDR96 : the Elm homepage also lists some companies
+U3SJEDR96 : There's also this outdated list: <https://github.com/lpil/elm-companies>
+U3SJEDR96 : and then there's a whole big bunch of companies who don't feel like they have to write a blogpost whenever they try out some new tech :wink:
+U3SJEDR96 : (or who are too busy making software)
+U2LAL86AY : no i guess we need an official page specifically designed for this reason
+U2LAL86AY : the easiest way to start is to build a slack channel :smile:
+U2LAL86AY : #we--are-using-elm
+U2LAL86AY : bad name
+U0VQB2TC7 : That is exactly my thought! I was pretty surprised that small community was such a heavy point. They also searched Stack Overflow and didn't find anything. Also google trends...
+U2LAL86AY : 983
+questions tagged - with elm in stack overflow
+
+U3SJEDR96 : There's also the Elm reddit, the `elm-discuss` mailing list, and 3 elm-only conferences in the past 12 months
+U3SJEDR96 : which is 3 more than the year before :wink:
+U3SJEDR96 : (I couldn't resist and threw together a "replay messages POC" - <https://ellie-app.com/3PpG8HZs7BMa1/0> )
+U0VQB2TC7 : :grinning: 
+U3SJEDR96 : Note that it intentionally drops messages resulting from a replayed message; which means no HTTP requests are triggered, no ports are called, etc. However, if those commands result in a message, that message would be included so that sort of a moot point anyway
+U0VQB2TC7 : Ok
+U3SJEDR96 : instant replay! <https://ellie-app.com/3PpG8HZs7BMa1/1>
+U2LAL86AY : crazy stuff :smile: i will use this for my bot
+U5ZC6V535 : Hi, I am trying to do a simulation using Elm (graphics package for canvas) and so far I have a moving object (boid) on the screen. The movement direction works alright until i start rotating the object. In JS i would have push+pop the matrix to avoid this but I am not sure how to do this in Elm. Can someone help with this? I have submitted my code here: <https://github.com/stelioskiayias/elm-boids>
+U1CE9DL9H : <@U5ZC6V535> push/pop as in removing an element from an array/matrix and then adding it back?
+U5ZC6V535 : <@U1CE9DL9H> Yeah, I think so. So getting it off the global transformation matrix, rotating it and then putting it back with the rotated state without affecting the global matrix state
+U1CE9DL9H : so, you have a global transformation matrix, and then each object has a matrix of its own. the object matrix can be modified (e.g. to rotate) and you're not sure how to make all of this fit together?
+U5ZC6V535 : <@U1CE9DL9H> Yes (roughly). I did this before by doing something like push to matrix, then rotate the object and then pop
+U1CE9DL9H : so, your model only has a boid (location, rotation) and a 2d location. that looks like one "local" matrix build up from those three values. am I missing something there?
+U5ZC6V535 : <@U1CE9DL9H> Yes, the main issue is the fact that the transformation matrix is not part of a model/type/etc. it is part of the canvas so when i do something like rotate boid, that changes the global canvas transformation behind the since. Then every other transformation is going to be offset by how much I have rotated one of the elements. So rotate object A one by 30 degrees and then rotate another object by 30 it will actually be rotated by 60 because transformation accumulate.
+U1CE9DL9H : I think that's your problem: having state that lives outside of the model makes elm unhappy. Can you put it into the model (even if it just mirrors the external state)?
+U5ZC6V535 : <@U1CE9DL9H> Yeah but you can’t control that state, it is part of the canvas. You can’t put it in a state an control it. The only way is that when you want to perform a “transformation” is to control the state through the canvas. Here’s an example <https://html5.litten.com/understanding-save-and-restore-for-the-canvas-context/>
+U1CE9DL9H : yes, but can't you store the offset, mirroring the external state in your model ?
+U48AEBJQ3 : <@U3SJEDR96> I went a little crazy: <https://ellie-app.com/3Ps8DdvxF5na1/0>
+U5ZC6V535 : Not really, that will be really tough and I don’t think it is correct to do so. There are far too many transformations that I will make it unennecesairly difficult. Maybe I am missing something from the elm-graphics packages. :disappointed: :slightly_smiling_face:
+U1CE9DL9H : well maybe you can use a port to read that state in?
+U5ZC6V535 : Yeah, but it seems like there must be a simpler solution
+U1CE9DL9H : the simple (though not necessarily easy) solution is to replicate the state on the elm side, either through interaction with js, or simulating the canvas state. It seems that the canvas package wasn't developed far enough to include this sort of thing, so you'll have to do some of that work yourself
+U5ZC6V535 : Yeah..
+U2LAL86AY : :aw_yeah:
+U4KFY2V6V : I'd like to have a discussion about elm and libraries being stack safe. A recursive function can potentially crash if there is no tail call optimization. There is an argument that stack safe implementations could be slower. My personal opinion is that potential runtime errors are worse.. 1000x. I'm happy to have input, opinions and perhaps information or pull requests regarding this topic :)
+U3SJEDR96 : <@U4KFY2V6V> sure. That's why we try to make everything stacksafe, and if you run into an error due to the stack overflowing, you should definitely log an issue.
+U0CL0AS3V : I generally default to stack safe, but I think it's reasonable to make the other choice if it benchmarks better and that matters more for the library in question.
+U0CL0AS3V : deep enough recursion to blow the stack can be rare enough to be irrelevant for plenty of libraries
+U2H92KKEY : What JS data type can you pass into a subscription that will be received as a tuple?
+U1G51S63S : <@U2H92KKEY> just an array
+U1G51S63S : See `Customs and Border Protection` here <https://guide.elm-lang.org/interop/javascript.html>
+U2H92KKEY : <@U1G51S63S> Thanks. It seems Native modules are treated differently.
+U1G51S63S : ah, you talking about Native?
+U2H92KKEY : ```...
+return callback(_elm_lang$core$Native_Scheduler.succeed( ["Tuple", "Test"]);
+....
+```
+returns this in my elm model
+```
+{ 0 = "Tuple", 1 = "Test" }
+```
+Edit: Here is the right answer! Found it.
+```
+{ctor: '_Tuple2', _0: 'Tuple, _1: 'Test'} == ("Tuple", "Test")
+```
+
+U2H92KKEY : Yeah, native was the real meat of the matter, but I was curious if subscriptions acted differently, which it seems they do.
+U1G51S63S : <@U2H92KKEY> really not sure, but maybe try `_elm_lang$core$Native_Utils.Tuple2(a, b)` for example
+U2H92KKEY : literally looking at that right now as well :slightly_smiling_face: Thanks!
+U4872964V : subscriptions are part of Elm, native is just an implementation detail
+U2H92KKEY : native is a part of Elm too :wink:
+U4872964V : it’s part of the implementation, but not the language, if that makes sense
+U2H92KKEY : indeed
+U4872964V : you can use native in your Elm code, for sure, but then you are not really using Elm
+U2H92KKEY : regardless, we are building our own Native modules for our platform, to interop with a very tricky system
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

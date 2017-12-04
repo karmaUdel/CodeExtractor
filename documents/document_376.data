@@ -1,4 +1,61 @@
+U37BS6J6N : roger that~
+U5J08KX0D : Using elm-bootstrap Tabs in my UI and I notice that each item is` item  :  { id : String, link : Link msg, pane : Pane msg }`
+
+U5J08KX0D : Is there a reason that id is a string, and not a member of a union type? I guess it might have to pass the id value to the underlying JS? And the return value in update is `TabMsg state`, and in the console, state looks like `State { activeTab = Just "Auscultation", visibility = Showing }`. It's described as an 'opaque type'. I want to know which tab I need to update - and so I'm not sure how to fund out the value of activeTab:Thanks, as ever.
+
+U5J08KX0D : So is there a minimal example of updating various panes of a Tabbed control - that would require finding out the active tab after a click on the tab and then updating the items.item.pane content. Just not sure how that's done - there seem to be a couple of opaque types : State and Item and Pane! How do I "get at" these? thanks again.
+U5YDC1YUW : what's the best practice in regards to union types that have the same labels, such as `type Action = Selected | Idle` and `type Result = Selected | Idle`
+U5YDC1YUW : the compiler complains about the double-up of `Selected`
+U5YDC1YUW : do people generally prefix them? like `type Action = ActionSelected | ActionIdle`
+U153UK3FA : <@U5YDC1YUW> you can prefix them or put them in different modules
+U153UK3FA : the same as you would if you had two functions with the same name in the same module
+U153UK3FA : You might also like to Split that very similar type out on it's own eg.
+U153UK3FA : ```type Selectable = Selected | Idle
+type Action = Action Selectable
+type Result = Result Selectable
+
+blah = Result Selected
+beep = Action Idle
 ```
-(well - perhaps it is obvious and I'm just not totally converted to reading the Elm way of typing and spec'ing the syntax)
-Hello! Does anyone have a very basic example in Elm of an app with new page, edit page, index page, etc.. (ruby on Rails platform with controllers, etc..). I am getting a bit lost in the complexity of the examples I see.
-I have all the data from the backend, that I decode into my Model.  I want to use the view of my FirstCallNew, I don't know how to enter that in
+
+U153UK3FA : then you could define some functions for that type like `toggle: Selectable -&gt; Selectable` that toggles between the two states or perhaps a `toString: Selectable -&gt; String`
+U153UK3FA : `toCheckBoxView: (a-&gt; msg) -&gt; Selectable -&gt; Html msg` for displaying it
+U5J08KX0D : <@U0JFEBK6F> are there setters and getters for the Tab control? I want to be able to find out the new activeTab, and to update the relevant pane - it seems (to a beginner like me!) that State, Item and Pane are opaque types, and I don't know how to "get at them" - thanks!
+U5YDC1YUW : <@U153UK3FA> excellent, thank you!
+U3LT1UTPF : Great article! :blush:
+U0JFEBK6F : <@U5J08KX0D> there are intentionally no getters and setters for tab state. Is your use case that you dynamically want to change the content of a tab once the user selects a particular tab ? 
+U5J08KX0D : Yes, exactly - to know which tab has been selected, and then to change the contents
+U5J08KX0D : and sorry for not posting in the elm-bootstrap channel - I've just found it! :slightly_smiling_face:
+U0JFEBK6F : I think a better way than getters/setters in that case would be a "callback"7message  ónTabSelcted? with the id of the tab passed.
+U5J08KX0D : Forgive my beginner-ness! Is there a way of doing what I want to do, or will it require a change to the module? Do you mean that there is already a message `onTabSelected id` ?
+U5Q1H5XC2 : Hey, Im trying to set a field in a record, then use the new field value in the model to update another field. Im using a let block to first create a model, then using this to create another one. Is there a better way? It gets very messy now if I want to have it chain further. ``
+U5Q1H5XC2 : How i do it now:```let    tempModel =
+        setWidth input model.height (*) model
+in
+setRight tempModel.width tempModel.left (+) tempModel```
+
+U41NK9BM4 : Now I think to grok because the line after `in` is not indented. It must be a single expression. Correct?
+U3SJEDR96 : the line after `in` must _always_ be a single expression.. This is just elm-format@exp :slightly_smiling_face:
+U41NK9BM4 : It feels a bit strange, TBH. I'm not used to it :slightly_smiling_face:
+U3SJEDR96 : <@U5Q1H5XC2> that's basically a good way for now. If you feel like it's getting out of hand because you have too many nesting, you could examine whether you need that nesting (what does it buy you?), and if you feel that you do in fact need it, you can make a somewhat more pipeline-friendly api so you can do `model |&gt; withWidth input model.height (*) |&gt; \(model -&gt; setRight model.width model.left (+) model)`
+U3SJEDR96 : <@U41NK9BM4> yeah, it's a little weird at first. If your actual function bodies tend to be longer than your `let in` blocks, it works out pretty nicely; and adding a `let..in` to an existing function won't cause pointless lines to appear in diffs because of the extra indent they used to get
+U41NK9BM4 : I see. So there's also the diff-friendly aspect to keep in mind.
+U3SJEDR96 : <https://github.com/avh4/elm-format/issues/350> for more context :slightly_smiling_face:
+U5Q1H5XC2 : thanks, was trying to do the pipe format yesterday, but couldnt figure out how to reference the "new" model down the pipeline. Is that why you did an anon function?
+U3SJEDR96 : yeah, though I think I'd rather work with functions that _know_ how to calculate the `right` based on the current state.. And perhaps even better, if I change the `width` through the proper function, I'd expect the model to be in a consistent state afterwards
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

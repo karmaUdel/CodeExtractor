@@ -1,24 +1,79 @@
-``` I don't know if it's cider, but something's misbehaving
-...ah, it didn't compile and didn't say anythign
-oh - right-  macroexpand silently outputs a form that doesn't start with a known macro
-even if the thing in it isn't defined
-Back to the drawing board, I guess. Apparently I'm still too dumb to do macros.
-Cider magic introduces ambiguities and special cases about what's been evaluated and what hasn't, it's an easy mistake
-and macroexpand doesn't care if the things inside it are known, it just expands known macros and leaves the rest alone
-Ok so it expands with `C-x e` in the editor, but not in the REPL, which is set to be the same ns. Huh.
-Heh ^^ But I wouldn't want to miss it. It's weird, but it's great.
-...like Emacs, I guess :stuck_out_tongue:
-`C-x e` by default is for calling a keyboard macro inside Emacs, and I think the default binding for expanding a clojure macro is `C-c RET` which works for me from the REPL as well
-`C-c RET` for `cider-macroexpand-1` and `C-c M-m` for `cider-macroexpand-all`
-Ah. So `clojure.core/macroexpand` isn't expected to work in the CIDER REPL?
-oh right you are typing it in the REPL, let me try that
-exactly
-I get the same result as <@U051SS2EU> when typing it in the REPL
-It simply returns the input for me on the REPL, but works fine when evaluating with C-x e in the editor
-But `C-c RET` is a more-than-worthy REPLacement anyway
-what is `C-x e` bound to for you?
-The default, that is evaluating the expression at the cursor
-perhaps you mean `C-x C-e`?
-Ah, yes, right.
-it works for me the same way regardless of whether I type it or evaluate the form in a code buffer or in the REPL
-I'm not on the latest version however, so perhaps something changed, anyways this should probably belong to <#C0617A8PQ|cider>
+U5ZAJ15P0 : <@U3QUAHZJ6> ah, I was planning on doing the same thing. It seems to me this should be done within one test block? I don't think there are much guarantees as to in which order tests will run
+U5ZAJ15P0 : and you would rely on order there
+U3QUAHZJ6 : im trying to avoid a giant let with tons of implicit tests, but i seems that i got no other option
+U5ZAJ15P0 : <@U3QUAHZJ6> I am a newb, but what do you think would be the issue? You can nest `testing` calls to create context
+U050MP39D : dynamic vars and a fixture would be another option but probably not a very good one
+U5ZAJ15P0 : and from what I just inferred from the source of `testing`, it returns its last expression
+U5ZAJ15P0 : so you could use that to pass values around
+U5ZAJ15P0 : not sure though…
+U5ZAJ15P0 : like
+U3QUAHZJ6 : the last line of deftest is returned?
+U5ZAJ15P0 : ```(defn- create-user-account []
+  (testing "Create a user account"
+    (let [user-account (app/create-user-account)]
+      (is (= ....))
+      user-account)))
+
+(defn- create-bank-account [user-account]
+  (testing "Create bank account"))
+
+(deftest scenario-1
+  (let [user-account (create-user-account)
+        bank-account (create-bank-account user-account)]))
+```
+
+U5ZAJ15P0 : I don't know if you can use `testing` outside a deftest though
+U5ZAJ15P0 : if you can't, just move it to within the deftest
+U5ZAJ15P0 : I haven't tried it though, and completely new to clojure.test, so don't take my word on it
+U5ZAJ15P0 : do you have a better option? dynamic vars is all I can think of
+U3QUAHZJ6 : i wanst aware of the `testing`  function / macro
+U3QUAHZJ6 : will check it out thanks :smile:
+U5ZAJ15P0 : <@U3QUAHZJ6> I just tried to use `testing` inside a `defn-` function called from a `deftest` and it worked, but the doc says `May be nested,but must occur inside a test function (deftest).`, so I am not sure how to take it
+
+U050MP39D : unless there's a serious desire to split the tests across multiple files I would go the huge let block over the dynamic vars
+U5ZAJ15P0 : maybe it means it will work so long as it's called within the callstack of a `deftest` function
+U5ZAJ15P0 : or maybe I am doing something very wrong :smile:
+U5ZAJ15P0 : <@U050MP39D> huge let blocks can't be shared across tests though
+U5ZAJ15P0 : no?
+U050MP39D : if they can't I wasn't aware of it
+U050MP39D : well they can't be shared across deftests I guess, but they can be shared across assertions
+U5ZAJ15P0 : <@U050MP39D> would you mind showing me a quick example?
+U5ZAJ15P0 : oh right
+U5ZAJ15P0 : is it common to have a lot of `testing` blocks under a single `deftest`?
+U050MP39D : I guess I'm generally a bit ambivalent about the difference between "tests" and "assertions". I don't really care about the granularity
+U050MP39D : I don't know about common, but I would prefer it over fixtures populating dynamic vars
+U5ZAJ15P0 : +1. I agree, the granularity is a bit confusing
+U5ZAJ15P0 : thanks!
+U04V70XH6 : <@U5ZAJ15P0> I just did a `macroexpand` of `(testing "foo" body)` and it looks like it relies on dynamic calls for context so I _think_ you're OK -- but it's definitely a bit unorthodox.
+U04V70XH6 : ```(macroexpand '(clojure.test/testing "foo" (something)))``` =&gt; ```(let*  [] 
+ (clojure.core/push-thread-bindings 
+  (clojure.core/hash-map 
+   (var clojure.test/*testing-contexts*) 
+   (clojure.core/conj clojure.test/*testing-contexts* "foo"))) 
+ (try (something) (finally (clojure.core/pop-thread-bindings)))) ```
+
+U5ZAJ15P0 : <@U04V70XH6> so deftest sets a dynamic var which is available anywhere within the callstack during its execution?
+U5ZAJ15P0 : thanks for checking it!
+U5ZAJ15P0 : do you have a better suggestion to do what I was trying to do? (split a test in this way)
+U5ZAJ15P0 : is it "not ok" for some reason to split a test in multiple functions that way?
+U5ZAJ15P0 : it seems that it improves composability
+U04V70XH6 : I haven't seen it done that way before -- so it looks unfamiliar -- but if `clojure.test` manages all of its testing context dynamically, I guess it's fine. I guess I would have a specific test for each creation function that asserted whatever behavior I expected (and cleaned up after itself), and then in the main test I'd just call the creation functions without worrying about `testing` or `is`...
+U04V70XH6 : In other words, I'd only have "one" test for those common things, rather than repeating the tests every time they are called.
+U5ZAJ15P0 : Ah, I see.
+U09LZR36F : How should a regex look for the `:aot` option in leiningen?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

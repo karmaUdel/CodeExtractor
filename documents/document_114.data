@@ -1,72 +1,110 @@
+U0NCTKEV8 : (following the thread with <@U0BKWMG5B>) it looks like he uses protocols for some stuff, so maybe that is less of a problem
+U5ZAJ15P0 : <@U0BKWMG5B> the last web framework I looked into was Pedestal. Do you have any opinions on it?
+U0NCTKEV8 : at my last job we used component but had a team member who hated defrecords, so we more or less retro-fitted component to use multimethods instead (which is pretty easy to do) which is where my experience with the pain of mocking that kind of thing comes from
+U0BKWMG5B : I haven't use Pedestal in anger. Some ideas it has are good, but it feels more complex than what I need, and it's web-focused.
+U0BKWMG5B : Duct/Integrant are more generic
+U0LGCREMU : did i just kill a discussion?  ouch.
+U2PGHFU5U : Interesting discussion. At my work we use mount (mount.lite actually), but I always liked the IoC-pattern in OO, which I miss doing mount. It is nice that you do not have to pass state as parameters everywhere, and if you want to mock a state you can substitute state for a mock implementation. BUT I miss having a composition root responsible for composing modules, and seeing that you have to refactor because a module takes too many constructor parameters.
+U0CME35FV : <@U5ZAJ15P0> when you looking at mount, besides the docs, these little example apps may help you to see how it could be used: <https://github.com/tolitius/stater>
+U5ZAJ15P0 : thanks!
+U5ZAJ15P0 : <@U0BKWMG5B> sorry, watching the rest of your talk and reading a bit of Duct's doc I realise this was a silly question. Duct seems more like an approach to structure an application around Integrant
+U2PGHFU5U : I find initializing state in one file like below (where a timbre appender is added) quite nice. I don't know what the equivalent would be for a Component application. Logging is a cross-cutting concern, so perhaps not really something you inject.
 ```
-<@U3JURM9B6> Not sure I'm understanding you but Clojure does not support "reader macros"...
-<@U04V70XH6> : I also thoguht it might be impossible, but then I read: <https://stackoverflow.com/questions/20677055/define-my-own-reader-macro-in-clojure>
-Tagged literals begin with `#` -- like `#inst` and `#uuid` -- but that's not "reader macros".
-Tagged literals have `#`, a namespace-qualified symbol, and a regular Clojure expression. The regular Clojure expression is read, then passed to the function associated with that symbol.
-<@U3JURM9B6> We use tagged literals in our configuration library at work so we can define values in "special" ways.
-<@U04V70XH6> : (I know nothing about tagged literals / reader macros) -- so what you're saying is that (1) what tagged literals get is after macro expansion and (2) it's basically a function call with a single argument ?
-How come `tools.deps.alpha` is using a map (which is merged with the default deps)? Doesn't that mean I can't specify the order of the deps? Which, IMO is crucial on the JVM.
-Just tried out Compojure API (2.0). <https://github.com/metosin/compojure-api>
-I had no idea it was this easy to set up an API. Is this normal?
-Paranormal
-<@U051SA920>. Do you mean the order of maven coordinates in project.clj? I wasn't aware that ordered mattered there
-it matters anywhere (boot, lein etc) I think, it's a maven property
-<@U06F82LES> No I mean the new `tools.deps.alpha` project that just got released. In maven all of the order matters, which makes projects predictable. Though there is a bug report for leiningen too: <https://github.com/technomancy/leiningen/issues/2283>
-but yes, I think <@U051SA920> is right about that
-It's going to seeminly work for projects that have &lt;=8 dependencies and then all in a sudden the depedencies will be semi random and even change if you just change the version number.
-So IMO, deps shouldn't be specified by a map.
-it's prolly worth raising the issue with <@U064X3EF3> &amp; co
-Yeah I'll wait until they wake up in the states.
-<@U051SA920>, I was aware of tools.deps but didn't know order influenced the maven algorithm
-Maybe just order apathetically?
-Whoops alphabetically
-A wonderful typo though
-sorting wouldn't help
-<https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html>
-At least it would make it predictable
-but it prevents you to have control over it
-But yeah deviating from maven here doesn't seem like a good idea
-I imagine deps could support a vector of "tuples" and map transparently, use the former if you care, the other if not (but since maps make ordering unpredictable I am not sure that even make sense to support them at all)
-Yeah I wish the new `t.d.alpha` was leaning heavily on maven and would just provide a hiccup wrapper around their XML config. That'd be neat.
-to be fair I've never been in a situation where I had to re-order maven coordinates in clojure to fix dependencies. Have you?
-Can't you accomplish the same thing through exclusions?
-imho it doesn't really matter, if the aim is to have a simple tool that kind of maps 1-1 with maven without too much indirection, that ordering issue could be considered a flaw
-but no, never had to mess with ordering myself I think
-It's seldom and only matters if you have the same files in two jars. Which you shouldn't have. But then, it's not clear how often this problems has been the issue with user reported problems who never figured it out what the issue was.
-<@U06F82LES> we have had to do this many times when using xml
-deps conflicts is quite common, ex between guava versions in transitive deps it happens to me all the time
-IMO predictability is crucial, so deps should neither be put into a set (as leiningen does currently) nor into a map.
-hi everyone,…i want ask, sqlkorma how set date and datetime mysql format timezone GMT ?
-<@U051SA920>, wait why is it a set? do you mean internally?
-<@U051SA920> my (limited) understanding is that you're meant to resolve all dependency conflicts completely, so it would actually be ok to store them as a map
-<@U051KLSJF> how would that work given that there are transitive dependencies, java dependnecies, etc.?
-do you mean a complete spec in the style of yarn.lock?
-I thought the idea was that you completely resolved all of the transitive dependencies explicitly
-more like, being explicit about exclusions to solve these kind of issues, but still
-(which is the best way to fix these in general anyway)
-<@U051KLSJF> ahh? didn't understand it that way.
-yeah I think you're closer <@U050SC7SV>
-but I thought idea is that there is no conflicts
-sort of like lein pedantic
-I see, that would make sense, and actually an improvement over raw maven definitions (arguably, since way more verbose)
-<@U051KLSJF> My issue isn't only about transitive deps, but about the non-predictable ORDER of the jar's on the classpath. (See my leiningen ticket)
-hmm, yeah
-Does the order matter for you because you have several JARs which provide the same namespaces/classes?
-alex mentioned the classpath order in the talk here in berlin
-iirc, he said that the order is useful for some things (like overriding packages a la carte) but is not a great fit for other things, like making sure the right dependencies are picked up
-so it sounded to me like tools.deps is intended to take classpath order out of the equation somehow
-hey, anyone here who can help out with a boot-clj related question?
-well... probably someone, just ask, but maybe in the <#C053K90BR|boot> channel...
-`{:a 1/2 :b 1/4 :c 1/4}`
-returns me a random element from [:a ':b :c] respecting the probabilities for each of them
-put the cnhoices in arbitrary order
-sample randomly from [0, 1]
-index into the cumulative probability
-yeah I thought about that, so I guess there is no easier way?
-wouldnt repeating each choice depending on the probability and then using `rand-nth` do the trick?
-that would work in a simple case like this one
-but in the general case I would need to find the LCD of all the fractions
-and generate a massive vector with all the repeated stuff
-right, i see
-suppose an item has probability .3957 , do you repeat it 3957 times? :slightly_smiling_face:
-fair point
+(ns blabla.logging
+  "Logging setup for blabla."
+  (:require [blabla.config :refer [config]]
+            [clojurewerkz.elastisch.native :as es]
+            [mount.lite :refer [defstate]]
+            [taoensso.timbre :as log]
+            [blabla.logging.elastic :as log-es]))
+
+
+(log/handle-uncaught-jvm-exceptions!)
+
+(defstate log-level
+  :start (let [current-level (:level log/*config*)]
+           (log/set-level! (:log-level config))
+           current-level))
+
+(defstate blacklist
+  :start (when-not (:development config)
+           (log/swap-config! update :ns-blacklist conj "io.pedestal.http.impl.*"))
+  :stop (log/swap-config! update :ns-blacklist #(vec (remove #{"io.pedestal.http.impl.*"} %))))
+
+(defstate elastic-client
+  :start (let [{:keys [elastic-native-pair elastic-cluster-name]} config]
+           (when elastic-native-pair
+             (es/connect [elastic-native-pair] {"cluster.name" elastic-cluster-name})))
+  :stop (when elastic-client
+          (.close elastic-client)))
+
+(defstate elastic-appender
+  :start (when elastic-client
+           (let [options {:base-doc {:app "blabla"
+                                     :k8s {:namespace (:kubernetes-namespace config)}}
+                          :mapping  log-es/mapping}]
+             (log-es/add-elastic-appender! elastic-client "hd-logging" options)))
+  :stop (log-es/remove-elastic-appender!))
+```
+
+U5ZAJ15P0 : Duct is a backbone, and all the web/else related logic is handled by other librairies, e.g. Compojure
+U0BKWMG5B : Right. It provides a template, a bunch of integrant-compatible libraries, and "modules" which are essentially pure functions that transform the Integrant configuration.
+U0BKWMG5B : Modules provide a way of automating gluing together libraries
+U5ZAJ15P0 : <@U0BKWMG5B> do you have an example of how a module would work?
+U0BKWMG5B : An example, or an explanation?
+U5ZAJ15P0 : explanation, or an explanatory example :slightly_smiling_face:
+U0BKWMG5B : Okay, let me find something quick…
+U0BKWMG5B : Actually, I wrote a blog post about this, which might be more useful: <https://www.booleanknot.com/blog/2017/05/09/advancing-duct.html>
+U5ZAJ15P0 : <@U0BKWMG5B> ah that's perfect, thank you!
+U0BKWMG5B : One module is `:duct.module/web`. That sets up a handler and middleware, and looks through the configuration for a web server. If it finds one, it connects the handler to the existing web server. If none exist, then it creates a new one.
+U0BKWMG5B : There's also: <https://www.booleanknot.com/blog/2017/05/29/building-web-services-with-duct.html>
+U0BKWMG5B : The explanation I find myself often using for modules are web sessions that are stored in a SQL database.
+U5ZAJ15P0 : how does it "find the web server" in the config? based on the name of popular web servers?
+U5ZAJ15P0 : or a special key?
+U0BKWMG5B : Keyword inheritance. The `:duct.server.http/jetty` key is derived from `:duct.server/http`.
+U0BKWMG5B : So to find all the web servers in a Duct config, you just run `(ig/find-derived config :duct.server/http)`
+U0BKWMG5B : The idea is to use `derive` a little like a dictionary definition or a thesaurus. It allows us to describe what a keyword is, to give it some meaning.
+U5ZAJ15P0 : keyword inheritance is just based on the name + namespace of the keywords? e.g. a keyword X inherits from a keyword Y if X's namespace is Y's namespace plus its name?
+U0BKWMG5B : No, it's its own thing. Any namespaced keyword can `derive` from any other.
+U0BKWMG5B : Namespaced keywords have multiple inheritance in Clojure.
+U5ZAJ15P0 : ah, I wasn't familiar with Clojure's `clojure.core/derive` function. I'll look into it before bothering you further
+U5ZAJ15P0 : Thanks!
+U0BKWMG5B : It's not often used, but I feel like it has some important niches
+U0BKWMG5B : <https://clojure.org/reference/multimethods>
+U5ZAJ15P0 : mmh, so `derive` is effectful from what I gather
+U5ZAJ15P0 : Where does it hold the relationship data between keywords? A global registry? I can't see it setting metadata on the keywords themselves
+U0BKWMG5B : A global registry. Derive *can* be used functionally if you supply a hierarchy, but mostly it's used globally.
+U0BKWMG5B : To my mind it's like vars, or specs.
+U5ZAJ15P0 : Oh, I think I get what you meant by a "grammar" then. You use keywords + derive to build a sort of ontology?
+U0BKWMG5B : Exactly :slightly_smiling_face:
+U0BKWMG5B : Jetty, for instance, is a HTTP server that supports synchronous and asynchronous handlers. So we could write:```
+(derive :duct.server.http/jetty :duct.server/http)
+(derive :duct.server.http/jetty :duct.server.http/async)
+(derive :duct.server.http/jetty :duct.server.http/sync)
+```
+
+U5ZAJ15P0 : that's brilliant
+U0BKWMG5B : If Integrant is the "grammar", Duct is attempting to build a "vocabulary".
+U5ZAJ15P0 : So duct is an ontology for configuration + tools that understand and work with this ontology
+U0BKWMG5B : Right. That, plus a way of transforming configurations via a preprocessing "prep" stage.
+U0BKWMG5B : Basically query+transformation
+U5ZAJ15P0 : I'll check out Duct's code if it's not too complex
+U5ZAJ15P0 : That's super exciting
+U0BKWMG5B : Start with duct/core
+U0BKWMG5B : <https://github.com/duct-framework/core/blob/master/src/duct/core.clj>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

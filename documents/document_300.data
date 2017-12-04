@@ -1,35 +1,78 @@
+U0EUHKVGB : You can also use a decoder and encoder to send more complicated objects in and out of Elm
+U0EUHKVGB : Requires a bit more legwork, but it is a good option to turn to if you already have them :slightly_smiling_face:
+U5P4FLYLE : I have :```data=[[163229,"Mon","a"],[248083,"Wed","b"]]
+dims=["dim1", "dim2", "dim3"]```
+I want to make array of records:
+```[{"dim1":163229,"dim2":"Mon","dim3":"a"},
+{"dim1":248083,"dim2":"Wed","dim3":"b"}]```
+I bet I have to do something like below (with fix):
+```List.map (\el -&gt; List.map2 (\val dim -&gt; dim=val) el dims ) data```
+How to enforce in outer lambda to instantiate record?
+
+U0EUHKVGB : In Elm, we don't really have instances of records.
+U0EUHKVGB : This is how you create a record:
 ```
-did you run `yarn` to install npm dependencies?
-I don't believe so.  Doing that now  Lots of activity.
-:thumbsup:
-and if that doesn't get you any further, then maybe `yarn global add webpack-dev-server`?
-All working!!! I had to kill some stray `webpack` processes, but then ... YAY!!  Thanks so much. Would never have been able to do this by myself.
-<@U4BJ8UDCP> module names in elm match the filesystem 1-1: `src/Foo/Bar.elm` corresponds to `module Foo.Bar`. Case sensitivity is also important.
-(the above assumes `"source-directories": ["src"]`)
-Server.Main fails to import Server.Request :disappointed:
-Yeah, go for `/Server` instead :slightly_smiling_face:
-in the package.json?
-in the folder structure
-ah
-and the package too
-the `elm-package.json` doesn't need any changes, but the directory needs to match the module-name, exactly
-the funny thing is - it was working great on my macbook, but now I'm on my ubuntu machine it isn't working :disappointed:
-Mac is case insensitive on the folders
-oooooooooh :slightly_smiling_face: makes a lot of sense now
-thanks guys ^_^
-<@U0CLDU8UB> I made `EverySet` today: <https://gist.github.com/leonderijke/18f04f991a5f1945876e285249f5c8ad> For now, only the functions I needed in the project, but is does work. Is this what you had in mind?
-Yep, that's exactly it! :slightly_smiling_face:
-Cool, thanks!
-Hi! I have a type CycleList which contains List Cycle:
-`type alias CycleList =    { cycleList : List Cycle }`
-`type alias Cycle = { cycle : String , productList : List Product }`
-Cycle.cycle is a date in form of a string 'yyymmdd'
-What I want to do is find the latest Cycle (with the greatest string)
-I tried to do it with foldl, but I don't know if it's the way to go
-There's also `List.maximum` you could use to find the maximum element in a list: <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/List#maximum>
-Maybe you can express `yyyymmdd` as an Int instead of a String? That would make the comparison easier, I'd say.
-strings are just as comparable, and `yyyymmdd` especially. As for getting the maximum; it's a little annoying that there is no `List.maximumBy : (a -&gt; comparable) -&gt; List a -&gt; Maybe a`
-but as luck would have it, `List.Extra` has _exactly_ that :stuck_out_tongue:
-<http://package.elm-lang.org/packages/elm-community/list-extra/6.1.0/List-Extra#maximumBy>
-Then it would be `List.maximumBy cycleList.cycleList.cycle cycleList` ?
-So I have a validation function which checks the length of a String, what type would I use such that I could provide a type `a` which I know supported `length`? So my function could take more than `String` (say `List`, `Set`, etc)
+makeDimRecord dim1 dim2 dim3 =
+ { dim1 = dim1
+ , dim2 = dim2
+ , dim3 = dim3
+ }
+```
+
+U0EUHKVGB : Elm will automatically make this function for you when you make a type alias
+U0EUHKVGB : ```type alias Dims = 
+  { dim1 : Int
+  , dim2 : String
+  , dim3 : String 
+  }
+
+-- Dims is the same as the makeDimRecord shown above
+```
+
+U0EUHKVGB : Next, you probably don't want lists. You probably want a list of tuples.
+U0EUHKVGB : `data= [(163229,"Mon","a"),(248083,"Wed","b")]`
+U0EUHKVGB : If you don't know the name or the number of fields you'll have at compile time, you are better off using a `Dict`, which is otherwise known as a hash, a table, or a map
+U0EUHKVGB : ```Dict.fromList [ ("dim1", dim1), ("dim2", dim2), ("dim3", dim3) ]
+```
+
+U0EUHKVGB : You can't have a record with a changing number of fields. You must know all the fields at compile time. With a dict, you can plop whatever you want in there.
+U5P4FLYLE : ok, thank you. how to go from [Dict.fromList[], ..., Dict.fromList[]] to [record, ..., record]
+U0EUHKVGB : Do you know all the fields at compile time?
+U0EUHKVGB : If you don't, then you can't.
+U48AEBJQ3 : We might want to explore why you have a `Dict` to begin with.
+U5P4FLYLE : I do not know data and dims at compile time
+U0EUHKVGB : Where is this data coming from?
+U5P4FLYLE : From server
+U0EUHKVGB : Who's server?
+U5P4FLYLE : third party server
+U0EUHKVGB : Do they have an API or spec?
+U0EUHKVGB : If you are getting data from there, then they probably have some consistent data structure that they are sending you back.
+U0EUHKVGB : If not, then you have to use a Dict
+U5P4FLYLE : ok, I got it that Dict is more suitable. But how to get from```[[Dict.fromList [("count","163229")],Dict.fromList [("bestDay","Mon")],Dict.fromList [("data.markets.instrument","deposit")]],[Dict.fromList [("count","248083")],Dict.fromList [("bestDay","Wed")],Dict.fromList [("data.markets.instrument","spot")]],[Dict.fromList [("count","105479")],Dict.fromList [("bestDay","Fri")],Dict.fromList [("data.markets.instrument","swap")]]]```
+to array of three records - I do not know names, number of objects at compile time?
+
+U0EUHKVGB : Like I said, you _can't_
+U0EUHKVGB : That's not how records work. The fields are fixed at compile time.
+U0EUHKVGB : Otherwise, you can't provide any kind of type safety, because any dynamically added field to an object changes the type of that object.
+U0EUHKVGB : Hence why `Dict` is what you have to use - a Dict can store keys and values, without needing to care about the fields other than the key must be a certain type, and the value for each key must be a certain type
+U52GHJJTU : Is it possible to have the `elm-stuff` directory somewhere else than the root of the project?
+U0EUHKVGB : Nope, it's always where your elm-package.json is
+U0EUHKVGB : Why?
+U52GHJJTU : For example, if the project root happens to be read-only...
+U0EUHKVGB : What situation is that?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

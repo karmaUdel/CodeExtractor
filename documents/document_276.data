@@ -1,42 +1,112 @@
+U5WD40ZA9 : Anyone know a great package for file uploading in elm?
+U48AEBJQ3 : <@U26LR8F4H> There are a couple of paths to take, but I think that in your case, I would get rid of `type Results` and change the function to `shorten : (Result Http.Error Bitly -&gt; msg) -&gt; String -&gt; Cmd msg`
+U41NK9BM4 : <@U5XHTBFS6> Why are you doing a GET?
+U5XHTBFS6 : it should be a POST, that was a copy paste error :smiley:
+U41NK9BM4 : OK. Makes more sense now
+U5XHTBFS6 : There, fixed it. Thanks for spotting the error
+U26LR8F4H : <@U48AEBJQ3> thanks, worked like a charm :slightly_smiling_face:
+U2UUNG9KK : Thank you <@U41NK9BM4>
+U59AF21LJ : <@U5XHTBFS6> <@U41NK9BM4> I tried and I still get None
+U59AF21LJ : But it still doesn't say the Content-type is anything in the Network tab of Chrome.
+U59AF21LJ : Just says:```
+Accept:*/*
+Accept-Encoding:gzip, deflate, br
+Accept-Language:en,fr-FR;q=0.8,fr;q=0.6,en-US;q=0.4,en-GB;q=0.2
+Connection:keep-alive
+Content-Length:0
+Host:localhost:5000
+Origin:<http://localhost:5000>
+Referer:<http://localhost:5000/>
+User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36
 ```
-ah
-perfect
-working now!
-I mean, you can do it in Elm too, using `decodeString` rather than `decodeValue`, but there's little added value atm
-Yep
-I didn't realise that just changing the types you passed in changed how it interpreted the json
-so i thought i had to just pass in the string
-btw what the new release of my plugin looks like. Totally revamped ui
-yeah, makes sense. But basically, `decodeValue` works on a JS value, `decodeString` works on a string. Any JS value is a valid `Json.Encode.Value`, so passing in a string as a `Json.Encode.Value` means you'd have to `decodeString string flags |&gt; Result.andThen (decodeValue yourDecoder)`
-ah gotcha
-Now, to figure out how to best handle your feedback on `elm-demystify-decoders` :sweat_smile:
-lol well you now have the entire problems i had from go to wo
-yeah, which is invaluable, really
-again thanks for all the help
-Hello, I'm new to elm and currently experimenting a bit. I'm trying to create a port module to a javascript library, but the method has an optional configuration parameter. What is the best way to deal with this? Wrapping the configuration in a Maybe seems to result in a really clunky interface, while making two functions seems to require different names for each. Is there an elm  convention for this?
-if it's optional, then maybe is the way to go
-an when it's optional, I guess there is a default, so then in elm you can use `Maybe.withDefault defaultParam paramFromPort`
-<@U623QK78C> which will give you a normal value without the maybe
-is there a way for multiple case matches to take the same branch in a `case of` ?
-nope; though it's worth considering if they really are separate cases, then. Separating the contents of the branch and making that into a function often helps, too.
-How do we reconcile the will to expose as little as possible and the will to test functions, is it a good practice to expose everything from the main module to be able to do test, is there another way?
-when testing functions i'll usually have them in the same file, then i'll abstract them out and share them as i need them
-Another pattern that's occasionally used is having an `Internal` module that is not part of the exposed modules, but that contains the actual internal logic and exposes the necessary functions. The exposed modules then use those internal functions to expose a nice api
-as an example: <https://github.com/rundis/elm-bootstrap/blob/master/src/Bootstrap/Internal/Button.elm> and <https://github.com/rundis/elm-bootstrap/blob/master/src/Bootstrap/Button.elm>
-thanks
-Over the past few days I made my first Elm app: <https://ellie-app.com/3C82gcxFFjsa1/1> I welcome any feedback. In particular I'm looking for feedback regarding the chosen data model and how to make things more concise (if possible). If anyone wants to take a look, that'd be awesome!
-Can somebody elaborate on the return type `Html Msg`? I understand `Html` because you return an HTML element, but why `Msg`?
-That means that you can/will send `Msg` values from the HTML: they emit messages.
-These `Msg` will then be fed to the `update` function
-The guide explains it as well: <https://guide.elm-lang.org/architecture/>
-especially the section on buttons: <https://guide.elm-lang.org/architecture/user_input/buttons.html>
-<@U2D5SAEMN> Looks nice! If you wanted, you could make do without the initialCmd by using programWithFlags instead.
-Thanks! Do you mean calculating today in JS instead of in Elm?
-Yeah. You can pass the date in as a Unix timestamp in the flags, for example.
-Ah I see. But what would the benefit of that approach be? Only dropping the `initialCmd`?
-Yeah I'm not saying that it's a better way to do it, just pointing it out. So if some time later you happen to get in a situation where the data _has to_ be resolved from the start, flags is a way to do that.
-Got it, thanks!
-Do you have any further feedback? For example regarding the data model or making things more concise?
-Nothing major, to be honest. The filters are sort of screaming they want to be stored in a Set, but since union types are not `comparable` you would need to use an extra package so maybe it's not worth the hassle.
-Thanks <@U0CLDU8UB>! I'm glad to hear I'm on the right track :slightly_smiling_face: Why would you use a Set for the filters?
-- the order is not important
+
+U5XHTBFS6 : Hmmm
+U41NK9BM4 : Mmm. Content-Length:0
+U5XHTBFS6 : Can you post that part of the code?
+U59AF21LJ : So```
+save : Cmd Msg
+save =
+  let
+    url : String
+    url = "update"
+
+    value : Encode.Value
+    value =
+      Encode.object
+        [ ("name", Encode.string "Tom")
+        , ("age", <http://Encode.int|Encode.int> 42)
+        ]
+
+    body : Http.Body
+    body =
+      Http.jsonBody value
+
+    request =
+      Http.request {
+        method = "POST",
+        headers = [
+          Http.header "Content-type" "application/json"
+        ],
+        url = url,
+        body = body,
+        expect = Http.expectString,
+        timeout = Nothing,
+        withCredentials = True
+      }
+  in Http.send PostBack request
+```
+
+```
+#!flask/bin/python
+from flask import Flask, request, abort
+import json
+
+app = Flask(__name__, static_url_path='')
+app._static_folder = '.'
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
+
+@app.route('/&lt;path:filename&gt;')
+def serve_static(filename):
+    return send_from_directory('.', filename)
+
+@app.route('/update', methods=['POST'])
+def update():
+    print request.json
+    if not request.json:
+        abort(400)
+    with open('data.json', 'w') as outfile:
+        json.dump(request.json, outfile)
+    return 201
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+U5XHTBFS6 : I can't find anything odd with your code =s
+U5XHTBFS6 : The Content-length : 0 on the header is very odd though, but I have no idea why that could be.
+U59AF21LJ : <@U5XHTBFS6> Well that's odd… Thanks for trying anyway.
+U59AF21LJ : Yeah it is.
+U41NK9BM4 : Is it the case: `withCredentials = True`
+U41NK9BM4 : I mean, how do you pass credentials?
+U59AF21LJ : <@U41NK9BM4> Tried with False it doesn't work.
+U41NK9BM4 : If there's no creds, leave it False. Don't complicate things
+U59AF21LJ : I also tried `body = Http.stringBody "application/json" "Test string"` but Content-length is still 0 for some reason.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,12 +1,98 @@
+U0LPMPL2U : The request hasn't been made yet
+U285A8S8H : the repl is quite limited unfortunately, it doesn't give you the full elm runtime
+U285A8S8H : what you have there is data that represents your request
+U285A8S8H : you'd need to pass it to elm runtime to see some results
+U0LPMPL2U : you do that by converting to a `Cmd` and returning it from `update`
+U5FU80S06 : <@U0EUHKVGB> Regarding <https://elmlang.slack.com/archives/C0CJ3SBBM/p1498747762625749>, it seems that the technique hinges on creating a function which does not evaluate right away, which means a function that takes an arg (otherwise, the 'function' is simply a value definition which of course happens right away). But this arg could in fact be anything, an `Int` for example, and does not have to be the special `()` value.  So why insist on using `()`?  Is it simply convention?
+U1CE9DL9H : convention I guess. plus the argument is evaluated, so we may as well guide people into the right direction by enforcing `()`
+U0EUHKVGB : convention. `()` is known as `unit`
+U0EUHKVGB : it is the only possible value of it’s type
+U0EUHKVGB : aand that makes it perfect for when you want to show that something has no value
+U0EUHKVGB : Consider this API:
 ```
-i have a variable `today = datetime.date.today()`
-I would presume it needs to be a string
-comma after `today }`
-?
-That's valid
-<@U0PKTUWKH> what's the other end of the stack say?
-You could try `today.isoformat()`
-<@U1BP42MRS> <https://gist.github.com/pleegor/f82958c0755b33d96fe286d79bab8bbe>
-Yeah, on line 35
-A Date object isn't valid, you need to choose a date format as a string (isoformat is a standard)
-something like that?
+unwrap : (() -&gt; b) -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+```
+vs
+```
+unwrap : (Int -&gt; b) -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+```
+
+U0EUHKVGB : It looks like the second `unwrap` does something with an int!
+U0EUHKVGB : Whereas with the first, we know that the first argument to the function we pass in is useless.
+U5FU80S06 : Yes, I just wanted a sanity check that the technique is nomal Elm with no special magic.
+U5FU80S06 : Is the `()` syntax guaranteed to stick around?
+U0EUHKVGB : Err.. Yes?
+U0EUHKVGB : Hard to answer that really, but yes.
+U0EUHKVGB : It’s as guaranteed as tuples, functions and lists.
+U23SA861Y : It's an empty tuple
+U0F01KLV6 : jfbourget: It's not compatible with advanced optimizations. Should work fine in "simple" mode though.
+U0F01KLV6 : I know there has been some discussion on removing `()`, as you can always use `{}`. But that seem like something `elm-upgrade` would handle if that were to happen.
+U2D0V2SAC : Thanks.
+U0EUHKVGB : There will always be a way to represent unit, and it will be a trivial upgrade if the time comes for that, yeah.
+U23SA861Y : I wonder if anyone has rolled an elm app up into a web component?
+U0EUHKVGB : Yep
+U0EUHKVGB : <https://github.com/ohanhi/elm-ement>
+U23SA861Y : huh
+U23SA861Y : does that still work, it seems to consume Signal
+U0EUHKVGB : The concept is exactly the same today.
+U23SA861Y : umm, I see no signal in core today. I was under the impression all the FRP stuff was stripped out
+U23SA861Y : oh never mind those are just ports so they would be replaced with subscriptions
+U0EUHKVGB : Yes
+U0EUHKVGB : ```port module Hello where
+
+import Html exposing (Html, program)
+
+port increment : (() -&gt; msg) -&gt; Sub msg
+port greeting : (String -&gt; msg) -&gt; Sub msg
+
+type alias Model = { clicks : Int, greeting : String }
+
+defaultModel : Model
+defaultModel = { clicks = 0, greeting = ""}
+
+type Msg = Click | Greet String
+update : Msg -&gt; Model -&gt; (Model, Cmd Msg)
+update msg model =
+  case msg of 
+    Click -&gt; { model | clicks = clicks + 1 }, Cmd.none
+    Greet greeting -&gt; { model | greeting = greeting }, Cmd.none
+
+view : Model -&gt; Html Msg
+view model =
+  Html.text (model.greeting ++ " Web Components! Click count: " ++ toString model.clicks)
+
+subs : Model -&gt; Sub Msg
+subs model =
+  Sub.batch [ increment (\_ -&gt; Click), greeting Greet ] 
+
+main :  Program
+main = { view = view, update = update, init = \_ -&gt; (defaultModel, Cmd.none) , subscriptions = subs }
+```
+
+U0EUHKVGB : I only compiled by eye, so bits might be a bit off. But that’s basically all you need to do to make it work on 0.18.
+U0EUHKVGB : Plus change the ports so that now it’s `app.module.ports.portname`
+U0EUHKVGB : and delete the elm-package.json, and just recreate it via `elm-package install --yes`
+U23SA861Y : <https://ellie-app.com/3CjXtn88X6Ma1/0>
+U0EUHKVGB : <https://ellie-app.com/3Ck4498RrTHa1/0>
+U23SA861Y : what did you change there
+U0EUHKVGB : changes:- send `null` instead of `[]` for `()`
+- bind the click event listeners to the buttons by id, rather than using `onclick=..`
+
+U23SA861Y : ahh, was the second step nessecary
+U23SA861Y : my javascript is terrible
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

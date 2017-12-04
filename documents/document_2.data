@@ -1,2 +1,69 @@
+U3JURM9B6 : no, I meant implemenatikn of oget
+U3JURM9B6 : why does it have to be a macro instead of a function ?
+U08E3BBST : the question is, why do you need those to be functions?
+U3JURM9B6 : then I wrap a base layer in cljc
+U3JURM9B6 : and get rid of the #?(:cljs ...) everywhere
+U08E3BBST : cljs-oops (e.g. oget) is writing code for you you would otherwise write by hand, that is why is implemented as macros
+U08E3BBST : if it was a function, it would at runtime dynamically perform some code, but not rewrite your existing code
+U08E3BBST : again, why you cannot wrap oops macros with your own macros? where do you see a problem in that approach?
+U08E3BBST : and btw. we are off-topic here, we should be discussing this in <#C03S1L9DN|clojurescript> instead, have to go anyways
+U0LJU20SJ : just in case a developer of clojars is around. The GSoC link in the github README is broken :disappointed:<https://github.com/clojars/clojure-gsoc-2017>
+
+U050AACJB : how do people feel about the idea of EDN files that have an `(aliases)` header at the top to enable shorter keywords in the rest of the document:```
+(aliases [[monitor.reporter :as r]])
+{:r/foo 1
+ :r/bar 2}
 ```
-so instead of returning the next subtree it returns a function to the next subtree, which can be called like this
+
+U050AACJB : not proposing for this to be part of Clojure, just asking what you think of it as a practice
+U06SGCEHJ : <@U0LJU20SJ> can you file an issue or PR on that repo?
+U0LJU20SJ : I guess so. I just thought it would be faster if any of them was here :smile:
+U06SGCEHJ : I'm here, just focused on other things ATM :)
+U0LJU20SJ : ah ok, well … done
+U0LJU20SJ : the fix is quite simple so no op :wink:
+U06SGCEHJ : <@U0LJU20SJ> thanks!
+U0LJU20SJ : <@U06SGCEHJ> I just created another pr for some other small markdown problems that I found. Hope it helps
+U06SGCEHJ : thanks! I'll let <@U07BWACEA> review those changes, he's the primary on the GSoC stuff
+U46LFMYTD : I am constructing a nested datastructure, similar to a binary tree, recursively using```
+(defn make-tree [{in :in out :out left :left right :right :as tree} indices]
+  (cond
+    (empty? indices) tree
+    :else (assoc
+           tree
+           :left (make-tree {:in (conj in (first indices)) :out out} (rest indices))
+           :right (make-tree {:in in :out (conj out (first indices))} (rest indices)))))
+```
+
+U46LFMYTD : however the recursion will run quite deep and cause stack overflow. Is there a lazy way I can define this tree? I will not actually visit all of the tree
+U46LFMYTD : In short it sets up a deeply nested map, but I want to do this in a lazy way so that the values mapped to by keys are not evaluated until accessed
+U0EJ065V2 : You can do tail recursion for the stack overflow but that won't help with the lazy part.
+U3L6TFEJF : michaellindon: There's <https://github.com/Malabarba/lazy-map-clojure>
+U3L6TFEJF : I haven't tried it myself but it seems to do what you want
+U3L6TFEJF : otherwise, you'll have to implement something like that yourself with `delay` and `force`
+U46LFMYTD : Hi <@U3L6TFEJF>
+U46LFMYTD : I have come up with this, i think it is inelegant
+U46LFMYTD : ```(defn make-lazy-tree [{in :in out :out left :left right :right :as tree} indices]
+  (cond
+    (empty? indices) tree
+    :else (assoc
+           tree
+           :left (fn [] (make-lazy-tree {:in (conj in (first indices)) :out out} (rest indices)))
+           :right (fn [] (make-lazy-tree {:in in :out (conj out (first indices))} (rest indices))))))
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

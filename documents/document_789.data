@@ -1,0 +1,81 @@
+U0RPQMZ9S : <@U0EUHKVGB>, any other advice for <@U42FYKFRN> on reducing compile time on a large project? I feel you're the most qualified person to ask :smile:
+U42FYKFRN : we just looking through the elm-make code to see if there are any optimizations we can make
+U0EUHKVGB : <@U5GSVKPJS> Yes. One of the things that will be addressed with 0.19
+U42FYKFRN : <@U0EUHKVGB> I’ll try to weed out some of the things covered here so far - and wait for 0.19 then - unless I spot a quick win in some of the haskell code
+U0EUHKVGB : <@U42FYKFRN> You already got pretty good advice. 5 mins for that 500 files sounds about right to me. One thing you can do is to turn anything possible into a package. That way it forces code to not be entangled, and therefore lead to faster compile times. but obviously it's hard to do that without private packages.
+U42FYKFRN : <@U0EUHKVGB> yeah thanks - will investigate those options mentioned
+U5GSVKPJS : <@U0EUHKVGB> ok, I wasn't sure if it needed 0.19 or just elm-webpacker-loader to be smarter
+U5GSVKPJS : I guess as Webpack itself just runs loaders per file there's not much it could do
+U0EUHKVGB : There's not a good way to make it work consistently at the webpack level 
+U0EUHKVGB : not in the way people want it to work, anyway 
+U6DG2DGAK : It should _never_ ever be the case that I have to replace```
+viewRecord : Associations -&gt; Element Styles Variations Msg
+viewRecord =
+    renderRecord [] viewAssociation
+```
+with
+```
+viewRecord : Associations -&gt; Element Styles Variations Msg
+viewRecord =
+    renderRecord [] (\index -&gt; viewAssociation index)
+```
+to get rid of a runtime error in elm ```Uncaught TypeError: Cannot read property 'arity' of undefined```
+right?
+
+U5GSVKPJS : Shame
+U6DG2DGAK : Does anyone know whether this elm-compiler bug is known?
+U0EUHKVGB : <@U6DG2DGAK> looks like a recursion bug of some sort. hard to say without seeing more code
+U6DG2DGAK : well the code is online: <https://github.com/matheus23/elm-ide/blob/490e747002cd1446169420bc0c09c5f51c084d28/src/Edit/Type.elm#L107>Its not _that_ much, but its not that little either...
+
+U6DG2DGAK : I have already had experience with recursion bugs in elm, but after looking as hard as I could, I couldn't find any lets that seemed odd
+U6DG2DGAK : I looked through the elm-compiler open issues, and didn't find anything that looked related. I'll try to create a smaller test case
+U6DG2DGAK : ah and I'm sorry. Its got nothing to do with currying. Its actually called "eta abstraction/reduction" I just saw
+U23SA861Y : god is point free syntax ever hard to read
+U2GTQM83A : Hi people. I've got a tough problem for which I cannot find a solution that doesn't involve type classes.
+I fetch objects from the server that, depending on the request, will have a full object in a field or just the object ID. To support that in my types, I have something like this:
+```
+type alias Book author = 
+   { name: String
+   , author: author
+   }
+```
+This way I can define what I expect to be inside book. The same happens with my decoders.
+But in my http request I say which fields should be populated using strings. Something like `/books?embed=author`. I don't have any type safe way to relate my type to what I send in the `embed` field of the url.
+
+What I need is a function that given the type `Book String` would return `[]` and given the type `Book Author` would return `["author"]`.
+
+*Is this possible in Elm?*
+
+U1CE9DL9H : not in this fashion, you'd need to bring stuff down from the type level to the value level, so `Book AuthorOrString` where `type AuthorOrString = A Author | S String`
+U23SA861Y : that and a oneOf decoder
+U2GTQM83A : I don't have an instance of the type when doing Http requests, but I do have the decoder. I was thinking of doing something on the lines of```
+authorToEmbed : SomeType Author -&gt; String
+authorToEmbed d = ["author"]
+
+bookToEmbedString : SomeType a -&gt; SomeType Book a
+```
+
+But I can't really figure out how that would work
+
+U2GTQM83A : <@U23SA861Y> I'm not really trying to decode it. I'm trying to encode it.
+U2GTQM83A : Is there anything like `oneOf` for encoding?
+U0PC31XD0 : <@U6DG2DGAK> did you try defining the function that isn’t working in non-point-free style? might help diagnose the issue
+U23SA861Y : umm well in a sense yes. If you are using a union type an encoder would be simple enough to construct
+U23SA861Y : if you have control over then endpoint you probably shouldn have different types of data going to the same place but if you have to then..
+U2GTQM83A : Hmm. but I'm not using a union type. That's the thing. I know exactly the type I want. Sometimes I want a Book Author. Sometimes I want a Book String.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

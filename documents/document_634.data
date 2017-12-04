@@ -1,24 +1,72 @@
-``` Kindly advise.
-its backed by js, what were you expecting in large numbers?
-I'm not sure myself, but would like to know what max safe upper limit is for `Float`.
-Floats to my understanding are inherently imprecise at a certain point.
-Floats are inherently imprecise at any point. `0.1 + 0.2 == 0.3` is  `False`
-An integer is a float without decimals, basically, so for floats that end in `.0`, the limits are the same as for integers
-when comparing floats for equality, you should generally allow for a margin of error (`epsilon`) relative to the inputs
-yes, thanks
-But I would expect `Basics` to have such an equality function for `Float`.
-<@U3L8MM10T> floats are as defined by IEEE 754 double precision floating-point numbers
-so the limitations of them are pretty well known
-I _think_ it's somewhere on the TODO list, but it's hard to get a "one size fits all" solution for even something as seemingly simple as floating point equality. Such a function _is_ being integrated into `elm-test`, btw, with the slight annoyance that you have to manually specify a margin of error which will then be interpreted relative to the input
-and then there's the special case of one or more args being `0` :sweat_smile:
-floats are inheriently imprecise at any point.
-<@U23SA861Y> Re floats, indeed they are inherently imprecise. Integers should probably be some kind of bignum (unlimited) in Elm though. Having limited integers invites trouble. If you really want speed, Elm could provide special types for that.
-<@U23SA861Y> that was indeed my opening statement :smile:
-regarding floating point representation, i watched a talk a few days ago - Douglas Crockford explaining another implementation for numbers -&gt;  <https://youtu.be/bo36MrBfTk4?t=2580> - he claims will solve a lot of our problems, i'm not experienced enough to say one of the other - but i think if something like he proposes can be implemented in elm - maybe would be useful to do it. One more awesome reason to choose elm :smile:
-It would be great if Elm numbers were not tied to javascript strangeness, for sure
-<@U2LAL86AY> is it the DEC64 he’s talking about?
-<@U4872964V> Yeah, I’m not sure how many problems it would actually solve for Elm though.
-<@U4872964V> yep, DEC64 - <@U4F64AKQV>  me neither. but `this idea that we could implement something completely different` - not needing to copy old stuff that's buggy - seems very applealing :simple_smile:  As Douglas Crockford says - our memory and computational power has increased a lot - and optimizing for it might be like optimizing for datastructure - when dom rendering it accounts of 90% of performance. Optimizing for ease of reasoning and no bugs is more important then memory .
-Wouldn’t it be a good thing to have a way to get the actual HTML element of a virtual DOM node, like you can in React? Or does this somehow violate Elm principles?
-Do you know if there is easy way to "rate-limit" events? Something like with setTimeout in vanilla js. For example I am watching for `Window.resizes` and really don't want to redraw on each pixel changed, maybe just after 300ms when resizing is finished
-<@U170TNSTZ> there is the issue of how you would get access to that value
+U5YKRLXGT : No, exactly!
+U0EUHKVGB : Great, so we’re on the same page.
+U5YKRLXGT : ```view model =    stylesheet (\mailbox -&gt;
+        div []
+            [ h1 [] [ text "Hi" ]
+            , console mailbox [ Html.Attributes.id consoleId ] [ text model.lines ]
+            , button [ onClick (Send "Hello") ] [ text "Append" ]
+            ]
+    )
+```
+
+U5YKRLXGT : So then I thought this, with a foldp at the end
+U5YKRLXGT : imagine mailbox is accumulating rules as the view runs
+U0EUHKVGB : :scream:
+U5YKRLXGT : haha :slightly_smiling_face:
+U5YKRLXGT : I want the output to be:
+U0EUHKVGB : That would not have been a good idea even in 0.15.
+U0EUHKVGB : Okay, hold up a sec
+U5YKRLXGT : ``````div []    [ h1 [] [ text "Hi" ]
+    , div [ Html.Attributes.id consoleId ] [ text model.lines ]
+    , button [ onClick (Send "Hello") ] [ text "Append" ]
+    ]
+style
+    ...rules from every styled element```
+
+U0EUHKVGB : That library has sadly led you down a bad path - in Elm, we _like_ things to be pure
+U5YKRLXGT : Yup, I like that also
+U0EUHKVGB : So, don’t think about side effects or magic or mutation
+U0EUHKVGB : Think about it in terms of pureness
+U5YKRLXGT : I just don't know how I do it without some kind of Monad type thing and forcing the user to totally rewrite the structure to be functors or something
+U0EUHKVGB : If you want to return two things from a pure function, how would you do that?
+U5YKRLXGT : In this case, I really do just want to accumulate elements in a list. I know that is naughty, but I don't want to have to insert a bunch of boilerplate in front of every function call
+U5YKRLXGT : :slightly_smiling_face:
+U0EUHKVGB : Ignore the boilerplate, ignore the the elements, ignore everything else
+U0EUHKVGB : If you wanted to return two things from a function, how would you do that?
+U5YKRLXGT : I have rewritten styled, this third party library to return a record with a node and a list of Strings
+U5YKRLXGT : in one of my many iterations on this problem
+U5YKRLXGT : Then I still struggle to collect those all together without having to modify the way a view normally looks
+U5YKRLXGT : I've also tried adding the css as `data-css` attribute. That's nice, except VirtualDom wont let you traverse and transform the output :slightly_smiling_face:
+U0EUHKVGB : So then your type looks like this, right? `styled : List (Html msg) -&gt; List (Attribute Msg) -&gt; (Html.Html msg, Css)`
+U5YKRLXGT : The stock library looks like this:
+U5YKRLXGT : ```styled : (List (Property msg) -&gt; List (Node msg) -&gt; Node msg)    -&gt; List Rule
+    -&gt; List (Property msg)
+    -&gt; List (Node msg)
+    -&gt; address
+    -&gt; Node msg```
+
+U0EUHKVGB : You’re going to have a bad time if you keep trying to think of things in terms of mutating away and doing everything to avoid boilerplate
+U0EUHKVGB : So that code isn’t even 0.17
+U5YKRLXGT : OH, sorry
+U5YKRLXGT : I added the signal earlier
+U5YKRLXGT : haha
+U5YKRLXGT : that's what led me here
+U5YKRLXGT : Ignore that part :slightly_smiling_face:
+U5YKRLXGT : NOT HELPING :slightly_smiling_face:
+U5YKRLXGT : haha, sorry
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

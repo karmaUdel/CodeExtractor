@@ -1,43 +1,80 @@
+U0LPMPL2U : particularly the section on insertion
+U34MW57SN : hi. So I have a bit of experience doing elm - have a few simple things in production but havent written elm in a few months. I would like to follow a series to nail the basics again and get onto much more advanced tutorials. Any recommendations (free is best)
+U2W8J47KQ : if you haven't done it already, I found <https://www.elm-tutorial.org/en/> to be very helpful
+U1G51S63S : <@U0LPMPL2U> thanks, reading it already :thumbsup:
+U1T0RKXDX : Hey everybody, I wanted to ask if some of you are from Slack, and if we could find a way to have a great slack plan to have access to history ?
+U101G7VEX : I'm interested in building an interactive map with Elm (like this <https://dl.dropboxusercontent.com/s/ir26ue9lftzoqzr/2017-06-26%20at%2019.14.png>) and I'm not really sure what the best approach would be. Has anyone done anything similar and can share some tips?
+U0EUHKVGB : <@U0CK8CJ5D>’s your person for maps in Elm :slightly_smiling_face:
+U0EUHKVGB : <@U1T0RKXDX> We already have slack history
+U0EUHKVGB : <@U1T0RKXDX> <http://elmlang.slackarchive.io/>
+U0EUHKVGB : You have to invite the bot to the channel you wish to archive, via `/invite @archivebot`
+U2MLC3R4G : Hello all,I need a little thoughts on the below code 
 ```
-my parent update can get cluttered, but I can always extract the code into reusable functions
-Ah, that sounds like a better pattern
-I find it easier to reason about this way
-<@U170TNSTZ> it’s definitely an anti-pattern unless you really do have a completely separate component
-Sure. Is it something you picked up anywhere? I’m trying to stick to rtfeltman’s  `elm-spa-example`, but it doesn’t do much child-&gt;parent communication
-<@U170TNSTZ> I found `elm-spa` to not really meet my needs
-I am trying to do an autocomplete which has some self-contained state.
-Ok
-<@U170TNSTZ> that “pattern” is just how we do things in functional languages: if a function needs to return more info, we return more info
-just a heads up that "easier to reason about" is typically a euphemism for "this is the way I'm used to thinking about things"
-there is nothing magical about the `update` function (except for the one you pass to the `program` of course)
-<@U170TNSTZ> that sounds like a separate component, but you can use `opaque types`
-<@U23SA861Y> well...
-<@U66RFDZ8F> I haven’t heard of that before?
-<@U170TNSTZ> I think <https://github.com/evancz/elm-sortable-table> has a really good way of doing it
-I mean self contained components
-<https://stackoverflow.com/questions/40794368/what-is-an-opaque-type-in-elm-and-why-is-it-valuable>
-<@U66RFDZ8F> Great, I’ll read up on both :slightly_smiling_face:
-I generally lean more towards the sortable tables method of a config/context where you pass your message constructors in
-the reason is because then it plays nicely with partial application and currying
-<@U23SA861Y> definitely the best way to do reusable components
-<@U170TNSTZ>, unless your component is meant to be reusable, opaque types are a headache to deal with
-Sortable tables has a great pattern as mentioned by <@U23SA861Y>
-Though be careful with sending calculated state through messages. Sortable tables can get away with it because it doesn't need the previous state to calculate the new state, but if you happen to calculate new state based on rpevious state and send _that_ in your msg from the view, you're up for subtle bugs the moment someone can trigger two messages without your view re-rendering in between...
-<@U170TNSTZ> I went with returning `(model, Cmd msg, childState)` from `update` in my first approach to a reusable autocomplete thing.
-You should _never_ send messages that contain something from your state :slightly_smiling_face:
-in my _humble_ opinion
-if you want to get data from your state, it’s right there, no need to put it in a message
-It seems intuitive. You want to get the selected state back out of it.  But later I dropped doing this, I can't remember exactly why
-I guess it was more of an approach that your app should own its own state, not rely on the component to pass it back up.
-The potential bugs it can lead to are _very_ tricky to figure out
-I meant less passing in a message wrapper that dispatched back state and more just providing a dispatch table that lifts the lower events to your upper messages
-That _is_ a great pattern
-Got a list of `a` tags that I want to drop into a `td`, but I want to have them comma separated. How would you recommend doing this?
-`<http://Html.td|Html.td> [] &lt;| List.intersperse (Html.text ", ") [ Html.a [] [], ... ]`
-thanks
-Has anyone deployed an Elm app into an android WebView? I'm thinking about using elm to implement a part of my android app that has to done with a WebView...
-<@U6DUP1WMA> yes, I have
-Works fine
-cool, might give it a shot. Thanks
-<@U6DUP1WMA> we are doing so now using React Native to wrap it.. works fine on Android
-Wow that sounds dangerous, but I'm glad it's working fine for you. Will definitely try it out.
+type Route
+         = Companies
+          | EditCompany String
+route : Route
+route = EditCompany "first"
+
+&lt;--After I set the route above How do I extract the "first" from variable route --&gt;
+&lt;-- I did use a case like below --&gt;
+
+companyId = case route of
+  EditCompany someString -&gt; someString
+  _ -&gt; Debug.crash "this will never happened" &lt;-- Is there another thing to use instead of Debug.crash here . Given we definitely know this will never happened.--&gt;
+```
+
+I wonder what to use in the case that will never happened. like in the above example.
+Now I could noly use Debug.crash
+
+U0EUHKVGB : You’re going to need to explain a bit more what thoughts you’d like to hear :slightly_smiling_face:
+U101G7VEX : <@U0EUHKVGB> It looks like this map thingy is doable with just CSS and SVG... <https://www.youtube.com/watch?v=2TM63ing6jY>
+U0EUHKVGB : Yeah, that map would be pretty easy to make in Elm.
+U101G7VEX : it would?
+U0EUHKVGB : <@U2MLC3R4G>, please use ``` ``` for code blocks
+U2MLC3R4G : thank you <@U0EUHKVGB>
+U0EUHKVGB : <@U101G7VEX> Yep, very easy. Make the SVG shapes in an editor as they did, then use `elm-svg`: <http://package.elm-lang.org/packages/elm-lang/svg/latest>
+U101G7VEX : interesting, I'll look into it... thanks
+U0LPMPL2U : <@U2MLC3R4G> the compiler can't guarantee that the other cases won't hapen
+U0LPMPL2U : same reason you need the `_` case here:```
+case 1 of
+  1 -&gt; "one"
+  _ -&gt; "other"
+```
+
+U2MLC3R4G : Yes <@U0LPMPL2U>. What would we use instead of Debug.crash here. Do you have any alternatives. To make it compiles.
+
+U5ABF3BH7 : hi everyone. I am getting a list ‘rolodexList’ from my decoder. From it I want to build my sub model location with the values I am getting to build the field hospitals, hospices, etc..  location should look like { location | hospitals = hospitals, hospices = hospices..}The following code gives me an error that I have the same variable used twice in my let—in statement.  ```Types.LoadRolodexLists (Ok rolodexList) -&gt;
+    let
+        hospitals =
+            getInstitutions rolodexList "hospital"
+        updatedLocation = Types.UpdateLocation (Location.ChgHospitals hospitals)
+
+        hospices =
+            getInstitutions rolodexList "hospice"
+        updatedLocation = Types.UpdateLocation (Location.ChgHospices hospices)
+
+  …….
+
+    in
+    ( { model | location = updatedLocation}, Cmd.none )```
+
+U5ABF3BH7 : If I use different name, I will not get all the updates I need. How can I update the submodels in one shot?
+
+U0LPMPL2U : <@U2MLC3R4G> based on the types, it looks like the case statement needs to return a string
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

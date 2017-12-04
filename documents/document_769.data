@@ -1,0 +1,75 @@
+U3SJEDR96 : <@U2Q5GJNTB> running tests before committing is always a good idea :wink:
+U4872964V : <@U2Q5GJNTB> this will be adressed in 0.19 i hear
+U2Q5GJNTB : yeah, I will just add it to my push hook so that I stop forgetting to look at the tests.
+U2Q5GJNTB : <@U4872964V> cool. That would be nice.
+U23SA861Y : one way is to prevent pushes to master directly and then require all tests in github to pass before you can merge in (provided you are using github)
+U24HQ3RJ7 : <@U2SR9DL7Q> provided i go the route of `qaData, qbData`..i donot understand how can i write :
+```
+toggleExpand : QuadrantType -&gt; ViewData -&gt; ViewData
+toggleExpand quadrantType viewData =
+    { viewData | case quadrantType of
+                     QA -&gt; { expanded : not viewData.q1Quadrant.expanded }
+                     QB -&gt; ...
+    }
+```
+`case` will return a `QuadrantViewData`.. but How do i get right variable name before it.. like `q1Quadrant or q2Quadrant`.. ?
+
+U2Q5GJNTB : <@U23SA861Y> yeah that is true as well. I should get into that habit for documentation purpose and for the reason you just mentioned. The curse of side projects I guess… laziness
+U23SA861Y : meh, if it's just a side project then setting up all that stuff takes more time than it saves
+U2D07QZN3 : Anyone interested in helping out with this? <https://github.com/smckissock/trump-conflicts>
+U2D07QZN3 : (please let me know if I shouldn't be posting this kind of thing here)
+U2SR9DL7Q : <@U24HQ3RJ7>  ```
+viewQuadrant -&gt; QuadrantType -&gt; Html
+viewQuadrant quadstuff =
+    case quadstuff of 
+        QA { expanded, otherparam otherparam } -&gt; actions
+        QB { expanded, otherparam otherpparam } -&gt; actions
+```
+
+U24HQ3RJ7 : i figured out i will need 2 case expressions..i want to change `ViewData`  itself.. which is part of Model.
+
+U2Q5GJNTB : yes, that is why i did not do it yet
+U2SR9DL7Q : <@U24HQ3RJ7> you want to change ViewData when it's not describing a quadrant?
+U2SR9DL7Q : <@U24HQ3RJ7> so your `QuadrantType` is the Unique name QA, QB, QC followed by the viewData record. You don't need two inputs. For example, I have a `type Game = NoGame | ActiveGame | WonGame Player` type. `WonGame` is just a unique name but `Player` is a record. In my view function, I have```
+viewGame game = 
+    case game of 
+        NoGame -&gt;
+        ActiveGame -&gt;
+        WonGame { data1, data2, data3} -&gt;
+``` 
+the { data1, data2, data3 } type here is the `Player` record. 
+
+I'm probably not understanding your use case clearly. In my head, it sounds like quadrants should be a union and all quadrants need viewdata on how to show them so the quadrant type should be Both a unique name and an accompanying vewData record. If you want to edit viewdata you can, but it would be within the context of updating a quadrant.
+
+U24HQ3RJ7 : yes.. each quadrant-type will have a `QuadrantViewdata`..but to keep data separate, i am putting them in different types.. `type QuadrantType = QA | QB | QC | QD` and `type alias ViewData = { qaData = QuadrantViewData, qbData = QuadrantViewData ... }` as all quadrants are in view.. so they will have `QuadrantViewData`. which is `type alias QuadrantViewData = { enabled : Bool } `
+
+U24HQ3RJ7 : so, given a quadrant type if i have to toggle its view.. i.e. for function with signature : `toggleExpand : QuadrantType -&gt; ViewData -&gt; ViewData`
+U2SR9DL7Q : um, so qaData and qbData have the same fields?
+U24HQ3RJ7 : yes..
+U2SR9DL7Q : I guess if you have operations that work only on ViewData independent of quadrants you could keep separate. But I rather just have them together `type Quadrant  = QA QuadrantViewData | QB QuadrantViewData | QC QuadrantViewData | QD QuadrantViewData` So to toggle a quadrant view you just go```
+toggleQuad quadrant = 
+    case quadrant of 
+       Qtype Qview -&gt; Qtype { Qview | toggle = False} 
+``` 
+and your views know not to display quadrants with toggle set to False
+
+U3LUC6SNS : <@U2SR9DL7Q> Thanks for the comments.  I will check out `Navigation` and `UrlParser`.
+U2SR9DL7Q : if there's a view for every quadrant, why allow them independence? Just have a type that is both the Qtype and the QViewData. Then that becomes the one source of truth for your quadrants.
+U2SR9DL7Q : .... of course, I could be totally wrong. That's the nice part about elm. If you can get it to compile then whatever you choose will probably work, regardless.
+U24HQ3RJ7 : the problem has now moved to upper level.. which will need to have data for 4 quadrants..
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

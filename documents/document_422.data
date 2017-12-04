@@ -1,14 +1,213 @@
+U0FP80EKB : Luckily the constructors for a union type are composable, since they are just ordinary functions, so we can do `FieldsHelpers.GeneralField &lt;&lt; FieldHelpers.DisplaName` as the event handler
+U5QJW0DDE : I like it
+U0FP80EKB : Keep it in your pocket as a tool for when you start noticing groupings in your `Msg` constructors. That's often a flag that you'll want to collapse some of them.
+U0FP80EKB : But, it definitely adds complexity to the system, so I will always say "extract to this, don't plan for it"
+U0FP80EKB : Our system is constantly going through cycles of extraction. We're currently replacing our original, faulty design of `AppearanceFields` and `ContentFields` with `GeneralFields` and `TypeSpecificFields`  :slightly_smiling_face: Luckily Elm makes it pretty safe to do these refactorings, although it will be a bit time-consuming.
+U5QJW0DDE : i assume in your example embed would refer to a record somewhere
+U5QJW0DDE : and CommonControls.textControl is a function returning Html?
+U0FP80EKB : yeah. It is just a wrapper for a view function.
+U0FP80EKB : ```textControl : String -&gt; String -&gt; (String -&gt; msg) -&gt; Html msg
+textControl labelText value onInputMsg =
+    controlWithLabel labelText &lt;|
+        input
+            [ class "text-control"
+            , defaultValue value
+            , onInput onInputMsg
+            ]
+            []
 ```
-I'm at the bottom of the learning curve regarding these more complex (?) types...
-no worries, we've all been there at some point :slightly_smiling_face:
-<@U0LPMPL2U> that's unfortunate :confused: i found create-elm-app, now you mention elm-new... now there's one extra decision i wouldn't want to make as a beginner. do you know if this is something the core devs are concerned about? i mean, elixir went ahead and added `mix new` to the language itself, so for phoenix it's a simple `mix phoenix.new`. anyway, any i'll give both a try and see what i find, thanks!
-The thing is, Elm is a language, not a framework. So the equivalent of a start app is super minimal
-why not have a bit of both? i assume elixir must also allow one to just do `elixir &lt;file&gt;` or something like that, but if you're starting something bigger, it has the tooling and, most importantly, the _conventions_ for it. even if it's optional, it would be nice to have a blessed official starter cli thing, imho :slightly_smiling_face:
-I think elm apps tend to vary more though. An SPA with routing is different from an embedded widget or a non-routed SPA
-<@U6D3ERLA1> is the `string` function from the `Json.Decode` lib or from the `Xml.Query` lib?
-it looks like <http://package.elm-lang.org/packages/eeue56/elm-xml/2.2.2/Xml-Query#string> would satisfy that particular type mismatch
-Agreed on principle, but not in practice - I feel like the language and conventions are still a little too much in flux to present this type of "this is how to do it." The very very basics are there already, tho - `elm-package install` will create a package file and install minimal dependencies for an HTML app. Creating a `Main.elm` or whatever and starting elm-reactor is the bare minimal to get started.
-that makes sense. i guess for now it's better to let the community come up with different and possibly overlapping generators and see which ones get traction. later the winning strategies can be adopted upstream.
-also, i didn't know i could start a project with just `elm-package install` so thanks for that :grin:
-<@U0CQ254F5> Indeed that fixes the type mismatch - thanks! What led you to that conclusion?
-`Decoder String` is a type from `Json.Decode`
+
+U0FP80EKB : `Embed` is a module that gives an entry point to building the embed modules. We use the same code for the actual live embed that sites on our customers' sites and the customization editor in our admin site.
+U0FP80EKB : We have a bunch of records floating around, but, at the core, it looks like```
+type alias Embed =
+    { id : Id
+    , displayName : String
+    , embedType : String
+    , apiUrls : ApiUrls
+    , appearance : UI.Appearance
+    , content : Content
+    }
+```
+
+U0FP80EKB : We initialize it via flags at load time.
+U5QJW0DDE : thanks, nice summary
+U5QJW0DDE : reading more code like this from real-world examples will be good to understand all the syntax and architecture and best practices
+U0FP80EKB : Yeah. I wouldn't call ours best practices, though. :slightly_smiling_face: We're constantly evolving the design as we feel pressure. There are a couple good ones, like the collapsing technique for `Msg`
+U5QJW0DDE : i'm switching my mind from clojurescript so for me the first thing i'm always doing is trying to follow the types through the flow
+U0FP80EKB : That can be a reasonable way to look at it.
+U0FP80EKB : At any point in time, our codebase consists of what I call a bunch of "fish with goat heads". Halfway evolved to the final design. :slightly_smiling_face:
+U5QJW0DDE : well, at least the compiler enforces some degree of structure at a minimum
+U0FP80EKB : yup
+U5QJW0DDE : which you don't get with dynamically typed langs
+U0FP80EKB : we rely on that a lot
+U0FP80EKB : We have other techniques for those languages. We have a rails backend, so we rely on other things to maintain the structures there.
+U0FP80EKB : Our Rails codebase is the same, though, as it has a fairly fluid design
+U0FP80EKB : We have a really small team with pretty good communication, so it works well to be more fluid
+U5QJW0DDE : <http://www.elm-tutorial.org|www.elm-tutorial.org> seems pretty good so far
+U0FP80EKB : We have come up with some nice libraries that we use, such as handling our overlays, coordinating with css-based animation timing, `Id`, `Editable`, a library for handling workflows, then combined with the overlay to handle overlay-based workflows. :slightly_smiling_face:
+U0FP80EKB : Lots of fun stuff.
+U5KAUJZ4K : Hi here, is it possible to create elm interface for  c++ application? how should I write a wrapper for it?
+U0K92QFST : <@U5KAUJZ4K> do you want to integrate an Elm front end with a c++ back end? Or something else? Not sure what you mean by "elm interface"
+U5KAUJZ4K : yes sorry, ELM for front end yes
+U5QJW0DDE : if by backend you are referring to the web server, you can write a server in anything
+U5QJW0DDE : alternately, you could use a c++ library for sending out websocket messgaes, and then subscribe to them in Elm
+U5QJW0DDE : and bundle the whole thing as one program
+U5QJW0DDE : i'd recommend websocket++ library for c++
+U5QJW0DDE : or, if you use Qt for your C++, you can embed your Elm application in a Qt web view layer, which can always communicate with C++ logic
+U5KAUJZ4K : I create UI for C++ audio program, I should try to embed ELM app in a QT web view layer, that sound nice :slightly_smiling_face: thank you
+U5QJW0DDE : If you are using Qt, you might just consider QML as well, it is more tightly integrated into Qt already, and it uses FRP for its UI mechanisms. It is dynamically types and uses javascript. Another option would be to load Elm compiled JS into a QML program that interfaces with the C++. I've done that with Clojurescript
+U5QJW0DDE : is there a way to grab what is inside a tuple at a particular index without a let binding?
+U3SJEDR96 : Tuple.first/Tuple.second for 2-tuples, or with a patter in either a let binding, the function declaration, a lambda, or a case..of
+U2JA29EKF : think you can also pattern match them in a function defintion
+U3SJEDR96 : i.e. `foo (bar, baz) = baz` is essentially how `Tuple.second` is defined
+U5QJW0DDE : and update msg ( f, sec )  is pretty nice
+U3SJEDR96 : :slightly_smiling_face:
+U5QJW0DDE : is it possible to  match on a range, i.e. a case branch for an Int between 5 and 10 and another for a different range, etc
+U0J1M0F32 : Yes, I think, <@U5QJW0DDE>... I'm looking for some of the code now.
+U0J1M0F32 : I have it somewhere.
+U0K92QFST : I actually don't think it is, at least not in the way you can match on a range in Ruby.
+U0K92QFST : But prove me wrong <@U0J1M0F32>!
+U3SJEDR96 : you can do something like `case (compare x 5, compare x 10, compare x 20) of`, but I doubt that'll be more readable than a list of `if..else if`, or a function `rangeFor : Int -&gt; Range` where `type Range = Range Int Int` or something
+U0J1M0F32 : Sorry <@U0K92QFST> and <@U5QJW0DDE> seems my memory betrayed me. I basically have what <@U3SJEDR96> is describing, not a pattern match on a case.
+U0J1M0F32 : I do remember there was something vaguely like that back when Elm has range literals, but none of that would work now a days.
+U0K92QFST : I do love Ruby's range literals, but I also realize that it's not exactly Elmish
+U5QJW0DDE : Swift has them, very convenient
+U0J1M0F32 : There are a few things like that in Elm, that are not the decision I'm the most used to, or most comfortable with, but when it has me work through a more robust and better thought out system, I'm rather glad the easy tool wasn't always there.
+U494Y62N7 : Does anybody here experience with the `elm-community/random-extra` package? Specifically, I'm looking here: <http://package.elm-lang.org/packages/elm-community/random-extra/2.0.0/Random-Extra#andMap>
+U48AEBJQ3 : <@U494Y62N7> Many of us can probably help you with that. What do you want to know?
+U494Y62N7 : In the code example, they reference `person` and I'm wondering exactly what `person` is or probably is
+U494Y62N7 : I mean, i know it's a function - I'm just unsure about what the function is
+U3SJEDR96 : In that case, it's probably `type alias Person = { firstName: String, lastName: String, birthday: Date, phoneNumber: String, address: Address, email: String}`
+U3SJEDR96 : essentially, just "a large record", really
+U3SJEDR96 : which means `Person : String -&gt; String -&gt; Date -&gt; String -&gt; Address -&gt; String -&gt; Person`
+U494Y62N7 : ok
+U494Y62N7 : thank you
+U3SJEDR96 : It's basically how json-decode-pipeline works
+U494Y62N7 : yea
+U3SJEDR96 : except rather than `andMap (field..)` it has `required`
+U494Y62N7 : should it be `Person` instead of `person`?
+U3SJEDR96 : eh, maybe they just have a `person = Person` somewhere. Not sure if using a type-alias in that example would make thing more or less confusing, it would be better if that function definition were there tho
+U494Y62N7 : yea
+U3X6H8X8W : Good morning, everyone
+U3X6H8X8W : I'm working on a not so small SPA and I came with an issue that I don't know how to resolve
+U3X6H8X8W : here's the code
+U3X6H8X8W : <https://gist.github.com/davidpelaez/a30eb3d5a8db8828d49ac45ee6be21a7#file-productdata-elm-L75-L78>
+U3X6H8X8W : and the problem is as follows:
+U3X6H8X8W : I have a "drawer" with a form to edit or create a "Product" in our backend. For that we have a `ProductData` representing all the valid data with the proper types and we have a `ProductForm` representing the info of the form with the potentially invalid user input. I need to implement a funtion to convert from the form to the actual data so that I can send it to the server. This conversation may fail, therefore it returns a `Result String ProductData`. How do I handle conversions of one record type to another where field conversation may fail?
+U3X6H8X8W : I'm thinking of something like json decoders but for my own types :thinking_face:
+U3X6H8X8W : but I have no idea how to do it
+U3X6H8X8W : I look at `elm-validate` but that only gives me errors, I don't know how to combine something like a validation and a record generator
+U3X6H8X8W : I also considered not storing invalid data but I cannot do this because validating that a String is a number usually fails until the user completes his input. that's why I have a form with strings all over
+U3SJEDR96 : <https://ellie-app.com/3J4SM5dSGBxa1/0>
+U3SJEDR96 : since we were talking about `andMap`/`apply` anyway
+U3X6H8X8W : Let me read this functional wizardry for a moment!
+U3SJEDR96 : actually, <http://package.elm-lang.org/packages/elm-community/result-extra/2.2.0/Result-Extra#andMap>
+U4JT89FGB : One approach is to store invalid data - have the validator make sure it can all be properly cast to the values necessary for the HTTP request. So as long as the validators all pass, you can safely convert type. I.e. don't do anything unless it's all valid. This way, an extra Result converter might be overkill since the types are defined in an abstract way by the validator
+U3X6H8X8W : the error string would be the first error in the chain?
+U3SJEDR96 : Yes
+U3SJEDR96 : You could potentially make them accumulate..
+U3X6H8X8W : <@U3SJEDR96> I get it. Thanks for pointing it out
+U3X6H8X8W : <@U4JT89FGB> I'm trying to do the don't do anything approach until it's all valid. But it the validator passes I can convert but I would have to discard the potential errors on the conversion which makes me feel uneasy.
+U3X6H8X8W : <@U4JT89FGB> what you propose is validate, if it passes then you are certain that the conversion process will be OK, then, convert and you should never get an error on conversion, is that correct? More like a logical approach to the steps than fully considering all errors in every step?
+U4JT89FGB : that's what i'm proposing - but it all depends on what you're using the converted data for. my original assumption was you're just validating so it meets the HTTP API spec
+U3X6H8X8W : yeap, I just ensure they match the expected types and let the backend validate all the extra things
+U3X6H8X8W : not the best UX but a little faster to ship right now
+U4JT89FGB : yeah, so what i'd do is have a FormData with validators and have the server respond with the fully qualified record for decoding after successful creation. but this is just my preference
+U3X6H8X8W : and how do you validate things? With a library like elm-validate or your own code?
+U4JT89FGB : yes, i use elm-validate
+U3X6H8X8W : OK, thanks for the help I'm going to implement that and see if I can accumulate things like <@U3SJEDR96> suggested
+U3X6H8X8W : this channels has helped me so much, thank you <@U4JT89FGB> &amp; <@U3SJEDR96>
+U2SR9DL7Q : Hey, so I'm trying to see how far I can take this static page model in github. Do you think I could make add blogging functionality to a site without having to implement a db on the backend. I'm wondering if a simple JSON file could be feasible.
+U4JT89FGB : yeah, that'd work fine. `{user}.<http://github.io/{repo}/{filename}.json|github.io/{repo}/{filename}.json>`
+U4JT89FGB : of course you wouldn't be able to POST new articles to the blog, you'll need to git push an update to your json file
+U1NME8MS8 : How crazy would it be to build an elm -&gt; react/redux transpiler so I can use elm in work, but pretend to still use react
+U23SA861Y : very crazy
+U0FP80EKB : <@U1NME8MS8> talk to <@U0F7JPK36> about the elm-react bridge he wrote :slightly_smiling_face:
+U0F7JPK36 : It's not worth it :stuck_out_tongue_closed_eyes:
+U2SR9DL7Q : <@U4JT89FGB> could Elm easily encode my text input to a json file type and update the json file? or would I have to do that myself manually?
+U4JT89FGB : the elm app would have no way to write that file.. unless you had some server-side component that updated the file and pushed the change to github… in which case it'd be easier to use a database
+U23SA861Y : heh, arguably I like the idea of publishing via git commit :stuck_out_tongue_closed_eyes:
+U1NME8MS8 : <@U0FP80EKB> yeah I assume it would be quite an effort
+U0JFGGZS6 : <@U3X6H8X8W>  I don't know if it suits your case, but I put up a validation library that works like ilias described, with some extra bells and whistles like an Initial state.  <http://package.elm-lang.org/packages/ericgj/elm-validation/1.0.0/Validation>
+U3SJEDR96 : <@U3X6H8X8W> also I'm going to claim temporary braindeathness while writing that example earlier and say you can redefine `apply = Result.map2 (|&gt;)`.
+U64MK7215 : hi,
+U64MK7215 : how do i send json requests in elm?
+U48AEBJQ3 : <@U64MK7215> POST? GET?
+U48AEBJQ3 : The answers you seek are probably here: <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http>
+U23SA861Y : prepare the task and then dispatch
+U2SR9DL7Q : does anyone know of any elm applications with flask on the back-end?
+U5QJW0DDE :  <@U2SR9DL7Q> I know some people who wear a flask on their back end
+U23SA861Y : I have a flask in my desk, does that count?
+U2SR9DL7Q : <@U23SA861Y> only if it has a python in it.
+U2SR9DL7Q : I'm looking through some github repos, but I was just wondering if anyone active here knew of some good ones... I've been using elm with no back-end so far. Starting to look into server-side connections
+U31A7HG1E : I am attempting to decode some oddly structured JSON and struggling to figure out how to leverage what exists in Json.Decode and Json.Decode.Pipeline to make it happen.  I essentially want to decode *and filter* contents of a single array from JSON into different fields of an Elm record.
+U31A7HG1E : The JSON looks like:
+U31A7HG1E : {  children: [
+    { title: "a title" },
+    { description: "description" },
+    { info: … },
+    { info: … },
+    { info: … }
+  ]
+}
+
+U31A7HG1E : And my Elm record and alias looks like:
+U31A7HG1E : type alias Organization ={ title : String
+, description : String
+, infos : List Info
+}
+
+U31A7HG1E : It is guaranteed that there is only ever one 'title' and one 'description' in the 'children' array.  There can be many 'info' instances.
+U23SA861Y : oh wow, thats special isn't it
+U31A7HG1E : Yeah, I have no control over that format, unfortunately
+U663M2MB7 : Special, and surprisingly common...
+U31A7HG1E : This is JSON converted from an XML document, which kinda explains the structure
+U48AEBJQ3 : <@U31A7HG1E> There are different ways to attack this problem. If you are confident that the title will always be at index 0 and the description is at index 1, it is easier. If you can't be confident of that, then it is a bit more convoluted.
+U23SA861Y : yeah I was going to ask, are they at the top garunteed
+U31A7HG1E : <@U48AEBJQ3>, thanks, I have seen the index decoder, but unfortunatley I do not believe that I have a guarantee of the positioning.
+U31A7HG1E : My current thinking is to introduce an intermediate representation to decode to, and then post process that
+U31A7HG1E : Something like:
+U31A7HG1E : type Node = Title | Description | Info
+type alias ParsingOrganization = 
+{ nodes: List Node
+}
+
+U23SA861Y : that would be one way to attack it
+U23SA861Y : and then do a final map from List Node -&gt; Organization
+U31A7HG1E : Yes <@U23SA861Y>,  I think that seems workable
+U23SA861Y : it would be more like `type Node = Title String | Description String | Info InfoRec`
+U31A7HG1E : Oh yes, definitely, thanks
+U48AEBJQ3 : Make decoders for each type, use `oneOf` and then you end up with a `Decoder (List Node)`. Then write `processList : List Node -&gt; FinalStructure` and use `Json.Decode.map`.
+U23SA861Y : yeah you get a `nodeDecoder = JD.oneOf [titleDecoder, descDecoder, infoDecoder]`
+U31A7HG1E : Ah, ok
+U23SA861Y : title decoder might look like ```
+JD.field "title" JD.string
+   |&gt; JD.map Title
+```
+
+U31A7HG1E : Great, this is making sense.  I'll give it a go.  Thanks!
+U0FP80EKB : I probably would write it `JD.field "title" (JD.map Title JD.string)`
+
+U0FP80EKB : We do just this thing for our `Id` decoder <https://gist.github.com/coreyhaines/5f2a8d15de99ce91adbb10ac855172b1#file-id-elm-L20-L22>
+U0FP80EKB : makes it easier to use in a pipeline while decoding other fields
+U641LDZFU : hey everybody, I am trying to get unique values out of a list I have a nasty big function which works, and I am wondering if there is a much nicer more FP way to do it?
+U641LDZFU : <https://ellie-app.com/3J7tc7ykKZqa1/10>
+U641LDZFU : any hints appreciated :slightly_smiling_face:
+U641LDZFU : nvm I found <https://github.com/elm-community/elm-list-extra/blob/master/src/List/Extra.elm>
+U641LDZFU : Which has a) the dropDuplicates function and b) juicy lecker source code :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,16 +1,151 @@
+U3SQ42JJW : only in the browser inspector
+U6EV3H0N7 : <@U5QE9LDU4> I think this was discussed _somewhere_ in this slack yesterday, and the answer was "maybe in 0.19, maybe not" if i remember correctly
+U3SQ42JJW : but that's of course not persistent…
+U5QE9LDU4 : kk thanks. Ain't no biggy.
+U5X2ZRFDF : ```getInts : List (String, Int) -&gt; Maybe (Int, Int)
+getInts pairs =
+    case pairs of
+        [(_, i1), (_, i2)] -&gt; Just (i1, i2)
+        _ -&gt; Nothing
 ```
-Cool. Thanks all.
-Just watch out for 0.
-You'll need to special case that in any case.
-Not in my version
-Uh, okay. As long as you don't mind negative infinity values floating around your runtime....
-`String.length &lt;&lt; toString` works with 0
-...or you just special case it to 1.
-but doesn't work for infinity
-the `logBase 10` approach works for infinity but returns `-Infinity` for 0
-Oh, I see what y'all are saying.
-Yes, you don't have to special case `0` in the `String.length &lt;&lt; toString` version.  Sorry, I thought when <@U3L8MM10T> said "Not in my version", he meant, "Not in the codebase where I will be implementing this function". I've been misreading things.
-Ignore my comments as attempts to correct errors that people weren't making. :stuck_out_tongue:
-Actually, my version is correct -- all you have to do is turn `8` sideways. :slightly_smiling_face:
-The number of digits in 1000 * 1000 is not infinity.
-There's a very finite number of digits there, thankyouverymuch. :smile:
+
+U23SA861Y : sry what?
+U48AEBJQ3 : Leftover from a previous conversation, it appears.
+U48AEBJQ3 : And yes, that is how one would implement it if there wasn't a way to fix it before it became a problem.
+U3LUC6SNS : I'm looking for more advice on how to deploy an Elm app.  Fire away! :slightly_smiling_face:
+U6E5PS83X : Aww, I can't do this:
+`import Project.Thing.Request.User as Request.User`
+
+Or can I and I'm missing something?
+
+U6E5PS83X : for example if i have
+```
+import Project.Thing.Data.User as User
+...
+import Project.Thing.Request.User as ???
+```
+
+U4872964V : No, but you can import it as `RequestUser` for instance
+U6E5PS83X : yeah that's probably going to be my workaround. thanks <@U4872964V>!
+U3SJEDR96 : You could also make things potentially confusing and improt both `as User` :stuck_out_tongue:
+U6CB44HMF : What do you all verbalize something like `Html Msg` as? Do you say "An Html with Msg subtype", or like "An Html Msg"? Or what?
+U5QE9LDU4 : <@U3LUC6SNS> are you curious about deploying an app in general or something specific about Elm? Elm just generates a js file that you include in your index.html as far as I know
+U0LPMPL2U : <@U6CB44HMF>  I'll typically say "An Html Msg" or "An Html emitting Msg"
+U0LPMPL2U : <@U5AN2ATNZ> you're trying to DRY up your case statement?
+U5AN2ATNZ : I guess you could say that. :slightly_smiling_face:
+U4872964V : <@U5AN2ATNZ> I could tell you, if you tell me why you think that would be better than what you have :slightly_smiling_face:
+U5AN2ATNZ : It's not logical to copy/paste that getRandomGif message all over, right?
+U0LPMPL2U : returning `getRandomGif` or `triggerMorePlease` is equivalent in terms of DRYness
+U0LPMPL2U : however, it's not recommended to trigger `Msg` manually
+U0LPMPL2U : `Msg` is used to respond to events from the outside world
+U0LPMPL2U : You've extracted a `getRandomGif` function that's being re-used in two places. I think you've DRYed this up as far as it will go.
+U5AN2ATNZ : That makes sense, actually. Hadn't thought about it that way yet.
+U5QE9LDU4 : <@U0LPMPL2U> Can you explain why it isn't recommended to trigger Msg manually?
+U5AN2ATNZ : I was thinking: model's topic changed, so I could reuse MorePlase without any "params", which would get the topic from the model and just get me a new image, instead of calling the getRandomGif myself with a different topic.
+U0LPMPL2U : when you're trying to DRY up your code, there's no need to go all the way out to the runtime and back when you could extract a shared function instead
+U5AN2ATNZ : This could be more error prone in that I can get a new image with this new topic, but the topic might not be set on my model for future clicks on the moreplease button, right?
+U0LPMPL2U : correct. when using a `Msg`, your code also becomes asynchronous which can lead bugs
+U5AN2ATNZ : So, reusing the MorePlease message which would get the topic from my model might block me from making the mistake?
+U0LPMPL2U : the other way around. reusing the Msg can lead to events happening in a different order than you expected
+U0LPMPL2U : In the Elm architecture, `Msg` represents events from the outside world, not an "interface" that should should be triggering programatically
+U0LPMPL2U : If you break up your behavior into small functions, you can easily combine and reuse them in different branches of your `update`
+U3LUC6SNS : <@U5QE9LDU4> I've been using webpack so far.  All the files needed for the app are either in `./src` or `./js`.  The `./src` directory contains elm files and folders of elm files, as well as a `index.html`, a `index.js`, and finally ./src/css` which.  All these are nee.  I tried `elm-make --output foo.js` at root level, but it did not compile anything.  How should I go about compiling all this?
+U5AN2ATNZ : Ok, so how would I go about preventing myself from making an edit in the future, returning ( model, getRandomGif newTopic ) from that branch. The code would still work at first, but next time I get into MorePlease my topic would not have changed. Apart from writing a test, of course.
+U5AN2ATNZ : Oh, extract a funtion that takes my model instead of just the topic, then?
+U4872964V : I don't see how sending the `MorePlease` message prevents you from making that mistake though
+U4872964V : the topic would still not be set
+U4872964V : logical errors you write tests for yes
+U5AN2ATNZ : My return value would be ( {model | topic = newTopic } , &lt;trigger MorePlease&gt; ), which would trigger getRandomGif with the new model
+U4872964V : yes, but it could be (erroneously) `(model, &lt;trigger MorePlease&gt;)` just as well, exactly the same error as when calling the function directly
+U5QE9LDU4 : I'm assuming your webpack is working for dev. 
+And considering you are also using webpack for your css, you probably want to stick with webpack instead of running elm-make manually.
+
+you will need to understand how your current webpack config works and then look at webpacks documentation for creating a production build. <https://webpack.js.org/guides/production/>
+
+You will probably need to look at the elm-webpack-loader (I am assuming you are using this) <https://github.com/elm-community/elm-webpack-loader>
+
+U5AN2ATNZ : Which would also fail to get an image of the new topic in the first instance (aka the user would see it right away), not only on the second one.
+U4872964V : yes, so?
+U5QE9LDU4 : once you have the export you want, you can decide how to deploy
+U3LUC6SNS : Thanks!  I will look at this.
+U4872964V : The point is that messages are, conceptually, input to your program from the outside world, not meant to be used for internal communication (as it's asynchronous)
+U5QE9LDU4 : Just to make sure, "outside world" meaning like user input and/or server response?
+U4872964V : you _can_ use them if you actually want asynchronous evaluation (for instance if you have a long-running calculation, or want a delay or something)
+U5AN2ATNZ : Understood and agreed. :slightly_smiling_face: So, how would I go about improving this code snippet so that both the MorePlease and the ChangeTopic branches would make use of the full model to get the new data, instead of passing a string only?
+U4872964V : <@U5QE9LDU4> anything that is not Elm code
+U5QE9LDU4 : kk
+U5AN2ATNZ : I can change the signature of getRandomGif to take in a Model, but can I pass that new model when I'm in the ChangeTopic branch?
+U5AN2ATNZ : ( { model | topic = newTopic }, getRandomGif model) wouldn't do the trick I guess?
+U0LPMPL2U : You'd need a `let newModel = ...` in the `ChangeTopic` branch
+U0LPMPL2U : `model` is always the _old_ model
+U4872964V : you can do whatever you like, it's just functions
+U5AN2ATNZ : Ohh, right, I can put that in a let statement and use it twice in the return value. Duhh.
+U5AN2ATNZ : Thx! :slightly_smiling_face:
+U4872964V : I think your original code is the best though :slightly_smiling_face:
+U5AN2ATNZ : That would improve my code and prevent the mistake of not changing the model but still passing the new topic once
+U5AN2ATNZ : Why?
+U4872964V : because it's completely clear what it does
+U4872964V : set the topic and fetch an image for the new topic
+U4872964V : another problem with emitting a message is that now you have a non-obvious dependence on how that message is handled. If you change the way that message is handled, you now also change the way that the `ChangeTopic` is handled, which may not be what you want
+U0LPMPL2U : I've found that if I use `update` only for dispatching and move all the actual logic into functions, I no longer find myself wanting to trigger `Msg` manually
+U0LPMPL2U : it's also much more readable
+U4872964V : Yes, and if you confine messages to actual events from the outside, it's much easier to understand the program flow
+U5AN2ATNZ : Thx for the input :slightly_smiling_face:
+U5AN2ATNZ : Would you say that this applies to only the elm architecture, or would it go broader, as in "in all functional languages"?
+U5AN2ATNZ : Or even broader than that, since I can see how it would make sense in an OO language as well...
+U4872964V : well, messages are pretty specific to the elm architecture
+U5AN2ATNZ : I'll have to figure that out in the code base at work tomorrow, it might help some use cases to be simpler. Don't respawn (new) events, just handle all events that have to do the same thing in one function that gets called from those different places.
+U4872964V : Now, if you really want to do it anyway, use `Task.perform` :slightly_smiling_face:
+U5AN2ATNZ : Let's pretend you didn't say that for now. :wink:
+U5AN2ATNZ : I'd rather try to do it the "correct" way now, instead of polluting my dive into functional languages with OO concepts.
+U5AN2ATNZ : Btw, you mention that messages are specific to the elm architecture. Would you say that messages are different from events that you typically see in OO languages?
+U4872964V : yes, normally you'd attach event handlers or some such
+U5AN2ATNZ : Since I am currently interpreting a Msg as an "event" that gets spawned somewhere and handled somewhere else.
+U4872964V : but in Elm they are just tagged and sent into the message queue
+U5AN2ATNZ : More like publish/subscribe I guess?
+U4872964V : but it applies to things like react/redux etc
+U5AN2ATNZ : I typically call actions in redux events as well... But I might need to forget about that word. :stuck_out_tongue:
+U5AN2ATNZ : Great, thx for the help and the insights, I got a whole lot of new things to consider. :slightly_smiling_face:
+U5AN2ATNZ : Back to the tutorials now :slightly_smiling_face:
+U6GP18APL : Hello guys, I'm new in the slack, new to elm. I played with it using the beginnerProgram for a while, and now I want to build a small app. Can you point me some examples or tutorials on building real apps with multiple pages, routing, http, css(not the default inline), etc? I'm struggling to find it by myself, it's not like javascript where you have tons of it
+U2U94G0QG : <https://github.com/isRuslan/awesome-elm>
+U2U94G0QG : also <https://dev.to/rtfeldman/tour-of-an-open-source-elm-spa>
+U23SA861Y : you probably want and `andThen` with some of your own validation code
+U23SA861Y : something like:```
+pointVerify: Point -&gt; Parser Point
+pointVerify (x,y) = 
+   if x &lt;= y then
+      Parser.succeed (x,y)
+   else 
+     Parser.fail "x must be less than or equal to y"
+```
+use as:
+```
+Parser.andThen pointVerify pointParser
+```
+
+U6D0EGB4K : Hi jonf: Thanks, that's helpful! But I think it doesn't quite work for what I'm doing. The idea is that I want to do the error checking before the end of the Point parsing, so as to get a "precise position" of the error. Say for example if the Point has 3 floats, and if there is something wrong with the first two, then I want that error to be generated at the position where the 2nd float is parsed, instead of waiting until the end of the parsing to check the whole thing. My application has several things in a row that are much larger than floats (spanning many lines) so it's important not to wait until the end to do the validation, so that I can direct to the exact line where the error was first detected.
+U23SA861Y : I believe that will do what you want (after all you can't validate that that statement is true until after you have both values
+U23SA861Y : how are you producing the tuple from the two points?
+U23SA861Y : I presume via map2
+U23SA861Y : I must admit my knowledge of the parser library is a not fantastic.
+U23SA861Y : ok then, rather than `succeed Point` you can use pointVerify
+U6D0EGB4K : Suppose the Point is 3 floats, then at the time I've read only two of the floats, there is no Point constructed yet, so I can't pass that value to the pointVerify function.
+U23SA861Y : so what that Parser Point is doing is creating a parser of the type `Parser (Float -&gt; Float -&gt; Point)`
+U23SA861Y : so the parser you have doesn't handle tuples any bigger than two
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

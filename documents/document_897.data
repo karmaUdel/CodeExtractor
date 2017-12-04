@@ -1,0 +1,169 @@
+U0LSCQQNR : you can ensure that whatever issues you have are code related and not OS related
+U0LSCQQNR : furthermore, bringing in a new dev and getting them integrated with the projects is much simpler, because you already hhave the environment and code _right there_
+U5CGPBF0U : <@U5LNXQHN3> Through the Google Maps API? Or do they have downloadable datasets?<@U0LSCQQNR> Thanks! I'll look into that. Also, Docker does sound really useful. I'm going to check them out! Thanks! :smile:
+
+U5LNXQHN3 : through the API
+U0LSCQQNR : <@U5CGPBF0U> <@U5LNXQHN3> <http://workshops.boundlessgeo.com/postgis-intro/geography.html#casting-to-geometry>
+U0LSCQQNR : if you already have the data, no need to use google maps
+U0LSCQQNR : and the US Census bureau already has plenty of data for download
+U0LSCQQNR : <https://www.census.gov/geo/maps-data/data/tiger.html>
+U5LNXQHN3 : Yeah, I wasn't suggesting he use Google Maps, just saying that my application did
+U0LSCQQNR : ah ok
+U5CGPBF0U : <@U5LNXQHN3> Oh, sorry I suppose I actually misunderstood my problem. I'm running this query:`SELECT * FROM towns WHERE ST_Distance_Sphere(geom, ST_MakePoint(71.3033,44.2706)) &lt;= 150 * 1609.34`
+and the error is:
+```ERROR:  BOOM! Could not generate outside point!
+CONTEXT:  SQL function "st_distance_sphere" statement 2```
+By `statement 2` I think it's actually referring to `ST_MakePoint(71.3033,44.2706)`. This is a valid lat/long though and looking at the documentation it appears `ST_MakePoint` does in fact accept a lat/long. :thinking_face:
+
+U5CGPBF0U : <@U0LSCQQNR> Oh, not sure why census data never occurred to me. Nice!
+U0LSCQQNR : you're in canada, right?  there should be something similar for you there
+U0LSCQQNR : <http://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/bound-limit-2016-eng.cfm>
+U5CGPBF0U : Yep. Although any dataset with a lot of records is good. I think I used the US census site awhile ago when doing machine learning so I'm a bit familiar with it, so I'd probably just use that again.
+U5CGPBF0U : Oh, well since I don't have to look for it I might use the Canadian information then. :joy: Thanks
+U5CGPBF0U : What I'm trying to do is get all recorded locations within a radius of a specific lat/long. I'm using PostGIS now which has been nice so far, but I'm wondering if there might be an even simpler solution...
+U0LSCQQNR : and regarding your query
+U0LSCQQNR : what is `geom`
+U5LNXQHN3 : To get all locations within a radius of somewhere is exactly the right sort of problem for PostGIS
+U0LSCQQNR : yeah
+U0LSCQQNR : because you're working with spatial data
+U5LNXQHN3 : The only simpler solution is to call someone else's API to perform the same operation on their database
+U0LSCQQNR : and postgis is highly optimized
+U0LSCQQNR : you could do a naive solution
+U0LSCQQNR : but it would be significantly less performant
+U5CGPBF0U : `geom` is a column containing geometry data (in this case it's the boundaries of towns in a small section of the US).
+U0LSCQQNR : <https://postgis.net/docs/ST_DistanceSphere.html>
+U5LNXQHN3 : It needs points, not just any arbitrary geometry
+U5CGPBF0U : Well I better stick with PostGIS then. While load will be very light at first it could become quite heavy later on.
+U0LSCQQNR : for example, make a multilinestring
+U5CGPBF0U : <@U5LNXQHN3> I assumed the geometry was in projectable coordinates...?
+U0LSCQQNR : <@U5CGPBF0U> if you want more help about gis stuff
+U0LSCQQNR : <http://thespatialcommunity.org/>
+U5LNXQHN3 : It needs one single point
+U5CGPBF0U : <@U0LSCQQNR> Oh nice! Didn't think there'd be a Slack for this. I requested an invite now.
+U0LSCQQNR : are you using flask or django for this
+U5CGPBF0U : <@U5LNXQHN3> Oh yeah, my bad. I guess what I want to do then (to keep things simple) is to work out the center-point of each shape first.
+U5LNXQHN3 : I think there are other functions that are more lenient on which types they accept for distance calculations, but the docs for that one suggest that it doesn't
+U5CGPBF0U : <@U0LSCQQNR> Flask
+U0LSCQQNR : <https://geoalchemy-2.readthedocs.io/en/latest/>
+U0LSCQQNR : might want to use that instead of raw queries, especially now
+U5CGPBF0U : <@U0LSCQQNR> Oh, yep, you or <@U5LNXQHN3> (or somebody at least) posted that here the other day so I have it. I'm running these queries raw in pgAdmin against the database though just to familiarize myself without having to run a .py script each time. :slightly_smiling_face:
+U0LSCQQNR : there isn't a shell for flask, like there is for django?
+U5CGPBF0U : There is
+U0LSCQQNR : so why not use that ORM instead?
+U5CGPBF0U : but my database in my Flask app isn't set up with the proper data
+U0LSCQQNR : gotcha
+U5CGPBF0U : I just loaded a sample dataset into a database in my local postgres install to play with it, for now
+U5CGPBF0U : Once I feel comfortable with how it works and the data I need and how to structure the tables for my data I'll do that part (hopefully soon!)
+U0LSCQQNR : alright
+U5CGPBF0U : So I've loaded a table with a list of world cities but I'm not getting the expected results. For example I can run `SELECT * FROM cities WHERE ST_DWithin(geog, ST_MakePoint(45.4215,75.6972)::geography, 470000)` which _should_ return Toronto and a number of other surrounding cities. I've confirmed that Toronto exists in the database with the expected lat/long. However 0 rows are returned. :disappointed:
+U5CGPBF0U : I'm not sure what I'm doing wrong. I've been following examples from articles and there are no errors returned...tried a few variations too.
+U6944D5GU : dear friendssss
+U6944D5GU : why does python tell me:
+U5LNXQHN3 : <@U5CGPBF0U> Do you ever get any results? e.g. if you increase the distance to a very large number?
+U6944D5GU : FileNotFoundError: File b'Macintosh HD/Users/Desktop/Programming/AAPL.csv' does not exist
+U6944D5GU : <@U5U4MSHC1>
+U6944D5GU : i copied and pasted the path tho
+U5CGPBF0U : <@U5LNXQHN3> Yes, I increased the number to something huge like 57000000 and had some results - from somewhere very far away from Toronto, or North America for that matter.
+U486CN4VD : <@U6944D5GU>, try adding a forward slash before "Macintosh"
+U6944D5GU : <@U486CN4VD>  it shows me the same thing
+U5LNXQHN3 : <@U5CGPBF0U> _"the source geometries must both be of the same coordinate projection"_... are you sure the data is all correct?
+U5CGPBF0U : <@U6944D5GU> I'm not a Mac user but where are you running your script from? Is that path relative to the location of your script?
+U486CN4VD : I don't think you need to include the MAC HD bit in your path
+U6944D5GU : <@U5CGPBF0U> yes its exactly the location
+U1BP42MRS : The path looks to be attempting to be absolute but is missing the initial slash
+U6944D5GU : HAHA! i got it
+U6944D5GU : <@U486CN4VD> you are right
+U1BP42MRS : The if/main thing simply means: if executing this script directly run this code. It allows you to have a module that is runnable or importable (that code won't run on import)
+U5CGPBF0U : <@U5LNXQHN3> So I took a very large dataset of world cities in .csv and imported them into my database, then I added a `geog` column and used `UPDATE cities SET geog = ST_SetSRID(ST_MakePoint(longitude, latitude), 4326);` which ran without errors. Did I perhaps miss something in that command?
+U6944D5GU : how does one “executes this code”
+U5LNXQHN3 : Probably not, but that's beyond my knowledge
+U5CGPBF0U : `python myscript.py`
+U6944D5GU : how does one “executes this script”***
+U6944D5GU : oh!
+U1BP42MRS : <@U5CGPBF0U> :taco: 
+U5CGPBF0U : vs. running `python myotherscript.py` - on a script containing `import myscript`
+U5CGPBF0U : <@U1BP42MRS> :fork_and_knife:
+U5LNXQHN3 : Although it looks like you're assigning geometry to a geography column... not sure if that's okay or not
+U5CGPBF0U : There aren't all that many times when I have enough knowledge to help around here, so I try to do it when I can.
+U5CGPBF0U : Maybe I should have ran `ST_MakePoint(longitude, latitude)::geography`?
+U486CN4VD : Nice!
+U5LNXQHN3 : ST_SetSRID returns geometry
+U5CGPBF0U : Oh does it? I used the command because I think it was in a solution on StackOverflow...now I can't seem to find the page so maybe I just got mixed up. :joy:
+U5LNXQHN3 : Those commands look fine - but if you try to assign a geometry to a geography column I don't know what will happen
+U5CGPBF0U : I see... Well, I'm having a lot of difficulty finding a way of populating a geography column from lat/long coordinates :confused:
+U5LNXQHN3 : you probably just want a geometry column
+U5CGPBF0U : Ok so I found the StackOverflow post. I see that it was recommended to run `ST_SetSRID(ST_MakePoint(long, lat), 4326)::geography`. I omitted casting completely.
+U5CGPBF0U : After reading it doesn't sound like geometry would be a good fit as my use case involves locations on a global scale
+U5CGPBF0U : Unless I misunderstand the pros/cons which is certainly possible
+U5LNXQHN3 : Usually it'll depend on what sort of distances are involved
+U6944D5GU : i am still trying to figure it out lol
+U6944D5GU : The if/main thing simply means: if executing this script directly run this code. It allows you to have a module that is runnable or importable (that code won't run on import)
+U6944D5GU : this script here means this chuck of code?
+U6944D5GU : chunk*
+U6944D5GU : this code means:import pandas as pd
+def test_run():
+    df=pd.read_csv(‘/Users/elaineyang/Desktop/Programming/AAPL.csv')
+    print(df)
+
+U6944D5GU : ?
+U6944D5GU : and can i say, whenever i import something i have to have “if __name__==‘__main__‘:”
+U6944D5GU : or else the imported code cant be run?
+U6944D5GU : <@U5CGPBF0U>
+U1BP42MRS : So for example, I have this script:
+```
+# cat.py
+class Cat:
+    def say(self):
+        print("meow")
+
+
+if __name__ == "__main__":
+    Cat().say()
+```
+
+I can either call it directly: `python cat.py` and it will meow.
+
+But say I have another module that wants to use this class:
+
+```
+from cat import Cat
+
+class ChesireCat(Cat):
+    def dress_up(self):
+        pass
+```
+
+I wouldn't want it to meow until I tell it to
+
+U5CGPBF0U : <@U6944D5GU>So everything...oh wait he beat me to it :joy:
+
+U5CGPBF0U : <@U1BP42MRS> :lightning: :runner:
+U6944D5GU : lol
+U1BP42MRS : The background on this is that `__name__` is a build in dunder (double underscore). It is set to the name of the module running - if the module is executed directly it's "__main__", otherwise I think it defaults to the file name (I don't recall ATM)
+U1BP42MRS : Tldr you only need the if name/main if you want to be able to execute some code when the script is directly invoked
+U6944D5GU : so accordin to what you said, how do you let it say meow on the second code
+U6944D5GU : from cat import Cat
+class ChesireCat(Cat):
+    def dress_up(self):
+        pass
+
+U1BP42MRS : That class inherited the meow method, so make an instance and call say on it!
+Sorry, a class may have been a bad example
+
+U6944D5GU : <@U1BP42MRS> <@U5CGPBF0U> <@U486CN4VD> :taco: thanks so much!
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

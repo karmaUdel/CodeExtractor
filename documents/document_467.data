@@ -1,1 +1,133 @@
-        on "keyup" (JD.map handler toTuple)```
+U5ABF3BH7 : I am doing server side for now, hoping to do client side later.
+U5ABF3BH7 : <@U23SA861Y> Do you have any simple examples?
+U23SA861Y : not off hand no.... at least nothing I can release
+U5ABF3BH7 : Ok, thanks anyways.
+U63LX5HFY : Hola <@U23SA861Y> ! Hope you're well. I'm new to Elm and i really love it! How can i limit the result of a List.map? Say i just want 50 results out of 200?
+U23SA861Y : well List.map with operate on the whole list, but you can List.take to grab up to a certain number of elements
+U23SA861Y : `someList |&gt; List.take 50 |&gt; List.map myFunc`
+U23SA861Y : this will take only 50 items from the list and then call map on them
+U63LX5HFY : Thanks a lot <@U23SA861Y>. List.take, noted!
+U48AEBJQ3 : <https://ellie-app.com/3KyxztC5J2pa1/0>
+U2SR9DL7Q : does anyone know why the compiler isn't recognizing this type alias?```
+viewBoardCanvas : Model -&gt; Html Msg
+viewBoardCanvas model =
+    case model.game of
+        Nothing -&gt;
+            Options.div [] [ Button.render Mdl [ 0 ] model.mdl [] [ text "Start Game" ] ]
+
+        Just Game -&gt;
+            text "I'm a game!"
+```
+It says it can't find pattern game, but in my _Types.elm_ file I have.
+```
+type alias Game =
+    { board : Html Msg
+    , players : List Player
+    }
+
+type alias Model =
+    { resume : List ResumeSections
+    , mdl : Material.Model
+    , route : Route
+    , game : Maybe Game
+    }
+```
+
+U48AEBJQ3 : When you pattern match, you need to give the game a regular variable name, not the name of its type or constructor. `Just game -&gt;`
+U2SR9DL7Q : bless your heart kind sir.
+U48AEBJQ3 : <@U2SR9DL7Q> Where my family comes from, that phrase means something *totally* different, but I take it as intended. :wink:
+U48AEBJQ3 : Oh, I don't know if this sent a notification or not <@U5ABF3BH7> My apologies if you had already seen it.
+U5ABF3BH7 : <@U48AEBJQ3> Thanks you so much. I hadn't seen your message. Really appreciate it!
+U2SR9DL7Q : ... oh dear.
+U2SR9DL7Q : I had to google alternate meanings after you said that... didnt realize so many people used it to be... not nice.
+U4H406NET : Are there any complete examples of sending HTTP headers?  I do not understand the custom request documentation.
+U153UK3FA : <@U4H406NET> <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#request>
+U153UK3FA : The `headers` field has the type `List Header`
+U153UK3FA : and you create a header by calling <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#header>
+U153UK3FA : once you've created your `Http.Request` you pass it to <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#send>
+U4H406NET : The cited docs do not show the complete sequence.  I am trying to do as you describe but keep getting errors I do not understand.
+U153UK3FA : <@U4H406NET> post the errors and I'll help
+U153UK3FA : the `expect` field passed to `request` is the one that confuses people the most, but most commonly you'll just want to use <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#expectJson>
+U4H406NET : Haven't even got there.
+U4H406NET : This is one try
+U4H406NET : req =   Http.request            { method = "GET"
+            , headers = header
+            , url = url
+            , body = Http.emptyBody
+            , expect = Http.expectStringResponse (\_ -&gt; Ok ())
+            , timeout = Nothing
+            , withCredentials = False
+            }        
+    in
+        Http.send LoginResult req
+
+U4H406NET : REsults in
+U4H406NET : The 2nd argument to function `send` is causing a mismatch. 101|         Http.send LoginResult req                                    ^^^ Function `send` is expecting the 2nd argument to be:     Http.Request String But it is:     Http.Request ()
+U4H406NET : What is the meaning of the String that it is expecting as a second argument?
+U153UK3FA : In `expect = Http.expectStringResponse (\_ -&gt; Ok ())` you said the result of the request would be the value `()` which is of type `()`
+U153UK3FA : But you actually want it to be a `String` since `LoginResult` is a function that takes a `String`
+U153UK3FA : what is the actual response you're expecting to get?
+U4H406NET : Eventually json, at this point I am just trying to get an HTTP request to run to see how the headers work
+U153UK3FA : Changing `expect = Http.expectStringResponse (\_ -&gt; Ok ())` to be `  , expect = Http.expectStringResponse (\_ -&gt; Ok "pizza")` will make the result always be "pizza" ignoring the actual response
+U4H406NET : Thank you, it compiled and matched the error case in the update function.
+U68471J6P : I'm thinking of building my first "real" Elm website with Elixir for the back-end. Which part should I build first, the front-end or the back-end?
+U0CLDU8UB : I'd say either way you will be building them side by side
+U0CLDU8UB : Building the frontend makes you realize the API needs to be changed, so then you switch to the backend side
+U5P4FLYLE : Hi, I have the following compilation error:```The definition of `rangeFrameHintDot` does not match its type annotation. 
+100| rangeFrameHintDot : Maybe Point -&gt; Float -&gt; Float  -&gt; DataPoint Msg 
+101| rangeFrameHintDot hinted x y = 
+102|&gt;  { view = Just (myCircle x y) 
+103|&gt;  , viewHint = Nothing 
+104|&gt;  , x = x 
+105|&gt;  , xLine = Maybe.andThen (flashyLine x y) hinted 
+106|&gt;  , xTick = Just (simpleTick x) 
+107|&gt;  , y = y 
+108|&gt;  , yLine = Maybe.andThen (flashyLine x y) hinted 
+109|&gt;  , yTick = Just (simpleTick y) 
+110|&gt;  } 
+The type annotation for `rangeFrameHintDot` says it always returns:     DataPoint Msg 
+But the returned value (shown above) is a:     
+{ view : Maybe (Svg Msg)     
+, viewHint : Maybe a     
+, x : Float     
+, xLine : Maybe (AxisSummary -&gt; LineCustomizations)     
+, xTick : Maybe TickCustomizations     
+, y : Float     
+, yLine : Maybe (AxisSummary -&gt; LineCustomizations)     
+, yTick : Maybe TickCustomizations     
+} 
+Hint: The record fields do not match up. Maybe you made one of these typos?             x &lt;-&gt; y     xLine &lt;-&gt; yLine     xTick &lt;-&gt; yTick         y &lt;-&gt; x     yLine &lt;-&gt; xLine     yTick &lt;-&gt; xTick```
+I look above and see the same thing...Do you know how to proceed in such a case?
+
+U3SJEDR96 : could you show the definition of `DataPoint`?
+U3SJEDR96 : oh, there <http://package.elm-lang.org/packages/terezka/elm-plot/latest/Plot#DataPoint>
+U3SJEDR96 : you have `viewHint` rather than `hint`
+U5P4FLYLE : <@U3SJEDR96>  yes it should be `hint`. Thanks!!!
+U666LA9NK : Hi, I am very new to elm. I have questions regarding good practices of updating internal intermediate status. If I have the case of ```
+type alias Model = 
+  { number : Int
+  , numberIsTooLarge: Bool
+  }
+```
+I want `numberIsTooLarge` to be automatically be updated along with `number`. What is the best practice to do this? Shall I include the code to update `numberIsTooLarge` when handling all the cases that `number` is updated, or is there a better way to do that in elm?
+
+U2XRG0UKA : When does you use `numberIsTooLarge`? Do you reference it once in the view to display an error message?
+U153UK3FA : don't store what you can calculate
+U2FL3ARLG : right, I'd say you don't need `numberIsTooLarge` in your model, but a function `numberIsTooLarge : Model -&gt; Bool` that you can use anywhere
+U666LA9NK : <@U2XRG0UKA> I use it in multiple places in view and when update some other messages.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

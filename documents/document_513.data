@@ -1,3 +1,73 @@
-<@U0LPMPL2U> thanks, I guess I will simply define an Ignore message and use it for all kinds of Task/Cmd whose result I don’t care, like ``` Task.attempt (always Ignore) (Dom.focus elementId) ```
-This is the part where the user click the update button (all routing logic has been done') and sending the Cmd to the api end. But since this model allow it to update the primary key also. I will have to find a way to get the primary key from the route instead of form model here.
-Can you extract the id when you're doing the routing logic and set it on the model or pass it into whatever function is building the Cmd?
+U27KX9MEJ : <@U3SJEDR96> That would be a great feature if we can to do pattern matching with union types and if we will get ability to use types as variables in this patterns? :slightly_smiling_face:
+U0JBSEGHY : What does `&gt;&gt;` do?
+U3SJEDR96 : `(\foo -&gt; foo |&gt; .metas |&gt;  List.length)` == `.metas &gt;&gt; List.length`
+U0JBSEGHY : so its is like `foo.metas |&gt; List.length`
+U3SJEDR96 : yeah, exactly :slightly_smiling_face:
+U3SJEDR96 : `foo.bar` is the same as `.bar foo`, where `.bar : { b | bar : a } -&gt; b -&gt; a`, in other words it just returns the value of a named field in a record
+U0JBSEGHY : This is what is tripping me up. Not sure what these types mean ```Function `map` is expecting the argument to be:
+    comparable -&gt; a -&gt; b
+
+But it is:
+
+    { b | metas : List a } -&gt; Int```
+
+U3SJEDR96 : Ooh, right, I completely forgot that `Dict.map` takes the key, too :smile:
+U3SJEDR96 : Try `Dict.map (\key val -&gt; val.metas |&gt; List.length)` instead
+U0JBSEGHY : Yea I did that earlier but was still being tripped up somewhere. I'll add those in.
+U0JBSEGHY : ```The argument to function `indexedMap` is causing a mismatch.
+203|                                        List.indexedMap (\( name, numberofMetas ) -&gt; name ++ " has " ++ toString numberofMetas ++ " metas")
+                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Function `indexedMap` is expecting the argument to be:
+
+    Int -&gt; a -&gt; b
+
+But it is:
+
+    ( String, a ) -&gt; String```
+
+U41NK9BM4 : `indexedMap` pass you a index, so I would try with `\(index (name, numberofMetas))`
+U3SJEDR96 : oh, you don't need `indexedMap` there. -_-
+U41NK9BM4 : Maybe he forgot to use the index? :slightly_smiling_face:
+U41NK9BM4 : Anyway something is wrong…
+U3SJEDR96 : nah, it's mapping of the a `Dict.toList` which gives a `(String, a)` so you already have "the index"
+U0JBSEGHY : Yea cool
+U41NK9BM4 : That is, the string?
+U0JBSEGHY : I was trying to avoid Dict.toList earlier but that is obviously a mistake haha
+U41NK9BM4 : makes sense
+U41NK9BM4 : I've just used `Dict.foldl` for the first time: there must be some "Achievement unlocked" for this kind of things  :joy:
+U0JBSEGHY : We need Elm badges
+U0JBSEGHY : I feel like a mega noob haha. I'm literally recompiling heaps of different things in `Debug.log`
+U4RR7KX45 : hello elmers. I'm trying to implement the following library in my elm app:<https://github.com/RubaXa/Sortable>
+
+And I can't figure out how to pass the dom element to it?
+
+it accepts an element like so
+```
+new Sortable(el, options);
+```
+
+U4RR7KX45 : so I'm trying to pass an element to it via ports, but I just can't figure out how to get an actual dom element from Elm
+U4RR7KX45 : is that even possible?
+U3SJEDR96 : That's unlikely to play nice with Elm; since it changes the DOM in a way that Elm isn't aware of...
+U3SJEDR96 : As for getting an element, you'd assign it an id and extract it from the document using `document.getElementById(..)`, but I suspect you'll see unexpected behaviour using this with Elm...
+U2Q1KN06T : how are larger SPA type applications handled in Elm? It seems to me that the `update msg model` function needs to know how to handle/dispatch every type of message that could be generated? Which doesn't seem to allow easy use of components?
+U236M9FH9 : You can nest messages inside one another and dispatch submessages to their own update functions
+U236M9FH9 : "components" are typically just messages and update/view functions, if they require internal state, they'll provide a type &amp; the values for you to store somewhere in your model
+U236M9FH9 : It's not as simple as `import antigravity` but I see it as an additional form of documentation
+U2Q1KN06T : <@U236M9FH9> OK.. I _think_ I understand… it does seem to me like there's a deliberate design decision to force you to think about this at the top-most `update msg model` point?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

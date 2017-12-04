@@ -1,0 +1,70 @@
+U1BP42MRS : <@U5CGPBF0U> - no, blueprints are just a good way to break up your app into components and separate concerns.
+U1BP42MRS : They can help with the import issue since you decorate the route with `@bp.route` instead of `@app.route` though
+U5CGPBF0U : <@U1BP42MRS> the breaking up an app into components thing sounds like good OOP really. So blueprints somehow extend this concept?
+U5LNXQHN3 : I'd say it's more about general modularity than OOP
+U5CGPBF0U : Ah, ok
+U5CGPBF0U : Also, I'm using Flask-restful so I don't have any route decorators, instead `api.add_resource(API_Users, '/users/')` :speak_no_evil: Not sure if that makes a difference in your example, <@U1BP42MRS>
+U1BP42MRS : I am not familiar with that one, but it looks like they probably build on top of blueprints and you have to register the `api` with your app
+U5CGPBF0U : Register the api? Sorry... I'm not sure if I understand. :disappointed: "Register"? Which `api` might that be?
+U1BP42MRS : Ah, no you use `Api(app)` or `api = Api(); api.init_app(app)`
+U1BP42MRS : That is what I was looking for
+U0NRYQNAZ : ```api = Api(app)
+
+class HelloWorld(Resource):
+    def get(self):
+        return {'hello': 'world'}
+
+api.add_resource(HelloWorld, '/')
+```
+
+U0NRYQNAZ : api = Api(app) is registering api with app, no?
+U5CGPBF0U : Ah, yes, that's right. I guess it's the "you have to register the `api` with your app"...this is what I'm already doing, right? I'm not sure if it was meant that I need to do this (e.g. I haven't done it) or if it's just being stated that I was required to do this...
+U0NRYQNAZ : to do this with a blueprint you can do:```
+#extensions.py
+api = Api()
+```
+
+
+```
+from extensions import api
+bp = Blueprint('api', __name__, url_prefix='/api/v1')
+
+api.init_app(bp)
+
+class HelloWorld(Resource):
+    def get(self):
+        return {'hello': 'world'}
+
+api.add_resource(HelloWorld, '/')
+```
+
+U57PL65T6 : Guys, hiI have searched for it a little bit, but still dont find information
+
+When I write a custom path in django logging settings like ‘filename': ‘logs/main.log' a error occur saying that there is no such file
+
+Am I really should create it manually? Or there is a way it can be done automatically, if no such file exist?
+
+U5CGPBF0U : <@U0NRYQNAZ> Oh nice! Thanks for the example! Makes a lot more sense to me now.
+U5CGPBF0U : So I guess I should dive into learning to implement gunicorn, blueprints, and app factory patterns now. Thanks for the help guys! I can't tell you how much I appreciate it.
+U0NRYQNAZ : i haven't updated this in a while but it's a good approach to using blueprints and app factory pattern. <https://github.com/mikefromit/real_world_flask>
+U0NRYQNAZ : i had many ideas for it initially but it was pushed up mainly to help someone who had a project structure question.
+U1BP42MRS : Here is another take, but it's a cookiecutter so slightly less obvious to read: <https://github.com/mrasband/cookiecutter-flask>
+U0NRYQNAZ : mine is slightly based off mattupstates blog article <http://mattupstate.com/blog/how-i-structure-my-flask-applications/>
+U0NRYQNAZ : i asked him tons of questions about his structure in the #pocoo channel on irc.
+U0NRYQNAZ : this was when i was learning flask. i don't use everything he does.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

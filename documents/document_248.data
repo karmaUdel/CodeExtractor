@@ -1,24 +1,101 @@
+U5ABF3BH7 : ```The argument to function `selected` is causing a mismatch.
+88|                                                                                                                       selected model.country
+                                                                                                                                   ^^^^^^^^^^^^^
+Function `selected` is expecting the argument to be:
+
+    Bool
+
+But it is:
+
+    String```
+
+U5ABF3BH7 : Since I don't know in advance what the bool is I am a bit confused as what I should put for selected
+U48AEBJQ3 : You have to put `selected True` in the currently selected `option` tag. But I think you should try `Keyed.node` first.
+U5ABF3BH7 : Ok, thanks, I will try that
+U48AEBJQ3 : ```countryOptionList id =
+    List.map (\country -&gt; option [selected (country.id == id), value country.id] [text country.name])
 ```
-<@U5DDM498S> do you mean a path that you can send data to?
-and get a response from?
-yes, responses can be hardcoded
-then just a static webserver
-but handle different HTTP verbs and URLs
-man y'all cut that function down real good. thanks for showing me how nice it can get!
-You should be able to make a single file Flask (Python) app or Express (nodejs) app without much work
-I just googled and found this example:
-you can probably define more paths user `<http://router.post|router.post>`, `router.put`, etc in the middle section
-thanks, I see I can also serve a static JSON file
-then just install node and run it with `node server.js`
-yeah you could do that as well, but then you need to define different responses for each verb if that's what you want to test
-yes, I'd like to design an API and build the Elm front-end, but not worry about the API implementation details
-indeed, that's how it should be done
-Does anyone have a good pattern for propagating sub-view errors (like HTTP 404) to a parent view to have it display a nice not-found page? I was trying to follow this example(<https://github.com/rtfeldman/elm-spa-example>) but it is not clear how the `NotFound` page is set.
-It looks like it's being set here: <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L252>
-in response to a `Maybe Route` being `Nothing`
-When does the `SetRoute` get set as the model then? <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L336>
-I'm new to `elm`, but familiar with the functional concepts. The difficulty has been the patterns of `elm`. These are state machines, but the transitions between states are hard to hunt down. Wish they were more declarative.
-If I want to call `update` programatically, should I do so, or is there a recommended technique?
-umm, it is just a function. If it's the same function you are passing to program, then that seems a little odd.
-Call it programmatically. Nothing odd about doing that.
-If you are calling `update` programatically for code re-use, you probably want to extract a function instead
+
+U5ABF3BH7 : Ok, thanks <@U48AEBJQ3>
+U5HM74BD0 : Is there an Elm package for encoding my model to json? I want to store my model in localStorage.
+U48AEBJQ3 : <@U5HM74BD0> `Json.Encode`?
+U5HM74BD0 : <@U48AEBJQ3>, how would you work with tuples?
+U48AEBJQ3 : Either in separate fields in an object or in a list.
+U48AEBJQ3 : ```tupleToList : (a -&gt; Value) -&gt; (b -&gt; Value) -&gt; (a, b) -&gt; Value
+tupleToList xEncoder yEncoder (x, y) =
+    Encode.list [xEncoder x, yEncoder y]
+```
+
+U5HM74BD0 : <@U48AEBJQ3> I see, yes.  Okay, I'll give it a whirl.  Am I thinking about this right: the model gets encoded into json; that json gets passed to javascript side, which can then convert it to a string representation; it can then store that string in localStorage. To decode, reverse the process?
+U48AEBJQ3 : A `Value` isn't actually JSON, it is a JavaScript value. You have to call <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Encode#encode> to turn it into a JSON string. You are free to do this on either side of the port.
+U5HM74BD0 : Okay, thanks very much.
+U5ABF3BH7 : <@U48AEBJQ3>, thanks you for your help earlier, it did solve the issue!
+U5WDQMREK : Hey all, wondering why `{a.b | c = d}` is not compiling? This type of `x...y | ...` merge seems pretty useful.
+U153UK3FA : <@U5WDQMREK> the record update syntax requires a single identifier, so you can't have `.` in there
+U0PBSF05S : <http://faq.elm-community.org/#how-can-i-change-the-value-of-a-nested-field>
+U5MKS6L80 : hey all, i've been scratching my head about this for a while: is there any way to achieve the effect of emitting multiple `Cmd`s _in order_ (i.e. not executed in random order, like in `Cmd.batch`) (the use case is that i'm using `port`s)
+U5MKS6L80 : so far the only workaround i could think of was: give a pair to all my `port`s that return `Sub`s which i could use to chain stuff (bloats the `port` module) or to use a timer to fire off the next `Cmd` in the chain
+U153UK3FA : <@U5MKS6L80> there isn't a way to order `Cmd`s besides having them go through `update`
+U153UK3FA : you can sequence `Task`s and things like http requests can be converted to `Task`s so they can be sequenced
+U5MKS6L80 : <@U153UK3FA> how would having them go through `update` work? i would be OK with that workaround, but i couldn't figure it out either
+U153UK3FA : if you need to send a sequence of requests to a `port` you should make that `port` take a list of things to do
+U5MKS6L80 : basically where i get stuck is that no matter what i do i can only fire off one `Cmd` at a time, but because these `Cmd`s come from `port`s they don't generate messages to keep the "state machine" moving
+U5MKS6L80 : that was actually one of the earlier things i considered... but there i get stuck when providing the arguments (i tried heterogenous argument lists, but that didn't work 'cause heterogenous lists, and the only other option i could see was "everything is a string" which feels distinctively un-Elm-y :D)
+U3SJEDR96 : You can send out a json.encode'd value
+U5MKS6L80 : ah yeah good point! i've seen that suggestion somewhere. however in this case i'm working with video image data, and i cringe at the idea of having to json encode every frame :smile:
+U153UK3FA : you can also use a tuple or a record
+U5MKS6L80 : ah nice
+U5MKS6L80 : i might try that
+U5MKS6L80 : so basically i'd have a single `port` that takes `List (String, Args)` where the first element is the function name to call, and `type alias Args = { fn1Args: Maybe ... , fn2Args: Maybe ..., ... }`
+U5MKS6L80 : and all other methods in the `port` module are wrappers around that to provide the actual methods in some composable way
+U153UK3FA : <@U5MKS6L80> You might also consider writing functions in JS for the various things you'd want to do from Elm
+U5MKS6L80 : yeah, but then in theory i'd have to provide all combinations and orders of the various methods on the port api (granted, some of those don't make sense, but still)
+U153UK3FA : `ports` being async makes them a lot more like network connections than function calls
+U5MKS6L80 : yeah, but e.g. as you pointed out with `Task`s there are built-in primitives for chaining them
+U5MKS6L80 : anyway, thanks for the suggestions! i'll try them soon hopefully
+U153UK3FA : yep, but `ports` can't be converted to `Task`s
+U5MKS6L80 : yeah i was just going to say that `Task`s seem to be the "network connection" type things in Elm
+U153UK3FA : the difference between `Cmd`s and `Task`s is that Tasks can fail and `Cmd`s can't
+U153UK3FA : It's been suggested to make ports return Tasks but this exposes your Elm app to the error prone nature of JS
+U153UK3FA : ie. if you send on a port and never get a reply (because JS errored), what should the Elm app do?
+U5GJ5FEAU : <@U153UK3FA> that sounds like a good way to differentiate between `Task`s and `Port`s.
+U0CLDU8UB : <@U5ABF3BH7> Can you try `onChange` instead of `onInput`?
+U5L2XPH54 : Can some help me to understand 
+```
+login : { r | email : String, password : String } -&gt; Http.Request User
+```
+
+<https://github.com/rtfeldman/elm-spa-example/blob/master/src/Request/User.elm#L23>
+
+What is ` { r | ` ?
+
+U0CLDU8UB : "a record that has at least `email : String` and `password : String`, I don't care about anything else that may be in the record"
+U5L2XPH54 : thanks
+U5TQ5FZA5 : Hi! I'm wondering how to model a dictionary in Elm which has arbitrary keys whose values are either a string  or another dictionary (which in turn has arbitrary keys and values of String | Dictionary). Is this possible in Elm?
+U5TQ5FZA5 : So far the only examples I've seen refer to Dictionaries which aren't nested and whose keys are known.
+U0CLDU8UB : What do you mean by "arbitrary keys"?
+U4872964V : for arbitrary keys you could use <http://package.elm-lang.org/packages/eeue56/elm-all-dict/latest> and for values of either string or another dictionary you'd use a union type like so```
+type EitherStringOrDict
+  = AString String
+  | ADict YourDictType
+```
+
+U5WGZ2GTZ : I am an Elm beginner, but I think this might be possible using the union types?
+U5TQ5FZA5 : Arbitrary keys: {foo = ‘1', bar = ‘2'} or {fuzz = ‘3', bazz = ‘2'}. It doesn't matter what the keys are called, nor how many of them are present.
+U1P6FFJ64 : <@U5TQ5FZA5> have you seen this package? <http://package.elm-lang.org/packages/eeue56/elm-all-dict> It has an EveryDict that allows the Dict keys to be of any type
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

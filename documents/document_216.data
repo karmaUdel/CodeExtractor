@@ -1,10 +1,43 @@
-```
-I tried with `Expect.all` but it does not seems to do what I want
-seems like those should be multiple tests, actually?
-for me it's the same test but with different data
-so it's not worth having multiple tests
-anyway it's working like that but I wanted to do something more "datadriven"
-If you are set on doing this, however, I think you will need to roll your own helper function to handle it.
-<@U48AEBJQ3> : right, but fuzzing supposes to know how to compute the result of the function you want to test and independantely of your original implementation
-with fuzzing, you have no control of the data your test generates, so you cannot challenge your test function result against a predefined computation
-I'm not going to argue the merits of `elm-test`, that is probably better left for <#C0CLGCMMF|testing>.
+U2ZDLHVQD : has anyone run into good platforms that do Sentiment Analysis?
+U3LDUPV2A : the microsoft one is pretty easy to use...
+U3LDUPV2A : you can play with a smple version online.  here.  I threw a bunch of tripadvisor reviews at it, and it did a pretty good job at returning accurate results <https://www.microsoft.com/cognitive-services/en-us/text-analytics-api>
+U3EFK8UES : Kinda iffy
+U3EFK8UES : I took the default of:
+U3EFK8UES : ```I had a wonderful experience! The rooms were wonderful and the staff were helpful.```
+U3EFK8UES : It returend a 98
+U3EFK8UES : Changed it to
+U3EFK8UES : ```I had a wonderful experience! The rooms were *somewhat* wonderful and the staff were helpful.```
+U3EFK8UES : and
+U3EFK8UES : ```I had a wonderful experience! The rooms were wonderful and the staff were *somewhat* helpful.```
+U3EFK8UES : Same percentage on all 3
+U3LDUPV2A : interesting… did it pickup on somewhat as a key phrase?
+U3EFK8UES : Nope
+U3EFK8UES : Hrm, it picks up on Kind of
+U3EFK8UES : but doesn't reduce the percent
+U3LDUPV2A : i see… in many contexts *somewhat* would probably be a useless word… in this context, it's definitely adding something.
+U3EFK8UES : ```I had a wonderful experience! The rooms were wonderful and the staff were kind of helpful.```
+U3LDUPV2A : have you used another service that deals with this scenario better?
+U3EFK8UES : Oh no
+U3EFK8UES : Just looking at this :confused:
+U3EFK8UES : lol
+U3EFK8UES : This is definatyely better than nothing
+U3EFK8UES : thats for sure
+U3LDUPV2A : haha.. yeah - for most things (like what I'm looking to build), I think it'd be adequate.  I can deal with a false/positive error rate of 10-20%
+U3EFK8UES : Indeed :stuck_out_tongue:
+U3LDUPV2A : Planning to pay with Amazon Lex in then next week or two… but lex seems like it requries a little more setup to get going then MS. <https://aws.amazon.com/lex/>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

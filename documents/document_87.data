@@ -1,40 +1,51 @@
+U3L6TFEJF : but if I do `clojure.tools.namespace.repl/refresh`, it doesn't
+U3L6TFEJF : yep, `tool.namespace` clobbers it somehow
+U3L6TFEJF : the prevailing wisdom on the internet when having problems with data readers is to call `(#'clojure.core/load-data-readers)`, but then I get: ```dev=&gt;   (#'clojure.core/load-data-readers)
+clojure.lang.ExceptionInfo: Conflicting data-reader mapping```
+
+U051SS2EU : if you look at the ex-data on *e that should show you what went wrong, right?
+U3L6TFEJF : I'm getting a conflict with my own data reader file :neutral_face:
+U051SS2EU : OK - so the data readers are already loaded, you have to reload the code they refer to, right?
+U0NCTKEV8 : (which refresh would do if you properly required that code before using the readers)
+U3L6TFEJF : still get the error after calling `refresh`
+U0NCTKEV8 : right, because somewhere you aren't properly doing the require
+U0NCTKEV8 : so find all the places you use the tag, ensure in that namespace you require the namespace where the function the tag maps to is
+U3L6TFEJF : ```dev=&gt; (dev/refresh):reloading (... kleinheit.pg.impl ...)
+:ok
+
+dev=&gt; #foo [1 2 3 4]
+        java.lang.IllegalStateException: Attempting to call unbound fn: #'kleinheit.pg.impl/foo
+clojure.lang.LispReader$ReaderException: java.lang.IllegalStateException: Attempting to call unbound fn: #'kleinheit.pg.impl/foo
 ```
-Can't say I've used Integrant before though. Sorry.
-You've given me a direction. Thanks
-How can I add java dependencies to my clojure project?
-<@U068SUJNT> same way you add clojure dependencies. the project.clj dependencies list is just maven artifacts
-okay.
-<@U1B0DFD25> you might want to look at Integrant-REPL
-Does anyone know of a fuzzy finder lib for Clojure? By fuzzy finding I mean that you can, for example, search for "msd" and it would match, and give a high score to, "my/secret/dir", because the letters appear at word boundaries.
-Hi <@U0BKWMG5B>, I was wondering if i could ask you a <#C5K1SHR6X|duct> related question?
-<@U4DNSU5NE> <http://yomguithereal.github.io/clj-fuzzy/clojure.html> (and there's also a Java lib: <https://github.com/tdebatty/java-string-similarity> )
-<@U0E0XL064> Does that do what I want? All the examples look weird, e.g. `(dice "healed" "sealed") =&gt; 0.8`
-<@U4DNSU5NE> oh, I must have misunderstood you. But it looks pretty easy to make it work as you expect: extract the letters at word boundaries and match it against one of the fuzzy string algorithms
-Sure, <@U6BEL7FPC> 
-so, the only thing to do for you would be: convert `my/secret/dir` to `msd`, right?
-<@U0E0XL064> I want some more features, like "msod" would not match "my/secret/dir" but it would match "my/awesome/dir"
-But I have now written it myself. :stuck_out_tongue:
-oh... that's different, right :slightly_smiling_face:
-So, you've written it in less than 3 hours, right? Nice :slightly_smiling_face:
-Yes :stuck_out_tongue:
-I wonder if you could rip off elisp from one of the emacs helpers that does that and convert it
-<@U0E0XL064> <https://ptpb.pw/y1Qw>
-Ops, that last one should not have a score of 3 :stuck_out_tongue: I added it manually and did it wrong. :stuck_out_tongue:
-I accidentally put s and d next to each other in the string.
-got it. :+1:
-Anyone have a pointer to a small-to-medium-size, open source codebase that uses `clojure.spec` in the ways that it is typically used?
-I expect to have one next week :slightly_smiling_face:. Well, it still needs some work, but the current state is: <https://gitlab.com/kurtosys/lib/factoidic/>
-Thanks!
-is there a good clojure library for very simple GIS/map data visualization? or am I better off using something like Om with clojurescript?
-<https://gitlab.com/kurtosys/lib/factoidic/blob/master/factoidic/src/clj/factoidic/config.clj> - spec for config (will be lib boundary, that's why it's in a separate namespace; other specs might not be in a separate namespace).
-3. instrumentation during debugging
-may not fit your requirements, but <https://github.com/wiseman/leaflet-gorilla> could be relevant
-generative testing code is not in there yet, right?
-right, that's one of the reasons why I keep it quiet and it's still in `SNAPSHOT`. I have to add more specs, testing and some benchmarking.
-awesome.  Thanks for the link
-Okay <@U0BKWMG5B>, right now i'm trying to integrate `buddy`'s authentication middleware with `ataraxy` and `duct`, and looking at the ataraxy module docs, it says that for finer control i should use `duct.router/ataraxy` instead of `duct.module/ataraxy`. I was wondering if there was a way to add other middleware using the `module` instead of `router`?
-<@U6BEL7FPC> you can use both. Use the module to create the routes, then add the middleware to the router key.
-<@U0BKWMG5B>, oh what would that look like? Would `duct.module/ataraxy` and `duct.router` be keys in the edn file?
-Hi, how do I write a response directly in http-kit? I'm building a tunneling proxy and need the very first response to be exactly `"HTTP/1.1 200 Connection established\r\n\r\n",` but it seems http-kit renders that as a *body*, even if I do something like `{:status "HTTP/1.1 200 Connection established"}`
-sounds like what you want is to supply a :headers map? but I thought :status would automatically be lifted into the headers
-<@U051SS2EU> Oddly, it's not a header, it's a `status-line` in the HTTP spec
+
+U3L6TFEJF : and it works if I just skipped the `refresh` and do the regular `(require ...)`, so I'm at a loss ¯\_(?)_/¯
+U0NCTKEV8 : what kind of repl you are using?
+U3L6TFEJF : `lein repl`
+U0NCTKEV8 : lein repl can be kind of weird
+U3L6TFEJF : ehh… errhmm… how do I launch a REPL without lein? :sweat_smile:
+U0NCTKEV8 : that depends, ```java -cp `lein classpath` clojure.main``` often works
+U051SS2EU : rlwrap is very handy when doing it that way
+U3L6TFEJF : still get the same behavior in that REPL unfortunately :confused:
+U0NCTKEV8 : put a println at the top of the kleinheit.pg.impl namespace to see if it is actually getting reloaded
+U3L6TFEJF : yessir, it prints
+U3L6TFEJF : well, I'm gonna give this a rest for now, appreciate all your help folks
+U0NCTKEV8 : ah, I bet refresh breaks var interning, so you end up with two vars with the same name
+U3L6TFEJF : ohh, now that sounds like it might be it!
+U3L6TFEJF : time to dig into the source…
+U051SS2EU : yeah, it destroys namespaces which might also include doing something wacky with vars that other code has captured…
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

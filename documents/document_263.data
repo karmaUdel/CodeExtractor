@@ -1,21 +1,66 @@
-output = [ [1,3,5,...], [2,4,6,...]]```
-<@U5P4FLYLE> Does this meet what you are hoping for? <http://package.elm-lang.org/packages/elm-community/list-extra/6.1.0/List-Extra#transpose>
-yes, this is what I am looking for - thanks
-`
-As ever, grateful for the help!!
-<@U5J08KX0D> it works just like the Html package, <http://package.elm-lang.org/packages/elm-lang/svg/2.0.0/Svg-Events#onMouseOver>
-OK, thanks <@U153UK3FA> - exactly the advice I needed and got me underway!
-I now get a "Click" msg onClick... how can I get the name of the object clicked on. onClick only expects one argument, and I'd like to say [onclick Click "head",...]
-Message = Click String
-`onClick (Click "head")` or `onClick &lt;| Click "head"`
-is that correct?
-Great <@U236M9FH9> - thanks!
-But if you have a fixed amount of strings you're going to use, you could make it it's own type: `type BodyPart = Head | LeftArm | Torso | ... `, `type Message = Clicked BodyPart`, `onClick &lt;| Click Head`
-And then the compiler will tell you if you accidentally misspell one :slightly_smiling_face:
-Architecture question.  I have an API module with internal state that's needed to generate a Http.Request.  Other child modules don't have access to that state, so they can't call the API module directly.  Instead, I use an OutMsg from children back to Main.  That OutMsg causes Main to tell API to send a specific request.  I'm having trouble finding a clean way to get responses back to the children that initiated requests.  They way I'm doing it involves a lot of tagging functions and making all my child models and msgs variable types (where the type variable is the main Msg type).  Any examples of clean solutions to this type of problem?
-<@U5VTA57UN> I have a model w/ an array of items nested under another array of items. I use indexedMaps to generate the HTML. When one of the nested items creates a Http.Request, I identify which one by adding the indexes to the msg: `type Msg = SaveSectionExercise Int Int (Result Http.Error SectionExercise)`, that lets me update the proper nested child.
-<@U236M9FH9> I see.  I suppose I could do the routing using identifier strings (in place of the 2 Ints you use) and have main pass the response to the child that wants the response.  But that means that for every call to the API in every child I'll need a unique routing string, and I don't get any compile time checks to make sure I didn't typo a routing string.
-The initiating children don't have some unique identifier in their model?
-<@U5VTA57UN> Talk of children and routing of messages sounds like you might benefit from letting go of how you are accustomed to architecting things. Instead of children, it is often useful to think in terms of data structures and functions. Evan's talk at Elm Europe might be worth watching for some guidance in this area: <https://www.youtube.com/watch?v=2ihTgEYiKpI>
-I could get used to this help from the compiler :slightly_smiling_face:
-so, when I do floating type division 0 / 0 I get NaN, but integer division 0 // 0 gives zero, is there another way to safely handle this case?
+U1EEBCQM6 : Yes.. correct
+U0LPMPL2U : OK, that should be possible without a `Dict`
+U0LPMPL2U : let me see if I can write up something
+U1EEBCQM6 : Not that I would have multiple lists. Just one list of all the options. And the `attribute` would allow me to filter based on that.
+U1EEBCQM6 : I thought that might be most efficient
+U3SJEDR96 : <https://ellie-app.com/3xfPcjxfy4ja1/0> something like that?
+U1EEBCQM6 : check that out! Let me try to understand it.
+U0LPMPL2U : I wrote up <https://ellie-app.com/3xfTdwMjGCra1/0>
+U0LPMPL2U : looking at <@U3SJEDR96>'s solution :eyes:
+U0LPMPL2U : ooh! `Json.Decode.keyValuePairs` super nice! TIL :thumbsup:
+U23SA861Y : are we playing code golf```
+itemdec : Dec.Decoder (List {attribute:String, id:String, name:String})
+itemdec =
+    Dec.map2 (,) (Dec.field "id" Dec.string) (Dec.field "name" Dec.string)
+        |&gt; Dec.list
+        |&gt; Dec.field "options"
+        |&gt; Dec.keyValuePairs
+        |&gt; Dec.map (List.concatMap (\(n,l) -&gt; List.map (\x -&gt; (n,x)) l))
+        |&gt; Dec.map (List.map (\(a,(i,n)) -&gt; {attribute=a,id=i,name=n}))
+        |&gt; Dec.field "attributes" 
+```
+
+U2FP79HN3 : So uhm, I just expanded a case of statement into 33 possible matches and now it takes about 3 minutes to compile
+U3SJEDR96 : Yeah, the exhaustiveness checker goes a little crazy with large case of stmts. Should be much better in 0.19, tho
+U2FP79HN3 : make it ten
+U37PQL9PB : I just discovered that elm treats this as a valid type signature: "foo : List Int Bool -&gt; Int". I don't understand how that's valid. I can understand "foo: List Int -&gt; Int", but I don't understand why "Bool" is allowed in this context when it's not a separate argument. Is this a bug or can someone educate me as to what this means?
+U3SJEDR96 : It's a bug, and it's been logged :)
+U3SJEDR96 : (same with `foo : List -&gt; Int` btw)
+U37PQL9PB : Great thanks. I tried searching for it, but google failed me. It messed me up as I was trying to do "List (List a)" but typed "List List a" and got confusing error messages :wink:
+U5ABF3BH7 : Hello! Does anyone know if there is a good package implementing 'search' in a select2
+U5ABF3BH7 : ?
+U2FGMAQ5R : <@U5ABF3BH7> , I was looking for something similar and started looking at implementing select2 in Elm , is there a project like this already ?
+U5ABF3BH7 : <@U2FGMAQ5R> I don't know. I need to implement something using select2 search. I am just starting.
+U236M9FH9 : <@U5ABF3BH7>  <@U2FGMAQ5R> Check out <https://github.com/thebritican/elm-autocomplete>
+U5ABF3BH7 : <@U236M9FH9> Thanks!
+U5HM74BD0 : I have a json string I need to decode. It's complex enough (in my mind, anyway) that I don't understand how to use Json.Decode with it to break it down into an Elm model. Its structure is something like this:
+```{playerNames: ["Fred", "Barney"], games: [{date: "May 20", stats: [{ab:2, hits: 1}, {ab: 3, hits: 0}]}, {date: "May 27", stats: [{ab: 1, hits: 1}, {ab: 3, hits: 1}]} ]}```
+
+I'm not sure how to begin to decode this. Can I use Json.Decode on its own or should I use the elm-decode-pipeline package, or something else?
+
+U153UK3FA : <@U5HM74BD0> you can use Json.Decode on it's own. When writing a Json decoder start by writing a decoders for the child nodes and compose those together to create decoders for the parent nodes
+U153UK3FA : eg. start by making a decoder for `{ab:2, hits: 1}`
+U5HM74BD0 : <@U153UK3FA> So begin with my records?  Yes, okay.  Then how do I use the result of that with its parent?
+U153UK3FA : once you have a decoder for `{ab:2, hits: 1}` you can pass that decoder to <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#list> and get a decoder that decoders lists of `{ab:2, hits: 1}`
+U5HM74BD0 : Okay, sounds good. Let me give it a whirl.  Thank you.
+U153UK3FA : <@U5HM74BD0> note that what you pasted above isn't valid json since the field names need to be quoted
+U5HM74BD0 : Yes, you're right. I was short-cutting it with my representation.  I do have valid json with quotes in the right places.
+U153UK3FA : alrighty, I just didn't want you to get frustrated trying to write a parser for invalid json
+U5HM74BD0 : Thanks for that.  Here's the actual json I'm working with:```{"playerNames":["Fred","Barney"],"games":[{"date":"May 20","stats":[{"ab":2,"hits":2},{"ab":2,"hits":1}]},{"date":"June 3","stats":[{"ab":2,"hits":2},{"ab":3,"hits":3}]},{"date":"June 4","stats":[{"ab":2,"hits":2},{"ab":2,"hits":2}]},{"date":"June 10","stats":[{"ab":2,"hits":2},{"ab":2,"hits":0}]},{"date":"June 17","stats":[{"ab":2,"hits":2},{"ab":3,"hits":2}]},{"date":"June 19","stats":[{"ab":0,"hits":0},{"ab":4,"hits":4}]},{"date":"June 20","stats":[{"ab":2,"hits":2},{"ab":0,"hits":0}]}]}```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

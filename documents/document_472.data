@@ -1,47 +1,108 @@
+U3FJSB596 : At the very bottom of the module is `toTask` that explicitly says that it can be use for chaining requests
+U4872964V : <@U3WM55ZG8> oh yes, you're right
+U4872964V : then that's another option
+U3FJSB596 : <@U4E8RTDPF> There's no chaining of Commands
+U4E8RTDPF : `toTask` nice ! thanks <@U4872964V> <@U3FJSB596> :raised_hands:
+U4872964V : i guess it depends on why one depend on the other
+U4E8RTDPF : still, it's better to go with the update way..
+U4872964V : which method is more suitable
+U3LUC6SNS : Hi all.  I've made some changes (added a package) to my project, and now `elm-test` fails to run (the app compiles).  Here is the error message:```
+jxxmbp:koko_client carlson$ elm-test
+I cannot find module 'LatexParser.Latex'.
+
+Module 'LatexParserTest' is trying to import it.
+
+Potential problems could be:
+  * Misspelled the module name
+  * Need to add a source directory or new dependency to elm-package.json
 ```
-Hi jonf: Thanks, that's helpful! But I think it doesn't quite work for what I'm doing. The idea is that I want to do the error checking before the end of the Point parsing, so as to get a "precise position" of the error. Say for example if the Point has 3 floats, and if there is something wrong with the first two, then I want that error to be generated at the position where the 2nd float is parsed, instead of waiting until the end of the parsing to check the whole thing. My application has several things in a row that are much larger than floats (spanning many lines) so it's important not to wait until the end to do the validation, so that I can direct to the exact line where the error was first detected.
-I believe that will do what you want (after all you can't validate that that statement is true until after you have both values
-how are you producing the tuple from the two points?
-I presume via map2
-I must admit my knowledge of the parser library is a not fantastic.
-ok then, rather than `succeed Point` you can use pointVerify
-Suppose the Point is 3 floats, then at the time I've read only two of the floats, there is no Point constructed yet, so I can't pass that value to the pointVerify function.
-so what that Parser Point is doing is creating a parser of the type `Parser (Float -&gt; Float -&gt; Point)`
-so the parser you have doesn't handle tuples any bigger than two
-you want something a bit recursive
-hmmm
-Well, suppose the Point is 3D (i.e., `type alias Point = { x:Float, y:Float, z:Float}`)
-so Point isn't dynamic in size like that as you have coded it.
-No, say it's fixed size, but that the float descriptions are so long that it's really important to pinpoint the exactly position of an error.
-The `|.` and `|=` syntax is very nice, but a bit alien to me, so I'm not sure precisely what it's a shorthand for, and how to get a name for some of the intermediate values it produces and then run a check based on those names. I see from the source code that `|=` calls map2, but I have trouble following the logic exactly.
-But perhaps I should call map2 directly instead?
-so whats going on here, is you take a function which takes the values you care about and then those operators slowly consume values which get handed in as parameters
-right
-use the operators as the library recommends that
-the function isn't "called" until the last value is specified
-However, when it is called you can then provide a message indicating which value is out of place
-there is also some stuff you might want to read in regards to delayed commits
-yeah, there looks like there is something in there that may be useful to you
-ok, thanks :slightly_smiling_face:
-Can anyone help me understand this stack overflow answer? <https://stackoverflow.com/questions/12405555/css-extend-div-to-fit-the-whole-page> I'm trying to get a div to expand to the full height of my page and it absolutely refuses.
-<@U2SR9DL7Q> do you have an example?
-it's usually the case that the div's parent does not have a height
-<@U0ZRNV5M3> yeah... I'm using mdl, so the whole view is nestled in this Layout object. Let me see if I can cut out a snippet that makes sense.
-The second grid element is what I need stretched to fill the space in the page.
-so you want things to be the height of the page at minimum?
-min-height: '100vh' or something along those lines will work
-vh &amp; vw are very useful units
-<@U5W5F6QGP> I'll give that a try.
-What I really need is just that little footer bound the bottom of the page, and the middle page to scroll as it's content increases. I managed the footer part. But the middle div behaves very strangely when there's too many dominoes (really only a problem for mobile)
-Rather than just resize itself as the new elements come in, the domino chips spill into the player data space... 
-it feels a lot more sane
-Thats the thing. Elm mdl grid components use flex box . But I'll have to look through the source code to see how they manage it. 
-ahhh right, sorry, I'm not super familiar with the mdl package
-It's a great package. Very comprehensive. But it thwarts me sometimes in these types of situations. 
-Hey all, I'm getting the following crash when running elm-test. I think I'm not doing the recursion correctly across a list and blowing up the memory. Does anyone have any tips on where I should look?
-FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
-Do you have any example code? In general, commenting out bits of code at a time can help debug. There are probably better ways
-are you doing list recursion yourself or using fold or map?
-<@U6907LQ6S>
-Thanks - I'm using List.map as part of a recursive method. I'll simplify the code to its essentials and paste it in
-<@U6907LQ6S> what is your goal? Are you trying to create a generator for GroupValue?
+I diffed the regular `elm-package.json` with the one in `tests`.  They are identical. So I am baffled.
+
+U0FP80EKB : <@U3LUC6SNS> Do you need to have `..` in the src directories in `tests/elm-package.json`
+U3LUC6SNS : In elm-tools parse is there a way to parse (and keep) everything from `\\[` to `\\]`?  I've been using code like```
+arg =
+    succeed identity
+        |. symbol "{"
+        |= keep zeroOrMore (\c -&gt; c /= '}')
+        |. symbol "}"
+```
+but the boolean function takes a Char as argument, not a String.
+
+U3LUC6SNS : <@U0FP80EKB> I tried that, but alas, it doesn't work. (same error message)
+U0FP80EKB : Interesting. I think the src directories are relative pathed from the location of the elm-package.json, so I don't think they should be identical.
+U0FP80EKB : Can you paste the source directories part?
+U3LUC6SNS : Do you mean the elm-package.json?
+U0FP80EKB : yeah
+U3LUC6SNS : Here we go:```
+{
+    "version": "1.0.0",
+    "summary": "helpful summary of your project, less than 80 characters",
+    "repository": "<https://github.com/user/project.git>",
+    "license": "BSD3",
+    "source-directories": [
+        "../src"
+    ],
+    "exposed-modules": [],
+    "native-modules": true,
+    "dependencies": {
+        "NoRedInk/elm-decode-pipeline": "3.0.0 &lt;= v &lt; 4.0.0",
+        "elm-community/list-extra": "6.1.0 &lt;= v &lt; 7.0.0",
+        "elm-community/string-extra": "1.4.0 &lt;= v &lt; 2.0.0",
+        "elm-lang/core": "5.1.1 &lt;= v &lt; 6.0.0",
+        "elm-lang/html": "2.0.0 &lt;= v &lt; 3.0.0",
+        "elm-lang/http": "1.0.0 &lt;= v &lt; 2.0.0",
+        "elm-lang/navigation": "2.0.0 &lt;= v &lt; 3.0.0",
+        "elm-lang/websocket": "1.0.2 &lt;= v &lt; 2.0.0",
+        "elm-lang/window": "1.0.0 &lt;= v &lt; 2.0.0",
+        "elm-tools/parser": "2.0.1 &lt;= v &lt; 3.0.0",
+        "evancz/url-parser": "2.0.1 &lt;= v &lt; 3.0.0",
+        "fbonetti/elm-phoenix-socket": "2.0.0 &lt;= v &lt; 3.0.0",
+        "jystic/elm-font-awesome": "2.0.1 &lt;= v &lt; 3.0.0",
+        "krisajenkins/remotedata": "4.3.0 &lt;= v &lt; 5.0.0",
+        "lukewestby/elm-http-builder": "5.1.0 &lt;= v &lt; 6.0.0",
+        "mdgriffith/style-elements": "3.2.3 &lt;= v &lt; 4.0.0",
+        "simonh1000/elm-jwt": "5.0.0 &lt;= v &lt; 6.0.0"
+    },
+    "elm-version": "0.18.0 &lt;= v &lt; 0.19.0"
+}
+```
+
+U3LUC6SNS : It still has the ../src that I tried.
+U0FP80EKB : This is the one in `tests` ?
+U0FP80EKB : I'm assuming that the modules are in `../src`
+U0FP80EKB : Can you paste the package json from the root? non-tests?
+U3LUC6SNS : Yes.  Normally it says ```
+"source-directories": [
+        "src"
+    ],
+```
+All of my Elm files except tests are in `src`
+
+U3LUC6SNS : And the app compiles, which is one check
+U0FP80EKB : Hmm…. And you are running `elm-test` from within `tests` (sorry for the basic questions)
+U0FP80EKB : (just going over some of the things I've accidentally done)
+U3LUC6SNS : Just to be sure: `jxxmbp:koko_client carlson$ diff elm-package.json tests/elm-package.json `
+No problem about the questions.  I've always run tests from the root directory.  If I do so from `tests`, I get this:
+```
+jxxmbp:tests carlson$ elm-test
+No tests found in the test/ (or tests/) directory.
+
+NOTE: Make sure you're running elm-test from your project's root directory, where its elm-package.json lives.
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,18 +1,93 @@
-```? Given that `/` says it’s arguments need to be `Float`, but the type declaration says it’s `number`?
-then you just change the onConfrim message you pass to the view 
-model field `confirm: Maybe String` should change then
-because I can confirm more things than just deleting by id
-Does it make sense to just use Msg there, or I should create my own union `type Confirm : Delete String | OtherThingToConfirm`
-Generally, I prefer to keep the Msg focused on UI interactions, rather than logic
-So I would make a new union
-ok, thanks, this was helpful!
-<@U1N4KAHT6> <https://github.com/elm-lang/elm-compiler/issues/1373> it shouldn't, and it's a bug (with some known variations)
-I thought so
-I wish there was a way to convert any number to Float, it would make sticking to your own type signatures a lot easier
-There is an issue for possibly changing `toFloat : number -&gt; Float` which would help :slightly_smiling_face:
-<https://github.com/elm-lang/core/issues/721> tracked in that meta issue
-Thanks, you seem to remember all the GH issues :slightly_smiling_face:
-If you want to write down your ideas, I might be able to help. Its fun to dive into those topics
-I have a record Product which I need to convert to a Javascript object to pass it to a custom element as a property: node "leaflet-map" [property "product" (Json.Encode.object model.currentProduct) ][]. The compiler says: Function 'object' is expecting the argument to be List (String, Value), but it is Product. Any hint?
-What I mean by inlining is to move the data from the includes into the main attributes in the first plcae, so the includes are no longer needed
-You need to build up a list of (String, Value) from your product
+U1ZFF0E5P : if an item can't be found in a `Dict` we do handle it in the view, but additionally we want to log it
+U1ZFF0E5P : so I need a way to send a `Msg` to my `update` function where I can send an `Http` request
+U23SA861Y : how are you selecting the item in the dict, presumably that key is in the model
+U1ZFF0E5P : yeah so I have the key for `StudentCourse`, which I can look up and send to my view
+U1ZFF0E5P : which has a List of keys of other entities (StudentCourseUnit), which I have to loop up again
+U23SA861Y : wait, you don't send it to your view
+U23SA861Y : your view renders your model
+U23SA861Y : nothing gets sent to it
+U1ZFF0E5P : this is my model: ```{?entities = {
+?apprenticeshipProviderFieldOfficers = Dict(0)
+?apprenticeshipProviderRegions = Dict(0)
+?apprenticeshipProviders = Dict(0)
+?changeOfSrtos = Dict(0)
+?courseDescriptors = Dict(0)
+?courseSchemeUnits = Dict(18)
+?courseSchemes = Dict(3)
+?courseUnits = Dict(13)
+?courses = Dict(1)
+?deliveryLocations = Dict(0)
+?employers = Dict(0)
+?fundingSchemes = Dict(0)
+?notifications = Dict(0)
+?referralSources = Dict(0)
+?registeredTrainingOrganisations = Dict(0)
+?studentCourseClasses = Dict(1)
+?studentCourseUnitTasks = Dict(0)
+?studentCourseUnits = Dict(0)
+?studentCourses = Dict(1)
+?tasks = Dict(0)
+?trainerRoles = Dict(1)
+?trainers = Dict(1)
+?trainingContractNumbers = Dict(0)
+?units = Dict(13)
+}
+error = Nothing
+openedDatePicker = Nothing
+route = TrainingPlan "dGYgQa"
+settings = NotAsked
+?trainingPlan = Success {courseScheme…}
+courseScheme = Nothing
+?courseSchemes = List(3)
+date = &lt;Wed Jul 19 2017 18:08:05 GMT+1000 (AEST)&gt;
+modal = Closed
+selectedStudentCourseUnits = Nothing
+studentCourse = "dGYgQa"
+?studentCourseForm = { comment = Nothing, endDate = Nothing, … }
+trainer = "mbk5Xe"
+}```
+
+U1ZFF0E5P : so my main view function is this:
+U1ZFF0E5P : ```view : Model -&gt; Html Msgview model =
+```
+
+U1ZFF0E5P : now if a key can't be found, I show an error
+U23SA861Y : ellie dude
+U23SA861Y : ellie
+U1ZFF0E5P : BUT I also want to log this
+U2SR9DL7Q : <@U1ZFF0E5P> Views can be shown or not shown depending on the state of your model. So you're view code would look like```
+view model = 
+  case model.relevantThing of 
+    everything there -&gt; ViewIfWorking
+
+    somethingMissing -&gt; ViewIfNotWorking
+```
+`ViewIfNotWorking` may be some default or anything you like. 
+
+Error logging would have nothing to do with the view however. It would be triggered or not when your app attempts to read the data from the `dicts` in your backend.
+
+U23SA861Y : You need to handle all of this in your update function when you get the message that changes the selection
+U1ZFF0E5P : we have relational data (8 layers deep) that we normalised and store in `Dict`s
+U1ZFF0E5P : we want to avoid having to query all dicts upfront to make sure everything is there, we'd rather let the view functions pick what they need
+U23SA861Y : but the view functions are picking what they need based on keys which are known to update
+U1ZFF0E5P : but it's a Dict, not a record, it may not be there
+U1ZFF0E5P : Dict.get returns a `Maybe a`
+U23SA861Y : But you can do that check in update
+U1ZFF0E5P : then I would need to write some sort of `guard` function
+U1ZFF0E5P : a function to look up everything upfront, replicating all of the view logic
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

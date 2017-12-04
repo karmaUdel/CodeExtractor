@@ -1,44 +1,86 @@
+U40QW928G : I guess I'm just not understanding where to put messages
+U40QW928G : or for that matter how to import them
+U40QW928G : I try `import User.Commands exposing (UserMsg)`
+U23SA861Y : if you did that your messages would be imported by update but not user
+U40QW928G : but when I try to put `FetchUser` in the case it doesn't work
+U40QW928G : ```Cannot find pattern `FetchUsers`
+
+26|         FetchUsers -&gt;
+            ^^^^^^^^^^
+Maybe you want one of the following?
+
+    User.Commands.FetchUsers
 ```
-like this?
-I think it's quite nice
-in your class definition
-`self.name` sets an attribute for every new instance already
-I know but I think it it's more explicit
-What would I use if I would to serialize SQLAlchemy model result?
-would like to be able to encode the results as JSON or cast it to a dict
-Is `marshmallow` any good or is there anyway to it with pure python easily? Can I implement a special attribute like `__json__`?
-marshmallow is the tool to go
-what should I use for web dev?
-Flask? aiohttp?
-oh, it's up to you completely, there are too many options for one to be considered the only way :slightly_smiling_face:
-I'm searching for something that can handle async methods since I'm going to fetch data from external HTTP APIs
-Can I do async I/O in Flask? Woud like to use async/await since I'm already familiar to that concept
-But Flask can play nicely with WebSockets for example
-Hmm
-"However Flask is just not designed for large applications or asynchronous servers. Flask wants to make it quick and easy to write a traditional web application."
-No you can't really do asyncio with flask. 
-What happens if I try? :grin:
-There's some gevent based options for flask that makes it "async", but generally it's considered best to have a background worker do asnyc things (celery or rq)
-so I would be better of to use aiohttp?
-You can combine sync with async by using `loop.run_until_complete`. it will work locally, but once you run in thread mode (prod) you wont have an event loop.
-don't want to use any queuing
-<@U63VCB8AH> if making lots of remote calls in parallel is required for returning the response, i would use an asyncio framework. Sanic is flasklike
-Aiohttp is also a good option. 
-Seems nice
-Then I just need to figure out how to get JWT auth working :smile:
-jwt-extended!
-that may work with the Sanic API
-<@U63VCB8AH> better have `to_dict` method, so you can serialize it into more than just json
-Say, yaml
-I'm considering how to make this part python 2 friendly
-it works, but I have to do it in a couple of places in my script
-what is the proper way to make this code work in both python 2 and python 3?
-The quick and easy way is to just make a function that gets the basename from your string.
-Hi! What TUI library would you guys recommend learning? I want to make GUIs for the terminal but I dont want any new windows opening
-easy or hard? :stuck_out_tongue:
-Whatever really, as long as it gives me the oppertunity to develop some kind of gui for an application for the terminal :slightly_smiling_face:
-<https://github.com/pfalcon/picotui>
-There was another project like that but I can't find it!
-Very similar, with windows and common elements like checkboxes...
-If you want something more barebones, then good old `curses`, or `bearlibterminal` for a modern approach, though it's aimed at games
-Thanks, will check them out!
+
+U5LFUHH19 : I'm being told by `elm-package` that `Json.Decode.Extra` is not compatible with Elm 0.18.
+U48AEBJQ3 : <@U5LFUHH19> `JD.string |&gt; JD.map String.toInt |&gt; JD.andThen Json.Decode.Extra.fromResult` I think should do it.
+U23SA861Y : <@U40QW928G>, do you got a repo to point at so we can get a better feel?
+U40QW928G : I can create one
+U0LPMPL2U : Imagine two files```
+module User.Commands exposing (fetchUsers)
+
+fetchUsers : (a -&gt; msg) -&gt; Cmd msg
+fetchUsers tagger =
+  -- fetch users and tag with tagger
+```
+
+```
+module Main exposing (main)
+import User.Commands exposing (fetchUsers)
+
+type Msg = FetchUser | UserFetched User
+
+update : Msg -&gt; Model -&gt; (Model, Cmd Msg)
+updage msg model =
+  case msg of
+      FetchUser -&gt;  (model, fetchUsers UserFetched)
+      -- rest
+```
+
+U0LPMPL2U : <@U5LFUHH19>  are you using `elm-community/json-extra` ?
+U5LFUHH19 : Ah, no.
+U40QW928G : ok I have that
+U40QW928G : ```fetchUser : Cmd msgfetchUser =
+    Http.send FetchUsers userEndpoint```
+
+U0LPMPL2U : right. Instead of hardcoding `FetchUsers`, pass it in as an argument
+U0LPMPL2U : that way `fetchUser` function has no dependency on the `Msg` type
+U40QW928G : oh ok
+U0LPMPL2U : ```fetchUser : (a -&gt; msg) -&gt; Cmd msg
+fetchUser tagger =
+    Http.send tagger userEndpoint
+```
+
+U40QW928G : ok but now
+U5ABF3BH7 : In my company, we are transitioning from Rails to Elm for the FrontEnd. So far, things have been built thinking only about the front end, building  models that make sense for the front end, and without thinking too much about the back end. Now I have the task of refactoring so that we have a better separation between data and views.  I am having a hard time because it is all tightly connected in several layers. For example, one view touches different database models, and the same database model is represented in  different views. I am a bit confused as what is the best way to encapsulate that in the view. Let's say I have an Address model, an Organization model and a person model (I have many more but it is to simplify). Both the organization and person have a contact information which in turn has phone numbers (which are all models). And all those fields are in one view. A person and an organization have an address.How would you design your view model to reflect that complexity, making it easy to encode and decode.  I know I am to separate your data from the view, but I am hesitant on what is the right way to go about it. Any advice? Sorry for the long paragraph.
+U40QW928G : It's yelling at me for this function type
+U40QW928G : ```userEndpoint : Http.Request (List User)
+userEndpoint =
+    Http.get (baseUrl ++ "/users") decodeUsers
+```
+
+U40QW928G : ```Function `send` is expecting the 2nd argument to be:
+
+    Http.Request a
+
+But it is:
+
+    Http.Request (List User)
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

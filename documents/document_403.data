@@ -1,24 +1,82 @@
+U6531GSTW : is there any easy way to make it work?
+U6531GSTW : the different types to decode are really getting to me
+U23SA861Y : so if you have a function which goes `foo : String-&gt;Time` you can use `JD.string |&gt; JD.map foo` to get a decoder of type time
+U23SA861Y : as it should be
+U23SA861Y : types are there to help you
+U23SA861Y : they tell you when things are incompatible
+U23SA861Y : that incompatibility exists whether you explicitly call it typing or not
+U0FP80EKB : Here's the decoder we wrote```
+dateDecoder : Decode.Decoder (Maybe Date)
+dateDecoder =
+    Decode.map dateFromString Decode.string
+
+
+dateFromString : String -&gt; Maybe Date
+dateFromString =
+    Date.fromString &gt;&gt; Result.toMaybe
 ```
-<@U31FGNWCT> You don't actually need to decode that, Elm will do it for you
-<https://guide.elm-lang.org/interop/javascript.html>
-So I just pass it as flags without decoding?
-yep
-Well, that's pretty convenient!
-Thank you, Ill try that.=)
-Haha! Awesome! Thank you very much <@U153UK3FA>!
-Hmmm... In order to use Bootstrap tooltips, you have to do some JS initialization on the DOM elements after they are created. Does Elm have a JS hook after the DOM has been created or updated?
-No, Elm doesn't have lifecycle hooks
-:sad_panda: : - then I'm not sure one can make use of the nice declarative tooltips in Bootstrap
-I suppose you don't want to use elm-bootstrap?
-well.. I didn't think I needed all that... does that have _native magic_ to get around the tooltip issue?
-I have no idea, I've never used Bootstrap :slightly_smiling_face:
-<@U601ELFEG> I think the packages published on <http://package.elm-lang.org|package.elm-lang.org> are not allowed to have native code. Just pure Elm
-/Ok &lt;Thu Jul 20 2017 00:00:00 GMT-0300 (BRT)&gt;
-<https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse#ECMAScript_5_ISO-8601_format_support>
-<@U236M9FH9> that answers my question. Thank you! :smile: 
-Hi
-Random.map2 (\pos chance -&gt; { position = pos, chance = chance }) spawnPosition spawnChance
-what is \ ?
-:-?
-\pos
-<@U6B7NBTLZ> that's an anonymous function
+
+U0FP80EKB : Then used it like```
+        |&gt; required "date" DateHelpers.dateDecoder
+```
+
+U23SA861Y : heh, there is a date decoder in extra
+U1CE9DL9H : <@U0FP80EKB> why not let the decoder fail when no date can be parsed? so ```
+decode.string |&gt; andThen (\str -&gt; 
+    case dateFromString str of
+        Nothing -&gt; Decode.fail "could not parse date"
+        Just v -&gt; Decode.succeed v
+)
+```
+saves you from having to deal with maybes everywhere
+
+U0FP80EKB : <@U1CE9DL9H> Not totally sure, but I think we had cases where it wasn't a failure maybe
+U6531GSTW : i only partielly understand what has to be done.. is there anyway to make this code running&gt; <https://ellie-app.com/3GpdHFztdsta1/5> ? im still stuck on these errors with different types..
+U0FP80EKB : oh, yeah, looking at other uses, there are cases where we want the Nothing to be there
+U0FP80EKB : Since it wasn't always set
+U37BS6J6N : Or should I take this to mean that my models are too complicated?
+U37BS6J6N : full code listing<https://ellie-app.com/3Gs79HdmykBa1/1>
+
+U23SA861Y : create recursive inits to help you
+U23SA861Y : err, both of those are lists so yeah
+U23SA861Y : ok
+U23SA861Y : ahh no your model is ChatModel
+U23SA861Y : yeah you should have a seperate init for each of those types and then compose them togoether
+U23SA861Y : There are no `nil` types in elm
+U37BS6J6N : Are you seeing a "nil"? somewhere?
+U37BS6J6N : OH the MeetingInfo!
+U23SA861Y : no, I mean there is not default constructur
+U23SA861Y : so break it up into a few different inits
+U6574P2MB : hello
+U37BS6J6N : <@U23SA861Y> k thanks~ I'll give it a try
+U23SA861Y : if you have things like ```
+initUser: User
+initUser = ...
+```
+it will make it easier to see where the types are breaking down
+
+U23SA861Y : hello <@U6574P2MB>
+U64FYS317 : Is there a way to define type alias B which is a superset/subset of type alias A, but without explicitly copying all the same field annotations from  A?
+U23SA861Y : hmm, I believe not
+U23SA861Y : there is an issue for this let me dig it up
+U23SA861Y : <https://github.com/elm-lang/elm-lang.org/issues/529>
+U23SA861Y : you can however have a method accept a partial record
+U64FYS317 : hrm. Thanks for the tip. wouldn't you just have to redefine a `PartialType`, though?
+U23SA861Y : no
+U23SA861Y : one sec
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

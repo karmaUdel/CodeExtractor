@@ -1,19 +1,88 @@
-        """&lt;path fill="#D1D3D4" d="M128.5 115.862l-90.205 27.51v37.177l90.205 27.508 90.205-27.508v-37.177z"/&gt;&lt;path fill="#808285" d="M128.5 48.943L38.295 76.455v37.176l90.205 27.51 90.205-27.51V76.455z"/&gt;&lt;path opacity=".5" fill="#D1D3D4" d="M87.054 128.503l41.446 12.638 41.445-12.638-41.445-12.641z"/&gt;"""```
-but it's about 2000 lines already and I should add 300 more icons now :smile:
-(className is a string because `Svg.Attributes.class` was not special case like in `Html` and not allowed to use twice for example. looks like fixed already, need to rewrite)
-but this code requires a lot of work - need to `svgo` icons, extract paths (and avoid root `svg` tag), paste it here. I think it will be easier when webpack will do it
-and it will be a hell when icons will change
-I am really just considering other ways now - `object`, svg sprites, etc.
-looks like `object` allows some customizations too
-is there special magic involved in the `Json.Decode` functions or can they be implemented in pure elm?
-You can implement json decoders in pure elm
-under the hood, `Json.Decode` may have some fancy stuff but you never need to deal with that
-i'm specifically looking for that fancy stuff though
-i am trying to construct a record piece by piece from results
-from a form record
-You can do that in pure elm using the functions provided by `Json.Decode`
-there's no json involved there, i am merely trying to copy the api
-Ah, so you have many `Result` values that you want to combine together?
-in a way -- and collect in a record
-can i paste stuff in here?
-sure that would be helpful :slightly_smiling_face:
+U0FP80EKB : :slightly_smiling_face:
+U17R1GD96 : more or less
+U0FP80EKB : I use this in several places in my app (across two products), and it works great
+U0FP80EKB : And since it creates vdom nodes, elm can use it effectively for diffing and rendering
+U17R1GD96 : I have `&lt;a href="foo"&gt;bar&lt;/a&gt;` inside. AFAIK, Markdown uses a different syntax`[foor](bar)`
+U0FP80EKB : No, that works
+U0FP80EKB : Html is a subset of markdown
+U0FP80EKB : So, `Markdown.toHtml [] "&lt;a href="foo"&gt;bar&lt;/a&gt;"` will yield `&lt;a href="foo"&gt;bar&lt;/a&gt;`
+U0FP80EKB : In fact, if you want to add things, such as `target` to the link, you have to use the html form, not the `[foo](bar)` form (with standard Markdown parsers, that is)
+U0FP80EKB : Also, using `Markdown.toHtml` means you can pass in the sanitize option, if you want.
+U17R1GD96 : <@U0FP80EKB> it does not work. My HTML is always escaped whatever `sanitize` value I use :disappointed:  I changed my code into ```
+module DangerousHtml exposing (dangerousHtml)
+
+import Html exposing (Html)
+import Markdown exposing (Options, defaultOptions, toHtmlWith)
+
+
+options : Options
+options =
+    { defaultOptions | sanitize = False }
+
+
+dangerousHtml : String -&gt; Html msg
+dangerousHtml userInput =
+    Markdown.toHtmlWith options [] userInput
+
+```
+
+U17R1GD96 : Markdown also wraps my html into `&lt;pre&gt;&lt;code&gt;myhtml&lt;/code&gt;&lt;/pre&gt;`. I don’t want it.
+U5T739RFW : May be there is some indentation. If you use python you can call `textwrap.dedent()` on the html before handing it to client.
+U0FP80EKB : <@U17R1GD96> interesting. I’ve not run into that. I’d say try it without the options, which is what we tend to use. Just `Markdown.toHtml`
+U0FP80EKB : Yeah, I think indentation will hurt, too.
+U17R1GD96 : What is textwrap.dedent? Which package?
+U17R1GD96 : I don’t use Python. OK. I will fix it somehow.
+U17R1GD96 : works. cool
+U0FP80EKB : <@U17R1GD96> it was the indentation?
+U37HUSJ4R : Hi everyone :slightly_smiling_face:
+U37HUSJ4R : is it possible to pass json as a flag into `programWithFlags`?
+U0EUHKVGB : yes
+U37HUSJ4R : great
+U37HUSJ4R : what would the type signature of main be in this case then?
+U37HUSJ4R : `main : Program Json.Decode.Value Model Msg`?
+U17R1GD96 :  <@U0FP80EKB> yes, it was indentation
+U0EUHKVGB : <@U37HUSJ4R> yes
+U37HUSJ4R : <@U0EUHKVGB> whats the correct way to then call by decoder on the data then?
+U0EUHKVGB : `Json.Decode.decodeValue`
+U37HUSJ4R : do you know of any examples of flags/json decoding
+U0EUHKVGB : Do you just not know how to use a decoder?
+U0EUHKVGB : Or is the flag part?
+U37HUSJ4R : flag part, I have a decoder
+U37HUSJ4R : just want to know how to pass my flag json into the decoder
+U0EUHKVGB : so, you have a function which is like this: `init : Json.Value -&gt; (Model, Cmd Msg)`
+U0EUHKVGB : then that wants to look something like this:
+U0EUHKVGB : ```init value =
+  case Json.Decode.decodeValue myDecoder value of
+    Err e -&gt; some error model
+    Ok actualModel -&gt; (model, Cmd.none)
+```
+
+U0EUHKVGB : where `myDecoder` is the decoder that you have.
+U0EUHKVGB : See here for more examples: <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode>
+U37HUSJ4R : I will take a look, thanks sir :slightly_smiling_face:
+U0FP80EKB : <@U17R1GD96> awesome! Thanks. Glad it worked.
+U2LAL86AY : what is the use/meaning of this function? <http://package.elm-lang.org/packages/Fresheyeball/elm-function-extra/3.0.0/Function-Pro#mapAfter> - i can't wrap my head around it :smile:
+U37HUSJ4R : <@U0EUHKVGB> in the example above this words great if I `actualModel` is the model I wish to update, what happens when my model is something like:
+U37HUSJ4R : ```type alias Model =
+    { application : Application
+    }
+```
+
+U37HUSJ4R : where Application is another type alias
+U37HUSJ4R : how do I pass `model` into the init function so i can do something like `{model | application = data}`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

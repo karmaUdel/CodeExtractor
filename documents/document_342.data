@@ -1,14 +1,144 @@
+U0FP80EKB : That's the most important thing
+U0FP80EKB : Because, in the end, whether you use array or list, WELCOME TO ELM! is a pretty consistent message I see here. I :heart: that!
+U23SA861Y : :stuck_out_tongue:
+U5AR0LDQA : Is it possible to call a function onClick?
+`button [onClick (&lt;funtion&gt; &lt;model&gt;)] [text "blah]`
+
+U23SA861Y : function no, it dispatches a message with which you can do something with
+U5AR0LDQA : Alright. Just was curious if there was another way. Thanks <@U23SA861Y>
+U23SA861Y : you can however run a function against the model and have the message get dispatched back with the result
+U31A7HG1E : Can anyone point me to an example of how to use Json.Decode.Pipeline to decode a field  defined as a union type?
+U23SA861Y : oneOf is the function you want I believe
+U31A7HG1E : Ah, ok. I just found an example using that.  Thanks!
+U3SJEDR96 : `oneOf` seems weird for that, I'd go for```
+type Union = One | Other
+unionDecoder : Decoder Union
+unionDecode =
+  Json.Decode.string |&gt; Json.Decode.andThen (\s -&gt;
+    case s of
+      "one" -&gt; succeed One
+      "other" -&gt; succeed Other
+      _ -&gt; fail &lt;| "I don't know how to decode " ++ s
+  )
 ```
-Great, this is making sense.  I'll give it a go.  Thanks!
-`JD.field "title" (JD.map Title JD.string)`
-We do just this thing for our `Id` decoder <https://gist.github.com/coreyhaines/5f2a8d15de99ce91adbb10ac855172b1#file-id-elm-L20-L22>
-makes it easier to use in a pipeline while decoding other fields
-hey everybody, I am trying to get unique values out of a list I have a nasty big function which works, and I am wondering if there is a much nicer more FP way to do it?
-<https://ellie-app.com/3J7tc7ykKZqa1/10>
-any hints appreciated :slightly_smiling_face:
-nvm I found <https://github.com/elm-community/elm-list-extra/blob/master/src/List/Extra.elm>
-Which has a) the dropDuplicates function and b) juicy lecker source code :slightly_smiling_face:
-Using a `Set` is the best way to do this, indeed. The one in `List.Extra` preserves order - if you don't need that, you can just `unique = Set.fromList &gt;&gt; Set.toList`
-oh wow, even sneakier!
-thanks!
-i gather that the update portion of the architecture happens on the requestAnimationFrame, right? if there are multiple messages to be processed, they are sequentially handled in the same order they were sent?
+
+U3FJSB596 : <@U23SA861Y> <@U0FP80EKB> I'm surprised noone mentioned `Array`.<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Array>
+Is it because this is <#C192T0Q1E|beginners>?
+
+U23SA861Y : <https://github.com/elm-lang/core/issues/649>
+U23SA861Y : it has issues
+U3SJEDR96 : Array.Hamt fixes that (and has been merged), tho
+U23SA861Y : merged and released?
+U3SJEDR96 : nope, that'll be the next release of `elm-lang/core`
+U3SJEDR96 : but you _can_ already use `import Array.Hamt as Array` using `Skinney/elm-array-exploration`
+U0FP80EKB : I was more talking data structure vs specific implementation :slightly_smiling_face:
+U2SR9DL7Q : question: when elm 0.19 is released, if I upgrade my projects to the new release, will the maintainers of the packages i use have to do the same for me to keep using them?
+U0K92QFST : <@U2SR9DL7Q> yep
+U0K92QFST : in my experience so far the community as a whole's been pretty good about upgrading repos
+U0K92QFST : since major version releases are exciting
+U3SJEDR96 : They'll have to do so, indeed, though in the past there have always been tools to make upgrading projects/libraries a little easier :slightly_smiling_face:
+U2SR9DL7Q : it sounds like something i will be annoyed about in the short term, but then REALLY happy about later on.
+U2SR9DL7Q : like taking my vitamins, or not sending passive-aggressive emails...
+U0K92QFST : In the past also, abandoned libraries that a lot of people relied on were forked and/or reimagined by more active maintainers
+U0K92QFST : that's part of the role of the `elm-community` org
+U2SR9DL7Q : sounds good. thanks folks.
+U3FJSB596 : ilias: Thanks for the tip, didn't know of this implementation.
+U3SJEDR96 : Oh, you should totally watch Robin's talk from elm-europe! (the person who wrote `Array.Hamt` :slightly_smiling_face: )
+U3FJSB596 : I did. That's where I got the notion that a better implementation of Array was coming. He made allusions to it at the beginning of the video.
+U3SJEDR96 : :smile: Yeah, I think he _tried_ to mention that you can use that _right now_ at the end of the presentation
+U3FJSB596 : Nice
+U5QJW0DDE : Is it possible to pass any kind of data from JavaScript into elm thru ports? For example, raw image data that would then get assigned to an elm node?
+U3SJEDR96 : Hmm, depends a little on _how_ raw you're talking, and what you mean with an `elm node` :slightly_smiling_face:
+U5QJW0DDE : I just mean a DOM node that Elm controls
+U3SJEDR96 : <https://ellie-app.com/3qpgdbQFFfqa1/0> but this interesting nevertheless :slightly_smiling_face:
+U5QJW0DDE : By image, I mean data you can use to construct an image in JavaScript
+U3SJEDR96 : <https://ellie-app.com/3qpgdbQFFfqa1/1> *
+U0K92QFST : <@U5QJW0DDE> if it's just a string, so why not!
+U5QJW0DDE : <@U3SJEDR96> did you literally just whip up that example this moment?
+U3SJEDR96 : nah, had that laying around
+U5QJW0DDE : I was like %#}]#^*^#{
+U5QJW0DDE : What is the most recommended technique to serialize elm data on the server? I've seen a couple of scarce articles about encoding JSON, would that be the way to do it? (nearly all articles are about going the other direction, decoding)
+U0FP80EKB : Definitely easiest if you serialize to JSON
+U5QJW0DDE : Jason.encode?
+U0FP80EKB : Elm is very adept at deserializing JSON
+U0FP80EKB : Depends on what server-side system you are using
+U3SJEDR96 : Most articles are about decoding because it tends to be a larger "hurdle" so to speak :slightly_smiling_face:
+U0FP80EKB : What server are you using? We use, for example, Rails, so I have a combination of custom and ActiveModel::Serializer
+U3SJEDR96 : Which is to say - encoding isn't very hard
+U0FP80EKB : Also, Elm is entirely on client-side, so serializing on the server is independent of Elm
+U5QJW0DDE : And it's easy enough to represent elms data types, like sum types, as JSon and have them encoded and decoded easily both ways?
+U0FP80EKB : No, you have to decode something else to the sum types. Have a string, perhaps, then decode to a sum type
+U0FP80EKB : We generally use a string in the JSON representation. We then have a small function that knows how to convert each string to a type.
+U3SJEDR96 : as for learning how decoders work; I have this experiment ongoing and would love any and all feedback on it, _especially_ from people new to decoders - <https://github.com/zwilias/demystify-decoders>
+U3SJEDR96 : so feel very much invited to give that a try :slightly_smiling_face:
+U5QJW0DDE : Thanks, I will check that out
+U5QJW0DDE : In any case, it doesn't sound like it will be a problem from what you guys are saying
+U5QJW0DDE : Thanks slack bot, but those two gentlemen clearly have photos that indicate they are in fact men
+U48AEBJQ3 : kfairwink: I think that <@U0FP80EKB> identifies as feline.
+U48AEBJQ3 : :joy_cat:
+U635MRFPY : hi, is there some example I could look into that pushes some parts of the state into url params? what I want is e.g. to have a box I can open and close by clicking a button or link but that should be somehow reflected in the url (e.g. via `?detailed=true`)
+U48AEBJQ3 : <@U635MRFPY> Take a look at this <http://package.elm-lang.org/packages/elm-lang/navigation/latest>
+U635MRFPY : <@U48AEBJQ3> ah, thanks, I was using that for the routing already. I suppose I would need that special option attribute which skips the event propagation?
+U0FP80EKB : This is true!
+U5VTA57UN : I have some code for 0.18 that causes the compiler to suck as much memory as it can get and never terminate, I think while it's trying to do type inference (adding an annotation makes the problem go away).  Are these types of things worth generating test cases for and reporting, or is it not mature enough for that to be a useful exercise?
+U5XC2FJ1Y : do you have deeply nested let-bindings?
+U5XC2FJ1Y : (i have no opinion on generating test cases, i just know that nested let-bindings screw up HM type inference)
+U5VTA57UN : It's a function I'm defining in a let, but it's not nested.   The function didn't have a valid signature as I'd entered it.  I'd have preferred an error message to a reboot though.
+U3SJEDR96 : <@U5VTA57UN> yea, please do attempt to make an SSCCE and log it <https://github.com/elm-lang/elm-compiler/issues> :slightly_smiling_face:
+U5QJW0DDE : i'm inspecting the compiled html file from elm-make. is this the typical/only way Elm compiles to JS, but including the whole language in the HTML file along with your custom logic?
+U5QJW0DDE : s/but/by
+U2SR9DL7Q : <@U5QJW0DDE> you can compile to a js file, and simply reference that file from your html
+U2SR9DL7Q : i believe the command is elm-make --output=elm.js. you can of course, call the js file anything you like.
+U5QJW0DDE : but as far as JS compilation options ,in general, what I'm seeing is approximately correct, and thus for most projects a big part of the JS will always be the same... the Elm language itself
+U2SR9DL7Q : When you say 'including the whole language in the html file', I'm not sure what you mean. The compiler takes the elm you write, and maps that to the equivalent js code.
+U2SR9DL7Q : The js you see is js that does the same as what you wrote in elm, not js simulating elm running your elm code. At least, that's how I've always understood it.
+U2SR9DL7Q : But you are right in the fact that since all elm projects basically follow the elm architecture, a certain part of the js that handles the interaction between those elements and interfacing with the DOM will be the same every time.
+U5QJW0DDE : no, the elm language itself compiles to js, right? and that js is in your js file, along with your own logic. or am i wrong?
+U5QJW0DDE : that is, the entire elm language's js version is in the file along with your own code
+U5QJW0DDE : for example I can take a very tiny Elm file and it compiles to nearly 8000 lines of JS
+U5QJW0DDE : and that nearly 8000 lines will be in every Elm project, right?
+U2SR9DL7Q : I didn't think it worked that way. But you may be right. If so, then for small projects it would be mainly that.
+U5QJW0DDE : have you ever looked at the JS your projects create?
+U2SR9DL7Q : Briefly. I never concerned myself with it too much, because well... It's got that hard to read nature of generated code, and elm is so performant, I never thought to consider the size of the document.
+U5QJW0DDE : except it is not hard to read at all. it has regular, readable definitions for all functions, like foldl and foldr
+U5QJW0DDE : function xor(a, b){
+	return a !== b;
+}
+
+U5QJW0DDE : have no idea how to format code on here
+U2SR9DL7Q : Perhaps. Maybe I should say I never attempted to read it beyond skimming through after my first elm-make attempt.
+U2SR9DL7Q : `test`
+U2SR9DL7Q : enclose the code in the " ` " symbol and it will format it appropriately
+U5QJW0DDE : try it with multiple lines
+U2SR9DL7Q : ` multiplelines
+`
+
+U2SR9DL7Q : ``` once 
+more 
+```
+
+U2SR9DL7Q : use triple for multi-lines " ``` "
+U2SR9DL7Q : it's kind of like python, where triple quotes let you use multi-line strings
+U0J1M0F32 : Yes <@U5QJW0DDE> the entire Elm core language is compiled with your Elm logic at this point. That puts a certain "floor" to the size of current elm applications. However, cutting down that size is being worked on in coming elm versions, with DCE, tree shaking, and generally improving support for after compilation compression and minification.
+U5QJW0DDE : i heard a bit about that earlier
+U5QJW0DDE : can't wait to see how that develops
+U0FP80EKB : Also, we have a 2.5KLOC elm app that sits around 52k. This isn't with too much stuff other than uglify and gzip. As we add code, this shouldn't grow much.
+U0FP80EKB : just for reference
+U0FP80EKB : This contains all our embed code that gets embedded on customer sites (example <https://www.wuft.org/findoutflorida/> you can see the What do you wonder? and Help us out). We just put all our embeds into the same app, so we only have to load the elm app once
+U0FP80EKB : It will be great when it gets a bit of the DCE, etc, but otherwise it isn't too big, relatively speaking.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

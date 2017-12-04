@@ -1,15 +1,115 @@
+U57KYFW67 : No worries.
+U2SR9DL7Q : I have a throwaway project I set up following the tutorial that works perfectly. Can't recreate it for my existing project though... I don't really mind manual but, I have to give it another try later.
+U2SR9DL7Q : everyone seems to use a different setup though...
+U1ZCL9GAX : hi, does anyone know how to display a string unquoted in elm-repl?
+U1ZCL9GAX : i have a function that generates a multiline formatted string (of GLSL), and I want to see what it looks like with actual linebreaks, not interspersed \n escapes
+U57KYFW67 : <@U1ZCL9GAX> Unfortunately, there's no print function in Elm. I don't think there's a way to do it --- as odd as that sounds.
+U1ZCL9GAX : ok
+U3SJEDR96 : `print : String -&gt; ()` with a definition like `print = flip Debug.log ()` might work. Not sure if that escapes things, but worth a try..
+U57KYFW67 : oh, I guess `Debug.log` does work in the repl... interesting
+U3SJEDR96 : Also, I seem to remember that `elm-make` looks for a module named `Main` if not explicitly passed a path to an entry point. That seems like it's worth a try
+U5W5F6QGP : Is it possible to update a record member with a dynamic key? I have a feeling I've barked up the wrong tree here
 ```
-do you not have `ap` in Elm? ^^ It's the applicative instance for Function or S combinator
-It's not included in the Higher-Order Helpers section here <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Basics>
-But I guess it's fine cause it is easy to define myself
-I think we're obscure enough at this point
-marvelous :slightly_smiling_face:
-My original code is much better and more understandable
-Wow... That is sick
-Oh no doubt :smile:
-This talk describes the trade-offs in point free and how it's actually a spectrum really well <https://www.youtube.com/watch?v=seVSlKazsNk>
-Oh, cool, thanks for reminding that I should watch this video. Amar is my colleague at SoundCloud
-Oh wow, you're lucky! Extend my thanks to him for the talk if you happen to talk to him :slightly_smiling_face:
-It is important to have alpha &lt; 1.0 so that colors mix.
-Pretty :star:
-Thx!
+exampleFn record key value =
+    { record | key = value } 
+```
+
+Basically the same as using the `object[variablekey]` syntax in JS
+
+U3SJEDR96 : Nope; since you have no compile-time guarantees that this key exists. One option is using a Dict, another option is using a union type to represent the updatable keys, and use a `case..of` to write the appropriate update logic for each possibility
+U3SJEDR96 : <@U1ZCL9GAX> my suggestion actually seems to work, even if it adds some extra cruft :slightly_smiling_face:
+U4WH8STNX : <@U5W5F6QGP> just wanted to point out that `object[variableKey]` is one of the reasons why Elm exists :slightly_smiling_face:
+U5W5F6QGP : Yeah that's fair, I was just trying to avoid having to be super verbose about updating 300 form values in a recordI tried the route with the case of method and I was still unhappy
+
+I've been super stubborn about avoiding dicts, I think I'm just going to bite the bullet
+
+Thanks! 
+
+U4WH8STNX : That's a hell of an API call :aussie_revconga_parrot:, is your use case a big form that posts *all* of the data to the server?
+U5W5F6QGP : Yeah pretty much hahah, it's just the nature of the applicationThere is also multiple of those forms, all of which have to have data persisted to localstorage
+
+U5W5F6QGP : I picked a fun one to start converting to see what my CTO thinks of elm
+U3SJEDR96 : I _think_ I would attempt to describe my Form as a sort of AST, and have the view and logic be built on top of that; so you final form becomes the result of representing your actual form as that AST
+U5W5F6QGP : Yeah, there is a lot of conditional regex and validation that causes interaction between fields so it's nice and hairy
+I'm just incrementally chugging along in my 10% free time at work + some home time 
+
+I may come to the same conclusion
+
+U5W5F6QGP : I learn through being terrible and ruining everything though, mistakes help me a lot 
+U5W5F6QGP : I always try not to jump too far ahead of myself
+U3SJEDR96 : Yeah, that's a great way to learn :slightly_smiling_face:
+U3SJEDR96 : No harm in discovering (the hard way) why something doesn't work out; and you may still come to different conclusions on a way to handle this that works for you
+U5W5F6QGP : Yup, it's still easier than jumping face-first into a complex solution that you might not have needed
+U5W5F6QGP : Is there an easy way to define multiple dictionary members at once upfront? Can't see anything in the docs
+U4WH8STNX : I've cobbled something together that maybe worth considering <https://ellie-app.com/3PgPmqNtYRRa1/0>
+U4WH8STNX : The idea is to see a mutation to your giant record as a mutation that is modelled with a union type and you just build a log of mutations and then transform this log into a server request
+U5W5F6QGP : That is a very interesting and left-field way of thinking about this problem
+U5W5F6QGP : would never have considered that, hmmm
+U4WH8STNX : I've successfully used this approach in a tedious UI - I just pushed the mutations to the server as simple json and handled the gritty details there
+U5W5F6QGP : It definitely solves it generically, the stuff it doesn't account for is like:WHEN: these 2 fields are these 2 values
+THEN: these 2 fields are mandatory
+AND: these 6 fields hide
+AND: these other 6 fields show
+
+U5W5F6QGP : I do like this approach though, and it may be very relevant to an internal tool I will be making next week
+U4WH8STNX : true, if you need your current state you have to jump through some hoops. It is fun to think about, so basically what you would have is a "read-view" that holds the current state to your eventlog and that is being updated every time a mutation is registered and that you want to apply logic to... in that case the 300 explicit fields approach seems the only sane choice if you're not going to make a prototype only consisting of hacks *g*
+U3SJEDR96 : re defining entries in a dict up-front - `Dict.fromList [ ( "key", "val" ), ( "other", "otherVal" ) ]`
+U5W5F6QGP : Thanks Ilias :pray:
+That sounds like it would work, I think I'll try it out on that internal tool (smaller scale, less hoops, but still annoying) and see how it feels
+
+I really appreciate you going above and beyond with that little ellie sample, thanks heaps!
+
+U4WH8STNX : In a run-off-the-mill eventsourced system your dependency logic would be expressed as a saga, you still would have to have a way of expressing "the current state" and somehow let that knowledge flow through the types. I'll meditate on that, sounds interesting
+U5W5F6QGP : There wouldn't happen to be any good way to pretty much 1-for-1 "json stringify" a section of my model would there?The fight with encoders has pretty much broken my spirit for now
+
+U57KYFW67 : I don't think there's currently any way to create a Json encoder or decoder automatically
+U57KYFW67 : It's a feature that will surely show up..... eventually....
+U2J1FUQTZ : I need to write a little parser for Prolog terms, which parser package you suggest to use? There are too many :slightly_smiling_face:
+U5W5F6QGP : Yeah that's fair, I may have to wuss-out to javascript for this one in that casethe encoder would be absolutely massive
+
+U5W5F6QGP : it was going so well up until now :disappointed:
+U3SJEDR96 : <@U2J1FUQTZ> I recommend `elm-tools/parser`
+U3SJEDR96 : <@U5W5F6QGP> writing encoders for records can be a little tedious, though it pays off when you represent your internal state differently from how the API needs it. Now, if you have a `Dict String String`, you could `Dict.toList |&gt; List.map (Tuple.mapSecond Encode.string) |&gt; Encode.object` :wink:
+U5W5F6QGP : I actually have an Array (Dict String String)
+U3SJEDR96 : Oh. What seems to be the problem for writing the encoder, then?
+U2J1FUQTZ : thx <@U3SJEDR96> , it supports recursive parser?
+U3SJEDR96 : Sure. It's a good old parser/combinator library that works on character-chomping with delayed commits, and has the regular "forced laziness" for defining recursive values.
+U5W5F6QGP : Well now I'm discovering the problem may be my own incompetence here
+U5W5F6QGP : I have hope again now
+U2J1FUQTZ : Ok perfect, thx again <@U3SJEDR96>
+U5W5F6QGP : hmm <@U3SJEDR96> I'm getting ```
+(Dict comparable String -&gt; List ( comparable, String )) -&gt; a
+
+But the right side is:
+
+(List ( comparable, String )) -&gt; List ( comparable, Encode.Value )
+```
+I double-checked the docs for Tuple.mapSecond and everything there seems to make sense to me
+
+Any ideas?
+
+U3SJEDR96 : Hm, can you show the actual code? My example up there ^ is missing the actual `yourDict |&gt; ` in front of it, so maybe that's it?
+U5W5F6QGP : nope, you were right, for some reason I assumed you could just assign that to a function and it would leave a pipeline waiting for an initial value
+U3SJEDR96 : Oh, you can, if you replace `|&gt;` with `&gt;&gt;` to compose the functions
+U6D41LX7Y : hello, I am new to elm and was wondering how stable to syntax is going to be moving forward?
+U3SJEDR96 : Things aren't set in stone, but I don't expect _huge_ changes anytime soon. Good to know: new versions of the language usually come with tooling to convert old code; both in terms of syntax as well as the core libraries changing
+U2Q5GJNTB : I want to have html links and lists embedded in a string/text block and elm-markdown seems to be a solution. However it generates a &lt;code&gt;&lt;pre&gt; block around my text and unfortunately the marked native implementation is not understandable for me. Did anybody so something similar in the past and knows the reason? I just want to convert the text into regular html in a div or something similar.
+U3SJEDR96 : Your string is probably indented by 3 or more spaces
+U2Q5GJNTB : I will check that, because for simple test string it worked as expected. Give me a sec
+U2Q5GJNTB : that would be a really shameful outcome …
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

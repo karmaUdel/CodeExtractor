@@ -1,10 +1,110 @@
-you can use ```which python``` to check which one you are using
-but i think the issue is with the library <@U5SQYT750>, :re <https://pythondev.slack.com/archives/C07EFMZ1N/p1497625527626658>
-3 ... and (maybe this is just a dumb question) but I was worried that installing using conda to install virtual env is not what I wanted.
-but as <@U0NRYQNAZ> said, probably best to not try and mix them up
-Oh, hadn't seen zappa before
-when you do `which python` what comes up?
-Normally the conda one.
-that's where we would run into our first issue. we wouldn't want to be using the conda one. we would want something like the system python, i believe.
-Right... thus my question :slightly_smiling_face:
-Seems like I need to be able to deactivate conda and ‘activate' python3 (sytem would be python2) and then use virtual env.  Thanks for getting me started on the right track.
+U0LPMPL2U : and the routes don't get passed around to other functions
+U2MLC3R4G : Do you have anything friendlier than Debug.crash for this case. @joeql
+U5ABF3BH7 : <@U0JFGGZS6> I ended up creating a function that updates everything at once
+U5AEH3L05 : If there's a question I have about a package that isn't necessarily a bug, what's the right place to do so? In the github issues?
+U0LPMPL2U : <@U2MLC3R4G> I'm saying you don't want to write that function at all. Instead you should handle all routes in a single place and eliminate the problem altogether. Something like:
+```
+setRoute : Route -&gt; Model -&gt; (Model, Cmd Msg)
+setRoute route model =
+  case route of
+    Companies -&gt; (model, Cmd.none)
+    EditCompany id -&gt; doSomethingWithId id
+```
+
+U0LPMPL2U : you can use this approach both for changing state on the model when changing routes or to display different views
+U0LPMPL2U : See the `setRoute` and `viewPage` functions in this example app: <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm>
+U5ZKYURNY : <@U0LPMPL2U> thanks, I guess I will simply define an Ignore message and use it for all kinds of Task/Cmd whose result I don’t care, like ``` Task.attempt (always Ignore) (Dom.focus elementId) ```
+U2MLC3R4G : @joeql, My logic for the route is like thatBut In my case I am doing something different here. 
+I am updating the model that can allow update there primary key. 
+This is the part where the user click the update button (all routing logic has been done') and sending the Cmd to the api end. But since this model allow it to update the primary key also. I will have to find a way to get the primary key from the route instead of form model here.
+
+U0LPMPL2U : Can you extract the id when you're doing the routing logic and set it on the model or pass it into whatever function is building the Cmd?
+U0LPMPL2U : If you have a `viewPage` function like the one I linked, you can do something like:```
+viewPage : Route -&gt; Model -&gt; Html Msg
+viewPage route model =
+  case route of
+    Companies -&gt; viewCompaniesList
+    EditCompany companyId -&gt; viewEditForm companyId model
+```
+
+U1G51S63S : there is a pretty simple example since node can be empty or have 2 childs max :disappointed:
+U2MLC3R4G : @joeql yes that would one of alternative here.
+U1G51S63S : it will not solve problem when I  need to find node in a deeply nested list and updated it :disappointed:
+U2MLC3R4G : @joeql this would be a better way. by adding one more input to the view function will allow avoid looking at the route information when we send Cmd after the form submitted.
+U2MLC3R4G : thank you @joeql
+U0LPMPL2U : Glad to help :slightly_smiling_face:
+U0LPMPL2U : <@U1G51S63S> since you have the idea of "paths" and everything seems to be keyed to an id, thoughts on using a `Dict` for children instead of a `List`? It might make it easier to look up deeply nested children
+U1HSH8SSE : <@U101G7VEX> - amCharts has free svg maps you can use here <https://www.amcharts.com/svg-maps/>
+U1G51S63S : <@U0LPMPL2U> yeah, it will be easier to do with dicts, I have piece of Elixir code already which doing same thing. just trying to figure out how to do it with lists :smile:
+U101G7VEX : sweet! thanks <@U1HSH8SSE> 
+U0LPMPL2U : <@U1G51S63S> gotcha :smile:
+U0LPMPL2U : I'm guessing you'll need a combination of `List.filter`, `List.head`, and some case statements
+U1G51S63S : yeah, more like exercise
+U1G51S63S : hmm, I am really thought about some recursive function which will go deeply in, update node and then go up again :smile:
+U1HSH8SSE : <@U101G7VEX> -also, I think you should be able to use the HtmlParser package to parse a dynamically loaded map. Have not verified that.
+U1G51S63S : so like find A -&gt; find B inside A -&gt; insert node into B.children -&gt; set A.B to new B -&gt; return A
+U1G51S63S : but not sure how it should look :smile:
+U0LPMPL2U : Ah, you could probably just do that with a recursive function + case statement
+U0LPMPL2U : You can probably break it into two parts: recursion and setting the child
+U0LPMPL2U : figure out setting the child for leaf nodes first
+U0LPMPL2U : then figure out how to apply that function recursively to the tree
+U4F64AKQV : <@U1G51S63S> Didn’t read everything but maybe `List.Extra.updateIf` would work?
+U0LPMPL2U : essentially, figure out the base case, then the recursion
+U1G51S63S : setting a child for leaf is pretty simple like `newChild :: node.children` if you mean that
+U1G51S63S : <@U4F64AKQV> yeah, looks like this will not work for my case :disappointed:
+U1G51S63S : <@U0LPMPL2U> so recursive + reduce (fold) should work, right?
+U0LPMPL2U : fold _is_ recursion
+U0LPMPL2U : If you have a `fold` defined it becomes pretty easy. Just return the current node if it isn't the one you want to update, otherwise update the node
+U4F64AKQV : <@U1G51S63S> What are you using the tree for? This seems like an XY problem to me.
+U1G51S63S : I thought to have a fold for reducing a list of values into another list and separated recursive function for updating values in accumulator
+U1G51S63S : <@U4F64AKQV>
+U1G51S63S : I want to display thing like this
+U0LPMPL2U : `List.foldl` is recursion over a list. You could also implement a `Tree.fold`
+U1G51S63S : but from API I got plain list of records with LTREE keys (postgresql thing) like `Mahnattan.Bedford-St.Ocean_hill`
+U0LPMPL2U : In your case, what your probably want a tree map function. Something like:```
+Tree.map (\node -&gt; if node.key == "some.key" then Tree.addChild child node else node)
+```
+
+U0LPMPL2U : none of these functions exist though :stuck_out_tongue:
+U4F64AKQV : So the issue is parsing the strings to create a tree structure?
+U1G51S63S : <@U4F64AKQV> creating a tree structure yeah. this is Elixir code which doing what I need but with dicts and not lists ```      |&gt; Enum.reduce(%{}, fn (area, acc) -&gt;      {name, path} =
+        area.path
+        |&gt; String.split(".")
+        |&gt; List.pop_at(-1)
+
+      node = %{children: %{},
+               id: area.id,
+               name: area.name}
+
+      case path do
+        [] -&gt;
+          Map.put_new(acc, name, node)
+        path -&gt;
+          full_path =
+            Enum.intersperse(path, :children) ++ [:children, name]
+          put_in(acc, full_path, node)
+      end
+```
+
+U1G51S63S : <@U0LPMPL2U> I thought reducing is a `n - 1` op, where recursion is here?
+U1G51S63S : so basically it's iterating over all items while keeping acc, no?
+U1G51S63S : or you mean under hood with head/tail?
+U4F64AKQV : So why not use an Elm `Dict` then?
+U1G51S63S : btw I can't get you idea with Tree.map :disappointed:
+U0LPMPL2U : `List` is a recursive structure, therefore "iterating" is done recursively (although the compiler may turn that back into iteration)
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

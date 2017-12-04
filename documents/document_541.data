@@ -1,2 +1,249 @@
-```type alias GroupBox ratio msg = { scale: Int, contents: List (Svg msg) }```
-and use it with a bunch of auxiliary types, like this:
+U6ECA0Q4D : so if I had a model that was like this:``` { one: Int, two: Int } ```
+and I wanted to update just the 'two' value in the update I would do something like
+```(model | two = 123) ```
+?
+
+U6ECA0Q4D : I guess I need curlies instead of parens
+U6ECA0Q4D : ```{model | two = 123}```
+U6ECA0Q4D : Thanks for the help <@U153UK3FA>!
+U153UK3FA : yep
+U6D3ERLA1 : <https://www.cis.upenn.edu/~matuszek/Concise%20Guides/Concise%20Elm.html>
+U6D3ERLA1 : this is cool
+U6D3ERLA1 : might not be up to date?
+U153UK3FA : yep, very out of date
+U6D3ERLA1 : format is nice oh well
+U31FGNWCT : Hi folks! I don't understand the next type issue:
+```
+type alias TablesModel flags =
+    { rows : flags
+    , sortBy : Column
+    , currentLocale : String
+    }
+
+...
+type alias Flags = List Row
+...
+main : Program Flags TablesModel Msg
+...
+init = (\flags -&gt; ( TablesModel flags initialSort "en", Cmd.none ))
+...
+simpleTable : TableSetup row -&gt; TablesModel flags -&gt; Html msg
+simpleTable setup model =
+    table
+        [ class "table" ]
+        [ tableColgroup setup.columnsTitles setup.actions
+        , tableHead setup.columnsTitles
+        , tableBody setup.extractor setup.actions model.rows
+        ]
+
+tableBody : Extractor row -&gt; List Action -&gt; List row -&gt; Html msg
+tableBody extractor actions rows =
+    tbody
+        [ class "main" ]
+        (List.map
+            (\row -&gt;
+                row
+                    |&gt; extractor
+                    |&gt; filledRow actions
+            )
+            rows
+        )
+```
+*Function `tableBody` is expecting the 3rd argument to be:  List row But it is: flags *
+
+U31FGNWCT : I'm missing something very basic, but can't think it out
+U3SJEDR96 : well, `model.rows` isn't a `List row`, it's `flags`. No way to tell it's a list, really..
+U31FGNWCT : But flags is Flags which is List row
+U3SJEDR96 : might want to change that to `type alias TablesModel row = {rows : List row, ...}`
+U3SJEDR96 : no, `flags` is a type variable. Could be a `String`, for all the compiler knows :slightly_smiling_face:
+U3SJEDR96 : also, I think your type annotation for `main` is a little off, since it doesn't have the type param for the row-type in there
+U31FGNWCT : Woah! <@U3SJEDR96> , thank you very much. That helped. Not sure why cant I pass Flags type to type variable though.
+U3SJEDR96 : Well you can, but your type annotation for `simpleTable` doesn't say `TablesModel Flags`, so at that point, it's really "anything"
+U3SJEDR96 : you could change that to `TablesModel Flags`, but then one wonders why it would be a type param at all :wink:
+U31FGNWCT : The thing is I need to have a flexible table constructor (not programming term), one table might receive one pack of "flags" data (for sure, I will use ports in the future, but for now I'm embedding a little thing and flags are super handy)  and another will receive another one.
+U3SJEDR96 : Sure, that makes sense. But your rows will always be a `List row`, for varying definitions of `row`, right? :slightly_smiling_face:
+U31FGNWCT : Yes, that's how I structure it for now
+U6EAT2Z37 : It's a good idea to start with something *more specific* first, then make it more general later when you actually need it, usually.
+U3SJEDR96 : Premature generalization, it's a thing!
+U5W5F6QGP : Fear the helper function that is used in 10000 slightly different places
+U31FGNWCT : Why should I fear it? I've got over 9000 tables, which share the same view and behavior, but rely on different api. I think it is a good decision to make tableHelpers for them.
+U31FGNWCT : So that later I can add a new table by just "configuring" one well tested function
+U3SJEDR96 : That makes sense. Getting a feel for the "right" abstraction tends to flow from making functions for a single thing and recognizing ways to make it more re-usable. Skipping a step every now and then is ok, of course. In your case, generalizing the `row` type is a first step. Generalizing `rows` entirely is a possible next step, _if needed_ :slightly_smiling_face:
+U31FGNWCT : Thank you, I'm trying to balance between waterfall approach and the opposite one, but it's sometimes paralyzing.
+U3SJEDR96 : Well, one thing to keep in mind is that refactoring in Elm is super-easy and the compiler guides you through it to make sure you got everything. So starting from exactly what you need for 1 single case, then refactoring as you introduce new cases to handle, is easy and relatively pain-free. Trying to predict what cases you might need to handle, all at one, is much harder :slightly_smiling_face:
+U5CPJRWQ6 : because of an error in a previous type signature I got this. Instead of saying Html Msg, i accidently typed Html and something way way below complained about this
+U3SJEDR96 : Yeah, that's a painful one, and indeed related to "incomplete" type annotations
+U5CPJRWQ6 : its a tracked bug, I assume then…
+U3SJEDR96 : Yep
+U5E3DU81K : what does |&gt; mean?
+U3SJEDR96 : `foo |&gt; bar` is the same as `bar foo`. It's the "forward function application" operator
+U3SJEDR96 : <http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#%7C&gt;> more info there :slightly_smiling_face:
+U5E3DU81K : I don't understand that
+U1ZCL9GAX : instead of saying " bake (mix (combine flour eggs)) " you can say " combine flour eggs |&gt; mix |&gt; bake "
+U4SM7ECAG : ^ best explanation ever!
+U5E3DU81K : the |&gt; puts the thing on a stack for the next piece to use?
+U4SM7ECAG : yeah kind of. you can also read it as "then" like: do this, then with the result do that, ...
+U6EAT2Z37 : <@U5E3DU81K> if you want to know what it *actually* does, it applies the function on the right to the value on the left.
+U6EAT2Z37 : `toString 5` could be expressed as `5 |&gt; toString`.
+U6EAT2Z37 : "does" is a bit of a misnomer, though.
+U1ZCL9GAX : you could implement it by putting the return value on a stack, if you were writing an elm interpreter
+U6EAT2Z37 : <@U1ZCL9GAX> might not be the most helpful explanation ever!
+U1ZCL9GAX : i don't know what the elm compiler does, it probably optimizes most of that away
+U1ZCL9GAX : <@U6EAT2Z37> yeah, but <@U5E3DU81K> is thinking operationally so why not
+U6EAT2Z37 : because it'll confuse him/her later.
+U1ZCL9GAX : hmm, i think it's useful to map out a path from where someone is right now (they asked about a stack) to where you'd like to take them (denotational semantics of |&gt;)
+U6EAT2Z37 : That's true.
+U6EAT2Z37 : I don't think we need to get to denotational semantics, though. Maybe a clearer representation of a model that will work in all situations is good, though. The stack idea won't work for very long :slightly_smiling_face:
+U6EAT2Z37 : <@U5E3DU81K> `toString 5` is a single expression. It's an application of the function `toString` to the number `5`. `5 |&gt; toString` is also a single expression. It's applying the `|&gt;` operator (which is a function of two arguments: one argument either side of it) to the `5` value and the `toString` function. It results in an application of the `toString` function to the `5` value.
+U6EAT2Z37 : So, basically, `|&gt;` is useful for switching around the way you write stuff so it reads more easily.
+U68471J6P : Could somebody provide me with a sscce for the usage of keyframes in Elm-css?
+U6FAU8U6A : I'm an absolute beginner in Elm. At the moment I try to build a Html table. In each row there should be a Dropdown element in a cell, other cells contain other things. I'm using r31gN/elm-dropdown. With a "Dropdown.renderDropdownHtml ..." I get the error, that this type is a "Html Dropdown.Msg" instead of a "Html Msg". No idea how to proceed...
+U4PT7NG4V : I'd be tempting to suggest going through <https://guide.elm-lang.org/> as a first step if you're an absolute beginner.
+U4PT7NG4V : I've never used the `elm-dropdown` package. But <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html#map> might be useful in this case
+U6FAU8U6A : Thanks. I'll take look
+U5E3DU81K : interesting that |&gt; is called a forward function application operator, because it actually drags the thing on the right over to make use of the thing on the left. The thing on the left must be stored temporarily somewhere (as if on a stack) and because of the |&gt; the thing on the right sees the first thing on 'the stack' and consumes it.
+U5E3DU81K : but could it be used to go fully reverse-polish?
+U4PT7NG4V : I see it less as "Dragging the right hand side thing over to the left", and more of "Pipe this left hand thing --&gt; into this"
+U5E3DU81K : ah
+U4PT7NG4V : Microsoft calls it "The forward pipe operator" <https://msdn.microsoft.com/en-us/visualfsharpdocs/conceptual/operators.%5b-h%5d-%5d%5b't1,'u%5d-function-%5bfsharp%5d>
+U4PT7NG4V : Makes a little more sense to me :slightly_smiling_face:
+U6EAT2Z37 : Yeah, except for some languages it does something other than what it does in Elm.
+U4PT7NG4V : True true, I think F# has identical rules to Elm in this regard
+U6EAT2Z37 : Elixir uses a similar operator which has a similar effect `|&gt;` :slightly_smiling_face:
+U5E3DU81K : if there are several used at once, the forward one is written on separate lines, vertically, but the backward one seems to be all on one line - is that correct?
+U5E3DU81K : judging by those examples in the 'Basics' page
+U6EAT2Z37 : Yeah, the formatting generally formats it that way...
+U6EAT2Z37 : that's because the forwards one is good for "piping expressions together", and so they go on new lines... and the other one is good for removing parenthesis (brackets) so they go on the one line (usually)
+U6D3ERLA1 : How do people handle watch / compile workflow in dev?
+U635238TG : do you mean something like elm-live where you can see your changes happen live as you save your file? either way, i found it really cool and easy to use so other beginners should check it out if they haven't
+U5S1LBR7Y : Does any one know if auto completing case statements like in this video is possible in VSCode?Look at 27:16
+<https://youtu.be/sHWexPRFuUw>
+
+U5E3DU81K : how often is the identity function used?
+U0J1M0F32 : <@U5E3DU81K> Occasionally
+U6734UL1Z : <@U6D3ERLA1> I found create-elm-app which seems to work really well, and I think the dev for that is on slack too
+U6B7NBTLZ : hello
+U6B7NBTLZ : can somebody explain the following?
+U6B7NBTLZ : removeTask : String -&gt; List Task -&gt; List TaskremoveTask id tasks =
+    List.filter (\task -&gt; id /= task.id) tasks
+
+U6B7NBTLZ : only what s in the paranthesis
+U6B7NBTLZ : \task -&gt; id /= task.id
+U6734UL1Z : it's a function, the "\" in front indicates the start
+U6B7NBTLZ : and whats task?
+U6734UL1Z : the parameter
+U6B7NBTLZ : and /= is different?
+U6734UL1Z : yes :slightly_smiling_face:
+U6734UL1Z : like != in other languages
+U6B7NBTLZ : ok
+U6B7NBTLZ : so
+U6B7NBTLZ : i call removeTask 1 list
+U6B7NBTLZ : what happens?
+U6D3ERLA1 : Is it possible to do something equivalent to `npm run script`
+U6D3ERLA1 : defined in elm-package.json
+U0J1M0F32 : <@U6D3ERLA1> I don't think so, because I've never seen anything to that effect, but I have also never tried honestly.
+U6734UL1Z : removetask calls list.filter, supplying the filter function and the list of tasks.  list.filter calls the supplied function on each item in the list, which compares 1 to the id of each task.
+U6B7NBTLZ : oooo
+U6B7NBTLZ : so
+U6B7NBTLZ : (\task -&gt; id /= task.id)
+U6B7NBTLZ : this is lke the condition
+U6B7NBTLZ : if it doesn t passes is deleted from tasks
+U6B7NBTLZ : rght?
+U41NK9BM4 : Yes. technically a *new* list is returned
+U6B7NBTLZ : undestood
+U6B7NBTLZ : Thanks
+U41NK9BM4 : So if the `removeTask` caller code doesn't capture this `newList` the update is lost :slightly_smiling_face:
+U6D3ERLA1 : Why can't I define a type `type Grid = List List Int`
+U6D3ERLA1 : "Find all the top-level values named `List` and do some renaming. Make sure thenames are distinct!"
+
+U6D3ERLA1 : Not sure what this is all about... trying to define a Grid type that is a List of Lists of ints: `[[1,2,3], [2,3,4], ...]`
+U4872964V : <@U6D3ERLA1> `type alias Grid = List (List Int)`
+U6D3ERLA1 : :smile:
+U0CQ254F5 : `type Grid = Grid (List (List Int))` too i _think_?
+U4872964V : If you want a distinct type, yes
+U6D3ERLA1 : Still don't really understand the difference between defining a type and defining a type alias
+U0CQ254F5 : <@U6D3ERLA1> <http://faq.elm-community.org/#what-is-the-difference-between-type-and-type-alias>
+U0CQ254F5 : <@U6D3ERLA1> since `List Int` is already a defined type you'll need to `alias` it, or get around that by defining a single type union constructor like above `type Foo = Foo …`
+U6D3ERLA1 : ok `type alias Row = List Int` `type alias Grid = List Row`
+U6D3ERLA1 : perhaps
+U4872964V : yes, why not
+U0CQ254F5 : seems reasonable to me
+U0J1M0F32 : :thumbsup:
+U6D3ERLA1 : It's semantically correct also
+U0J1M0F32 : Which is a plus.
+U6D3ERLA1 : OK writing a checkbox was one of the hardest things I've ever done
+U6D3ERLA1 : This is starting to make sense tho:
+U6D3ERLA1 : This still looks cray to me - am I [[[[[ over-bracketing  ]]]]] ?
+U0RPQMZ9S : the parens around the `[H.text ....]` stuff in the `boards` definition should be unnecessary
+U0RPQMZ9S : but other than that looks good, you'd get type errors if you were over-bracketing
+U0J1M0F32 : It does take a bit of getting used to, all the brackets, but I've learned to love the explicitness of it.
+U6D3ERLA1 : {:heart: }
+U6FM5KWTZ : can some1 pls explain why elm-repl says "syntax problem" when I try to type in "half : Float -&gt; Float" from the tutorial?
+U635238TG : well it just doesn't allow type annotations like that. not sure the philosophy, i think this goes into it: <https://github.com/elm-lang/elm-repl/issues/113>
+U0J1M0F32 : I don't find the repl very user friendly myself. I would recommend following a tutorial with something like <http://ellie-app.com|ellie-app.com>
+U6FM5KWTZ : thanks guys!
+U635238TG : one thing i've kind of found the repl useful for is basically going about this in reverse. so when exploring a new thing like String.map you can do something like `import String` and then `String.map` and the Repl tells you it's going to expect this: `&lt;function&gt; : (Char -&gt; Char) -&gt; String -&gt; String`
+U635238TG : of course the docs will tell you the same thing but i find typing it into the repl sometimes helps my brain wrap around the concept a little better
+U23SA861Y : <@U6D3ERLA1> if you are dealing with grids I've found `List (List a)` to be a little clunky to work with. I tend to prefer `Dict (Int,Int)` a instead. Easier to grab vertical neighbours if you need to.
+U66RFDZ8F : <@U23SA861Y>, I'm about to embark on a project and I was going to use nested lists, can you explain the benefits of the dictionary method better? 
+U23SA861Y : it maps a bit better, with the List of Lists to form a grid you have to constantly be double unwrapping
+U6D3ERLA1 : I was actually using Array so I could grab indexes `Array (Array Int)`
+U6D3ERLA1 : Haven't messed with Dicts yet
+U23SA861Y : with a `Dict (Int,Int) a` you can reach in and grab up down, left or right
+U23SA861Y : the Dict can also be sparse
+U66RFDZ8F : It seems like a great solution too
+U23SA861Y : Thats fine, the current impl of Array has some bugs there is a replacement for it available
+U66RFDZ8F : I'm not able to wrap my head around your explanation of the benefits of dict
+U66RFDZ8F : Aside the sparse nature 
+U23SA861Y : well iterating over the grid is code you don't have to write, its alread provided for you in the dict
+U23SA861Y : likewise for lookups
+U66RFDZ8F : I don't see how it would be much better than `arr[0][`
+U66RFDZ8F : Any code? I haven't used dicts yet
+U66RFDZ8F : Do that's possibly my problem 
+U0JFGGZS6 : you might also want to look at `elm-flat-matrix`
+U23SA861Y : if you making a table I would proabably use a `List recordtype` or `List (Dict keyval field)` instead because the traversal symantics are a bit different
+U0JFGGZS6 : <http://package.elm-lang.org/packages/eeue56/elm-flat-matrix/latest>
+U6D3ERLA1 : :mind blown:
+U23SA861Y : unwrapping the into a flat list works as well (which is what flat-matrix does)
+U6D3ERLA1 : and mergeLeft mergeRight
+U6D3ERLA1 : `|&gt; Matrix.merge matrix` `&lt;| Matrix.merge matrix`
+U23SA861Y : if you need matricies, you need matricies but for things like look ups on a game grid I like to keep it simple
+U23SA861Y : dependencies and imports have a cost and you really need to consider if pulling that package is worth it
+U6D3ERLA1 : An unrelated question what does `!` represent in elm
+U23SA861Y : its defined in Platform.Cmd
+U6D3ERLA1 : and `|`
+U23SA861Y : `(!) mdl cmds = (mdl, Cmd.batch cmds)`
+U23SA861Y : `|` is used for union type definitions
+U6D3ERLA1 : I'm looking at the model updating code here <https://github.com/evancz/elm-todomvc/blob/master/Todo.elm>
+U6D3ERLA1 : looks like they are returning updated / filtered state
+U23SA861Y : oh sry yes it's also used in the record update syntax
+U6D3ERLA1 : ```        ChangeVisibility visibility -&gt;
+            { model | visibility = visibility }
+                ! []
+```
+
+U23SA861Y : it allows you to change one or more fields in a record while keeping all others the same
+U6D3ERLA1 : Must have missed this in the syntax docs
+U6D3ERLA1 : Can someone explain the above snippet?
+U23SA861Y : it says update the field called visibility in model and then return that from update without any commands
+U23SA861Y : <http://elm-lang.org/docs/syntax#records>
+U6D3ERLA1 : yes
+U23SA861Y : here is the update syntax in action
+U0JFGGZS6 : fyi `elm-flat-matrix` doesn't add much code, and potentially saves a lot in speed &amp; memory usage if you have an arbitrary number of rows/cols.
+U0JFGGZS6 : if you have a small fixed number of rows/cols, not much difference from `Array (Array a)`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

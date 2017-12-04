@@ -1,10 +1,55 @@
+U1C03090C : Not yet. Posted an issue on the github but no answers. 
+U3L6TFEJF : with Specter: ```(s/setval [s/MAP-KEYS s/NAMESPACE] "your-ns" your-map)```
+U3L6TFEJF : with regular clojure you're gonna have to do the usual for-loop dance (or something like it): ```(into {} (for [[k v] your-map] [(keyword (name k) "your-ns") v]))```
+
+U3JURM9B6 : Anyone here using <http://nd4j.org/> ? This library shows up first for "java ndarray", but reading the docs, this project seems to have a very high opinion of itself (and I can't find other people using it.)
+U051HUZLD : Is following "thread safe"? Can there be a race condition?```(reset! db @db)
 ```
-there's probably a better way to rewrite`(cons 'quote (list decls))` - that's super ugly
-it works if i just do `(list 'quote decls)`
-oh, right, much nicer
-wow, thanks for explaining that to me as always
-definitely would not have picked up on that on my own
-yeah, there's an art to this stuff, and seeing simple examples makes a difference in learning it
-tbh i never cared much about macros before the project i'm using this for
-it's funny because in scheme i'm pretty sure i'd do some fancy transformation like closure conversion, but that's not possible since clojure is JIT compiled at the function level. but otoh, i don't think i could do it this way with scheme-style macros
-now i get to play around with techniques for parsing the asts. i'll check out the muir library, but suspect i'll end up having to hack away at it myself
+e.g. changed `db` value between `deref` and `reset!`
+
+U053XQP4S : unsafe
+U3L6TFEJF : the value can change
+U3L6TFEJF : for the behavior you want, use <http://clojuredocs.org/clojure.core/compare-and-set>!
+U051HUZLD : :hearts:
+U3LURNK5W : Is there a way to time all sub-calls of a fn?
+U3LURNK5W : let's say i have:```(defn foo [x]
+         (-&gt; (foo-1 x)
+               foo-2
+               foo-3))```
+
+U3LURNK5W : ofc i can do ```(time (foo x))```
+U3LURNK5W : but can i get the timings of the calls to foo-1,foo-2,foo-3 without wrapping each fn?
+U04V1HS2L : Is there any way (lib?) to rerun only "failed-last-time" clojure.test vars?
+U051HUZLD : <@U3LURNK5W> have a look at <https://github.com/thunknyc/profile>
+U3LURNK5W : thx
+U051HUZLD : what would be a use case for this? <https://github.com/weavejester/medley/blob/1.0.0/src/medley/core.cljc#L273>same as `swap!`, but returns atom's previous value (before it was successfully swapped)
+
+U053XQP4S : <@U051HUZLD> ```
+(def queue (atom clojure.lang.PersistentQueue/EMPTY))
+
+(defn push! [x]
+  (swap! queue conj x))
+
+(defn pull! []
+  (-&gt; queue (deref-swap! pop) peek))
+```
+
+U1Q12R4F2 : Hello everyone, I have an app which stores documents (edn/json files, size from 100kb up to 1000kb) and I want to save the whole change-history (changes will be small, max 30kb maybe, but frequently) without storing the whole document for each change. Is there a free document database which supports document history with delta encoding?
+U06FTAZV3 : <@U1Q12R4F2> Datomic comes close to doing what you want, but it's not an exact match.
+U053XQP4S : git ?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

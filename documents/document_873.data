@@ -1,0 +1,51 @@
+U64MJCDNH : sorry I'm newbie in python. Can I add this in while loope whith if, and when certain time has passed to call my function for new key ?
+U5LNXQHN3 : Before the loop, when you get the token for the first time: `start_time = time.time()`
+U5LNXQHN3 : And in the loop, before each request:```
+if time.time() - start_time &gt;= 7200:
+    api_key()
+```
+
+U5LNXQHN3 : You'll probably want a value lower than 7200 anyway, because waiting until the last second means you might get a failed request at the end
+U64MJCDNH : kylotan, thank you.
+U5LNXQHN3 : (also, test it with a number like 60, so you don't have to wait 2 hours to see if it's correct or not!)
+U5LNXQHN3 : No problem.
+U5CGPBF0U : So, configuring a Python app to use gunicorn on Heroku, the docs show `web: gunicorn hello:app` for the example Procfile but doesn't really explain what `hello:app` represents. Is it `&lt;class&gt;:&lt;method&gt;` or something like that?
+U64MJCDNH : <@U5LNXQHN3> Of course. Thank's :wink:
+U0L8Y8ZEW : <@U5CGPBF0U> I'm guessing it is probably module:function
+U64MJCDNH : <@U5LNXQHN3> Do you have some idea ?I added start_time variable before loop, and added this in loop. My loop now looks:
+```while True:
+        if time.time() - start_time &gt;= 60:
+            get_key()
+
+        time.sleep(15)```
+When I start script, after 60 seconds scripts run get_key function what is good, but then on after each 15 second again.
+
+U5LNXQHN3 : ah, of course. you'll need to reset start_time to time.time whenever you get a new key.
+U64MJCDNH : I supposed, but how I can to do that in this if statement ?
+U64MJCDNH : <@U5LNXQHN3>
+U64MJCDNH : Can I only to add again ```start_time = time.time()``` in this if statement ?
+U5LNXQHN3 : yes
+U64MJCDNH : cool !
+U5LNXQHN3 : you could probably improve the code by setting that time inside the get_key function, so that you don't need it in the if statement
+U64MJCDNH : yes, I thinking about that. Thank you <@U5LNXQHN3> I will test !
+U5CGPBF0U : If I run `python manage.py db init` on my server it works, but then I run `python manage.py db migrate` and I get `Path doesn't exist: 'migrations'. Please use the 'init' command...`. :neutral_face:
+U5CGPBF0U : Not sure what I'm doing wrong.
+U5NMSURAQ : is there a directory named migrations after init?
+U5NMSURAQ : `app/migrations`...
+U5NMSURAQ : maybe it was expected in the root directory
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,11 +1,123 @@
+U64MK7215 : I want to replicate ajax code in elm
+U3SJEDR96 : Or even `Expect.equal (Macro { name = "foo", args = [] })`
+U3SJEDR96 : <@U64MK7215> - Right. So that example I posted makes HTTP requests, receives JSON, and uses that JSON to drive the application state.
+U64MK7215 : $(document).ready(function () {        hidebody();
+        $.ajax({
+            type: 'POST',
+            url: "/load",
+            contentType: false,
+            data: null,
+            processData: false,
+            success: function (data) {
+                $("#loader").hide();
+                showbody();
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+
+U4872964V : <@U3SJEDR96> yes, for the special case of checking full equality, that works too :slightly_smiling_face:
+U3SJEDR96 : Exactly. Just make sure we cover all bases and don't miss the "obvious" :wink:
+U3LUC6SNS : <@U4872964V>, <@U3SJEDR96>, thankou!!! I have my first test working, so should be able to do what I need.
+U29JSAR9S : I'm trying to make the following function point free and can't figure out why I'm getting an error when I do so:```
+whoAteThePies : List Int -&gt; List Int -&gt; ( Int, Int )
+whoAteThePies a b =
+    List.map2 (,) a b
+        |&gt; List.indexedMap flipFlopSort
+        |&gt; List.map (mapTuple evenToZero)
+        |&gt; List.foldr sumTuples ( 0, 0 )
 ```
-ah that worked
-Json Decode Pipeline is used for decoding records with a lot of keys
-Hello all :slightly_smiling_face: A bit stuck on something, I have an update branch that sends a Cmd Msg with the updated model but the Cmd Msg is sending before the model has updated. What's the best way to make sure the model has updated before I send the Cmd? I've just made a variable for the list I need at the moment, but thought there had to be a better way of doing it! Any advice would be appreciated
-I'm curious why you want to send yourself a `Cmd Msg`? Is it to prevent duplication in two branches of your `update` ?
-I don't understand sorry I'm not sending myself one I'm using d3 so using it to send filtered data via a port :slightly_smiling_face:
-I probably wasn't very clear
-inside your `update` function, `model` always refers to the _old_ version of the model
-All data is immutable in Elm so using the `{ model | ... }` syntax doesn't mutate `model`, but instead returns a _new_ record
-since you want the new filtered data, you should use the same value you are assigning to the model
-Ah fair enough! Thanks for your help :grin:
+Anyone have any ideas?
+
+U4872964V : well, you should look at what the error says :slightly_smiling_face:
+U4872964V : hard to say without knowing what those other functions are
+U29JSAR9S : ```whoAteThePies : List Int -&gt; List Int -&gt; ( Int, Int )
+whoAteThePies =
+    List.map2 (,)
+        |&gt; List.indexedMap flipFlopSort
+        |&gt; List.map (mapTuple evenToZero)
+        |&gt; List.foldr sumTuples ( 0, 0 )
+```
+gives me
+```
+The right side of (|&gt;) is causing a type mismatch.
+
+8|     List.map2 (,)
+9|&gt;        |&gt; List.indexedMap flipFlopSort
+
+(|&gt;) is expecting the right side to be a:
+
+    (List Int -&gt; List Int -&gt; List ( Int, Int )) -&gt; a
+
+But the right side is:
+
+    (List ( Int, Int )) -&gt; List ( Int, Int )
+```
+
+and 
+
+```
+whoAteThePies : List Int -&gt; List Int -&gt; ( Int, Int )
+whoAteThePies =
+    List.map2 (,)
+        &gt;&gt; List.indexedMap flipFlopSort
+        &gt;&gt; List.map (mapTuple evenToZero)
+        &gt;&gt; List.foldr sumTuples ( 0, 0 )
+```
+
+gives me
+
+```
+The right side of (&gt;&gt;) is causing a type mismatch.
+
+8|     List.map2 (,)
+9|&gt;        &gt;&gt; List.indexedMap flipFlopSort
+
+(&gt;&gt;) is expecting the right side to be a:
+
+    (List Int -&gt; List ( Int, Int )) -&gt; c
+
+But the right side is:
+
+    (List ( Int, Int )) -&gt; List ( Int, Int )
+```
+
+U29JSAR9S : mainly I think I'm misunderstanding something because I thought
+```
+whoAteThePies a b =
+    List.map2 (,) a b
+```
+
+was essentially the same as
+
+```
+whoAteThePies =
+    List.map2 (,)
+```
+
+U4872964V : it is, but not if you put stuff after it
+U4872964V : you can't do "point free style" with two arguments though
+U29JSAR9S : if I'm piping things onwards you mean?
+U4872964V : yes
+U29JSAR9S : ah, ok
+U4872964V : you can only `|&gt;` and `&gt;&gt;` one value
+U29JSAR9S : right, ok - that makes sense
+U3SJEDR96 : you could make a `&gt;&gt;&gt;` but that seems symbol-heavy and won't get the special treatment `&gt;&gt;` and `|&gt;` do :slightly_smiling_face:
+U4872964V : it would also induce headache
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

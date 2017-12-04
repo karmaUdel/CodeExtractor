@@ -1,43 +1,89 @@
+U0U6ML22H : those "selected filters" are, for now, a record with "key" and "value"; it matches a "filter" which is a "key" and a list of possible values
+U0U6ML22H : now I want to write the function to filter my things so that, in short: `(match the query with any of the searchable fields) AND (match selectedFilter1) AND (match selectedFilter2) AND ...`
+U0U6ML22H : the `match selectedFilter` function needs to be generic
+U0U6ML22H : each items provides a list of accessors (`.name` and the like) to match the query
+U0U6ML22H : but I found myself having a hard time doing the same for filters, because it has such a huge impact on the code
+U0U6ML22H : because now my `SelectedFilter` needs to carry an accessor, that it needs to inherit from the `Filter` list, and my whole code is changed for something that, in ugly JS, would require one line of dirty dynamic access
+U0U6ML22H : so I was hoping maybe there was something I wasn't seeing
+U3SJEDR96 : okay, so you could have a `Filter { a | name : String }`.. Is that an avenue worth exploring?
+U0U6ML22H : because after changing my types for half an hour, I'd be willing to accept an "undefined is not a function" =P
+U0U6ML22H : I don't see how that applies, would you please elaborate?
+U153UK3FA : `myObject[filter.key] === filter.value` can be written as ```(case filter.key of
+  "someKey" -&gt; myObject.someKey)  == filter.value
+``` and you’ll need to write a case for every field and every type you have in the collection you’re filtering
+
+U0U6ML22H : I don't think it's practical in my use case
+U153UK3FA : you can’t write this generically because it requires specific knowledge of the types you’re working with.
+U0U6ML22H : yeah, I know :smiley: I know all that, I know why, I was just asking if there was a workaround, in code or in modelling
+U0U6ML22H : thanks for your help <@U153UK3FA> and <@U3SJEDR96> :smiley:
+U153UK3FA : It’s one of the trade offs between static and dynamic languages
+U0U6ML22H : I ended up writing a "matchFilters" function for each data type and passing it to my generic Fitler handler
+U41NK9BM4 : How many `matchFilters` do you have?
+U0U6ML22H : for now, I have three data types
+U41NK9BM4 : A real non-issue, then (very little duplication)
+U41NK9BM4 : I starting to believe that data, not code redundancy, is the real thing to avoid.
+U0U6ML22H : it'd be much better to write a list of accessors than to write a case of
+U0U6ML22H : makes much more sense from a semantic point of view
+U0U6ML22H : "here's a list of tools, do that thing you do with tools", better than "here's what you need to do; it so happens to be exactly the same every time, but i'll explain it to you form scratch anyway"
+U0U6ML22H : I like my code to express stuff
+U0U6ML22H : but I agree that, given the constraints, it's better to be pragmatic and do what you say :smiley:
+U41NK9BM4 : Yes, one needs to cope with reality
+U0U6ML22H : damn you, reality!
+U41NK9BM4 : I’ve spent too many hours crafting elegant OOP data structures and then see them collapsing after a “software requirement” change. So better move fast and don’t break things :wink:
+U0U6ML22H : yeah, I'm trying to limit breakage by not disseminating the logic across various modules, but, as with all things, it is a matter of balance, I agree
+U0U6ML22H : <@U0LKV53U1> hi there! I'm trying to use Date.Format to format the elm-community/elm-datepicker; I want to use monthToWord and dayOfWeekToWord but they're not exposed by your module. For now we'll copy-paste, but is there a reason not to expose them? Thanks for the library, it's really helpful :smiley:
+U0U6ML22H : OK, <https://github.com/elm-lang/elm-compiler/issues/1549>
+U3SJEDR96 : Known issue; ability to use qualified records has been merged in the `dev` branch of `elm-compiler` :slightly_smiling_face:
+U0U6ML22H : sorry :smiley:
+U3SJEDR96 : I.. think :thinking_face:
+U41NK9BM4 : Well, let’s hope! It is an annoying asymmetry
+U3SJEDR96 : you can sort of kind of work around it with `.baz Foo.bar` but yeah, that's not great either :slightly_smiling_face:
+U2LAL86AY : <@U0U6ML22H> for each of your 3 types that you want to display in that table , can you can hold a list of "labels".  Now because this 3 types are different types - you need 3 different functions that extract thouse labels. `extractLabelsForFirstType: FirstTypeOfItemInThatTable -&gt;  List Label` - and you have 3 of this functions. all tree returning just a `List Label`
+
+and your query module/functionality will just check if this labels on this items - will match the filters selected.
+
+`genericQueryItem : List filters -&gt; List Label -&gt; Bool` what i'm tring to say is - you don't let the `query thing` know about your types of items.  You just give him some labels - and based on the filters it has already selected - it gives you back if this list of labels is mached. Maybe i didn't underestoond your usecase too well but for what i have "in my head in terms of filtering" this should work.
+
+U0U6ML22H : <@U2LAL86AY> yeah, thanks, I think that's what I ended up going with :smiley:
+U4KFY2V6V : Is there a good way (or article) how to test http requests? Not the actual execution but the content or the url without bleeding too much into the implementation
+U2LAL86AY : there is this package - maybe it does what you want - i've  not worked with it yet. <http://package.elm-lang.org/packages/rogeriochaves/elm-testable/latest>
+U2LAL86AY : ```This package allows you to write components that follow the Elm Architecture in a way that is testable. To allow this, elm-testable provides testable versions of the Html, Task, Effects, Http and Process modules, as well as Testable.TestContext to test testable components and Testable to integrate testable components with your Elm app.
 ```
-I had started with a similar approach but their verification tool was not reporting errors properly.
-<@U68L8RAG0> sorry, didnt see the new one.
-code that ran perfectly in my Jupyter was failing.. So split it up and simplified it .
-This approach looks much better then what I was doing.
-This is what I originally tried but I hit memory errors.
-In case anyone is interested in triggering the Google code challenge. I've been spending a lot of time searching for Python, crawlers, NLP, analytics, algorithms, etc... This is the second time it came up for me in the last 2 months.. I  was on vacation last time it came up so time ran out.
-<@U6829S5NZ> I have a quick question about your example. One line 6 there is SUM of the permutation and then you are checking if it is divisible by 3. Then on line 8 your yield is the joined integer. Is this a faster way or an error?
-So 33333, if added together equal 15, which in turn equals 6
-so I would add all elements of list and see if that sum is % 3
-^this
-Not sure if that fits
-Thank you.. Its funny. I never really have to deal with this type of problem.
-not sure if it is faster than modulo-ing the int, that's just what came to mind
-I can time it and see if it helps performance
-<@U68L8RAG0>, just doing a modulo a la `if int(''.join(p)) % 3 == 0:` is a little faster, i'm guessing because the other way adds a list comprehension step. good catch
-Thank you both.. <@U653RFLBD> <@U5VGKQ2SY>.. I think this should unblock me..
-Thanks again! Hopefully I can get through the rest and get an interview. :smile:
-yup
-<@U5U4MSHC1>
-whats the function of the last line of this code
-i see the difference with and without it in the output is this:
-Out[1]: [‘English', ‘Math', ‘Science']
-What is Out[1]:
-?
-yea, I am happy that something out of my school math class helped. :stuck_out_tongue:
-<@U6944D5GU> It sorts the dictionary based on the keys
-what is Out[1]?
-<@U6944D5GU>  it sorts the keys Alphabetically
-May be you are using some interactive python shell like Jupyter
-so the list() gets it printed automatically?
-<@U6944D5GU>  What tool are you using to write/run the code anyway?
-i see. so the sorted() does not really have any effect on this dictionary
-<@U5U4MSHC1> <@U6829S5NZ> :taco:
-`Sorted` sorts the dictionary based on the keys in increasing order since you are passing the list of keys here, here it is in alphabetical order.
-yup i got it :slightly_smiling_face:!
-Cool :thumbsup:
-good luck. when google hires you, don't forget us little guys :stuck_out_tongue_winking_eye:
-<@U6944D5GU> to elaborate more on <@U5U4MSHC1> ‘s answer, the function `marks.keys()` returns a list of keys in the dictionary and `sorted()` returns the sorted list. Although why is there a conversion to list when it will return a list anyways?
-<@U6829S5NZ> mmm good point..
-idk either
-Good luck,
-interesting to note is that it doesn't effect your dictionary in any manner, it will return a list of sorted elements anyways. even if you pass a string to `sorted()` function but if you use the `list.sort()` function , it changes the list.
+
+U1CE9DL9H : you cal also parse the url back with `url-parser`
+U17R1GD96 : I don’t understand how to pass a JSON object from JS to Elm in subscription. When I send something like `ports.payload.send({message: "HI!"})` what is actually sent? The JSON string, right? How to subscribe to that?
+U17R1GD96 : I have `port payload : ({ message : String } -&gt; msg) -&gt; Sub msg`. I’m not sure how to write subscription funcion
+U17R1GD96 : This has type mismatch ```subscriptions : { message : String } -&gt; Sub Msgsubscriptions data =
+    Sub.batch
+        [ payload data
+        ]```
+
+U0CLDU8UB : ```type Msg = Payload { message : String }
+
+subscriptions : Model -&gt; Sub Msg
+subscriptions model =
+    Sub.batch
+        [ payload Payload
+        ]
+```
+
+U0CLDU8UB : This is how it should work
+U17R1GD96 : I don’t want to subscribe to Model. It contains more things. I only want to load from JS some data.
+U3LT1UTPF : Hi. I need a dropdown select. I've seen several examples, but I don't know which one to take. Do you think this one is a good example to base mine on?: <https://github.com/wintvelt/elm-dropdown/blob/master/examples/Single/Main.elm>
+U3SJEDR96 : <@U17R1GD96> you don't subscribe to model, but the `subscriptions` call that you have to `program` takes your `model` as the first argument by default, so you can decide _what_ to subscribe to based on the state of your model
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

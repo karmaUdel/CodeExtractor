@@ -1,57 +1,53 @@
+U23SA861Y : Dict
+U23SA861Y : Task
+U0LPMPL2U : `Maybe.Extra` has a function `unwrap : b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b`
+U0LPMPL2U : So you could say `Maybe.Extra.unwrap (text "") Calendar.view model.calendar`
+U62JFJWKT : I'm friendly with map ruby is my defaut langage
+U4872964V : <@U0LPMPL2U> functions with three or more parameters are harder to understand though
+U0LPMPL2U : fair
+U4872964V : but it's a matter of taste i suppose
+U4872964V : i like pipelining
+U0LPMPL2U : I'd say `case` vs `map |&gt; withDefault` vs `unwrap` are probably context dependent for readability
+U6478N1V1 : Hi, could some one help me explain why these 2 expressions yield different results:```
+import Html exposing (text)
+
+x1 = (*) ((*) 2 3) 3 ^ (^) 2 2 + 5 --results in 104981
+x2 = (*) 2 3 * 3 ^ (^) 2 2 + 5 --results in 491
+
+main = text (toString (x1 == x2))
 ```
-Decode as a string &amp; use `String.toFloat` with `andThen`, with `fail` as the error case &amp; `succeed` with the success case
-Which seems wildly verbose
-Haha, good timing lysergia :slightly_smiling_face:
-You can use `fromResult` from `json-extra`: <http://package.elm-lang.org/packages/elm-community/json-extra/2.3.0/Json-Decode-Extra#fromResult>
-Oh neat, that's certainly terser
-It also looks like parseFloat would work as well
-Ah yep, just scrolled down a little :stuck_out_tongue:
-works a charm! thanks <@U236M9FH9>
-Lets say I have a function that accepts 3 arguments, is there a way to partially apply only second argument?
-<@U30J8RTKJ> the most readable version is to just wrap it in an anonymous function
-eg `\x y -&gt; yourFunction x 5 y`
-by convention function args are ordered so that this is a rare thing to need to do
-In the case of the second argument, you could also use flip: `(flip yourFunction) 5` switches the first and the second argument around and then applies `5`.
-But I do agree that the anonymous function is much more readable.
-Another option still is to make a helper function with the arguments reversed. If you name stuff well, then this is a very good option.
-If it's your own function, maybe changing the order of arguments in the original funciton is a way to go too.
-examples?
-<@U2DF486HL> do you want to be redirected to the POST response page or do you want to still be in your Elm app?
-<@U4872964V> exactly, it redirects to the new POST response page..
-Then the form will instead send `YourSubmitMessage` to your update function, from which you can then issue the post request.
-something like this: <https://stackoverflow.com/questions/36387409/how-to-submit-a-form-in-elm>
-(the last answer there)
-If you don't have a `form` element, you just bind your message to the `onClick` event on the submit button
-because i've to send the form data to the external url, and just that, redirect to its page
-oh, you _want_ to redirect?
-send the form data to the external action url, and move to there site..
-then you can just use a normal html form, no need for anything else
-i usually did (without elm) with just a submit button and the action attrb with its link
-but ConfirmPayment is Msg with no modifications in my Model
-If you want to redirect, you don't need a onSubmit
-but it sounds a bit like you want to redirect _and_ stay in your application
-if you want to redirect to a new tab/window you can use `attribute "target" "_blank"` I think
-great, good point..
-but it's a bit tricky this form submit business i Elm, for sure
-i know, with my staff I try to use my Models and Msg, but in this moving this special form must to keep this way by now
-Any recommendations for file uploads via Elm?
-Elm doesn't have a binary type, so, it's a bit tricky to do in Elm
-but there is also <https://github.com/simonh1000/file-reader> which you could try I suppose
-What options do I have?
-you probably don't need everything d3 exposes, right? i'm a little unclear on what exactly your use case is
-if you're just trying to draw a DAG you might be able to roll your own solution with `elm-lang/svg` and `elm-community/graph`
-if you're trying to make a Sankey diagram or something like that, that's different
-<@U3LUC6SNS> I just did this yesterday. I can write up a gist if you're still interested
-Hi, i'm learning elm and I'm stuck in the challenge to add an int input field to a form
-Mine is similar to the examples that exist, but it uses xhr in the port JavaScript since the examples seem to favor base64 and I didn't want to mess with the server side I was dealing with
-And this is the code - <https://runelm.io/c/95y>
-Any idea what i'm doing wrong?
-<@U6AHD8Q95> just as the message says, onInput will give your function a `String` but you want it to give you an `Int`
-input fields, even of type "number" can contain arbitrary strings
-So I defined a property of a record as an int
-yes, but the easiest is probably to have the message take a `String` and then convert it in your update function
-`String.toInt`?
-yes, `toInt` and then you have to handle the error, if any
-I see you have validation already, so you could add it to that
-Or just keep the 0 if the int value is invalid in the field
-Hmm… I'm proably missing something
+
+x2 only replaces infix operations with prefix operators of x1
+
+U0CLDU8UB : What I like to do with views is have a `maybeToList : Maybe a -&gt; List a`This lets me do compose views like so:
+```
+view model =
+    div []
+        ( maybeToList model.maybeOne ++ maybeToList model.maybeTwo ++ [ someView, otherView ] )
+```
+
+U3LUC6SNS :  I believe that it is the case that languages/os's designed by one person, maybe two (see: Unix) are more successful than those designed by a large group. There needs to a single coherent vision. But I'd love to see both examples and counterexamples. 
+U4872964V : <@U0CLDU8UB> yes, that's useful
+U0CLDU8UB : nbergsma: I think `(*) ((*) 2 3) 3` is not equal to `(*) 2 3 * 3`
+U4872964V : it's in maybe-extra too
+U0CLDU8UB : yep, I rarely have many cases for *.Extra though
+U0CLDU8UB : See, `(*) 2 3` has function precedence, which is the highest precedence in Elm.
+U6478N1V1 : Hi <@U0CLDU8UB>, could you explain?
+U6478N1V1 : ah equal to 0 right?
+U0CLDU8UB : Oh wait, that can't be the source, product is always the same no matter the order
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

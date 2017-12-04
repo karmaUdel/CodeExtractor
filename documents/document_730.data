@@ -1,94 +1,266 @@
+U4872964V : perhaps the most robust solution is to require an id for these nodes
+U3SJEDR96 : <@U4872964V> it's a reasonable implementation of "regular" elm types, though; where this would be used for records. But yeah, it's surprising :slightly_smiling_face:
+U4872964V : ah, yes
+U5J0H2NS2 : What a nice tutorial!I am going to use this pattern for sure.
+In Frame 21,  you show the original update, not the suggested one. Is it intended to be, or a mistake?
+(The same issue with frame 22, with the view)
+
+U0Z9TPK7S : <@U3SJEDR96> interesting. Thanks.
+U3SJEDR96 : `a == b &amp;&amp; b == a` would work, though :stuck_out_tongue:
+U4872964V : unless there are functions in that object…
+U0Z9TPK7S : Yup
+U0Z9TPK7S : dom elements have functions
+U0Z9TPK7S : it will crash
+U5J0H2NS2 : I'm not sure if it helps, but I think I had a similar issue and found a solution.You can change your subscriptions in every update cycle inside the subscriptions function.
 ```
-ok… I have that fixed… tho I have to say I have no idea how / why the lexer coloring function works the way it does. Also seems buggy. If I type `prin` it in red. It should go black when I add the final `t` for `print` but then I have a word that is 80% red and 20% black. DrRacket doesn't seem to re-lex &amp; color the whole word as it changes?
-<@U5KU1HNKY> DrRacket's colorer depends on the lexer giving it information to back up just enough to recolor. I'm guessing that something about the lexer prevented the colorer from going pack to the "p" to re-lex from there. Exactly what went wrong is difficult to guess, although I recall implementing error tokens wrong once or twice, maybe because it's easy to have the wrong backup or not have the error range covered by a single token.
-What if we drop the `raco pkg` tests? Has that set of test ever exposed a problem via Travis that wasn't discovered otherwise (either through DrDr or other tests)?
-<@U3NJS8H7C> I think we probably have at some point, but maybe not enough to be worth it (or worth trying to make the `raco pkg` tests faster)
-let me look at the history for the pkg code
-<@U3NJS8H7C> Travis exposed some problems in the `raco pkg` tests themselves, and it's possible that <https://github.com/racket/racket/commit/a5f6bf34dc75e33dd8a09d6ee7c9ea509395feb2> was motivated by Travis tests (but hard to tell now)
-that seems to be it that I can find
-Not sure that's enough of a positive record to be worth running 80 min of tests on every commit
-<@U0702F2CE> I don't recall the immediate motivation there, either. Turning off the `raco pkg` test for Travis seems right to me.
-<@U3NJS8H7C> this is what I'm working from: <http://beautifulracket.com/basic-2/the-syntax-colorer.html> — seems straightforward to me. I would have thought it would always be going back some to do coloring… I do find it rather odd that it is creating a `basic-lexer` on each call. What if the language needed stateful info to tell?
-I'll look a little more, but to answer your last question, the coloring API supports an extended mode to let you thread through state (i.e., store-passing), so the colorer can keep track of which state to send back if it needs to resume from a particular point
-I do totally believe you :slightly_smiling_face: and I understand that my code caused SQL_BUSY status codes to be converted into raised exceptions, breaking automatic retry. I'm just concerned that I'm effectively blind to seeing that at my end.
-zenspider: I'm not clear what code you're running. Do you mean that you're using "basic-2-tutorial.zip" unmodified?
-sorry, no. I have implemented all of basic up to the point of implementing the completed colorer, so `#lang basic` w/ my own main and basic/colorer. Lemme see if I'm fully pushed
-OK. I am: <https://github.com/zenspider/schemers/tree/master/br/basic>
-<@U3SEVDPJT> I started with the current master branch and used `hub am` (`hub` is a github-enhanced version of the `git` command) to add your changes. The effect should be the same as starting with your PR branch and rebasing with the current master branch. (And probably the same as just doing a merge, except without the merge commit.) How is the build failing? Out of memory, or something else?
-Ok, I guess I'm actually unclear on how to get into the state you showed. But I also notice that keywords are given the style `'no-color`, which seems to mean "don't change the color" – that is, if "prin" was formerly red to show an error then it won't be changed to a different color if it becomes part of "print"
-that's exactly the scenario. I can make a video to show it… but put `print” up there, it'll turn a proper color, backspace once and wait until "prin” goes red, and then type "t”. Only the "t” is black at that point.
-sorry to bother you with this. mbutterick isn't on anything online and doesn't respond much to my MANY reports against his content
-well… damn. I can't reproduce the red color right now either… I'm gonna have to back up to figure out why/how
-OK. Yes, I can reproduce. I had an extra commit from halfway through the next section which adds variables to the lexer. If I roll that out, then the 80% red 20% black thing sticks. If I change the no-color line to symbol, then it does redraw properly. Is there a "normal-but-not-no-color” value? I don't see where drracket's color semantics are documented
-OK. I used `ag` and dug up `syntax-color` module and decided a fair default was `other` and it seems to have fixed it… I'll send that as feedback to BR
-I'll give this another try when I have access to a different Windows machine. Are you satisfied with the most recent PR commit push?
-<@U3SEVDPJT> yes, I'll push them, thanks!
-<@U3QF0EM0E> did you have more comments on <https://github.com/racket/rackunit/pull/41> or shall I merge?
-go merge!
-huzzah!
-<@U3NJS8H7C> since the rktio changes, this test and a few like it have been failing on and off: <http://drdr.racket-lang.org/41014/pkgs/racket-benchmarks/tests/racket/benchmarks/shootout/typed/echo-non-optimizing.rkt>
-I realize that's not the most helpful diagnostic information
-It's also not clear if this is a concurrency bug in the tests that just started happening because of your changes, or if it's a real bug in Racket
-<@U0702F2CE> Is port number 8888 reserved in DrDr for that test?
-It's the only occurrence of 8888 in `racket/racket`
-I guess non-registration would be a `listen` error anyway
-is there a reservation mechanism in DrDr that I've forgotten about?
-There's some list of ports somewhere. Maybe it's not actually registered other than being in the list.
-Looking at that test, though, isn't there a race between the client starting and the server listening?
-it does look like a race
-looks like the race was there from the beginning, in <https://github.com/racket/racket/blob/d615bccb08274398f347b78a1dd746fe40eb3671/collects/tests/mzscheme/benchmarks/shootout/echo.ss>
-I'll add some synchronization
-<@U0702F2CE> what's the racket'y way of doing that? I don't find an equivalent to C/unix `select`, which is what I'd normally reach for…
-<@U5KU1HNKY> `sync` is the equivalent of `select`
-but in this case I think I can just start the client later
-no, that's wrong too
-heh. sure.
-hrm. sync is on _any_ data you send through the channel?
-that's nice
-`sync` is very nice
-and more composable than select
-but `break` is an exception, not some sort of event you send through?
-hrm… I can't tell how the break stuff gets fired
-is it more idiomatic to send off a `break-thread` to all your child threads or to send through some sort of `stop` datum/event to all of them?
-<@U5KU1HNKY> why would you need to do that?
-thinking of the worker model… fire off a pool of threads to do work, throw them things to work on via `sync`, then when you're done shut them down by telling them to stop somehow
-might be backwards thinking in racket land
-mostly you do `thread`-per-connection
-worker thread pools are more useful when stopping and starting threads is expensive and the resource overhead per-thread is significant
-for green thread systems like racket's that's typically not the case
-right, I use pools of Racket places in some situations
-since those are expensive
-a package providing a nice place-pool abstraction might be useful
-<@U0702F2CE> out of curiosity, do you know of any multicore webservers written in racket with places?
-I think I've seen examples, but not that I recall offhand
-<@U07SJGB4H> I've played around with that idea in the past. I think it would be a bit more straightforward if a tcp listener could be sent over a place channel.
-<@U3ZV4UG3T> how'd it work out? my first impression is that it seems like individual places should be responsible for binding to OS ports, but I haven't really done more than idly daydream about the problem
-You definitely could have different places bind to different ports, but then you'd need a proxy layer in front of that, right? You can also leave a single place in charge of accepting connections and handing them off to workers (which is what I was toying around with), but that seems like a bit lightweight of a task for a place.
-proxy layer would definitely be needed, yes
-specifically I was thinking of how to make a Racket web service with the SEDA architecture <https://en.wikipedia.org/wiki/Staged_event-driven_architecture>
-<@U3QF0EM0E> :party: :party: :party: <https://github.com/racket/rackunit/pull/48>
-<@U3QF0EM0E> <http://drdr.racket-lang.org/41016/racket/share/pkgs/redex-test/redex/tests/run-tests.rkt> looks like it's caused by your changes
-<@U3QF0EM0E> responded to #48, assuming your approval means it's good to merge
-death to the monads :tada:
-yep! I just had those little questions
-thanks for all the reviews :)
-of course, I'm just a concerned user of Rackunit. Thanks for all the improvements
-would it be inappropriate for rackunit to depend on `syntax/parse`?
-I doubt it would be a problem, given that `syntax/parse` is in `base`
-I'm less worried about package dependencies and more worried about test execution speed slowing down if loading `syntax/parse` is expensive
-I guess that's a valid concern, yeah
-but I have no idea how expensive loading `syntax/parse` is
-It should be fine
-Is there a way to "run” an input file as if it had a `#lang xxx` line at the front… basically say eval this port/file/whatever with xxx lang?
-I want to write a more "traditional” style of tool, then have that slurp into racket as if it were a `.rkt` file with a proper `#lang`
-<@U5KU1HNKY> if its a module language (and doesn't have a special reader), you can read the file in, construct a module with the language xxx and the read in stuff as the body, and eval that. might be an easier way though
-<@U5KU1HNKY> If the module language does have a reader, you can call it directory, but another option is to use `input-port-append` to add the `#lang` line. In any case, to handle relative paths,  you'll want to set `current-load-relative-directory` while reading; to get the module declaration associated with the original path, set `current-module-declare-name` during `eval`.
-Is the order of the marks of continuation-mark-set-&gt;list specified?  <http://docs.racket-lang.org/reference/contmarks.html>
-<@U086VDRBK> the innermost mark is first, I think
-Makes sense.
-discussion about 2d syntax on Hacker News: <https://news.ycombinator.com/item?id=14657857> (cc <@U3NGSC6AF>)
-whee!
-it's actually pretty positive
-There has been some Racket talk on HN lately.   <https://hn.algolia.com/?query=racket&amp;sort=byDate&amp;prefix&amp;page=0&amp;dateRange=pastWeek&amp;type=all>
-are there macro forms of IO that don't take thunks? (iow, use `expr ...`) just feels klunky
-also, I'm trying to do <@U3NJS8H7C>'s suggestion of using `input-port-append` to prepend a `#lang` line … Will location info be for the concatenation or for each port being used? IE, will error info be off-by-one?
+subscriptions : State -&gt; Sub Msg
+subscriptions state =
+  case state of
+    InitState -&gt; Sub.none
+
+    LoginState login_model -&gt;
+      Sub.batch
+      [ Sub.map LoginMsg &lt;| Menu.subs Login.Mdl login_model.mdl
+      , Sub.map LoginMsg &lt;| Layout.subs Login.Mdl login_model.mdl
+      ]
+
+    MainState main_model -&gt;
+      Sub.batch
+      [ Sub.map MainMsg &lt;| Menu.subs Main.Mdl main_model.mdl
+      , Sub.map MainMsg &lt;| Layout.subs Main.Mdl main_model.mdl
+]
+```
+
+U5J0H2NS2 : Here I forward the msg-s of the elm-mdl module to the currently active state. I think the same could be implemented with your port.
+U5QJW0DDE : <@U0CL0AS3V> so in Elm, if you add a feature further down your view tree, and that feature needs data that has never been needed anywhere in that view hierarchy, it is normal to then add that data as an argument to all those intermediate view functions so that final view can build itself? As an app grows in complexity and new features are added, you could find yourself adding new arguments to many functions often enough that eventually it emerges to just pass whole model state through the view rather than pick disconnected parts of the central data model to separately string through the view tree.
+U0EUHKVGB : You can use `toString`, which will strip it of functions.
+U0Z9TPK7S : <@U0EUHKVGB> but at that point I will lose the reference comparison, which is what I wanted in the first place
+U0Z9TPK7S : If `toString domElementA == toString domElementB` I'm still not guaranteed that the two elements are the same.
+U0EUHKVGB : In Elm terms, you are guaranteed they are same, i.e equivalent. You just aren't sure they are the same object :wink:
+U0Z9TPK7S : "are the same *element*"
+U0Z9TPK7S : nitpicking on the language doesn't help
+U0EUHKVGB : Ensuring that everyone is using a common language is an important part of helping people.
+U0EUHKVGB : It's not nitpicking -- it's ensuring that people can help understand your goals.
+U0EUHKVGB : So now the question is, _why_ do you want to know they are the same element?
+U0Z9TPK7S : I haven't had this problem until you entered in the discussion, with a suggestion that was not useful for the problem at hand.
+U0Z9TPK7S : Now, I am not an english native speaker.
+U0Z9TPK7S : But the problem is solved, I am convinced that id comparison is the way to go.
+U0EUHKVGB : Neither am I :wink:
+U3SJEDR96 : Keep in mind that in Elm, you have referential transparency; so wishing for referential equality is a bit of an odd thing. Noah's suggestion is the safe way of comparing json-values in Elm, though :slightly_smiling_face:U0Z9TPK7S
+
+U0EUHKVGB : It's not a matter of English ability or not. Before I help people, it's important to understand what they are trying to do. There is no need to take it personally, your English is great and even if it wasn't, it wouldn't matter. What does matter is making sure that we are helping you to find the solution you need -- not just what we _think_ you need.
+U0EUHKVGB : You have to rememeber that `===` isn't an explanation of what you want, since it's the defacto comparison method for modern JS.
+U0EUHKVGB : Therefore, when you are talking about things being the same _in an Elm context_, then it's important to clarify what you mean by "same" :slightly_smiling_face:
+U0EUHKVGB : Not to attack you or make you feel bad -- to make sure that we give you the right answer!
+U0Z9TPK7S : "In JS I can do X, is there any way of doing X in Elm?"
+U0Z9TPK7S : X = `elementA === elementB`
+U0EUHKVGB : Anyway, great that you found a solution. An id seems sensible if you can guarantee your elements will have an id.
+U0EUHKVGB : Eh, like I said, `===` is _the defacto comparison method_ in modern JS.
+U0Z9TPK7S : I am not clear what is the implication of that.
+U0EUHKVGB : It doesn't explain what you need or want. The answer in Elm is `you don't need to do referential equality so we just have ==`
+U0Z9TPK7S : On the contrary.
+U0EUHKVGB : <@U0Z9TPK7S> The implication is that people can say "How do I do 5 === 6 in Elm?", while meaning "How do I compare if two objects are equal?"
+U0Z9TPK7S : In JS, if both elementA and elmentB are DOM elements, `elementA === elementB` will yield true if and only if the two are the same element.
+U0EUHKVGB : People use `===` for every form of equality in JS. It's not a helpful explanation of what you want to do.
+U0Z9TPK7S : It describes a very precise requirement.
+U0EUHKVGB : No, _you_ know what you want from that. We do not.
+U0EUHKVGB : We can only guess. Guessing is bad because it leads to people getting the wrong answer.
+U0EUHKVGB : Hence the need to identify the common terms of a conversation.
+U0Z9TPK7S : You will notice that I gave quite some context.
+U4872964V : Yes, I understood exactly too.
+U0EUHKVGB : The context alone is not enough to go off.
+U0Z9TPK7S : In fact, in the discussion that followed, there was no ambiguity.
+U0Z9TPK7S : It is
+U4872964V : anyway, my suggestion was to require id on the node, which is probably the best solution all-round
+U0EUHKVGB : No, the others guess what you were after.
+U0EUHKVGB : They could not be _certain_ that is what you wanted.
+U0EUHKVGB : Anyway, this discussion is pointless. There is no need to get upset over clarification. Clarification is there to help _us_ help _you_.
+U53TPMXRT : If I may say so, I see the point of <@U0EUHKVGB> , because I think that he means a broader context. Like the use case you would need this comparison for. Anyway, here's my question:
+U53TPMXRT : In elm-tools/Parser `symbol` and `keyword` seem to do the exact same thing. Do they only have difference in meaning, or do they work somehow differently as well?
+U17MSA88M : <@U53TPMXRT> They give a different error message on failure
+U17MSA88M : <https://github.com/elm-tools/parser/blob/5c83ce6a17887c229afe9732bed01e642433cfa0/src/Parser.elm#L560-L572> if you're curious :wink:
+U53TPMXRT : Oh well, they seem a bit redundant to me if this is the only difference, but maybe I'm just not accustomed enough to the "elm way of things". Thank you for your answer!
+U0CL0AS3V : &gt; so in Elm, if you add a feature further down your view tree, and that feature needs data that has never been needed anywhere in that view hierarchy, it is normal to then add that data as an argument to all those intermediate view functions so that final view can build itself?
+I think if you remove "so that final view can build itself" the answer becomes clearer: "yes, because Elm views are nothing more than functions, and this is how function calls have worked since the beginning of programming." :smile: 
+
+&gt; As an app grows in complexity and new features are added, you could find yourself adding new arguments to many functions often enough that eventually it emerges to just pass whole model state through the view rather than pick disconnected parts of the central data model to separately string through the view tree.
+
+I can see why that might be true in ClojureScript, but there's a crucial difference between Elm and ClojureScript here: Elm's compiler.
+
+In Elm, this is a comically easy change to make. You add an argument to the view function that needs more data, and the compiler immediately jumps in and holds your hand through whatever changes need to happen to support that data getting there.
+
+The whole process takes less time than I've spent writing this response, the odds of it causing a regression are practically zero, and you almost never need to touch a unit test other than for the single function at the end of the call chain.
+
+I can see why this looks concerning from the outside, but after 150,000 lines of code I have yet to observe this materializing into a real problem in practice. :simple_smile: 
+
+U3SJEDR96 : The parser focusses on getting great error messages (and was written by Evan after rewriting the parser used in the compiler); so if it's simple to implement, creates clearer parsers and better error messages, then that's 3 reasons to have it :slightly_smiling_face:
+U3SJEDR96 : `symbol "case"` and `keyword "{"` don't really make sense, after all
+U3SJEDR96 : the first I could live with, tho
+U53TPMXRT : For me simply using `token` would be good as well, but I will see. Maybe after using it for a while I will start appreciating it! :wink:
+U53TPMXRT : Thanks for the answers everybody!
+U5QJW0DDE : this isn't really about refactoring or making it easier to add arguments, it's about having a code base where all your views are either taking lots of arguments for components that might be distant in the tree, or about passing whole model state. It sounds like in essence, it is common to have view functions with a large collection of arguments to support all the descendants, and that stringing along new arguments to all view functions in a tree would be common practice when you add new features to distant view children.
+U5QJW0DDE : clojure's compiler also warns when there are mismatches between arities or unknown symbol names; it's more about the conceptual burden of having a codebase where your views are handling and passing lots of disconnected state. I'm fine to accept that this is the only way to do it in Elm, but just thought I'd ask.
+U0CL0AS3V : more data doesn't necessitate more arguments; it can be accepting larger (possibly extensible) records, for example
+U5QJW0DDE : that would mean that either those records are stored in your model data in a way to match your user interface, or that you are constructing those records somewhere separately in your view chain, which would mean that some of your views at least are getting these extra arguments, parsing them, building data structures, to support view components far down the tree
+U5QJW0DDE : or, just pass whole model state to obviate these steps
+U1FCZNA7R : I'd like to render a box around text using SVG (with the text centered both horizontally/vertically). Here's my current progress: <https://ellie-app.com/3KLrFNdtrYGa1/9> After some basic research I'm getting to the conclusion that to center it precisely I need to somehow get the exact width of svg text element. Anyone here faced/solved this kind of problem before?
+
+U0CL0AS3V : but in general, I think it would be tough to argue that any language can have lower conceptual burden than "pure functions that each accept only what they need" :wink:
+U0CL0AS3V : anything fancier than that is going to increase conceptual burden, I claim
+U5QJW0DDE : in clojurescript, the pattern that has emerged is to entirely separate the process of delivering required data to a view function from the logic necessary to build that view, via pure functions called "subscriptions". it's been a great paradigm that has largely changed how UIs are build in cljs, because in cljs we used to do something a couple years ago that largely resembles the Elm Architecture but eventually a cleaner pattern emerged to combat the issues i've described
+U0CL0AS3V : I have yet to hear an actual issue though :grimacing: 
+U5QJW0DDE : possibly because you haven't seen the alternatives :slightly_smiling_face:
+U0CL0AS3V : you keep implying that passing arguments between functions is a problematic experience and I fundamentally disagree
+U0CL0AS3V : I don't see the appeal in trying a more complex way to do the same thing
+U5QJW0DDE : do you not find that if you have a view tree that is, say, a hundred layers deep, it adds conceptual burden to pass a single arg through dozens of layers that will never touch or handle that data, just to support a new component you added near the bottom of your hierarchy? and if you add multiple components, you do this many times over until your view tree's functions are full of many disconnected arguments? or, that you must manually aggregate these instead into a composite structure, which more or less presents the same tedium?
+U0CL0AS3V : all else being equal, I prefer the simpler solution
+U5QJW0DDE : my argument is that the elm archicture complicates the process of feature development by making you touch many view functions to support views that they have no direct interaction with. that seems less simple or elegant to me.
+U5QJW0DDE : i used to need to write apps in this architecture, because that was the only real paradigm available in cljs a couple years ago. i really like static typing and thus am giving Elm a try, but it requires i go back to that older paradigm. i just miss some of the developments in UI design patterns that have emerged more recently.
+U0CL0AS3V : &gt; do you not find that if you have a view tree that is, say, a hundred layers deep, it adds conceptual burden to pass a single arg through dozens of layers that will never touch or handle that data, just to support a new component you added near the bottom of your hierarchy?
+I'm not saying it adds zero, I'm saying I don't see how you can add less than this.
+
+What you are describing is a mechanical process that is easy to do. The result is that understanding each view function's dependencies is simple: I look at what arguments it accepts. That minimizes conceptual burden.
+
+Any system that saves me mechanical work is necessarily going to hide that information. That is not avoidable. If you want to do less typing on the keyboard, you must make some dependencies a secret, thus making it conceptually harder to follow how state changes affect different parts of the page.
+
+U0CL0AS3V : I'm saying the mechanical cost is low, and I'd rather optimize for being able to look at each view function in isolation, and understand it by looking at what it accepts and what it returns
+U0CL0AS3V : the hardest problem with scaling is things getting too big to fit in your head, and this strategy optimizes for breaking things into smaller pieces, each of which can fit in my head even as they combine to form a larger whole
+U5QJW0DDE : that doesn't make sense to me because what a view needs to actually do might be much smaller than the data it receives. i guess it is just a difference of opinion. i don't think views should be responsible for handling large amounts of data that they do not directly touch, to me *that* adds conceptual burden -- you cannot just look a view's args and see what it does, because most of those args it will not handle directly
+U3SJEDR96 : we are talking about `view : State -&gt; Html` still, right?
+U5QJW0DDE : <@U3SJEDR96> yes i'm talking about the complexities of building a large view tree in a big app
+U3SJEDR96 : I still find it hard to think of that as something that could potentially use some piece of state that is *not* part of `State`
+U5QJW0DDE : i don't follow; i'm talking about different parts of the central app state
+U0CL0AS3V : &gt; you cannot just look a view's args and see what it does, because most of those args it will not handle directly
+What does "handle directly" mean here? They use that data to call other functions, and without it they couldn't call those other functions. Most of fp is functions calling other functions, so I'm not sure what the distinction is here.
+
+U5QJW0DDE : they are just passing data down, you have to inspect each view function in your tree to finally see where the data is getting used. that's not really simple in my opinion. all views take the same data that nearly none of them use.
+U5QJW0DDE : or, worse, some of them might use it while others not.
+U5QJW0DDE : it's just harder to follow data flow in a large app
+U0CL0AS3V : they do use it though
+U0CL0AS3V : they use it to call other functions!
+U0CL0AS3V : that's precisely what makes this the simplest system of data flow
+U0CL0AS3V : there is only one source of truth: which arguments get passed to which functions, that's it
+U5QJW0DDE : i think i've interacted with everyone enough to understand the elm way of thinking about this. that's fine, i just wanted to get to the bottom of the philosophy. it's a defendable design pattern because this was also how we did it in clojurescript for a couple years, it's a natural UI technique to arrive at. but it's been largely replaced by other patterns that i'm used to, and i just have to accept that absent writing my own version of html program, those patterns are not available to me in elm, and that's fine.
+U0CL0AS3V : fair enough! :hearts:
+U0CL0AS3V : thanks for the discussion :grinning:
+U5QJW0DDE : it probably means i might not be successful in convincing my company to switch from our current practices (because the re-frame library is really a great way to think about writing user interfaces), but perhaps for smaller components here and there we can test out elm.
+U1SF6G7PA : <@U1FCZNA7R> to get data from the rendered dom, you can add a port and extract the information using javascript.  it is also possible to extract properties of the dom tree when decoding events like it is done here <https://medium.com/@debois/elm-the-dom-8c9883190d20>
+U1SF6G7PA : but this only works when you know that there is an event triggered
+U5QJW0DDE : check this out some time: <https://github.com/Day8/re-frame>
+U0FP80EKB : (Just as an aside, in case you have anything to do with it, when I looked at the readme, I couldn’t make it past the first couple sections before I stopped reading out of annoyance at the writing style and the idea of trying to make it through the whole documentation in that style)
+U5QJW0DDE : that's true, it's rather verbose. unfortunately, great ideas are often accompanied by pomp
+U0FP80EKB : The greatest ideas are generally whispered. I dislike the “I’m a clever writer”-style of unclever writing. That’s just my personal style, though. I’m sure some people like it. ¯\_(?)_/¯
+U5QJW0DDE : well, i can't say the greatest ideas are whispered. einstein was pretty full himself too.
+U5QJW0DDE : at least, according to the biographies
+U0FP80EKB : ¯\_(?)_/¯   But past style, I prefer the documentation for a new thing for me to start with “Do you have this problem? We have a solution.” This says “here are a bunch of things about us, but I’m not going to relate it to your actual problem.” But again, my style, which is most definitely not shared by everyone.
+U5QJW0DDE : it's probably because re-frame is a very high level abstraction that is built on other abstractions that the community is already familiar with. you wouldn't likely be looking at re-frame if you didn't already understand what problems you had with state management or virtual doms that led you to consider re-frame
+U5QJW0DDE : re-frame is a bit of a word-of-mouth tool
+U5QJW0DDE : and actually re-frame shares a lot with the elm architecture, but it's the decoupling of view logic from data queries that makes it particularly nice to use
+U5QJW0DDE : but outgoing events are the same in elm and re-frame
+U5QJW0DDE : in re-frame, views do specific tasks, and don't require any data that is not needed for those tasks. the data that a view receives is in fact a pure function; many of the concepts would appeal to fp devs of any language. views can specify other views that need built, but don't need to know what those other views need for data; instead each view subscribes to pure functions that handle the query aspect. it makes for much cleaner and more elegant code, while also making all views highly re-usable.
+U0FP80EKB : I’m sure it is great and works well for you. :slightly_smiling_face:
+U0FP80EKB : I’m not sure why you would be trying to get your company to move to Elm, though, if this is working well. I’d love to hear what thoughts you have that make you want to move away from clojurescript/re-frame to Elm. It sounds like re-frame is awesome.
+U0FP80EKB : That’s actually more interesting to me than re-frame, itself.
+U1FCZNA7R : <@U1SF6G7PA>, thank you, that will be helpful :slightly_smiling_face:
+U5QJW0DDE : Fair question. It's because I have an inner tug of war with typing. I like the benefits of static typing, but I also like the benefits of lisp and macros and dynamic manipulation of syntax. But I also write a lot of C++ for my job, so I'm used to compiler assistance. Clojurescript's compiler has gotten quite good and does many of the things you'd expect from a static type checker. But perhaps more than anything, i like the reduction of runtime errors that Elm provides. Though, I think that time saved in debugging is made up a bit in the extra time that JS interaction can require: there are some stellar JS libraries out there. So it's a give and take, and ultimately we are a company very open to experimentation, and Elm is a reasonable contender.
+U0FP80EKB : <https://elmlang.slack.com/archives/C0CJ3SBBM/p1500035251496454?thread_ts=1499957492.389554&amp;cid=C0CJ3SBBM>
+This fascinates me, especially after you’ve talked about how great iframe is relative to the elm architecture. Could you elaborate on why you would want to do this?
+
+U0FP80EKB : If what you are looking for is primarily a different form of typing, then perhaps something like purescript is the way to go?
+U5QJW0DDE : <@U0FP80EKB> i wrote that as a consequence of learning that the elm architecture doesn't really support some of the patterns in re-frame -- i had read how elm and re-frame were similar and had assumed I could do some of the same things.
+U5QJW0DDE : but purescript does not have built-in persistent data structures which I consider quite necessary for proper FP. clojurescript has a great set of immutable data structures that are extremely fast and wonderful, and I'd hate to give up the patterns you can use with data like that.
+U0FP80EKB : My recommendation would be to build something in Elm and see how it feels, rather than assuming that there aren’t things in Elm which help with any problems you found in the old clojurescript libraries.
+U5QJW0DDE : i have built several small apps as tests of Elm and was trying out the idioms i'm used to in those apps, which led to all these questions from me.
+U0FP80EKB : I’d recommend taking an attitude more like “Hey, Elm seems to exhibit certain qualities that I worry about, but when I bring them up, people are pushing back that it doesn’t seem to an issue in Elm. Perhaps I should see whether my underlying assumptions from clojurescript hold up in Elm, as well.”
+U0FP80EKB : Building small apps, then talking about how they will have the same problems at large scale as you did in cljs can be potentially problematic.
+U5QJW0DDE : it's not like it would be a super major problem: i wrote apps in clojurescripts Om library back in '14 and '15 that were more or less identical to the elm architecture -- as did many companies -- and i could do so again. but when the design patterns evolved in that community, i found them so nice that going back to those older patterns requires some pause.
+U5QJW0DDE : and really, there is much more in common between elm and clojurescript than probably either community realizes.
+U0FP80EKB : The Elm language and Clojurescript have different capabilities, different aspects to them. Perhaps the same issues don’t come up in the same way.
+U5QJW0DDE : or cares to admit :slightly_smiling_face:
+U0FP80EKB : Well, as with most things, my response is always ¯\_(?)_/¯  I bet you’d find that there are aspects of Elm which make your problems not as pronounced as in clojurescript, just as I’m sure there are aspects of clojurescript that make certain difficulties in Elm easier.
+U5QJW0DDE : i bet you have this somewhere quite ready all the time, ready for pasting: ¯\_(?)_/¯ :slightly_smiling_face:
+U0FP80EKB : For example, supporting functions with side effects is something I understand clojurescript does (via js interop). Elm doesn’t support that at all (no js interop). So, those qualities make some things more complex and some things more simple. Perhaps your worry about having lots of layers of functions on top of each other is one of those situations, as well.
+U5QJW0DDE : no, the js interop issue is entirely separate from what i've been discussing here.
+U0FP80EKB : I have ¯\_(?)_/¯on my clipboard. I find that I use it an awful lot in technical conversations with people. (incidentally, slack has it as a built-in slash command, too)
+U0FP80EKB : I’m using it as an example of different qualities supporting different solutions.
+U0FP80EKB : For example, getting the current date is more complex in Elm, because you can’t have side effects in your functions. I would assume that in clojurescript, you could write a function that would return it.
+U0FP80EKB : That’s an example of a complexity that different choices address in different ways.
+U0FP80EKB : Perhaps this is one of those.
+U3GD698R5 : <@U5QJW0DDE>
+U5QJW0DDE : i've heard that some browser user events are not accessible in Elm. is that true? i don't now which ones, but i'm curious.
+U0FP80EKB : I don’t know. I’ve been able to access all the ones I’ve needed.
+U0FP80EKB : Again, I’d recommend rather than finding the problems with Elm, join the community, start building, ask how Elm solves certain problems, rather than taking the approach that the way Elm solves certain problems is wrong.
+U5QJW0DDE : well i've been doing all those things; and hopefully it's been more of "how do you do this in elm that i'm used to" vs. "elm is wrong"
+U0FP80EKB : You’ve spent the past handful of days pointing out why Elm is wrong, not “I’m running into this concrete problem, how does Elm solve it.” You bring up things, people respond that “Elm does it this way” and your response pretty much is “that’s wrong, clojurescript used to do it that way, but we moved on to something better.”
+U0FP80EKB : I realize that there are certain things you are used to in cljs and re-frame. That’s fantastic. Elm is different. The language has things that potentially make it easier to work this way. A lot of the solutions are “things are just functions, use them like that”
+U5QJW0DDE : asking how to avoid passing whole model state or passing many extra arguments was the goal; sorry if it came across differently to you. i have received a fair amount of push-back, so perhaps that shifted the tone of the conversation on all sides along the way. sorry about that.
+U0FP80EKB : I have a sense that you think in terms of nested components. So, you might have a container that has 4 components in it. Those components might have sub components. Etc. And, thus, you have a big tree. Elm doesn’t build like this. We don’t work in “nested components,” so the conceptual issue of passing data through parent components isn’t there.
+U3SJEDR96 : Heh, I for one haven't seen this perceived "Elm is wrong" coming from <@U5QJW0DDE> and actually think that, given the circumstances, they've behaved admirably.
+U3GD698R5 : <@U5QJW0DDE> did you take a look at elm-ui? it uses a different pattern for independent components based on subscriptions. I'm not sure if that is something that can fit your design constraints but maybe help you avoiding deep trees on your view functions. IMO changing functions signatures and even passing the entire model to the more external ones is not big deal in elm, but honestly I didn't make such big apps on Elm yet.
+U5QJW0DDE : A view that builds other views is all we are talking about, in either language. Whether it's called nesting or not, it's the same idea.
+U0FP80EKB : I don’t think in terms of “views that build other views”
+U5QJW0DDE : <@U3GD698R5> yes i took a look at it briefly; it doesn't behave on touch screens, so i didn't give it too much further consideration. but i should look at the source
+U5QJW0DDE : <@U0FP80EKB> yes, but view functions do call out to other view functions, right?
+U0FP80EKB : I think that is a fundamental difference. For my systems, I have one view.
+U5QJW0DDE : but inside that one view, you call other view functions?
+U0FP80EKB : I have one view function.
+U0FP80EKB : I call other functions, but there is nothing that makes them a “view function”
+U5QJW0DDE : that must be a rather large function
+U0FP80EKB : This is what <@U0CL0AS3V> was getting at. It is just functions. Sometimes you pass the dependencies in. Sometimes they depend on other functions.
+U0FP80EKB : Nope. My functions generally are pretty small. &lt;10 lines, although formatting can make them longer vertically.
+U5QJW0DDE : you keep assuming that i am new to what functions are; all ui development in clojurescript is also just functions; they are both immutable, functional languages
+U2FL3ARLG : aren’t the text messages centered properly in that example? (edit: I see the problem after changing the font size)
+U2LAL86AY : <@U1FCZNA7R> i had a similar problem with a chat app - i needed the height of each message - it was variable because a message could contain more or less text inside. So this height calculation can't be done in elm - because is only known after that text is rendered.
+You pretty much have the same problem from what i understand. You have a text - and you can't predict it's dimensions - without rendering it first. Because once you know dimensions and absolute positioning - you can draw that rectangle in such a way that will leave space and be centered and what not.
+
+I solved this by having 2 states: `Ready` and `NotReady` for each of my chat-messages. In your case you can have a ready and not ready state as well ex: 
+`type MySvgText = TextNotReady String | TextReady String Width Height Top Left`
+
+If that text is added dynamically: 
+1. add text to the model with `NotReady` state - and in the view only the text will be rendered - and put `visibility hidden` with css - to not show anything to the user - unthil will be ready.. You also add an id to it. Also at this point you will not draw any rectangle around it.
+2.  you fire a cmd (cmd port ) - to js to calculate the position or whatever you need from that rendered text. SetTimeout of 10 ms worked for me.
+Ex: 
+```
+... 
+     CreateText text -&gt; 
+            {myText  = TextNotReady  text } =&gt; [ jsSendMeTextStuff id ]
+```
+Then when the js comes back - ( subscription port)
+You receive a message with the position and width and what you want -&gt; you update in the model like so:
+```
+... 
+JsSentTextStuff width height top left -&gt; 
+      {myText = TextReady text width height top left } -- not in this order :)) - and the text arg you extract it form the previous model.
+```
+And now in the view you have all the info you need to draw a box around it - in the appropriate place. Also this time the text will have `visibility : true` .
+
+All this will happen very fast `10 ms` - so nothing will actually be changed on the screen.
+
+And if this text is not aded dinamically - then you manually set it to NotReady inside your init - and fire that command inside an `Initialize` message, or something.
+All this is kind of complicated - but i couldn't find a better solution in my case.
+
+U0FP80EKB : My only assumption is that you are thinking in terms of a different architecture, a different way of thinking about things.
+U5QJW0DDE : for example, the elm-spa-example is also "nested components" as far as I'm concerned.
+U0FP80EKB : But, in the end, I’d fall back on my recommendation of building in Elm. It is delightful. When you run into the issues that re-frame solves, and the answer is “that isn’t really a problem here” look to understand why not instead of digging in your heels that it definitely is a problem.
+U0FP80EKB : But, I’ll bow out of the conversation.
+U5QJW0DDE : i'm obviously not generating problems for the sake of finding problems; we are all too busy for that. i'd rather take 2 days to ask serious questions, rather than go down a similar path i've been down before with what is essentially the same architecture, and I already know what the stumbling blocks were, so I'm just getting some advance information about what to expect in Elm. perhaps I will be convinced to go down that path again with Elm
+U0FP80EKB : (as a last thought, though, the problems you are describing in the `view` function exist exactly the same in the `update` function)
+U0FP80EKB : I think an interesting thing would be to look at the `update` function in the same light with the same concerns and see how things are solved there. I tend to solve things in exactly the same way between `update` and `view`
+U0FP80EKB : that might isolate the issue from the whole “nested views” and “nested components” semantic question.
+U0FP80EKB : That actually does sound more interesting to understand what techniques are used to solve this same dependency issue in the `update` function. There also is a lot more thought around it in the Elm community, I think.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

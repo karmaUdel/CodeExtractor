@@ -1,4 +1,66 @@
+U0E0XL064 : clojure and jdbc... there seem to be 2 libs: `clojure.java.jdbc` and `clojure.jdbc`. Anyone any experience reports? Reasons why using one over the other? ...?
+U050ECB92 : the first one is the standard one.  the second one's name is unfortunate
+U04V70XH6 : <@U0E0XL064> I'm the maintainer of the standard (contrib) one: `clojure.java.jdbc` and we use it extremely heavily at work (with MySQL) for large volumes of data/queries.
+U04V70XH6 : It's also tested against MS SQL Server (both MS driver and jTDS), PostgreSQL (both Postgres and Impossibl drivers), and H2, SQLite, Derby etc. There are Oracle and Terabase(?) users of it too. It's what most other JDBC wrapper libraries use under the hood.
+U04V70XH6 : If you run into any issues with it, feel free to ask in the <#C1Q164V29|sql> channel.
+U0E0XL064 : Right... Thx.
+U0E0XL064 : :)
+U04V70XH6 : You can also see from this initial commit that the author basically copied `clojure.java.jdbc` (without permission and without attribution -- I took him to task on the mailing list for that!): <https://github.com/funcool/clojure.jdbc/commit/dfb16894734c2a95838cd5f5b3fef3e63ac1c4bf>
+U04V70XH6 : In later commits he added some acknowledge of code he'd taken from `clojure.java.jdbc` and he did, over time, substantially rewrite the code base.
+U04V70XH6 : (but, yeah, years later I'm still pretty annoyed about it)
+U0W0JDY4C : a list isn't IAssociative, but I want to update a list with deeply nested values somehow like:```
+(def L '( '( '( :a :b '( :c :d '( 'needs-updating )))))
+(update-in L [0 0 1 1] fn)
 ```
-there's a cache for the Longs, but only between -128 and 127, they aren't all cached
-identical? isn't just an equality check, it checks if the data is stored in the same location on hardware
-when you type in 127, clojure asks for an instance of Long, and java uses a cached set of Longs to look up the value, when you type in 128 clojure once again asks for a Long, but this time java makes a new one
+now it's easy to do if the lists are vectors… but given that most-everything defaults to a list after running some process (map filter reduce etc.), I wonder whats the better way to do this that works for a more general `seq`?
+
+U051SS2EU : if you need associative updates, don't use lazy operations for modification - map, filter, etc all provide transducers that can make vectors
+U0W0JDY4C : so pour things `into []` or use `vec-*` for map/filter/etc.?
+U04V70XH6 : <@U1Z5X06NP> `clj-time` 0.14.0 is available <https://github.com/clj-time/clj-time/releases/tag/v0.14.0>
+U051SS2EU : <@U0W0JDY4C> right - but especially when chaining operations into with composed transducers is a better option
+U051SS2EU : and I don't think it's vec-*, it's *v
+U051SS2EU : (and not all of the foov exist - but filterv and mapv do at least)
+U1Z5X06NP : <@U04V70XH6> awesome!
+U0W0JDY4C : ah, it's `*v` yea … but why is into a better option? does it preserve laziness?
+U051SS2EU : no - vectors cannot be lazy
+U051SS2EU : by composing transducers you avoid creating intermediate data (which does nothing but create gc churn)
+U0W0JDY4C : hm, not totally following you but that's okay. i know `(comp a b c)` will produce a transducer. are you saying there's a way to do `into [] some-fn` where it doesnt use a transducer?
+U051SS2EU : no - and comp doesn't generate a transducer unless its args are transducers
+U051SS2EU : if you call `(filterv pred? (mapv f coll))` that generates a vector you don't need
+U051SS2EU : if you use `(into [] (comp (map f) (filter pred?)) coll)` you get the same result without creating a data structure nobody uses
+U0W0JDY4C : ooof. so much to learn I do have. thanks for the tips :yoda:
+U051SS2EU : you can still get the right answer without composing the transducers, and it's easy to change once you know how they work
+U051SS2EU : but back to the original question, if you need to do updates by index, keep things in associative collections, there are good options for making them but you don't need to do it the optimal way on the first pass through
+U28TJ0DDZ : what's your favorite logger library and why ?
+U0NCTKEV8 : I tend to use tools.logging on top of log4j2. it works great, just about every other routing framework can be rerouted to log4j2
+U0NCTKEV8 : the dependencies for that are something like ```                 [org.apache.logging.log4j/log4j-core "2.8"]                                                                                                                                                                                   
+                 [org.apache.logging.log4j/log4j-slf4j-impl "2.8"]                                                                                                                                                                             
+                 [org.apache.logging.log4j/log4j-jul "2.8"]                                                                                                                                                                                    
+                 [org.clojure/tools.logging "0.3.1"] 
+```
+
+U0NCTKEV8 : since you were asking about pedestal logging on irc, last I checked(years ago), it was a simple wrapper on log4j
+U0NCTKEV8 : my mistake, it is a wrapper on slf4j
+U66G3SGP5 : when accessing nested maps, do you guys prefer (-&gt; a-map :a :d :c) or (get-in a-map [:a :d :c]) ?
+U04V4HWQ4 : `get-in`
+U0NCTKEV8 : I think most people prefer `get-in`
+U0NCTKEV8 : I like the uniformity of `-&gt;`
+U0NCTKEV8 : you can stick some functions in there
+U0NCTKEV8 : `-&gt;` may also be faster if you are dealing with nested records
+U0NCTKEV8 : `-&gt;` is a syntax short cut, it is gone at runtime, `get-in` is actually a function and will run and exist at runtime
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

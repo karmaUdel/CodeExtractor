@@ -1,0 +1,117 @@
+U4872964V : great!
+U4872964V : lot of things happening :slightly_smiling_face:
+U1AN4JRFV : there's also this, that might be up, or it mightn't. <http://52.233.199.184/>
+U1AN4JRFV : (currently working on making it update after discovery)
+U3SJEDR96 : Heh, cool. Also, if you're interested in parsing signatures, <https://ellie-app.com/3PSwcRDd9L3a1/1>
+U1AN4JRFV : bookmarked!
+U6CCW4KV1 : Hi everybody, I have an `Elm.fullscreen` app and want to render a c3 chart into it (the code already existed), but the app is just freezing. I guess the elm rendering mechanism gets in the way. Is there an easy workaround for this, or do I have to use `Elm.embed` and render the charts in a not managed html element?
+U2W28MK6K : X-post from <#C192T0Q1E|beginners> :
+Hi all! I've been struggling with being able to send a request that returns a 204 No Content.
+
+I've explored creating a low level request like so:
+
+```
+myRequest msg payload =
+    let
+        req =
+            Http.request
+                { method = "POST"
+                , headers = []
+                , url = "/my-url"
+                , body =
+                    (Http.jsonBody &lt;|
+                        Encode.object
+                            [ ( "field1", Encode.string &lt;| payload.field1 )
+                            ]
+                    )
+                , expect = Http.expectStringResponse (\response -&gt; Ok response.body)
+                , timeout = Nothing
+                , withCredentials = False
+                }
+    in
+        Http.send msg req
+```
+
+i've also tried:
+
+```
+expect = Http.expectString
+```
+to no avail
+
+and the result that I always get is an Error regarding not being able to parse invalid JSON
+
+U1SF6G7PA : <@U0CL7EPPG> that is how i did it, too :slightly_smiling_face: sorry, for the delay, didnt have my computer on me for the weekend
+U1AN4JRFV : <@U2W28MK6K> : does this link apply to your case? <https://stackoverflow.com/questions/41884524/http-delete-with-empty-body>
+U1AN4JRFV : specifically I wonder, if this would do the trick: ```expectUnit : Expect ()expectUnit =
+    Http.expectStringResponse &lt;&lt; always &lt;| Ok ()```
+
+U2W28MK6K : ~still getting `BadPayload`~ I think I just didn't have my latest code
+U1AN4JRFV : what is the error exactly?
+U2W28MK6K : <@U1AN4JRFV> that worked, thanks!
+U1AN4JRFV : awesome!
+U4Z4NEUQG : How would you parse date in json?
+U1CE9DL9H : <@U4Z4NEUQG> <http://package.elm-lang.org/packages/elm-community/json-extra/2.3.0/Json-Decode-Extra#date>
+U4Z4NEUQG : great, I was about to write it, but I thought it was better to ask before
+U4Z4NEUQG : thanks
+U4Z4NEUQG : The protection against brutal API changes made me, once again, happy to use a library.
+U4Z4NEUQG : With node I was so scared to have the "update hell long weekend". (that I had too many times)
+U6C09T8HX : I've got a question: In the Http library the first definition is: "type alias Request a = Request a".  I thought type alias was used to give a name to an existing type so does this mean that "Request" is already defined?  If so where?...and why define it again?
+U0CJA7BLJ : <@U6C09T8HX> yes it is already defined somewhere else <https://github.com/elm-lang/http/blob/15e12ec430f7b25b80dbfdec0b20a08c93d76cc8/src/Http/Internal.elm>This is a way of re-exporting a type
+
+U6C09T8HX : Thank you sporto!
+U2D07QZN3 : I'm getting "Uncaught RangeError: Maximum call stack size exceeded" in chrome, but it is fine in IE
+U2D07QZN3 : <https://smckissock.github.io/trump-conflicts/>   Code is here: <https://github.com/smckissock/trump-conflicts>
+U6CAFUBM2 : :slightly_smiling_face:
+U6CAFUBM2 : I have no idea about haskell, I have tried learning it, but just can't wrap my head around it.
+U6CAFUBM2 : I would really appreciate, if you could just give me some pointers.
+U6CAFUBM2 : I am trying another approach, and it is helping speed up compilation time. I am just flinging it in the blind. let me push new branch.
+U6CAFUBM2 : basically I am converting sub messages into commands, this is speeding things up.
+U6CAFUBM2 : I have also figured out some stuff about compiler, apart from the fact that "on any modification entire dependent tree is recompiled "
+U6CAFUBM2 : there is one more thing, where dependencies are also recompiled, and that is the case with update function. so just splitting up update function doesn't help. The messages have to be decoupled and `Cmd.map`ed so as to avoid recompilation.
+U6CAFUBM2 : removing that entire file had no impact on compile time. :disappointed:
+U1FFA46TT : when I try to build locally I get```
+elm-make: elm-stuff\packages\elm-lang\core\5.1.1\src\Array.elm: getFileStatus: does not exist (No such fi
+le or directory)
+```
+
+U0CL7EPPG : All good, thanks for letting me know!
+U1FFA46TT : ok I got it after deleting the `elm-stuff` folder and reinstalling. after ~1400 lines in the `Data.elm` modules it breaks. It looks really like an issue with `List` creation: if you *split* the list into two sublists it works:
+```
+conflictList : List Conflict
+conflictList =
+    headOfConflicts ++ tailOfConflicts
+
+
+headOfConflicts : List Conflict
+headOfConflicts =
+    -- from line 14 to line 805
+
+tailOfConflicts : List Conflict
+tailOfConflicts =
+    -- from line 809 to the end
+```
+
+U5WD40ZA9 : I have two pages in a SPA, “Home” and  “Asset”, both of them have the same structure html wise. On Home I render a chart using ports (I give javascript some values and lets the lib insert itself, Elm has with other no idea that the dom is updated). If I then swap to the page with the same structure html wise, Elm is a little bit too smart and doesn’t re-render the html, but instead just change the classes of the divs which means that the chart is displayed on the Asset page. With other words, if I go from Home -&gt; Asset I get this problem. If I go to Asset from any other page I don’t have this problem and I don’t have the problem with any other page getting the chart displayed when I move from Home -&gt; other pages. My current solution is to add a wrapping div around the container where the chart is going to insert itself, this to trick Elm to re-render the html. This seemed like a better solution than using javascript to remove the chart itself when the url changes or something like that. Anyone else had this problem before and have some thoughts on a better solution? I don’t want another poor soul having to debug this issue in the future which is the type of issue that could take 8hrs to understand what is going on. In react I could have done something like “onComponentDidUnmount” to remove the chart when the Home page is swapped. Is there any Elm version of that?
+U3SJEDR96 : <@U5WD40ZA9> Elm doesn't like foreign things touching its DOM. So what you'd do in Elm is used `Keyed` nodes so that you can control how the DOM is/can be reused
+U2D07QZN3 : hmm- I deleted elm-stuff, and it rebuilt.  I'm using elm 0.18.0.  Still the same problem - IE ok, chrome no
+U2D07QZN3 : Does your built version work on chrome?
+U2Q5GJNTB : Anybody here that implemented touch or gesture support for small screen in elm? Looks like the packages are either outdated or don't support simple swipe. Any recommendations?
+U4SM7ECAG : <@U2Q5GJNTB> I recently reverted to port and zingtouch (<https://github.com/zingchart/zingtouch>)
+U4SM7ECAG : which was easier to configure than hammer.js
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

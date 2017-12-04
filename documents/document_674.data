@@ -1,17 +1,64 @@
+U2LAL86AY : maybe a picture with what you have there will help more
+U3R7CKQRX : ok one sec
+U3R7CKQRX : <@U2LAL86AY> It looks kind of like this, the top blue row should always display the current week, the lower three rows can scroll. when they are scrolled the top blue row should update it's week.
+U3R7CKQRX : does that make it more clear?
+U23SA861Y : is there way to get the scroll event to dispatch back the percent scrolled through
+U23SA861Y : that will give you the range of indices for which to compute the week
+U3R7CKQRX : i think you can only compute that percentage by doing `tableScrollTop / tableheight`
+U23SA861Y : what value does the scroll event get you?
+U5LFUHH19 : I'm working through the <https://github.com/rtfeldman/elm-spa-example>.  My site can been seen here: <http://test.hurwitzlab.org/#/>, and the code is here: <https://github.com/rtfeldman/elm-spa-example>.  I have only implemented the "Browse -&gt; Investigators" successfully.  When I click on an investigator to get to the "/investigator/&lt;id&gt;", I get lost on how to pass the ID (an int) into the model and so forth.  I'm hoping someone can look at my code and see the problems.
+U5LFUHH19 : Here is the error I get: <https://gist.github.com/kyclark/6b16685d633102611d299c5eaf2716c6>
+U285A8S8H : I guess I can't put an if statement where value is expected when calling a function? like so```
+div [ containerStyle ]
+  if foo then
+    [ text "Foo" ]
+  else
+    [ text "Bar" ]
 ```
-yeah <@U0L8Y8ZEW> helped me on the django channel. btw have a :taco:
-<@U5NMSURAQ> :taco: I missed that you could just provide order.index instead of a full on lambda. This will be much better
-:heart:
-Do you have a specific question about dns ?
-<@U29163YQH> I'm using namecheap
-Does this record look alright?
-Or should it be the whole domain name?
-this will point `www.my_awesome_website` to the same IP as `c.storage....`
-no you don't need to put the whole name
-so this should work :confused:
-yes
-if you do `dig www.my_awesome_website` you should see the result
-yep
-kinda...
-But of course it doesn't work, therefore my question :slightly_smiling_face:
-well it seems to be pointing the right way
+so  now the question is - `let..in` or a new function? :wink:
+
+U5LFUHH19 : `div [ style ] [ text (if foo then "Foo" else "Bar") ]` ?
+U285A8S8H : I guess that could work, but there's more html than a simple text - I settled on a let-in
+U285A8S8H : ahh cosmetic stuff, the bane of every dev's existence :+1:
+U0M9CNX1A : Case by case basis when this is appropriate, but you can also wrap the `if` expression in parens```
+div [ containerStyle ]
+    (if foo then
+        [ text "Foo" ]
+     else
+        [ text "Bar" ]
+    )
+```
+
+U0J1M0F32 : I prefer the `let` `in` approach, *or* I'll usually use that opportunity to pull out a helper view function.
+U0JFXEUCT : you can also do```
+test2 =
+    div [] &lt;|
+        if True then
+            [ text "Foo" ]
+        else
+            [ text "Bar" ]
+```
+
+U0JFXEUCT : not that thats a good idea or anything…
+U1432C733 : Hi all. My colleagues and I did a bit of searching on this and couldn't quite come up with something we liked. We have an Elm app that is basically just a left bar app to select "sub apps"
+U1432C733 : Right now, we compile all of them into one project with the left bar as the parent.
+U1432C733 : The trouble is, it's becoming a little tightly coupled and hard to deal with as we keep developing more sub apps. Additionally, complexity has been introduced where each user now needs a different list of sub apps.
+U1432C733 : The the question is: is it a totally awful (high bar, I know) idea to have a parent app expose a div and on a button click, get a new static (the compiled sub app) to attach to that div?
+U1432C733 : *awaits tomatoes*
+U0J1M0F32 : What you're asking is technically possible, but I'm not sure I'd recommend it from a design perspective.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,0 +1,143 @@
+U2GTQM83A : I want to make sure that if I am making an Http request to my `book` endpoint requesting a `Book Author`, this http request must ask for the author to be embedded.
+U0CL0AS3V : I don't think it's (even theoretically) possible to be confident of that without tests :thinking_face:
+U0CL0AS3V : in any language
+U0CL0AS3V : like "the author is embedded" is business logic, which can be incorrect
+U0CL0AS3V : I'm not even sure how you'd use a theorem prover to check that
+U2GTQM83A : This is what I mean by author is embedded: the endpoint looks like this: `/books?embed=author`
+U0CL0AS3V : (I'm hardly an Agda/Coq/Idris expert though, so maybe it's possible and I don't know how to do it)
+U2GTQM83A : I have a function that translates a record with fields like `embeded` into a url.
+U2GTQM83A : `embeded` takes a list of strings.
+U2GTQM83A : I would like a function that given a `CustomDecoder a` could produce a list of strings.
+U2GTQM83A : I can do it for a non-parameterised type like this:```
+custom: CustomDecoder a -&gt; String
+custom a =
+  ["some field"]
+```
+
+U0CL0AS3V : &gt; I would like a function that given a `CustomDecoder a` could produce a list of strings.
+I don't think that's possible in Elm
+
+U0CL0AS3V : (well, a non-hardcoded list of strings)
+U2GTQM83A : But this has two problems: 1 - It doesn't work with parameterised types
+ 2 - I would need to know which function to call for the type anyway because I cannot create generalised function that could pattern match on the type. Or be a type-class of some form..
+
+U0CL0AS3V : to be that general that would require runtime type reflection, which Elm intentionally doesn't support
+U2GTQM83A : toString is a function that takes anything and outputs an appropriate string.
+U2GTQM83A : I know we can't build functions like `toString`. But can we get close?
+U0CL0AS3V : no, by design :slightly_smiling_face: - also, the current design of `toString` led to bugs; it's moving to `Debug.toString` in 0.19 and being replaced by (if memory serves) `String.fromFloat` and `String.fromInt`
+U0CL0AS3V : (bugs like accidentally calling it on the wrong value and having it type-check anyway, thus leading to incorrect business logic)
+U2GTQM83A : hmm.. If I were to be naughty and use native code :smiling_imp:, does anything come to mind as for how I could with JS transform a `CustomEmbed MyType` into a string of my choice?
+U2GTQM83A : The idea is that if MyType has other types within it I would see that and call my custom decoder for each of them.
+U0CL0AS3V : sounds like you want TypeScript :wink:
+U0CL0AS3V : if it were me, I would do it this way: <https://elmlang.slack.com/archives/C0CJ3SBBM/p1501178855101622>
+U0CL0AS3V : if you want to introduce runtime exceptions for the sake of avoiding a few functions and/or fuzz tests, I would (in all seriousness) not bother with Elm and just go TypeScript or something
+U0CL0AS3V : nothing wrong with those preferences
+U2GTQM83A : Hahaha no thanks. My old company was going to do a project for a client in 3 months and 3  developers using php and JS in the front end. Before the project started they went bust. I started my own company and took the project by myself. Using Elm I was able to do it alone in 4 months.
+U2GTQM83A : Would definitely not have happened weren't for the time savings Elm allowed/
+U0CL0AS3V : fair enough!
+U37HUSJ4R : I am looking into building something with Twilio and elm, Twilio has a few js libs that make life easier
+U37HUSJ4R : for example
+U37HUSJ4R : <https://www.twilio.com/docs/api/taskrouter/worker-js#worker-activity-update>
+U37HUSJ4R : is there any way I could do stuff like this in elm and not have to use ports?
+U37HUSJ4R : I worry I’ll need to use lots of port for listening to different events
+U37HUSJ4R : also if anyone has built anything with twilio and elm I’d LOVE to chat
+U2LAL86AY : there is a solution with going native -&gt; but how many ports do you have? It is rely that bad with ports? Can't you try at least to see how it goes? Because native packages can  introduce run-time errors - and are not so easy to use either.
+U37HUSJ4R : it’s not that port are that bad, just would rather keep more stuff elm side
+U0CL0AS3V : I'd say if you want to get up and running fastest, use ports; if you want something super reliable, gotta do it the hard way - scratch-write a 100% Elm interface to the Twilio API :slightly_smiling_face:
+U0CL0AS3V : (if it were me, and I wanted to use Twilio to build an application, I'd definitely start with ports - then maybe later if the project is going well and I want to make things nicer, tackle the bigger project of the Elm interface to Twilio API)
+U37HUSJ4R : Sounds sensible to me, a Twilio/elm interface would be dream land!
+U37HUSJ4R : thanks gentleman
+U37HUSJ4R : great talk at Elm europe by the way Richard
+U37HUSJ4R : &gt; Would definitely not have happened weren’t for the time savings Elm allowed/
+U37HUSJ4R : <@U2GTQM83A> can you explain more about the time savings?
+U2GTQM83A : Basically, there was no debugging involved. I had my main types which were shared everywhere and each page was just an assembly of pre-existing stuff.
+U2GTQM83A : I was able to develop things very fast because all pages had the same components.
+U2GTQM83A : It is a business application, so there wasn't much UI craziness going on, just some form validation, date pickers and stuff.
+U2GTQM83A : Elm helped breaking down complex pages into very manageable chunks and allowed me to reuse code throughout.
+U2GTQM83A : In my previous company I remember I spent two weeks developing a widget in React, which I later developed in my free time in Elm in two days.
+U2GTQM83A : I was trying to demonstrate the value of Elm to them.
+U2GTQM83A : I remember it made quite an impact.
+U1CE9DL9H : is there a fix for making `number` a subset of `comparable` on the horizon. it's really annoying, as some functions cannot have a type annotation but are valid
+U0JFGGZS6 : :point_up:  yes
+U0JFGGZS6 : I mean, yes, I could use that too...
+U1CE9DL9H : seems that there is <https://github.com/elm-lang/elm-compiler/commit/5fe9bb9602163927295a6b37a64fd47f982d502a>
+U0H3A9XLN : Well, lets be honest - "thinking" part is kinda technology independent. If you will do something first in Elm and then reimplement in in JavaScript it will probably take less time as well. 
+U0H3A9XLN : I do not compare languages here, just trying to say that this fact does not prove any point
+U2GTQM83A : <@U0H3A9XLN> Yep that did contribute.
+U0H3A9XLN : And I am wondering when people start comparing Elm to TypeScript for example. Of course comparison to JavaScript gives more advantages, but more and more people are using typed supersets nowadays.
+U0H3A9XLN : For example while doing TypeScript for almost a year I haven't had any single runtime exception :)
+U0H3A9XLN : I still like Elm more. And I believe taking higher targets for comparison gives a good motivation for moving forward :)
+U0CL0AS3V : :heart: thanks!
+U2SR9DL7Q : Can anyone help with a bit of restructuring advice? Splitting my project into submodules currently. I'm delegating my main views to those of the submodule:```
+viewContent : Model -&gt; Html Msg
+viewContent model =
+    case model.route of
+        ...
+
+        PortfolioRoute -&gt;
+            Dominoes.view model.dominoes
+``` 
+There's a naming conflict where the view functions in _Dominoes.elm_ return type `Html Msg` but Dominoes.elm has it's own Msg type defined. I'm thinking I should change the name of that message type to like, `DominoesMsg` or something, but I think my bigger confusion is the whole use of `Msg` vs `msg` which I thought I understood, but perhaps I don't.
+
+U2GTQM83A : Hey <@U0CL0AS3V> and <@U23SA861Y> , I did it! Solved the puzzle.
+This is the requirement: I need to make sure that if I'm decoding something, my request must ask for it to be embedded, tying the embedding on the decoder type.
+For that we would need:
+    -  Have the API call be something like this `apiRequest : Decoder a -&gt; Embedding a -&gt; Cmd (Webdata a)`
+    -  Have a `Embedding a -&gt; List String` function that would be polymophic enough to take any `a` and return an appropriate list of strings
+    -  Be able to compose our embeddings so that we could have a function like this `func : Decoder author -&gt; Embedding (Book author)`
+
+We faced the following problems:
+    -  We can't create a function that will accept a class of allowed types to transform them to a list of strings
+    -  We do not have a value of the type we are embedding at the time of the request.
+
+Now to the code! 
+
+Here is our magic type
+
+``` 
+type Embedding a
+    = NoEmbedding (Maybe a)
+    | Embedding (List String)
+```
+
+With this type I can create an `Embedding Anything` that doesn't need to contain `Anything` at all. 
+It can just contain a list with the fields that must be embedded for that type.
+Or, if it is a string, it can say that there is no Embedding. And it can create an
+`Embedding Anything` by saying `NoEmbedding Nothing`.
+
+You can see a compiling and working example here: <https://ellie-app.com/3RJBsCTwWgVa1/0>
+
+U2GTQM83A : With this I was able to write our desired api call function like this:```
+someApiRequest : Decoder a -&gt; Embedding a -&gt; Http.Request a
+someApiRequest decoder embedding =
+    let
+        endpoint =
+            "/books/?embed=" ++ (List.foldr (++) "" &lt;| embeddingToList embedding)
+    in
+        Http.get endpoint decoder
+```
+
+U2GTQM83A : The drawback is that because there is no type relation between `Embedding a` and how `a` actually looks like, `Embedding Author` could look like anything and be defined many times in different ways. To avoid that I will have to make sure to only define one function to generate each `Embedding`.
+U0JFGGZS6 : Yes. If you have a top-level `DominoesMsg Dominoes.Msg`, then you can do this:
+U0JFGGZS6 : `Dominoes.view model.dominoes |&gt; Html.map DominoesMsg`
+U2SR9DL7Q : Html has a map...
+U0JFGGZS6 : alternately, you can do the mapping in `Dominoes.view` by passing in the mapping:`Dominoes.view (\submsg -&gt; DominoesMsg submsg) model.dominoes`
+
+U2SR9DL7Q : Sorry, taking time to respond, but I need to make sure I understand. So I can define `DominoesMsg` in the top level of my Main as The Msg type in dominoes, and pass it to my dominoes view
+U0JFGGZS6 : but that's often used in 'reusable' sub-views which have generic `Html msg` return types, and are intended to be called from different 'parent' call sites.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

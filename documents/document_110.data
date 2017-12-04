@@ -1,10 +1,69 @@
-[:find ... :where [clojure.core/identity ?foo]]```
-I just picked a random thing with identity in the name, but I hope it translates
-ah
-I guess I should have explicitly mentioned the `~'` idiom to prevent namespacing
-is there a way to do the opposite? selectively pick the symbols I want to namespace qualify
-that's harder
-instead of the ones I do not want to namespace qualify
-mmh ok
-nevermind then
-thanks :slightly_smiling_face:
+U053V4R5N : I'm not saying anyone in clojure-land would ever give that response, just seeing it in general for searching "set status-line http" :stuck_out_tongue:
+U051SS2EU : (don't actually do that)
+U66SFLTPT : <https://textslashplain.com/2015/11/19/understanding-connect-tunnels/> seems relevant
+U0BKWMG5B : <@U6BEL7FPC> Something like:```
+{:duct.module/ataraxy {"/" ^:foo [:index]}
+ :duct.router/ataraxy {:middleware {:foo #ig/ref :foo.middleware/auth}}}
+```
+
+U66SFLTPT : specifically:&gt; Upon receiving such a request, the proxy is expected to establish a TCP/IP connection to the requested hostname and port and signal its success by returning a HTTP/200 response indicating that the requested connection was made:
+```
+  HTTP/1.1 200 Connection Established
+  Connection: close
+```
+
+U0BKWMG5B : Come to think of it, I think middleware of `:foo` assumes a key of `:project.middleware/foo` already.
+U6BEL7FPC : <@U0BKWMG5B> so if i wanted to use a 3rd-party middleware i'd replace `:foo.middleware/auth` with `&lt;3rd party ns&gt;.wrap-auth`?
+U085HE1PB : <@U66SFLTPT> ahhh thanks!
+U0BKWMG5B : <@U6BEL7FPC> You'd need to create an `init-key` method for it. Say your project name is "foo". What I tend to do is have a `foo.middleware` namespace where I dump all the init-keys for middleware.
+U0BKWMG5B : ```(ns foo.middleware
+  (:require [integrant.core :as ig]
+            [buddy.middleware.auth :refer [wrap-auth]])
+
+(defmethod ig/init-key ::auth [_ options]
+  #(wrap-auth % options))
+```
+
+U0BKWMG5B : And then in my config:```
+{:duct.module/ataraxy {"/" [:index], "/private ^:auth [:private]}}
+```
+
+U085HE1PB : Lol you have to set "Connection: close" but leave the socket open
+U66SFLTPT : yeah lol
+U6BEL7FPC : <@U0BKWMG5B> ahh thanks, i'll give it a try!
+U085HE1PB : httpkit also forces you to add headers, tsk tsk. ```        if (!headers.containsKey("Server")) {          headers.put("Server", "http-kit");
+        }
+        if (!headers.containsKey("Date")) {
+          headers.put("Date", DateFormatter.getDate()); 
+        }```
+
+U085HE1PB : I guess the spec says you need these sometimes, and I'm a corner case anywayU0CAUAKCG
+
+U0CAUAKCG : there are two boxes (and invisible chars) that I don't want in my string.
+U0NCTKEV8 : slice
+U0NCTKEV8 : <https://docs.oracle.com/javase/7/docs/api/java/nio/ByteBuffer.html#slice()>
+U0CAUAKCG : mindblow, try it... :slightly_smiling_face:U0CAUAKCG
+
+U0CAUAKCG : debugging charsets, I try all the combination until I get something working :slightly_smiling_face:
+U0GN0S72R : I love how `clj-time.core/today`'s docstring says "LocalDate objects do not deal with timezones at all.", but it doesn't mention that the function is sensitive to the current timezone.
+
+I don't think programmers have a good vocabulary for discussing time[-zones]
+
+U69US348Z : My apologies if this is a FAQ, I did try searching here and in the Google Group… but I'm just curious, does anyone have a sense for when Clojure 1.9.0 might start making its way to beta and then final releases? I'm not stressed about it or anything, really I'm just curious. Thanks!
+U0CAUAKCG : solved my shit above, someone from the past made osc message decoder that I could just use directly. This is what happens when I program without a beer.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

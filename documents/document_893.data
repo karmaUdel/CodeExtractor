@@ -1,0 +1,131 @@
+U4BMZ90T0 : The error comes in line 4 with `self.xl_grid[i][j-1]`
+U5LNXQHN3 : okay, so obviously your __getitem__ function is irrelevant as you're not dealing with that type here, only lists
+U4BMZ90T0 : Oh wait
+U5LNXQHN3 : Personally I wouldn't be trying to implement that logic in a single hairy one-liner, either
+U4BMZ90T0 : Yeah i think that's what's broken
+U5LNXQHN3 : what is the _actual_ error?
+U4BMZ90T0 : The error I had previously was due to attempting to subscript the list twice
+U4BMZ90T0 : it was giving me a message about the list
+U4BMZ90T0 : But not it's not making a 2d array, but that was my fault
+U4BMZ90T0 : Works now
+U5CGPBF0U : I'm using Heroku and I want to add PostGIS to my Postgres database, however to do this I need to run in Windows command prompt:```heroku pg:psql
+create extension postgis;```
+And that requires that Postgres be installed on my local machine. Is there any way around this? Do I _have to_ install Postgres on my computer?
+
+U0LSCQQNR : how are you working locally?
+U0LSCQQNR : eg, dev/staging/prod with their own specific env configurations
+U5CGPBF0U : I just run my code locally...um...I guess that's it. I have the Heroku toolbelt. When I run the command with the toolbet I'm informed that psql.exe could not be found. After a quick search it seems it's because Postgres needs to be installed.
+U5CGPBF0U : Sorry if I didn't understand your question correctly
+U5CGPBF0U : I run my app in its development configuration when running it locally. Not that it's that much different from the other modes.
+U5LNXQHN3 : How can you be running locally if you use Postgres but don't have it installed? Are you accessing a Postgres instance remotely?
+U5LNXQHN3 : I didn't think Heroku had a local option
+U0LSCQQNR : it does, but you really should have everything replicated locally that's on heroky
+U0LSCQQNR : as close to 1:1 as possible
+U5LNXQHN3 : Aha. Still curious about how it handles the DB.
+U5CGPBF0U : Ya I have no idea. I just want to get PostGIS running on Heroku. But I guess I'll need Postgres anyway if I intend to test my app locally. Currently I just plug it into an SQLite DB to test it.
+U5LNXQHN3 : yup, switch that out for postgres.
+U5CGPBF0U : I must say that I did enjoy the simplicity though, and especially when we have new developers coming in. I wish Postgres could be self-contained somehow to avoid having to set anything up. Oh well.
+U5LNXQHN3 : That's the tradeoff though... SQLite basically has the whole database functionality built right into your application. That's only practical because the functionality it offers is quite minimal.
+U5LNXQHN3 : If you're writing something for multiple developers to work on then everybody could share a Postgres installation on a central server
+U5CGPBF0U : That's true. I suppose I could have everyone connect to the database on the Heroku staging Dyno for the project though...
+U6AV4LKDK : Hello. Anyone with experience in django-filer and django-storage (i.e. s3) ?
+U0L051JUB : try <#C0LMFRMB5|django>
+U5NMSURAQ : <@U5LNXQHN3> what
+U5NMSURAQ : &gt; That's only practical because the functionality it offers is quite minimal.
+U5NMSURAQ : SQLite's Full-text search was blazing fast before Postgres had a reasonable FTS at all.
+U1BP42MRS : Docker!
+U1BP42MRS : I put a `docker-compose.yml` in all my projects now so people can be up and running with it in a few minutes
+U1BP42MRS : It won't solve all problems, but it's really nice for dev-prod parity, ish
+U5LNXQHN3 : <@U5NMSURAQ> I didn't say the functionality was slow or bad, just that there isn't so much of it
+U5NMSURAQ : true that
+U5NMSURAQ : but I'd guess the most useful stuff is already there
+U4BMZ90T0 : Does anyone know if there is any possible way to figure out the proper URL for an API call? I have an issue with an API im trying to work with that basically one of the URL parameters can be changed server side and the guy who maintains the server might as well be AWOL. So basically is there any to see the endpoints available if I make a request to the parent endpoint of the endpoint I don't know?Example - `<http://crucible.server.com/{unknown-endpoint-name}>`
+I'd imagine if there is no WADL or some sort of blueprint for a given server than probably not
+
+U2UP91YLE : anyone comfortable with marshmallow? ,trying to remove missing data after deserialization ,i don't want `{'first_field': &lt;marshmallow.missing&gt;, 'second_field': u'some value'}`
+U6AFDVDA9 : hello, question related to something i asked yesterday.
+i have a small web app that allows users to search instagram for two hashtags.  on the first page they enter their hashtags, on the second page they get the results and a button to process more results.  clicking this button send the user to a URL with the next page token and the hash tags (required for processing next results) stored in the url. like this `<http://10.51.50.10:42066/results/J0HWW-lwQAAAF0HWW-jjgAAAFoAKAA%253D%253D/%5B%27lol%27%2C%20%27dog%27%5D>?`
+
+my problem is i keep getting this error and i'm not sure what it means 
+
+```
+werkzeug.routing.BuildError: Could not build url for endpoint 'results' with values ['tags']. Did you forget to specify values ['token']?
+10.51.50.1 - - [19/Jul/2017 18:36:54] "GET /results/J0HWW-lwQAAAF0HWW-jjgAAAFoAKAA%253D%253D/%5B%27lol%27%2C%20%27dog%27%5D? HTTP/1.1" 500 -
+INFO:werkzeug:10.51.50.1 - - [19/Jul/2017 18:36:54] "GET /results/J0HWW-lwQAAAF0HWW-jjgAAAFoAKAA%253D%253D/%5B%27lol%27%2C%20%27dog%27%5D? HTTP/1.1" 500 -
+```
+
+this is the route
+```
+@app.route('/results/', methods=['GET', 'POST'], defaults={'token': None, 'tags': None})
+@app.route('/results/&lt;token&gt;/&lt;tags&gt;', methods=['GET', 'POST'])
+def results(token, tags):
+    if request.method == 'POST':
+        tags = request.form['text'].replace(' ', '').split(',')
+        data = fetch_data(tags=tags, next_page_token=token)
+        processed_data, token = process_data(data=data, tags=tags)
+
+    if request.method == 'GET':
+        <http://logging.info|logging.info>("TOKEN: {}".format(token))
+        <http://logging.info|logging.info>("TAGS: {}".format(tags))
+        data = fetch_data(tags=tags, next_page_token=token)
+        processed_data, token = process_data(data=data, tags=tags)
+        return render_template('results.html', data=processed_data[:1], token=token, tags=tags)
+
+    return render_template('results.html', data=processed_data[:1], token=token, tags=tags)
+```
+and this is the template
+```
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;body style="background-color:powderblue;"&gt;
+
+&lt;h1&gt;{{ data }}&lt;/h1&gt;
+
+&lt;form action="{{ url_for('next', token=token, tags=tags) }}"&gt;
+    &lt;input type="submit" value="More results plz" /&gt;
+&lt;/form&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+```
+
+U6AFDVDA9 : any thoughts?
+U5NMSURAQ : ```127.0.0.1 - - [19/Jul/2017 21:43:01] "GET /results/J0HWW-lwQAAAF0HWW-jjgAAAFoAKAA%253D%253D/%5B%27lol%27%2C%20%27dog%27%5D? HTTP/1.1" 200 -
+```
+
+U5NMSURAQ : ```from flask import Flask
+app = Flask('app')
+app.config['DEBUG'] = True
+
+@app.route('/results/', methods=['GET', 'POST'], defaults={'token': None, 'tags': None})
+@app.route('/results/&lt;token&gt;/&lt;tags&gt;', methods=['GET', 'POST'])
+def results(token, tags):
+    return 'OK'
+```
+
+U5NMSURAQ : Strange indeed.
+U6AFDVDA9 : one thought i just had
+U6AFDVDA9 : my token and tag vars come through as ```
+INFO:root:TOKEN: J0HWW-lwQAAAF0HWW-jjgAAAFoAKAA%3D%3D
+INFO:root:TAGS: ['lol', 'dog']
+```
+
+U6AFDVDA9 : could the tags coming through as a python data structure as a string have somethign to do with it?
+U6AFDVDA9 : i've been banging my head on this for hours.  and you saying strange indeed gave me some validation that is helping me to not go crazy haha
+U5NMSURAQ : wait, what do you mean coming through as a python data structure?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,136 +1,61 @@
+U2Z0RF6CW : <@U1AN4JRFV> I tried something like this, `extractHeader : String -&gt; Http.Response String -&gt; Result (List User) String`
+U1SF6G7PA : the problem is, that we make an http request everytime the user types in one key, so maybe you want to save the query and only make a request if the query is == 3 and then filter the list in the elm application. or maybe have some timeout logic, so that at most every second or so a request is triggered?
+U1AN4JRFV : The first argument to a Result-Constructor is of the error-type, the second one is the type in case of Success
+U1AN4JRFV : so, you need to turn them around, and we are also no longer talking about this url: `<https://jsonplaceholder.typicode.com/posts/1>`
+U1AN4JRFV : and if you want the header as well, it would be `-&gt; Result String (String, List User)`
+U1AN4JRFV : if you want all the headers, probably `Result String (List(String,String), List User)`
+U1AN4JRFV : but it can get ugly combining results, so I would also suggest looking into using helper-packages.
+U1AN4JRFV : ("ugly" is a very subjective term)
+U1RJZ6SEL : Yeah, I was definitely thinking of debouncing the requests, have a check to see if more than 2 (or 3) characters have been typed and there have been no keystrokes within 200ms (or thereabouts).
+U2Z0RF6CW : My intention was this `Result String (String, List User)`. Now I understand why the compiler thrown the mismatch error. But how can I return the `Result String (String, List User)` from the method `extractHeader`?
+U1AN4JRFV : <@U2Z0RF6CW>: if you managed to decode the body (<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#decodeString>), then your `Msg`-type, from the sample: ```type Msg    = Login (Result Http.Error String)``` also has to match that same Result-type.
+
+U1AN4JRFV : I have never done it myself before, but you will end up with two results, one from getting the header out, and one from decoding the body, which you will need to combine with `Result.map2` <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Result#map2>?
+U1RJZ6SEL : Thanks for the Ellie! I'll give that a shot later (regrettably Elm isn't my day job yet... :slightly_smiling_face: )
+U1SF6G7PA : :slightly_smiling_face:
+U66RFDZ8F : Hello everyone, I have the following pipeline```
+test a =
+    a
+        |&gt; required "isFailed" bool
+        |&gt; required "isSuccess" bool
+        |&gt; required "reasons" (list reasonDecoder)
+        |&gt; required "errors" (list reasonDecoder)
+        |&gt; required "successes" (list reasonDecoder)
 ```
-`()` is used as a sort of "I don't care" value
-If you'd wanted to track a board state, you could have used `Board` in there
-or done `type alias Model = Board` and used `Model` like in the examples
-`()` is essentially the same as `{}`, the empty record type.
-Instead of a record with no fields, it's a tuple with no slots :slightly_smiling_face:
-empty tuple for the win!  Nothing beats purity!  Makes me think of Harry Potter and the whole pureblood concept.
-Fun Fact: `()` (the type) and `Never` are actually opposites of each other
-`()` (as a type) has exactly one element (which is confusingly also called `()`, so we have `() : ()`).
-`Never` on the other hand has no elements.
-Does a checkbox send it's text/value?
-with `onCheck`, it only sends a boolean of whether it was checked or not.
-(ie, whether it's being checked or if something else is being checked and so it's going to be deselected)
-If you need the text or value, you can stuff it into the message
-Maybe your message will be `type Msg = SelectOption String Bool` and then in attributes, you write `onCheck (SelectOption "value of this checkbox")`
-I guess it's not possible to write a partially applied function like this? `List.filter (/= "foo") ["foo", "bar"]`
-BTW, <@U57KYFW67> that did exactly what I wanted!
-<@U5LFUHH19> you need some parens :slightly_smiling_face: `List.filter ((/=) "foo") ["foo", "bar"]`
-when operators are used prefix (instead of infix), you need to wrap them in parens
-Flippin' sweet.  Thanks <@U0LPMPL2U>
-<@U5LFUHH19> Glad to help :slightly_smiling_face:
-That's a point I realized last night could be very confusing to some beginners
-You see `Bool -&gt; Msg` and you might end up thinking you *need* to have a message which takes a bool as its only argument.
-That's a possibility, but not a requirement! It's very common to throw a lambda in there `(\bool -&gt; .... { code that constructs a Msg })`
-Any thoughts/ideas?
-Writing native code is probably not a good idea. If its an absolute requirement that you use those js dependencies then using elm with it is going to be a slog.
-umm it seems like regular old elm would handle the grid stuff fairly well
-there are some native elm modules for charting but they can be a bit feature poor.
-I'm afraid it would be too much to implement such features as column reordering, multiple column sorting and grouping just to reproduce the existing and supported library.
-I'd check out `elm-plot` for the charts and use ports otherwise
-<@U5WS7CJLV> The `f : a -&gt; a` pattern is very common when, for example, you repeatedly apply a function to something.  Imagine that `a` represents the current state of a physical system (real, or modeled by computer).  Imagine that `f a` is the state one tick later, where a tick might be a second or a hundredth of a second or  whatever.  Thus `f` is the tool by which you evolve the system forward in time.  Great for simulations.
-hamiltonian
-Nah, it's only for ports, iirc
-I get that it is hard for the compiler to reason about the possible return values of a function at compile time, but wouldn't it be better to just force the use of an otherwise case when functions are used to  pattern match?
-<@U61FZV5EK> the compiler would need some way to distinguish between ‘match this pattern and assign values to these variables’ and ‘match this pattern where part of the pattern is the value of these variables’
-a pattern in a `case of` asks the question "can this value be described with this pattern". In the case of a variable, that is always "yes". Making a difference there between a "constant" function and an unknown variable would either mean special syntax for "assign to this variable", or "if you rename some function, your case suddenly behaves differently"
-Also, the compiler wants to statically analyze the case options to see if any is missing etc. That's hard to do if variable case constants are allowed.
-But I don't get why it is a concern for the compiler. When it sees the numbers it says "cool, an int can match to these". When it sees the function it could just go "cool, this returns some int too". In both cases it can't know if the cases are exhaustive, so an otherwise is needed.
-also true; you'd have an arbitrary cut-off of what the compiler can and cannot check
-what if you make a function `otherwise : Int`?
-Hm, what then?
-that would have to (magically) behave differently
-or what if `constant1 == constant2`? It can't warn you about it, as it would now. What if you remove `constant1` as a function? Now it's just a free variable, and you'd always end up in that branch
-Nothing would break, but I see your point. It is a tradeoff
-the behaviour is fairly non-obvious, for all but the most straightforward cases
-Some syntax to declare functions to be constants would be nice then :grin:
-besides, we do have `if..then..else` for a reason
-Well you could have special syntax, like @constant but I'd rather have pattern guards then
-<@U3SJEDR96> Yeah sure, butI feel like if you have 10 cases the `case of` syntax is cleaner
-I've never had that many cases though. I think it says something about how you model complex data types.
-if I have 10 constants that express something, I tend to make them a union-type, rather than variables ¯\_(?)_/¯
-Yes exactly
-I should probably do that, but I'm just using them once
-then why are they in variables?
-Using them twice, once when created and once when matched?
-It's pretty complex business logic. Lots of different cases that needs to be handled differently. In the other parts of the system the numbers are used to identify the different cases. So I get it as numbers, and pass it along as numbers.
-Even more reason to convert to a union type in the decoder
-But I agree its probably better to just represent them as union types anyway.
-ye
-well. Ty for input
-Clear up the logic using better types
-I think this was a pretty interesting discussion, tbh, didn't figure we'd go from "what's the rationale" to "union types ftw" :smile:
-You never know with these things :)
-True, it's nice to be surprised, tho :elm:
-<@U0CL0AS3V> ok, in case of using ports how is it possible to embed native js UI component in the middle of my pageview?
-<@U650CUWGM> The JS called via the port can find a DOM node that was created by Elm and attach arbitrary child nodes and event handlers to it.
-It’s not pretty but you trade that against the cost of reimplementing it in Elm
-The following method works pretty well to embed js ui components in Elm, without ports. <https://ellie-app.com/qyNKkTsrNRa1/2>
-basically you set up a `MutationObserver` to catch the DOM node being created and then send back info to Elm through custom events
-<https://github.com/terezka/elm-jquery-datepicker> gives an example of using ports to attach a jquery datepicker
-yes, that’s another option, problem is if your node is rerendered etc
-with the MutationObserver, it works almost like any other Html element
-I am trying to update a field in the `foo` property
-so I am passing the index in the list when I want to update
-do I need to use `RemoteData.map` and then also `List.indexedMap`to update a record?
-or is there a 'better' way?
-<@U37HUSJ4R> yep, that’s how you’ll need to do it.
-`RemoteData.map (List.indexedMap f) model.data`?
-I see the package has `update`
-<http://package.elm-lang.org/packages/krisajenkins/remotedata/4.3.0/RemoteData#update>
-<@U0FBZ4J5V> do you have an example of how to use this? I assume this is meant for updating a record?
-Sure
-<@U37HUSJ4R> it’s just a convenience method to only run the update function if the data is fetched
-<@U4872964V> ah right ok, so I need to map map then?
-map?
-update is sort of a map
-`RemoteData.map (List.indexedMap f) model.data`
-yes, sorry, didn’t see that earlier question
-ok thanks :slightly_smiling_face:
-Is it bad practice to save functions to the model?
-<@U61FZV5EK> yes, and usually there are ways around it. what are you trying to do?
-what kind of problem do you mean?
-elm-community/typed-svg/1.0.1
-<@U6B9DCP28> the elm-community one
-I think elm-community adopted canadaduane's project when he decided to no longer actively maintain it
-<@U1CE9DL9H> I just thought it would be nice to partially apply a function and use that curried function instead of applying the same value to a function over and over. I can do pretty much the same thing, without saving the function to the model. Just more parameters to pass around
-Functions in models are generally avoided, but there are certain cases where it makes code much more maintainable: sounds like your case may be exactly the kind.
-well you could also store the arguments in a record, so then there is really only one extra thing to pass around
-Can you be more specific: what is the function and why do you need to partially apply the same thing again and again?
-A translation function that takes a language type and a key and returns a String. In this case it's just the language parameter I wanted to curry, so it doesn't make a big difference.
-As it happens, I am currently working on making an existing codebase use translations from flags instead of hardcoded strings. See how I am solving it here: <https://github.com/Tradenomiliitto/tradenomiitti/compare/content-in-json>
-I am passing the `(String -&gt; String)` (aliased to `T` for convenience) translation function through to almost all views.
-This way I don't need to store the function in the main model or any of the more specific models.
-also watch this talk if you haven't <https://www.youtube.com/watch?v=RcHV6R-Jq00>
-it's an alternate approach to localization - as a build phase
-This is the `Translation.elm` file, in case you're interested: <https://github.com/Tradenomiliitto/tradenomiitti/compare/content-in-json#diff-1f97dd159689b2c5f3696d4a9008e2c1>
-<@U0CLDU8UB> That was pretty much how I thought to do it instead.
-Thank you for feedback :slightly_smiling_face:
-Cool! :+1:
-I've been pretty happy with our solution so far, and it'd be totally doable to convert it into Elm in the build phase, should we decide to do so.
-<@U1CE9DL9H> I will check it out later :slightly_smiling_face:
-I should probably watch the talk too, just to know if there are some benefits I'm not seeing right now.
-If you have questions regarding <https://github.com/iosphere/elm-i18n> feel free to contact me
-Thanks! But what the difference? It has almost same last commit dates. So they both supported. Why?
-The person probably told the elm-community maintainers that they will not continue developing it further, which means the elm-community one is the safer bet come 0.19
-For future: it would be better if there are some mechanism to mark such kind of things to avoid questions like this. Like ‘Transfer repository in BitBucket’. Or just mark it in documentation.
-there a simple way to generate a sequence of ints in Elm?
-one that can be infinitely long?  Yield the ints on demand in a deferred execution kind of way?
-in C# you can manage it with IEnumerable magic
-You'd want either a lazy-list or a stream. I have to ask, though - what's your use-case?
-generating ids
-this is all for fun, so I imagine I could get the time in milliseconds and that would do
-just wondering if Elm can do stuff like IEnumerable magic
-sounds like it can, but I'm guessing lazy list and stream are not in the core modules.
-I'm still not sure I'm following (and I haven't done any C# in ~8 years, so no idea what IEnumerable does/can do). It's easy to make a function that can generate a "next" id given a "current" id. If ou want to do it _without_ passing it a previous id, you're basically asking for implicit state... :wink:
-so in C#
-you have a loop
-while(true)
-yield return ++someInt
-the "yield" keyword gives you magic
-Ok, so implicit state :slightly_smiling_face:
-sure
-Use triple backticks for code snippet. Single backtick for inline code
-Like `this` :slightly_smiling_face:
-yeah, can't do that in Elm. Hence why for example generating random numbers requires passing a `Seed` in and receiving a value + a new seed back. (unless you're using `generate` which gives you a `Cmd` so that it can sneakily keep track of the seed-management in an effect manager)
-`got it` :slightly_smiling_face:
+This i meant to be a generic pipeline because this code is common to all responses.
+What I can't seem to know how to do is add additional items to the pipeline for the other responses.
+How would I go about this?
+
+U23SA861Y : without additional information, that will be difficult to answer. It is possible that writing a "generic" pipeline like this might be the wrong abstraction.
+U4872964V : <@U66RFDZ8F> so, you'd want to put more stuff after that pipeline, correct? in which case you'd just do `test yourFunction |&gt; theRestOfThePipeline` I suppose
+U65B9414J : I'm using `type Msg = PlanetMsg (Result Http.Error String)` to capture http response as string. I would like to get Response object. <http://package.elm-lang.org/packages/evancz/elm-http/3.0.1/Http#Response> .  I tried a few options but nothing worked. Anyone has anything they can point me to.
+U66RFDZ8F : yes <@U4872964V>
+U66RFDZ8F : let me try that
+U23SA861Y : it really does come in waves... <http://package.elm-lang.org/packages/lukewestby/http-extra/2.0.0/Http-Extra>
+U66RFDZ8F : that works <@U4872964V> didn't realize it was just a pipe lol
+U65B9414J : Thanks jonf. Will give it a try.
+U3SQ42JJW : Hi there :slightly_smiling_face:Is there a way to destruct a tuple on the fly in a shorter way so there would not be a need for the let block?
+```
+let
+    ( start, stop ) =
+            record.range
+in
+    List.range start stop
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

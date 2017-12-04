@@ -1,11 +1,109 @@
+U4F64AKQV : Alternatively, you could have passed the entire output of `renderWords` to `div []`
+U4JT89FGB : Has anyone had luck getting `Go to definition` reliably working with Elm in VS Code?
+U5V0HVAKB : u didnt miss the second [] from the high level div ?
+U5V0HVAKB : oh no i am wrong because the an array of list
+U4F64AKQV : <@U5V0HVAKB> What is the type of `div`? What is the type of `(input... ) :: renderWords model.content`?
+U5V0HVAKB : ye i am wrong
+U5V0HVAKB : div : List (Attribute msg) -&gt; List (Html msg) -&gt; Html msg
+U5V0HVAKB : that's look really sexy ^^ i like this
+U5V0HVAKB : <@U4JT89FGB> i dont think u have a function path finding in vs code like in phpstorm
+U5V0HVAKB : <@U4JT89FGB> that's what u looking for?
+U4F64AKQV : Personally, I would write the snippet like this```
+renderWords : String -&gt; Html msg
+renderWords sentence =
+    String.split " " sentence
+        |&gt; List.map renderWord
+        |&gt; div []
+
+view : Model -&gt; Html Msg
+view model =
+    div []
+        [ input [ placeholder "Text to proof", onInput NewContent, myStyle ] []
+        , renderWords model.content
+        ]
 ```
-Oh maybe it does `text &lt;| Time.ZonedDateTime.toISO8601 d`
-It looks like you string is ISO8601 formatted?
-LOL :smile:
-`2017-07-06T03:14:02.530+00:00`
-<@U0LPMPL2U> actually it could not parse it :disappointed:
-oh waut
-wait*
-`Date.fromString` i was passing the result of that function to the fromISO8601 function
-maybe that's why, XD
-Also, going through `Date.fromString` may be what's truncating the time parts
+But that's neither here nor there. Really depends on if you want an intermediate `div`.
+
+U4JT89FGB : well, it works some times, just not always. in fact, symbol lookup (cmd-t) is much more reliable (it's always worked fine for me) than the go to definition.. which seems to randomly fail to find definitions.. at least i can't put my finger on why it works in some cases and not others
+U5V0HVAKB : maybe u dont respect the syntax or the architecture
+U4F64AKQV : <@U4JT89FGB> You might have better luck asking a question like that one in <#C0CJ3SBBM|general>.
+U5V0HVAKB : the go to definition always follow a default logic finding
+U5V0HVAKB : if you dont folloz it
+U5V0HVAKB : you will not have it sometimes
+U2FJ2D6M7 : <@U4F64AKQV> thank you for the perspective, i'm not sure I follow it all just yet, but maybe soon :slightly_smiling_face:
+U4F64AKQV : <@U2FJ2D6M7> Np! Your code was basically right anyway. I was just showing some other ways one might think about it. One tip for those kinds of bugs is to look at the type definitions. They're actually quite helpful.
+U23SA861Y : difficult without code but if you have you probably have a task converted to a message somehere that gets a gif on button click, examine that code
+U60AQDN5C : Hi everyone, I've been trying to add elm into a react app, but haven't been able to test elm embedded into react components, I'm trying to compile the whole thing through webpack but still I'm at a loss (I'm new to Elm which is why I'm struggling and my apps are react so I want to ease react into it), could anyone help? more context here:
+<https://www.reddit.com/r/elm/comments/6jijtd/test_elmreactcomponents/>
+
+U60U00ML6 : hihi please help :S I get this: Some new packages are needed. Here is the upgrade plan.
+  Install:
+    elm-lang/core 5.1.1
+    elm-lang/dom 1.1.1
+    elm-lang/html 2.0.0
+    elm-lang/virtual-dom 2.0.4
+
+Do you approve of this plan? [Y/n] 
+
+
+Starting downloads...
+
+  ?ùÅ elm-lang/dom 1.1.1
+  ?ùÅ elm-lang/core 5.1.1
+  ?ùÅ elm-lang/html 2.0.0
+elm-make: elm-lang-virtual-dom-73c00fd: MoveFileEx "elm-lang-virtual-dom-73c00fd" "elm-lang\\virtual-dom\\2.0.4": permission denied (Access is denied.)
+
+U60U00ML6 : This I get when running elm-make on the Todo.elm DEMO
+U3SJEDR96 : Looks like the elm executable doesn't have write access for `elm-stuff` or something like that? Not sure, I don't really know much about windows
+U5RKHSP38 : Hello! I was wondering if anyone could look at this function and give me an opinion on wether there's a better way to write it:
+```
+playersFromPresences : PresenceState Player -&gt; List Types.Player
+playersFromPresences newPresenceState =
+    -- I don't know if there's another way other than this crazy function.
+    --
+    -- presences : {
+    --  "ASDASDADSASDA" : {
+    --    metas : [ payload: {
+    --          , isUser = False
+    --          , name = "Anonymous"
+    --          , ...
+    --          }
+    --    , phx_ref = "1BFfJ0KgU90="
+    --    ]
+    --   }
+    -- }
+    newPresenceState
+        |&gt; Dict.values
+        |&gt; List.map .metas
+        |&gt; List.map List.head
+        |&gt; List.filterMap identity
+        |&gt; List.map .payload
+```
+Some context:
+I'm using `fbonetti/elm-phoenix-socket` to talk to my Elixir/Phoenix server, and the library comes with some helpers to handle Presence events. It allows you to pass a decoder, and then returns an updated structure like the one seen in the comment. `.meta` can have multiple values for a single id, but I only want to grab the latest one from each and return them as a list.
+
+U3SJEDR96 : well you could write it shorter, but not sure if that's "better"
+U3SJEDR96 : `newPresenceState |&gt; Dict.values |&gt; List.map (.metas &gt;&gt; List.head &gt;&gt; Maybe.map .payload) |&gt; List.filterMap identity`
+U60U00ML6 : <@U3SJEDR96> Yea.... I don't get it... I installed it as administrator the second time.
+U60U00ML6 : Or should I install elm in C:\elm ?
+U60U00ML6 : it's in program files now
+U5RKHSP38 : ah I see, thank you <@U3SJEDR96>! I still rarely consider combining functions like that, so I'm definitely learning something from that :slightly_smiling_face:
+U60U00ML6 : Well, i'm gonna give up for now . Bye elm :disappointed: Seemed cool though
+U41NK9BM4 : FWIW other ppl have experienced that issue: <https://github.com/elm-lang/elm-package/issues/139>
+U41NK9BM4 : Some reasons include: "Windows Defender", "Windows 10 with McAfee antivirus", "moving my project to a directory outside of my ‘dropbox' folder", etc.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

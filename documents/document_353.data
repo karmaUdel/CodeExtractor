@@ -1,15 +1,129 @@
+U5Z3Y472L : I'm trying to implement a login form. My view code looks like this :
+U5Z3Y472L : view : Model -&gt; Html Msgview model =
+     form [ class "w70 center", onSubmit Login ]
+          [ label [ for "email", class "row mts" ] [ text "Adresse email"]
+          , input [ name "email", type_ "email", class "row", onInput ChangeEmail ][]
+          , label [ for "password", class "row mts" ] [ text "Mot de passe"]
+          , input [ name "password", class "mbs w70", type_ model.passwordFieldType, onInput ChangePassword, value "" ]
+                  [ div
+                      [ class "passwordShow" ]
+                      [ input
+                          [ checked model.isPasswordVisible, type_ "checkbox", onClick TogglePasswordVisibility ]
+                          [ text "Afficher"]
+                      , a [ onClick Login, class "row btn primary-btn" ]
+                          [ div [ class "grid-3-1" ]
+                                [ div [ class "txtcenter" ] [ text "Me connecter"]
+                                , viewSpinner model.isWaitingConnect
+                                ]
+                          ]
+                      , div [ class "w50 center" ]
+                          [ a [ href "#", onClick SendResetLink ] [ text "J'ai oublié mon mot de passe"]
+                          , viewSpinner model.isWaitingReset
+                          ]
+                      ]
+                  ]
+          ]
+
+viewSpinner : Bool -&gt; Html Msg
+viewSpinner isWaiting =
+    if isWaiting then
+        div []
+            [ i [ class "fa fa-spinner fa-pulse fa-lg" ] []
+            ]
+    else
+        div [][]
+
+U5Z3Y472L : The compiler doesn't like it:
+U5Z3Y472L : The 1st and 2nd entries in this list are different types of values.
+56|                           [ a [ href "#", onClick SendResetLink ] [ text "J'ai oublié mon mot de passe"]
+57|&gt;                          , viewSpinner model.isWaitingReset
+58|                           ]
+
+The 1st entry has this type:
+
+    Html (String -&gt; Msg)
+
+But the 2nd is:
+
+    Html (Msg)
+
+U5Z3Y472L : I don't understand how to fix this
+U3SJEDR96 : What's the type of `SendResetLink`?
+U5Z3Y472L : type Msg    = Login
+    | ChangeEmail String
+    | ChangePassword String
+    | SendResetLink
+    | TogglePasswordVisibility Bool
+
+U3SJEDR96 : Hm, it seems to think you have `SendResetLink String`
+U5Z3Y472L : Yep. The question is: why?
+U5Z3Y472L : When I remove the href attribute from the link, the error message becomes:
+U5Z3Y472L : ```Html (Bool -&gt; Msg)
+
+But the 2nd is:
+
+    Html (Msg)
 ```
-I understand I can now do without the `FetchFail` Msg but I'm not sure how
-<@U3LUC6SNS> `|= keep oneOrMore \x -&gt; x != '}'` should work
-if I want to handle errors in my `processFetch` function I would have to have access to `model` in the function
-<@U1X5ZRJUX> Look at the type definition for Http.send, `send : (Result Error a -&gt; msg) -&gt; Request a -&gt; Cmd msg`
-`(Result Error a -&gt; msg)` can be any function that produces any `Msg`
-the simplest way to do that is `type Msg = FeedResponse (Result Error String)`
-and just pass `FeedResponse` to http.send
-Do you see what I am doing wrong?
-is there a way to build the HTML doc for the modules that my project imports - and say have them somewhere inside `./elm-stuff` --- I'm going to be offline for a vacation, and want the library docs at hand
-Thanks! <@U153UK3FA>  I'll give that a think
-in general, I'm wondering where documentation on how to use elm-make and elm-project live... the web site doesn't really point to anything
-<@U3LUC6SNS> the ‘\' character in strings is used to escape the characters after it, eg "\"" is the way to make a string that has a `"` character, you'll need to do "\\begin{foo}blah, blah\\end{foo}"
-<@U153UK3FA> Thanks - got it!  Works now.
-oh god, you're not trying to parse latex are you?
+
+U3SJEDR96 : Oh, wait, it's a different place entirely - `onClick TogglePasswordVisibility` where `TogglePasswordVisibility : Bool -&gt; Msg`
+U3SJEDR96 : you may want `onClick &lt;| TogglePasswordVisiblity &lt;| not model.isPasswordVisible`
+U3SJEDR96 : or you can just get rid of the boolean parameter and flip it in your model
+U3SJEDR96 : (I'd also try to derive `isPasswordVisible` from your `passwordFieldType` rather than keeping it as two separate pieces of state)
+U5Z3Y472L : Great! Thanks for your help <@U3SJEDR96>!
+U3SJEDR96 : or the other way around. Point being you have two ways to describe the same data currently; and if they get out of sync, you'll have some pretty odd behaviour
+U5Z3Y472L : you're right
+U3SJEDR96 : Glad we figured it out, tho - good luck!
+U5GJ5FEAU : after watching <@U13H7FNDQ> elm-europe talk, my app has reduced by ~25 files. Realized each page of a spa doesn't need to have its own update + view + rest file .. just in case someone else is also doing the same thing, you'll save yourself writing a lot of imports for sure :smile:
+U5J08KX0D : Hi folks. What's the best way to play sounds? The Howler js library is fantastic (does cross browser really well) - if there's no agreed-upon Elm solution, ought I learn about ports?  - thanks again!
+
+U3SJEDR96 : Ports are probably best, yeah
+U62KVQVD1 : Any idea why can I be getting following error: "Cannot find variable `=&gt;`" ?
+U62KVQVD1 : Is this something what was deprecated? Operator =&gt; ?
+U62KVQVD1 : <https://gist.github.com/korczis/ed88388c2188fd39550d1b0a49a36448>
+U5A726ZAR : <@U5GJ5FEAU> which video is that? I cant find it in the Elm Europe 2017 playlist
+U3SJEDR96 : <@U62KVQVD1> it's not defined in `core`. It's defined in a util module in `elm-spa-example`though. Basically', it's this:```
+(=&gt;) : a -&gt; b -&gt; (a, b)
+(=&gt;) = (,)
+infixl 0 =&gt;
+```
+
+U62KVQVD1 : <@U3SJEDR96> I see, thanks
+U62KVQVD1 : Writing SPA in elm is quite hard :disappointed: Any ideas when elm 0.19 will get released?
+U41NK9BM4 : BTW, `=&gt;` operator will be available in 0.19 by default
+U3SQ42JJW : Hi everyone. I am just sitting here and think if my code is as pure functional as it should be.For Example I have a function 
+```
+getUsers : Model -&gt; List User
+getUsers model = 
+    model.users
+```
+Later in the code I use the following function:
+```
+getAllUserNames: Model -&gt; List String
+getAllUserNames model = 
+    List.map (...) (getUsers model)
+```
+
+U3SQ42JJW : This is not pure and should be avoided, I would say… or?
+U41NK9BM4 : Why do you think isn't pure ?
+U3SQ42JJW : right way would be ```
+getAllUsers : List User -&gt; List String 
+```
+
+U62KVQVD1 : <@U41NK9BM4> I am afraid if I will be able to migrate my code to 0.19
+U3SJEDR96 : getUsers doesn't work, though
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

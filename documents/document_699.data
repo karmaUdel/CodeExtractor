@@ -1,91 +1,92 @@
+U17R1GD96 : My update still does not work. This is wrong: ```update : Msg -&gt; Model -&gt; ( Model, Cmd Msg )update msg model =
+    case msg of
+        Payload data -&gt;
+            { model | themeUri = data.theme_uri }
+                ! []```
+
+U17R1GD96 : ````data` does not have a field named `theme_uri`.
+67|             { model | themeUri = data.theme_uri }
+                                     ^^^^^^^^^^^^^^
+The type of `data` is:
+
+    Result String Model```
+
+U17R1GD96 : the same the `{ model | themeUri = data.themeUri }`
+U3SJEDR96 : `data` at that point is a `Result String Model` because if someone sends you bad values, you want to handle that somehow, too
+U17R1GD96 : yes, just found it may contain errors I have to handle somehow
+U3SJEDR96 : so you can```
+case msg of
+  Payload (Ok data) -&gt; { model | themeUri = data.themeUri } ! []
+  Payload (Err error) -&gt; { model | error = error } ! []
 ```
-Thanks for taking a look <@U1BP42MRS> :taco:
-Yeah it's a little awkward, but at the end I meant to print `cache.values()` 
-That works great, when the data gets too large I'll adjust as necessary.
-Good call on not pre-optimizing too much! I am sure there is some really terse and cool trick, but I like simple :smile:
-Get the loader memory for each machine ?Is there any good way?
-question for anyone who uses pyenv — should the `.python-version` file be commited to vcs, or is it considered good practise to ignore this file?
-<@U6B8B09JT> ignore, of course
-That's an environmental detail
-How can I send the value of a variable in endpoints api to _post_put_hook function in python ?
-can anyone help ?
-I'm sure someone can help but you'll need to post more details :slightly_smiling_face:
-I am using google cloud endpoints along with ndb datastore .
-I am setting values in my request class parameters
-can then I put these data in ndb
-my api know the value of the variable
-but right after I put
-_post_put_hook function is called
-but it does not know the value of that variable
-Sorry I have never used google could endpoints so I can't really help you :confused:
-<@U3T76H0JW> can you post a snippet of your code ?
-so i started using fantastical and i really like it but want to integrate other services. they didn't make this very easy =(. to parse text outside of fantastical it says to type this: `<x-fantastical2://parse?s=Sentence> goes here` i tried this in a browser to no avail. does anyone know where i can type this sort of thing into osx?
-i've tried spotlight but that didn't work either.
-Anyone have a simple to use GUI?
-HTML?
-desktop?
-tkinter, I'd say
-Yeah desktop, and I saw tkinter, might have to go with that
-has anyone worked with crucible/fish eye before?
-I've used crucible before
-was ok
-why?
-Basically grabbing analytics from it for peer reviews and then essentially updating a CSV with new data of progress of peer reviews
-So I gotta use their API, hoping I can get the data I need
-not sure this will work but if you used a jupyter notebook they would have something essentially like a gui. they could run your code and get ouput and it be relatively easy.
-Uh oh, management wants insights... huh?
-Haha, well they already get insights. It just gets tedious for the guys to hand type in all the updated info for each week for the last 12 weeks
-and it has to be redone each time cause each week the analytics change of course for the weeks before also so they can spend an hour updating the thing
-When python can do it in a few seconds :slightly_smiling_face:
-checkout a temp jupyter notebook here: <https://tmpnb.org/>
-What is it exactly? <@U0NRYQNAZ> temporary server for running python?
-jupyter is cool
-&gt; The Jupyter Notebook is an open-source web application that allows you to create and share documents that contain live code, equations, visualizations and explanatory text. Uses include: data cleaning and transformation, numerical simulation, statistical modeling, machine learning and much more.
-Hmmm okay that might be really convenient
-plus it can be put on github and look cool
-Sort of like a prelim thing I can show them when I'm done and they can decide if they want a GUI or not
-you might have to setup your own jupyterhub server but it is relatively easy to do. the jupyterhub server can be setup to require username and password.
-then no one needs to install anything.
-they simply go to your page: <http://jupyter.kbman.com|jupyter.kbman.com> and login
-i have an ansible playbook if needed :wink:
-more info here: <https://jupyter.org/>
-Once I get this setup I'll definitely get that setup
-if you are just looking to use basic jupyter, and you use pycharm you can start a new project, pip install jupyter then instead of making a .py file you can make a .ipynb file
-since it is python the sky is the limit. if you want you can setup a way for the csv to be emailed to them or whatever.
-the notebooks can also utilize `input` if you need the user to type in information.
-so if you wanted to run a cli script inside the notebook and prompt them for their name, etc, you can do that.
-That might actually be super convenient
-Oh man this should be fun. The documentation for this API is leading me to 404 errors.
-TIL ipython does input
-<@U0NRYQNAZ> can you show live terminal output in there?
-what do you mean live?
-Say I run a long-running subprocess
-hmmm... idk. i would have to try it. you can run pip commands and they scroll out. that's what is happening at the top.
-Or can you only spawn one and print the data
-Oh, I guess I didn't think about how they have the syntax to run straight shell commands
-<@U0NRYQNAZ> :taco:
-I totally spaced the `!shell command`
-yea it's cool
-i use jupyter notebook for one off things like this all the time.
-very convenient
-Yeah, I was thinking about adding a subdomain to my site so I can just have one centralized
-i have an ansible playbook if you want to deploy jupyterhub.
-you will have to pull all the the R things out of it.
-one of my first projects where i work was setting up a jupyterhub with an R kernel and other packages.
-Oh yeah, I love references
-i'll try to test it later on to make sure it works. haha
-okie
-i have a vm i can run the playbook.
-Would love to have it too. <@U1BP42MRS> one of pyslackers rôle? 
-We can do that for sure, make it a community effort
-I'll start on breaking those up tonight if I have time
-:thumbsup: 
-Do you still need help w/ this?
-* but they decide to enforce that the host needs to be a domain name... so in my compose file I had to hack it with `<redis://redis.cache>`
-hello, could someone help me with a flask issue i'm having?
-Simply post your question in <#C0LN2AD7T|flask>
-<@U6AFDVDA9> sure, post your question here (or <#C0LN2AD7T|flask>) and someone will answer when they can :slightly_smiling_face:
-Please read the intro doc on suggestions, basically: post your question (rather than ask for permission).
-:thumbsup: will do
-thx
-You got it!
+
+U3SJEDR96 : or something along those lines
+U17R1GD96 : Almost working. My model is not changing. I have init with some initial fake data. My  model should be overwritten by update, right? It looks like the model is keeping only that init data values.
+U0J1M0F32 : I would imagine that the model is not _actually_ being updated then for some reason. Either the wrong action is firing or there is some sort of issue in the `update` function.
+U0J1M0F32 : Maybe I missed it, where is the code that kicks off the Ajax request?
+U17R1GD96 : My JS is using React ```import React from 'react'import Elm from 'react-elm-components'
+import { connect } from 'cerebral/react'
+import { state } from 'cerebral/tags'
+import { HeaderModule } from '../../elm/dist/elm'
+
+export default connect({
+    themeUri: state`app.theme_uri`,
+    headers: state`app.header`,
+
+  }, function Header ({themeUri, headers}) {
+
+    function setupPorts (ports) {
+      ports.payload.send({themeUri, headers})
+    }
+
+    return &lt;Elm src={HeaderModule} ports={setupPorts}/&gt;
+  },
+)```
+
+U17R1GD96 : I don’t have AJAX calls.
+U17R1GD96 : I pass data from JS
+U0J1M0F32 : Ah I see the port now.
+U0J1M0F32 : Have you tried loading the elm app through the elm-reactor or using `Debug.log` inside the `update` function to see what events are firing. My gut says something is not sending the payload to the app.
+U23SA861Y : wheres the fun in coding something if the API is stable, pfft.
+U17R1GD96 : It’s like that message is never executed…
+U0J1M0F32 : I wonder if this issue is in redux, and something is going wrong with the Thunk.
+U17R1GD96 : I don’t use Redux. I use Cerebral. I pass the data to ports
+U0J1M0F32 : I would add the debug call outside of the case statement, even though I'm pretty sure no messages are being sent through the port.
+Perhaps also put a `console.log` in the `setupPorts` function.
+
+U0J1M0F32 : Gotcha.
+U2H4UJE9Z : <@U17R1GD96> Might be nothing, but in your `payloadDecoder` you have `|&gt; required "error" string`, but you only pass `{themeUri, headers}` through your port (also, your decoder expects `theme_uri` and not `themeUri`)
+U2H4UJE9Z : You can try to use `optional` (<http://package.elm-lang.org/packages/NoRedInk/elm-decode-pipeline/3.0.0/Json-Decode-Pipeline#optional>) instead of `required`.
+U4872964V : You should see a `Payload (Err ...)` message in that case though
+U4872964V : but maybe you weren’t looking for that, should show up in the debugger
+U17R1GD96 : I fixed theme_uri. The data in JS are fine. console.log shows all is OK in setupPorts
+U17R1GD96 : OK. I added Debug.log to error and I have something
+U4872964V : When i debug messages, I usually put a `case Debug.log "update" msg of` in the `update` funciton
+U17R1GD96 : nice, I will add it there
+U4872964V : then you get a nice listing of all messages
+U17R1GD96 : ```update: Payload (Err "Expecting an object with a field named `error` but instead got: {\"themeUri\": ...```
+U17R1GD96 : strange
+U2H4UJE9Z : Try exchanging `|&gt; required "error" string` in payloadDecoder with `|&gt; optional "error" string ""`
+U2H4UJE9Z : If you use the `required` function, it will fail the decoding with the error you are seeing (unless you actually add a property called "error" to the data sent through the port)
+U17R1GD96 : uff, works!! (I only needed to rename “class_” to “class” because my data uses “class”)
+U17R1GD96 : That was good lesson. Thanks all for help
+U4872964V : it seems strange to use `Model` as your payload type though
+U0CL0AS3V : sounds like documentation would take all the fun out of it then :wink:
+U23SA861Y : It seems fairly straight forward if you want to make js functions available to elm, just need to set a name mangled variable with a record of function pointers. But the when it comes to creating something at main, there are a few compiler defined functions I can't track down like `F2` and `A2`
+U5ABF3BH7 : Hello, I am looking for advice on how to organize my views. I have a very long complex page which is the page I am working on (Views.FirstCall). Right now, this view is divided into different views representing the different sections in the page (PersonInfo.elm, Location.elm, Caller.elm, Appointment.elm...etc..). I am trying to re-organize them as we had the data and views all mixed up.  I am wondering if I should structure all the sub-views related to FirstCall page into a special folder or if it is un-necessary and I should just put them all under the Views folder? Any advice of people who have experience?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

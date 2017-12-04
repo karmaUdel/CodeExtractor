@@ -1,0 +1,91 @@
+U5CGPBF0U : Oh, nice. Guess I'm kind of micro-optimizing by wanting to combine the init and migrate into one command as well then. Haha
+U1BP42MRS : I do the upgrade/run at boot each time so it's always up to date for prod ¯\_(?)_/¯
+U1BP42MRS : but init is one time ever for a project, and migrate creates the migrations
+U1BP42MRS : so I don't think you need those often enough, those are developer run manually
+U5CGPBF0U : Ah, ok.
+U5CGPBF0U : Good point
+U5CGPBF0U : In `__main__.py`, `from broadway import create_app` results in `No module named 'broadway'`... Hmm... It's definitely the right name
+U1BP42MRS : how are you running it?
+U5CGPBF0U : `python -m broadway`
+U5CGPBF0U : From the module's parent directory
+U1BP42MRS : and the dirs are:
+```
+broadway
+  - __init__.py
+  - __main__.py
+```
+?
+
+U5CGPBF0U : Yep
+U1BP42MRS : python2 or 3?
+U1BP42MRS : delete out your __pycache__ dirs
+U5CGPBF0U : Same error. :thinking_face:
+U1BP42MRS : Oh, there is a `__pycache__` at the top level too - do you have an `__init__.py` in the `backend` dir?
+U1BP42MRS : That would cause it
+U5CGPBF0U : Oh, no but there used to be. It became my Broadway module.
+U1BP42MRS : is this pushed somewhere, or a work thing?
+U5CGPBF0U : I'm working on the company repo which I've cloned. The above image is from the local copy. I'm just trying to run it locally on my own PC
+U1BP42MRS : Yeah, I was just hoping to see the code to look for anything funky
+U1BP42MRS : hmm
+U1BP42MRS : and `pwd` has you in the `backend` directory?
+U5CGPBF0U : Could such a thing be cause by a circular import error?
+U5CGPBF0U : Yep
+U1BP42MRS : It shouldn't, you'd probably see a circular import related error in my experience
+U1BP42MRS : :thinking_face: not sure what to suggest given what I can/can't see
+U1BP42MRS : what's main.py look like? just `from broadway import create_app`?
+U1BP42MRS : I think it may be the broadway from the `__init__`, try changing the `import broadway.external` to `from . import external`
+U1BP42MRS : external looks ok, the init otherwise looks ok and then in `__main__.py` I think the `.external` may be a problem
+U1BP42MRS : Usually in this case, I would comment out pretty much everything in __init__ and make sure that imports. Then start re-adding things
+U1BP42MRS : I gotta get back to work, I will check back in a bit
+U5CGPBF0U : So I commented out lines one by one as you said and found the problem line. It's `app.config.from_object(config)`. The way I have this set up is that I pass in `os.environ['APP_SETTINGS']` which contains the relevant configuration class (e.g. `broadway.config.DevelopmentConfig`), and it's this that's throwing the error. I've tried without `broadway` and without `broadway.` but neither of those are working. Before modulizing this I just used `config.DevelopmentConfig` which worked.
+U1BP42MRS : The error is now related to config, not imports?
+U5CGPBF0U : No, still the same error, but if I comment out `app.config.from_object(config)` in `__init__.py` I no longer receive any errors
+U1BP42MRS : yeah, sounds like you just need to change how the config is resolved
+U5CGPBF0U : Even hard-coding it like `app.config.from_object(config.DevelopmentConfig)` produces the same error `no module named 'broadway'` even though `broadway` is not anywhere in the parameter. Again, if I comment out this line, the error disappears. :thinking_face:
+U5CGPBF0U : `from broadway import config, util` in `models.py` appears to have caused the problem. Specifically `config`.
+U1BP42MRS : try relatives for anything other than `__main__`, `from . import config, util`
+U5CGPBF0U : Guess I spoke too soon. I'm not even sure what's going on now. I'm not sure if the line in `models.py` is relevant at all. I just can't get `app.config.from_object()` to work no matter what I provide it with.
+U1BP42MRS : Even a raw class?
+U5CGPBF0U : Yep. `app.config.from_object(config.DevelopmentConfig)` causes `NameError: name 'config' is not defined`
+U1BP42MRS : is config imported?
+U1BP42MRS : sounds like not
+U5CGPBF0U : Well, I thought that was the issue, so I tried adding `import config` and now I'm back to the old error `No module named 'broadway'`, referring to `from broadway import create_app, models, util` in `__main__.py`, and if I comment out `app.config.from_object(config.DevelopmentConfig)` in `__init__.py` the error no longer occurs.
+U1BP42MRS : `from . import config` is probably better
+U5CGPBF0U : Oh, my bad. Yes it's `from . import external, config` in `__init__.py`
+U1BP42MRS : It sounds like you still have a bad import somewhere, something external or config or something like that import
+U5CGPBF0U : Changing `from broadway import create_app, models, util` in `__main__.py` to `from . import create_app, models, util` changes the error to `ImportError: cannot import name 'create_app'`
+U1BP42MRS : yeah, because it's trying to import a module, not a function
+U5CGPBF0U : When should I use `from broadway` vs. `from .`? I didn't know there was a difference actually
+U1BP42MRS : you _should_ be able to use `from broadway` everywhere, but I am not sure what is causing you issues ATM. the `.` is a "relative" import so it just removes any ambiguity of which package you're talking about
+U1BP42MRS : But you can't do relatives in something like `__main__` because the `broadway` package isn't initted yet, or something like that
+U0PKTUWKH : hi guys what would b the correct the print out date with letters instead of digits as month using datetime```
+print(datetime.date.today())
+2017-07-13
+```
+I'd like to see  `2017-Jul-13` instead
+
+U1BP42MRS : <https://docs.python.org/2/library/datetime.html#datetime.datetime.strftime> <@U0PKTUWKH>
+U653RFLBD : `datetime.date.today().strftime('%Y-%b-%d')`
+U0PKTUWKH : thank u <@U1BP42MRS> and <@U653RFLBD> !!!
+U5CGPBF0U : I placed some `print()`s at certain points to see if things were actually executing. After running `python -m broadway` I can see...
+U5CGPBF0U : `created app` prints _after_ `app = create_app(os.environ['APP_SETTINGS'])` runs
+U5CGPBF0U : Why was there no error at the beginning? Is this behaviour normal?
+U1BP42MRS : python executes as it reads
+U1BP42MRS : I am kind of dumb, but in this case with flask you can do:  `FLASK_APP=broadway/__main__.py FLASK_DEBUG=1 flask run`
+U1BP42MRS : No need for the python -m and such (though that looks like windows, not sure how the flask CLI work sthere)
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

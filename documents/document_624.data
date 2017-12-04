@@ -1,6 +1,115 @@
+U5YDC1YUW : it's definitely something to wrap your head around! but I'm honestly enjoying it
+U5YDC1YUW : just having a look at how I would hook this up in my code, does something like this make sense?
+U5YDC1YUW : ```StartGame -&gt;
+            ( { model | status = Playing }, Task.perform (\_ -&gt; Tick) (Process.sleep 1000) )
 ```
-( swapped args around to allow piping )
-really nice :smile:
-I guess I am going to need helper functions to update, this is ok though
-Why pull controls out if you're not going to use them?
-oh... you missed out `{ controls | ...`
+
+U17R26VR8 : that should trigger your Tick process ~1000ms after a StartGame msg comes through
+U5YDC1YUW : I know in this situation I'm expecting that Tick will only be called once after 1000ms
+U5YDC1YUW : alright, the compiler is having a fit haha.
+U17R26VR8 : I say roughly because js has a error margin with setTimeout of &lt; 8ms i think…
+U17R26VR8 : if you can’t work it out, chuck the msg here and the community will help, according to some we’re ‘excessively’ helpful
+U17R26VR8 : actually that is true, last time, i needed a foldl which reduced a Result, and got 3 answers in just as many minutes
+U5YDC1YUW : sure, incoming...
+U5YDC1YUW : ```The 1st and 2nd branches of this `case` produce different types of values.
+
+12|     case msg of
+13|         Clicked -&gt;
+14|             if model.status == Playing then
+15|                 processClick model
+16|             else
+17|                 ( model, Cmd.none )
+18| 
+19|         StartGame -&gt;
+20|&gt;            ( { model | status = Playing }, Task.perform (\_ -&gt; Tick) (Process.sleep 1000) )
+21| 
+22|         Tick _ -&gt;
+23|             updateTime model
+
+The 1st branch has this type:
+
+    ( { click_count : Int
+    , click_limit : Int
+    , points : Int
+    , status : Status
+    , targets : List Target
+    , time_elapsed : Int
+    , time_limit : Int
+    }
+    , Cmd (Msg)
+    )
+
+But the 2nd is:
+
+    ( { click_count : Int
+    , click_limit : Int
+    , points : Int
+    , status : Status
+    , targets : List Target
+    , time_elapsed : Int
+    , time_limit : Int
+    }
+    , Cmd (Time.Time -&gt; Msg)
+    )
+```
+
+U17R26VR8 : Your Tick tag doens’t have a value, but your update function is expecting one
+U17R26VR8 : change ln 22: `Tick -&gt;`
+U5YDC1YUW : ah brilliant! good spot :slightly_smiling_face:
+U5YDC1YUW : that was leftover crud from when I was using `Time.every second Tick`
+U17R26VR8 : yes, you can pass values along with the tick if you want and that’s how you’d do it
+U17R26VR8 : `(\_ -&gt; Tick valueToUpdateInASecond)`
+U5YDC1YUW : awesome, thanks for your help mate :slightly_smiling_face: got myself a working timer!
+U17R26VR8 : My task is complete. I shall go back to work.
+U5YDC1YUW : :sunglasses:
+U5YFL1QNB : Hi folks, I'm hitting some 404 errors while downloading elm through npm install
+U5YFL1QNB : ```&gt; node -p "process.platform + '|' + process.arch"   
+
+darwin|x64                
+npm WARN prefer global ycssmin@1.0.1 should be installed with -g                                         
+
+&gt; elm@0.18.0 install /Users/XXX/XXX/node_modules/elm                                 
+&gt; node install.js         
+
+Unfortunately, there are currently no Elm Platform binaries available for your operating system and architecture.
+
+If you would like to build Elm from source, there are instructions at <https://github.com/elm-lang/elm-platform#build-from-source>
+```
+
+U5YFL1QNB : and on linux
+U5YFL1QNB : ```       &gt; XXX@1.0.0 preinstall /tmp/build_b0cf21c8edb00556fe127d8976446f11/XXX-XXX-46d0c17018e4b2089692c41b81aee48b7a38c75e
+       &gt; node -p "process.platform + '|' + process.arch"
+
+       linux|x64
+       
+       &gt; elm@0.18.0 install /tmp/build_b0cf21c8edb00556fe127d8976446f11/XXX-46d0c17018e4b2089692c41b81aee48b7a38c75e/node_modules/elm
+       &gt; node install.js
+
+       Unfortunately, there are currently no Elm Platform binaries available for your operating system and architecture.
+
+       If you would like to build Elm from source, there are instructions at <https://github.com/elm-lang/elm-platform#build-from-source>
+```
+
+U5YFL1QNB : Is anyone else having these difficulties?
+U5YFL1QNB : Ah! The issue is caused by the new package-lock.json
+U17J54S2U : Yeah I’ve encountered so many errors when I upgraded to node 8 and npm 5, I just downgraded to LTS 6 and npm 4.
+U0EUHKVGB : <@U5YFL1QNB> That seems very strange, can you open an issue forit here? <https://github.com/elm-lang/elm-platform>
+U5YFL1QNB : Will do
+U5YFL1QNB : <https://github.com/elm-lang/elm-platform/issues/210>
+U0EUHKVGB : <@U5YFL1QNB> Can you amend it to have the smallest possible reproduction steps?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,8 +1,136 @@
+U0CL0AS3V : Yeah! Haskell and Idris should get on board with what Elm and F# call them. :wink:
+<https://fsharpforfunandprofit.com/posts/designing-with-types-single-case-dus/>
+
+U5VFWL5MF : Probably not happening. I'll see if I can convince the F# and Idris people to name them ADTs :smiling_imp:
+U2D7NUGS1 : That's a great video <@U0S6BNVNY> . I think I'm sold to at least try it. Also very good point about type safety. I guess it should be quite straight forward to make Elm wrappers for these `nodes` and `attributes`.
+U3SQ42JJW : Hi everyone. I have a problem and it look like this:```
+generateSet : List Question -&gt; Question -&gt; Clip
+generateSet catalogue current =
+    case catalogue of
+        [] -&gt;
+            Clip Nothing Nothing Nothing
+
+        x :: [] -&gt;
+            case current of
+                x -&gt;
+                    Clip Nothing (Just x) Nothing
+
+        x :: y :: [] -&gt;
+            case current of
+                x -&gt;
+                    Clip Nothing (Just x) (Just y)
+
+        x :: y :: z :: [] -&gt;
+            case current of
+                x -&gt;
+                    Clip Nothing (Just x) (Just y)
+
+                y -&gt;
+                    Clip (Just x) (Just y) (Just z)
+
+                z -&gt;
+                    Clip (Just y) (Just z) Nothing
+
+        x :: y :: z :: rest -&gt;
+            case current of
+                z -&gt;
+                    Clip Nothing Nothing Nothing
+
+                _ -&gt;
+                    generateSet rest current
 ```
-And ideally the function to create the model is broken out into a separate helper
-Cool.  Let me try that.  BTW, not trying to be a fan-boy, but thanks very much for Elm.
-No problem! :slightly_smiling_face:
-I wonder if we are going to see `andMap` appear in the core libs....
-Not that it was ever in doubt, but that worked <@U13H7FNDQ>
-(our company uses Elm for our front-end app, it's going well, so I'm in full fan-boy mode here, me and all my team ^^)
-so grateful for the language and for the community both!
+
+U3SQ42JJW : ups formatting fail…
+U3SQ42JJW : Compiler is saying: pattern y in branch 4 is redundant.
+U0MDSQMUH : you can use triple backticks to format multi-line chunks of code!
+U0MDSQMUH : (and don't forget slack lets you edit)
+U0MDSQMUH : :+1:
+U3SQ42JJW : done :slightly_smiling_face:
+U0MDSQMUH : so, you can't do this:```
+case ... of
+ x -&gt; ...
+ y -&gt; ...
+```
+
+U0MDSQMUH : because it's going to treat `x` and `y` as variables to bind to
+U0MDSQMUH : you can't pattern match against the contents of a variable, I'm afraid
+U3SQ42JJW : What i want to do is the following. I have a List of Question and want to traverse this list. When I find the current Question I want to resolve with a type Clip, that takes the previous item in the list, the current and the next one…
+U3SQ42JJW : <@U0MDSQMUH> ah… ok :disappointed:
+U3SQ42JJW : hmmm…
+U3SQ42JJW : may be with if…then statements?
+U0MDSQMUH : lemme read your high level description and see what we can come up with
+U0MDSQMUH : so, one thing that jumps out at me:
+U0MDSQMUH : you have no guarantee (that the compiler can offer, anyway) that `current` is in `catalogue`
+U0LPMPL2U : It sounds like you may want a zip list?
+U3SQ42JJW : well it should be in there… but who knows…
+U3SQ42JJW : <@U0LPMPL2U> hmm… zip list means putting two list like a zipper together, or?
+U0LPMPL2U : It's  list that keeps track of it's currently focused element
+U0LPMPL2U : you can move the "cursor" forwards and backwards
+U3SQ42JJW : hmmm… sounds interesting… maybe this is what i am searching for.
+U3SQ42JJW : I think of a List of items and a kind of magnifying glass that traverses over the list. And all I see through that glass is the previous, the current and the next item…
+U1CE9DL9H : well, you can model that as data
+U1CE9DL9H : so `type alias MyStructure a = { toLeft : List a, selected = (a, a, a), toRight = List a } `
+U1CE9DL9H : then define a function `toTheLeft : MyStructure -&gt; Maybe MyStructure`, similarly for moving to the right
+U3SQ42JJW : <@U1CE9DL9H> uh :slightly_smiling_face: that looks advanced :slightly_smiling_face:
+U3SQ42JJW : good idea… so the selected is alwas that tripple touple…?
+U0LPMPL2U : right
+U3SQ42JJW : So I do not ned to have a separate list, but model the whole list in the way of this “MyStruvture”, right?
+U48AEBJQ3 : <@U3SQ42JJW> <https://ellie-app.com/3wPWjvN76C2a1/0>
+U48AEBJQ3 : It uses <http://package.elm-lang.org/packages/wernerdegroot/listzipper/latest> which implements a zipper already.
+U3SQ42JJW : <@U48AEBJQ3>  thanks… That looks easy with that package. I still have to think about <@U1CE9DL9H> approach.. Still do not get it ceompletely, but want to… I have to think a bout that…
+U0LPMPL2U : The <@U1CE9DL9H> approach is what that `List.Zipper` package implements
+U48AEBJQ3 : The big difference between that library and the data structure above is that the custom one always has 3 (or more) elements and can never focus on the very head or tail, but you don't have `Maybe` results.
+U1CE9DL9H : so, if this kind of pattern match is something you will do in many locations, and your structures is only valid with 3+ elemens, it may be worth it to write a custom data structure. Otherwise the package is probably easier
+U3SQ42JJW : Ok. Thanks everybody for that. That is awesone input I got. Trying to understand this and will have a look into the List.Zipper implementation. Will come back if I dont understand it :wink: Thanks :slightly_smiling_face:
+U48AEBJQ3 : If you want to understand the structure, try watching <https://www.youtube.com/watch?v=IcgmSRJHu_8>
+U0LPMPL2U : The section on zip lists starts at 11:20 but the whole video is worth watching :100:
+U48AEBJQ3 : I should polish up this empty-list-zipper I wrote and publish it.
+U3SQ42JJW : I watched this video once and was huge to me… but I totally forgot that Richard did address this problem exactly :smile:
+U3SQ42JJW : He even has the example with Questions.. I feel stupid now… Brain forgets too fast… :disappointed:
+U2GPAEU1L : marschro: That's why we have this slack :slightly_smiling_face: ~9000 brains forget less fast
+U3SQ42JJW : :grin:
+U0FQ4UYRK : This is possibly a <#C0F2GS35Z|node> thing, but is there anything that allows people to write simple command-line apps with Elm? I've found <https://github.com/laszlopandy/elm-console>, but it's intentionally semi-abandoned (not needed for the author's use-case anymore).
+U0FQ4UYRK : (Just interested in either taking lines of input from STDIN, or reading a file. The latter is optional.)
+U2GPX0EKC : <@U0FQ4UYRK> elm-repl?
+U0FQ4UYRK : <@U2GPX0EKC> Command-line app, as in:```
+$ cat mybigfile.txt | ./my-elm-app
+Lines: 4000
+Done.
+```
+... if `my-elm-app` were a command-line app that listed the number of lines from stdin and then printed Done.
+
+U0FQ4UYRK : Even having the capability for just goosing around with it. My options at the moment are "typing commands into elm-repl" or "writing a browser UI".
+U2GPX0EKC : Maybe they havent made that possible
+U0FQ4UYRK : That elm-console library above _used_ to do something like this, but it's pre-Signal-elimination.
+U3SJEDR96 : so, you can set your elm app up as a worker (using `Platform.program`), and set up an incoming and outgoing port - incoming where you stream stdin to, outgoing you dump on the console
+U0FQ4UYRK : (<@U2GPX0EKC>: Yeah, I don't see this being something that comes out of the box. More interested in people who've tried to make it work.)
+U0FQ4UYRK : <@U3SJEDR96> Ah, okay; as in, wrapping it in a `#!/usr/bin/env node` script that calls the compiled Elm JS.
+U3SJEDR96 : for a "write only" cli app, I had sometihng like this as the "runner":```
+const Elm = require('./elm.js');
+
+const app = Elm.App.worker();
+
+app.ports.emit.subscribe((msg) =&gt; {
+  console.log(msg);
+});
+
+```
+
+U0FQ4UYRK : Got it. Thanks. :slightly_smiling_face:
+U3SJEDR96 : note, also, that <@U0JUBLV8F> is exploring what the options are for elm cli apps, and how to make it the great experience we've come to expect from Elm
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

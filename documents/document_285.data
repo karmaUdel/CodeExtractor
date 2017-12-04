@@ -1,18 +1,71 @@
-Hi! How come ```Html.div [] [ text "foo \n bar" ]``` doesn't put bar on a new line but does remove the `\n`
-I'd like it to but bar on a new line
-That's how it works in regular HTML too. you'll want `Html.div [] [ text "foo", <http://Html.br|Html.br> [] [], text "bar" ]`
-Ok right. In my case I get a string of css from elm-css that I'd like to render on the page, but with the linebreaks
-Oh. You might want to use `Html.pre [] [ text yourStuff ]` then, which will render it into a "pre"formatted block
-Ah! Nice :slightly_smiling_face:
-Thanks!
-Hello
-I'm trying to implement a login form. My view code looks like this :
-        div [][]
-The compiler doesn't like it:
-    Html (Msg)
-I don't understand how to fix this
-What's the type of `SendResetLink`?
-    | TogglePasswordVisibility Bool
-Hm, it seems to think you have `SendResetLink String`
-Yep. The question is: why?
-When I remove the href attribute from the link, the error message becomes:
+U153UK3FA : Does the request actually succeed?
+U153UK3FA : You should add some code to your Err case to display something if the request fails so it doesn't silently fail
+U5ABF3BH7 : I get 404 in the console
+U5ABF3BH7 : I don't know why it is failing.
+U153UK3FA : Lots of context the web server can use to give a different response
+U153UK3FA : Do you control the server?
+U5ABF3BH7 : I stupidly forgot to add .json on the url!
+U5ABF3BH7 : Sadly, it is still not worker. <@U153UK3FA>, I am not sure what you mean by if I control the server. I control the json url (through frontend controller)
+U5ABF3BH7 : ^ not working
+U236M9FH9 : <@U5ABF3BH7> Open up the network tab of devtools &amp; look at the differences of each request, might be some headers you need to add
+U5ABF3BH7 : Could it be that a decoder calling another one messes the http.requestLooking at the error, it looks like the url is added twice. I get```No route matches [GET] "/cases/frontend/cases/frontend/all_rolodex.json"```. . I created a decoder for a list that is not nested, and it works fine.
+U236M9FH9 : Try putting a leading slash before `cases` in the URL?
+U236M9FH9 : Adding Decode.list shouldn't have anything to do with a double URL :confused: The decoder is used after the response is received...
+U5ABF3BH7 : Oh, you are right :slightly_smiling_face:
+U23SA861Y : see it's not json decoding thats hard, it's browsers :stuck_out_tongue:
+U153UK3FA : values relative to context
+U5Z6Q8Q9L : Hi all :slightly_smiling_face:
+U5Z6Q8Q9L : I'm looking into frontend stuff and I was wondering if I could get an opinion -
+U5Z6Q8Q9L : I'm building a webapp with rails, and I'm looking towards frontend.  In the past I've used pure JS (which can be a pain).  I've been experimenting with React, and while it's cool, I feel like it's a bit overkill (not to mention if the end-user doesn't enable JS, the whole page breaks).  I was looking into integrating elm with existing HTML (instead of replacing everything with elm), which seems to be possible with Elm embeds.   However I'm a little confused as to how they interact.  Can different elm embeds interact with each other?  For instance, if I were to have a persistent audio player similar to the one on soundcloud, could I make that audio player an embed, but have multiple controls for that component in other embeds?  Hopefully that makes sense...
+
+U0PBSF05S : <@U5Z6Q8Q9L> Each embedded Elm app would be separate and they would need to communicate using ports just like they would have to if they were communicating with any other JS application. You will need a thin layer of JS in the middle that will coordinate the messages between the various Elm apps that you have. It is quite doable.
+U153UK3FA : <@U5Z6Q8Q9L> of course you can do the same thing with React
+U153UK3FA : I wouldn't worry to much about people having JS disabled
+U5Z6Q8Q9L : <@U0PBSF05S> would that solution still allow me to take advantage of stuff like subscriptions and models (like in the clock example)?
+U0PBSF05S : <@U5Z6Q8Q9L> Yes, standard Elm and in fact incoming ports will come via subscriptions.
+U5Z6Q8Q9L : do you happen to have any resources on that subject?  I can't seem to find much of use but perhaps I'm looking in the wrong places/with the wrong keywords.
+U0PBSF05S : <@U5Z6Q8Q9L> Are you talking about ports? I would start here if you haven't read this already: <https://guide.elm-lang.org/interop/javascript.html>
+U5Z6Q8Q9L : Ah, thanks!
+U0JL9RPC4 : that reminds me this Elm Europe talk about microservices
+U2M8ER12B : elm noob, so i have no idea... dropbox marketing page has this code:```
+window.addEventListener('click', function(event) {
+    'use strict';
+    for (var elm = event.target; elm; elm = elm.parentElement) {
+        if (elm.id &amp;&amp;
+            window._goch_.hasOwnProperty(elm.id) &amp;&amp;
+            window._goch_[elm.id].call(elm, event) === false) {
+            event.preventDefault();
+        }
+    }
+}, true);
+```
+
+U2M8ER12B : is that an elm signature?
+U3SJEDR96 : no, that's just `elm` as short for `element`
+U2M8ER12B : ha, ooops
+U3SJEDR96 : yeah, their website is mostly react
+U5YJVL3B7 : hey elmos
+U5YJVL3B7 : I'm trying to understand this:```
+type alias Html msg = Node msg
+```
+from the Html package
+
+U5YJVL3B7 : where does `Node` comes from?
+U3SJEDR96 : from the `VirtualDom` package
+U3SJEDR96 : similarly, `type alias Svg msg = Node msg`. That is to say; they both use virtual-dom nodes under the hood :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,0 +1,51 @@
+U1WJH1JU9 : Thanks.
+U3SJEDR96 : <@U4F64AKQV> although there's also a secondary use-case for keyed nodes where it's used to first prevent a node from re-rendering, then force a node to re-render. <https://github.com/elm-lang/html/issues/105#issuecomment-309524197>
+U13H7FNDQ : Yeah, <@U4F64AKQV>, I'd say the todo one is a fine place to start
+U13H7FNDQ : The usage is that when you add one entry on top, you do not want to do a deep diff of every single node after that
+U13H7FNDQ : you want to just hit the `lazy` and be done
+U13H7FNDQ : It also matters for checkbox state
+U13H7FNDQ : If you are swapping between the "active" and "completed" tabs in that example, there is checkbox state in the DOM that can get preserved in weird ways if you do not use keys, so it can be a correctness thing in those cases
+U13H7FNDQ : <https://github.com/evancz/elm-todomvc>
+U23SA861Y : he speaks
+U5LFUHH19 : I've been using an Elm SPA template (based on <@U0CL0AS3V>'s code) for a project. Each page init is `Task PageLoadError Model`.  I have a page with a Model that has 6 parts now, so I've exceeded the `Task.map*` limits.  In this case, I have only one real Task (fetching some data on load), and all the others are just `Task.succeed`.  How can I get around this?  Can I `map` the one `Task` into a partially created model?
+U13H7FNDQ : ```thatTaskYouNeed
+  |&gt; Task.andThen (\answer -&gt; Model a b c d answer f g h i j)
+```
+
+U13H7FNDQ : And ideally the function to create the model is broken out into a separate helper
+U5LFUHH19 : Cool.  Let me try that.  BTW, not trying to be a fan-boy, but thanks very much for Elm.
+U13H7FNDQ : No problem! :slightly_smiling_face:
+U23SA861Y : I wonder if we are going to see `andMap` appear in the core libs....
+U5LFUHH19 : Not that it was ever in doubt, but that worked <@U13H7FNDQ>
+U0U6ML22H : (our company uses Elm for our front-end app, it's going well, so I'm in full fan-boy mode here, me and all my team ^^)
+U0U6ML22H : so grateful for the language and for the community both!
+U3SJEDR96 : ```andMap : Task e a -&gt; Task e (a -&gt; b) -&gt; Task e b
+andMap =
+  Task.map2 (|&gt;)
+```
+
+U3SJEDR96 : not sure if that really needs to be in core, tbh
+U3SJEDR96 : interestingly, `Task.andMap` existed in 0.17
+U23SA861Y : huh, well there you go
+U0CL7EPPG : Ah that is very good to know I’ll try that out and it might be the least complicated solution. Thanks <@U1SF6G7PA>
+U0CL7EPPG : <@U1SF6G7PA> it says it works with `elm-css` but it doesn’t support arguments so won’t do `elm-css Stylesheets.elm`. Guess I could write my own little binary to run. How have you done it?
+U2GPAEU1L : I have to run, but is it true that if the elm vdom goes from an `a` with an href to *no* href it just leaves it as `href=""`. Ping me if you know
+U60SXAF96 : Anyone have guidance on running Elm via Node.js?
+U57KYFW67 : <@U60SXAF96> There's no official support yet. But elm-oracle is a package which manages to hack it together. I would suggest taking a look at how they do it perhaps
+U0VMVV1DF : Hi Team, does anyone know how to get an invite to the FP slack?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

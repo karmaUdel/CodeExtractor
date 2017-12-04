@@ -1,0 +1,97 @@
+U3SJEDR96 : you can always define a `array = list &gt;&gt; map Array.fromList`  function, tho
+U3SJEDR96 : it would work perfectly for thousand of elements. Actually the above is exactly how it works for the regular `Json.Decode.array`
+U23SA861Y : growing a linked list is constant time, growing an array is order N
+U66RFDZ8F : you know what, I just realized I only need the first element of the list
+U66RFDZ8F : I will stick to lists for now
+U170TNSTZ : Is this an anti-pattern? `Task.perform (always (Value s)) (Task.succeed ())`
+U170TNSTZ : Looks a bit ugly.
+U170TNSTZ : What I’m trying to achieve, is to get one component’s `update` fn to notify the parent.
+U66RFDZ8F : <@U170TNSTZ> I pass a third value in the response of the `update` function of the child
+U66RFDZ8F : e.g `update : Msg -&gt; Model -&gt; ( Model, Cmd Msg, Action )`
+U66RFDZ8F : ```type Action
+    = DoNothing
+    | Authenticate String
+    | HttpAction Network.HttpAction
+```
+
+U66RFDZ8F : my parent update can get cluttered, but I can always extract the code into reusable functions
+U170TNSTZ : Ah, that sounds like a better pattern
+U66RFDZ8F : I find it easier to reason about this way
+U4872964V : <@U170TNSTZ> it’s definitely an anti-pattern unless you really do have a completely separate component
+U170TNSTZ : Sure. Is it something you picked up anywhere? I’m trying to stick to rtfeltman’s  `elm-spa-example`, but it doesn’t do much child-&gt;parent communication
+U66RFDZ8F : <@U170TNSTZ> I found `elm-spa` to not really meet my needs
+U170TNSTZ : I am trying to do an autocomplete which has some self-contained state.
+U170TNSTZ : Ok
+U4872964V : <@U170TNSTZ> that “pattern” is just how we do things in functional languages: if a function needs to return more info, we return more info
+U23SA861Y : just a heads up that "easier to reason about" is typically a euphemism for "this is the way I'm used to thinking about things"
+U4872964V : there is nothing magical about the `update` function (except for the one you pass to the `program` of course)
+U66RFDZ8F : <@U170TNSTZ> that sounds like a separate component, but you can use `opaque types`
+U66RFDZ8F : <@U23SA861Y> well...
+U170TNSTZ : <@U66RFDZ8F> I haven’t heard of that before?
+U66RFDZ8F : <@U170TNSTZ> I think <https://github.com/evancz/elm-sortable-table> has a really good way of doing it
+U66RFDZ8F : I mean self contained components
+U66RFDZ8F : <https://stackoverflow.com/questions/40794368/what-is-an-opaque-type-in-elm-and-why-is-it-valuable>
+U170TNSTZ : <@U66RFDZ8F> Great, I’ll read up on both :slightly_smiling_face:
+U23SA861Y : I generally lean more towards the sortable tables method of a config/context where you pass your message constructors in
+U23SA861Y : the reason is because then it plays nicely with partial application and currying
+U66RFDZ8F : <@U23SA861Y> definitely the best way to do reusable components
+U66RFDZ8F : <@U170TNSTZ>, unless your component is meant to be reusable, opaque types are a headache to deal with
+U66RFDZ8F : Sortable tables has a great pattern as mentioned by <@U23SA861Y>
+U3SJEDR96 : Though be careful with sending calculated state through messages. Sortable tables can get away with it because it doesn't need the previous state to calculate the new state, but if you happen to calculate new state based on rpevious state and send _that_ in your msg from the view, you're up for subtle bugs the moment someone can trigger two messages without your view re-rendering in between...
+U0JFGGZS6 : <@U170TNSTZ> I went with returning `(model, Cmd msg, childState)` from `update` in my first approach to a reusable autocomplete thing.
+U4872964V : You should _never_ send messages that contain something from your state :slightly_smiling_face:
+U4872964V : in my _humble_ opinion
+U4872964V : if you want to get data from your state, it’s right there, no need to put it in a message
+U0JFGGZS6 : It seems intuitive. You want to get the selected state back out of it.  But later I dropped doing this, I can't remember exactly why
+U0JFGGZS6 : I guess it was more of an approach that your app should own its own state, not rely on the component to pass it back up.
+U3SJEDR96 : The potential bugs it can lead to are _very_ tricky to figure out
+U23SA861Y : I meant less passing in a message wrapper that dispatched back state and more just providing a dispatch table that lifts the lower events to your upper messages
+U3SJEDR96 : That _is_ a great pattern
+U1G7E1P9S : Got a list of `a` tags that I want to drop into a `td`, but I want to have them comma separated. How would you recommend doing this?
+U3SJEDR96 : `<http://Html.td|Html.td> [] &lt;| List.intersperse (Html.text ", ") [ Html.a [] [], ... ]`
+U1G7E1P9S : thanks
+U6DUP1WMA : Has anyone deployed an Elm app into an android WebView? I'm thinking about using elm to implement a part of my android app that has to done with a WebView...
+U0EUHKVGB : <@U6DUP1WMA> yes, I have
+U0EUHKVGB : Works fine
+U6DUP1WMA : cool, might give it a shot. Thanks
+U6FK3K430 : <@U6DUP1WMA> we are doing so now using React Native to wrap it.. works fine on Android
+U6DUP1WMA : Wow that sounds dangerous, but I'm glad it's working fine for you. Will definitely try it out.
+U1G7E1P9S : ```    let        roomNumber =
+            if List.length (String.words room) &gt; 1 then
+                List.head (String.words room)
+            else
+                room
+    in```
+
+U1G7E1P9S : how do I get rid of `Maybe` type to just get s `String`?
+U48AEBJQ3 : <@U1G7E1P9S>
+```
+roomNumber =
+    List.head (String.words room)
+        |&gt; Maybe.withDefault room
+```
+?
+
+U23SA861Y : yeah so rather than check first that it's possible to get the head, you should try to get the head and then deal with the fact that you couldn't
+U48AEBJQ3 : It might even make more sense to not use a default and actually handle the error case in a more intentional way.
+U1G7E1P9S : Ah
+U1G7E1P9S : In this case I find it awkward, because I'm only going to evaluate that branch if `String.words room` produces a list &gt; 1, so of course there's a head
+U1G7E1P9S : but that works much better, thanks
+U23SA861Y : The compiler doesn't really have anyway of knowing the list length was just checked
+U48AEBJQ3 : If you know the list has values, you might try using a data structure which models a non-empty list as early as possible.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

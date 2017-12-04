@@ -1,11 +1,59 @@
+U5ZAJ15P0 : ooh, makes sense!
+U5ZAJ15P0 : Hi! I have the following in a Datalog query:```
+'[:find ... :where [(wef-backend.app.identity/past-expiry? ?expiry)]]]
 ```
-<@U3QUAHZJ6> (some-fn :a :b) not good enough?
-some-fn is actually a function? i presumed i was supposed to fill in the gaps &gt;.&lt; feel so dumb right now
-oh I'm sorry yeah I could see how you'd read it that way. but no, some-fn is a higher order function that takes a list of predicate functions and returns a single predicate function that is the logical or of all of them
-makes sense now!
-you could also do `#(some % [:a :b])`
-^ relies on maps acting as functions
-You can use :req-un [(or ::foo ::bar)]
-I totally forgot about that syntax
-It's one thing I love in spec
-Where `(my-pred x)` returns either `nil` or a value I want to use?
+
+U5ZAJ15P0 : Due to how Datomic/Datalog works I must fully qualify the past-expiry? function, even though it is available in the namespace where I wrote this query
+U5ZAJ15P0 : is there some clever trick that would let me omit the full qualifier?
+U5ZAJ15P0 : I tried syntax quoting on the query but that doesn't work, as it fully qualifies the `?expiry, etc` variables too
+U5ZAJ15P0 : Essentially I would like to fully qualify some symbols in that quoted expression
+U5ZAJ15P0 : but not others
+U2H58V4P2 : I don't recall any problems with namespaced keywords, but I seem to remember I had problems with namespaced maps. As these were limited to my test classes, I added these namespaces to the ignore list I think. Also, I think there were some fixes on the master branch that remain unreleased. A bit vague I realise, but if you're still stuck tomorrow (unlikely) then I'll check when I'm back in front of a computer...
+U051SS2EU : <@U5ZAJ15P0> you can use ` for this, and selectively use ~ for the symbols you want to namespace qualify
+U5ZAJ15P0 : <@U051SS2EU> how so? I tried variations on your suggestion but didn't manage to get it to work
+U051SS2EU : ```peregrine.circle=&gt; `[:find ... :where [identity ~'?foo]][:find ... :where [clojure.core/identity ?foo]]```
+
+U051SS2EU : I just picked a random thing with identity in the name, but I hope it translates
+U5ZAJ15P0 : ah
+U051SS2EU : I guess I should have explicitly mentioned the `~'` idiom to prevent namespacing
+U5ZAJ15P0 : is there a way to do the opposite? selectively pick the symbols I want to namespace qualify
+U051SS2EU : that's harder
+U5ZAJ15P0 : instead of the ones I do not want to namespace qualify
+U5ZAJ15P0 : mmh ok
+U5ZAJ15P0 : nevermind then
+U5ZAJ15P0 : thanks :slightly_smiling_face:
+U051SS2EU : this is close, but no cigar ```peregrine.circle=&gt; '[:find ... :where [`identity ?foo]][:find ... :where [(quote clojure.core/identity) ?foo]]```
+
+U5ZAJ15P0 : yep, not quite :confused:
+U5ZAJ15P0 : why wouldn't this work:```
+'[:find ... :where [~`identity ?foo]]
+```
+?
+
+U051SS2EU : ~ doesn't make sense outside `
+U5ZAJ15P0 : why does it make sense here:```
+`[:find ... :where [identity ~'?foo]]
+```
+?
+
+U051SS2EU : it's inside the ` at the beginning of the vector
+U051HUZLD : thanks
+U5ZAJ15P0 : right, but why does swapping out the use of syntax quoting vs normal quoting makes it different in use?
+U5ZAJ15P0 : (I'm not familiar enough with quoting yet)
+U051SS2EU : because ~ is only valid in syntax quote
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,22 +1,88 @@
+U5V0HVAKB : oh no!
+U5V0HVAKB : List.concat (List.map renderWord words)
+U5V0HVAKB : your renderWord
+U5V0HVAKB : return Html msg type
+U2FJ2D6M7 : <@U5V0HVAKB> yes, I take it back, I didn't understand why it was wrong! ‘Fixed' by
 ```
-<@U2W6RTGQH> `Html.Attributes` is just a module name. It's nothing that lives in the `Html` module. They are completely unrelated (except that one may import the other).
-<@U0LPMPL2U> <@U4872964V> thanks
-Does anyone know why i'd be able to `curl <http://localhost:8000>` when using `elm-reactor` but when opening in the browser it just refuses to connect/times out?
-Hey everybody, is there an easy way of changing pixel values in a `&lt;canvas&gt;`?
-have you looked at <http://package.elm-lang.org/packages/evancz/elm-graphics/1.0.1/Collage> <@U1C5N3NUD> ?
-As with HTML, you don't mutate the canvas but instead re-render based on a different model state
-Ah yep it looks like Collage is what I'm looking for
-<@U0LPMPL2U> yeah I just need to change individual pixels on state change
-You'd define a view function that takes in a model and renders the desired pixels
-now when the model changes, the pixels will too
-<@U218QNMR8> the only thing that comes to mind is browser specific proxy settings. Have you tried on a different port? (`elm-reactor -p 5050` for example)
-got it :thumbsup:
-yep - i've been using `python -m SimpleHTTPServer` on the same port as a workaround
-i've tried removing all traces of elm and reinstalling
-on the same port? that should not be possible
-correct
-i mean - i'm not using them both at the same time, but it makes no difference to the python server whether or not `elm-reactor` is running or not (on the same port)
-<@U0CLDU8UB> yeah, I've had wonky things like that happening too, tbh - elm-live + elm-reactor = weird :wink:
-fixed it
-i had some weird stuff in `/etc/hosts`
-okay good
+renderWords sentance =
+    let
+        words = String.split " " sentance
+    in
+        div [] (List.map renderWord words)
+```
+
+U5V0HVAKB : the function List.concat
+U5V0HVAKB : expected to have list type arguement of a list type not a list type of html msg
+U5V0HVAKB : i think its about parenthese here
+U5V0HVAKB : List.concat (List.map (renderWord words))
+U5V0HVAKB : try like thius
+U5V0HVAKB : or ``` 
+renderWord words
+  |&gt; list.map
+  |&gt; list.concat
+```
+
+U5V0HVAKB : <@U2FJ2D6M7> ?
+U2FJ2D6M7 : trying
+U5V0HVAKB : if it's working it's all about the left to right  (or maybe the right to left better ^^) reading
+U2FJ2D6M7 : I'm getting a different type error now, but if I return a Html msg to the view function then I'm all good
+U2FJ2D6M7 : I'm going to keep moving forward, I don't fully grok this at all yet, but hopefully soon
+U5V0HVAKB : yes at the end u have to return a html msg
+U2FJ2D6M7 : Appreciate the help <@U5V0HVAKB>!
+U5V0HVAKB : i started few days ago ^^
+U5V0HVAKB : np ask ! :slightly_smiling_face:
+U4F64AKQV : <@U2FJ2D6M7> the original problem was that `renderWords` returns a List of Html. This creates a problem in your `view` though, because we can't nest multiple levels of children when creating Html.
+U4F64AKQV : If you call the function as you did, it will attempt to put the list of rendered words as a child of the top level `div`. You do not want that though.
+U4F64AKQV : You want to add everything _inside_ the returned list to the child list of the top-level div
+U4F64AKQV : Ah, actually there's another problem before that one.
+U4F64AKQV : You really want something like this…```
+renderWords sentence =
+    let
+        words =
+            String.split " " sentence
+    in
+        List.map renderWord words
+
+
+view model =
+    div []
+        (input [ placeholder "Text to proof", onInput NewContent, myStyle ] [])
+        :: renderWords model.content
+```
+
+U5V0HVAKB : how thats pretty genius to destructuring with ::
+U5V0HVAKB : :slightly_smiling_face:
+U5V0HVAKB : gj
+U5V0HVAKB : i will explain a bit more tell me if i am wrong <@U4F64AKQV>.
+U5V0HVAKB : div [] [] the last one is a list
+U5V0HVAKB : by writing ```
+ (input [ placeholder "Text to proof", onInput NewContent, myStyle ] [])
+        :: renderWords model.content
+```
+its the same if you write so 1 :: [2, 3, 4]
+
+U5V0HVAKB : so that's why it should work
+U4F64AKQV : It also becomes easier to see when you write type annotations.
+U5V0HVAKB : but its should not be ``` 
+div [] [
+(input [ placeholder "Text to proof", onInput NewContent, myStyle ] [])
+        :: renderWords model.content
+]
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

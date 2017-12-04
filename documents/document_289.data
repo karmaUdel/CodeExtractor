@@ -1,14 +1,133 @@
-``` then the `let` clause will be eagerly executed, even if I don't reference it anywhere. In this case the `Debug.log` did it's effect despite the fact that `fetchData` was not called. I was expecting it to be lazy.
-Hello, <@U62UFEG4D> !
-hey <@U2D7NUGS1>
-To finish my though: That got me confused.
-Thanks in advance
-I have shared in this snippet my second attempt...
-<@U62UFEG4D> `Random.map2`
-`Random.map2 (,) (<http://Random.int|Random.int> 1 6) (<http://Random.int|Random.int> 1 6) |&gt; Random.generate (uncurry NewFace)`
-<@U48AEBJQ3> it works now, thanks a lot!
-is there a way with elm-package to "restore" packages that are already mentioned as dependencies in my elm-package.json?
-to download all dependencies after cloning a repository for the first time
-<@U604S603Y> just `elm-package install --yes` should handle that :slightly_smiling_face:
-perfect! thanks <@U3SJEDR96>
-I need very little interaction with leaflet for now, so ports are working ok. But I'll definitely watch the video. Thanks <@U3LT1UTPF> .
+U5Y4ERBU0 : do I need to import something?
+U0LPMPL2U : Are you trying to use that package?
+U5Y4ERBU0 : <http://package.elm-lang.org/packages/Fresheyeball/elm-guards/latest>
+U5Y4ERBU0 : i guess so
+U0LPMPL2U : if so, you will need to install the package: `elm package install Fresheyeball/elm-guards` on the command line
+U5Y4ERBU0 : oh got it working, import Guards
+U5Y4ERBU0 : ty
+U23SA861Y : to be fair, a whole import to remove what is like 2 keystrokes is probably not worth it
+U3LUC6SNS : The bug concerns the behavior of `textarea`.  If one types fast, the cursor jumps around, messing up your edits.  This is cured by using `defaultValue` instead of `value` to present text to the eye of the user.  However, this reveals another bug, which is that the textarea does not update when it receives input programmatically.  
+I the example, I use the `style-elements` package and its `textArea`.  It displays the same behavior as mentioned above for a textarea field using `defaultValue`.
+
+U0JFXEUCT : <@U3LUC6SNS> In your example, I think you need to adjust usage of `keyed` to match the comment at the end of this chain: <https://github.com/elm-lang/html/issues/105>
+U0JFXEUCT : Given in the thread```
+Keyed.node "div"
+        []
+        [ ( toString counter
+          , input
+                [ type_ "text"
+                , onInput HandleInput
+                , defaultValue message
+                ]
+                []
+          )
+        ]
+```
+
+In your code:
+
+```
+ Keyed.node "textarea"
+        [ HA.id "editPane3"
+        , HA.defaultValue model.current_document.content
+        , HE.onInput InputContent
+        ]
+        [] 
+```
+
+You need the text area to be within the keyed node.
+
+U2M73CM5F : hello everyone, I hope you're all great. I would like to ask a general question about Elm ; I'm about to start learning and I'd like to know if I am doing the right choice (even though, considering how everyone trying Elm is in love with it, it must be the right choice at some point anyway :wink: ). So I have 2 questions, my first one is about learning Elm, and the other one is about what you can do once you are able to use it : first, what previous knowledge do you need to learn Elm ? I have an intermediate level in JS, HTML and CSS, and I'm going back to work after a year off so I might be a bit rusty. And then, once you are able to use Elm, what more do you need to learn, to be independant to build a web app? (When I say independant, I mean, by your own, you can build your app, back and front, of course you don't know everything and maybe you'll struggle and ask help on the way but you have the basic knowledge to do it, and to get the knowledge you miss on your way. Versus : some parts are totally obscure to you.) Is it like, what you will learn on your Elm way will teach you what you need to know ? Or do you need to add some back-end and database deep knowledge ?  Well, sorry for the long message and thank you very much for your answers :slightly_smiling_face:
+U4JT89FGB : Unfortunately at this time you can't use Elm on the backend, so if your application requires centralized data storage or business logic of some sort, you'll still need to handle that separately.
+U2M73CM5F : zgohr, and I've read some things about Elm using Node or compiling to Node or something with Node… it doesn't help?
+U4JT89FGB : I haven't looked into it so I'm not sure how viable it would be
+U2M73CM5F : ok - and so, in other words, what can you exactly do with elm ?
+U4JT89FGB : Build the front-end of web applications
+U2M73CM5F : ok, thank you
+U4JT89FGB : Very generally, it replaces the use of javascript and html
+U2M73CM5F : and what about the previous knowledge that you need to start ?
+U2M73CM5F : ok, I see
+U0D4VR7BP : <@U2M73CM5F>as for the first question, about previous knowledge... knowing **some** programming language helps, although it's probably not necessary :slightly_smiling_face: today I've heard my friends from one startup say that when they hire somebody to work on their Elm codebase, in two to three weeks he is fully "caught up".
+
+U2M73CM5F : should I consider it a sort of "functional react ?"
+U0D4VR7BP : <@U2M73CM5F> Elm architecture maps very closely to React+Redux
+U0D4VR7BP : React = Elm's viewRedux = Elm's update+model
+
+U2M73CM5F : ok
+U2M73CM5F : this is still a bit abstract to me but I think I get the idea
+U2M73CM5F : but the guy who fully caught up Elm after few weeks was basically a web dev from other languages, right ?
+U0D4VR7BP : yeah
+U0D4VR7BP : JS guy
+U2M73CM5F : ok yes
+U2M73CM5F : cause right now I'm not at that step, I'm just learning still
+U2M73CM5F : as I said, like intermediate JS - html - css level, but not more except many readings that give me some hint of the thing, but nothing like a real experience or a deep knowledge
+U2M73CM5F : and I'd like to become independant, so I'm wondering what's the best way to follow (or if it's still too far from me) - i don't intend to be a superstar dev, right now just understanding the whole web app process and being able to do "something" with it
+U4JT89FGB : wish i could answer you better, it's pretty hard to generalize about anything. I think it comes down to what your goals are with it
+U4JT89FGB : A lot of us come from a javascript background and the preference for Elm comes from the distaste for javascript
+U2M73CM5F : thank you <@U4JT89FGB>, yes sure i understand that it's hard to answer like this, thank you
+U2M73CM5F : oh, ok, well personally I like javascript very much basically, maybe there are some real world problems coming from it, but I didn't have to experience them yet
+U2M73CM5F : ok and I have just an easy question, what resources do you recommend to learn elm? the one provided on elm's website ?
+U2M73CM5F : (or maybe it's not such an easy question, i don't know)
+U0D4VR7BP : <@U2M73CM5F> personally I'd try to do some programming exercises in it (on Exercism or Project Euler or something similar), but there are tutorials: <https://www.elm-tutorial.org/en/> or <https://guide.elm-lang.org/> ... and I'm sure there are others :slightly_smiling_face:
+U4JT89FGB : See the resources at the bottom of this blog post -&gt; <https://medium.com/@birowsky/web-is-ready-for-you-on-line-elm-d3aa14dbf95>
+U2M73CM5F : <@U0D4VR7BP> <@U4JT89FGB> thank you very much
+U3LUC6SNS : Thanks very much!  I'm looking into this now.
+U17MNKY3H : <@U2M73CM5F> I think the job pool will be much smaller for Elm unfortunately.
+U17MNKY3H : (Not sure if that's an important factor for you.)
+U2M73CM5F : <@U17MNKY3H>, you're right. I don't really intend to work full time in a company, but I'd like to be able to work as a freelancer. Well I guess the problem is the sae
+U2M73CM5F : same
+U17MNKY3H : I'd say it's worse for freelance work.
+U2M73CM5F : haha good
+U17MNKY3H : With permanent positions you can seek out companies that use Elm.
+U2M73CM5F : yes you're right
+U2M73CM5F : definitely right
+U17MNKY3H : And those that do will often advertise it since it's a tech that's easy to fall in love (or at least a slight infatuation) with  :wink: - so it makes them attractive workplaces.
+U2M73CM5F : ok yes
+U17MNKY3H : Hope that's more helpfull than preachy. :sweat_smile: :slightly_smiling_face:
+U2M73CM5F : <@U17MNKY3H>, yes, sure! :wink:
+U2M73CM5F : thank you
+U4JT89FGB : I have an interesting bug - basically a page with a form and submit (login) that upon success redirects to another page with another form. On the new form, the first two inputs contain the values that were in the first form. Elm's model is correct, those old form values aren't there.. The virtual dom seems to re-use the first page's inputs.
+U48AEBJQ3 : <@U4JT89FGB> Try using `Html.Keyed` and see if the problem goes away.
+U4JT89FGB : Not interesting - i guess common in virtual dom scenarios. was curious how to handle with elm
+U48AEBJQ3 : Yes, the virtual dom has to guess a bit to make things faster, it doesn't always get it how we want it, so we need to give some extra information.
+U17MNKY3H : <@U4JT89FGB> how's your view code for the second page/screen look like?
+U4JT89FGB : ah, using a keyed node works. thanks <@U48AEBJQ3>
+U2M73CM5F : thank you for the kind answers everyone and have a nice evening!
+U5W6LPGTE : I'm having trouble understanding "multiple types" (I'm sure that's not the correct term).  E.g. "Program Never Model Msg", or "Cmd Msg", or "Http.Request value", or "Result Error value".  Could someone point me to an explanation of these "compound types"?
+U5VD8S0HZ : How would I do math operations on values greater than 2,147,483,647? Is there something in the core library that can handle this?
+U57KYFW67 : <@U5VD8S0HZ> Where did you get that number, by the way?
+U57KYFW67 : <@U5VD8S0HZ> In general, any language that compiles to Javascript will have an obnoxious time dealing with large integers, since Javascript doesn't have a native integer type. (Maybe things have changed since I last looked, though, due to webasm? I'm not sure)
+U23SA861Y : <@U5W6LPGTE> these types are called Union Types or Algebraic Data Types
+U23SA861Y : depending on the community you're in
+U5VD8S0HZ : <@U57KYFW67> in my elm-repl:```
+&gt; 2147483647
+2147483647 : number
+&gt; 2147483648
+-2147483648 : number
+```
+
+U5W6LPGTE : <@U23SA861Y> There's nothing that looks like that at: <https://guide.elm-lang.org/types/union_types.html>…
+U57KYFW67 : <@U23SA861Y> <@U5W6LPGTE> I don't think those are union/algebraic types, though. At least the aspect <@U5W6LPGTE> seems to be asking about
+U57KYFW67 : Those are all parametrized types
+U23SA861Y : the parameterization in part of the algebra of algebraic data types
+U57KYFW67 : `Cmd Msg` means a command which, when it returns a response, has the "shape" of a `Msg`
+U5W6LPGTE : <@U57KYFW67> For example, where can I find the "definition" of "Program Never Model Msg"?
+U57KYFW67 : You can kind of ignore the parameters when working in your code. For instance, just think of `Cmd Msg` as just.... a command.
+U23SA861Y : <http://package.elm-lang.org/packages/elm-lang/core/latest/Platform>
+U57KYFW67 : <@U5W6LPGTE> <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Platform#Program> &lt;-- this has the declaration. The definition is not available, though, since it is a primitive in the langauge
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

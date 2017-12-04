@@ -1,4 +1,117 @@
-Hint: It looks like a function needs 5 more arguments.```
-<@U0KNG2NHH> There is not magical way to do that in Elm.
-You can do `toString x |&gt; String.split " " |&gt; List.head == toString y |&gt; String.split " " |&gt; List.head`
-Or define your own functions on a as-needed basis.
+U3SJEDR96 : other than "it happened"
+U0JBSEGHY : I had tried that.. But it didn't seem to work. I will try it again
+U4872964V : are you catching the "input" or "change" events?
+U4872964V : wouldn't input be triggered if you paste?
+U3SJEDR96 : Important to know - if the decoder fails, it will simply do nothing
+U3SJEDR96 : but yeah, I'd think input and change would be triggered, though if you're basing things on keyup, it might start to get weird
+U0JBSEGHY : yea input overrides the keyup. I will have a look at change. I wasn't aware of this event
+U0JBSEGHY : for reference this is where I am at
+U0JBSEGHY : VIEW ```[ input                        [ --onInput FormatNumber
+                          onChange HandleField
+                        , value model.numberToCall
+                        , placeholder "Enter a Phone Number"
+                        , class "login-form"
+                        ]
+                        []
+                    ]```
+
+U0JBSEGHY : ```onChange : (( Int, String ) -&gt; Msg) -&gt; Attribute MsgonChange handler =
+    let
+        toTuple =
+            JD.map2 (,) keyCode targetValue
+    in
+        on "keyup" (JD.map handler toTuple)```
+
+U0JBSEGHY : UPDATE ```        HandleField ( key, digits ) -&gt;            if (List.member key [ 8, 46 ]) then
+                ( { model | inputField = digits }, reformatNumber digits )
+            else if (List.member key (List.range 48 57)) then
+                ( { model | inputField = digits }, formatNumber (String.right 1 digits) )
+            else
+                model ! []```
+
+U4872964V : why aren't you just using the input event?
+U4872964V : why keyup?
+U0JBSEGHY : Each time a number is added it is sent through a port to be formatted
+U4872964V : yes, but input will trigger each time you write a number
+U0JBSEGHY : it also triggers each time I do anything else
+U0JBSEGHY : so a backspace will trigger it to send the last character of the string through the port. This then comes back and instead of backspacing the last number I duplicate it :confused:
+U4872964V : well, you'd have to compare the input to what you have in your model i suppose
+U4872964V : so you are sending a character at a time to the port? why don't you send the whole input
+U4872964V : oh, you are using a specific library
+U0JBSEGHY : yea I am using the AsYouType formatter from the Google library for phone numbers
+U2LC0U8JY : handling single char inputs can be very very painful
+U2LC0U8JY : if you see a way to avoid that, and instead can go with using the whole input
+U2LC0U8JY : i would do that
+U4872964V : so you could use the formatter for the whole number instead and send the whole input
+U0JBSEGHY : Hmm yea
+U4872964V : you already have reformatNumber it seems
+U0JBSEGHY : yea there seems to be issues with that as well. Seems passing in a string with more than one character messes the formatting :sweat_smile:
+U0JBSEGHY : I probably have to loop the string into the formatter on the JS side haha
+U4872964V : well, good luck :slightly_smiling_face:
+U0JBSEGHY : Wishes all libraries were readily available in Elm
+U4872964V : I don't see why you can't just use `onInput` pass that through a port to the `format` method of that lib, pass the formatted value back and put that into the model. Possibly with some debouncing.
+U0JBSEGHY : I'd still like to capture the key events.
+U0JBSEGHY : Regarding the format. I'm pretty sure it will come back with an error if it isn't a valid number. Like the right length.
+U4872964V : sure, you'd send back a `Result` or some such
+U4872964V : But if you want to do it with key events, it should be possible too, but tricky. Don't know how paste and key events work together
+U0JBSEGHY : I think the resending the whole thing and looping on the JS side might be the way to go.
+U4872964V : yes, probably easiest
+U0JBSEGHY : Further than I was before with significantly less code.
+U0JBSEGHY : Sometimes you just gotta get dirty with vanilla JS
+U45C5R6QP : `Html.Attributes.checked` doesn't seem to be working for radio buttons. <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html-Attributes#checked> isn't that supposed to be a supported attribute on that element?
+U45C5R6QP : I need to style a radio button differently when it's checked
+U1AP08WV6 : <@U45C5R6QP> Could you post a link to <http://ellie-app.com|ellie-app.com> showing the problem?
+U45C5R6QP : sure
+U45C5R6QP : <https://ellie-app.com/3TLDQDsvPcXa1/0>
+U45C5R6QP : <@U1AP08WV6> I added the class "selected" so you can see the proper radio is being highlighted, but `checked='checked'` isn't added to the input element
+U45C5R6QP : (When you inspect with dev tools)
+U45C5R6QP : Just updated the code with some CSS that looks at the [checked] attr and as you can see it's not working. <https://ellie-app.com/3TLDQDsvPcXa1/1> - The text next to the selected radio should become red
+U3SJEDR96 : try the `:checked` pseudo-selector instead
+U3SJEDR96 : this is a property vs attribute thing, basically
+U45C5R6QP : Excellent!
+U45C5R6QP : Thank you
+U1AP08WV6 : more info here: <https://github.com/elm-lang/html/blob/master/properties-vs-attributes.md>
+U1AP08WV6 : <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html-Attributes#property>
+U5E3DU81K : I want to make the contents of an existing html doc appear within a route that elm was responsible for making
+U4KF67LEM : Hey folks, can please anybody remind a name of a library that provides a very neat type for Http request statuses? Something like "not requested", "requested", "recieved", "error" or something like that.
+U5W9X7VP1 : Hello, Elm community! Let's say I have a single page app for reading articles read from an API. How would I set OG meta tags properly when reading an article so that the user can (say) share the links? I guess meta tags can't be created/modified from Elm so is ports the way to go?
+U153UK3FA : <@U4KF67LEM> <http://package.elm-lang.org/packages/krisajenkins/remotedata/latest>
+U4KF67LEM : Thank you
+U5W9X7VP1 : <@U4KF67LEM>, also check out <http://package.elm-lang.org/packages/ohanhi/remotedata-http/latest>
+U0JBSEGHY : Can I destructure this? `Just ("07",["QLD"])`
+U153UK3FA : <@U5W9X7VP1> &lt;meta&gt; tags seems like something you'd want to do server side
+U153UK3FA : <@U0JBSEGHY> with a `case..of` block
+U0JBSEGHY : shit I'm going to have to review this another time
+U0JBSEGHY : getting messy ```                _ =                    Debug.log "regions with filter "
+                        (model.regions
+                            |&gt; List.map (\x -&gt; ( x.areaCode, x.area ))
+                            |&gt; List.filter (\x -&gt; ((Tuple.first x) == model.region))
+                            |&gt; List.head
+                        )
+```
+
+U0JBSEGHY : haha
+U5W9X7VP1 : <@U153UK3FA>, oh, true. That might be the way to go. I'll look up how it can be done with Express.
+U153UK3FA : <@U0JBSEGHY> you can do, `List.filter (\(x,_) -&gt;  x == model.region)`
+U153UK3FA : and `List.map (\{areaCode, area} -&gt; (areaCode, area ))`
+U153UK3FA : <@U0JBSEGHY> what should your above code do in the case that the `List.Filter` returns an empty list?
+U0JBSEGHY : I guess just return an empty string.
+U0JBSEGHY : Or something I dno haha
+U0JBSEGHY : Haven't thought that far ahead. I'm a dynamic typing guy so still getting used to the types
+U153UK3FA : You can use `Maybe.withDefault` to provide a default value in the case of a `Nothing`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

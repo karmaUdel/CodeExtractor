@@ -1,8 +1,78 @@
+U6DQCTZT2 : <@U0JFXEUCT> so you're not defining it in `Main.elm` then, since that would create a circular import? Maybe Elm doesn't struggle with that?
+U0JFXEUCT : yeah, CommonMsg is in a separate file
+U0JFXEUCT : and imported by Main and by the Page
+U6DQCTZT2 : <@U0JFXEUCT> that's awesome :slightly_smiling_face:
+U3SJEDR96 : No, it's not strictly 32bits. It's 50-something. Under the hood, they're just JS numbers, which are all 64bit floats.
+U3SJEDR96 : <@U6D3ERLA1> yeah, random is a little harder in fp because functions have to be pure - every time you call a function with the same inputs, it should return the same output without any side-effects. Things that look simple in other languages, like getting a random number or the current time, require a bit more work in Elm and other fp languages because of that. So, random gives you two options, either running a generator as a cmd, or doing manual seed management and using `step`, taking care to store the new seed in your model.
+U6D3ERLA1 : this has led me down the ports rabbit-hole
+U3SJEDR96 : Ports? What for?
+U6D3ERLA1 : well, I'll need this anyway...
+U6D3ERLA1 : trying to do something like:
+U6D3ERLA1 : ```        var app = Elm.Main.embed(document.body)
+
+        app.ports.fromElm.handle( function (params, callback) {
+            callback(null, Math.random());
+        })
 ```
-supposed to be a type alias?
-urhm, yeah
-:+1:
-I wish slack would give me compiler errors :stuck_out_tongue:
-hehe
-Thanks for feedback!
-I will experiment some more
+
+U6D3ERLA1 : no worky
+U6D3ERLA1 : unable to get js values into my elm app
+U3SJEDR96 : So, you can do basically that but using `Random.generate`, without using ports
+U3SJEDR96 : as for the ports syntax, it's `app.ports.fromElm.subscribe(function (arg) { * do something with arg. There is no callback, tho, but you can app.ports.toElm.send(..) it back in * }`
+U3SJEDR96 : ports are always async and always "decoupled". It's not two way traffic. It's basically a remote API that you send stuff to, and that may send stuff to you
+U6D3ERLA1 : <@U3SJEDR96> How do I read the sent value `app.ports.toElm.send(..)`
+U3SJEDR96 : quicky using `Random.generate` <https://ellie-app.com/3SYQyLhXzmha1/0>
+U3SJEDR96 : you'd have a `port toElm : (String -&gt; msg) -&gt; Sub msg` for example, which would allow sending in a  string. You also have to hook that up to your `main` program using `subscriptions`. I'd advice going through the guide (<https://guide.elm-lang.org/>), especially the section on JS interop
+U3SJEDR96 : and adapted for manual seed management, with the initial seed provided on startup through flags: <https://ellie-app.com/3SYQyLhXzmha1/1>
+U3SJEDR96 : Note that random generators can be combined using `map`, `andThen` and related functionality to create pretty powerful generators, that make "now give me a random battleship board" completely feasible and calling that would be no more complex than getting a single random number.
+U6D3ERLA1 : If I could get a single random number I'd be good
+U6D3ERLA1 : `Random.step (<http://Random.int|Random.int> 0 100) (Random.initialSeed 0)`
+U3SJEDR96 : It will be random, but it will be the same sequence every time you run your application.
+U3SJEDR96 : Well, actually, if you don't save the resulting seed anywhere, you'll just get the same value every time
+U6D3ERLA1 : Yes
+U3SJEDR96 : So that might as well just say `25`
+U6D3ERLA1 : yes
+U6D3ERLA1 : Another question...
+U6D3ERLA1 : why does this not work in repl?
+U6D3ERLA1 : $ list = (1,2,3,4)
+U6D3ERLA1 : $ (a,b) = list
+U6D3ERLA1 : ```
+5|   a$b$z
+     ^^^
+Maybe you want one of the following?
+
+    !
+    %
+    *
+    +
+
+```
+
+U3SJEDR96 : heh, yeah, destructuring doesn't work in the repl apparently. Note that you'd need `(a, b, c, d)` in regular code to match on a 4-tuple, but yeah, that's pretty weird nevertheless
+U6D3ERLA1 : ok
+U3SJEDR96 : I surmise it does some weird manipulation with the lefthand side variable you try to assign to, so it can keep track of it and print its value and whatnot, and that this fails
+U3SJEDR96 : (same with `{ foo, bar } = { foo = "Foo", bar = "bar" }` btw. I'll see if there's a bug for that and log one if there isn't)
+U24HQ3RJ7 : i am using it inline.
+U3SJEDR96 : Using `Css.compile`? Did the record that is returned by that contain any warnings/errors?
+U24HQ3RJ7 : <@U3SJEDR96> is that comment for me. ?no, i am not using Css.compile..
+please see <https://github.com/ashishnegi/be_autonomous/blob/master/Quadrant/View.elm>
+and <https://github.com/ashishnegi/be_autonomous/blob/master/MyCss.elm>
+
+U24HQ3RJ7 : if i use it inline.. do i need to call Css.compile ?
+U3SJEDR96 : That was indeed a comment to you :slightly_smiling_face: So you need to compile the styles in `MyCss.elm` to a stylesheet,  have a read through this part of the readme: <https://github.com/rtfeldman/elm-css/tree/9.1.0#approach-2-generating-css-files>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

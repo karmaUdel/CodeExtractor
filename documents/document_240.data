@@ -1,43 +1,69 @@
+U5D3HQ6R0 : ah i tend to just go back into the room and press `esc`
+U57G3TP37 : Ah okay, nice!
+U0GT29N3A : When this happens, shortcuts like ESC, Ctrl+K stop working (but thing like Alt + Arrow key still works). Not sure why
+U4ZPQHVJR : &lt;SHIFT&gt;+&lt;ESC&gt; in the desktop clients should clear notifications - but yes, I also have that issue of "stuck" notifications
+U3PCMK1AA : Is there a way to create a button so that when you click on it, it copies something into your clipboard?
+U5CESNHL2 : Trying to run facebook botkit on lambda, I understand I'll need to forgo conversations without db/sessions
+U5CESNHL2 : but I can't figure out how to wire up the lambda events so the right route is triggered in the controller. any ideas?
+U5CESNHL2 : I've tried sifting through this example: <https://github.com/mvaragnat/botkit-messenger-express-demo>
+U5CESNHL2 : ok... just pass the event.body to `handleWebhookPayload` it seems
+U5CESNHL2 : that github example is doing all the heavy lifting when it should be offloading to botkit
+U5CESNHL2 : ```exports.handler = (event, context, callback) =&gt; {
+  const Botkit = require('botkit')
+  const controller = Botkit.facebookbot({
+    access_token: PAGE_ACCESS_TOKEN,
+    verify_token: VERIFY_TOKEN,
+  })
+  const bot = controller.spawn({})
+
+  controller.on('facebook_postback', (bot, message) =&gt; {
+    const [name, data] = message.payload.split(' ')
+    switch (name) {
+      case 'GET_STARTED_PAYLOAD':
+        return bot.reply(message, 'Welcome!')
+    }
+  })
+  
+  const body = JSON.parse(event.body)
+  controller.handleWebhookPayload({body}, null, bot)
+  callback(null, {statusCode: 200})
+}
 ```
-init logs
-<@U0JL9RPC4> just a quick update. did some reading. should be possible to keep the css locally. i'll need bower, some build steps and some finnicking, but it *should* work. thanks again!
-i gtg, but follow it down the rabbit hole, look in the `parseLocation` function.... then keep digging :wink:
-Alright, take care!
-good luck
-Problem solved
-What do you recommend in the way of application icons.  Material? Something else?  I'd love to see an example of styling a button or something with an icon.
-Oops: TheSeamau5/elm-material-icons doesn't work with 0.18
-i'm thinking how do we handle a textbox that holds a field of type float. Whenever a user inputs a dot, it doesn't pass as a valid float (in the update) and then the re-render causes the textbox to remove the dot.  Same goes for clearing/emptying out such a field .
-Are you setting `value` ?
-<@U3LUC6SNS> yes
-<@U5GJ5FEAU> Maybe you should have two different checks for whether the input is valid. One for when the user is still typing and another for when they attempt to submit the value.
-yeah! i was thinking of that as well. Earlier method seemed like the easy way out :smile:
-Another thought was to do the check onBlur but unfortunately we don't have the value on blur. Maybe i'll try to write a custom onBlur event handler
-custom onBlur seems like a good way to do it. Just not sure if it punishes me sometime in the future :smile:
-is there a syntax for combining exposing all `module My.Module exposing (..)` with exposing union types `module My.Module exposing (MyType(..))`?
-<@U5UP0B6QM> combining how?
-just wanted to expose everything in my module, but it seems to be having trouble with me union types when i try to access them in other files
-woops i figured it out.. my mistake. thanks for the quick feedback though!
-How do I create commands? I'm not finding any docs about it
-And how do I use `if else` with Maybes?
-<https://www.elm-tutorial.org/en/03-subs-cmds/02-commands.html>
-Yes but it's not really helpful, because it only shows how Random gives you a command, not how to issue one of your own
-from my understanding commands can only be called in the update
-Yup
-<@U3YDBDP4Z> a Cmd is a structure that the runtime can interpret and allows the runtime to execute something, after which it would call your update with the resulting msg. What is your use-case for creating commands?
-as for `if..else` with `Maybe`; could you explain what you're trying to achieve? I'm sure we can help you figure out how to best handle it :slightly_smiling_face:
-Basically, in pseudo-elm code
-`cmd = if model.user then Cmd.none else ChangeLocation "sign-in"`
-model.user is a `Maybe User`
-Right, so, `ChangeLocation "foo"` is a branch of your `update`, right?
-Yup
-Does it change anything in your model, or does it just return your model and adds a cmd to actually go to a different page?
-If the command is ChangeLocation, then model.route would also need to be updated
-So the url and route match
-Right. So what you'd basically do is take the content of that branch of your update, turn it into a function, and call that
-I mean, you already _have_ the code you want to execute, now you just need to call it. But rather than you telling the runtime to execute your `update` with a certain message, you can just call it directly
-Sure. But then this branch of `update` would just return `(model, Cmd.none)` if that's the case?
-If I call `update` with another message directly?
-I wouldn't call `update` directly, making `update` a recursive function can get confusing while there's no real need for that. Taking the code you actually need (the content of tht branch) and putting it into a function, then calling that function from both places is going to be much easier
-Then you lost me. :slightly_smiling_face: Cause I thought we were talking about recursive update calls
-I see how I could've given you that idea, but I was rather talking about calling the common code directly, rather than update itself. Could you perhaps post your update somewhere? I could give you some pointers :slightly_smiling_face:
+
+U5CESNHL2 : if anyones interested in lambda -&gt; botkit
+U24AT9ZN1 : Check out <#C0HJYTUQ2|events> :wink: Just posted something interesting for bot developers!
+U4FSUJLLU : is there an example for a list template for faccebook
+U4FSUJLLU : why does it log ```info: ** Invalid X-HUB signature on incoming request```
+U04SM6T2H : Hey folks, the BOTNESS group has organized a survey on the types of UI primitives you use and/or want to use in your bots. If you have a few moments, we'd love to get your answers to this survey -&gt; <https://www.surveymonkey.com/r/J9L92LB>
+U04SM6T2H : the results will be collected and published by, I believe, Jon Bruner from the Oreilly Bots podcast
+U3PCMK1AA : bug? when I get a user info using the api tester, I get an email field in the profile. But if I use the rest api, I don't, everything else is there.
+U07CW6N3A : API tester tokens have maximal permissions. Using the web API with standard tokens, you'll need to have the `users:read.email` scope to access that field: <http://api.slack.com/changelog/2017-04-narrowing-email-access|api.slack.com/changelog/2017-04-narrowing-email-access> and <http://api.slack.com/changelog/2016-11-10-addressing-email-addresses|api.slack.com/changelog/2016-11-10-addressing-email-addresses> have more detail.
+U3PCMK1AA : Thanks, I thought it would be permission related, but when I saw I could access the phone #, I did not think so anymore :wink:, thanks!
+U3PCMK1AA : I already have the scope `users.profile:read`, which, if I'm reading that changelog right should enable me to get the email, right?
+U4T0WR6EM : Hi! I have some bot domains available if interested DM me!
+```
+<http://makeamessengerbot.com|makeamessengerbot.com>
+<http://makeaslackbot.com|makeaslackbot.com>
+<http://messagebotdeveloper.com|messagebotdeveloper.com>
+<http://slackbotdev.com|slackbotdev.com>
+<http://slackbotdeveloper.com|slackbotdeveloper.com>
+```
+
+U07CW6N3A : I _believe_ that should still grant you access -- at least I wrote that it should back in November! It's possible I mis-spoke and you're the first to notice though :wink:
+U4DU4NRL4 : I made a Google Bot for Slack. Check it out @ <https://github.com/MatejMecka/GoogleAssistantSlack>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

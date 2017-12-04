@@ -1,34 +1,175 @@
-nthItemWithDefault index default = nthItem index &gt;&gt; Maybe.withDefault default```
-I would still suggest that if you need random (nth element) access, then list is the wrong datastructure to use.
-there is a reason those methods are not in the stdlib and it's intentionally annoying to use
-I find the cognitive overhead of trying to remember which "listy" data structure I'm using isn't worth it. YMWV :slightly_smiling_face:
-In our system, we don't have any other listy data structure except `List`
-We had a case where we thought we needed random access, but it turned out we really needed a zipper, so we built one on top of `List` :slightly_smiling_face:
-precisely my point
-But, of course, context rules
-I'd probably say "if you need a random access data structure, you might look at whether you really do" :slightly_smiling_face:
-especially for beginners, I'd say "stick with the list!"
-IMNSHBCCO
-It could be that you need a dict instead
-also
-Then the complexity around `Dict` needing comparable comes in. :slightly_smiling_face:
-I'm pro-OnlyList ! :slightly_smiling_face:
-fair enough, I'm just saying its worth thinking about whether that's actually the data structure you want. If only so you sit down and force yourself to think about the structure of your data
-True, true. :slightly_smiling_face: I look at <#C192T0Q1E|beginners> and think "just use list!" :slightly_smiling_face:
-I think of <#C192T0Q1E|beginners> as beginners to elm but not necessarily programming, but I could be wrong.
-I think it covers all. but, a lot of people come in here from javascript, so there are implications from that on expectations around lists/arrays/dictionaries/etc
-Breaking those can be good.
-when moving into a language like Elm
-Which is why i tend towards "if you think you need random access, you probably don't"
-sure, I can agree with that
-But, in the end, :heart_eyes_cat: for every piece of friendly, welcoming advice that people give here
-That's the most important thing
-Because, in the end, whether you use array or list, WELCOME TO ELM! is a pretty consistent message I see here. I :heart: that!
-:stuck_out_tongue:
-`button [onClick (&lt;funtion&gt; &lt;model&gt;)] [text "blah]`
-function no, it dispatches a message with which you can do something with
-Alright. Just was curious if there was another way. Thanks <@U23SA861Y>
-you can however run a function against the model and have the message get dispatched back with the result
-Can anyone point me to an example of how to use Json.Decode.Pipeline to decode a field  defined as a union type?
-oneOf is the function you want I believe
-Ah, ok. I just found an example using that.  Thanks!
+U59AF21LJ : <@U5XHTBFS6> I guess I should trim it to a minimal example.
+U5XTFSTFV : Hi, Maybe somebody here can help meIs elm debouncing msgs send to the update function?
+I'm triggering an onScroll event on a div and it only gets passed to the update ftn once the scroll event  ends.
+
+U5XHTBFS6 : <@U59AF21LJ> I see you reverted to using `<http://Http.post|Http.post>` with `Http.jsonBody`. Can you try again with the raw `request`?
+U59AF21LJ : <@U5XHTBFS6> Doesn't change anything if I have```
+saveTree : StoryTree -&gt; Cmd Msg
+saveTree tree =
+  let
+    url : String
+    url = "update"
+
+    value : Encode.Value
+    value =
+      Encode.object
+        [ ("name", Encode.string "Tom")
+        , ("age", <http://Encode.int|Encode.int> 42)
+        ]
+
+    body : Http.Body
+    body =
+      Http.jsonBody value
+
+    request =
+      Http.request {
+        method = "POST",
+        headers = [
+          Http.header "Content-type" "application/json"
+        ],
+        url = url,
+        body = body,
+        expect = Http.expectString,
+        timeout = Nothing,
+        withCredentials = True
+      }
+  in Http.send PostBack request
+```
+
+U5XHTBFS6 : hmmm i'll try running locally here and see if I can spot something
+U59AF21LJ : <@U5XHTBFS6> I'm really afraid it's due to caching even though I'm using private browsing.
+U59AF21LJ : <@U5XHTBFS6> <@U41NK9BM4> I have to apologise. It was a caching problem…
+U41NK9BM4 : As I said: "Usually when things like this happen usually there's some stupid, obvious, tiny thing that screws up everything"
+U41NK9BM4 : :grimacing:
+U59AF21LJ : Yeah.^^
+U5W50TZ6C : Hi! I'm trying to model a file system in Elm. Here's what I have so far:```
+type alias File =
+    { name : String
+    , content : String
+    }
+
+
+type alias Folder =
+    { name : String
+    , children : Items
+    }
+
+
+type Items
+    = Folder
+    | File
+    | Nothing
+```
+But this isn't valid; Elm sees *two* `Folder` and *two* `File`. What is the proper way to do this?
+
+U59AF21LJ : <@U5W50TZ6C> You probably have to give different names to Folder and File in the definition of Items.
+U41NK9BM4 : Glad you made it to work, <@U59AF21LJ>
+U59AF21LJ : `type Items = ItemFolder Folder | ItemFile File | Nothing`
+U5W50TZ6C : Ahh, I see <@U59AF21LJ>
+U59AF21LJ : <@U41NK9BM4> Thanks.
+U41NK9BM4 : Of course you have to put data somewhere :slightly_smiling_face:
+U5XHTBFS6 : <@U59AF21LJ> ha! cache is always a problem.
+U59AF21LJ : <@U5XHTBFS6> Yeah, I thought I took enough precautions but I didn't.
+U41NK9BM4 : I tend to like Safari's Develop -&gt; Disable Caching a lot :slightly_smiling_face:
+U5XHTBFS6 : "There are only two hard things in Computer Science: cache invalidation and naming things."
+U59AF21LJ : I already took precautions because it wasn't updating my CSS otherwise, but for some reason I needed to tick the box to disable it in the network inspector.
+U41NK9BM4 : So basically it was using older version of your Elm code, I guess.
+U41NK9BM4 : And your edits didn't make a difference
+U3SJEDR96 : <@U5XHTBFS6> and off-by-one errors.
+U41NK9BM4 : Ah yes, that's the corollary
+U5XHTBFS6 : hahah yes
+U5XHTBFS6 : and racondice tions also
+U59AF21LJ : <@U41NK9BM4> Yes, I understood when I went for a minimal version to paste here and when it didn't change anything even though I had removed all but the button.
+U41NK9BM4 : Indeed. :slightly_smiling_face:
+U59AF21LJ : Thanks again to all of you.
+U0J8D9M2P : If I have `lang` property in the model e.g.```
+type Lang
+    = En
+    | De
+
+
+type alias Model =
+    { lang: Lang
+    }
+```
+
+and I have translate functions e.g.
+```
+title lang =
+    case lang of
+        En -&gt;
+            "I'm a title"
+
+        De -&gt;
+            "Ich bin ein Titel"
+
+
+description lang =
+    case lang of
+        En -&gt;
+            "I'm the description"
+
+        De -&gt;
+            "Ich bin die Beschreibung"
+```
+How I can partially apply language property of model to translate functions? So I can just call them without passing language around.
+
+U5XHTBFS6 : I'm not sure I understood what you want, but if you do something like `let en_title = title En in ...` you can use the `en_title` var wherever a `String` is allowed
+U5XHTBFS6 : (that is, inside that `let-in` context)
+U14Q8S4EM : I think hes asking how he can use `Lang`, but without a case statement at the lowest level of all his html.
+U14Q8S4EM : Right?
+U0J8D9M2P : The question is how I can use translation functions without passing language into them
+U0J8D9M2P : in `elm-css-helpers` I can do like this```
+{ id, class, classList } =
+    Html.CssHelpers.withNamespace "dreamwriter"
+```
+
+U0J8D9M2P : so whenever I use those functions they will be called with given prefix
+U48AEBJQ3 : I'm not aware of a simple, out-of-the-box way of avoiding passing *something* around. It sounds like figuring out how to wrap things in `State` would work, but that's a rather advanced topic.
+U5XHTBFS6 : Maybe something like that would help?
+
+```
+type alias Translation =
+    { title: String
+    , description: String
+    , ...
+    }
+
+
+translate : Lang -&gt; Translation
+translate lang =
+    { tile : title lang
+    , description : description lang
+    , ...
+    }
+
+
+create_div : Translation -&gt; (Translation -&gt; String) -&gt; Html Msg
+create_div translation text_getter =
+    div [ ]
+        [ p [] [ text_getter translation ]
+
+
+view model =
+    let
+        translation = translate model.lang
+    in 
+        create_div translation .description
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

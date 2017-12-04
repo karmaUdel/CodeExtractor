@@ -1,14 +1,47 @@
-hey I was thinking about a way to minimize the memory requirements of a nested clojure data structure where some substructures are identical, and I came up with this: ```(partial clojure.walk/postwalk (memoize identity))``` but I haven't really given it much thought. How would you do something like this?
-<@U1ACUMJKX> if you just use the same object as an arg to assoc, it won't be duplicated
-depending on how the data was created, of course
-my use case involves taking an .edn file from disk that is probably too self similar and large to fit in memory
-oh, yeah, fun
-it would be interesting to try the postwalk identity and then compare the object pointers via jdb maybe(?)
-yeah i haven't tested it i was just wondering if anyone else had ideas
-what's "fn*"? I cannot find the document of it~
-it's an implementation detail of fn
-fn is implemented as a macro, and uses the destructuring functions that clojure.core defines for macros
-so means: I don't have to care about it?
-fn* is implemented in java code
-right, remembering that it's an fn that can't destructure is probably enough
-could you please give an example? of the difference?
+U5ZAJ15P0 : ah
+U051SS2EU : I guess I should have explicitly mentioned the `~'` idiom to prevent namespacing
+U5ZAJ15P0 : is there a way to do the opposite? selectively pick the symbols I want to namespace qualify
+U051SS2EU : that's harder
+U5ZAJ15P0 : instead of the ones I do not want to namespace qualify
+U5ZAJ15P0 : mmh ok
+U5ZAJ15P0 : nevermind then
+U5ZAJ15P0 : thanks :slightly_smiling_face:
+U051SS2EU : this is close, but no cigar ```peregrine.circle=&gt; '[:find ... :where [`identity ?foo]][:find ... :where [(quote clojure.core/identity) ?foo]]```
+
+U5ZAJ15P0 : yep, not quite :confused:
+U5ZAJ15P0 : why wouldn't this work:```
+'[:find ... :where [~`identity ?foo]]
+```
+?
+
+U051SS2EU : ~ doesn't make sense outside `
+U5ZAJ15P0 : why does it make sense here:```
+`[:find ... :where [identity ~'?foo]]
+```
+?
+
+U051SS2EU : it's inside the ` at the beginning of the vector
+U051HUZLD : thanks
+U5ZAJ15P0 : right, but why does swapping out the use of syntax quoting vs normal quoting makes it different in use?
+U5ZAJ15P0 : (I'm not familiar enough with quoting yet)
+U051SS2EU : because ~ is only valid in syntax quote
+U5ZAJ15P0 : oh
+U051SS2EU : it's a special operation that is only defined in that context
+U5ZAJ15P0 : using it outside throws ```java.lang.IllegalStateException: Attempting to call unbound fn: #'clojure.core/unquote```
+U5ZAJ15P0 : does this only get bound within a syntax quote?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

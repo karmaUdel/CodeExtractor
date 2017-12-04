@@ -1,14 +1,79 @@
+U6531GSTW : <@U23SA861Y> <https://jsonblob.com/6ecd993e-6290-11e7-ae4c-e793fe90c432>
+U6531GSTW : used on this code <https://ellie-app.com/3HGC3s98j2xa1/4>
+U23SA861Y : looks alright, but I think you might be reading the wrong file maybe?
+U6531GSTW : can i link this url to the elm code?
+U6531GSTW : or what do you mean by "wrong file"
+U6531GSTW : this part of update reads the json link etc. :
+U6531GSTW : LoadJson -&gt;            --( model, Http.send JsonLoaded (Http.getString "hello.txt") )
+            --( model, Http.send JsonLoaded (Http.getString "shapes.json") )
+            ( model
+            , Http.send JsonLoaded
+                (Http.get "<https://jsonblob.com/6ecd993e-6290-11e7-ae4c-e793fe90c432>"
+                    (JD.field "Aufgaben" (JD.list aufgabe))
+                )
+            )
+
+        JsonLoaded (Ok newListAufgaben) -&gt;
+            ( { model | saved = newListAufgaben }, Cmd.none )
+
+        JsonLoaded (Err error) -&gt;
+            ( { model | show = "Error:  " ++ (toString error) }, Cmd.none )
+
+U23SA861Y : heh, doesn't that link to the html page not the raw json blob
+U6531GSTW : yes how can i upload such a raw json?
+U23SA861Y : umm, well you need a server to host it. you do it through github maybe
+U62V8HFJR : I'm getting a syntax error for this code snippet:```
+module Src.Models exposing (..)
+
+import Navigation
+
+import Homework.Week4.Main as Week4
+
+type Route = ReadmeRoute
+           | Week4Route
+           | NotFoundRoute
+
+type alias Model =
+    { week4 : Week4.Model
+    , route : Route
+    }
 ```
-and the result that I always get is an Error regarding not being able to parse invalid JSON
-Hey guys, wondering im struggling with types annotation where the type is two seperate words, but i think it clicked...if i get this right...when we see `view: Model -&gt; Html String` its basically shortHand for `view: Model -&gt; { recordTypeA : Html, recordTypeB: String }`
-If i'm wrong, i'd love to understand what is really happenning
-I think you're wrong
-The raw type is `Html a` where `a` can be anything at first. You will then say that, in your particular use case, it will be a `String` becoming a `Html String`
-For example, you have `Maybe a` using the same pattern where `a` will be the type of the value inside the `Maybe`
-If you have an `Int` inside it, it will be a `Maybe Int`
-For `Html`, the generic type `a` is the type of msg that the html can trigger
-Thanks <@U1UGYHGCA> this makes much more sense than my initial though
-I already posted this in general, but I guess it's actually a newbie question :sweat_smile:
-Can somebody help me? :confused:
-Hi everybody. What is the easiest way in elm to change dynamically style of some element?. I have button with Id and how can I choose and change its color? Should I try to use jQuery or actually exist some elm mechanism to do that?
-Yeah, you can do an inline style
+
+U62V8HFJR : ```-- SYNTAX PROBLEM ------------------------------------------- ././Src/Models.elm
+
+I ran into something unexpected when parsing your code!
+
+18|     { week4 : Week4.initModel
+                ^
+I am looking for one of the following things:
+
+    "|"
+    an equals sign '='
+    whitespace
+```
+
+U62V8HFJR : I keep staring at this and don't see the issue -- am I just blind or is something weird going on?
+U23SA861Y : hmm, I'm not seeing it either...
+U62V8HFJR : my initial guess was that Elm didn't like numbers in identifiers (e.g. `week4` as the field in `Model`), but the REPL didn't seem to mind them
+U23SA861Y : ohh the issues is where you are creating the model
+U23SA861Y : record assignment uses `=` not `:`. The colon is used for the type declaration but in the assignment you need to use equals
+U62V8HFJR : Oh, :facepalm:
+U62V8HFJR : just looking at the wrong line
+U62V8HFJR : yep, blind then. Thanks
+U23SA861Y : line 18
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

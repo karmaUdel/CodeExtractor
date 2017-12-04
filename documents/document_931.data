@@ -1,0 +1,55 @@
+U07SCV14J : I ask because I know that code recently changed, but I don't think it made it into the release
+U5KU1HNKY : correct. I'm not leet :stuck_out_tongue:
+U07SCV14J : maybe try a snapshot and see if you get the same error? the answer would be informative, at least.
+U462H29AR : <@U5KU1HNKY> I see you switched here from `#racket` on this so I will, too. :slightly_smiling_face:  Found the thing this reminded me of: <https://groups.google.com/d/msg/racket-users/Jw3jMB2viCk/ggJbXHu5BQAJ>
+U5KU1HNKY : hrm… left side of nightlies (6.9.0.4) or right side (current)?
+U5KU1HNKY : and wow… can I check this with minimal? 90% smaller and I'm in a cafe
+U07SCV14J : <@U5KU1HNKY>: you can probably check it with minimal, but you'll want to use `racket/help` instead of `xrepl`, since the latter is not shipped with minimal racket, and it ends up pulling in a lot of dependencies
+U07SCV14J : (see <https://github.com/racket/racket/issues/1465> )
+U07SCV14J : also, 6.9.0.4 and current are the same version, the latter is just a stable alias for things like CI scripts
+U5KU1HNKY : is there a way to isolate this? in ruby we can set GEM_HOME to create a temporary repository that you can later throw away
+U5KU1HNKY : moot point:
+```
+10058 % ./bin/raco pkg install --dry-run racket-help
+Resolving "racket-help" via <https://www.cs.utah.edu/plt/snapshots/20170527-7f1ab90/catalog/>
+tcp-connect: connection failed
+  detail: host not found
+  address: <http://www.cs.utah.edu|www.cs.utah.edu>
+  port number: 443
+  step: 1
+  system error: nodename nor servname provided, or not known; errno=8
+```
+
+U07SCV14J : I mean the module `racket/help`. it's in the `base` package; you won't have to install it.
+U07SCV14J : also, the snapshot should maintain its own set of packages.
+U5KU1HNKY : I can't figure this out… ¯\_(?)_/¯
+U5KU1HNKY : ```&gt; (help string-trim)
+standard-module-name-resolver: collection not found
+  for module path: help/help-utils
+```
+
+U07SCV14J : oh, right. apparently that requires the `racket-doc` package to be installed, which admittedly makes sense.
+U07SCV14J : (since it's opening the docs)
+U5KU1HNKY : yeah. as far as I can tell, minimal is too minimal for this :slightly_smiling_face:
+U07SCV14J : but it's `racket-doc` that will bring in the whole universe of dependencies. :stuck_out_tongue:
+U07SCV14J : since `racket-doc` currently links to other docs, including the web server docs… which means you'll end up installing the web server (and a whole bunch of other packages) if you "just” install the docs.
+U5KU1HNKY : yeah… I'll just download the minimal+gui+docs package. it's 80mb (instead of 9!)… it'll just be slower on this cafe network
+U07SCV14J : that's probably the safest bet, yes
+U5KU1HNKY : maybe it should have a more descriptive name than "gui-6.9.0.4-x86_64-macosx.dmg” … maybe "racket” should be in there somewhere. :stuck_out_tongue:
+U5KU1HNKY : compared to: min-racket-6.9.0.4-x86_64-macosx.dmg
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

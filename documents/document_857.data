@@ -1,0 +1,134 @@
+U5VGKQ2SY : so if list, and first element exists and that first element is 'None', then it is empty
+U5VGKQ2SY : also, if val does not exist (None or empty), it is also True (is_empty)
+U5VGKQ2SY : ```is_empty([None]): True
+is_empty(): True
+is_empty(None): True
+is_empty(['None']): True
+is_empty(1): False
+```
+
+U560XSDT3 : ?h, man! Thank you soo much! I hope you live near me, so i can buy you a beer or something!! Thanks!
+U560XSDT3 : <@U5VGKQ2SY> Please, don't ban him, ban me, i'm a noob :smile:
+U5VGKQ2SY : hey, what about `" "` or `[" "]`? &lt;-- spaces
+U5VGKQ2SY : As for the alcoholic refreshment, I'm near an airport. Just tell me where to go. :laughing:
+U560XSDT3 : Eheheheh :smile: Come to Serbia dude! :smile: 
+I will add that option, don't worry :slightly_smiling_face: I was in trouble to determine is list or what :slightly_smiling_face:
+
+U5VGKQ2SY : packing bags yo
+U560XSDT3 : <@U5VGKQ2SY> See ya mate!!
+U5CRANMFV : Hi all.Can't deal with pandas.
+I have six columns 1,2,3,4,5,6
+I need to merge into one on 1 and 4, 2 and 5, 3 and 6
+How to do it - I do not understand.
+```first_column = [df["1"], df["4"]]
+second_column = [df["2"], df["5"]]
+third_column = [df["3"], df["6"]]
+result = pd.concat(first_column, second_column, third_column)```
+not working.
+Used `append` - did not help.
+
+U65CTNMTR : `pd.concat([first_column, second_column, third_column])` perhaps ?
+U5NMSURAQ : oops, it looks a bit strange at the end
+U5NMSURAQ : but that's not the point :stuck_out_tongue:
+U5CRANMFV : Thank you very much.
+U5SUV9BPD : has anyone worked with `gspread` to retrieve and write data to google spreadsheets? getting data from the spreadsheet works totally fine but i am having trouble writing to it. followed the documentation. maybe someone has had similar issues and i am missing something
+U4BMZ90T0 : Anyone here familiar with SVN?
+U5LNXQHN3 : The version control software?
+U4BMZ90T0 : Yeah.
+U4BMZ90T0 : Oh the joys of not being able to use Git
+U5LNXQHN3 : I spent several years with it. What's the problem?
+U4BMZ90T0 : Got a huge code base of multiple versions of a project and I needed to basically just get the newest versions. It seems that something happened to my local directory so it may or not be updating and checking out everything from the server
+U4BMZ90T0 : But it seems like a common issue is a `forcibly closed connection` also `truncated http response` and `hash mismatch`
+U5LNXQHN3 : ugh... sounds weird. Are you pulling from an HTTP repository then?
+U4BMZ90T0 : The hash mismatch problem seems fixed by going to the local directory where the issue occurred and running `svn update --set-depth empty` then `svn update --set-depth infinity`
+U4BMZ90T0 : <@U5LNXQHN3> yes
+U4BMZ90T0 : It's a outside hosted server
+U4BMZ90T0 : outside of our network that is
+U4BMZ90T0 : Also occasionally run into hanging on update. I use the CLI cause the GUI is just way too slow having to cleanup due to locked repo.
+U4BMZ90T0 : Where in the console it will just sit for a while
+U4BMZ90T0 : and eventually I have to `ctrl-c` and then `svn cleanup` and `svn update`
+U4BMZ90T0 : It probably wouldn't be such a huge PITA, but it's a massive repo
+U5LNXQHN3 : yeah... sorry that I probably can't help, because I've never had that sort of problem with it
+U4BMZ90T0 : No problem, thanks anyways
+U5S8CNULD : Guys, anyone worked with docker?
+U1UFZTD4J : lots of us have <@U5S8CNULD>
+U5S8CNULD : Could you help me? I can't connect mysql image with my python image;(
+U1BP42MRS : I presume you are using compose?
+U1BP42MRS : Just post your question :smile:
+U5S8CNULD : one moment;)
+U5S8CNULD : &gt;I presume you are using compose?no:slightly_smiling_face:
+
+U5S8CNULD : first I running, MySQL image```
+docker run --name my-db  -e MYSQL_ROOT_PASSWORD=t123  mysql  
+```
+
+then I build the image for the python app
+```
+docker build --rm -t myapp:dev -f Dockerfile .
+```
+Dockerfile body
+```
+FROM python:2.7
+RUN apt-get update &amp;&amp; apt-get install -y python-dev
+
+ENV DEBIAN_FRONTEND noninteractive
+RUN echo "en_US.UTF-8 UTF-8" &gt; /etc/locale.gen &amp;&amp; locale-gen
+
+ENV PYTHONPATH /app
+
+RUN mkdir app
+WORKDIR /app/
+
+# Ensure that Python outputs everything that's printed inside
+# the application rather than buffering it.
+ENV PYTHONUNBUFFERED 1
+
+# Defaults to PIP
+ENV PIP_NO_CACHE_DIR off
+ENV PIP_DISABLE_PIP_VERSION_CHECK on
+
+ENTRYPOINT [ "/bin/bash" ]
+```
+
+then I running my app image
+```
+docker run --name=test-app -p 8000:8000 -it -v $PWD:/app --link my-db --env-file=.env myapp:dev
+```
+
+and tried to run flask app in the docker container, and got error
+```
+Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock'
+```
+
+U5S8CNULD : Spend a lot of time, and can't find solution:disappointed:
+U1BP42MRS : Looks like you are trying to access the MySQL server through the socket, I think you need to set it to use the port and the hostname `my-db` (or whatever `link` arg you name)
+U5S8CNULD : ```docker run --name -p 3306 -h localhost  -e MYSQL_ROOT_PASSWORD=t123  mysql  
+```
+something like this?
+
+U1BP42MRS : No, it's what you link it as, so the `docker run --name=test-app -p 8000:8000 -it -v $PWD:/app --link my-db --env-file=.env myapp:dev` The `--link my-db` would name the link `my-db`
+U1BP42MRS : So I think you need to change your mysql connection string to be looking at the port, not a local socket
+U5S8CNULD : okay I'll try.```
+docker run --name=test-app -p 8000:8000 -it -v $PWD:/app --link -p 3306 -h localhost my-db --env-file=.env myapp:dev
+```
+this one;)? sorry, I :disappointed:confused
+
+U1BP42MRS : that looks invalid, `--link` requires an argument
+U1BP42MRS : I am saying, just use what you originally posted, but in your app code where you connect to the database, use the hostname `my-db`
+U1BP42MRS : What lib are you using to talk to your DB?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

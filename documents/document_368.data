@@ -1,10 +1,142 @@
+U153UK3FA : `subject` and `error` are type parameters, they can be any type
+U62PV9CPN : Instead of messing around in my app, maybe I can contribute something when I figure this out… would be kinda neat
+U153UK3FA : any lowercase identifier in a type signature is a ‘type parameter'
+U2D7NUGS1 : Good morning! (It's morning here :)
+U2D7NUGS1 : Any hints how to implement a custom Json Decoder?
+U2D7NUGS1 : I have a `Decode.Decoder String` and want to turn it into `Decode.Decoder MyCustomType`
+U2D7NUGS1 : Let's say I have a Json.Decode.Value that holds only a string, like `"a"` or `"b"` or `"c"`. I also have a type `MyCustomType = A | B | C`.
+U2D7NUGS1 : I know I can use a `decodeValue` to get a string and then pattern match it and return `MyCustomType`, but I want to get a decoder so I can use it in decoding larger JSON structure, say: ```{
+  name: "Bob",
+  type: "a"
+}
 ```
-Yea, I was thinking that would be nice. F# has the ability where you can just highlight code &amp; send it to the repl.
-Clojure does as well.
-I guess it's time to start learning Haskell :slightly_smiling_face:
-Is there an easy way to extract the part after the `Ok`?  Working with multi-line code in the repl is a pain.
-The only thing I can think of is to write a function with `Result.withDefault` and then have the `value` just be an empty array if it fails
-Sorry :disappointed:
-<@U3LUC6SNS> `Result.withDefault` is what you want. But you might just want `Result.map` if you're planning on using that value for something
-These 5 mini-tutorials take you through everything you need to know about encoding and decoding in Elm
-<@U3SJEDR96> My attempts at `at : List String -&gt; Decoder a -&gt; Decoder a` :
+
+U2D7NUGS1 : So I guess I still need pattern matching, but without actual decoding.
+U2D7NUGS1 : Shall I use `Decode.map`?
+U2D7NUGS1 : Ok, got it! In case someone wonders, here is a sample code for decoding `string` into `type`: ```decodeAttribute : Decode.Value -&gt; Attribute
+decodeAttribute json =
+    let
+        stringToValueType string =
+            case string of
+                "boolean" -&gt;
+                    Boolean
+
+                "string" -&gt;
+                    String
+
+                "number" -&gt;
+                    Numerical
+
+                _ -&gt;
+                    Other
+
+        typeDecoder : Decode.Decoder ValueType
+        typeDecoder =
+            Decode.map stringToValueType Decode.string
+
+        attributeDecoder =
+            Decode.map2 Attribute
+                (<http://Decode.at|Decode.at> [ "name" ] Decode.string)
+                (<http://Decode.at|Decode.at> [ "type" ] typeDecoder)
+    in
+        case Decode.decodeValue attributeDecoder json of
+            Ok attribute -&gt;
+                attribute
+
+            Err message -&gt;
+                Debug.crash message
+```
+
+U2D7NUGS1 : Still JSON decoding feels a little bit like black magic to me.
+U153UK3FA : <@U2D7NUGS1> which part feels like magic?
+U2D7NUGS1 : It's hard to pin it down. I guess that's the thing about magic :magic_wand:
+U153UK3FA : `Decode.map2 Attribute` is often something that people mention
+U153UK3FA : `(<http://Decode.at|Decode.at> [ "name" ] Decode.string)` is pretty straight forward
+U153UK3FA : `Decode.map stringToValueType Decode.string` is just a `map` and it works like most other `map` functions. eg. `Maybe.map`, `List.map` etc.
+U604S603Y : I find writing json decoders hard because the error messages look really crazy when I mess up - and as a beginner I mess them up constantly. And I'm probably pampered already by the other Elm compiler error messages...
+U2D7NUGS1 : <@U153UK3FA> you are right and I'm not really complaining. Probably it's just my brain rewiring from imperative to FP.
+U2D7NUGS1 : Probably the difficult part is composing decoders. In JS you would just travers value. In Elm you have to think in more abstract terms.
+U3SJEDR96 : Yeah, you have to compose them to match the intended structure. It's a somewhat different way of thinking, indeed.
+U2D7NUGS1 : It's very good. Just takes a change of a mindset.
+U153UK3FA : <@U604S603Y> are you using elm-decoder-pipeline ? That trades nicer API against good error messages
+U604S603Y : yes, I am using elm-decoder-pipeline
+U3LUC6SNS : Hello all!  I've transferred the entire folder containing my app from my dev machine (with inoperative keyboard) to my wife's computer.  On the latter I have installed elm, node, webpack, etc.  However, when I run `yarn start`, I get this error message:```
+$ yarn start
+yarn start v0.27.5
+$ nf start
+[WARN] No ENV file found
+5:52:52 AM api.1    |  module.js:487
+5:52:52 AM api.1    |      throw err;
+5:52:52 AM api.1    |      ^
+5:52:52 AM api.1    |  Error: Cannot find module '/Users/carlson/Documents/dev/koko_client2/api.js'
+5:52:52 AM api.1    |      at Function.Module._resolveFilename (module.js:485:15)
+5:52:52 AM api.1    |      at Function.Module._load (module.js:437:25)
+5:52:52 AM api.1    |      at Function.Module.runMain (module.js:605:10)
+5:52:52 AM api.1    |      at startup (bootstrap_node.js:158:16)
+5:52:52 AM api.1    |      at bootstrap_node.js:575:3
+5:52:52 AM api.1    |  error Command failed with exit code 1.
+[DONE] Killing all processes with signal  null
+internal/util.js:183
+  throw new errors.Error('ERR_UNKNOWN_SIGNAL', signal);
+  ^
+
+Error [ERR_UNKNOWN_SIGNAL]: Unknown signal: null
+    at convertToValidSignal (internal/util.js:183:9)
+    at ChildProcess.kill (internal/child_process.js:373:5)
+    at EventEmitter.&lt;anonymous&gt; (/Users/carlson/Documents/dev/koko_client2/node_modules/foreman/lib/proc.js:54:11)
+    at emitOne (events.js:120:20)
+    at EventEmitter.emit (events.js:210:7)
+    at ChildProcess.&lt;anonymous&gt; (/Users/carlson/Documents/dev/koko_client2/node_modules/foreman/lib/proc.js:50:13)
+    at emitTwo (events.js:125:13)
+    at ChildProcess.emit (events.js:213:7)
+    at Process.ChildProcess._handle.onexit (internal/child_process.js:197:12)
+error Command failed with exit code 1.
+```
+I've missed something, but have no idea what it is.
+
+U3SJEDR96 : to be fair, <@U3LUC6SNS>, I didn't see an api.js when I had a look at your code last week.. I did see a `server.js` though, but that seems a mock at most
+U3SJEDR96 : can you check if there _is_ an api.js on your (former) dev machine? Plugging in an external keyboard might help..
+U3LUC6SNS : <@U3SJEDR96>, I'll investigate -- thanks!
+U3LUC6SNS : <@U3SJEDR96>, just looked at the old app folder.  No `api.js` file there.  Interestingly enough, when I run `yarn start` there, I get a similar error message.: `Cannot find model ...koko_client/api.js` etc.  But it is much shorter.  It ends with `Killing all processs with signal null ... Exited with code 1`  But then it goes on to say `Project is running at http://...3000`
+U3LUC6SNS : Hard to do much on the old machine since I can't type a space with the  incompatible keyboard.
+U3LUC6SNS : server.js is an express web server.  I looked in webpack.config.js and found no `api.js`
+U3LUC6SNS : Ah here it is: in `package.json`:```
+"scripts": {
+    "api": "node api.js",
+    "build": "webpack",
+    "client": "webpack-dev-server --port 3000",
+    "start": "nf start"
+  },
+```
+
+U3SJEDR96 : right. So your Procfile probably has a `yarn client` in there somewhere... It's a little odd that foreman decides to stop on your current machine, but continued on your older machine. I suppose you can remove the `yarn api` part of your Procfile for now..
+U3LUC6SNS : <@U3SJEDR96> Commented out `api yarn api` in `Procfile`.  The error is now```
+172-10-18-240:koko_client2 carlson$ yarn start
+yarn start v0.27.5
+$ nf start
+[WARN] No ENV file found
+6:27:11 AM client.1 |  sh: webpack-dev-server: command not found
+6:27:11 AM client.1 |  error Command failed with exit code 127.
+```
+Could there be a problem with `PATH`?  It is now
+```
+172-10-18-240:koko_client2 carlson$ echo $PATH
+/Users/carlson/Library/Haskell/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/carlson/.rvm/bin:/Users/carlson/dev/node_modules/mathjax-node/bin
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

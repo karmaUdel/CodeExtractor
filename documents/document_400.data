@@ -1,2 +1,53 @@
-}```
-so my main view function is this:
+U5W50TZ6C : Wow, good to know <@U0LPMPL2U> !
+U2DSBB76Y : Is it possible to click on a button which expands out an input, and give that input focus?
+U4WH8STNX : <@U2DSBB76Y> as far as I know that's only possible with ports right now
+U0LPMPL2U : Yes. You want `Dom.focus`
+U0LPMPL2U : from `elm-lang/dom` package
+U4WH8STNX : Oh, I didn't know that one :slightly_smiling_face:
+U0LPMPL2U : it returns a `Task` that you can turn into a `Cmd`
+U2DSBB76Y : Awesome, thanks! :raised_hands:
+U2DSBB76Y : Btw, it did return a `Task` :smile:
+U0LPMPL2U : typically you don't care to do anything after the focus has happened so I typically just use a `Noop` message
+U0LPMPL2U : ```focus : Cmd Msg
+focus =
+    Dom.focus "search-box"
+        |&gt; Task.attempt (always Noop)
+```
+
+U0LPMPL2U : where `"search-box"` is an id on the input
+U0LPMPL2U : It get's triggered in an `update` function like:
+```
+ OpenSelect -&gt;
+            ( { model | state = Open }, focus )
+```
+
+U2DSBB76Y : Cool, I've never really used `always` before! Neat
+U5GSY0G9J : So i have this container that has a date picker in it and it is being built with a port. Right now i have to call the port everytime i switch the view in that container. Is there a better way to do this other than calling that port on all the buttons that switch to that view?
+U0LPMPL2U : The port calling would be done in the `update`, not on the buttons right?
+U0LPMPL2U : your probably have a Msg like:```
+TransitionTo page -&gt; (transitionTo page model, triggerPort)
+```
+
+U37BS6J6N : Ello all, what is the simplest way to work with design heavy views that need to be responsive. Working with bootstrap is pretty painful atm.I"m debating trying elmx
+<https://github.com/pzavolinsky/elmx>
+
+U1CE9DL9H : what exactly is problematic?
+U1CE9DL9H : and how would another way of writing html help?, the default elm html is really nice once you have worked with it a little bit
+U37BS6J6N : I'm trying to translate existing bootstrap html into sections of Html
+U1CE9DL9H : are you familiar with <http://elm-bootstrap.info/>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,1 +1,134 @@
-                ! []```
+U3LUC6SNS : Re the `childNodes` error above, it occurs in this code at `X MARKS THE SPOT`:```
+switch (vNode.type)
+	{
+		case 'tagger':
+			var subNode = vNode.node;
+
+			while (subNode.type === "tagger")
+			{
+				subNode = subNode.node;
+			}
+
+			return addDomNodesHelp(domNode, subNode, patches, i, low + 1, high, domNode.elm_event_node_ref);
+
+		case 'node':
+			var vChildren = vNode.children;
+			var childNodes = domNode.childNodes; /* X MARKS THE SPOT */
+			for (var j = 0; j &lt; vChildren.length; j++)
+			{
+				low++;
+				var vChild = vChildren[j];
+				var nextLow = low + (vChild.descendantsCount || 0);
+				if (low &lt;= index &amp;&amp; index &lt;= nextLow)
+				{
+					i = addDomNodesHelp(childNodes[j], vChild, patches, i, low, nextLow, eventNode);
+					if (!(patch = patches[i]) || (index = patch.index) &gt; high)
+					{
+						return i;
+					}
+				}
+				low = nextLow;
+			}
+```
+
+U635238TG : hey, <@U2ABT6UKF>, check out <https://github.com/isRuslan/awesome-elm> for a lot of resources. I think the <http://courses.knowthen.com/> free Elm intor course might be a good place to start.
+U2ABT6UKF : Will do thank you.
+U6FFMA51S : <@U6GB56346> I still don't know why it is not inferred, but ran into this in the documentation when I was looking for something else:&gt; Generally speaking, you do not want Never in your return types though.
+
+<http://package.elm-lang.org/packages/elm-lang/core/latest/Basics>
+
+U4ZK5BVK6 : <@U3LUC6SNS> i am not familiar enough with what you are trying to accomplish here, but my best guess is trying to set a breakpoint using developer tools and follow the stack trace to find why `domNode` is undefined. Seems like this method doesn't have access to the variables you are expecting. Is this code you are showing inside your project or an ELM library? If ELM library, what is the name of it? I think I'd need more context to help properly.
+U2ABT6UKF : If I need to use version .17 of elm would I just edit the package file or is there an nvm like tool for elm?
+U3FJSB596 : <@U2ABT6UKF> <https://www.npmjs.com/package/elm-version-manager>
+U6FFMA51S : Where do I put files so elm-reactor's web-server will serve them?
+U635238TG : do you mean just like the normal Elm files and such? You just want to be in the directory containing your files before you run elm-reactor. for things like external css and such I don't think elm-reactor can actually handle that and you would want to use elm-make. i could easily be wrong on that though
+U3VCFFH1S : Hi folks, I have some questions about multiple effects. My goal is to run N commands (eg Random or Http) in parallel, then merge the results and kick off an update.
+I understand you can do this in `Task.map` or `Task.sequence`, but I'm looking for parallel execution.
+
+`Cmd.batch` sounds like the parallel part I want, but I can't figure out how to merge the results of the executions.
+
+Here's what I'm working with
+<https://github.com/mLuby/cats-elm/blob/cd15226a4892b9d79de91cdb139060ce5bb6cf49/Dice.elm>
+and my guess as to what to do.
+<https://github.com/mLuby/cats-elm/compare/cd15226...b6a4838>
+Any advice?
+
+For what it's worth, I'd accomplish this with `Promise.all([request1, request2, …]).then(resultsList =&gt; …)` in JS.
+
+Can't find anything on this topic online except this, which sidesteps the question: <https://stackoverflow.com/q/39392469/1862046> Here's this same question on Stack Overflow <https://stackoverflow.com/questions/45395712/how-to-merge-multiple-effects-in-elm>
+
+U5P4FLYLE : Hi. In a package X I have```module X exposing (Msg(..))
+type Msg id =
+...
+SelectItem id
+```
+I would like to use SelectItem in my module where I import package X via:
+```
+import X exposing (Msg(..))
+```
+What to do in order to use`SelectItem?
+I have compilation error that X does not expose SelectItem
+
+U2PTZFKFX : Hello, anyone sucessfully implemented bulk actions using ELM?
+U3VCFFH1S : <@U2PTZFKFX> what do you mean by bulk actions? Sounds similar to what I'm asking about. I found a sequential solution using `Task.sequence` and am working on a parallel solution using `Cmd.batch`…
+U2PTZFKFX : <@U3VCFFH1S> Bulk actions, i.e in a table, we can have the sorting functionalities, or in an external table, we can Apply functions to selected rows, i.e delete, update, or anything else,
+U3VCFFH1S : I don't quite follow, but there's this sortable table by the BDFL himself <https://github.com/evancz/elm-sortable-table>
+U2PTZFKFX : well, aside the sortable, i m looking for additional functionality, i.e i m loading list of items in a table. i want to bulk update existing cells,
+U2PTZFKFX : let's say, table with 3 columns`
+Actions: update column  newmae: 'mynewname'
+
+id, name, newname
+1, testnae, mynewname
+2, anothername, mynewname 
+
+and so on...
+`
+
+U2PTZFKFX : so action update column, supposed to add a bulk action and send the updated result to the server
+U3VCFFH1S : Having a hard time understanding what you're getting at. Do you have any code to share, or can you post a minimal example? eg```
+type alias Model = {columns: List String}
+type Msg 
+  = UpdateColumn String
+  | SendToServer 
+update msg model = case msg of
+  UpdateColumn updatedColumns -&gt;
+    ({model | columns: updatedColumns }, sendToServer updatedColumns)
+  SendToServer response -&gt;
+    (model, Cmd.node)
+```
+
+U2PTZFKFX : sorry for my late reply
+U2PTZFKFX : ok, to further explain, i m loading set of data via api from remote server, which will be contained in a row, later, i want to modify part of all of the record and update back, just like how gmail functionality works, were a user can mark set of messages to be send to trash, or apply some labels to some specific messages,
+U3VCFFH1S : IMO simplest way code-wise would be separately firing off one request per row. But it sounds like you want one request that contains what, row/record IDs and maybe a list of key/value pairs that were changed?
+```
+request JSON {rowsModified: [
+  {rowId: 1, changes: {name: "alice", age: 50}},
+  {rowId: 3, changes: {age: 30}} 
+]
+```
+If that's right, then I'd store those changes in your model on the row as it happens, probably in a "changes" key with a `Dict` value so you can add changes.
+
+That way you can construct the above JSON by iterating through the rows and grabbing the data you want.
+
+U153UK3FA : <@U3VCFFH1S> there isn't currently a way to run Tasks in parallel. It's a limitation of the current Tasks API.
+U153UK3FA : Cmds can run in paralllel, but they can't be sequenced. So you need to handle that yourself in your `update`
+U3SJEDR96 : <@U2PTZFKFX> please don't ask _every_ question in multiple channels :)
+U3SJEDR96 : <@U6FFMA51S> start elm-reactor at the same path you have `elm-package.json`. Files are resolved relative to that root. So `localhost:8000/src/Main.elm` will compile and load that file. `localhost:8000/static/foo.css` will load `static/foo.css`. There's a magical `/_compile/` "prefix" that compiles and returns the compiled file as JS, rather than the default `compile to HTML`, too - <https://blog.ilias.xyz/elm-reactor-and-custom-html-9e7143553807>
+U3SJEDR96 : <@U3LUC6SNS> it does sound as if an Elm-controlled dom node was changed or replaced somehow.. Hard to say exactly what goes wrong, but does feel like a bad JS interaction..
+U4872964V : <@U3VCFFH1S> If all your random values are in a list like that, you can use the `Random.list` function to generate all of them at the same time though. But I'm guessing your question is more general.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

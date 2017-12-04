@@ -1,0 +1,91 @@
+U5KU1HNKY : <@U60J15S1Y> ? can you explain?
+U60J15S1Y : for example, I have a function `f` and it takes one argument, when applying `(values ...)` to `f`, I would like to use `(values ...)` as a single variable inside of `f`
+U2Y8JBMUJ : Something like <https://docs.racket-lang.org/reference/values.html#%28def._%28%28quote._~23~25kernel%29._call-with-values%29%29> , or maybe <https://docs.racket-lang.org/sugar/index.html?q=values-%3E#(form._((lib._sugar%2Flist..rkt)._values-~3elist))> ?
+U5KU1HNKY : (call-with-values (thunk (values 1 2 3)) list) ; ‘(1 2 3)
+U5KU1HNKY : but… I don't think you can make a function that takes a variable number of values… hence the thunk
+U60J15S1Y : I do found `call-with-values` but it restricts me to put values inside of lambda, I'm just looking for a more elegant way to do this
+U5KU1HNKY : <@U60J15S1Y> why do you want to apply `values` as an arg? can you explain what you're trying to do?
+U5KU1HNKY : &gt; It is impossible to bind the evaluated result of values expression to a single variable unlike other Scheme expressions
+<http://docs.racket-lang.org/srfi/srfi-86.html>
+
+Might want to check out mu/nu from 86
+
+U5KU1HNKY : they look interesting
+U60J15S1Y : Well, I have a function that returns `values`, I would like to compare the results of two applications of that function. Probably macro could do that?
+U5KU1HNKY : ```(define v (values 1 2 3))		=&gt; error
+(define v (lambda () (values 1 2 3)))	=&gt; (lambda () (values 1 2 3))
+(define m (mu 1 2 3))			=&gt; (lambda (f) (f 1 2 3))
+(define a (apply values 1 '(2 3)))	=&gt; error
+(define a
+  (lambda () (apply values 1 '(2 3))))	=&gt; (lambda () (apply values 1 '(2 3)))
+(define n (nu 1 '(2 3)))		=&gt; (lambda (f) (apply f 1 '(2 3)))
+
+(call-with-values v list)	=&gt; (1 2 3)
+(m list)			=&gt; (1 2 3)
+(call-with-values a list)	=&gt; (1 2 3)
+(n list)			=&gt; (1 2 3)
+```
+
+U5KU1HNKY : so for testing? yeah… you could do that with a macro. wrap up LHS and RHS with call-with-values … list
+U5KU1HNKY : then use check-equal?
+U60J15S1Y : yeah, for testing, right, for now I just put `values` into a lambda and use nested call-with-values, then I could compare the equality of two lists
+U60J15S1Y : <@U5KU1HNKY> anyway, SRFI-86 looks helpful, thank you!
+U0702F2CE : <@U0702F2CE|samth> set the channel topic: Racket — <http://racket-lang.org> — <http://pasterack.org> - Slack invite link: <http://racket-slack.herokuapp.com> - Archives: <http://racket.slackarchive.io/>
+U07SJGB4H : <@U3NP867S6> if I wanted to write benchmarks for a package that are part of a test suite and don't produce pretty plots, should I extend <https://github.com/stamourv/racket-benchmark> or would I be better off making my own package for that?
+U3QF0EM0E : notjack: extending `racket-benchmark` would be cool
+U07SJGB4H : <@U3QF0EM0E> do you use it often?
+U3NP867S6 : <@U07SJGB4H>: Sure, I'm all for making racket-benchmark better!
+U3NP867S6 : We have a number of experiments that use it, so not breaking it is important, but improvements would be welcome!
+U07SJGB4H : <@U3NP867S6> do you have links to some of the experiments?
+U3NP867S6 : Not directly, but I think some of our research artifacts may have some, lemme check.
+U3QF0EM0E : never
+U3QF0EM0E : but yeah I had put some benchmarks here: <https://github.com/nuprl/gradual-typing-performance/tree/master/benchmarks>
+U3QF0EM0E : and then I put some others here: <https://github.com/bennn/eidetic/tree/master/benchmarks/rkt>
+U3QF0EM0E : and this is getting silly. Usually I want some tooling around these benchmarks (to reproduce data in a paper), but the code should all be in 1 place
+U3QF0EM0E : like the larceny benchmarks <http://www.larcenists.org/benchmarksAboutR7.html>
+U3NP867S6 : <@U07SJGB4H>: Here's one artifact: <http://drops.dagstuhl.de/opus/frontdoor.php?source_opus=5514>
+U3NP867S6 : It's a large VM, that has a benchmark suite (and other stuff) inside.
+U07SJGB4H : thanks <@U3QF0EM0E> and <@U3NP867S6>  for links :)
+U07SJGB4H : really the main thing I want is something like `(check-faster (foo-benchmark foo-impl1) (foo-benchmark foo-impl2))`
+U3NP867S6 : Oh, sure. That should be easy to do with the results data structure.
+U3NP867S6 : Beware of the case where the confidence intervals overlap, though. Can't conclude that either is faster.
+U07SJGB4H : memory consumption benchmarks instead of timing benchmarks would also be useful
+U5KU1HNKY : <@U07SJGB4H> I have benchmark-ips… it might help normalize some of the error
+U5KU1HNKY : and in minitest, I have minitest/benchmark which allows you to assert that the performance of a block of code fits well to a particular curve. Allows tests to pass regardless of the hardware you run on.
+U07SJGB4H : <@U5KU1HNKY> I definitely want curve-fitting perf tests for racket. The lens library in particular could benefit from perf testing.
+U5KU1HNKY : basically looks like:
+```
+    def bench_my_algorithm
+      assert_performance_linear 0.9999 do |n| # n is a range value
+        @obj.my_algorithm(n)
+      end
+    end
+```
+
+And asserts against the R^2 of the fit instead of actual measurements
+
+U5KU1HNKY : <https://github.com/seattlerb/minitest/blob/master/lib/minitest/benchmark.rb>
+U5KU1HNKY : benchmark-ips is my port of a ruby tool. Similar to racket's benchmark, but it doesn't graph and it is focused on iterations per second instead of some fixed number of iterations… I mostly use it when experimenting with N different implementations of something
+U07SJGB4H : Happy branch day! :party: 
+U3NP867S6 : <@U07SJGB4H>: Haven't gotten to starting the festivities yet. ;)
+U0702F2CE : <@U3NP867S6> I don't know if you get this email, but the stxparse tests failed on windows on the release branch <https://ci.appveyor.com/project/plt/racket/build/1.0.2619> cc <@U3VGR2S7Q>
+U3NP867S6 : FWIW, fails on master as well: <https://ci.appveyor.com/project/plt/racket/build/1.0.2619>
+U0702F2CE : <@U3NP867S6> that link is to the release branch build
+U0702F2CE : you can see the history here; it's passing on master: <https://ci.appveyor.com/project/plt/racket/history>
+U3NP867S6 : Oh, you're right. I can't read appveyor's page.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

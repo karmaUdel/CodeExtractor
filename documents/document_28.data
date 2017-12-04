@@ -1,41 +1,128 @@
-        nil))))```
-Let's move this to a thread, if you don't mind? <@U051SS2EU>
-I'm unable to start the server while listening to that port. The address is already in use
-what I meant was to test if you could open the port with nc - that rules out another point of failure
-Oh yes, the port is definitely open. The api serves traffic. The nrepl server just won't start
-I'm talking about the nrepl port not the api port, but OK
-Ah, let's make sure of that
-Yep, the nrepl port is definitely available as well
-OK - that verifies it's an nrepl problem then?
-That's my guess
-But nrepl works fine when I start the server using `lein repl`
-is it trying to bind to localhost?
-It is
-you could double check eg. that localhost is resolved in the vm
-sometimes you need to add that mapping by hand
-and localhost not being found would be consistent with that error
-So that might actually be it, when I start the nrepl server using `lein repl`, I also add `lein repl :headless :host 0.0.0.0 :port 4343`
-you could try adding :host to the args map to start-server
-That's a good idea
-I'll try it now
-Different error, not sure if it's failing sooner: `Exception in thread "main" java.lang.NumberFormatException: Invalid number: 0.0.0.0`
-The host is looking for a number?
-wait, are you providing `0.0.0.0` or "0.0.0.0" because clojure will give that error for the first one
-0.0.0.0 is an invalid literal in clojure, is what that means
-I found this: <https://github.com/clojure/tools.nrepl/blob/9eed58bed6aa01cfeb3c328adc5a12d487a5d305/CHANGELOG.md>
-If you look st 0.2.8
-right - just make sure :host is a String
-I bet that will work
-That did it
-:heart:
-sweet!
-Thanks for that <@U051SS2EU>
-np - glad I could help
-btw it might be better for security to adjust /etc/hosts so that localhost is defined, rather than providing 0.0.0.0 as your host - I'm not an expert on these things though
-IIRC 127.0.0.1 can be used instead of 0.0.0.0 and is safer (but if you intend to connect from outside the vm... maybe you need the 0.0.0.0 binding)
-You're right. If this were to be deployed with an nrepl server started it would certainly be a security concern
-anyway, at least you know the precise parameters now and can make an informed decision
-Indeed, I very much appreciate the help
-I seem to recall a recommendation to bind on 127.0.0.1 inside the vm, and use an ssh tunnel to access it from the host
-but maybe that's silly.
-I'll test to see if 127.0.0.1 works as well
+U61KCTX8S : wait, i got it
+U61KCTX8S : [clojure.pprint :as pprint] was in the ns clause, but outside the (:require clause
+U61KCTX8S : thanks for the quick help guys :slightly_smiling_face:
+U0K0TFQLW : spec in 1.9 is really nice for that sort of thing
+U0K0TFQLW : if you're just playing with the language, I recommend trying out the 1.9.0-alpha17
+U61KCTX8S : well, ia m not just playing around with the language, i want to make money with it :slightly_smiling_face:
+U61KCTX8S : so i wont try anything with "alpha" in it
+U0K0TFQLW : I run my startup on so many "alpha"s and pre-alpha spur-of-the-moment forks that I've lost count.
+U61KCTX8S : and those alphas run somewhere on production?
+U0K0TFQLW : yes
+U3JURM9B6 : ```(defkeyframes blinkBlackGreyKF
+  [:0.00001% {:fill "#ddd"}]
+  [:50% {:fill "#000"}]
+  [:100% {:fill "#ddd"}])
+```
+
+works, but if I change the 0.00001 to 0.0 or 0 , it fails -- somehow the css refuses to display the % if it's 0
+
+U61KCTX8S : well, tha is inspiering :slightly_smiling_face:
+U0K0TFQLW : I usually prefer to have bugfixes and features over some mythical stability
+U0K0TFQLW : `lein ancient`, which is a plugin for one of the common clojure build tools, leiningen, actually makes it really easy to speculatively upgrade packages and run the entire test suite, only keeping the upgrades if your tests pass
+U61KCTX8S : hmmm... maybe the aplphas are so stable becuase of clojure's nature, i think it's harder to make bugs in clojure
+U0K0TFQLW : of course, that requires that you actually bother to write tests
+U61KCTX8S : do you bother?
+U0K0TFQLW : when they make sense
+U0K0TFQLW : whether to write tests and what kind of tests to write depends on how much time I have, what I'm writing, and what the lifespan of the code is expected to be
+U0K0TFQLW : things like a compiler for a dsl ends up with a lot of tests
+U61KCTX8S : I see
+U0K0TFQLW : sometimes I'm wrong about how much time I have or what the lifespan of the code is going to be, and tests get added on a later iteration
+U0K0TFQLW : i.e. I expect something to be a one-off prototype and it ends up in production. it'll grow tests sooner rather than later so I can be confident about happy paths when I need to make changes.
+U61KCTX8S : today i had the following problem: after one day braek of coding nothing worked,something was fucked up, i needed 3 hours to get it back to life
+U0K0TFQLW : that seems like a git-diff kinda problem
+U61KCTX8S : last time i wordked for corporate i solved this problem in that everyday one hour before going home i started to clean up and do notes about everything that was doing problems
+U61KCTX8S : and put a piece of paper describing these problems on my keyboard
+U61KCTX8S : i think it'[s rather a psychological problem than a git one :smile:
+U0K0TFQLW : I find that only really happens to me if I'm not constantly evaling my code and tests during development. i.e. if I spend 3 hours just writing code without evaling for some reason. that code will take much longer to get working than if I had just been evaling the code and my tests while going.
+U0K0TFQLW : <@U61KCTX8S> but if you had working code one day and two days later your code doesn't work, isn't the solution just to stash, revert to the working code, make sure it still works like you expect, then diff your stash and that working code?
+U61KCTX8S : i think you undrerstand my problems, i am curretly figuring out the perfect workflow for me
+U0K0TFQLW : that's what I meant by a git-diff problem
+U0K0TFQLW : sometimes I end up writing pseudo-code that is only somewhat working lisp when trying to get ideas out of my head. that's the kind of code that takes forever to get actually working. I often put it into its own namespace that isn't required anywhere (a persistent `*scratch*` of sorts) and then reference it in another coding session when I actually write tests and eval it as I'm going. I've found that if I try to get the code working, as opposed to using stream of consciousness code as "notes", I spend a ton of time just making it work. As a consequence, I try to be disciplined about making sure I eval everything as I go, to avoid the kind of scenarios where I write unusable code for several hours and then spend the rest of the day trying to make it usable.
+U61KCTX8S : how do you do the architecture?
+U61KCTX8S : also like a *scratch* ?
+U61KCTX8S : that gets proper?
+U61KCTX8S : or do you take a piece of paper?
+U61KCTX8S : it's really an interesting experience to write in clojure for me
+U61KCTX8S : recently i was coding the whole night
+U61KCTX8S : and in my opinion i did 1-2 weeks of work
+U61KCTX8S : in comparison with other languages
+U61KCTX8S : so i need to think totally different
+U61KCTX8S : i mean i have to organize my work different
+U06HHF230 : depends what you mean by architecture <@U61KCTX8S> and what you're doing.  There are lots of orthogonal concerns; code layout (namespace hierarchy / load orders), runtime data flow, use of polymorphism, state, building for composition, structuring data etc…
+U050ECB92 : Anyone ever generated a "compact ECDSA" signature (bitcoin style) from Java?
+U050ECB92 : this is a #{64 65} byte signature -- as opposed to DER encoding which is #{70 71 72} byte sig
+U050ECB92 : I've been using the bitcoinj library but can't figure out the incantation
+U5LPUJ7AP : <@U0567Q30W> Any way to temporarily disable paredit to make parens balanced again after pasting unbalanced parens or deleting code leaving it unbalanced?
+U3GJHS5DY : bottom right is a menu that lets you change your structural editing pattern
+U3GJHS5DY : turn to Off -&gt; fix -&gt; turn back to paredit
+U3GJHS5DY : also there is a <#C0744GXCJ|cursive> fyi
+U3GJHS5DY : there might be a quicker way though ¯\_(?)_/¯
+U5LPUJ7AP : I know about the menu, but I was thinking about, CTRL + "(" or something (tried that)
+U5LPUJ7AP : Thanks for the channel
+U3GJHS5DY : ah ya no idea
+U3GJHS5DY : Toggle Structural Editing Style in keymaps <@U5LPUJ7AP>
+U5LPUJ7AP : Let's give it a try!
+U5LPUJ7AP : That's wonderful :slightly_smiling_face:
+U0W0JDY4C : i often find myself with too many options to get something "polymorphic" done in clojure.. was wondering if someone could speak to this:
+say I need to switch on a data's type. there's the standard map approach {:type :some-custom-type}. then you can wrap that `:type` with a more formal `multimethod` and `defmethod :type/foo :type/bar, etc.`. you can also create a record to further formalize the map, and thus get access to things like `(instance?  _)`. you can also define a protocol for the various types and gain access to things like `(satisfies? _)`. now with spec.alpha you can go another step and do things like `(if (s/conforms? _) ...)`. 
+
+surely there's a good blog post or two out there illuminating such matters… but every time I reach for polymorphism i find myself almost paralyzed with options, not really sure which is best in each case.
+
+U5LPUJ7AP : you'll love this <https://leanpub.com/clojurepolymorphism/>
+U5LPUJ7AP : i was asking myself the same question when i stumbled upon that
+U0W0JDY4C : oh neat-o .. ill definitely take a look
+U5LPUJ7AP : even the sample is very helpful
+U1LCB75M2 : <@U0W0JDY4C> I guess it boils down to the definition of "polymorphism". In Clojure you're not tied to any particular approach because you can dispatch on arbitrary fns, so you can have the equivalent of dispatching based on OO hierarchy (Java classes), nominal typing (your own taxonomy), structural typing (spec, etc) ...
+U1LCB75M2 : While in other languages (most I guess?), polymorphism bundles type system + dispatch/pattern matching together
+U61KCTX8S : I'd like to run a couple of functions in my main function
+U61KCTX8S : in sequence
+U61KCTX8S : like
+U61KCTX8S : -main (
+U61KCTX8S : (func1)
+U61KCTX8S : (func2)
+U61KCTX8S : )
+U61KCTX8S : how do i do this?
+U1ALMRBLL : <@U61KCTX8S> this slack has a message limit that, when hit, removes the messages. I'm not sure whether multiple short messages like yours are counted as one, or as many, but consider combining them into a single, formatted message (a nice bonus is, they are more readable). just fyi
+U1ALMRBLL : to answer your question — what does "I'd like to run a couple of functions" mean exactly? What you've posted certainly does just that. But what is the point?
+U1ALMRBLL : ```(defn -main []
+  (func1)
+  (func2))
+```
+The result of the above will be whatever `(func2)` evaluates to. Of course, if `(func1)` produces side-effects (I/O, etc), these side-effects will occur.
+
+U1CTH1TUY : *unless `(func1)` produces a lazy sequence which would never be realized.
+U61KCTX8S : you are right, it didnt compile because of some other mistake
+U61KCTX8S : but
+U61KCTX8S : (defn -main  "This should be pretty simple."
+  []
+  (
+   (println "hallo")
+   (println "hallo2")
+  ))
+
+U61KCTX8S : prints both hellos
+U61KCTX8S : but gives after it a null pointer exceptoin
+U1ALMRBLL : yes, try this, and see the difference:```(defn mainnn
+  "This should be pretty simple."
+  []
+  (println "hallo")
+  (println "hallo2"))```
+
+U1ALMRBLL : You have an extra paren before the first `println`. This evaluates the result of the first `(println "hallo")`, which is `nil`, as a function, and this is what creates the NPE.
+U61KCTX8S : i see
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

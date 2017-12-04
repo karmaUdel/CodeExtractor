@@ -1,25 +1,44 @@
-and use ``` (set/rename-keys a {:a :aa, :b :bb} ```
-but nothing changes
-Am I doing something wrong?
-nice
-Try `(def a {:a "A", :b "B"})`
-well for one, `a` and `b` are both unquote symbols which evaluate to some value where `:a` and `:b` are keywords that evaluate to themselves
-the problem is that I receive the Json as it is
-I can not change the a variable
-it was just an example; But i need to modify the names of the keys
-sounds like your real problem is that you aren't using the return value of rename-keys
-nothing in clojure actually modifies the built in maps, vectors, lists, etc. - they return new ones you can use
-I did a println
-You're probably getting string keys.
-but it printed the same a
-don't use println to look at data, use prn
-If you are working with JSON, you're likely getting the map as `{"a" "A", "b" "B"}`
-I bet a is actually "a" yeah
-so you need rename-keys {"a" :aa} etc.
-mmm I tried but I got this error :
-java.lang.ClassCastException: clojure.core$map$fn__4781 cannot be cast to clojure.lang.IPersistentMap
-that means you used `(map f)` where it expected a hash-map
-wait, yes!!!!
-I was doing it to another functionality
-now it is working
-rename-keys with "a" as key
+U5YHNV0EA : it's due to one of those sticky situations in clojure where sometimes building a project depends on the actual editor used by the developer. give the project to another developer with a different IDE and it blows up
+U5YHNV0EA : i think it's the only language i've used where a project's build process can be coupled with the code editor
+U051SA920 : <@U5YHNV0EA> I'd first inspect the classpath and see if you have the `nrepl` jar on there
+U5ZAJ15P0 : <@U5YHNV0EA> try `lein deps :tree`
+U5YHNV0EA : <@U5ZAJ15P0> <@U051SA920> i managed to resolve the problem by installing and using cider. not my preference but it's a quick solution for now
+U5ZAJ15P0 : <@U5YHNV0EA> odd… glad it worked though
+U5YHNV0EA : are environment variables cached somehow. I removed one that was set in my project.clj, and instead put it in a separate profiles.clj. Even after a lein clean and restart of cider, calling the environ function to read an environment variable reveals the old value that was removed.
+U11BV7MTK : <@U5YHNV0EA> not sure how that's working but i can wager a guess. Emacs starts up with an environment and its possible that this process, since it is spawning the others, is preserving that environment you started with. perhaps restart emacs and see if the environment is updated then
+U050SC7SV : Check if you have a . lein-env file in the root of the project 
+U5YHNV0EA : thanks. my probably was actually resolved after a reboot of the machine
+U553KK0QH : Is there a function to process the values of a map and get back a map with the original keys and updated values? A `mapmap` function? I find myself doing this a lot and use reduce like: ```(defn process-map  [m]
+  (reduce #(let [v (get m %2)
+                 new-v (some-processing-here v)] (assoc %1 new-v)) {} (keys m)))``` but seems like this is a useful method to have built in.
+
+U3L6TFEJF : there is no built-in for that
+U3L6TFEJF : with Specter: `(transform MAP-VALS your-fn your-map)`
+U60259LCB : I have an atom with a vector with an map, how would I update the value :done of one item?```[{:id "1", :title "Learn Clojure", :done "active"} {:id "2", :title "Learn ClojureScript", :done "active"}]
+```
+
+U3L6TFEJF : which item?
+U3L6TFEJF : by index or by id?
+U60259LCB : by id
+U60259LCB : if possible
+U60259LCB : Pasted the wrong code :neutral_face:
+U3L6TFEJF : <@U60259LCB> again, with Specter: `(setval [ATOM ALL :id #(= your-id %)] :your-value your-atom)`
+U06B8J0AJ : I'd like a version of `empty?` that doesn't throw on numbers (etc), but simply informs me that, no, the number `9` (for example) is not empty, whereas `""` is empty. What's the least unintelligent way to achieve this?
+U06B8J0AJ : (my current method is quite unintelligent)
+U3L6TFEJF : can you post it?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

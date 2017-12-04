@@ -1,91 +1,88 @@
-```{"playerNames":["Fred","Barney"],"games":[{"date":"May 20","stats":[{"ab":2,"hits":2},{"ab":2,"hits":1}]},{"date":"June 3","stats":[{"ab":2,"hits":2},{"ab":3,"hits":3}]},{"date":"June 4","stats":[{"ab":2,"hits":2},{"ab":2,"hits":2}]},{"date":"June 10","stats":[{"ab":2,"hits":2},{"ab":2,"hits":0}]},{"date":"June 17","stats":[{"ab":2,"hits":2},{"ab":3,"hits":2}]},{"date":"June 19","stats":[{"ab":0,"hits":0},{"ab":4,"hits":4}]},{"date":"June 20","stats":[{"ab":2,"hits":2},{"ab":0,"hits":0}]}]}```
-You can also paste that in to <http://eeue56.github.io/json-to-elm/> and you'll get a generated parser. But it's good to write one yourself when learning so you actually understand how it works.
-No doubt.  If I'm pulling my hair out over writing my own after a couple days, maybe I'll resort to that. Thanks for the link.
-I wrote the encoder piece fine on my own, so you'd think I'd get this decoder stuff better than I do!
-it's good for pasting in small bits of json, eg. paste in just `{"ab":2,"hits":2}`
-Yeah, that makes sense.  I'm brand new to functional programming, and so I'm still shifting my mind a bit.
-How can I convert a list of 2 strings into a tuple?
-<@U5HM74BD0> `List.map2`: <http://package.elm-lang.org/packages/elm-lang/core/latest/List#map2>
-Or `List.Extra.zip`: <https://klaftertief.github.io/elm-search/?q=List%20a%20-%3E%20List%20b%20-%3E%20List%20(a%2C%20b)>
-<@U236M9FH9> Doesn't `List.map2` give another List back?  I want ["apples, "grapes"] to become ("apples", "grapes").  What am I missing?  Maybe I'm up too late at night. Sorry if this is obvious.
-(apples and grapes are unknown strings at compile time in my case)
-Ah sorry, I read 2 lists, not list of 2
-Really you're list of 2 should be a tuple the whole time, otherwise you'll have to return a `Maybe (String, String)` instead, but you write a function that uses a `case ... of ...` to match `x1 :: x2 :: []` which is a list of 2 items. Return a `Just` for that and `Nothing` for all other cases(you can use `_ -&gt; ` after the 2 item pattern to match everything else).
-Hmmm. I've got a json string which comes in as a list of two strings, but my model represents those things as a tuple.  Okay, let me try what you're suggesting.
-If you're starting with a list because of JSON decoding, you should be able to skip the list using something like `Decode.map2 (,)` along with `Decode.index`.
-Oh! That'll be much better, yes.
-I feel like my model should have represented these things as a 2-item List to start with. Not sure I'm buying much by having these stored in a tuple.
-A tuple gives you a guarantee about the number of items. With a list you'll find you'll have to handle cases of empty lists, 1-item lists, &amp; 3+ item lists as well as the 2-item list
-If you'll be pulling the values out of the list often, you'll probably have to repeat the above a lot, or handle a lot of `Maybe`s
-Thank you for the help. I'll give it a shot tomorrow.
-Good Night everyone hope everyone is doing okay.
-jonf: We should have a numpy like converntion. in scipy/numpy you always import a bunch of common modules using accepted aliases, so it makes examples lot terser. if I see np, I know you have done `import numpy as np`, and I need not ask what is `np`.
-<https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt#overview>
-I always import Json.Decode as JD, Json.Decode as JE, RemoteData as RD and so forth. I feel it would be good if we had a community maintained page documenting a convention.
-hey! for some reason my time travel debugger stopped popping up at app start at some point... i still `use elm-make --debug` is there a way to start it from console or something like that? or does anyone have a clue why my time travel debugger could have stopped starting?
-Do you see the "tab" on the bottom right of the page?
-Or does it fail to expand when you click the tab?
-the tab is missing! it was there at some point (expanded and in tab form) but now even after recompiling/restarting computer it does not shop up anymore. application works still fine (sorry for late answer)
-Have you tried running `elm-reactor` from the command line?
-The tab is a div abs. positioned in the page so it might happens that it plays badly with other elements.
-Check if you have other page elements which overlaps with the tab.
-<@U41NK9BM4> thats probably it! I will check 
-Let us know :slightly_smiling_face:
-Is there an event in elm for onFocus but for when you leave the element?
-like onBlur?
-The event is called "blur", I'm not sure if there is a ready-made helper for that particular event but you can do it with `on "blur"` at least.
-I think there is <http://package.elm-lang.org/packages/evancz/elm-html/4.0.1/Html-Events#onBlur>
-<@U2M4VPZ9D> <@U0CLDU8UB> thx!
-Works like a charm
-<@U3SJEDR96> <@U23SA861Y> <@U0LPMPL2U> Thanks for yesterday. I had to run, so I didn't have time to reply or get into the feedbacks. Will check them out today.
-How do I get the size and position of placed DOM elements?
-<@U5X2VC483> i have the feeling think we can't get that just in elm. i'm still learning :smile:
-If you have your model with properties for position and size you can always take control of it
-that's true!
-but cannot get it of a rendered DOM element, right?
-Elm does not have direct access to DOM
-So if you can design to use your model for it, it's the way to go. If not then you can use JS with ports.
-I don't want to implement my own flow, I would like the browser to do it. As in, I don't want to decide myself the position and size of the elements, but get the size after the fact
-Okidokies, thanks for your help
-<@U5X2VC483> what's your case by the way?
-I would like to draw arrows between elements
-such as from and to centers of two DOM nodes
-You can do this using port. Write a port like `findDimension : String -&gt; Cmd msg` where you can pass a selector. Then have something like `elementDimension : ({ r | selector : String, dimensions : Dimensions } -&gt; msg) -&gt; Sub msg` that the javascript can provide the dimensions.
-Alternatively, if you are doing this in reaction to a click on an element, for example, you can probably decode the dimensions from the event using `on`
-<@U5X2VC483> And can you achieve positioning with css?
-<@U0J8D9M2P> Yes
-<@U0FP80EKB> Thanks. That looks like a good start.
-I made a thing! <http://cloud.jorisooms.be/1B0m3R2f3M2I>
-<@U2FP79HN3> it's a pretty thing :slightly_smiling_face: but what is it?
-dunno :disappointed:
-just generating random svg paths and animating them
-I like it, could easily become hypnotic :slightly_smiling_face:
-nice!
-passiomatic: sorry for answering so late again: but yes! that was it! i used a footer, which is also `position: fixed` and it was just underneath it! i didn't think about checking the dom! thanks!
-Great. Glad it worked
-Hi! My project is based on reading information off a local JSON file. I can then update the data from the browser, what can I do to save it back to JSON (I'm not asking about JSON.Encode but rather about how to save to an external file)? Do I need to use `port`?
-<@U59AF21LJ> elm is compiled into JS and this is executed into the client browser. The browser does not have access to write into the server file system. You will need a backend for that.
-<@U1P6FFJ64> Oh yes I had forgotten about that… I guess whatever memory I want to last would need this. I guess I should make a little program than runs in parallel, listening on a socket or something? Thanks.
-If you want to store information in the browser, you can use LocalStorage (via a port)
-depends on what you want to store really
-Basically I have a tree that I manipulate and want to save even after I close my browser (I don't want it to be save in the browser memory).
-yes, so you could either use LocalStorage, which will store it on disk locally, but will be restricted to that particular computer/browser, or you need a server
-Can I get elm-reactor to refresh the site when saving the file? Even better, can I get it to do hot module reload? (I.e. maintain the state)
-`elm-live` has at least one of those features
-Right <@U4872964V>, thanks. I think I'll make a server on the side. And then use websocket / port?
-Well, if you have a simple REST service you'd just use the <http://package.elm-lang.org/packages/elm-lang/http/latest> package
-Hi does anyone know how I can encode a set to a JSON list object?
-I tried: Encode.list &lt;| Set.map Encode.string formData.objectives
-<@U5X84PY9G>, just use `Set.toList` first
-<@U4872964V> Oh right. I'm still not familiar with what you can and cannot do.
-Thanks
-<@U3SJEDR96> thanks!
-<@U4872964V> do you mean: Encode.list &lt;| List.map Encode.string &lt;| Set.toList formData.threat_objectives_at_stake
-looks right
-Ok thanks a lot
-<@U5X2VC483> <https://github.com/fluxxu/elm-hot-loader> maintains state too :smile: 
-perhaps, but unlike in python the compiler enforces it. You also don't get ancestor imports either. I suspect it's less of an issue.
-<@U5X2VC483> I also used this <https://www.npmjs.com/package/create-elm-app> which packages up the elm-hot-loader mentioned by <@U0JFEBK6F>
-Hi <@U0CL0AS3V>, I have a quick question about the SPA Conduit App that you shared a few weeks back. Is this the appropriate forum in which to ask it?
-In your comments for the Main.elm file, you say that the majority of the code in that file will go away in 0.19. I've found that as I've built my app (based on your work), that Main.elm is getting bigger.  I'm anxious that based on your comment that I'm moving in the wrong direction. so, when you say that Main.elm will largely go away what does that actually mean?
-(I guess I'll just ask the question here :slightly_smiling_face: )
+U3FGRUSLT : ```~ $ irbirb(main):001:0&gt; Time.now.to_f
+=&gt; 1483865562.30614
+irb(main):002:0&gt; Time.now.to_f
+=&gt; 1483865563.194669
+irb(main):003:0&gt; 
+```
+
+U3FGRUSLT : ```irb(main):003:0&gt; <http://Time.at|Time.at>(1483865563)=&gt; 2017-01-08 08:52:43 +0000```
+
+U3C1KGJDD : Hi. I need to wrap my storage function into a promise for use with a middleware. I'm using the cool botkit-storage-mongo module. Have very limited understanding of promises, if anyone could help with that? this is my simplified storage function
+U3C1KGJDD : module.exports = {// with Callback
+toDatabase: function(key, value, response) {
+    controller.storage.users.get(response.user, function(err, user) {
+        if (!user) {
+            user = {
+                id: response.user,
+            };
+        }
+        user[key] = value;
+        controller.storage.users.save(user, function(err, id) {
+        });
+    });
+}
+};
+
+U0E9LFL3F : <@U3FGRUSLT> <@U3EFK8UES> strange cause new Date().getTime() now returns 1483891366599 which has 3 chars more. Anyway I just think my issue is that new Date(1483891366599) returns an invalid date, I am not really familiar with JS date. Maybe I'll switch to moment
+U3MG94ZJP : Just created my first bot with Botkit , my problem is that near the bot user i have the word “BOT” twice , i am working with the EVENTS_API and not opening any RTM connection.. can anyone help understand why this problem can happen?
+U3FGRUSLT : yeah / 1000 to get back to seconds
+U3FGRUSLT : js is giving time in different units
+U3FGRUSLT : ```irb(main):003:0&gt; 1483894941440/1000=&gt; 1483894941```
+
+U3FGRUSLT : or multiple the full value slack gives by 1000
+U3FGRUSLT : ```irb(main):007:0&gt; 1483895037.1102788 * 1000=&gt; 1483895037110.2788```
+
+U0E9LFL3F : ok now makes sense
+U0E9LFL3F : multiply by 1000 and then both new Date(ts) and moment(ts) works properly
+U3FGRUSLT : don't even get me started about timezones and utc 24 :slightly_smiling_face: I changed all my clocks to be utc 24 so time for me is always a number from 0 to 23
+U3EFK8UES : Hey there, so let's say I open a DM channel and get the channel id, and the use closed it or I try to use it days later and it's closed, and I try to use it, will it just reopen the channel? 
+U3EFK8UES : I'm trying to minimize api calls 
+U3EFK8UES : *user closed it, not use close it 
+U3FGRUSLT : yes D3MJKEHEB or whatever the id is
+U3FGRUSLT : is a link between the two users
+U3FGRUSLT : send a message to that "channel" and it re-opens the DM
+U3EFK8UES : Awesome! 
+U3EFK8UES : Thanks, for anybody who's interested I'm storing the channel in a sqlite db, so that only call the api once
+But I'm sure most people have already though of that
+
+U3N3DR3ME : wow... lot of channels here. Apologies if i ask the right question, in the wrong room on occasion! :stuck_out_tongue_winking_eye:
+U3LQGKTR6 : added an integration to this channel: <https://dev4slack.slack.com/services/B3NSUAPKP|outgoing-webhook>
+U3LQGKTR6 : removed an integration from this channel: <https://dev4slack.slack.com/services/B3NSUAPKP|outgoing-webhook>
+U34F4FH7U : I'm working on putting together a slack command
+U34F4FH7U : I've got oauth verifying correctly, but can't seem to figure out how to access the users list via the command
+U34F4FH7U : looks like my two scopes are identify &amp; commands
+U34F4FH7U : when I try to get the user list it complains about "missing_scope"
+U34F4FH7U : ahh... I think I understand now.  I was thinking it wanted me to provide the scope with my request, but it's probably that I didn't request the correct scope when I authed, isn't it?
+U34F4FH7U : there needs to be a rubber duck emoji
+U3N8DHUDN : Hi there, I just joined this slack team so sorry if I am asking this in the wrong channel
+I am working on an slack app that prints buttons. That part works but when I click the button I got a message saying 
+```Darn – that didn't work (error message: `No error`). Manage the app at name_of_my_app```
+
+This message is not very useful. Do you know where I can get more info or why I this message is being printed?
+Thank you guys!!
+
+U0GT29N3A : <@U3N8DHUDN> Did you configure your Interactive Messages callback URL?
+U3N8DHUDN : Hi <@U0GT29N3A>. Yes I did and I can see how it is not being called
+U3N8DHUDN : Is there a way where I can see what my button is sending every time I click it? The ‘No error' message does not help me too much
+U0GT29N3A : You can check what it _should_ send in the docs, or check your server logs (but the latter won't help much if you didn't receive the request at all).
+U3FGRUSLT : we are starting a new class <http://losangeles.craigslist.org/wst/eng/5951261475.html> if anyone here wants to take our program for free.
+U3PCMK1AA : Hi all, I've been playing with integrating slack different ways but now that I want to use the events api in a bot, the doc is really confusing me. If I get it right, to use the event api, I need to create a slack app to use my bot in it. The first step is to go through the url verification process, this has been done successfully. Now, the oauth flow. That's where I'm stuck. I don't want to distribute my app, which means my slack app, my bot and my users are all in the same team. If they are on slack, they are authenticated. Any hints and pointers? thanks in advance
+U04SM6T2H : you need to use oauth to grant your app permission to your team
+U04SM6T2H : once you do it, you can disable your oauth endpoints to prevent others from signing in
+U3PCMK1AA : I'll try that, thanks <@U04SM6T2H> . So even if the app is created from a team's account, it actually does not have permission.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

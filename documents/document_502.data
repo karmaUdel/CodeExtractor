@@ -1,7 +1,165 @@
+U0LPMPL2U : There's also <https://klaftertief.github.io/elm-search/> that allows searching by type signature
+U4872964V : <@U0LPMPL2U> yes, but not by data type
+U4872964V : which could be fixed I suppose
+U0LPMPL2U : it already allows searching for function names
+U0LPMPL2U : seems like searching for type definitions isn't too much of a jump
+U4872964V : it also allows things like "user:norpan" (reading the source code) :slightly_smiling_face:
+U4872964V : <https://github.com/klaftertief/elm-search/issues/16>
+U0CK8CJ5D : Regarding the elm-search… Yes, adding those features is not a problem. The exposed types and aliases are not contained in the index, though. I started a rewrite some time ago with a different focus and backlogged adding those features, and then I started a different pet project and backlogged working on elm-search. Maybe I should just hack in some features into the current version… Just for some context.
+U39DE7RQ9 : I need help. Im using rtfeldmans SPA example to build my own SPA. Instead of using http requests im using ports against firebase. Now I have a problem in my update function where my subscription returns a list of forms (my own type Form) and should be convertet / mapped to a model for a sub page holding a list of forms.```
+subscriptions : Model -&gt; Sub Msg
+subscriptions model =
+    let
+        getAllFormsSub =
+            Ports.gotAllPublicForms (Decode.decodeValue jsonFormListDecoder)
+    in
+        Sub.batch
+            [ Sub.map HomeLoaded getAllFormsSub
+            ]
 ```
-is not clear why this can't be  done using just function application. console is a specialized version of some div - with styles applied. is it not?
-<@U5YKRLXGT>, what is the _type_ of that function?
-It returns a `-&gt; Html.Html msg` right?
-I literally started programming Elm today :slightly_smiling_face:
-No, I don’t think it does.
-In another language I might do this:
+And my update:
+```
+case ( msg, page ) of
+( HomeLoaded (Ok subModel), _ ) -&gt;
+                { model | pageState = Loaded (Home subModel) } =&gt; Cmd.none
+```
+And the compile error:
+```
+0:38:39 client.1   |  Function `Home` is expecting the argument to be:
+20:38:39 client.1   |      HomePage.Model
+20:38:39 client.1   |  But it is:
+20:38:39 client.1   |      List Form
+```
+How do I map the list of forms to the model HomePage.Model and where?
+
+U4872964V : What does `HomePage.Model` look like
+U39DE7RQ9 : ```type alias Model =
+    { forms : List Form
+    }
+```
+
+U4872964V : Ok, so maybe `Loaded (Home { forms = subModel })`
+U39DE7RQ9 : yay! Tanks <@U4872964V>
+U6ASXAHUZ : Hi there folks, first time here (:
+U6ASXAHUZ : I'm new to Elm, but I've worked a bit on some other functional langs
+U6ASXAHUZ : I've started reading a bit around how to use Protocols, like I'm used to do in closure, but I didn't get that far
+U6ASXAHUZ : I wonder how I could write the commented part of the code
+U6ASXAHUZ : <https://ellie-app.com/3NxLPYhDn43a1/4>
+U4872964V : Ellie will give you the signature if you hover over the function name
+U4872964V : or is it somewhere else?
+U6ASXAHUZ : oh, nice
+U4872964V : I'm not sure what you are trying to achieve here though
+U4872964V : Elm is not really suited for object orientation
+U6ASXAHUZ : I was looking more for extension points than OO
+U6ASXAHUZ : Given that a datastructure respond to comparable, I could use on my functions
+U23SA861Y : actually it looks more like typeclasses or something
+U6ASXAHUZ : yup, more like it
+U23SA861Y : which elm has complier support for a small set, but no support for user type classes
+U4872964V : yeah, well, same thing there :slightly_smiling_face:
+U6ASXAHUZ : I noticed there is coparables that I can't implement for my structs
+U6ASXAHUZ : And I tried instead to make a comparable that I can implement for any struct
+U23SA861Y : it is implemented for records but not ADTs
+U4872964V : so is there an actual problem you're trying to solve using these, or just toying around?
+U23SA861Y : err, hold on no
+U6ASXAHUZ : norpan: nope, just toying around
+U4872964V : ok, yes, well Elm does things differently :slightly_smiling_face:
+U6ASXAHUZ : I've read around all the discussions on typeclasses
+U2Q5GJNTB : hi. anybody using elm with webpack and hash asset names for the compiled bundle?
+U6ASXAHUZ : And I understand why, I've been through MonadT complexity haha
+U6ASXAHUZ : But I was wondering if it would be possible to implement comparable using the suggestions given around when people ask for typeclasses
+U6ASXAHUZ : which is records
+U6ASXAHUZ : Does it make sense?
+U23SA861Y : no, it's really something that needs to be implmented at the language level
+U2Q5GJNTB : <@U6ASXAHUZ> but then again, without any concept of abstract interfaces we create inconsistent ad hoc things. Like Task.sequence vs Result.Extra.combine , …
+U4872964V : well, records should be comparable, that's an "easy" fix
+U62UFEG4D : Dear Elm people, hope you are doing all great!My question is the following, what  are the options to update a model without intervention of the user. I know I can use the Time package and subscribe to e.g. `Time.every second`.  But isn't there other options e.g. to get closer to cpu clock cycle ?
+
+U4872964V : <@U62UFEG4D>, the important cycle is animation frame: <http://package.elm-lang.org/packages/elm-lang/animation-frame/latest>
+U23SA861Y : <@U62UFEG4D> are you trying to do animation or something else
+U6ASXAHUZ : jonf: does it need to be on the language level? All the recommendations I've heard propose to use records to solve the issue
+U4872964V : <@U6ASXAHUZ> the first question is what the issue _really_ is :slightly_smiling_face:
+U6ASXAHUZ : jonf: I'm just investiganting, but it got me to think if it would be possible to use the recomendation to all the current interfaces blessed by the compiler
+U23SA861Y : you can do partial record matching and have that record contain functions
+U4872964V : maybe this is less <#C3K1L92FP|beginner> and more <#C2QPJLU2X|elm-discuss>
+U23SA861Y : little bit cumbersome but you can do it.
+U23SA861Y : right
+U6ASXAHUZ : oh, ok
+U3BTVEFQU : hey elm community … what is the best way to communicate from parent to child "components"
+U3BTVEFQU : exposing a child msg and sending it via the childs update function or creating a dedicated child function for this?
+U3BTVEFQU : I created a gist to show my problem: <https://gist.github.com/ream88/c076814d3936a8a70f89ff5eb120276f>
+U3BTVEFQU : Child1 exposes the msg, Child2 a update function
+U6ASXAHUZ : thanks @jonf, @norpan, <@U2Q5GJNTB>
+U62UFEG4D : <@U4872964V> and <@U23SA861Y> thanks for the prompt reply! Animation is not really my use case, although that use case does involve refreshing the screen from time to time when certain conditions are met.  The calculation of the condition relies on random generator, that's why I need to know the best way to minimize the "Elm architecture Cycle"...
+U23SA861Y : so, on what condition is the screen refreshing
+U23SA861Y : <@U3BTVEFQU> that architecture is ok at a very large scale but in general thinking about things as "components" can get you into trouble
+U4872964V : <@U3BTVEFQU> I'm not sure what the actual problem is though
+U3BTVEFQU : <@U4872964V> I'm not sure what's the proper way to do it
+U4872964V : any way that works :slightly_smiling_face:
+U4872964V : you can make whatever functions you like
+U3BTVEFQU : yeah :stuck_out_tongue_winking_eye: I figured out that part :stuck_out_tongue:
+U3BTVEFQU : but is the community doing, what feels "right"?
+U4872964V : If you have some pain, then that's a problem and we can certainly help suggest better ways to do things
+U3BTVEFQU : <@U4872964V> exposing and using a child msg feels kinda wrong
+U3BTVEFQU : however splitting the update function into multiple ones does it also
+U4872964V : Most people have "component pain" because they are locked into thinking that the `update` function for a "child" has to look a certain way
+U4872964V : but it really depends on the nature of the "child"
+U23SA861Y : often what is a component is really just a view
+U23SA861Y : but people get caught up with thinking that because there is this seperate thing in my view it should have seperate data
+U4872964V : A general tip is to consider data first. Data that only is used by a component does not need to be in a special model, it can be passed to the view function
+U4872964V : in your case, I think Child2 looks better, but the function can still be called `update`
+U3BTVEFQU : ok
+U3BTVEFQU : thanks :slightly_smiling_face:
+U3BTVEFQU : coming from the react side of development (and not doing functional programming before) is sometimes hard I guess
+U4872964V : just as long as you don't have a fixed idea on how function should and must look you'll be fine, I think
+U4872964V : It's a bit hard coming from a "framework" that dictates these things as "components"
+U4872964V : I gather that there are more to your children, but right now, they are just `WebData` so they serve little purpose
+U3BTVEFQU : yeah, definitely more … and they are quite different in fact
+U3BTVEFQU : however they all share data from a remote api, fetched by the "parent"
+U4872964V : so probably that data only need to be passed to the view function
+U2SR9DL7Q : Hello all. Is there any way to tell a function "Expect a list of four values" in the type signature? Or rather, can I define a type as `SomeType = List  Int Int Int Int` where I'm saying it can only be a List containing 4 elements?
+U0LPMPL2U : You probably want a 4-tuple
+U23SA861Y : what are the 4 values
+U23SA861Y : you can have a tuple of 4 or just a function with 4 parameters
+U2SR9DL7Q : for context, I have a list of values that gets passed around to a few function, but I define the list in the init as having 4 values, and it could never not have four, but every time I need an element from it I'm forced to handle every case of list.
+U23SA861Y : what do they represent, are they all the same thing
+U2SR9DL7Q : <@U23SA861Y> I guess I could. Or just another type.
+U23SA861Y : given that they are exactly 4 I presume there is some structure to them
+U2SR9DL7Q : The list holds "players" which are a type alias of a few things.
+U2SR9DL7Q : but I guess I could just make `type Players = Player Player Player Player` ?
+U23SA861Y : ahh, can you play with only two players?
+U2SR9DL7Q : For now, no.
+U0LPMPL2U : Some ideas:```
+(Player, Player, Player, Player)
+
+-- OR
+{ player1 : Player, player2 : Player, player3 : Player, player4 : Player}
+
+-- OR
+type Players = FourPlayers Player Player Player Player
+```
+
+U2GPAEU1L : I like `type Players = FourPlayers Player Player Player Player`, down the line if you support two players you could refactor easily
+U2SR9DL7Q : <@U0LPMPL2U> those could all work potentially.
+U23SA861Y : thats ok if you can only ever have a fixed set of numbers like 1,2,4 but if it's arbitrary then a list would be the correct structure
+U2SR9DL7Q : I have one function that essentially does `List.map2 (\x y -&gt; Player x y) X_list Y_List`
+U2SR9DL7Q : This would no longer work now... is there a similar map function for records?
+U2SR9DL7Q : <@U23SA861Y> I don't plan on supporting arbitrary amounts of players anytime soon.
+U2SR9DL7Q : Technically there's nothing wrong with the Lists... but I keep on having to deal with Nothing moments that are impossible, and that seems like code smell.
+U23SA861Y : If you have a fixed structure for the render (ie each of the 4 sides of the screen) then the ADT would be probably pretty good
+U23SA861Y : then add support for 1,2, and 3 players later
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

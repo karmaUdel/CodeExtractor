@@ -1,25 +1,64 @@
+U5ZAJ15P0 : oh right, ok, but the behaviour is similar
+U051SS2EU : I guess conceptually that difference doesn't matter - it's as if you flattened and took the first you found
+U5ZAJ15P0 : Will lein report if dependencies conflict? e.g. if I try to use a version of a dependency that introduced breaking changes, and a library I later require uses an old version of that dependency?
+U051SS2EU : no, lein will not complain, but `lein deps :tree` will report the conflict and tell you which it picked
+U5ZAJ15P0 : great, thank you :slightly_smiling_face: that clarifies some things
+U051SS2EU : you can use `lein pedantic` (a plugin) to make it bail out with an error <https://github.com/xeqi/lein-pedantic>
+U051SS2EU : oh wait that's depricated and lein has the pedantic feature… never mind!
+U051SS2EU : <@U5ZAJ15P0> see also `lein help deps`
+U3JURM9B6 : Is there a way to create a 'struct' that IS CONSTRUCTABLE ... but is NOT UPDATEABLE.
+{} does not wok since it's updateable via assoc
+
+Is there some way via deftype / defrecord to create something where (1) I have a constructor and (2) it can't be updated via assoc (or if it is updated, it becomes a plain map and is no longer a type / record)
+
+U051SS2EU : sounds like you want deftype - you can't assoc or conj etc. a deftype (unless you extend to those protocols of course)
+U11BV7MTK : ```user&gt; (deftype Trial [a b])
+user.Trial
+user&gt; (def t (Trial. 1 2))
+#'user/t
+user&gt; t
+#object[user.Trial 0x5e0c24f4 "user.Trial@5e0c24f4"]
+user&gt; (assoc t :a 2)
+ClassCastException user.Trial cannot be cast to clojure.lang.Associative  clojure.lang.RT.assoc (RT.java:792)
+user&gt; 
 ```
-<@U1LCB75M2> right - it's not an absolute but a tendency - and I would discourage using namespaces as if they were a series of nested keys…
-`{:thing "" :schedule/start "" :schedule/end "" :schedule/completed}`?
-<@U1LCB75M2> what about (s/def ::tree-node (s/keys :req [::left ::right]))
-or perhaps more appropriately `{:thing "" :schedule_start "" :schedule_end "" :schedule_completed}`
-to avoid namespaces being a series of nested keys
-but at some point code that renders a view by looking at an entity's `(get-in x [:schedule :start])`, or in a better organized entity `(:schedule_start x)` would have to be changed either way, no?
-`(:schedule/start x)`
-<@U050MP39D> by "nested" I'm thinking document-oriented representation. this tree-node definition is more like a memory model (you're describing the shape of a tree vs. a tree that represents anything in particular - e.g. company org chart)
-<@U051SS2EU> Can you elaborate on what you mean by "using namespaces as if they were a series of nested keys"
-Hi all, I am trying to get the value of a key from a hashmap in clojure but I am getting always nil.
-<@U0J9LVB6G> replacing `{:foo {:bar {:baz 0}}}` with `{:foo.bar/baz 0}` where there is no foo.bar ns in your app
-<@U5NAUMCAD> can you show how you put the value in and how you get it out?
-for instance I have something like [{:one "something"}]
-I do (:one nameVariable)
-well, that's not a hash-map, it's a vector with a hash-map at index 0
-in that example `(get-in v [0 :one])` would work
-:scream:
-sorry I did not realize that!!!
-I am new to clojure!!
-it's OK - maybe you don't need the vector part?
-actually is the response from a REST service
-so I do not have any option!!!
-you could map or reduce over the collection you receive. (map key coll)
-Loom (the graph library) has an Edge protocol which has `src` and `dest`. But when you call `add-edges` on a graph it expects the edges in the form [n1 n2]. What's the point of that protocol is i can't easily extend it how I like and instead have to implement nth?
+
+U11BV7MTK : from the deftype page in the clojure docs: `deftype provides no functionality not specified by the user, other than a constructor`
+U050ECB92 : qqq: `{}` is _not_ updateable
+U050ECB92 : persistent data structure
+U3JURM9B6 : sorry, by 'update', I meant create new obj with same 'type' as old obj
+U3JURM9B6 : I'm concerned with 'invaild objects'
+U3JURM9B6 : that claim to satissy certain constraints, but in reality do not
+U3JURM9B6 : due to assoc
+U3JURM9B6 : <@U11BV7MTK>: defrecord doesn't does not work, as assoc 'prserves the record type' ; with deftype, how do I read the 'a' and 'b' ?
+U11BV7MTK : ```user&gt; (.a t)
+1
+```
+
+U050ECB92 : &gt; The XY problem is asking about your attempted solution rather than your actual problem
+U3JURM9B6 : <@U11BV7MTK>: this was not part of the original request ...
+but is there a way to have this also work with cljs + optimizations advanced
+
+U3JURM9B6 : <@U050ECB92> : I agree that my question was poorly formulated.
+U050ECB92 : invalid data is a gating problem -- you validate at the edge of a subsystem, then you operate with the data
+U11BV7MTK : what was not part of the original request?
+U11BV7MTK : you asked how do you read the fields of the deftype
+U3JURM9B6 : I wnat field acccess to also work via cljs optimiazationsa dvanced
+U3JURM9B6 : (.a t) I suspect, will not work as cljs optimizatinos renames the .a
+U050ECB92 : IMHO this is not a data structure problem / impl detail but a program design problem
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

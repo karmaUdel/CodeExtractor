@@ -1,0 +1,73 @@
+U0NRYQNAZ : i enjoy building cli apps with argparse but lately click has been my go to.
+U07JGLLKF : click is super nice
+U07JGLLKF : but i never use it unless i'm pulling in at least one other dependency
+U13L8J76J : You can always vendor it
+U3EEX4N78 : click is slick
+U07JGLLKF : <@U13L8J76J> true true
+U4JJH96TS : Hello, `HTTP GET` is giving `400` on one machine but works perfectly fine (`200`) on other machine for the same URL. Any ideas why?
+U4JJH96TS : machine 1```
+&gt;&gt;&gt; import requests
+&gt;&gt;&gt; requests.get(url)
+&lt;Response [400]&gt;
+```
+machine 2
+```
+&gt;&gt;&gt; import requests
+&gt;&gt;&gt; requests.get(url)
+&lt;Response [200]&gt;
+```
+
+U4JJH96TS : Both use the same version of `requests`
+U07JGLLKF : is there anything in the returning body of your 400?
+U5VNFM6HF : Hi all,I want to write a program to get the MySQL status through the command line.
+E.g The command what I am doing is 
+`msqladmin -u username -p password status`
+(there is no space between -p and password.)
+But I don't want to provide password through the command line. But give the input as password to the command line on asking password. Like 
+```
+msqladmin -u username -p status
+
+password ******
+
+```
+Is there a way to do it?
+
+U4JJH96TS : oh, thanks <@U07JGLLKF> , just checked the returned `text` from the request. my machine's IP is blacklisted, oops
+U07JGLLKF : that'd do it!
+U07JGLLKF : <@U5VNFM6HF> technically `subprocess.Popen` has a `communicate` method to do this
+U07JGLLKF : but after 10 years of python i still can never get any subprocess thing to handle input properly and i hate it
+U07JGLLKF : ooh cool i found a handy library called `sh` that isn't awful
+U07JGLLKF : <@U5VNFM6HF> you can use `sh` to easily get this result:```import sh
+result = sh.mysqladmin('-h', '127.0.0.1', '-u', 'root', '-p', 'status', _in='password')
+print(result.stdout)```
+
+U29163YQH : is it just a subprocess with some helpers ?
+U07JGLLKF : its like subprocess for humans
+U07JGLLKF : from the documentation, stuff like this:```from subprocess import Popen, PIPE, STDOUT
+
+mysql_check = Popen(['mysqladmin', '-h', '127.0.0.1', '-u', 'root', '-p', 'status'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+out, err = mysql_check.communicate(input=b'password')
+print(out)```
+
+U07JGLLKF : should work, but never does
+U29163YQH : yeah i'm looking through the doc
+U29163YQH : seems nice
+U5VNFM6HF : <@U07JGLLKF> I tried it already. But it's asking for password.
+U07JGLLKF : <@U5VNFM6HF> yeah i couldn't get the `subprocess.Popen` version working without asking for a password either
+U07JGLLKF : the `sh` version works though
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

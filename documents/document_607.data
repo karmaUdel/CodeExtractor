@@ -1,2 +1,55 @@
+U0EUHKVGB : It achieves the same goal.
+U5GSVKPJS : Ish
+U2LAL86AY : <@U5GSVKPJS> <@U0EUHKVGB> <@U3SJEDR96> <@U17MSA88M> thanks all for explaining - pff this stuff pretty mind bending :smile:
+U5GSVKPJS : The Haskell solution witnesses a specific type at particular indices. F# cannot guarantee that, so you still have to match more cases than you would like to model.
+U5GSVKPJS : `Dict.get 5 (Dict.insert 5 (ABoolean True))` cannot _guarantee_ that `ABoolean` comes back.
+U5GSVKPJS : It says that you might get `AnInt` or `AFooble`
+U0EUHKVGB : It achieves the same goal, which is to have mixed types in a collection.
+U5GSVKPJS : Maybe you're ok with that, I'm just saying - the more power you give to your types, the more you can model
+U5GSVKPJS : Of course, but one leads me to a situation where I might get "stuck". In the above example, I _have_ to match an `AnInt`, even though that might be impossible. So what do I do? Writing `crash "impossible"` isn't particularly elegant, but often the best you can do
+U5GSVKPJS : Not arguing for this, just showing <@U2LAL86AY> that type systems have various levels of expressivity
+U4872964V : There are definitely stronger type systems. Then you’d have to grok things like this :slightly_smiling_face:```
+data DSum k tag f :: forall k. (k -&gt; *) -&gt; (k -&gt; *) -&gt; * where
 ```
-Ahh, yes, okay.
+
+U5GSVKPJS : <https://www.reddit.com/r/elm/comments/3hhlsp/htmllazy_for_any_number_of_arguments/cu7fn9d/> is this really true? The comment says how to write `lazy4` by using tuples, but lazy is defined using pointer equality on the argument, and surely every time the model changes you'll get a different tuple pointer, so the whole thing breaks?
+U0EUHKVGB : Old lazy is different from new lazy
+U5GSVKPJS : Ah
+U4872964V : I’ve noticed this too, with lazy. It’s not obvious, and it sort of goes against the notion to make your function types less general, for instance if you have a view function that only uses part of the model, you’d like to call it with just that part, but then you can’t use lazy
+U5GSVKPJS : Sure you can, `lazy f foo.bar` is fine
+U5GSVKPJS : Or did you mean `lazy (\{bar} -&gt; f bar) foo`, and have that be actually lazy on `foo.bar`?
+U4872964V : it is, but `lazy f (foo.bar, foo.baz, foo.qux, foo.quux)` isn’t and `lazy4` is not defined
+U4872964V : So, let’s say I have a model that updates frequently (some animation or whatnot) and then I have another part of the view that uses four fields from the model. Agreed, it’s not a very common case, but still
+U5GSVKPJS : right
+U4872964V : but in the process of making your function type more specific this will probably happen more often, since you replace `model` by specifc fields in the `model`
+U4872964V : So, having `lazy` work with a tuple or record by checking the fields is something to consider. Or adding a version of `lazy` that does
+U4872964V : I’ve started to make functions like this, which is pretty nice, as you can pass the `model` but it’s still specific.```
+viewX : { m | foo : Foo, bar : Bar } -&gt; Html msg
+```
+and so, to make it `lazy` you’d then just do `lazyThatWorksOnRecord viewX { foo: model.foo, bar: model.bar }` and not have to change the function style
+
+U0U6ML22H : I've got a UI question: I'm using RemoteData/WebData, so when my users submit something, I switch a value to`Loading` before the value is turned into a `Failure`/`Success`. Initially, I wanted to show a "Loading" message while the value was `Loading`; however, most of the time, it only stays `Loading` for a very brief time, which leads to the UI flashing and the "Loading" content not being readable
+U0U6ML22H : in my Redux days, I used to delay updating the model for about 0.4 or 0.5s so that users could see what the flash was about
+U0U6ML22H : how would you deal with that in Elm?
+U2JA29EKF : I think you can try adding an animation delay - see here for more info: <https://dev.to/rtfeldman/tour-of-an-open-source-elm-spa>
+U0U6ML22H : ah yeah, thanks; I'll look into it but I'd like a no-CSS solution if possible
+U0FP80EKB : <@U0U6ML22H> You can return a `Cmd` from your update that triggers in .5s.
+U0FP80EKB : That’s what we do with our flash messages.
+U0U6ML22H : ideally, I'd like the "entire process" to take "at least 0.5s" but no longer that strictly useful
+U0U6ML22H : ie, if it takes less than 0.5, wait for it to take 0.5, but otherwise don't needlessly delay it
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,16 +1,88 @@
+U27KX9MEJ : how can i share with you my structure for better understanding?
+U27KX9MEJ : what do you need to know about it?```
+type WidgetState
+    = TabsState TabsStateRecord
+    | SidebarState SidebarStateRecord
+    | ComboboxState ComboboxStateRecord
+    | FormState FormStateRecord
+    | TableState TableStateRecord
+    | FileManagerState FileManagerStateRecord
+    | ListState ListStateRecord
+   ...
 ```
-since the company id only exists in some cases
-Alternatively, have some top-level "dispatching" case statement that destructures all routes and then passes the unwrapped string into other functions
-<@U5ABF3BH7>  are you sure those lines shouldn't be `updatedLocation = Types.updateLocation ...`  (i.e. you are calling the `updateLocation` function in `Types` correct?)
-<@U5ZKYURNY> no because `Html.program` expects your `update` function to return commands of the same type as the messages it takes as input
-`update : msg -&gt; model -&gt; ( model, Platform.Cmd.Cmd msg )`
-But as it's a functional language you should everything should return some value. It's not a good code to use Debug.crash to handle the never happen case.
-@ericgi, it is Types.UpdateLocation, it is a msg in my Types model (it is the upper model)
-@joeql I think. I could use the Never type. but after look into that. I didn't understand it well.  I think it's use with some Html Never. Html that doesn't has a message
-<@U2MLC3R4G> right. I think the problem comes from the way your code is probably structured
-you probably want a top-level `case` that handles all possible routes
-now any sub functions can be passed the necessary strings or integers extracted from the current route
-and the routes don't get passed around to other functions
-Do you have anything friendlier than Debug.crash for this case. @joeql
-<@U0JFGGZS6> I ended up creating a function that updates everything at once
-If there's a question I have about a package that isn't necessarily a bug, what's the right place to do so? In the github issues?
+
+U27KX9MEJ : ```type alias TabsStateRecord =
+    { active : String
+    }
+type alias TableStateRecord =
+    { selector : Selector
+    , options : Bool
+    , minimizedGroups : List String
+    , modals : Dict String ModalBoxRecord
+    , selected : List String
+    , loadingState : LoadingState
+    }
+```
+That's example of state record with loadingState and witout it.
+
+U0JBSEGHY : <@U3SJEDR96> doesn't a map just transform what it maps over though?
+U0JBSEGHY : I really want to map over the Dict and cause a side effect
+U3SJEDR96 : That's a pretty complex structure. One option is to create a `type Widget = Instant InstantWidgetState | Deferred Bool DeferredWidgetState` where those two `WidgetState` types are sub-sets of your current `WidgetState`. Then again, is it really that bad to define this one function? It seems like you're using pretty heavy encapsulation, and that leads to more code to reach into separate cases.
+U0JBSEGHY : The dot notation doesn't seem to help me either
+U3SJEDR96 : <@U0JBSEGHY> - What side-effect are you trying to cause? I'm not sure I'm following?
+U0JBSEGHY : Given this ```Dict.fromList [("Jazz",{ metas = [{ phx_ref = "/cEkW0uji8g=", payload = { online_at = "1500725263", device = "browser" } }] }),("Wade",{ metas = [{ phx_ref = "mIHOmevHztc=", payload = { online_at = "1500725467", device = "browser" } },{ phx_ref = "pxEwxgqeucY=", payload = { online_at = "1500725252", device = "browser" } }] })]```
+U0JBSEGHY : I want to be able to count how many sessions each user has and show them.
+U0JBSEGHY : `listDefault` in the package provides me with this when I provide the `Dict` ```[{ metas = [{ phx_ref = "uKpvL9lGfw0=", payload = { online_at = "1500725539", device = "browser" } }] },{ metas = [{ phx_ref = "RW6kKhTyRRo=", payload = { online_at = "1500725535", device = "browser" } },{ phx_ref = "RqT4Wmqtw6A=", payload = { online_at = "1500725531", device = "browser" } }] }]```
+U0JBSEGHY : Maybe I am just looking at this the wrong way.
+U3SJEDR96 : `yourDict |&gt; Dict.map (.metas &gt;&gt; List.length) |&gt;Dict.toList |&gt; List.indexedMap (\(name, numberofMetas) -&gt; Html.text &lt;| name ++ " has " ++ toString numberofMetas ++ " metas")`
+U3SJEDR96 : `listDefault` is really just `Dict.values`, apparently
+U0JBSEGHY : Oh true it is.
+U27KX9MEJ : <@U3SJEDR96>  yes, that's bad to define a way like this because i have a lots functions like makeWidgetLoad And every time when i want to add new widget i need to rewrite every function written this way;( I have pretty big app and wanted to make refactorring simplier. But thank you in advance i very appriciate Elm community. Elm really cool language
+U27KX9MEJ : <@U3SJEDR96> That would be a great feature if we can to do pattern matching with union types and if we will get ability to use types as variables in this patterns? :slightly_smiling_face:
+U0JBSEGHY : What does `&gt;&gt;` do?
+U3SJEDR96 : `(\foo -&gt; foo |&gt; .metas |&gt;  List.length)` == `.metas &gt;&gt; List.length`
+U0JBSEGHY : so its is like `foo.metas |&gt; List.length`
+U3SJEDR96 : yeah, exactly :slightly_smiling_face:
+U3SJEDR96 : `foo.bar` is the same as `.bar foo`, where `.bar : { b | bar : a } -&gt; b -&gt; a`, in other words it just returns the value of a named field in a record
+U0JBSEGHY : This is what is tripping me up. Not sure what these types mean ```Function `map` is expecting the argument to be:
+    comparable -&gt; a -&gt; b
+
+But it is:
+
+    { b | metas : List a } -&gt; Int```
+
+U3SJEDR96 : Ooh, right, I completely forgot that `Dict.map` takes the key, too :smile:
+U3SJEDR96 : Try `Dict.map (\key val -&gt; val.metas |&gt; List.length)` instead
+U0JBSEGHY : Yea I did that earlier but was still being tripped up somewhere. I'll add those in.
+U0JBSEGHY : ```The argument to function `indexedMap` is causing a mismatch.
+203|                                        List.indexedMap (\( name, numberofMetas ) -&gt; name ++ " has " ++ toString numberofMetas ++ " metas")
+                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Function `indexedMap` is expecting the argument to be:
+
+    Int -&gt; a -&gt; b
+
+But it is:
+
+    ( String, a ) -&gt; String```
+
+U41NK9BM4 : `indexedMap` pass you a index, so I would try with `\(index (name, numberofMetas))`
+U3SJEDR96 : oh, you don't need `indexedMap` there. -_-
+U41NK9BM4 : Maybe he forgot to use the index? :slightly_smiling_face:
+U41NK9BM4 : Anyway something is wrong…
+U3SJEDR96 : nah, it's mapping of the a `Dict.toList` which gives a `(String, a)` so you already have "the index"
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

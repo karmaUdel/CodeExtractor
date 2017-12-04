@@ -1,36 +1,73 @@
+U5QJW0DDE : ah so there is a not function specifically written to hand Bools
+U0FP80EKB : <@U1ANV9FML> that would be an interesting graph.
+U41NK9BM4 : I believe it exists. I recall I've seen something like that
+U5QJW0DDE : if i have type Msg = Bool and I want to match on msg, are the cases branches not True -&gt; and False -&gt; ? the compiler is complaining
+U5QJW0DDE : oh, Msg needs to be a union
+U0FP80EKB : <@U5QJW0DDE> you would need `type alias Msg = Bool` if you want that
+U0FP80EKB : `type` defines a new type, whereas `type alias` let's you set a new name (Msg) for existing type (Bool)
+U0FP80EKB : If you used `type alias Msg = Bool` then the compiler won't complain, and you should be able to go fine
+U5QJW0DDE : from what I can understand about the Architecture, all messages that could change application state (for purposes of view rendering) are grouped together into a single type, right? If so, that must mean that for some large applications, you'd have something like a union with maybe dozens or hundreds of options
+U5QJW0DDE : if essentially every single action a user can take on a page is an option of the same type
+U604S603Y : I'm dealing with a challenge concerning nested models again: I have a `Record a`, containing a `Record b`, containing a `Maybe c`, containing a `Maybe Float` of which I want the string representation of the inner value in the Just case. When I'm using ugly nested `case ... of ...` to match the `Maybe`s I get the `Float` as `String` in the end just fine, let's say "42". 
+But when making it look nicer using `Maybe.map` I end up with "Just 42" in the end. 
+And using `|&gt; Maybe.withDefault ""` does not work, because Float and String don't match. And `toString`ing the Float beforehand gets me "Just 42" again.
+The complete helper methond in the let block is:
+```getErgebnisZahl schnellcheckData =
+            case schnellcheckData.rechenergebnis of
+                Just re -&gt;
+                    case re.ergebnis of
+                        Just ergebnis -&gt;
+                            ergebnis |&gt; toString
+
+                        Nothing -&gt;
+                            ""
+
+                Nothing -&gt;
+                    ""```
+
+U0FP80EKB : Yeah
+U0FP80EKB : <@U5QJW0DDE> so, you have one top-level `type Msg = ....` that contains all the messages that can be triggered.
+U0FP80EKB : <@U5QJW0DDE> Here's a sample of my top-level `Msg` on one of my apps (this is an editor for customizing our embed modules) ```
+type Msg
+    = UpdateEmbed FieldHelpers.FieldInfo
+    | Save
+    | SaveResult (Api.ApiResult Embed)
+    | EmbedMsg Embed.Msg
+    | ImageSelected ImagePicker.ImageControl FieldHelpers.FieldInfo
+    | ImageControlClicked ImagePicker.ImageControl
+    | ImageStateChange { id : String, state : String, data : String, bytes : Int, totalBytes : Int }
+    | ToggleEmbedCodeVisibility
+    | IgnoreEmbedMsg Embed.Msg
 ```
-I just needed to add Maybe String to my port it seems
-slowly getting the hang of this Types thing :slightly_smiling_face:
-I thought so too but this way feels like a workaround. I mean perhaps there is another way to acheive the same goal i.e. to animate some div element?
-<@U0JFGGZS6> I thought so too but this way feels like a workaround. I mean perhaps there is another way to acheive the same goal i.e. to animate some div element?
-<@U3F8KG1DE> it is a workaround, Elm treats the DOM as being essentially ‘write only' and doesn't provide ways to look at the state of the DOM. All attempts to look at the DOM require doing some kind of workaround.
-The simplest way to do what you want is to explicitly set the height so you already know it
-<@U153UK3FA> This is what I have actually done but this mean I will have to adjust this height every time I modify size of my div.
-Yep, you will
-I am still trying to find out a more ELM way to that. I mean CSS way is quite simple to use but not like really ELM way doing this
-The fact that the DOM keeps state itself that Elm can't set or calculate is a big pain
-Btw, it's just 'Elm' like the tree
-is there a way to get "named arguments" in function signature when using auto-complete (Visual Studio Code with Elm plugin), e.g. via a certain type of comment?
-for example I have `titleArea : String -&gt; Html msg`, but I want it to display additional info to explain that the `String` is the title text
-The issue here is that the argument might not even have a name; due to point-free programming
-for example, that could be implemented as `titleArea = Html.text`
-you can use a record to get named arguments `titleArea : { title : String } -&gt; Html msg`
-but i have no oppinion about whether this is a good idea :wink:
-mh, a record... that would make some of my long function signatures easier to handle for sure
-Yes, a record would give you auto-complete in a competent editor/plugin. But it would be nice to get the names of the parameters too, as defined in the function definition (if not using points-free style, which I never do in function definitions because it's just confusing)
-Anybody know how to install the elm-platform binaries on a by-project basis? I have one project using 0.17 and another using 0.18.
-<@U329ZV5T8> there are several tools, <https://github.com/eirslett/elmvm> or <https://github.com/mattludwigs/elm-version-manager> probably more
-Thanks. I was hoping  NPM could just handle it all, but that'll do I suppose!
-Pretty sure you _can_ also do it with npm/yarn; though you'll have to manually pass paths to stuff like `elm-test`
-I need help! I am using ContextMenu in a div but when I right click on custom caret it select the text! any solution :slightly_smiling_face:
-<@U6CQ51474> if you make an example in <https://ellie-app.com/> I'm sure somebody can help you
-It's a little difficult to write an example of this because there is a lot of code, it's an SVG rect where i write a text and so i use contextMenu to rightclick and display a menu on a custom caret position! So on right click it select the word between two spaces!
-But if it doesn't happen in a small example, then it's very hard to help, because it will be specific to your code
-hey can anyone recommend some good sample code on how to emit different message based on parsing incoming JSON in websocket?
-<@U3SARGL7Q> not sure exactly what you want, but you can certainly decode the JSON into different union type values and handle the different cases in your update function
-<@U4872964V> I am trying to conditionally parse JSON, I have JSON's delivered over WS such as `{"event" : "abc", params: {}}`, `{"event" : "def", params: {"someparam" :123}}`
-I want to write JSON decoder that outputs the Msg.Abc or Msg.Def, where parameters to these messages are different depending on the message that arrived
-<@U3SARGL7Q> Can you maybe use andThen as in <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#andThen> ?
-Depending on what the event string is set to, you chain it the right decoder.
-<@U2M4VPZ9D> I already reached the point where I know that it is about andThen but I can't proceed
-here's my code
+
+U5QJW0DDE : <@U0FP80EKB> would be nice if elm-format allowed you to put empty lines between parts of that long list, for annotating different categories of related messages
+U0FP80EKB : As you start noticing groupinng of messages (such as ones that update the data for our `Embed`), you can pull them into a new one and collapse them, such as `EmbedMsg Embed.Msg`
+U0FP80EKB : If you start wanting to annotate, you might be at a point where you want to start grouping them.
+U5QJW0DDE : oh i see. so EmbedMsg is itself a union
+U0FP80EKB : Yeah, notice `FieldHelpers.FieldInfo`, as well. This is how we collapsed editing form fields
+U0FP80EKB : We have `FieldInfo` further collapse```
+type FieldInfo
+    = ContentField ContentFieldInfo
+    | AppearanceField AppearanceFieldInfo
+    | GeneralField GeneralFieldInfo
+```
+
+U5QJW0DDE : that's' nice
+U0FP80EKB : So, over time, there are techniques to keep your top-level `Msg` from being too cluttered. At some point, I always end up collapsing my form field update messages.
+U5QJW0DDE : i dig it
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

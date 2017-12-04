@@ -1,6 +1,98 @@
+U3SJEDR96 : to capture either the `Err "I failed"` or the `Ok [ projects ] `
+U4RR7KX45 : I wanted to see how `sequence` works, but I guess I cannot do it without actually using HTTP
+U3SJEDR96 : sequence performs the tasks one by one, and gathers up the results. As of `0.19`, it will be a simple `List.foldr (Task.map2 (::)) (succeed []) tasks`, I think
+U3SJEDR96 : though that's an implementation detail at best
+U6EV3H0N7 : is there a reason there's no Task.parallel <@U3SJEDR96>?
+U6EV3H0N7 : (while we're discussing Task.sequence…)
+U3SJEDR96 : Not really; other than it's not super-straightforward to implement, and it isn't insurmountable to live without it.
+U64FYS317 : Anyone have any links regarding setting up the elm-overlay debugger with webpack dev server?
+U4RR7KX45 : so shouldn't this work then?```
+Task.sequence [ Process.sleep (2 * Time.second) ]```
+
+U3SJEDR96 : <@U4RR7KX45> it should, and it does. It would return a `Task x (List ())`
+U2SR9DL7Q : I've encountered a problem that's happened before, but I'm not exactly sure why.```
+updatePlayers : Player -&gt; Players -&gt; Players
+updatePlayers player players =
+    Zipper.mapCurrent (\x -&gt; player) players
 ```
-I guess I'm just not understanding where to put messages
-or for that matter how to import them
-I try `import User.Commands exposing (UserMsg)`
-if you did that your messages would be imported by update but not user
-but when I try to put `FetchUser` in the case it doesn't work
+The compiler complains that mapCurrent wants a `Zipper.Zipper Player` but got `Players`. `Players` _is_ `Zipper.Zipper Player` though.
+
+U153UK3FA : <@U2SR9DL7Q> `Players` is a type alias for `Zipper Player`?
+U2SR9DL7Q : <@U153UK3FA> yup
+U3SJEDR96 : I'm not sure what `(\x -&gt; player)` does, tho?
+U3SJEDR96 : (or is supposed to do)
+U2SR9DL7Q : mapCurrent applies a function to the 'current' element in the zipper. So `(\x -&gt; player)` just updates the current player to a new player.
+U3SJEDR96 : ah, alright, gotcha. hm. In that case, ¯\_(?)_/¯
+U153UK3FA : <@U2SR9DL7Q> so you've got `type alias Players = Zipper.Zipper Player` somewhere?
+U2SR9DL7Q : <@U153UK3FA> yup
+U153UK3FA : What happens if you change the type declarations of `updatePlayers` to take a `Zipper Players`?
+U2SR9DL7Q : fixed it! Everything compiles. And that's terrifying.
+U3SJEDR96 : I'd triple check you had a `type alias` rather than a `type`, and that the type alias was accessible at that point, and not overriden elsewhere, etc
+U2SR9DL7Q : <@U3SJEDR96> <@U153UK3FA> an override was the problem. I'd accidentally defined Players twice.
+U2SR9DL7Q : And... it all seems to work. After a pretty big refactor.
+U2SR9DL7Q : Elm: 1000 runtime errors: 0
+U1AN4JRFV : <@U64FYS317> you need to pass `Debug=true` to the elm-loader options.
+U64FYS317 : <@U1AN4JRFV> tyvm
+U45C5R6QP : Is there anyway to define a type as an integer between 0-10? Ie. throw compiler error if I try to set a value of 12
+U45C5R6QP : Guess I could do something like `type BetweenOneAndTen = 0 | 1 | 2 | 3...`
+U4872964V : <@U45C5R6QP>, not in any really practical way, however you can hide your type in a module and have functions that check the values when setting it.
+U4872964V : depends on what operations you want on your integer too
+U45C5R6QP : but then that's going to be a pain down the road… No, this is a rabbit hole I'm not going to jump down into. Thanks for the feedback though :slightly_smiling_face:
+U1A0BJG7J : Is it possible to pattern match on a type variable? An alternative to the following (not working) snippet:```
+type MyType 
+    = Tag1 Int
+    | Tag2 String
+
+update : msgType -&gt; modelType -&gt; ( modelType, Cmd msgType )
+update msg model =
+    case msg of 
+        msgType (Tag1 number) -&gt;
+            ...
+            ( model, Cmd.none )
+        _ -&gt;
+            ( model, Cmd.none )
+```
+
+U1A0BJG7J : my use case is: I have a library that has some messages, and I would rather just tell the client code to plug the update function of my library after their update function, instead of having to manually handle the tag they use to wrap the messages of the library
+U1A0BJG7J : ```update msg model
+    |&gt; Update.Extra.andThen MyLib.update msg
+```
+
+U1A0BJG7J : what I'm trying to get away from is:```
+type Msg 
+    = Msg1
+    | LibMsg MyLib.Msg
+
+update : Msg -&gt; Model -&gt; ( Model, Cmd Msg )
+update msg model =
+    case msg of 
+        LibMsg libmsg -&gt;
+            let 
+                (model2, cmd) =
+                    MyLib.update libmsg model
+            in
+                (model2, Cmd.map LibMsg cmd)
+```
+
+U60MNG7T7 : Beginner question: Is it possible to run Elm on server-side?
+U3SQ42JJW : people say so :wink:
+U60MNG7T7 : without extra tools or packages?
+U3SQ42JJW : I have no clue how the do it. Just heard that they are experimenting with this.
+U3SQ42JJW : Would be curious about this , too
+U2U94G0QG : The most common answer I see to this is "kinda, but that's not what it's for"
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

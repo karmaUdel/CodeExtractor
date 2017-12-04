@@ -1,80 +1,105 @@
+U41NK9BM4 : It's also strange that  you have `'int' object is not callable`, eh!
+U41NK9BM4 : So there might be issues on both sides.
+U41NK9BM4 : Mmmm.
+U41NK9BM4 : return 201
+U41NK9BM4 : This smells wrong.
+U59AF21LJ : Oh you're right I should look into that as well.
+U5XHTBFS6 : Indeed it is. Flask expects that if the return from a view is a single value, it should be a string with the content
+U41NK9BM4 : So the plan is, fix Flask side using Curl, then switch to Elm
+U41NK9BM4 : Python never lies.   :slightly_smiling_face:
+U59AF21LJ : <@U41NK9BM4> Done. I just switched to a string as <@U5XHTBFS6> suggested. (The `201` was shamefully pasted from a stackoverflow example)
+U5XHTBFS6 : From flask's doc:
+<http://flask.pocoo.org/docs/0.12/quickstart/#about-responses>
 ```
-Nice. But this would require some extra package because union types can't be stored in a Set, right?
-Yes, that's right.
-Though the "magic" of it is that you can use `toString MyType` to get `"MyType"`, which is comparable.
-So if you're interested in learning some data structure stuff, you could try making your own `EverySet`, which uses the core `Set` underneath, but does the string conversion in between.
-Sounds interesting, I'll give it a try!
-Got to go now, thanks for your valuable insights, highly appreciated!
-so, i know Elm cannot directly access the DOM. But, can you give an Elm "element" an id that the DOM can independently find with some raw JS also on the page?
-You can set any attributes you want on DOM elements in Elm
-for example `div [ id "my-id", class "my-class" ] []`
-Check out the `Html.Attributes` library
-i'm revisiting this idea i posted yesterday, it was suggested that this is not really possible in Elm, but it occurs to  me that it doesn't need to be; I just need the Elm-generated SVG to be accessible from JS for further processing: <https://paste.ofcode.org/XACLTwrZwaTgDvizZUY77T>
-If you want to be clever, you can even assign ids dynamically and then pass them out to JS via ports
-For what you're doing though, it sounds like a static id should be fine
-the struggle I"m having with getting convinced to go with Elm on a new company project is the limitation of JS interop, trying to think of ways to do things.
-JS interop in Elm is more like asynchronously calling a different service than it is synchronously invoking JS functions
-or, just allowing an external service to dig into your Elm DOM without Elm knowing about it
-It's tricker to allow external JS to mutate Elm-owned DOM because Elm could re-render that at any time
-not to mutate, just to read
-reading is totally OK
-there are a great many UI frameworks for HTML5 now, and another limitation is not really getting to use them, from what I understand.
-like Semantic or Material
-There are Elm libraries for both Material and Bootstrap (and possibly others?)
-i assume it is no problem to use css libraries like Font Awesome though, freely and manually?
-Correct. You can manually add a stylesheet to your HTML page it will play nicely with any classes/ids/etc that you set on your DOM in Elm
-there are also libraries that try to integrate CSS more closely into Elm such as elm-css
-i really want to dive deep with Elm after a few years using Clojurescript (which i like too), but giving up some of that JS freedom is something I need to think about
-Clojurescript is great in  many many ways, all immutable, functional, but it suffers the runtime errors that regular JS does
-Er, I'm a little confused: Since elm doesn't have type classes, how does it have functions like `&lt;`?
-Seems like all those type class like functions are calls out to Native JS?
-Elm _does_ have type classes, just not user-defined ones :slightly_smiling_face:
-If you look at the signature for `&lt;`, you'll see: `(&lt;) : comparable -&gt; comparable -&gt; Bool`
-`comparable` is a typeclass
-but you can't extend it and you can't create your own
-see <http://faq.elm-community.org/#does-elm-have-ad-hoc-polymorphism-or-typeclasses>
-how dependable/consistent is the cross-browser behavior of Elm? any gotchas to look out for?
-I suppose I wouldn't call that "has type classes", I'd call it "has magic woo only the language developers can use"  :stuck_out_tongue_winking_eye:
-Saddly, I really want type classes.... well, that and `Array.map2` (my more immediate need)
-<@U5QJW0DDE>: I am piping the output of Elm through Babel (with the `env` preset). Haven't had gotten any tickets from browser compatibility issues.
-<@U5QJW0DDE> It's very dependable. The key features that may need are requestAnimationFrame and Object.assign
-The JS produced is mainly ES3
-<@U60SXAF96> whta do you meant you are piping through babel -- the Elm transpiled JS gets further transformation from Babel?
-<@U5QJW0DDE>: Why can't you use these UI frameworks?
-i didn't realize there were Elm ports of them
-I haven't even thought of running compiled Elm through Babel :)
-Yes. But for us, that's mostly because we've got non-Elm JS that needs to be transpiled down, and the Elm-produced JS gets swept up into that.
-i'd like to use the Google Closure compiler but my understanding is that Elm's JS is not Closure-compatible
-<@U5QJW0DDE>: We just talked about this in <#C0CJ3SBBM|general>. You can use Closure out-of-the-box -- you just can't turn it up to the `ADVANCED` optimization setting, because it mangles property names in code (but not in Strings). If there was a way to turn off property name mangling, you would be fine.
-advanced compilation is the only reason i'd want it :slightly_smiling_face:
-That's a different statement than "it's not Closure-compatible".
-for example, all clojurescript projects go through advanced google closure eventually and its simple and leads to really optipmized code
-It's important to be precise in these kinds of claims, or you get people freaking out on heresay.
-You can run Elm through Closure no problem. It is simple to do so -- I'm doing so in my project, in fact.
-well, there is a paricular meaning to "closure compatible" with regards to the style of JS google allows for many of its optimizations
-Got a link?  I didn't know the term.
-yes, the normal Closure restrictions is what I'm referring to, like here: <https://developers.google.com/closure/compiler/docs/limitations>
-advanced is nice for dead code elimination, last I had read this was not in Elm but perhaps that has changed?
-We just talked about that in <#C0CJ3SBBM|general>, too -- basic DCE is coming in the next release, but there's more advanced DCE (akin to what PureScript does) in the pipeline.
-well that's good to hear
-That link has 3 distinct levels of restrictions. Which one is necessary to be "Closure compatible"?
-all of them
-for advanced optimizations
-what do I use when I know that something can't produce a `Nothing`. Like, I'm willing to be my program on it?
-In Haskell I'd use `error`, but elm doesn't seem to have a function like `String -&gt; a` that always fails like `never` does.
-What are you trying to do exactly? :thinking_face:
-well, ultimate goal is implement `Array.map2`....
-Debug.crash?
-but in the small, say I have an index, `i` that I know is less than `Array.length someArray`
-Ah!
-not the best named function, but the right signature!
-Well, it does exactly that.  Also the name implies that you should find a better way to deal with it sooner or later :slightly_smiling_face:
-question about Json.Encode (with context).  In javascript it is so easy to go JSON.stringify({ isThisEasy: true }) - but in Elm, one cannot simply Json.Encode.encode { isThisEasy = true }
-why is that?
-<http://package.elm-lang.org/packages/Gizra/elm-keyboard-event/1.0.0/Keyboard-Event>
-<@U5GSY0G9J> - I am new to this myself, but I think if you sent some kind of "Key13Pressed" Msg then you could kind of handle it that way
-but maybe you need a solution more general than that
-(you can't actually simulate the "click", but you can handle what _would_ happen on a click)
-You can likely set the same Msg for both clicks and enter-presses
-<@U5WS7CJLV> I think the most direct answer to your question is that the `Encode` package prefers type safety and reliability to convenience
-I see.  For me, I just want my JSON stringified ASAP so I can make a web request.  Seems like there's a lot of resistance for something so simple (in javascript).
+    If a response object of the correct type is returned it's directly returned from the view.
+    If it's a string, a response object is created with that data and the default parameters.
+    If a tuple is returned the items in the tuple can provide extra information. Such tuples have to be in the form (response, status, headers) or (response, headers) where at least one item has to be in the tuple. The status value will override the status code and headers can be a list or dictionary of additional header values.
+    If none of that works, Flask will assume the return value is a valid WSGI application and convert that into a response object.
+```
+
+U59AF21LJ : Yeah, so now `curl` works perfectly. So we can assume the server side is correct.
+U41NK9BM4 : Great.
+U59AF21LJ : Thanks for this part/
+U5XHTBFS6 : Can you attach the full code? Maybe the problem is not on the `save` value, but where it is used.
+U59AF21LJ : <@U5XHTBFS6> I guess I should trim it to a minimal example.
+U5XTFSTFV : Hi, Maybe somebody here can help meIs elm debouncing msgs send to the update function?
+I'm triggering an onScroll event on a div and it only gets passed to the update ftn once the scroll event  ends.
+
+U5XHTBFS6 : <@U59AF21LJ> I see you reverted to using `<http://Http.post|Http.post>` with `Http.jsonBody`. Can you try again with the raw `request`?
+U59AF21LJ : <@U5XHTBFS6> Doesn't change anything if I have```
+saveTree : StoryTree -&gt; Cmd Msg
+saveTree tree =
+  let
+    url : String
+    url = "update"
+
+    value : Encode.Value
+    value =
+      Encode.object
+        [ ("name", Encode.string "Tom")
+        , ("age", <http://Encode.int|Encode.int> 42)
+        ]
+
+    body : Http.Body
+    body =
+      Http.jsonBody value
+
+    request =
+      Http.request {
+        method = "POST",
+        headers = [
+          Http.header "Content-type" "application/json"
+        ],
+        url = url,
+        body = body,
+        expect = Http.expectString,
+        timeout = Nothing,
+        withCredentials = True
+      }
+  in Http.send PostBack request
+```
+
+U5XHTBFS6 : hmmm i'll try running locally here and see if I can spot something
+U59AF21LJ : <@U5XHTBFS6> I'm really afraid it's due to caching even though I'm using private browsing.
+U59AF21LJ : <@U5XHTBFS6> <@U41NK9BM4> I have to apologise. It was a caching problem…
+U41NK9BM4 : As I said: "Usually when things like this happen usually there's some stupid, obvious, tiny thing that screws up everything"
+U41NK9BM4 : :grimacing:
+U59AF21LJ : Yeah.^^
+U5W50TZ6C : Hi! I'm trying to model a file system in Elm. Here's what I have so far:```
+type alias File =
+    { name : String
+    , content : String
+    }
+
+
+type alias Folder =
+    { name : String
+    , children : Items
+    }
+
+
+type Items
+    = Folder
+    | File
+    | Nothing
+```
+But this isn't valid; Elm sees *two* `Folder` and *two* `File`. What is the proper way to do this?
+
+U59AF21LJ : <@U5W50TZ6C> You probably have to give different names to Folder and File in the definition of Items.
+U41NK9BM4 : Glad you made it to work, <@U59AF21LJ>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

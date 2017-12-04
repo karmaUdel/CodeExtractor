@@ -1,10 +1,65 @@
+U2SR9DL7Q : i'm designing for the small screen first through then moving my way outwards.
+U17PWHU4D : been struggling since yesterday on importing an array from json with mixed types.  Its always consistent.  `[ int, int, string, int ]`.
+U17PWHU4D : Im' using pipeline decoder.  and works for everything else, however, I have to specify a type alias. and have no idea how to describe this.
+U17PWHU4D : any advice would be much appreciated.
+U5J0H2NS2 : Did you try oneOf ?
+U17PWHU4D : was trying to learn oneOf, but i think the issues is more that i need to map.  i got this far, with the help of someone yesterday.
+U17PWHU4D : ```segmentsDecoder list =
+    Decode.map5 &lt;need type alias here&gt;
+        (Decode.index 0 <http://Decode.int|Decode.int>)
+        (Decode.index 1 <http://Decode.int|Decode.int>)
+        (Decode.index 2 Decode.string)
+        (Decode.index 3 <http://Decode.int|Decode.int>)
+        (Decode.index 4 <http://Decode.int|Decode.int>)
+
+
+segmentDecoder : Decoder SegmentResponse
+segmentDecoder =
+    decode SegmentResponse
+        |&gt; required "segments" (Decode.list segmentsDecoder)
 ```
-startgame returns a div with a button in it, render Game returns the game board
-I was about to ask another question, but I _think_ I just answered it for myself.
-I was going to ask what if I did just want a small piece of a page to show up or not. But I realized that a helper function just makes that this scenario again.
-And putting a case in a list is exactly the situation where I'd want to abstract with a helper
-you always need to choose between one or more things
-you don't get the option of a case/if returning nothing
-what they return could be an empty `div` or a `text ""`, but it has to be something
-spoiled for choice
-<@U23SA861Y> thank you *very* much, and <@U0FP80EKB>_  as well
+
+U17PWHU4D : it feels like oneOf is more for if i wanted to convert if all index are not the same type.  When really, i just want to pull that `index 2` out and make it a key/dict or something.
+U2D7NUGS1 : :champagne: Just published my first Elm package! <http://package.elm-lang.org/packages/lzrski/elm-polymer/latest>
+U2D7NUGS1 : Thanks for your tremendous help!
+U0CLDU8UB : <@U17PWHU4D> Does your JSON look something like this:```
+{ "segments": [ 4, 2, "yes", 4, 2 ] }
+```
+
+U17PWHU4D : yes, exactly <@U0CLDU8UB> !
+U0CLDU8UB : Okay so what is the problem you are facing?
+U17PWHU4D : so this is my first attempt with json decoders.  and i'm able to correctly decode all other data.
+U17PWHU4D : but as far as i know i need to specify an alias, so the decoder, can use it to create the Elm object.
+U17PWHU4D : in my ex. above.  after Decode.map5.
+U0CLDU8UB : You can do that, or use a function. For example, if you wanted to make that into a 5-element tuple, you could:```
+ segmentsDecoder list =
+    Decode.map5 (\num1 num2 str num3 num4 -&gt; ( num1, num2, str, num3, num4 ))
+        (Decode.index 0 <http://Decode.int|Decode.int>)
+        ...
+```
+
+U0CLDU8UB : But what does your `SegmentResponse` type look like?
+U17PWHU4D : i removed a lot of the other fields, but it just includes 1 field that has the segments key, with the mixed array.
+U17PWHU4D : what you showed me is great here though.  so basically, those args of the Tuple, match up to the decode.index below, correct?
+U0CLDU8UB : Correct
+U17PWHU4D : ah, great, going to give this a shot, i'll ping if i get stuck again.  thank you a ton!
+U0CLDU8UB : the very bottom of this page explains the same thing gradually: <http://ohanhi.com/secret-spy-messages.html>
+U17PWHU4D : oh nice, going to read that right now…
+U17PWHU4D : it worked perfect <@U0CLDU8UB> .   Can't thank you enough for that one!
+U37BS6J6N : ello all, trying to do the extra credit for the "random" exercise in the docs and I can't seem to get my update to return the correct type
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

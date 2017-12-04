@@ -1,0 +1,98 @@
+U5ZPMJA06 : Thanks, I'll try to read it.
+U69HXQZJ9 : When I tried to parse it using other scripts, it would give me (ValueError: Extra data: line 2 column 1 - line 1201 column 1 (char 13339 - 8801096)
+U5ZPMJA06 : For starters, thats *not* a valid JSON file.
+U5ZPMJA06 : It's more like a text file where every line seems to contain a JSON representation of an object.
+U5ZPMJA06 : ...workin....
+U69HXQZJ9 : Ahh
+U69HXQZJ9 : I had set up a crawler to download scripts 
+U69HXQZJ9 : Sorry 
+U69HXQZJ9 : Tweets I mean 
+U69HXQZJ9 : Is there a way I can fix it?
+U5ZPMJA06 : <@U69HXQZJ9> This will work:```
+import json
+
+nr = 0
+for line in open("stream_BhagNawazBhag.json"):
+    ob = json.loads(line)
+    text = ob.get("text", "")
+    user = ob.get("user")
+    if user:
+        username = user.get("name", "")
+    print username
+    print text.encode("utf8")
+    print
+
+    if nr &gt; 10:
+        break
+    else:
+        nr += 1
+```
+
+U5ZPMJA06 : <@U69HXQZJ9> Getting data from Twitter is quite something else as parsing that data ;-)
+U1BP42MRS : You should use the context manager for the file open to ensure it's closed, and use the future print function to make sure the code is 3.x compatible
+U69HXQZJ9 : I understand. Sorry for being a noob
+U69HXQZJ9 : Just that I got the data. Wanted to parse it 
+U5ZPMJA06 : <@U1BP42MRS> Thanks for your excellent advice!
+U69HXQZJ9 : <@U1BP42MRS> should I install python 3 then?
+U1BP42MRS : <@U5ZPMJA06> :taco: nice suggestion for the op
+U1BP42MRS : <@U69HXQZJ9> - Python 3 is the future of the language, so it is worth using. But for now, I wouldn't divert your attention from your current issue
+U69HXQZJ9 : Ahh
+U5ZPMJA06 : <@U69HXQZJ9> It depends on what you use now. Do you need any Python 3 features for your work that you can't do in Python 2? Eventually, Python 2 will become obscure indeed.
+U69HXQZJ9 : <@U1BP42MRS> I will keep that in mind 
+U5ZPMJA06 : ...probably 20 years into the future.... but remember 2000!  Nobody saw _that_ coming.
+U69HXQZJ9 : <@U5ZPMJA06> for the moment, I just need to finish this 
+U5ZPMJA06 : <@U69HXQZJ9> Stick with what you have then ;-) But make a mental note to upgrade, 10 years from now.
+U69HXQZJ9 : I will upgrade 2 months from now :)
+U5ZPMJA06 : That's great
+U69HXQZJ9 : Will try the code 
+U5ZPMJA06 : <@U69HXQZJ9> Also, your file should be named *BhagNawazBhag_stream.txt* instead of *stream_BhagNawazBhag.json*, because it is really not a JSON file. It is a text file with a JSON packet on every line. The program which produces this, will cause confusion by naming it with a '.json' extension.
+U69HXQZJ9 : Ohhh
+U69HXQZJ9 : I wish i had joined this group earlier 
+U69HXQZJ9 : Had spent countless hours looking for a solution 
+U5ZPMJA06 : <@U69HXQZJ9> And this is the code with mattrasband's suggestions applied:```
+from __future__ import print_function
+import json
+
+nr = 0
+with open("stream_BhagNawazBhag.json") as f:
+    for line in f:
+        ob = json.loads(line)
+        text = ob.get("text", "")
+        user = ob.get("user")
+        if user:
+            username = user.get("name", "")
+        print(username)
+        print(text.encode("utf8"))
+        print()
+
+        if nr &gt; 10:
+            break
+        else:
+            nr += 1
+```
+
+U69HXQZJ9 : let me try it out. Thank you for that. I really appreciate the help.
+U5ZPMJA06 : I agree that the *from future* is quite useful for all of the people who use Python 3 already, but I'm less convinced of the *with open() as f* context manager. I think the file object will be closed anyway when it goes out of scope; the context manager seems to add extra complexity and an extra indentation level. However I _do_ think a file context is useful when writing a file as part of a larger operation, so you can indeed force it to close (and flush to disk).
+U69HXQZJ9 : I did try python 3 earlier but a lot of the scripts/recipes were written in 2.7, so I had to downgrade
+U5ZPMJA06 : Uh-uh. I see.
+U5ZPMJA06 : Well, it's not forbidden to use Python 2 ;-)
+U5ZPMJA06 : I used it for 25 years and I'm still using it.
+U69HXQZJ9 : i understand :slightly_smiling_face: Apologies for being a bit slow here
+U69HXQZJ9 : the script worked
+U5ZPMJA06 : Great! And now?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

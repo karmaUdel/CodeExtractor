@@ -1,10 +1,102 @@
+U23SA861Y : no, because those are strings and your decoder is expecting them to be
+U6531GSTW : holy shit
+U6531GSTW : it worked..
+U23SA861Y : and by date a presume you mean aTermin and aDeadl
+U23SA861Y : there you go
+U6531GSTW : i believe that one day, i will be able to use the full potential of coding
+U6531GSTW : :))
+U6531GSTW : thanks to you guys, for making this possible
+U23SA861Y : getting your code types to align with your data types can be one of the more infuriating experiences.
+U23SA861Y : its garunteed to manifest as a runtime error
+U3BTVEFQU : <@U5W86UED6> <@U48AEBJQ3> the problem is … I have views/components on my page which are different enough to all be defined as their own modules, but they are build using the same components
 ```
-<http://package.elm-lang.org/packages/Fresheyeball/elm-return/latest> is a package that can remove some of the boilerplate
-Thankyou <@U153UK3FA>!!
-<@U3LUC6SNS> I wasn't sure if you wanted to sequence the Cmds (which you can't do)
-<@U153UK3FA>, that works fine - actually, it works beautifully!
-just to be clear, there is no guarantee that your login will complete before your search request.
-if they depend that ordering (implicitly passing state through the model) then they'll likely fail under different network conditions
-<@U6C09T8HX> Just try to be a decent person who makes the world a bit better. I don't have a rationalization for why I do this.
-(link to _free_ course: <http://courses.knowthen.com/>)
-I hope to get to know Elm a lot better over the coming months, partly for self-enrichment, partly in order to convince my team that Elm is a big step in the right direction for web UIs.
+main
+??? sub1
+?   ??? shared
+??? sub2
+?   ??? shared
+??? sub3
+    ??? shared
+```
+
+U3BTVEFQU : <@U5W86UED6> <@U48AEBJQ3> so the messages of the shared component are kinda shared between them :disappointed:
+U48AEBJQ3 : Alright, I have a minute to thick on this. We should have 'the talk' :wink:. Thinking in components in the way that you seem to be is going cause you a lot of grief working with Elm. You probably come from an OO background, so you are used to isolating state into objects, but in Elm, all of the state is in one place (the model) and you have to use that state to produce the view. Please don't take any of this the wrong way, it is a *very* common problem that the community is still working on a way to communicate earlier.
+As for what is going on here, you have a bunch of 'components'. For each of them, you will likely have a data structure which holds its various pieces of state (usually a record) and this data structure lives in the model somewhere. You will use these data structures in functions which produce `Html Msg`. These functions need to generate different messages so you know which 'component' data structure to update.
+
+There are a couple of ways to do this. One is to just make a whole bunch of messages, one for each message that the component needs times the number of components. That probably sucks.
+
+Another way is to take the messages that you are already using and upgrade them with some sort of identifier which lets you know which component produced it. This could be an integer or a string or a union, it doesn't matter, you just have to be able to identify which data structure to update (perhaps they are all stored in a `Dict String ComponentState`) I am going to call this the `Id`. Now you need to upgrade all of the component-related message data constructors, so `MyMsg` becomes `MyMsg Id` or `MyOtherMsg String` becomes `MyOtherMsg Id String` (note the placement of Id ahead of String). Then you upgrade your component view functions to take the `Id` somehow. I would recommend that your view functions look something like `componentView : msg -&gt; ComponentState -&gt; Html msg`, then you would call `componentView (MyMsg "footer") model.footerComponentState`.
+
+U333XNTNY : Hi y'all! Short story: I'm looking for a function, that takes each element of a list and the next, applies another function and returns the result list. Something between `map` and `foldl` I believe :thinking_face: Longer story: I have a list of coordinates and a function, that can compute the distance between two coordinates. Now I'd like to compute the distance between each coordinate and it's next one in the list.
+U333XNTNY : I was thinking of creating two lists, one without the first and the other without the last element and then use `map2`. Feels a bit clumsy tho.
+U23SA861Y : no thats the typical way to do it
+U23SA861Y : List.map2 f list (List.tail list)
+U0FP80EKB : I'd probably do `zip list (List.tail list) |&gt; foldl` instead of `map2` but that is just me
+U0FP80EKB : Depends on whether `map2` is optimized better
+U0FP80EKB : You probably want to make sure what each does since those lists are of different sizes
+U0FP80EKB : Depends on what you want the behavior to be
+U23SA861Y : why would you fold
+U23SA861Y : it would just be a map
+U0FP80EKB : I thought he wanted to fold
+U23SA861Y : also, there is no zip, only map2
+U0FP80EKB : oh, I misread. Yeah, map
+U23SA861Y : unless you pull out list-extra
+U0FP80EKB : oh, haha
+U0FP80EKB : I was looking at list-extra
+U0FP80EKB : Yeah, map2 is the best :slightly_smiling_face:
+U0FP80EKB : (serve me right for briefly jumping in and not paying attention)
+U23SA861Y : :stuck_out_tongue:
+U6531GSTW : whats one way to check for dates? i have something like "termin : date.date" and now i want to check if a something.termin is between two set dates
+U333XNTNY : Thanks <@U23SA861Y> &amp; <@U0FP80EKB> :slightly_smiling_face:
+U6531GSTW : would 31-10-2017 &lt; something.termin &lt; 23-11-2017 work?
+U23SA861Y : you're attempting to do what?
+U6531GSTW : i have this one "date" to an item
+U6531GSTW : like type alias something = {termin : date.date}
+U6531GSTW : something.termin = 01-11-2017
+U6531GSTW : now i want to only have these "something"s
+U6531GSTW : if their date is between certain two dates
+U6531GSTW : basically how can i check if a date is before another and after one
+U23SA861Y : so if you have a list and you only want to take a section of that list you want List.filter
+U23SA861Y : you can then construct a function that returns true, if it is between the dates.
+U6531GSTW : no no im just working with the dates
+U6531GSTW : yes a function that checks if the date is between certain 2 dates
+U6531GSTW : how would that work?
+U23SA861Y : do you have the dates as a string or as  an actual date object
+U6531GSTW : as an actual date object
+U6531GSTW : , aTermin : Date.Date
+U6531GSTW : but if its possible i want to write the other dates as string in the code
+U23SA861Y : you need to parse them to actually compare in a sane way
+U23SA861Y : are these static dates
+U6531GSTW : actually i would like to check if the dates are in the current week
+U6531GSTW : on a timetable i would only like to see the tasks that i have for this week
+U6531GSTW : but then i would also need to import other things such as now/time
+U6531GSTW : and for the sake of simpleness and demonstartion for tomorrow i would like to just write 2 dates for next week
+U23SA861Y : ok so ```
+start = Data.fromString "01-11-2017"
+```
+
+U23SA861Y : will give you a nice date in your code
+U6531GSTW : and should i also say start : date.date
+U6531GSTW : ?
+U23SA861Y : yep, you could do that
+U23SA861Y : I don't believe dates are directly comparable but times are
+U23SA861Y : so you can use the toTime function and then compare those
+U48AEBJQ3 : <http://package.elm-lang.org/packages/justinmimbs/elm-date-extra/2.0.3/Date-Extra#isBetween> ?
+U23SA861Y : then of course you can pull in more dependencies
+U48AEBJQ3 : Or at least go and see how someone else has done it.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

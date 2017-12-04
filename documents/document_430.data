@@ -1,170 +1,66 @@
-```{model | two = 123}```
-Thanks for the help <@U153UK3FA>!
-yep
-<https://www.cis.upenn.edu/~matuszek/Concise%20Guides/Concise%20Elm.html>
-this is cool
-might not be up to date?
-yep, very out of date
-format is nice oh well
-*Function `tableBody` is expecting the 3rd argument to be:  List row But it is: flags *
-I'm missing something very basic, but can't think it out
-well, `model.rows` isn't a `List row`, it's `flags`. No way to tell it's a list, really..
-But flags is Flags which is List row
-might want to change that to `type alias TablesModel row = {rows : List row, ...}`
-no, `flags` is a type variable. Could be a `String`, for all the compiler knows :slightly_smiling_face:
-also, I think your type annotation for `main` is a little off, since it doesn't have the type param for the row-type in there
-Woah! <@U3SJEDR96> , thank you very much. That helped. Not sure why cant I pass Flags type to type variable though.
-Well you can, but your type annotation for `simpleTable` doesn't say `TablesModel Flags`, so at that point, it's really "anything"
-you could change that to `TablesModel Flags`, but then one wonders why it would be a type param at all :wink:
-The thing is I need to have a flexible table constructor (not programming term), one table might receive one pack of "flags" data (for sure, I will use ports in the future, but for now I'm embedding a little thing and flags are super handy)  and another will receive another one.
-Sure, that makes sense. But your rows will always be a `List row`, for varying definitions of `row`, right? :slightly_smiling_face:
-Yes, that's how I structure it for now
-It's a good idea to start with something *more specific* first, then make it more general later when you actually need it, usually.
-Premature generalization, it's a thing!
-Fear the helper function that is used in 10000 slightly different places
-Why should I fear it? I've got over 9000 tables, which share the same view and behavior, but rely on different api. I think it is a good decision to make tableHelpers for them.
-So that later I can add a new table by just "configuring" one well tested function
-That makes sense. Getting a feel for the "right" abstraction tends to flow from making functions for a single thing and recognizing ways to make it more re-usable. Skipping a step every now and then is ok, of course. In your case, generalizing the `row` type is a first step. Generalizing `rows` entirely is a possible next step, _if needed_ :slightly_smiling_face:
-Thank you, I'm trying to balance between waterfall approach and the opposite one, but it's sometimes paralyzing.
-Well, one thing to keep in mind is that refactoring in Elm is super-easy and the compiler guides you through it to make sure you got everything. So starting from exactly what you need for 1 single case, then refactoring as you introduce new cases to handle, is easy and relatively pain-free. Trying to predict what cases you might need to handle, all at one, is much harder :slightly_smiling_face:
-because of an error in a previous type signature I got this. Instead of saying Html Msg, i accidently typed Html and something way way below complained about this
-Yeah, that's a painful one, and indeed related to "incomplete" type annotations
-its a tracked bug, I assume then…
-Yep
-what does |&gt; mean?
-`foo |&gt; bar` is the same as `bar foo`. It's the "forward function application" operator
-<http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#%7C&gt;> more info there :slightly_smiling_face:
-I don't understand that
-instead of saying " bake (mix (combine flour eggs)) " you can say " combine flour eggs |&gt; mix |&gt; bake "
-^ best explanation ever!
-the |&gt; puts the thing on a stack for the next piece to use?
-yeah kind of. you can also read it as "then" like: do this, then with the result do that, ...
-<@U5E3DU81K> if you want to know what it *actually* does, it applies the function on the right to the value on the left.
-`toString 5` could be expressed as `5 |&gt; toString`.
-"does" is a bit of a misnomer, though.
-you could implement it by putting the return value on a stack, if you were writing an elm interpreter
-<@U1ZCL9GAX> might not be the most helpful explanation ever!
-i don't know what the elm compiler does, it probably optimizes most of that away
-<@U6EAT2Z37> yeah, but <@U5E3DU81K> is thinking operationally so why not
-because it'll confuse him/her later.
-hmm, i think it's useful to map out a path from where someone is right now (they asked about a stack) to where you'd like to take them (denotational semantics of |&gt;)
-That's true.
-I don't think we need to get to denotational semantics, though. Maybe a clearer representation of a model that will work in all situations is good, though. The stack idea won't work for very long :slightly_smiling_face:
-<@U5E3DU81K> `toString 5` is a single expression. It's an application of the function `toString` to the number `5`. `5 |&gt; toString` is also a single expression. It's applying the `|&gt;` operator (which is a function of two arguments: one argument either side of it) to the `5` value and the `toString` function. It results in an application of the `toString` function to the `5` value.
-So, basically, `|&gt;` is useful for switching around the way you write stuff so it reads more easily.
-Could somebody provide me with a sscce for the usage of keyframes in Elm-css?
-I'm an absolute beginner in Elm. At the moment I try to build a Html table. In each row there should be a Dropdown element in a cell, other cells contain other things. I'm using r31gN/elm-dropdown. With a "Dropdown.renderDropdownHtml ..." I get the error, that this type is a "Html Dropdown.Msg" instead of a "Html Msg". No idea how to proceed...
-I'd be tempting to suggest going through <https://guide.elm-lang.org/> as a first step if you're an absolute beginner.
-I've never used the `elm-dropdown` package. But <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html#map> might be useful in this case
-Thanks. I'll take look
-interesting that |&gt; is called a forward function application operator, because it actually drags the thing on the right over to make use of the thing on the left. The thing on the left must be stored temporarily somewhere (as if on a stack) and because of the |&gt; the thing on the right sees the first thing on 'the stack' and consumes it.
-but could it be used to go fully reverse-polish?
-I see it less as "Dragging the right hand side thing over to the left", and more of "Pipe this left hand thing --&gt; into this"
-ah
-Microsoft calls it "The forward pipe operator" <https://msdn.microsoft.com/en-us/visualfsharpdocs/conceptual/operators.%5b-h%5d-%5d%5b't1,'u%5d-function-%5bfsharp%5d>
-Makes a little more sense to me :slightly_smiling_face:
-Yeah, except for some languages it does something other than what it does in Elm.
-True true, I think F# has identical rules to Elm in this regard
-Elixir uses a similar operator which has a similar effect `|&gt;` :slightly_smiling_face:
-if there are several used at once, the forward one is written on separate lines, vertically, but the backward one seems to be all on one line - is that correct?
-judging by those examples in the 'Basics' page
-Yeah, the formatting generally formats it that way...
-that's because the forwards one is good for "piping expressions together", and so they go on new lines... and the other one is good for removing parenthesis (brackets) so they go on the one line (usually)
-How do people handle watch / compile workflow in dev?
-do you mean something like elm-live where you can see your changes happen live as you save your file? either way, i found it really cool and easy to use so other beginners should check it out if they haven't
-<https://youtu.be/sHWexPRFuUw>
-how often is the identity function used?
-<@U5E3DU81K> Occasionally
-<@U6D3ERLA1> I found create-elm-app which seems to work really well, and I think the dev for that is on slack too
-hello
-can somebody explain the following?
-    List.filter (\task -&gt; id /= task.id) tasks
-only what s in the paranthesis
-\task -&gt; id /= task.id
-it's a function, the "\" in front indicates the start
-and whats task?
-the parameter
-and /= is different?
-yes :slightly_smiling_face:
-like != in other languages
-ok
-so
-i call removeTask 1 list
-what happens?
-Is it possible to do something equivalent to `npm run script`
-defined in elm-package.json
-<@U6D3ERLA1> I don't think so, because I've never seen anything to that effect, but I have also never tried honestly.
-removetask calls list.filter, supplying the filter function and the list of tasks.  list.filter calls the supplied function on each item in the list, which compares 1 to the id of each task.
-oooo
-so
-(\task -&gt; id /= task.id)
-this is lke the condition
-if it doesn t passes is deleted from tasks
-rght?
-Yes. technically a *new* list is returned
-undestood
-Thanks
-So if the `removeTask` caller code doesn't capture this `newList` the update is lost :slightly_smiling_face:
-Why can't I define a type `type Grid = List List Int`
-names are distinct!"
-Not sure what this is all about... trying to define a Grid type that is a List of Lists of ints: `[[1,2,3], [2,3,4], ...]`
-<@U6D3ERLA1> `type alias Grid = List (List Int)`
-:smile:
-`type Grid = Grid (List (List Int))` too i _think_?
-If you want a distinct type, yes
-Still don't really understand the difference between defining a type and defining a type alias
-<@U6D3ERLA1> <http://faq.elm-community.org/#what-is-the-difference-between-type-and-type-alias>
-<@U6D3ERLA1> since `List Int` is already a defined type you'll need to `alias` it, or get around that by defining a single type union constructor like above `type Foo = Foo …`
-ok `type alias Row = List Int` `type alias Grid = List Row`
-perhaps
-yes, why not
-seems reasonable to me
-:thumbsup:
-It's semantically correct also
-Which is a plus.
-OK writing a checkbox was one of the hardest things I've ever done
-This is starting to make sense tho:
-This still looks cray to me - am I [[[[[ over-bracketing  ]]]]] ?
-the parens around the `[H.text ....]` stuff in the `boards` definition should be unnecessary
-but other than that looks good, you'd get type errors if you were over-bracketing
-It does take a bit of getting used to, all the brackets, but I've learned to love the explicitness of it.
-{:heart: }
-can some1 pls explain why elm-repl says "syntax problem" when I try to type in "half : Float -&gt; Float" from the tutorial?
-well it just doesn't allow type annotations like that. not sure the philosophy, i think this goes into it: <https://github.com/elm-lang/elm-repl/issues/113>
-I don't find the repl very user friendly myself. I would recommend following a tutorial with something like <http://ellie-app.com|ellie-app.com>
-thanks guys!
-one thing i've kind of found the repl useful for is basically going about this in reverse. so when exploring a new thing like String.map you can do something like `import String` and then `String.map` and the Repl tells you it's going to expect this: `&lt;function&gt; : (Char -&gt; Char) -&gt; String -&gt; String`
-of course the docs will tell you the same thing but i find typing it into the repl sometimes helps my brain wrap around the concept a little better
-<@U6D3ERLA1> if you are dealing with grids I've found `List (List a)` to be a little clunky to work with. I tend to prefer `Dict (Int,Int)` a instead. Easier to grab vertical neighbours if you need to.
-<@U23SA861Y>, I'm about to embark on a project and I was going to use nested lists, can you explain the benefits of the dictionary method better? 
-it maps a bit better, with the List of Lists to form a grid you have to constantly be double unwrapping
-I was actually using Array so I could grab indexes `Array (Array Int)`
-Haven't messed with Dicts yet
-with a `Dict (Int,Int) a` you can reach in and grab up down, left or right
-the Dict can also be sparse
-It seems like a great solution too
-Thats fine, the current impl of Array has some bugs there is a replacement for it available
-I'm not able to wrap my head around your explanation of the benefits of dict
-Aside the sparse nature 
-well iterating over the grid is code you don't have to write, its alread provided for you in the dict
-likewise for lookups
-I don't see how it would be much better than `arr[0][`
-Any code? I haven't used dicts yet
-Do that's possibly my problem 
-you might also want to look at `elm-flat-matrix`
-if you making a table I would proabably use a `List recordtype` or `List (Dict keyval field)` instead because the traversal symantics are a bit different
-<http://package.elm-lang.org/packages/eeue56/elm-flat-matrix/latest>
-:mind blown:
-unwrapping the into a flat list works as well (which is what flat-matrix does)
-and mergeLeft mergeRight
-`|&gt; Matrix.merge matrix` `&lt;| Matrix.merge matrix`
-if you need matricies, you need matricies but for things like look ups on a game grid I like to keep it simple
-dependencies and imports have a cost and you really need to consider if pulling that package is worth it
-An unrelated question what does `!` represent in elm
-its defined in Platform.Cmd
-and `|`
-`(!) mdl cmds = (mdl, Cmd.batch cmds)`
-`|` is used for union type definitions
-I'm looking at the model updating code here <https://github.com/evancz/elm-todomvc/blob/master/Todo.elm>
-looks like they are returning updated / filtered state
-oh sry yes it's also used in the record update syntax
+U26LR8F4H : oh thanks, that looks pretty useful as well.
+U153UK3FA : You can also use a port to get JS to query the DOM and pass it back to Elm, but that's quite a lot of effort
+U64MK7215 : how do i use a for loop in elm?
+U0JFXEUCT : there is no for loop, you'll need to check out `List.map`
+U0JFXEUCT : there are other functions too, but it depends what you want to do :slightly_smiling_face:
+U64MK7215 : i am trying to build a caesar cipher, for that i need to iterate through the strings
+U153UK3FA : <@U64MK7215> sounds like a perfect use of `List.map`
+U153UK3FA : a caesar cipher is mapping one character to a different character
+U153UK3FA : <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/String#map>
+U64MK7215 : how to a define a  custom function in elm and call it inside update?
+U14Q8S4EM : What like this?```
+update : Message -&gt; Model -&gt; Model
+update message model =
+    Shift i -&gt;
+        let
+            by : Model -&gt; Model
+            by model =
+                model + i
+        in
+            by model
+```
+
+U5W5F6QGP : <@U64MK7215> you can declare it as a function on the top level and you can use it in your update function, this is an example where you declare an "addThree" function, which gets used in your update function
+```
+addThree: Int -&gt; Int
+addThree num = 
+    num + 3
+    
+type Msg 
+    = AddThree
+
+update: Msg -&gt; Model -&gt; Model
+update msg model = 
+    case msg of
+        AddThree -&gt;
+            { model | count = addThree model.count }
+```
+
+U5W5F6QGP : or alternatively, you can use a `let...in` block like chadtech showed above
+U14Q8S4EM : Yeah, I would delcare it top level way before I would declare it in the `let` statement like I did in the example.
+U2U94G0QG : Had a break at work today and ran through <https://github.com/zwilias/elm-demystify-decoders>Sad that I finished it! Who knew writing JSON decoders in Elm would be such a nice bit o respite
+
+U153UK3FA : <@U2U94G0QG> Don't worry, now you can use your new found parser combinator powers to parser things other than json.
+U3LUC6SNS : <@U153UK3FA>, <@U2U94G0QG>, where can I learn about parser combinators?
+U0CLDU8UB : <@U5QJW0DDE> Types help with the problems you're describing. Watch this talk: <https://www.youtube.com/watch?v=DoA4Txr4GUs>
+U3LUC6SNS : Currently I am sending a long string to JS-land where it is rendered first by Asciidoctor.js, then by MathJax.  This happens inside a div "rendered_text".  I have a truly awkward set up where this div is carefully placed so as to look like an ordinary part of the Elm app.  Is there a way of capturing the rendered HTML in this div by a subscription and displaying it in an ordinary HTML element in the Elm app? 
+((In fact I am using <@U0JFXEUCT> 's `style-elements`, so I want to display it in one of those))
+
+U3LUC6SNS : <@U48AEBJQ3> I noticed you mentioned  ways of building apps other than passing `model` around. That is what I have been doing, and it has worked for me so far.  However, I'm very interested in learning about alternatives.
+U153UK3FA : <@U3LUC6SNS> for more general parsing you can use <http://package.elm-lang.org/packages/Bogdanp/elm-combine/3.1.1/Combine> you'll notice that the concepts there are very similar to those used in Json.Decode
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

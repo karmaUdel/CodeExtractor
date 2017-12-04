@@ -1,1 +1,104 @@
+U0CS6NSF5 : that's what we do
+U0JPS3SHX : is that public? can I have a look?
+U0CS6NSF5 : on the first sing in, we show a screen mentioning we'll be taking their email in case we need to get in touch with them, they accept our T&amp;Cs and Privacy Policy and they can opt-out there from receiving news
+U0CS6NSF5 : <https://slackline.io>
+U0JPS3SHX : interesting, thanks for the input
+U0CS6NSF5 : my pleasure
+U0CS6NSF5 : basically, you should make sure the user accepts your legal terms and opts-in to give you any contact details for you to use
+U0CS6NSF5 : once you get that, you'll have three ways to notify users about updates: a DM, a message to a channel, an email
+U0CS6NSF5 : sorted from most to least intrusive :simple_smile:
+U0CS6NSF5 : a fourth option would be to wait for the user to interact with your bot and then let them know about the new changes
+U0CS6NSF5 : something like ```&gt; cutebot say hello to <@U0JPS3SHX>
+&lt; hi <@U0JPS3SHX>!
+&lt; btw, did you notice I've been upgraded? [check out all the awesome new things I can do].
 ```
+
+U0JPS3SHX : Your last option is going to be my approach for the current users and for the new ones I will implement a better flow email capture option or post as a bot in a channel
+U0J27NX0X : hey, does anyone know how to get discounts on slack? I'm doing a workshop were everyone builds a bot. That means a lot of people + integrations, but only for two days or so. Thoughts?
+U0K7Y2SK0 : Been a while since I was reading, but I'm pretty sure they have a clause in their contracts for nonprofits
+U0CS6NSF5 : <https://get.slack.help/hc/en-us/articles/206646877-Slack-for-Education>
+U0CS6NSF5 : <https://get.slack.help/hc/en-us/articles/204368833>
+U0KKP72MT : How do I know what version Slack API is currently running?
+Also - Where can I find a list of error messages from SlackAPI (*example:* `cannot_dm_bot`)
+
+U0HNY2V47 : Does anyone know if <https://slack.com/api/api.test> returns false if the api is down?
+U0KKP72MT : <@U0HNY2V47>: Logically... you'd get a timeout (or a lack of response) from your own end. - therefore it would be `false`
+
+U0K7Y2SK0 : Pretty sure you'll also get a rtm_close event
+U0K7Y2SK0 : Was having an argument with my own bot about how to make that work a few hours ago, will come back to it
+U0HNY2V47 : denistsoi: fair enough.  I'm trying to write some monitoring checks that alert us when there are issues on the slack platform. <http://status.slack.com|status.slack.com> is fine until you want a computer to read the status and report on it... :disappointed:
+U0HNY2V47 : The RSS/Atom feeds that <http://StatusPage.io|StatusPage.io> tell you plenty about what's happening but don't appear to state when an incident is closed or what the current status is
+U0K7Y2SK0 : I mean, not sure what you're going to do with a status. Not like you're gonna post a message to your slack team about it.
+U0K7Y2SK0 : I'd just start a reconnect timer and hope for the best
+U0KKP72MT : I think <@U0HNY2V47>  might want to check if the api is down (say the bot is up but slack is down)...
+U0KKP72MT : which is fine - but then again... you wouldn't be able to respond within `slack`
+U0KKP72MT : :smile:
+U0HNY2V47 : <@U0K7Y2SK0>: there is a world of notifications outside slack you know... :wink: 
+This has been prompted by the GitHub outage overnight - we now monitor github via <http://dataloop.io|dataloop.io> (monitoring as a service) and we are starting to pull together a dashboard that shows us the status of our external providers
+
+U0K7Y2SK0 : <@U0HNY2V47>: Never.
+U0HNY2V47 : I want to add the slack platform to that so we can understand via our monitoring where problems with connectivity might lie
+U0KKP72MT : you could always use pingdom?
+U0HNY2V47 : I could, but then I need to setup something to monitor Pingdom as well... :wink:
+U0HNY2V47 : <http://cdn.meme.am/instances/66511658.jpg>
+U0KKP72MT : lol - hahaha
+U0HNY2V47 : I basically want a single dashboard that shows me the status of GitHub, PagerDuty/OpsGenie, Pingdom/StatusCake, Slack etc. so we know whether our business will be affected by a third-party outage
+U0HNY2V47 : GitHub seems to be easier than everyone else :disappointed:
+U0HNY2V47 : forgive the repost, but <http://doics.co/2016/01/28/when-github-goes-down/> explains it in more detail :simple_smile:
+U0KKP72MT : i probably wouldn't couple your monitoring into slack too tightly - (only use slack as a messaging end point) -
+U0HNY2V47 : Slack is not the destination for these alerts, it's the source.  "Is Slack Up? Yes/No" is all I'm after
+U0HNY2V47 : but in a way that means I don't have to scrape <http://status.slack.com|status.slack.com> looking for a specific image (or worse, a specific CSS Class!)
+U0HNY2V47 : As an example, the following works well for Github:```#### github.py
+#
+# Monitors the Github Status Api and
+# reports back on platform availability.
+#
+# (c) DevopsGuys Ltd/Matthew Macdonald-Wallace 2016
+# 
+# Made available under the MIT license 
+
+import json
+import requests
+import sys
+
+status_uri = '<https://status.github.com/api/status.json>'
+r = requests.get(status_uri)
+gh_status = json.loads(r.text)
+if gh_status['status'] == "major":
+    exit_code = 2
+elif gh_status['status'] == "minor":
+    exit_code = 1
+elif gh_status['status'] == "good":
+    exit_code = 0
+else:
+    exit_code = 3
+
+print "Current github status is %s" % gh_status['status']
+sys.exit(exit_code)
+```
+
+U0KKP72MT : use twitter...
+U0KKP72MT : <https://twitter.com/slackstatus>
+U0HNY2V47 : hmmmm, that might work, I'd need to work out how to check if it has recovered, but that's a possible start
+U0HNY2V47 : thanks
+U0KKP72MT : yeah i'm looking at `status.slack` - and you're correct that you have to `work` to check the status
+U0HBN0L9M : <@U0HNY2V47>: if you could monitor separately slack as a service, and slack RTM api, would be great
+U0HBN0L9M : some times the bots are down but Slack is up
+U0HNY2V47 : yup, it's certainly a challenge...
+U0HNY2V47 : I've emailed <http://statuspage.io|statuspage.io>, I'll see what happens... thanks for all your help :simple_smile:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

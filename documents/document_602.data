@@ -1,3 +1,132 @@
+U1SF6G7PA : :slightly_smiling_face:
+U66RFDZ8F : Hello everyone, I have the following pipeline```
+test a =
+    a
+        |&gt; required "isFailed" bool
+        |&gt; required "isSuccess" bool
+        |&gt; required "reasons" (list reasonDecoder)
+        |&gt; required "errors" (list reasonDecoder)
+        |&gt; required "successes" (list reasonDecoder)
 ```
-Yes, so Foo is not a List
-ok so `Foo` looks like
+This i meant to be a generic pipeline because this code is common to all responses.
+What I can't seem to know how to do is add additional items to the pipeline for the other responses.
+How would I go about this?
+
+U23SA861Y : without additional information, that will be difficult to answer. It is possible that writing a "generic" pipeline like this might be the wrong abstraction.
+U4872964V : <@U66RFDZ8F> so, you'd want to put more stuff after that pipeline, correct? in which case you'd just do `test yourFunction |&gt; theRestOfThePipeline` I suppose
+U65B9414J : I'm using `type Msg = PlanetMsg (Result Http.Error String)` to capture http response as string. I would like to get Response object. <http://package.elm-lang.org/packages/evancz/elm-http/3.0.1/Http#Response> .  I tried a few options but nothing worked. Anyone has anything they can point me to.
+U66RFDZ8F : yes <@U4872964V>
+U66RFDZ8F : let me try that
+U23SA861Y : it really does come in waves... <http://package.elm-lang.org/packages/lukewestby/http-extra/2.0.0/Http-Extra>
+U66RFDZ8F : that works <@U4872964V> didn't realize it was just a pipe lol
+U65B9414J : Thanks jonf. Will give it a try.
+U3SQ42JJW : Hi there :slightly_smiling_face:Is there a way to destruct a tuple on the fly in a shorter way so there would not be a need for the let block?
+```
+let
+    ( start, stop ) =
+            record.range
+in
+    List.range start stop
+```
+
+U6AU4N1HR : Hello, does Http.send set cookies send from server as Set-Cookie?
+U3SQ42JJW : <@U6AU4N1HR>  as far as I know not automatically - because all those sends are asynchronous…
+U4872964V : <@U3SQ42JJW> you can use `first` and `second`
+U6AU4N1HR : <@U3SQ42JJW> hm, then i'm confused by the notice here: <https://github.com/elm-lang/cookie>
+U3SQ42JJW : Right ! :smile: Totally forgot about those… but somekind I knew there was sth… Thanks :wink:
+U66RFDZ8F : I see you figured it out <@U3SQ42JJW>
+U3SQ42JJW : <@U6AU4N1HR> maybe I didnt got your question. I understood it like this: If one uses Http.send, the question is if the cookie for the host and path is automatically send along to the server … which isn't..
+U0JFGGZS6 : you could also do `uncurry List.range record.range` I think
+U4872964V : <@U0JFGGZS6> indeed
+U0JFGGZS6 : but uncurry and curry always confuse me a bit looking at them... I'm used to `flip` but not these for some reason
+U6AU4N1HR : <@U3SQ42JJW> yeah, i want to authenticate against django which is sending Set-Cookie in the response.. Can I set it manually in http.send?
+U4872964V : yeah, they are a bit tricky, but thinking of them as operators on functions works for me
+U66RFDZ8F : <@U6AU4N1HR> using custom requests, you can set your own headers
+U66RFDZ8F : under the hood, I think Elm just uses `xhr` so it should take cookies from browser
+U6AU4N1HR : ok thank you both
+U3SJEDR96 : No, but it should be sent along.. Iff you set `withCredentials` to `True` on your request
+U3SJEDR96 : You can't manually force custom cookies to be sent along, but you can ensure that cookies from a given domain are sent along using that ^
+U3SJEDR96 : more info here: <https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials>
+U3SJEDR96 : No, no headers
+U3SJEDR96 : <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#request> &lt;- that last entry there
+U3SQ42JJW : Ah… then I was wrong.. sorry…
+U3SJEDR96 : No problem; we all are, occasionally :slightly_smiling_face:
+U6AU4N1HR : <@U3SJEDR96> great, thank you :slightly_smiling_face:
+U0F7JPK36 : lol this is wild
+U23SA861Y : I blame Baader-Meinhof
+U66RFDZ8F : <@U3SJEDR96> `withCredentials` should only have an effect on `cors` requests
+U3SJEDR96 : Yeah, and cookies are automatically sent on same-origin requests
+U3SJEDR96 : Since cookies weren't sent, that implies it was a cross-origin request
+U3SJEDR96 : Unless I'm confusing the issue here, which is super-possible because I was mostly reacting to the "setting cookie headers yourself" comment
+U66RFDZ8F : ok
+U66RFDZ8F : I haven't tried setting cookie headers, but just wanted to point out the possibility was there
+U3SJEDR96 : That's the thing, you actually can't. Cookie headers are under exclusive control of the UA, can't be directly set through XHR. Same with `Content-Length` and a few others :slightly_smiling_face:
+U5ABF3BH7 : Hi again Gilbert! When I look a the following method in
+U5ABF3BH7 : ```    validateInput : Int -&gt; Int -&gt; String -&gt; Maybe String
+validateInput low high =
+    Validate.eager
+        [Validate.ifBlank ("Please type a number from " ++ toString low ++ " to " ++ toString high ++ ".")
+        , validateResult (\_ -&gt; "Entered value is not an integer.") (validateInRange low high) &lt;&lt; String.toInt
+        ]```
+
+U5ABF3BH7 : Is the result a Maybe String, or a function (String -&gt; Maybe String)?
+U6E5PS83X : I started my app with this in my `index.html`:
+```
+var main = document.getElementById('my-elm-app');
+Elm.Main.embed(main);
+```
+
+now i've got
+
+```
+var app = Elm.Main.fullscreen(localStorage.session || null);
+app.ports.storeSession.subscribe(function(session) {
+    localStorage.session = session;
+});
+window.addEventListener("storage", function(event) {
+    if (event.storageArea === localStorage &amp;&amp; event.key === "session") {
+        app.ports.onSessionChange.send(event.newValue);
+    }
+}, false);
+```
+
+Is there a way I can use session storage while still using `embed` instead of `fullscreen`?
+
+U6E5PS83X : actually, does `embed` still return an object i can assign to `var app`?
+U6E5PS83X : though i'm not sure how to pass `localStorage.session || null` to `embed`
+U6E5PS83X : Aha, I've figured it out:
+```
+var main = document.getElementById('friday-calls');
+var app = Elm.Main.embed(main, localStorage.session || null); // &lt;-- the magic
+
+app.ports.storeSession.subscribe(function(session) {
+    localStorage.session = session;
+});
+
+window.addEventListener("storage", function(event) {
+    if (event.storageArea === localStorage &amp;&amp; event.key === "session") {
+        app.ports.onSessionChange.send(event.newValue);
+    }
+}, false);
+```
+
+U5ABF3BH7 : Hi again! I have an input field, I want to show an error if the character entered is different from a digit or '-'. How can I accomplish that in Elm?
+U23SA861Y : presumably you have a field in your model that has the string you want to validate
+U23SA861Y : then you would need to construct a function `valid: String-&gt;Bool`
+U23SA861Y : then in your view check the string and display or not display your warning
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

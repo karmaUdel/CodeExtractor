@@ -1,90 +1,69 @@
+U0LPMPL2U : it returns a `Task` that you can turn into a `Cmd`
+U2DSBB76Y : Awesome, thanks! :raised_hands:
+U2DSBB76Y : Btw, it did return a `Task` :smile:
+U0LPMPL2U : typically you don't care to do anything after the focus has happened so I typically just use a `Noop` message
+U0LPMPL2U : ```focus : Cmd Msg
+focus =
+    Dom.focus "search-box"
+        |&gt; Task.attempt (always Noop)
 ```
-Ok, so maybe `Loaded (Home { forms = subModel })`
-yay! Tanks <@U4872964V>
-Hi there folks, first time here (:
-I'm new to Elm, but I've worked a bit on some other functional langs
-I've started reading a bit around how to use Protocols, like I'm used to do in closure, but I didn't get that far
-I wonder how I could write the commented part of the code
-<https://ellie-app.com/3NxLPYhDn43a1/4>
-Ellie will give you the signature if you hover over the function name
-or is it somewhere else?
-oh, nice
-I'm not sure what you are trying to achieve here though
-Elm is not really suited for object orientation
-I was looking more for extension points than OO
-Given that a datastructure respond to comparable, I could use on my functions
-actually it looks more like typeclasses or something
-yup, more like it
-which elm has complier support for a small set, but no support for user type classes
-yeah, well, same thing there :slightly_smiling_face:
-I noticed there is coparables that I can't implement for my structs
-And I tried instead to make a comparable that I can implement for any struct
-it is implemented for records but not ADTs
-so is there an actual problem you're trying to solve using these, or just toying around?
-err, hold on no
-norpan: nope, just toying around
-ok, yes, well Elm does things differently :slightly_smiling_face:
-I've read around all the discussions on typeclasses
-hi. anybody using elm with webpack and hash asset names for the compiled bundle?
-And I understand why, I've been through MonadT complexity haha
-But I was wondering if it would be possible to implement comparable using the suggestions given around when people ask for typeclasses
-which is records
-Does it make sense?
-no, it's really something that needs to be implmented at the language level
-<@U6ASXAHUZ> but then again, without any concept of abstract interfaces we create inconsistent ad hoc things. Like Task.sequence vs Result.Extra.combine , …
-well, records should be comparable, that's an "easy" fix
-My question is the following, what  are the options to update a model without intervention of the user. I know I can use the Time package and subscribe to e.g. `Time.every second`.  But isn't there other options e.g. to get closer to cpu clock cycle ?
-<@U62UFEG4D>, the important cycle is animation frame: <http://package.elm-lang.org/packages/elm-lang/animation-frame/latest>
-<@U62UFEG4D> are you trying to do animation or something else
-jonf: does it need to be on the language level? All the recommendations I've heard propose to use records to solve the issue
-<@U6ASXAHUZ> the first question is what the issue _really_ is :slightly_smiling_face:
-jonf: I'm just investiganting, but it got me to think if it would be possible to use the recomendation to all the current interfaces blessed by the compiler
-you can do partial record matching and have that record contain functions
-maybe this is less <#C3K1L92FP|beginner> and more <#C2QPJLU2X|elm-discuss>
-little bit cumbersome but you can do it.
-right
-oh, ok
-hey elm community … what is the best way to communicate from parent to child "components"
-exposing a child msg and sending it via the childs update function or creating a dedicated child function for this?
-I created a gist to show my problem: <https://gist.github.com/ream88/c076814d3936a8a70f89ff5eb120276f>
-Child1 exposes the msg, Child2 a update function
-thanks @jonf, @norpan, <@U2Q5GJNTB>
-<@U4872964V> and <@U23SA861Y> thanks for the prompt reply! Animation is not really my use case, although that use case does involve refreshing the screen from time to time when certain conditions are met.  The calculation of the condition relies on random generator, that's why I need to know the best way to minimize the "Elm architecture Cycle"...
-so, on what condition is the screen refreshing
-<@U3BTVEFQU> that architecture is ok at a very large scale but in general thinking about things as "components" can get you into trouble
-<@U3BTVEFQU> I'm not sure what the actual problem is though
-<@U4872964V> I'm not sure what's the proper way to do it
-any way that works :slightly_smiling_face:
-you can make whatever functions you like
-yeah :stuck_out_tongue_winking_eye: I figured out that part :stuck_out_tongue:
-but is the community doing, what feels "right"?
-If you have some pain, then that's a problem and we can certainly help suggest better ways to do things
-<@U4872964V> exposing and using a child msg feels kinda wrong
-however splitting the update function into multiple ones does it also
-Most people have "component pain" because they are locked into thinking that the `update` function for a "child" has to look a certain way
-but it really depends on the nature of the "child"
-often what is a component is really just a view
-but people get caught up with thinking that because there is this seperate thing in my view it should have seperate data
-A general tip is to consider data first. Data that only is used by a component does not need to be in a special model, it can be passed to the view function
-in your case, I think Child2 looks better, but the function can still be called `update`
-ok
-thanks :slightly_smiling_face:
-coming from the react side of development (and not doing functional programming before) is sometimes hard I guess
-just as long as you don't have a fixed idea on how function should and must look you'll be fine, I think
-It's a bit hard coming from a "framework" that dictates these things as "components"
-I gather that there are more to your children, but right now, they are just `WebData` so they serve little purpose
-yeah, definitely more … and they are quite different in fact
-however they all share data from a remote api, fetched by the "parent"
-so probably that data only need to be passed to the view function
-Hello all. Is there any way to tell a function "Expect a list of four values" in the type signature? Or rather, can I define a type as `SomeType = List  Int Int Int Int` where I'm saying it can only be a List containing 4 elements?
-You probably want a 4-tuple
-what are the 4 values
-you can have a tuple of 4 or just a function with 4 parameters
-for context, I have a list of values that gets passed around to a few function, but I define the list in the init as having 4 values, and it could never not have four, but every time I need an element from it I'm forced to handle every case of list.
-what do they represent, are they all the same thing
-<@U23SA861Y> I guess I could. Or just another type.
-given that they are exactly 4 I presume there is some structure to them
-The list holds "players" which are a type alias of a few things.
-but I guess I could just make `type Players = Player Player Player Player` ?
-ahh, can you play with only two players?
-For now, no.
+
+U0LPMPL2U : where `"search-box"` is an id on the input
+U0LPMPL2U : It get's triggered in an `update` function like:
+```
+ OpenSelect -&gt;
+            ( { model | state = Open }, focus )
+```
+
+U2DSBB76Y : Cool, I've never really used `always` before! Neat
+U5GSY0G9J : So i have this container that has a date picker in it and it is being built with a port. Right now i have to call the port everytime i switch the view in that container. Is there a better way to do this other than calling that port on all the buttons that switch to that view?
+U0LPMPL2U : The port calling would be done in the `update`, not on the buttons right?
+U0LPMPL2U : your probably have a Msg like:```
+TransitionTo page -&gt; (transitionTo page model, triggerPort)
+```
+
+U37BS6J6N : Ello all, what is the simplest way to work with design heavy views that need to be responsive. Working with bootstrap is pretty painful atm.I"m debating trying elmx
+<https://github.com/pzavolinsky/elmx>
+
+U1CE9DL9H : what exactly is problematic?
+U1CE9DL9H : and how would another way of writing html help?, the default elm html is really nice once you have worked with it a little bit
+U37BS6J6N : I'm trying to translate existing bootstrap html into sections of Html
+U1CE9DL9H : are you familiar with <http://elm-bootstrap.info/>
+U37BS6J6N : I played with it a bit
+U37BS6J6N : I've also attempted to use the Html2Elm but keep getting Text "" all over the place.
+U37BS6J6N : is elmx bad?
+U37BS6J6N : Or just not recommended?
+U0CLDU8UB : joelq: And even pieces of the signature!```
+type alias WebDataTask success =
+    Decoder success -&gt; Value -&gt; String -&gt; Task Never (WebData success)
+
+-- ...
+
+taskFnToCmdFn : WebDataTask success -&gt; WebDataCmd success msg
+```
+
+U0CLDU8UB : That's pretty involved though, I don't really recommend it :slightly_smiling_face:
+U1CE9DL9H : definitely not recommended, those empty text nodes are not harmful and you can easily delete them in your editor
+U1CE9DL9H : after you run the formatter, select all `, text ""` and delete
+U37BS6J6N : <@U1CE9DL9H> any idea why? It seems natural for folks coming from react. Fixing syntax errors for Text for huge chunks is definitely a sub optimal experience. Also it does break my code if I just try to leave them in.
+U37BS6J6N : Did elmx break a bunch ?
+U1CE9DL9H : because the html in elm is actually just elm, and so all the things that make elm nice apply to it
+U1CE9DL9H : type checking, not making typo's, formatting
+U1CE9DL9H : also the empty text nodes shouldn't do anything, what breaks?
+U0CLDU8UB : Okay that's very strange
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,33 +1,48 @@
+U0NCTKEV8 : the header map in clj-http is actually a special map type for dealing with header name case insensitivity
+U0E1BND6Y : I'm trying to write a  csv file, but the data is truncated when I look at the output file. If I print out the vector that I pass into write-csv I see all of the results, but only part of them make it to the file.
+U0E1BND6Y : I've also tried doubling the data `(into data data)` and that prints the rest of the result as well as some additional lines when it starts gets to the beginning of the original dataset again.
+U0E1BND6Y : Ha! I should write in here more often, it gave me an idea to use `(with-open [writer (io/writer output-file-name)]        (csv/write-csv writer data))` and it worked!
+
+U5YHNV0EA : i'm specifying an enviornment var in my project.clj in the :profiles :dev :env map. but when I try to run lein with-profile dev repl, that env variable is not there when using environ.core to load it. is there a piece to this process I'm missing?
+U07QKGF9P : <@U0NCTKEV8> Sorry; yeah — I meant "I'm not sure how this would deal with a header value set twice", which explains why I only see parts of the set cookies :slightly_smiling_face:
+U0QKTTY4D : i've seen many recommendations to use clojure.spec.alpha, but doesn't that require clojure 1.9? is the alpha stable enough for production or something?
+U09LZR36F : I'm trying to create a java object &amp; getting no matching ctor. Is it possible to show the available ctors somehow?
+U060FKQPN : use `clojure.reflect`
+U09LZR36F : <@U060FKQPN> I'm trying, but not really sure what I'm looking for in there?
+U060FKQPN : e.g. (sorry for the awkard code, wrote it on the repl) ```user=&gt; (-&gt; (cr/type-reflect String) :members (-&gt;&gt; (filter (comp #{'java.lang.String} :name)) (filter (comp #(contains? % :public) :flags)) (map :parameter-types)))([byte&lt;&gt;] [java.lang.StringBuilder] [int&lt;&gt; int int] [byte&lt;&gt; int int java.nio.charset.Charset] [byte&lt;&gt; java.lang.String] [] [byte&lt;&gt; int] [java.lang.StringBuffer] [byte&lt;&gt; int int java.lang.String] [char&lt;&gt; int int] [char&lt;&gt;] [byte&lt;&gt; int int int] [java.lang.String] [byte&lt;&gt; java.nio.charset.Charset] [byte&lt;&gt; int int])```
+
+U060FKQPN : to get the public ctors
+U060FKQPN : unless I'm not understanding what you're asking
+U09LZR36F : Hmm, it's non-public. That's... odd right?
+U050MP39D : <@U09LZR36F> in java land that's usually a sign that you're supposed to use a factory method, builder class, or some other way of getting instances of the object
+U09LZR36F : I see :thinking_face: <https://github.com/centic9/jgit-cookbook/blob/master/src/main/java/org/dstadler/jgit/api/GetRevCommitFromObjectId.java> so I need to walk the git repo history instead. That sucks.
+U050MP39D : ``` // You can also get the commit for an (abbreviated) SHA
+                walk.reset();
+                ObjectId id = repository.resolve("38d51408bd");
 ```
-I prefer `get-in` because it makes the intention clear, we know that the first argument is a map, and that the second argument is a path. That information is lost with `-&gt;`, also, that means you can't pull the path, `[:b :c :d]` from a data source or generate it without your own macro, because you can't apply to `-&gt;`
-sure, that is the flip side to what I said about the key vector
-if it is constant and known at compile time (which it seems like it almost always is) then keeping it around at runtime is (admittedly an insignificant) waste
-true that
-specter keeps popping up here and there with some nice solutions.. i'll have to look more closely around its api
-<https://aws.amazon.com/lambda/faqs/> &lt;-- java is listed as supporrted language; does this mean one can do "clojure -&gt; java" for lambda instead of "cljs -&gt; js" ?
-<@U3JURM9B6> my guess is that startup times might be problematic for many lambda use cases
-but yes, you definitely *could*
-Both clj and cljs can be used, but yeah, startup times become a thing.
-just a lot of the use cases I can think of for lambda, a very fast starting VM such as the js vm is more appropriate than jvm+clj
-to be clear, by java they mean jvm, clojure doesn't compile to java like clojurescript compiles to javascript
-clojure generates jvm byte code
-and with the incredible support cljs has for the node ecosystem these days... I would choose whichever vm makes the most sense for the scenario. which is a pretty amazing thing to be able to choose while keeping the language constant :slightly_smiling_face:
-<https://aws.amazon.com/blogs/compute/clojure/>
-relevant ^ though im sure most have seen it
-zylox: thanks for link, first time I'm seeing it
-<@U3JURM9B6> <@U050MP39D> the data from this talk suggest it might not be as big of a deal as you'd assume (if you are running lambdas frequently enough to limit cold starts): <https://www.youtube.com/watch?v=GINI0T8FPD4>
-<https://github.com/clojure/clojurescript/wiki/Differences-from-Clojure> just gets larger and larger
-<@U1CTH1TUY> yes! true. my assumption is that most people using lambda are using it for reasonably infrequent operations (to take advantage of paying for only what you use). but if that's not the case then clj could be perfectly fine
-somethings I know are different between clojure and clojurescript because I follow the jira issues aren't even on the list yet
-actually I'm using it to not think about scaling
-i.e. if my problem can be decomposed into an 'obviously parallel' setup, then AWS just scales everything for me
-and I no longer think at the grainualarity of machines
-if you create a language binding to a library written in another language
-how do you license it?
-do you keep the license of the source library?
-depends on the license of the source library. If you aren't distributing their library, you might be able to license it however you want. Not something that can be answered in the abstract
-Hi all, I'd like to fan out the same input sequence to several transducers and collect the results into a single sequence... is there a function for that?
-Any one experience with Lanterna?  I'm looking into making a snake game, and would like to know if it can do a non blocking ui
-<@U60259LCB> I believe it does, haven't used it in a while, but I see from the docs it has both `get-key` and `get-key-blocking` — the first returns nil if there's no keypress waiting to be read.
-I need to write a test, but I do not know how to mock the utils/count  (for example)
-what if I have several functions inside the same function and I need to test it
+
+U050MP39D : ^ that doesn't help?
+U09LZR36F : That made me reconsider, I can get the sha from objectid, but it was in a higher class... *sigh*. I hate java.
+U09LZR36F : Oh, nvm, repository.resolve doesn't return a RevCommit, ^^
+U09LZR36F : It's okay, the walker is simpler than expected
+U050MP39D : yeah... this is a pretty good example of "god dammit there's a whole magical DSL around traversing the commits in a repo" rather than the repository just being represented by regular data structures
+U050MP39D : iirc a git repo is DAG of immutable nodes, so would be perfectly representable as a persistent data structure
+U0QKTTY4D : is there a way to have multiple handlers in bidi? i want to use `-&gt;ResourcesMaybe` with a fallback route... something like `[["/" (-&gt;ResourcesMaybe ...)] ["/" index-handler]]`
+U0NCTKEV8 : the comment on <https://github.com/juxt/bidi/blob/master/src/bidi/ring.cljc#L110> seems to indicate it would work that way
+U0NCTKEV8 : it may depend on you using bidi in a particular way to work
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

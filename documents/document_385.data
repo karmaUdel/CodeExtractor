@@ -1,2 +1,79 @@
+U4872964V : So, when you're construction a _function_ you use `&gt;&gt;` but when you're piping a value through a function you use `|&gt;`
+U1AN4JRFV : <@U62JFJWKT> another hacky way is to use time, set it to 0 and then do `if model.time == 0 then text "loading" else div [] [ viewCalendar (Date.fromTime model.time) ]`
+U4872964V : In your case, your port wanted a function, so you use the `&gt;&gt;` operator (or `&lt;&lt;`)
+U1AN4JRFV : or smthing like that. joelq's suggestion is the preferrable one, if you want to avoid `Maybe`
+U62JFJWKT : you're right but I'm exploring :slightly_smiling_face:
+U5H8JJP24 : So &gt;&gt; is for constructing more generic functions which may be used with values later and piping is for actually piping a value?
+U4872964V : <@U5H8JJP24> basically
+U62JFJWKT : hacky way for letter
+U0LPMPL2U : ```True |&gt; not -- False
+.isSelected &gt;&gt; not -- function with signature { a | isSelected : Bool } -&gt; Bool
 ```
-Or maybe even
+
+U41CTMR1S : Hi everyone, I have a n00b question, what is the recommended way to use css? It's the only thing that not clear for me after reading the wonderful intro  guide. I read about elm-css and elm-style but I don't sure what the difference is. thanks!
+U2M39B7TM : Beginner question. How I can decode something like this?```
+type Page
+    = Home Home.Model
+    | Dresses Dresses.Model
+
+
+-- in Home.Model
+
+type alias Model = {
+  title: String 
+}
+
+"""
+{"Home":{"title":"home"}}
+or 
+{"Dresses":{"other":"property"}}
+
+"""
+
+```
+
+U4872964V : <@U41CTMR1S>, elm-css is closer to plain css, elm-style is a more composable way to do css
+U4872964V : <@U2M39B7TM> you'd probably use the `oneOf` decoder, and then a list of `field` decoders with the different constructors
+U0LPMPL2U : Look into `Json.Decode.keyValuePairs`
+U3HQVHERX : You might want to use `at ["Home","title"]` to dive into the json
+U4872964V : `keyValuePairs` does not really work if the values are different types though
+U3HQVHERX : <@U41CTMR1S> if you are just starting out i would recommend sticking with plain css
+U4872964V : I'd do it like this```
+oneOf
+    [ map Home (field "Home" homeDecoder)
+    , map Dresses (field "Dresses" dressesDecoder)
+    ]
+```
+
+U41CTMR1S : <@U4872964V> <@U3HQVHERX> thanks
+U41CTMR1S : <@U3HQVHERX> how can I integrate css file with elm-reactor?
+U2M39B7TM : I'll try. ty
+U4872964V : <@U41CTMR1S> you can include a stylesheet in your view like this:```
+node "link"
+        [ rel "stylesheet"
+        , href "yourstyle.css"
+        ]
+        []
+```
+
+U41CTMR1S : I see. My specific use case is 3rd party widget. Inline css help me to avoid class/id conflict, but feel more complicated and less natural with elm-css/style
+U4872964V : not sure what you mean by 3rd party widget
+U41CTMR1S : I write widget that another website implement in their website. Disqus is one example.
+U4872964V : ok, and they want to change styles with stylesheets?
+U41CTMR1S : Usually widgets like Disqus use iframe, but I must seat in the website html for my use case
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

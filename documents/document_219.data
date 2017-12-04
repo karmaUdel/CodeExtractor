@@ -1,18 +1,66 @@
+U3FGRUSLT : u can simulate any json in the world just place it in a text file and serve via a local web server
+U3EFK8UES : ah ok
+U3EFK8UES : I'll definately take a look
+U0E9LFL3F : hi. the slack timestamp is something like this: "event_ts": "1358878755.000002" what kind of format is that?
+U3FGRUSLT : unix epoch down to the mili second
+U3FGRUSLT : not just seconds
+U3FGRUSLT : the part before the . is seconds 1358878755
+U3EFK8UES : <@U0E9LFL3F> its also apparently unique or something according to <@U07CW6N3A> 
+U3FGRUSLT : well `unique` in that it's very unlikely two messages happen at the same time down to the mili second
+U3FGRUSLT : ```~ $ irbirb(main):001:0&gt; Time.now.to_f
+=&gt; 1483865562.30614
+irb(main):002:0&gt; Time.now.to_f
+=&gt; 1483865563.194669
+irb(main):003:0&gt; 
 ```
-I think you need to bounce through a dictionary for this one and then issue the map
-mmm.. I was afraid of that. So I'd have to create the nested `Dict` and from that create the `List`.
-what does that `attribute` string map to?
-presumably the key like `printing`
-ah, so there would be multiple options where the `attribute` is `printing`
-<@U1EEBCQM6>  ^
-If I understand correctly, you want the formatting and printing options together in a flattened list?
-Yes.. correct
-OK, that should be possible without a `Dict`
-let me see if I can write up something
-Not that I would have multiple lists. Just one list of all the options. And the `attribute` would allow me to filter based on that.
-I thought that might be most efficient
-<https://ellie-app.com/3xfPcjxfy4ja1/0> something like that?
-check that out! Let me try to understand it.
-I wrote up <https://ellie-app.com/3xfTdwMjGCra1/0>
-looking at <@U3SJEDR96>'s solution :eyes:
-ooh! `Json.Decode.keyValuePairs` super nice! TIL :thumbsup:
+
+U3FGRUSLT : ```irb(main):003:0&gt; <http://Time.at|Time.at>(1483865563)=&gt; 2017-01-08 08:52:43 +0000```
+
+U3C1KGJDD : Hi. I need to wrap my storage function into a promise for use with a middleware. I'm using the cool botkit-storage-mongo module. Have very limited understanding of promises, if anyone could help with that? this is my simplified storage function
+U3C1KGJDD : module.exports = {// with Callback
+toDatabase: function(key, value, response) {
+    controller.storage.users.get(response.user, function(err, user) {
+        if (!user) {
+            user = {
+                id: response.user,
+            };
+        }
+        user[key] = value;
+        controller.storage.users.save(user, function(err, id) {
+        });
+    });
+}
+};
+
+U0E9LFL3F : <@U3FGRUSLT> <@U3EFK8UES> strange cause new Date().getTime() now returns 1483891366599 which has 3 chars more. Anyway I just think my issue is that new Date(1483891366599) returns an invalid date, I am not really familiar with JS date. Maybe I'll switch to moment
+U3MG94ZJP : Just created my first bot with Botkit , my problem is that near the bot user i have the word “BOT” twice , i am working with the EVENTS_API and not opening any RTM connection.. can anyone help understand why this problem can happen?
+U3FGRUSLT : yeah / 1000 to get back to seconds
+U3FGRUSLT : js is giving time in different units
+U3FGRUSLT : ```irb(main):003:0&gt; 1483894941440/1000=&gt; 1483894941```
+
+U3FGRUSLT : or multiple the full value slack gives by 1000
+U3FGRUSLT : ```irb(main):007:0&gt; 1483895037.1102788 * 1000=&gt; 1483895037110.2788```
+
+U0E9LFL3F : ok now makes sense
+U0E9LFL3F : multiply by 1000 and then both new Date(ts) and moment(ts) works properly
+U3FGRUSLT : don't even get me started about timezones and utc 24 :slightly_smiling_face: I changed all my clocks to be utc 24 so time for me is always a number from 0 to 23
+U3EFK8UES : Hey there, so let's say I open a DM channel and get the channel id, and the use closed it or I try to use it days later and it's closed, and I try to use it, will it just reopen the channel? 
+U3EFK8UES : I'm trying to minimize api calls 
+U3EFK8UES : *user closed it, not use close it 
+U3FGRUSLT : yes D3MJKEHEB or whatever the id is
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

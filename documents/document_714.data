@@ -1,143 +1,128 @@
+U3SJEDR96 : <@U0U6ML22H> hm, what's the actual goal? Is this for caching on CI or something?
+U0U6ML22H : maybe it's a XY thing: we have several `Main`s, for as much apps. We have a webpack script for each. We also, sometimes, want to start them all at the same time, still serving all the files on port 3000. So we build them all at the same time. When we do that normally, it's quite fast. When we do that after cleaning elm-stuff, it takes forever (almost literally: i never lasted enough to see it go through, because it took too long). When that happens, we build one individually, then another, then start the entire thing again, and it works fast enough
+U0U6ML22H : I'm thinking that when we start all the builds in parallel, they all try to build core/third-party elm-stuff at the same time
+U0U6ML22H : but that's speculation, I have a limited understanding of the compilation phase
+U0U6ML22H : I'm just thinking that if we could prebuild the elmi/elmo files not relating to our modules before starting our parallel thing, it'd work much better
+U0U6ML22H : whaddaythink?
+U3SJEDR96 : hm, I suppose you can test if it would even have impact before actually figuring out how to do it: build all one by one, remove the relevant folder from build-artifacts and trigger the `build-all` script again
+U2LAL86AY : <@U0U6ML22H> that sounds .. :grimacing: i'm trying to understand what's the value of having all this elm apps sharing the same elm-stuff folder ?? Why not keep them separate apps in the first place?
+U0U6ML22H : They share data, modules, etc. 
+U0U6ML22H : <@U3SJEDR96> will test, yeah, should have thought about it 
+U2LAL86AY : ```port createNewDocument: Encode.Value -&gt; Cmd msg
+port printDocument : () -&gt; Cmd msg 
+
+createNewDocument: Document -&gt; Task err msg 
+printDocument: Task err msg 
 ```
-well there's `*args`, which is based on the order (as opposed to `**kwargs`, using keywords as you did)
-what is it about `*args, **kwargs` that's not working for you?
-i think kwargs is the way to go, same as you're doing
-It works for me. I was just thinking that there might be a better way to do it.
-Actually the args needs to have keywords <@U47HK8BS8>
-cool, just pointing out there's also *args which handles positional arguments
-i think that's what i'm going to have to do. i get this gut feeling that i'm doing testing wrong. my tests always are more code and logic than the actual fucntions
-Getting an odd error in a dictionary'
-I basically have a dictionary with 4 main keys, and their values lead to other keys where in turn their values are integers
-However when attempting to do something like `{'key': self.val1 + self.val2}` where `val1` and `val2` are both integers, I get TypeError that they must be str, not int.
-So can I not perform addition when setting values in a dictionary?
-dict keys are strings
-so I suspect its your key identification that's ht eissue
-Most likely you're just wrong about what val1 and val2 are. Probably they are different types
-Which is one reason why using a dict instead of something typesafe is a bad idea
-`{'key': int(val1) + int(val2)}`?
-yeah I'll try that real quick
-Hmm I guess I'm attempting to index a string with a dict key, so something is going on in the for loop to go through the dict. let me check
-Question is "is this method correct?"
-no
-Consider what happens if you call `isPrime(8)`
-(Also, stylistically, you don't need the parentheses around the if statements - it's not Java[Script] :)
-<@U0LSCQQNR> Dict keys are strings? Are other data types converted to strings when used as the key then? I've used several non-string objects as keys.
-well, technically keys are hashes
-string hash, I believe
-but I was wrong
-&gt;To be used as a dictionary key, an object must support the hash function (e.g. through __hash__), equality comparison (e.g. through __eq__ or __cmp__), and must satisfy the correctness condition above.
-<https://wiki.python.org/moin/DictionaryKeys>
-<@U6DUW96PP> hi
-shouldn't it work even if you profile the whole application that loads a module?
-i.e. that module will be profiled too as a part of a bigger profiling...
-OK thanks. and what about sub processing ? will it profile those as well ?
-In other words, you can't use mutable things as dictionary keys.
-Strings like "Helo" and tuples like (1,2,3) are immutable. But a list is mutable, so you can't use a list as a key.
-I'd guess that no
-bingo
-I mean, depending on what you mean. Time spent on waiting for a subprocess to finish is going to end up on a cProfile output
-or basically any data structure other than tuples
-But no detailed insight, because it's an entirely separate program.
-and fronzensets
-yes as I thought , Thanks a lot
-What exactly is a hash? I hear the term all the time but I'm not clear what it means.
-hash = dictionary in some contexts
-no way
-nope
-<https://en.wikipedia.org/wiki/Hash_function>
-there are some good pycon talks on dicts
-<https://www.youtube.com/watch?v=66P5FMkWoVU>
-That one has some good info on how dicts use hashes to store information
-<@U0EPQL3LG> loves the dict.
-_During writing my question I found it could be because wand counts from one and not zero._
-Hence off by one errors! That's really frustrating
-What is the best way to package a python application for easy distribution to someone who may not have python
-pyinstaller if you are on the same OS
-<http://sedimental.org/the_packaging_gradient.html#bringing_your_own_python>
-You can create a binary, effectively, that bundles in an interpreter and the dependencies
-I have some settings that the user can change based on their needs, should all those settings be put as `input()` to prompt a user?
-You could have your application read a config 
-I think it would depend on how many settings there are to change
-Something like this <https://docs.python.org/3.6/library/configparser.html>
-does anybody have experience with AWS file uploads? my app has trello integration and when a file is uploaded, a link is written to the trello card. the problem is that these links expire, so is there a way to replace that link with something that will be re-provisioned once clicked?
-<@U4BMZ90T0> If you can I'd usually generate a default on first start if it doesn't exist, then allow that to be customized
-something like `self.whatever = something if something else input('blah')`
-Depends on if your people are technical or not, but yeah you could do that if the config doesn't exist
-So the `.exe` isn't interactive unless I use a gui like `tkinter` I believe
-does anyone know of a simple maze generation library?
-I can build one but I want to use prebuild so it is easier and faster
-<https://github.com/boppreh/maze>
-yeah saw that might use it thanks <@U0LSCQQNR>
-whoah there
-Does anyone use `configparser`? Pretty sure I've asked this before, but just wondering
-I usually use `yaml` for configuration
-i've used it before. it's pretty nice. i also like yaml.
-I'm just trying to figure out if it's best practice to grab data for each variable with the configparser module individually like when needed, or setup something like `glob.py` and set them all at once in there
-configparser is ini files so if your used to microsoft world its less parity.
-Because it seems that when you're compiling if the object that holds all the config stuff doesn't exist and you attempt to import them into some sort of globals file you get errors
-so I'm trying to see what most do
-Like should I grab the values and set them as attributes as part of classes/objects
-<@U0NRYQNAZ> <@U29163YQH> are you just using `pyyaml`?
-yeah.
-so I can essentially just load in the yaml, store it in a settings variable and import the settings variable everywhere
-exactly. You might want to perform some check on it or put some default value but yeah that's the idea
-i think pyyaml is the defacto.
-just be careful the import is `yaml`
-got it.
-should I use the `- item` or `[item]` for a list?
-Personally I prefer `- item` but depend if you have a long list I guess
-okay wow this is insanely more simple
-is there a reason to maintain a globals file for any reason with the yaml
-depends what you want to be user configurable or not
-I think I'm gonna just leave the .yaml file for someone to add more items to if they want to configure it any more. I'm gonna use `tkinter` to make dropdowns to select an item from lists
-tkinter is alright!
-lots of people thing otherwise
-but it's got TTK for native widgets, pygubu for visual editing of your app...
-cursor = {a: [{b: 'Oregon', c: 223, d: 35}], e: 118686L}
-cursor[a][0][b]?
-`ValueError: dictionary update sequence element #0 has length 1; 2 is required` Getting this issue currently while passing a parent class to a create a new child class. I would like to pass both the parent as well as a list to the class.
-can you provide a small code sample <@U4BMZ90T0> ?
-Yeah
-oh wait that's the wrong part
-one sec
-I was previously destroying root every time, but I'd like to just destroy the frame so it doesnt close out 4 times and open back up...
-and the settings one is a list
-well it's a dict of lists
-`settings['route']` is a list though as well as `settings['base_url']`
-I tried using `*args`
-I think your super calls are a bit weird, you probably want `super(Values, self).__init__(parent, choices)` or if your're on py3: `super().__init__(*args)`
-Gotcha, probably just looking at old code examples
-Not sure of your issue there though
-Yeah it's odd you could be right though
-I had super earlier actually it was working find
-fine now that I think about it
-I think it's how you're passing to the super though
-I think the signature is `Frame(master, ...options)` - so you may need to unpack your dict as options
-`super().__init__(parent, **options)`
-oh wait, I don't need to pass `self` to super... :facepalm:
-hmmm, still same issue
-turns out tkinter Frames object cant take in 3 arguments unless the 3rd is a dictionary
-I was trying to find the docs on the signature more, they are certainly lacking
-Yeah pretty abysmal tbh
-Nearly done though
-And another issue... How am I supposed to pass in anything to this class if it cant take more than one argument...
-What do you mean? Only the parent can't take more than one - your class can though
-are there anymore easter eggs in python than 'import this'?
-'import this' is the surest way to a guilt trip in Python
-lol
-there's `from __future__ import braces`
-and `import antigravity`
-`from stackoverflow import quicksort`
-^^^ best help advice you've ever seen in your entire life.
-lol xkcd one nice
-`import hello`
-I have a stupid question: I'm doing a tutorial on making command line apps with argparse.  I'm most comfortable working in a Jupyter notebook, though - obviously I'll need to transfer it to a script eventually, but is there a way I could like simulate user input in a Jupyter cell instead of switching back and forth between text editor and shell?
-<@U6DGQTB5Z> yup! by default `arg_parse()` just looks for the command line arguments from `sys.argv` but you can pass your own list of arguments to it
-Aha!  Awesome, thanks!  :slightly_smiling_face:
-i enjoy building cli apps with argparse but lately click has been my go to.
-click is super nice
-but i never use it unless i'm pulling in at least one other dependency
-You can always vendor it
-click is slick
-<@U13L8J76J> true true
-Hello, `HTTP GET` is giving `400` on one machine but works perfectly fine (`200`) on other machine for the same URL. Any ideas why?
+i want to chain this `create` and `print` steps, in one step. 
+Because sometimes i need `both one after another` - some other times i need to `create the document` - make `some updates`, then `print`. 
+```
+someCmd: Cmd msg
+someCmd = 
+    createNewDocument
+        |&gt; Task.andThen (\ what? -&gt; -- what to add here?
+                printDocument
+
+            )
+        |&gt; Task.attempt (\ result -&gt; some result handler )
+```
+how can i chain `port` calls? Because ports return `Cmd msg` not `Task err msg`.
+
+U0CLDU8UB : You can't chain port calls, you can only handle a Msg produced by a port.
+U2LAL86AY : hmm.. thanks
+U2LC0U8JY : I am wondering if anyone has a setup for using elm in an angular application?
+U2LC0U8JY : so my question is more about the project setup.
+U5ABF3BH7 : I see. Thanks! That is very useful
+U58EMTHRN : Hi everyone,I need to embed a third-party js library that will modify a part of my domtree, the same way a text editor would. In my case it is a payment client-side SDK, which I have no choice but to use.
+If my view produces a "div" with a given ID and some content, the next update after the third-party library changes it, all its changes will be dropped.
+How can this problem be solved ?
+Can we produce nodes that will not be updated by elm after being created ?
+
+U0RPQMZ9S : <@U58EMTHRN> there is a trick to do this! although it can be a bit sketchy
+U58EMTHRN : I saw CKEditor uses webcomponents, I was hoping something else is possible.
+U0RPQMZ9S : You can wrap the element you embed the widget in with a function from the `Html.Lazy` module. This tells elm's diffing algorithm to leave that part of the dom alone unless the model changes
+U0RPQMZ9S : And if the model does change somewhere while the user is interacting with the widget, you can use `Html.Keyed` to tell elm to reuse the nodes already in the dom
+U58EMTHRN : xilnocas: oh that's clever!
+U0K92QFST : in this case if that div should definitely never change you can just say `lazy neverChangingDiv ()`
+U0K92QFST : where the type signature of `neverChangingDiv` is `() -&gt; Html msg`
+U58EMTHRN : Thats exactly what I will need! Thanks
+U58EMTHRN : On a related subject, is there a way to send out a Cmd after a given div was initially rendered ? I need to call some javascript only once the div exists...
+U0RPQMZ9S : Is it a div rendered by elm? or your 3rd party sdk?
+U0K92QFST : you could probably do something like `on "load" (Json.succeed DivLoaded)`
+U0K92QFST : not 100% sure that would work
+U58EMTHRN : The div is rendered by elm, then the 3rd party will put its own things inside
+U58EMTHRN : the "load" event is for any element ?
+U0RPQMZ9S : What you want to do is wrap your js port callback in `requestAnimationFrame`. This has the effect of making sure elm's render step is finished before your ports fire. When this is in place you can just call out to the port in your update function like normal
+U58EMTHRN : nice. Thanks a lot!
+U0RPQMZ9S : Happy to share my knowledge of these dirty hacks :smile:
+U0RPQMZ9S : waaaaaay better than hacking in native/kernel code though
+U0K92QFST : you're right <@U58EMTHRN>, "load" is only for the window. my bad.
+U0K92QFST : <@U0RPQMZ9S>'s solution is good tho :smile:
+U58EMTHRN : xilnocas: going kernel/native was the very last thing I would do...
+U5AQ585NH : Just published elm-multiselect package at the elm-packages: <http://package.elm-lang.org/packages/inkuzmin/elm-multiselect/latest>The process is extremely nice and convenient!
+
+U2LAL86AY : wow super! <https://inkuzmin.github.io/elm-multiselect/>Thank you :smile: :heart:
+
+U5AQ585NH : <@U2LAL86AY> any suggestions and/or recommendations are very welcome! As well as bug reports and feature requests, of course.
+U2LAL86AY : yes, i will use it in one of my projects very soon. :smile:
+U5AQ585NH : Cool! Look forward for your feedback!
+U5WS7CJLV : <@U5AQ585NH> (or anybody that knows if he's gone) what does the "!" in the update function of the minimal example do?
+U5WS7CJLV : <https://github.com/inkuzmin/elm-multiselect/blob/1.0.0/example/src/MinimalExample.elm>
+U5FU80S06 : <@U0H8PND27> Do you support Tachyons verbose? <https://github.com/tachyons-css/tachyons-verbose>
+U5FU80S06 : *All* -- What does it take to have a dedicated _Tachyons_ Slack channel?
+U0FP80EKB : <@U5WS7CJLV> <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Platform-Cmd#>!
+U0FP80EKB : It is shorthand for `(model, Cmd.batch cmds)`
+U5WS7CJLV : thanks
+U0FP80EKB : For the record, I strongly dislike it. But, that’s just me. ¯\_(?)_/¯ :slightly_smiling_face:
+U5WS7CJLV : why do you dislike it?  I just discovered its existence, so of course I have no views. :slightly_smiling_face:
+U1ANV9FML : <@U5WS7CJLV> See <http://faq.elm-community.org/#what-is-this---construct-in-the-code>
+U23SA861Y : operators like that are obtuse and unreadable
+U0FP80EKB : Just a stylistic thing for me. I’m not a fan of infix operators like that, because then people have to ask “what is this operator” . I prefer `(model, Cmd.batch cmds)` to be explicit
+U23SA861Y : I believe it's actually being removed
+U5WS7CJLV : ah yes, it's not very intuitive
+U5WS7CJLV : and ! is used for so many things
+U5WS7CJLV : bookmarking that FAQ page btw
+U0H8PND27 : Not yet but it would be pretty easy, <https://elmlang.slack.com/archives/C0CJ3SBBM/p1499450081834592>
+U5FU80S06 : *All* -- What does it take to have a dedicated _Tachyons_ Slack channel?
+U5WS7CJLV : <@U0FP80EKB> it looks like Ivan is making a list of commands from one command using square brackets and then flattening/folding the list into one command - but why?
+U5WS7CJLV : or have I misunderstood?
+U5WS7CJLV : ! [ Cmd.map HOI subCmd ]
+U5WS7CJLV : oh, probly cause ! only works with a list of commands
+U3SJEDR96 : so `a ! b` == `(a, Cmd.batch b)`. Since `batch` takes a `List cmd`, you need `b` to be a `List cmd` :slightly_smiling_face:
+U5WS7CJLV : right
+U0FP80EKB : Yup
+U2LAL86AY : <@U5WS7CJLV> i think you can take a look at the rocket operator. for example:```
+SendOtherRequest -&gt;
+            model
+                |&gt; doSomethingToModel
+                |&gt; doSomethingElseToModel
+                =&gt; [ Http.send someOtherRequest ]
+```
+<https://github.com/NoRedInk/rocket-update>
+It's my favorite now :heart:
+
+U23SA861Y : no, god no. No more custom operators
+U0FP80EKB : Actually that operator is a bit more useful as it has a concrete use case rather than just syntactic sugar
+U2LAL86AY : i think is very useful when having `div [ style [ ("width", "height") ] ]` it's much better to have `div [ style [ "width" =&gt; "height" ] ]` so write : `=&gt;` instead of `(` `,` `)`
+U2LAL86AY : it's faster for me
+U3SJEDR96 : Agreed. Note that `(=&gt;) = (,)` with the same fixity as `|&gt;` and `&lt;|`
+U3SJEDR96 : Also `Dict.fromList [ "foo" =&gt; "bar", "baz" =&gt; "klux" ]`
+U23SA861Y : you literally save a single keystroke
+U2LAL86AY : :smile: please just try it for a few hours. Then you owe me a fat beer :smile:
+U3SJEDR96 : Sure, but that's not really what it's about, at least for me. It expresses, visually, a relationship between things, which tuples encode quite often. Using it for things that don't express that relation would be confusing, tho.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,15 +1,108 @@
+U1CTH1TUY : Want to share code? Could you just wrap your method into a lazy-seq? a list where each item is the result of a function is still a list.
+U051SS2EU : <@U5NAUMCAD> aside from the other excellent answers, if your inputs are [:a :b :c] and [1 2 3] this is exactly what zipmap is for
+U051SS2EU : also, please don't use `:1` - the clojure reader accepts this keyword, but it's not actually valid, it's perfectly acceptable to use a number as a key in a hash-map if that's what you need
+U1CTH1TUY : Why isn't `:1` valid?
+U051SS2EU : the reader accepts it but the clojure docs rule it out
+U051SS2EU : which means that in the future the reader might stop accepting it
+U051SS2EU : I admit that's unlikely, but when we have the choice, I think it's better to not use things that clojure claims it shouldn't accept
+U051SS2EU : <@U1CTH1TUY> for example cljs read-string doesn't allow it
+U051SS2EU : and that's not a cljs bug, since clojure's docs already say it's not valid
+U051SS2EU : there's lots of things that accidentally work in clojure, but we shouldn't assume are intended
+U051SS2EU : ```+cljs.user=&gt; (cljs.reader/read-string ":1")TypeError: Cannot read property '0' of null
++cljs.user=&gt; (cljs.reader/read-string ":a")
+:a
 ```
-Hello everyone, is there any book/online resource about functional architectural patterns? Something like Patterns of Enterprise Application Architecture by Martin Fowler but from a functional point of view...
-Rich Hickey's Talks can be considered as source of some patterns I think
-<@U052TDWT7>  <http://mishadoff.com/blog/clojure-design-patterns/>
-Thanks <@U297WCSHK>, <@U5YHX0TQV>
-any spectacular clojure alternative to <https://github.com/Raynes/conch>?
-clojure's built-in `sh` is limited (no support for processing stdout/stderr as streams)
-What's going on here?
-<@U1C72J3J4> I pasted exactly what you have into the repl and got `2`.
-<@U1C72J3J4> Looks like that error message indicates a problem with the regex
-Just to double check, what version of core.match are you using?
-<@U07S8JGF7> `[org.clojure/core.match "0.3.0-alpha4"]`, with `(:require  [clojure.core.match :as m][clojure.core.match.regex])` in my ns
-<@U1CD720KB> `(re-matches #"stuff.*" "stuff123")` works, so no regex issues as well
-clojure version: `org.clojure/clojure "1.9.0-alpha15`
-I'm not sure what the design of this is, but it looks like it might be a boog.
+
+U098UL4QP : i'm currently diagnosing some garbage collection issues and am wondering if maybe i should be using the oracle jvm instead of openjdk
+U098UL4QP : i cant find any evidence that it matters but i cant say for sure
+U050ECB92 : it won't make a difference
+U098UL4QP : does anyone have any opinions on thi?
+U050ECB92 : you suspect a leak in your code?
+U098UL4QP : no, im looking into very long stop the world pauses ~20 secs
+U098UL4QP : i guess im wondering if the implementation of garbage collectors makes a difference
+U098UL4QP : ok i just wanted to hear someone say it wont make a difference because that's my instinct too
+U098UL4QP : while we're on the topic, just so i'm clear, the implementation of g1 garbage collector in openjdk is different than the implementation in oracle jvm right?
+U050ECB92 : it is not different <@U098UL4QP>
+U050ECB92 : G1 is G1
+U098UL4QP : ok thank you for clarifying that
+U050ECB92 : have you looked at heap profilers?
+U050ECB92 : the choice of GCs makes a difference with pause times, and your allocations are going to be workload dependent...
+U050ECB92 : i've found usually that there's an offending spot in my code, but it can be tricky to track sometime
+U050ECB92 : A quick temporary fix for long pause times is to a) make your max heap size _smaller_ and b) remove any JVM command line flags that somebody pasted into your deployment  (probably directly from stack overflow)
+U051SS2EU : I was almost going to mention that making the heap smaller thing, but then I realized it sounded really weird and I didn't have a cite... thanks for confirming that though
+U051SS2EU : also, I recently learned the term "jvm smoke break" for this kind of problem, which I find amusing
+U050ECB92 : lol
+U050ECB92 : the advice is totally counterintuitive.  mem leak =&gt; long GC =&gt; increase heap size =&gt; larger leak =&gt; longer pause time
+U5ZAJ15P0 : Hi! Is Clojure 1.9 stable enough to start a project on it now which will be pushed to production in a couple of months?
+U098UL4QP : <@U050ECB92> which heap profilers do you recommend?
+U08E3BBST : <@U5ZAJ15P0> looks pretty stable to me: <https://github.com/clojure/clojure/graphs/contributors?from=2017-01-01&amp;to=2017-07-01&amp;type=c>
+U5ZAJ15P0 : Is it ok to have side-effects in clojure specs? e.g. a database call. The application I am thinking of is checking that an email hasn't already been used on a "signup" API payload
+U0NCTKEV8 : seems gross
+U2MPUENUC : <@U5ZAJ15P0> only if idempotent
+U0NCTKEV8 : and implies effectively global scoping of the database connection, which is also gross
+U064X3EF3 : It's ok to validate things outside of spec too 
+U04V70XH6 : <@U5ZAJ15P0> Clojure 1.9 is stable enough for production use as far as I'm concerned — my company has Clojure 1.9 Alpha 17 in heavy production usage right now.
+U1164QHNY : does anyone have recommendations on a good job scheduling library for Clojure? checked out Quartzite earlier, but had some difficulty getting it to play nicely with my loading of env vars from mount
+U06BE1L6T : Should I follow kibit's recommendations?```
+Consider using:
+  (vec costs)
+instead of:
+  (into [] costs)
+```
+Is there any real difference between `vec` and `into []`? 
+`vec` is a bit shorter and maybe more explicit but I've also seen `into []` being used a lot.
+I've found following question on SO: <https://stackoverflow.com/questions/12044181/into-or-vec-converting-sequence-back-to-vector-in-clojure> but I don't think  the different behavior for small arrays mentioned in answer is true
+
+U06BE1L6T : I did following experiment:```
+(def my-a (int-array [1 2 3]))
+
+(def my-v (vec my-a))
+my-v
+;=&gt; [1 2 3]
+
+(aset my-a 1 10))
+(java.util.Arrays/toString my-a)
+;=&gt; "[1, 10, 3]"
+
+;=&gt; my-v
+[1 2 3]
+```
+
+U051SS2EU : <@U06BE1L6T> it can't alias an int-array
+U051SS2EU : ```+user=&gt; (def a (into-array [1 2 3]))#'user/a
++user=&gt; (def v (vec a))
+#'user/v
++user=&gt; a
+#object["[Ljava.lang.Long;" 0x5c089b2f "[Ljava.lang.Long;@5c089b2f"]
++user=&gt; (seq a)
+(1 2 3)
++user=&gt; v
+[1 2 3]
++user=&gt; (aset a 1 42)
+42
++user=&gt; v
+[1 42 3]
+```
+
+U051SS2EU : as you see, it can alias a Long array
+U06BE1L6T : I see, any thoughts on my original question? :wink:
+U051SS2EU : if the collection might in some cases already be a vector, or it's an array that won't be aliased, use vec
+U051SS2EU : if you already have a vector and need to add to it, or if you need to do some transformation like mapping or filtering as you add things, use into
+U051SS2EU : if none of those conditions apply, it doesn't matter which you use
+U051SS2EU : when I mention transforms here, I'm talking about using the transducing arg to into btw
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

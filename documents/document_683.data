@@ -1,11 +1,62 @@
+U6269MXK2 : Hi, did someone already experienced this issue when installing Elm trough npm ?
+U6269MXK2 : `Error extracting linux-x64.tar.gz - Error: EACCES: permission denied, mkdir '/usr/lib/node_modules/elm/Elm-Platform'`
+U3SJEDR96 : <https://docs.npmjs.com/getting-started/fixing-npm-permissions#option-2-change-npms-default-directory-to-another-directory>
+U3SJEDR96 : `/usr` isn't a very good place to (globally) install user-specific stuff :slightly_smiling_face:
+U6269MXK2 : Ah get it
+U6269MXK2 : Thanks a lot !
+U0CLDU8UB : Has npm changed the default recently? This has popped up several times in the past couple of days.
+U3SJEDR96 : Yeah, I'm not sure where this is coming from tbh
+U0CLDU8UB : Well actually:```
+› which elm-make 
+/usr/bin/elm-make
 ```
-<@U5ZPMJA06>  thanks i got it :smile:
-How to do that ?
-crontab?
-but I need to restart script every two hours because API security keys expires after two hours, and then I need to again generate that key
-ok
-then so have your script execute
-and then use crontab to execute it from the OS every two hours
-that would be the easiest way to do it
-yes, script is execute but I wish to restart itself scipt if posible :slightly_smiling_face:
-????
+
+U0CLDU8UB : I've installed it via npm quite a while ago, so it's not a new location.
+U0CLDU8UB : Though `npm i -g elm` (no sudo) also works on my machine, and:```
+› which elm-make
+~/.npm/bin/elm-make
+```
+
+U4N4DF3GW : Have you guys ever wondered why the official style guide says to use 4 spaces indentation, while Elm-core modules are written with 2 spaces indent?
+U3SJEDR96 : the core modules haven't been ran through elm-format (yet). This will likely happen once elm-format reaches a 1.0
+U3DG1D55J : Anyone have experience using the elm-tools/parser library? I have what I suspect is a pretty simple question
+U1CE9DL9H : fire away
+U3DG1D55J : So, first an example string that I’d like to parse: `**alphanumerics** (optional thing)`
+U3DG1D55J : So, I’m having the parser ignore the asterisks, keep the value inside the asterisks, and then optionally ignore the parens and keep the value inside them
+U3DG1D55J : The thing I’m having issues with is defining a parser that can have the optional component
+U3DG1D55J : This is how I’m defining the parser `parser: Parser { name: String, optionalPart: Maybe String }`
+U1CE9DL9H : I think the only way is to use `oneOf`, so `oneOf [ Parser.map2 YourTypeAlias parseName  (Parser.map Just parseOptionalPart), Parser.map2 YourTypeAlias parseName (Parser.succeed Nothing) ]`
+U1CE9DL9H : of course you could define some helper functions here
+U3DG1D55J : Ahh, I knew the answer would probably be simple :slightly_smiling_face:
+U3DG1D55J : Thanks a lot, that should get me moving along again
+U1CE9DL9H : for instance ```
+maybe : Parser a -&gt; Parser (Maybe a)
+maybe parser = 
+    oneOf [ Parser.map Just parser, Parser.succeed Nothing ] 
+```
+
+U17PWHU4D : Hi all, I'm in a situation where i have to decode a json array that has mixed types.  They're in a predictable pattern.  `[Int, Int, Int, String, Int]`
+U17PWHU4D : But in my limited experience, I create an type alias, and use that with decode pipeline.  however, i have no idea how i'd describe this.
+U1CE9DL9H : you'll have to do this in two phases: decode the array, then decode the items
+U1CE9DL9H : the first phase can use a `Decode.list Decode.value`
+U1CE9DL9H : yes, but you keep the elements as undecoded values
+U17PWHU4D : ah, ok.  going to look at Decode.value right now.  that one is new to me.
+U48AEBJQ3 : Since you will be building an Elm data structure out of this, do you know what you want that to look like?
+U17PWHU4D : i would love to!
+U1CE9DL9H : I assume a record with 5 fields of the correct type?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

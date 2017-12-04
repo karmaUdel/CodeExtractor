@@ -1,12 +1,64 @@
-``` should do the trick.
-<@U2D7NUGS1> Thanks for that! Now I need to solve the next issue of atom-elm-format not finding the elm-format binary
-Hmm. I have it working. Let me look at my config.
-It's probably because there is no executable named `elm-format` anymore. Use `elm-format-0.18`.
-<@U2D7NUGS1> That did it. :slightly_smiling_face: Thanks mate!
-Cool :slightly_smiling_face:
-where `StringHappened` is a constructor for my `Msg`. It just so happens that the `detail.value` is a `bool`. Currently in my app nothing happens. I want another variant of `Msg` to be used, say `ErrorHappened`. How can I do it?
-It's been addressed at <#C192T0Q1E|beginners> .
-Is there an elm version of something like classnames? <https://github.com/JedWatson/classnames>
-looks like it would work poorly with Elm’s type system
-what do you want to achieve with it?
-Elm-html merges class attributes automatically, if that’s what you want. So you can use multiple class attributes
+U0EUHKVGB : <@U6D3ERLA1> Basically, if there's a complex type it usually means you need to break up what you give to json-to-elm a bit. It works better if you give it a type alias, cause it has to guess less. But it can still have some issues with more complicated types. Generally meant as an aide to help you write 90% of the boilerplate, rather than 1-to-1
+U23SA861Y : It's one of those fine lines, the only way you can really avoid it and be strongly typed with with runtime type refection. Problem with that is your language needs to support runtime type reflection.
+U6D3ERLA1 : got it
+U6D3ERLA1 : (I don't know how to do that but I see what you mean)
+U0J1M0F32 : Yep
+U23SA861Y : And then people start to use runtime type reflection
+U23SA861Y : I shiver just thinking about it
+U6DBPU40Y : Hey everyone, where is this syntax documented? ```
+Msg -&gt; 
+     model ! []
+```
+
+U23SA861Y : it is, sort of but It is not preferred
+U23SA861Y : it can be found in Platform.Cmd
+U6DBPU40Y : Thanks <@U23SA861Y>, I saw it in the todomvc code, sort of confusing because I've also seen some people wrote an util function to do ```model =&gt; cmd```
+U23SA861Y : so `=&gt;` is an alias for (,)
+U23SA861Y : in both cases I would avoid the custom operator and just write plain code
+U23SA861Y : as you've just experienced, these clever™ operators just make the code harder to read
+U6DBPU40Y : haha alright, it's cool to see fancy operators but they do in fact confuse people
+U23SA861Y : you could write `model ! []` or you could have a simple funciton `prepCmds model []`
+U23SA861Y : little more typing but one is easier to look up (try looking up ! with ctrl+f) and has an explanation built in
+U23SA861Y : you can also `(model, Cmd.batch [])`
+U23SA861Y : or
+U23SA861Y : `(model, Cmd.none)`
+U6DBPU40Y : :ok_hand: thanks for all the advice, really appreciate it
+U1P6FFJ64 : <@U6DBPU40Y> that syntax was used on elm 0.17 but they decided to remove it in future versions: <https://github.com/elm-lang/core/commit/3dab5974837bd350cbee9ce1ecf9ddab1d0f0ebf>
+U0CQ254F5 : could the type signature here <https://github.com/evancz/elm-sortable-table/blob/master/src/Table.elm#L155-L161> be written as?
+```
+customConfig : Config data msg -&gt; Config data msg
+customConfig { ... } =
+  -- implementation
+```
+
+U6DBPU40Y : good to know <@U1P6FFJ64> , thank you, I guess I'll stick to plain code
+U0CQ254F5 : maybe im confusing it with an `alias`
+U2SR9DL7Q : <@U0CQ254F5> does Config accept data and msg as parameters?
+U2SR9DL7Q : If so, I think you can do```
+customConfig : Config -&gt; Config
+customConfig { data, msg } =
+    -- implentation -- 
+```
+and you would return ``` { new_data, new_msg } ```
+
+U2SR9DL7Q : Basically, you're free to deconstruct and pattern match in the actual function arguments, while keeping your type annotation high level and concise
+U4872964V : You'd have to return `Config new_data new_msg` or `{ data = new_data, msg = new_msg }` though
+U0CQ254F5 : yeah, i think i got confused, the function is taking a record and returning a type
+U663M2MB7 : What is the normal structure of a Elm application? Is it `src/` for the application and `tests/` for tests?
+U3FJSB596 : That's how I have it
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

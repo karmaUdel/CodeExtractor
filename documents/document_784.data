@@ -1,0 +1,81 @@
+U1PQJ4V32 : ugh. `At x` works. That's a bit unintuitive. How can I do (what I wanted) with 2 import statements?
+U23SA861Y : well when you use exposing it pulls it in without namespacing
+U23SA861Y : you can use at to specify namespacing
+U23SA861Y : so you wanted Moment to be unnamespaced but the constructors to be?
+U60SXAF96 : (Other way around, I think.)
+U60SXAF96 : He doesn't want to have to say `Moment.Moment`.
+U1PQJ4V32 : all functions should be fully namespaced `Data.Moment.aFunction`. The type and it's constructors can be shorthand. `x : String -&gt; Moment` `<http://Moment.At|Moment.At> foo`
+U1PQJ4V32 : Hm. I think not possible. No worries.
+U23SA861Y : ```import Moment.Data as Moment exposing (Moment)
+import Moment.Data
+```
+
+U23SA861Y : you'll wide up having a double alias for Moment
+U5ZC6V535 : Quick question: What do you think its the best practise for importing modules? Currently, I expose only what i need but i am not sure if this is the right way.
+However  says: 
+
+_Import <https://github.com/ohanhi/elm-style-guide> only needed modules
+ Order of preference:
+    non-exposing imports
+    explicitly exposing imports
+    imports exposing everything
+ When feasible, explicitly define what to expose from current module_
+
+```
+import Best -- ? GOOD
+import Okay exposing (This, That)
+import NotGood exposing (..)
+```
+
+U1PQJ4V32 : <@U5ZC6V535> I'm writing code that uses core `Date` `Time.Date.Date` and my own utility `Local.Date`. The only thing I can do *consistently* is to fully namespace (and therefore do that everywhere). Any other style requires deciding on a case-by-case basis, and refactoring if details change :disappointed:. Seems like too much deciding for my little brain.
+U1PQJ4V32 : (but readability suffers a bit)
+U5ZC6V535 : <@U1PQJ4V32> Hmm, full namespaces lead to long lines and thus hinder readability, exposing only what you need again hinders readability. Difficult to define the golden ratio of the two cases.
+U1PQJ4V32 : <@U5ZC6V535> right. But at least with full namespaces you can be  unreadable with consistency!
+U1PQJ4V32 : :confused:
+U5ZC6V535 : <@U1PQJ4V32> Well be consistently unreadable doesn’t seem good right? :stuck_out_tongue: :slightly_smiling_face:
+U1PQJ4V32 : Unreadable and consistent. That's better.
+U1PQJ4V32 : brb
+U5ZC6V535 : Hmm, perhaps
+U3ZNWN526 : I really feel like it depends on the context.
+U3ZNWN526 : In my JSON Decoders, I expose (..) from my related Model
+U3ZNWN526 : I've also considered exposing (..) from Json.Decode (although I haven't switched to that yet)
+U3ZNWN526 : (And I know if I ever run into a case where there is a conflict, I can just expose nothing, and let the compiler or IDE tell me which things I need to expose)
+U3ZNWN526 : But, for other modules I only expose what I need, or often nothing at all (as their contents aren't as directly relevant to the current context)
+U3ZNWN526 : Of course if you want a style guideline, this isn't much help :wink:
+U5ZC6V535 : <@U3ZNWN526> I suppose you mean it depends :slightly_smiling_face:
+U170TNSTZ : What about `Import List as L`? This style is used quite a lot in Clojure
+U170TNSTZ : For instance `(:require [foo.bar.baz :as baz])`
+U5ZC6V535 : <@U170TNSTZ> For third pary libraries I usually do that. i.e. 
+```
+import Math.Vector2 as V2
+```
+
+But that again depends. When it makes sense :slightly_smiling_face:
+
+U1CE9DL9H : part of the point of qualified imports is that it is easy to know what module a function comes from, a module `L` could be anything, `List` reads nicer and makes it immediately clear that we're dealing with lists
+U1CE9DL9H : I think those extra 3 characters are worth it
+U5W50TZ6C : Hello, I think I found an issue with the compiler. In "let" blocks, variables that are dependent on each other will compile, but error when run.
+Example: <https://ellie-app.com/3Rgzt2Hh39Xa1/0>
+
+U5W50TZ6C : What do you ~guys~ folks think?
+U1AP08WV6 : <@U5W50TZ6C> `file` and `template` depend on each other. AFAIK there're some bugs similar to this reported to elm compiler already
+U5W50TZ6C : Ok, I wasn't sure if this had been reported yet. I'll check the Github just to make sure
+U4F64AKQV : <@U5W50TZ6C> Check out <https://github.com/elm-lang/elm-compiler/blob/master/hints/bad-recursion.md>
+U4872964V : <@U5W50TZ6C>, yes this happens when two functions without arguments depend on each other
+U5W50TZ6C : I see, this is simply bad recursion. There's a few open issues on the compiler repo about detecting cases like the one I ran into, but it doesn't look like there's a solution yet
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

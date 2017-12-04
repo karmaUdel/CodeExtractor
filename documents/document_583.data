@@ -1,82 +1,94 @@
+U14Q8S4EM : So.. `type Msg = HandleField String | ...`
+U3HQVHERX : ```Project is running at <http://localhost:8080/>
+webpack output is served from /
+Success! Compiled 1 module.
+Successfully generated /var/folders/_c/8wr2xwdd5fgd09brqxxycj080000gp/T/117631-5543-1pmxcl4.bb90w1att9.js
+Hash: 585e3744c67183452465
+Version: webpack 3.4.1
+Time: 974ms
+    Asset    Size  Chunks                    Chunk Names
+bundle.js  628 kB       0  [emitted]  [big]  main
+  [35] multi (webpack)-dev-server/client?<http://localhost:8080> ./public/js/app.js 40 bytes {0} [built]
+  [36] (webpack)-dev-server/client?<http://localhost:8080> 5.83 kB {0} [built]
+  [37] ./node_modules/url/url.js 23.3 kB {0} [built]
+  [40] ./node_modules/querystring-es3/index.js 127 bytes {0} [built]
+  [43] ./node_modules/strip-ansi/index.js 161 bytes {0} [built]
+  [45] ./node_modules/loglevel/lib/loglevel.js 6.74 kB {0} [built]
+  [46] (webpack)-dev-server/client/socket.js 856 bytes {0} [built]
+  [78] (webpack)-dev-server/client/overlay.js 3.6 kB {0} [built]
+  [80] ./node_modules/html-entities/index.js 231 bytes {0} [built]
+  [83] (webpack)/hot nonrecursive ^\.\/log$ 170 bytes {0} [built]
+  [84] (webpack)/hot/log.js 1.04 kB {0} [optional] [built]
+  [85] (webpack)/hot/emitter.js 77 bytes {0} [built]
+  [86] ./node_modules/events/events.js 8.33 kB {0} [built]
+  [87] ./public/js/app.js 76 bytes {0} [built]
+  [88] ./src/Main.elm 303 kB {0} [built]
+    + 74 hidden modules
+webpack: Compiled successfully.
 ```
-You were right, my JSON was inconsistent with Decoder. Thanks.
-Yes I'm just wandering whether anyone had borrowed the React vernacular. Thought it might help other people get the idea more easily.
-I’m not sure we want to do that
-Elm is not React
-your update function is more analogous to Redux not React anyway
-it is architecturally extremely similar to certain flavours of React
-So, thinking in terms of components and ownership often leads to complexity
-it’s much easier to think in terms of functions. there is only one update function that has a specific form, all other functions are free to be whatever you think they should be
-so, sometimes you don’t need to return a `Cmd`, then you don’t
-sometimes you only need to pass part of the `Model` then you do that
-but in a large app there are many update functions. Thinking about ownership is critical.
-a function owns its output, that’s all
-there is still a perfectly valid concept of encapsulation in elm, that's all I'm talking about here
-yes, but not as react components necessarily
-Not really, there is just one update function composed of other functions - like in a Flux architecture you'll have a reducer composed of other reducers
-each reducer is an update function, so there is not just one.
-so, the caller of the sub-update function determines what to do with the result of the function, the function does not own anything else than its output
-<@U17MHJ12N> but in Elm there is only one relevant update function, the on that is called by the Elm runtime via the Program
-all other functions are free form
-<@U17MHJ12N> if you’re doing something in React style then you wouldn’t be passing in Props to an `update`
-<@U4872964V> Thanks.
-it applies equally to the view actually.
-if you want to do something like `combineReducers` you can do that of course, but you can structure it completely differntly if you want
-Elm is basically agnostic about how you do that
-The Elm Architecture clearly describes nested update function however, and that is what I am referring to.
-maybe some people do, but the basic Elm Architecture does not, it only specifies one update function
-it's a ubiquitous pattern - I think we know what I am talking about.
-making helper functions is indeed ubiquitous but the actual form of them varies a great deal actually
-yeah personally I would avoid doing this like the plague :smile:
-I've observed that if people know a little bit of React, it's easier for them to learn Elm than people who know zero React
-I've also observed that people who know React really well have a *much* harder time than people who know zero React
-it's a weird curve
-trying to learn Elm concepts in terms of React concepts, especially when it comes to scaling, is the cause of more learning-related pain than anything else I can think of
-for example
-&gt; but in a large app there are many update functions. Thinking about ownership is critical.
-I would disagree with this statement 100% :sweat_smile:
-so you're saying react is kinda like LSD. a little bit will let you see things you didn't realize before, but too much will leave you as a gibbering mess on the floor.
-hahaha
-I wouldn't go that far :wink:
-I think it's more that
-Yes, it’s a pure functional language, this means that a function owns exactly one thing: its output
-understanding the idea of a virtual DOM instead of mutating DOM nodes is something you need to understand
-and if you've done some of that in React, it's one less thing to get used to
-basically everything else beyond that is different :sweat_smile:
-but it intuitively seems like it shouldn't be; hence the problems
-why would you disagree with that statement. Having got to about 30,000 lines now, most of the problems we have had come from failure to properly think about where data belongs (having it in two places etc)
-also I am coming from a specific style of react which is actually very similar to the elm architecture in spirit.
-I think that's the most dangerous of all :grimacing:
-The data belongs in the Model, and having data in two places in the Model for the same data is indeed problematic
-exactly and if you don't think about ownership, that's what happens
-it's the last tiny change where you say "we will literally never have local mutable state" instead of "we will have it rarely" that leads to the biggest differences
-<@U17MHJ12N> i don’t see what ownership has to do with that
-oh, so you're saying ownership as a synonym for data duplication? :thinking_face:
-as in "where in the model the data lives, with the implicit expectation that it should only live in one place"
-(because I definitely agree with that)
-yes
-got it
-ok, never mind then! we agree about that after all :smile:
-actually I wrote these problems up <https://hackernoon.com/the-importance-of-state-ownership-in-elm-72f711ceb244>
-but I no longer agree with my own conclusions!
-this is how I came to the idea of hijacking Props as a concept
-:smile:
-thinking in terms of components is a sure way to get the structure headache for sure
-yeah
-thinking in terms of data is what I try to do, then “ownership” becomes a moot point. Data is data.
-I've been trying to come up with a concise way to explain how I think about views
-it's something like
-"start with writing the DOM I want, then if that needs state data, make it a function that accepts arguments for the data it needs to render, then figure out how best to model that data"
-the important part being that there's no recipe for the "model the data" part
-that's where all the thinking happens
-it's really easy to be like "I want the DOM to end up like this mockup"
-and then it's also really easy to say "here are the pieces of information my function must accept in order to render those"
-and then figuring out where that data ought to live...there is no one-size-fits-all answer
-what is the addage, "show me your code and I will have no clue what you're doing, but show me your data and I can deduce your code"
-or seomthing like that
-never heard that one haha
-show me your data... :smirk:
-Yes, my experience is that when I run into trouble I have modelled my data incorrectly
-I agree. The data modelling is the most important thing. But I maintain that there is a case for components and there is a case for encapsulation and that _can_ lead to duplication unless you are careful. In that cicumstance you have to separate the data the component is responsible for from the data it is not.
-I guess there is if you try to fit all sub-update functions into the same form.
-but the point is that you don’t have to
+
+U3HQVHERX : it says "emitted bundle.js" but i do not see it anywhere
+U14Q8S4EM : Although I would name it something other than `HandleField`, maybe something more specific to what you are doing
+U0JBSEGHY : Yea I am just trying to get it to compile for me first
+U0JBSEGHY : The thing is having `HandleField String` throws errors on all my `onClick` handlers
+U0JBSEGHY : That is once I remove the `onInput`
+U0JBSEGHY : ```The 2nd and 3rd entries in this list are different types of values.
+325|                 [ Html.form []
+326|                     [ input
+327|                         [ onChange HandleField
+328|                         , value model.numberToCall
+329|                         , placeholder "Enter a Phone Number"
+330|                         , class "login-form"
+331|                         ]
+332|                         []
+333|                     ]
+334|                 , h4 [] [ text model.numberToCall ]
+335|&gt;                , button [ onClick (MakeCall model.numberToCall) ] [ text "Make Call" ]
+336|                 ]
+
+The 2nd entry has this type:
+
+    Html (String -&gt; Msg)
+
+But the 3rd is:
+
+    Html (Msg)```
+
+U14Q8S4EM : Thats weird. What is `MakeCall`?
+U14Q8S4EM : Whats the type?
+U0JBSEGHY : ```type Msg    = Answer String
+    | MakeCall String```
+
+U0JBSEGHY : ```update...            MakeCall number -&gt;
+            ( model, call number )
+```
+
+U14Q8S4EM : I dont know why you are getting that error. Thats weird.
+U14Q8S4EM : This wont solve your problem, but you could also do `Msg = MakeCall | ..`
+U14Q8S4EM : and then in your update do `(model, call model.numberToCall)`
+U0JBSEGHY : This is my `onChange` ```onChange : msg -&gt; Attribute msgonChange message =
+    on "keydown" (JD.succeed message)
+
+```
+
+U14Q8S4EM : What happens if you exclude the second element, does it compile?
+U0JBSEGHY : I was hoping to simply pass whatever that gives me to `HandleField` then use debug to see what it gives me. But it keeps saying there is varying types
+U0JBSEGHY : Yes if I exclude the onChange it compiles
+U14Q8S4EM : Oh, thats interesting. I meant if you exclude the `h4` element tho.
+U0JBSEGHY : It starts throwing me everywhere :confused:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

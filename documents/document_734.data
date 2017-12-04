@@ -1,18 +1,111 @@
+U1EQAULH2 : I really liked this one <http://blog.testdouble.com/posts/2017-07-12-three-months-of-elm-our-experience>
+U153UK3FA : <https://www.youtube.com/watch?v=LZj_1qVURL0>
+U0EUHKVGB : checkout the Oslo Elm Day playlist, it has a few: <https://www.youtube.com/playlist?list=PLcAzxXzXQlPZsNcYycHittqeF3UG4dGli>
+U681TBBUP : Another one from kevin yank: <https://youtu.be/kuOCx0QeQ5c>
+U0EUHKVGB : In particular, the talks by David, Erlend, and Nils.
+U35100SJD : hi there!
+U35100SJD : is there some way to pattern match types in function annotations?
+U35100SJD : like we can do with type aliases this way: `func : {a | foo : String}
+U35100SJD : for instance I have this function :```
+when : Bool -&gt; msg -&gt; msg -&gt; msg
+when ok msgTrue msgFalse =
+    if ok then
+        msgTrue
+    else
+        msgFalse
 ```
-So I'm pretty sure there is a bug here.
-^ this test = <http://pasterack.org/pastes/86496>
-(point is, now the failures are consistent)
-As far as I can tell, adding `#:wrap (deallocator)` slows down `av-frame-free` enough that the finalization thread moves more slowly than the allocation thread, so my original answer is still what I think is happening. Removing `#:wrap (deallocator)` might be a reasonable solution if `av-frame-free` is not to be called directly.
-Ah, okay, thanks makes a lot of sense. Thank you.
-That would also explain why writing my own finalizer (and a single thread that calls the will executors in a loop), doesn't have the same problem.
-If I register a will for a value exported by a module, can that will ever be executed?
-use case is a value used by test modules, wondering if it can be automatically cleaned up after the tests finish by relying on `raco test` somehow
-<@U07SJGB4H> The namespace where the module is instantiated would have to become inaccessible, including not being `current-namespace`
-<@U3NJS8H7C> if I `raco test -p mypackage`, which contains some test submodules that require a module providing a value with an attached will, would `raco test`'s shutdown process trigger the will execution? would running the tests in parallel with `-j` affect that?
-<@U07SJGB4H> No, I don't think `raco test` will trigger the will execution. Either you're in `--direct` mode and it's all done in one namespace or the relevant place/process exits still holding its namespace
-drat
-leif: Hi Leif!
-Awwww
-is there an addendum for the redex book anywhere? the syntax in the book is a bit crufty. not sure what else changed
-Hello
-<@U3NP867S6> JFYI:
+
+U35100SJD : and I would like to do something like this:
+U35100SJD : ```when : Bool -&gt; (msg | NoOp) -&gt; msg
+when ok msg =
+    if ok then
+        msg
+    else
+        NoOp
+```
+
+U35100SJD : where we know `msg` has at least `NoOp` value
+U3SJEDR96 : Nope
+U35100SJD : too bad :disappointed:
+U35100SJD : that's what I thought
+U35100SJD : but we never know :slightly_smiling_face:
+U4872964V : what’s the use case?
+U4872964V : preventing messages?
+U35100SJD : the second function above
+U35100SJD : only keep one message instead of 2 in the function
+U35100SJD : because we already know what will be the second message
+U4872964V : yes but I mean when is this function used?
+U35100SJD : in my case it's for some buttons, where: if the form is valid I use a message, othterwise I use another message with no effect
+U35100SJD : well, actually it's not a button, it's a link
+U4872964V : So, I’d put that logic in my update function instead
+U35100SJD : I also may have other use cases where I want to avoid using `if`
+U3SJEDR96 : Why not remove the whole attribute instead, and not have a `NoOp` at all?
+U35100SJD : well, I know I have plenty of solutions to do this, but I like the `when` function
+U4872964V : maybe not the answer you’re looking for :slightly_smiling_face: but yes, it can’t be done that way in the type system, we don’t have “extensible union types”
+U35100SJD : but this function was defined in my module so it knew about `NoOp` message, but now I'm using it in other modules so I wanted to extract it in its own module, but then I have to add another parameter for the `False` case
+U35100SJD : ok, it's not a problem, if it was possible it would have been great but it's not a big deal :slightly_smiling_face:
+U35100SJD : thank you!
+U4872964V : or, as <@U3SJEDR96> is saying, just don’t have the event handler at all when you’d send a NoOp
+U35100SJD : ok, thanks
+U0CL0AS3V : Technically you don't need the actual `Debug.crash` for this
+U0CL0AS3V : You can recurse in the empty list case - it'll lead to infinite recursion if that branch gets run, so you still gotta be real sure :wink:
+U170TNSTZ : What’s the motivation for having commas at the beginning of lines?
+U681TBBUP : One is that it makes a better diff
+U681TBBUP : I can't tell you how many times I add something to a list in some language and forget the comma at the end of the line above
+U3SJEDR96 : It's actually not an uncommon coding style; for example `npm` has a similar convention (<https://docs.npmjs.com/misc/coding-style#comma-first>) and haskell tends to do so, too (<https://github.com/tibbe/haskell-style-guide/blob/master/haskell-style.md#list-declarations>)
+U3SJEDR96 : then again, it's not exactly "undisputed" - <https://github.com/avh4/elm-format/issues/161>
+U170TNSTZ : Cool! I’m coming from Clojure-land, where commas can be omitted (and I tend to forget to even put them in Elm code ;-)
+U4872964V : yes, omitting commas would be consistent with how `let` and `case` work
+U1CFBCD4J : it's mostly just Haskell/Elm/PureScript people that do the comma-first thing religiously, from what I've seen
+U1CFBCD4J : although I have seen people do it in SQL before also
+U4872964V : i’m not so sure about religiously, but yes, it’s the standard
+U2SR9DL7Q : it's funny. python (and a few other languages) encourage using commas on the last list element for the same diff reason, but it took me forever to be okay with elm-formats placement at the front.
+U1CFBCD4J : C# and JS also allow trailing commas now, so comma last is the most common in those languages
+U4872964V : Having been programming for 30 years you get used to a lot of different styles .)
+U2SR9DL7Q : But since format places the first element on the same line as the opening bracket, it ends up looking rather neat. I may be a convert.
+U1CFBCD4J : not a big fan of it, personally. it's weird having the opening bracket on the same line as the first item, IMO.
+U1CFBCD4J : it makes sense in languages where trailing commas aren't allowed at the end of a list, because it has a practical reason for being used
+U1CFBCD4J : but not in languages where trailing commas are allowed, like in JS
+U3SJEDR96 : I'm not too attached to it, I just like consistency. I do find myself formatting literals in JS in Elm-style now, too.
+U4872964V : Yes, having commas being optional (newline+same indent implies comma) would give very pleasing visual style, I think
+U4872964V : inside [] and {}
+U2SR9DL7Q : Sometimes when I hit save, I see the results of elm-format and I think, "Wow. That's what you're going with?" But it's readable and consistent.
+U1CFBCD4J : i think it's just a haskell based convention that people carried with them to elm &amp; purescript, honestly
+U4872964V : since we already have significant whitespace with `let` and `case` it’s not surprising to have it in more cases
+U4872964V : ```    [
+        item1
+        item2
+    ]
+```
+etc
+
+U4872964V : otoh having a comma is a nice visual cue to where an element starts
+U3R7CKQRX : Hi everybody, I got a question about destroying elm apps and possible conflicts.
+U3R7CKQRX : As far as I know there no real API to `destroy` an elm app so I am assuming it continues to live even if the container it has been `embed()`ded  in is no longer in the DOM.
+U3R7CKQRX : If that is correct I am kind of worried that the app will still listen to some on the page and might cause weird behaviour.
+U3R7CKQRX : Scenario:
+U3R7CKQRX : I have 2 elm apps on my page. Both use the Navigation package to listen to a route that ends in `/home`. Of course only one of the apps is mounted in the DOM at the same time. Will both listen to the urlchange?
+U1EQAULH2 : I asked for articles and you sent me awesome videos. Thanks :raised_hands:
+U14Q8S4EM : Hey <@U3R7CKQRX> , Im not sure, but I wonder if something like…```
+var pageState = { elmApp : Elm.embed(document.getElementById("elm-container") };
+delete pageState.elmApp;
+```
+.. would be a safe approach.
+
+U14Q8S4EM : It really depends on whether the event listeners in Elm that are tried to the window would prevent the Elm app from getting garbage collected. But if it doesnt, deleting the Elm object entirely might help since those event listeners are a part of that.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

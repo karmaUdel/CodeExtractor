@@ -1,11 +1,99 @@
-CompilerException java.lang.ExceptionInInitializerError, compiling:(foo.bar.clj:1:1)```
-If I remove the symlink in checkouts, everything seems to work fine.
-frameworks are things that call you, rather than things you call
-(which are more likely components)
-<@U0LGCREMU> ^^
-hmm, seems a reasonable defn
-not something I made up and probably not 100% satisfying, but I think it's about right
-I mentioned it's said there's a bug for gpg, it that mean the username and password in credentials.clj.gpg will not work, orI have to do something?
-Hey all, I am running into what I think is a bug with how clojure's java interop works
-I am trying to wrap <https://github.com/lokra/seaweedfs-client> for use in clojure
-but when I try to port the example upstart code
+U46LFMYTD : ```(defn make-lazy-tree [{in :in out :out left :left right :right :as tree} indices]
+  (cond
+    (empty? indices) tree
+    :else (assoc
+           tree
+           :left (fn [] (make-lazy-tree {:in (conj in (first indices)) :out out} (rest indices)))
+           :right (fn [] (make-lazy-tree {:in in :out (conj out (first indices))} (rest indices))))))
+```
+
+U46LFMYTD : so instead of returning the next subtree it returns a function to the next subtree, which can be called like this
+U46LFMYTD : ```(defn my-left [t] ((:left t)))
+(defn my-right [t] ((:right t)))
+
+(-&gt; foo
+    my-right
+    my-right
+    my-left)
+
+```
+
+U46LFMYTD : giving:```
+=&gt; {:in #{2},
+       :out #{0 1},
+       :left #function[bab.core/make-lazy-tree/fn--20560],
+       :right #function[bab.core/make-lazy-tree/fn--20562]}
+```
+
+U46LFMYTD : I guess delay is kind of doing the same thing?
+U46LFMYTD : just tried it, delay works nicely too
+U051SS2EU : you can't tail call that code though
+U051SS2EU : not without a radical design shift to move stack data into the heap
+U46LFMYTD : agreed. As per <@U3L6TFEJF> s suggestion i wrapped the calls with delay
+U46LFMYTD : ```(defn make-delay-tree [{in :in out :out left :left right :right :as tree} indices]
+  (cond
+    (empty? indices) tree
+    :else (assoc
+           tree
+           :left (delay (make-delay-tree {:in (conj in (first indices)) :out out} (rest indices)))
+           :right (delay (make-delay-tree {:in in :out (conj out (first indices))} (rest indices))))))
+```
+
+U46LFMYTD : writing ```
+(defn my-left [t] @(:left t))
+(defn my-right [t] @(:right t))
+```
+
+U46LFMYTD : I can traverse the tree to the leaf nodes that I want, without creating the others
+U46LFMYTD : I like this, but I'm wondering if anyone else can see any pitfalls
+U051SS2EU : delay is under-utilized imho
+U051SS2EU : a fun fact - force is an alternative for deref on delays, and is identity on non-delay values
+U1ALMRBLL : will still blow the stack, no?
+U051SS2EU : only if you eagerly call it recursively
+U051SS2EU : but it is easy to make a non-stack-consuming recursion that goes into deeper delays as far as you like
+U1ALMRBLL : like with a continuation
+U051SS2EU : right, a delay is a zero arg continuation, effectively
+U051SS2EU : thunk? maybe that's the word
+U1ALMRBLL : yep
+U051SS2EU : anyway, that overloaded behavior of force makes it convenient to write code that may or may not hit a delayed value
+U46LFMYTD : you've lost me now :slightly_smiling_face:
+U051SS2EU : thunks / continuations are how lazy seqs are implemented
+U051SS2EU : and delays do the same thing
+U051SS2EU : it's a function that stands in for a value we might access later
+U1ALMRBLL : <@U46LFMYTD> <https://en.wikipedia.org/wiki/Continuation-passing_style>
+U051SS2EU : <@U1ALMRBLL> that article mentions a continuation being a one arg function, which is why I was particular about argument count - these being zero arg
+U051SS2EU : <https://en.wikipedia.org/wiki/Thunk> whereas thunks are zero arg
+U46LFMYTD : so actually my first attempt was to change```
+:left (make-lazy-tree {:in (conj in (first indices)) :out out} (rest indices))
+```
+to
+```
+:left (fn [] (make-lazy-tree {:in (conj in (first indices)) :out out} (rest indices)))
+```
+and then I could traverse the tree by calling the function returned by :left. Is this what is meant by continuation?
+
+U051SS2EU : that's what's meant by thunk
+U46LFMYTD : ah ok, cool, im happy to be learning this
+U1ALMRBLL : yeah, it's cool stuff, and more common in the FP world
+U46LFMYTD : thanks for your help
+U1ALMRBLL : <@U051SS2EU> what would be the pros/cons of `delay` vs a `fn` in this case?
+U051SS2EU : a delay is a way of making a function that gets called only once when forced, whereas a function could get called more than once and would not cache the prior result (unless you memoized…)
+U051SS2EU : delays are a more specific feature for this purpose so they eliminate some gotchas and boilerplate that come up in usage
+U051SS2EU : <@U1ALMRBLL> it has a function inside <https://github.com/noisesmith/clojure/blob/master/src/jvm/clojure/lang/Delay.java>
+U051SS2EU : apologies for linking to my fork but that file is unmodified
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

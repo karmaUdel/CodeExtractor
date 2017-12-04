@@ -1,24 +1,139 @@
+U0GR6DHEK : ah, let me play around with ondrop some more
+U0CLDU8UB : Note that you need both `ondragover` and `ondrop` to preventDefault
+U0CLDU8UB : I think this package may be helpful, but I haven't tried it myself: <http://package.elm-lang.org/packages/norpan/elm-html5-drag-drop/latest>
+U0GR6DHEK : I looked at that but it had a line `attribute "ondragover" "event.stopPropagation(); event.preventDefault();"` that left me a little queezy
+U0GR6DHEK : <https://github.com/norpan/elm-html5-drag-drop/blob/1.1.0/src/Html5/DragDrop.elm#L190>
+U4872964V : Html5 drag and drop is a bit peculiar
+U4872964V : You need that ondragover for it to work properly
+U17J54S2U : norpan: Cant you achieve the same using `onWithOptions "ondragover"` again? I’m curious as to why `Html.Attributes.attribute` was needed :smile:
+U4872964V : You can, but then it sends a message
+U2LAL86AY : it is possible to have a `reduce/fold` method that `breaks`? like a `for loop` does, but in a pure functional programming language like elm. Sometimes is useful to not go trough the hole list if you find what you are looking for.
+
+U2LAL86AY : i got this - `reduce with breakes````
+var EXIT_REDUCE = {};
+
+function reduce(a, f, result) {
+  for (let i = 0; i &lt; a.length; i++) {
+    let val = f(result, a[i], i, a);
+    if (val === EXIT_REDUCE) break;
+    result = val;
+  }
+  return result;
+}
 ```
-Execute the script with `python3.6`
-nice spot
-<@U3JGK19NV> - consider using some virtualenvs to avoid this in the future :slightly_smiling_face:
-I will work on a video for that, it's been coming up a lot recently
-ooo we can add it to the learning resources.
-ahh i figured it out, i used pip3.5, which i've never used before
-I'm getting a new computer in a few days, how can I prevent myself from having 7 different python versions?
-and yes, I was setting up the virtualenv wrapper but ran into an error doing so
-what model mac, windows, etc.?
-mac!
-on a mac i install brew and then install python2 and python3. you definitely don't want to use system python for anything.
-then i use penv to manage python versions and virtualenvs.
-ahh ok
-Yeah, mac is popular enough I can focus on it. Then I can learn windows :stuck_out_tongue:
-I'll try to do it over the weekend and it'll be free
-Thanks!!
-windows you just install python from the msi.
-and make sure you check the box to add python to the path.
-Yah i'm trying to install virtualenvwrapper
-but am getting that
-my virtualenvwrapper seems to be here `/Library/Frameworks/Python.framework/Versions/3.5/bin/virtualenvwrapper.sh`
-your going to want to add some lines to your `.bash_profile` or `.bashrc` file.
-it's different if i'm using zsh, correct?
+from here : <https://stackoverflow.com/questions/36144406/how-to-break-on-reduce-method>
+
+U0GR6DHEK : then you need a json decoder that always fails
+U0GR6DHEK : i always understood that the answer was that you should not code breaks, but an optimized compiler would insert them
+U3SJEDR96 : <https://ellie-app.com/3Cxhjfm6Qrga1/1>
+U2LAL86AY : aa super :smile: - so somehow it is possible for the compiler to detect if it should break -and will write the appropriate code with a break statement automatically - so that i shouldn't worry to much about going trough the hole list?
+So elm doesn't have this ability at the moment? Or it does? -&gt; i rather not worry about this breaking and let the compiler do it for me.
+
+U3SJEDR96 : you can open the dev console and verify it doesn't examine past 5
+U3SJEDR96 : though it's hard to come up with a good use case for this that can't be covered more efficiently?
+U2LAL86AY : :smile: maybe not. - in reality i was building a function in js, not in elm - that was iterating the DOM - and started with reduce -because i like reducing :smile: - but i needed to exit quickly. Found that answer,Than i thought this should be useful in elm sometimes. Thanks for that example. :smile:
+
+U3SJEDR96 : but then it won't prevent defaults
+U3SJEDR96 : afaik, this is the only option to get it done _without_ a no-op message
+U0GR6DHEK : Ok, looks like I can confirm this from my own code just now
+U2JFD9ALE : Are you able to `Debug.log "foo"` when you build without `elm-make --debug`?
+U2JFD9ALE : If yes, why? :slightly_smiling_face:
+U3SJEDR96 : <@U2JFD9ALE> currently, yes; but I believe that might be changing in an upcoming version.
+U2JFD9ALE : OK, that would be really nice. I know that you can _*explode*_ the app by `Debug.crash` but I'm not really keen to that :wink:
+U4872964V : <@U0GR6DHEK> if you find a good way I'll gladly incorporate it :)
+U3SJEDR96 : True. Once in a blue moon, that makes sense, though
+U2DSBB76Y : Does anyone know if Evans talk from Elm-Europe will get uploaded anytime soon? Or am I just bad at finding it? :smile:
+U5DJNFLUD : It has been posted 
+U5DJNFLUD : <https://www.youtube.com/watch?v=2ihTgEYiKpI>
+U5DJNFLUD : Worth watching
+U0GR6DHEK : <@U4872964V> will do. I have just used a NoOp instead, but i can see that that is not very appropriate for a library
+U2DSBB76Y : Cool! Any particular reason keeping it hidden?
+U3SJEDR96 : editing might not be completely done yet
+U17R26VR8 : it’s taken a while, was up a couple of days afterwards but now it’s been 3 weeks
+U44CPUA82 : I find that a bit weird too. it's not like they hired David Fincher to handle post-production of these videos :slightly_smiling_face:
+U3SJEDR96 : most video's are released, though - <https://www.youtube.com/channel/UCT5HLUjjXdqUSUnpblFNOwQ>
+U3SJEDR96 : well sure, but consider these people need to get plenty of things still sorted out - catching up on whatever they missed while preparing the conf, getting all the paperwork sorted out, paying their dues, day jobs, etc.
+U17R26VR8 : ah, my bad, i didn’t see that… i watched evan’s and richard’s talk pretty much as soon as they came out 3 weeks ago
+U17R26VR8 : evan’s talk was good, it really reaffirmed the way that i was approaching breaking things out
+U601ELFEG : thanks - I was also tilting in favor of `elm-bootstrap` - I sort of didn't my thing to look like every Google app!
+U601ELFEG : Are type classes on elm's horizon?
+U17B2R554 : Has anyone had success with getting hot-swapping to work with elm in an IDE environment?  He is coming from javascript land where he is able to hotswap components without refreshing the whole page.  As far as I am aware, I'm not sure if this is possible, at least in a single-page web app.
+U17B2R554 : a friend is coming from js is what i meant to say
+U4872964V : <@U601ELFEG> type classes Haskell style? Probably not. <https://github.com/elm-lang/elm-compiler/issues/1039>
+U0QS3QAS3 : sometime ago, i heard there ppl were thinking about some type of "getter-setter simplification of type classes" -&gt; super vague, and I never understood it properly, perhaps someone can elaborate
+U601ELFEG : I just read that. I'm surprised because the proliferation of things like Xxx.map and Xxx.map2 would be cleaned up by having type classes.
+U601ELFEG : Grrr... there is no way to write `Array.map2` safely!  Missing something like mapMaybe, or any _filter and map_ construct.
+U4872964V : <@U601ELFEG> also this: <https://medium.com/@eeue56/why-type-classes-arent-important-in-elm-yet-dd55be125c81> (taking up your point with the maps)
+U0QS3QAS3 : nice link! good point
+U601ELFEG : But I think he misses a point about `map`: While I agree that the user knows when they are mapping `List` vs. `Array` vs. `MyFunkyTree` - and I'm willing to get used to prefixing everything with the module name - You lose the ability to write generic, high order functions about things that "are mappable"
+U601ELFEG : (Mind you, I made the exact counter argument in the Haskell community about turning everything into `Foldable`... though there are more complex issues at stake there.)
+U60SXAF96 : Who do I talk to about helping out with DCE/tree-shaking and making the codebase `ADVANCED_OPTIMIZATIONS`-safe for Closure (cite:  <https://developers.google.com/closure/compiler/docs/limitations> )? I'd like to put in effort on those fronts, for both professional (great for my work product at my job) and personal (I'm tired of hearing people whine) reasons.
+U60SXAF96 : Doesn't `fold` do that for you?
+U0J1M0F32 : <@U60SXAF96> Ultimately, you need to talk to Evan, I think in the short term, getting involved in the elm-dev mailing list and the progress on github would be a start.
+U0J1M0F32 : To see exactly what has already been done and what is planned on being done next.
+U60SXAF96 : K.
+U5QJW0DDE : <@U60SXAF96> perhaps you've heard it talked about many times, so I can understand some exhaustion on it, but I don't think that a desire for Closure advanced optimizations counts as "whining" -- having used advanced optimizations for several years in clojurescript, i can say they are really great to have.
+U5QJW0DDE : one really great feature of advanced optimizations is that the entire language itself gets optimized away after it has gone through first pass basic compilation. clojurescript is a large project, but the "hello world" in clojurescript is just a single line of emitted JS with no external dependency because of advanced
+U60SXAF96 : <@U5QJW0DDE>: I agree that it would be great to have. It would also save the language development team a lot of time/headache implementing optimizations within the language itself. But it also seems like people make it into a bigger deal than it is -- people seem to act like if it's not "closure-compatible", then it's just no good.
+U60SXAF96 : <@U5QJW0DDE> This isn't just you, for the record. I've discovered that "Elm's JS isn't safe for closure" is one of the few things people seem to know about Elm. :confused:
+U5QJW0DDE : doesn't mean "no good" but it can certainly mean "not optimized" and a large SPA on a professional level really benefits from those optimizations, so without them it can be an obstacle to adoption of Elm
+U60SXAF96 : <@U5QJW0DDE>: ...which is exactly why I'm volunteering to put effort into fixing that.
+U5QJW0DDE : the reason people know this about Elm is because for many product types, it is very important to be safe/compatible for Closure
+U2SR9DL7Q : silly side note but, I was just about to ask what SPA means... and then suddenly realized what SPA means. #contextclues
+U0EUHKVGB : <@U601ELFEG> Believe me, I do not _miss_ a point about `map` :wink:
+U0EUHKVGB : And I have made this exact point previously.
+U3SJEDR96 : <@U5QJW0DDE> it might be good to know that SPA's is an important focus for Elm 0.19 - hence most features in it will be aimed at making that process better, easier and overall more Elm-y
+U3SJEDR96 : <https://github.com/elm-lang/projects/blob/master/roadmap.md> this is very relevant
+U0EUHKVGB : Type classes are contracts that help design an API. In Elm, we generally stick to conventions for that.
+U5QJW0DDE : <@U3SJEDR96> what else is being looked at for SPA-type work than just DCE?
+U0EUHKVGB : <@U60SXAF96> Make a post on elm-discuss asking what the state of DCE is.
+U0EUHKVGB : <@U5QJW0DDE>, please read the link ilias just shared.
+U0EUHKVGB : It is likely what you desire is already being worked on.
+U5QJW0DDE : i missed that link, sorry!
+U0CLDU8UB : &gt; the ability to write generic, high order functions about things that "are mappable"
+I must admit that in my two years of using Elm almost day to day, I have never felt the need to do this.
+
+U0EUHKVGB : <@U0CLDU8UB>, while I agree, there are places in Elm where it would be useful.
+U0CLDU8UB : I am coming from JavaScript like the ~90%(?) of people in the Elm community at the moment
+U0EUHKVGB : For example, there is a lot of confusion about how a view should work or look — a typeclasss for what a view should be makes those questions go away
+U0EUHKVGB : However, I don’t think that will solve any issues and will cause more chaos
+U0CLDU8UB : So I can't properly spot the places where I could use them.
+U0K92QFST : My feeling about type classes is that they would be neat, but features that will make Elm a superb front-end language are more important than features that will make it a more-powerful functional language.
+U0EUHKVGB : If you want to use typeclasses, Purescript is out there! :slightly_smiling_face:
+U0EUHKVGB : Elm getting typeclasses is not a priority
+U0EUHKVGB : Even though there are benefits that we are aware of
+U3LUC6SNS : What is DCE?
+U0CLDU8UB : Great, I think we got through this discussion very nicely this time!
+U0CLDU8UB : <@U3LUC6SNS> Dead Code Elimination
+U3SJEDR96 : jxxcarlson: dead code elimination - removal of all code that isn't going to be used
+U0EUHKVGB : We had a panel talk about typeclasses at OsloElmDay, actually. It was meant to be a quick question but it ended up taking longer to answer than the others, and we kept talking about it for like 20 minutes after!
+U2CUK7KQA : Every time I read about the typeclasses topic I went to check out purescript and closed the tab again after seeing the hello world sample...```
+import Control.Monad.Eff.Console (log)
+```
+no thanks
+
+U3LUC6SNS : I am looking forward to that!
+U0EUHKVGB : One of the benefits that we love about Elm is that it is a well designed, small language. I could say that any bit of Elm code I see, I understand. One of the important ways of managing and achieving that is to only add language features once they have been excessively thought out.
+U0EUHKVGB : This is why Elm releases may take a while to come about. It’s also why Elm feels even better with every release. Try to revisit 0.15 code and you’ll see what I mean :slightly_smiling_face:
+U2CUK7KQA : <@U0EUHKVGB> exactly my thoughts
+U601ELFEG : <@U0EUHKVGB> - agreed on Elm being small is a big benefit - and no disrespect meant on the mappable comment - I was only into my first half cup of coffee....
+U0CLDU8UB : Ahaha, I just updated a 0.15 thing from two years ago. I do agree Elm has gone in a nice direction since then.
+U601ELFEG : And, as a member of the Haskell development team - I actually fought _against_ the set of generalizations that went in over the last few years. I agree that things like dependent types, impredicative types, module parameterization, rank-n types, etc... are rarely needed, even in Haskell, and certainly shouldn't be in something like Elm.
+U619DD78U : For larger elm projects, is there any reason to break it up into smaller projects or would it be ok to have it be a single large project?
+U601ELFEG : The only case I'd make that type classes are perhaps different and the first step is this: The Basic library uses them!
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

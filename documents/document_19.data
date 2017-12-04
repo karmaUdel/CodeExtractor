@@ -1,49 +1,53 @@
-```
-you could check for that set in your dispatch function and have that return ::foo
-remember your dispatch function doesn't have to just return the thing
-ah i see, then wire in a defmethod like :a-set and :b-set
-`(defmulti foo #(if (contains #{...} (:my-type %)) ::foo (:my-type %)))`
-then `(defmethod foo ::foo ...)`
-I think that is the simplest choice (with a better dispatch function of course, that's just the basic concept)
-great, that's much nicer than what I was planning to do
-any particular reason you use ::foo .. are defmulti's global or something?
-because who knows what value you would find, and namespaced things are safer? you can use any placeholder you like of course
-<@U0W0JDY4C> part of my instinct to use ::foo there is to indicate "this keyword is something my namespace cares about and maybe not generally relevant in other contexts"
-i should probably be doing more of that. thanks again for the help
-Yeah, just hoping :clj: won't follow down the same bad (class)path
-I use emacs and my cofounder uses Cursive. Is there a way to reconcile the formatting styles between the two so our code is consistent?
-my team uses the cljfmt plugin
-linter?
-best thing would be a linter as a post-commit hook
-<@U066TMAKS> Cursive is fairly customisable for formatting settings. You can probably match most things that Emacs does
-<@U066TMAKS> If you have specific issues, let me know over in <#C0744GXCJ|cursive> and I'll help you.
-with cljfmt I can even account for people that never remember to auto-format
-before we started using it, we had repeated problems where person x would indent code totally wrong, and person y had parinfer turned on and moved all the parens around based on the indentation  - there were two human failures that kept happening but just making sure cljfmt got applied to the repo was easier than fixing the bad code practices
-I think it's actually Emacs whose behavior seems to have more special cases. wondering if there's a premade setting for either Cursive or Emacs? (surely I'm not the first one to try to reconcile the two)
-from what i understand emacs will be more rigid and stubborn than cursive
-that's why cljfmt is so great, it doesn't care what your editor is
-^
-and by rigid i mean less adaptable
-<@U051SS2EU> You still really need your editor to agree with it though, or you will suffer pain.
-^ <@U0567Q30W> agree. and x2 with your partner's code. the worst is when Emacs indentation breaks parinfer on Cursive- that actually changes the program's behavior
-i'll bet your easier path is making cursive behave like emacs
-<@U0567Q30W> just running it before I check my code in catches little stuff, and my editor is smart enough to catch changed files
-always running it before commit, and always running it after a pull or merge is a pretty smooth workflow, even when some people forget to run their editor's indentor at all
-to be clear I'm not just running cljfmt, I'm using the optional `fix` arg that edits all the files in place
-<@U051SS2EU> cljfmt seems like a good first step, thanks for the suggestion. <@U0567Q30W> gonna give cursive formatting settings a shot
-<@U066TMAKS> I think the main one that's required to make Cursive line up with Emacs' initial settings is _Settings-&gt;Editor-&gt;Code Style-&gt;Clojure-&gt;General-&gt;One space list indent_
-which channel is best for posting links to talks?
-err, found <#C13E20NF5|videos>
-Maybe my google-fu is failing me, but is there a simple way to unzip a file on disk to a a directory using Clojure? Everything I've found is about unzipping a single file, but I have a zip that has several. I want to unzip it and then read a specific one into memory.
-Trying to build an ETL tool that downloads a zip file, unzips it, reads a specific file into memory, and then does some stuff to it.
-Ideally I could use .getNextEntry or something similar and read to memory when it matches a regex
-<@U5TBHUM8B> if you just need the information there is no need to unzip to files - you could read it file directly from the zip into memory
-Oh that would be ideal! How would I do that with a specific file that's in the zip file? (One of multiple that are zipped in the archive)
-I'm live translating this from some groovy code I wrote a while back (we'll see if I get lynched here), but you can iterate through the entries within a zip file and then call the ZipEntry `(.getInputStream zip-file zip-entry)` and then I believe you should be able to use slurp to get the contents of the input stream
-to find the right entry within the zip you can filter on zipEntry.name
-cigrainger: give me a few - will fire up a repl and see if I can cook up some example code. I'm not senior with clojure but I have spent a lot of time with file manipulations and zip files : )
-Awesome! Thanks. I'll play around with your suggestion re: ZipEntry as well. That was the general direction I was going but I couldn't find much and I'm not great with clojure yet either.
-<@U4VDXB2TU> Have a look at <https://stackoverflow.com/questions/5419125/reading-a-zip-file-using-java-api-from-clojure#5419767>
-Can anyone explain this behavior?
-<@U28947274>  Yes, don't use map to execute side-effecting functions like println since map basically returns a lazy seq
-you can wrap your map's in a (doall ... ) call, but it would be more idiomatic to use doseq for this case
+U5ZAJ15P0 : thus my interest
+U5ZAJ15P0 : I didn't know 4clojure; thanks!
+U5ZAJ15P0 : Out of curiosity, what has your experience been going from Erlang to Clojure <@U067BPAB1> ?
+U5ZAJ15P0 : It's one of those languages (Erlang) that is on my "to learn" list but never quite got around to doing it
+U5ZAJ15P0 : And did you have a good time with Erlang?
+U067BPAB1 : Clojure is a much better language. Erlang is more interesting from a concurrency perspective than an FP one, since the FP there is completely incidental (it was deemed necessary to implement the platform) rather than intentional. Both teach you something new, so if you feel like learning something else after Clojure I can recommend it. I enjoyed my time with Erlang but after 4+ years of it I think I've exhausted the platform, and I personally don't think it's the right fit in 90% of modern distributed/concurrent system development as a lot of the big selling points (failure handling, concurrency etc.) have been implemented outside of the VM these days and I just think that's the right way to do it instead of having to think about these explicitly within a service.
+U06QSF3BK : hmm, seems that eastwood doesn't like defrecord forms produced by [org.clojure/clojure "1.9.0-alpha17"]
+U060FKQPN : what's the issue?
+U5WDMBTUJ : Hello! Can anyone help me understand the use-case of defrecord? Everytime I write a code, it is usually enough with just a function, but I'm afraid I'm missing the good parts of it!
+U2PGHFU5U : Joy of Clojure is fun, and from a practical point of view I loved Learning ClojureScript, but that's about ClojureScript
+U06QSF3BK : ```== Eastwood 0.2.4 Clojure 1.9.0-alpha17 JVM 1.8.0_131Directories scanned for source files:
+  src test
+== Linting lol.core ==
+Entering directory `/private/tmp/lol'
+src/lol/core.clj:3:1: suspicious-expression: condp called with 3 args.  (condp pred test-expr expr) always returns expr.  Perhaps there are misplaced parentheses?``` where source is ```0% cat src/lol/core.clj
+(ns lol.core)
+
+(defrecord Lol [])```
+
+U06CM8C3V : <@U5ZAJ15P0> I'm planning to learn Erlang too. Well, ok, I'll probably learn Elixir instead, but that's derived from Erlang.
+U2PGHFU5U : When running around 1000 simultaneous clj-http/get requests with `:async? true` I get this error:
+```Exception in thread "async-dispatch-6" Exception in thread "async-dispatch-5" java.lang.OutOfMemoryError: unable to create new native thread```
+
+Is there a way to circumvent this?
+
+U5ZAJ15P0 : <@U06CM8C3V> yes Elixir looks interesting!
+U3JURM9B6 : <@U04V70XH6> : is it public if your team uses GAE or AWS ?
+U06QSF3BK : hrm, having hard time trying to teach eastwood to ignore defrecord
+U06QSF3BK : ```(disable-warning {:linter :suspicious-expression
+  :for-macro 'clojure.core/defrecord
+  :reason "Clojure 1.9 defrecord output causes false warning"})``` doesn't seem to work
+
+U0GN0S72R : what's the proper spelling for a new version of `foo-bar`? `foo-bar2` or `foo-bar-2`?
+U06QSF3BK : hmm, not actually clojure 1.9 problem <https://github.com/jonase/eastwood/blob/eb58d6fb2628e1d178d4b8d2c46d4788b2a20094/cases/testcases/suspicious.clj#L8-L11>
+U06QSF3BK : so the actual use for a defrecord without fields was a `com.stuartsierra.component`
+U37NPE2H0 : gfredericks: seems like it would be the former in most cases
+U37NPE2H0 : `foo-bar-2`, I think, more strongly implies it was intended to be a distinct symbol with a similar naming scheme, while `foo-bar2` is more clearly a mutation of the original `foo-bar`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

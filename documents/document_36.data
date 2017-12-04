@@ -1,37 +1,57 @@
+U08UTJ5PB : Thanks for that <@U051SS2EU>
+U051SS2EU : np - glad I could help
+U051SS2EU : btw it might be better for security to adjust /etc/hosts so that localhost is defined, rather than providing 0.0.0.0 as your host - I'm not an expert on these things though
+U051SS2EU : IIRC 127.0.0.1 can be used instead of 0.0.0.0 and is safer (but if you intend to connect from outside the vm... maybe you need the 0.0.0.0 binding)
+U08UTJ5PB : You're right. If this were to be deployed with an nrepl server started it would certainly be a security concern
+U051SS2EU : anyway, at least you know the precise parameters now and can make an informed decision
+U08UTJ5PB : Indeed, I very much appreciate the help
+U051SS2EU : I seem to recall a recommendation to bind on 127.0.0.1 inside the vm, and use an ssh tunnel to access it from the host
+U051SS2EU : but maybe that's silly.
+U08UTJ5PB : I'll test to see if 127.0.0.1 works as well
+U3L6TFEJF : <@U050SC7SV> hello! I'm trying out <https://github.com/mpenet/spandex>, and I'm getting this error when `take!`-ing from a `scroll-chan`:```#error {
+ :cause Response Exception
+ :data #qbits.spandex.Response{:body {:error {:root_cause [{:type illegal_argument_exception, :reason Failed to parse request body}], :type illegal_argument_exception, :reason Failed to parse request body, :caused_by {:type json_parse_exception, :reason Unrecognized token 'DnF1ZXJ5VGhlbkZldGNoBQAAAAAAAAEKFlFLeXR6MDh2UTRxLVdkLVhEbXZSMFEAAAAAAAABCxZRS3l0ejA4dlE0cS1XZC1YRG12UjBRAAAAAAAAAQ0WUUt5dHowOHZRNHEtV2QtWERtdlIwUQAAAAAAAAEMFlFLeXR6MDh2UTRxLVdkLVhEbXZSMFEAAAAAAAABDhZRS3l0ejA4dlE0cS1XZC1YRG12UjBR': was expecting ('true', 'false' or 'null')```
+
+U3L6TFEJF : any idea what might be going on here?
+U050SC7SV : If you give me the detail of the request I can have a look. Worse case tomorrow. We can do that in priv msg btw
+U3L6TFEJF : <@U050SC7SV> done :+1:
+U2UKX5DQR : I am trying to test a `java.sql.SQLException` handler which unwraps the exceptions like below. However I'm not sure how I would throw this exception in a test.```
+       (-&gt; e
+           (.getNextException)
+           (.getMessage)
+           (.startsWith "ERROR: duplicate key value"))
 ```
-Date is a less than great API, but clojure makes it readable
-does this `#inst` mean <https://clojure.github.io/clojure/clojure.instant-api.html>?
-no, it's how Date objects are printed, its the instant reader
-I confirm the fishiness, was pulling a dependency in the code :facepalm:
-so that was fun
-this is cool. didnt know about `#inst` and `#uuid` and stuff
-thx
-is there an easy way to run this guys in parallel and do something else when they *all* finish?
-plins: `(let [results (map deref  [(future trans1) (future trans2)  (future trans3)] do-something-else))`
-hey all… for a number of strange reasons I want to create an instance of a class whose name I only have as a string. How would I instantiate one?
-either via a macro or reflection possibly
-cheers <@U050SC7SV>. I just found `Class/forName` which does what I'm after
-(.newInstance (Class/forName "foo.bar.baz"))
-yes :slightly_smiling_face:
-tho `(.newInstance (Class/forName "foo.bar.baz"))` only seems to have a 0-args sig
-ah, you have to use `.getDeclaredConstructor` on the `Class` object to get the constructor method and then call that
-Do multiple threads just reading from (derefing) an atom that has a constant value block or cause any kind of contention?
-no
-Awesome -- so should be the same as just reading a var?
-in terms of multithread contention
-that is kind of complicated, they are different things. my intuition would be that vars would be ever so slightly faster before the jit has kicked in, and an atom would be ever so slightly faster after
-but they are different things, not drop in replacements for each other
-understood. the story is that we have a system with config data in atoms, which are constant after configuration, and our multicore scaling is bad. the question came up of whether billions of accesses to  constant-valued atoms might be causing contention. the alternative we're considering isn't actually to use a var (actually, we'd get rid of the vars that currently hold the atoms), but just to pass all of the config data as an argument throughout the system. it'll be a relatively big job to try this, so i'm trying to figure out if the underlying theory is even true, that reading (derefing) the atom in a var can cause contention among threads.
-atoms contain an AtomicReference <https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/Atom.java#L20> and use the get method to access their value <https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/atomic/AtomicReference.html#get()>
-get on an AtomicReference is the same overhead as reading a volatile, which sources claim is cheap
-this should also be easy to microbenchmark though
-you should actually hook something like visualvm and look at the hot methods
-don't just guess
-if your configs are in global atoms, then you are dereferencing both the var containing the atom and the atom
-that's a good point, based on profiling I've done I'd expect the var lookup to be more expensive than the atom deref
-I mean for the config thing
-for vars vs. atoms, without the jit, my guess is the atoms still have to traverse a few extra pointers for access, but with the jit I expect it is a regular reference that just uses atomic instructions
-(I don't know, I haven't profiled it or looked at the code the jit produces)
-but I would expect just about anything else to dominate those differences
-there should also be some improvement with direct linking on
-direct linking is only for functions
+current mock (`.getNextException` returns nil on this):
+```
+(throw (SQLException. "ERROR: duplicate key value"))
+```
+
+U04V70XH6 : (answered in <#C1Q164V29|sql> — use `setNextException()` <http://docs.oracle.com/javase/8/docs/api/java/sql/SQLException.html#setNextException-java.sql.SQLException-> )
+U34K4458X : Hey, clojurians. I'm using `yesql` in my project to query postgres database. Some tables has boolean columns ending with question mark. How to properly use queries like this with yesql:```
+select name, email from user_accounts where "activated?" = true;
+```
+Seems `yesql` thinks that question mark is param placeholder and fires error.
+
+U04V70XH6 : <@U34K4458X> Could you try that same query directly with `java.jdbc` just to eliminate whether the problem is `yesql` or something else?
+U04V70XH6 : I've never seen a database with `?` in column names... I didn't even think it was legal.
+U34K4458X : Me neither, but have to use it :slightly_smiling_face: Tried JDBC - works fine.
+U34K4458X : In postgres it is not legal, but can be escaped with column name with quotes
+U04V70XH6 : OK, well, that confirms a bug in `yesql` so you should create a GitHub issue.
+U34K4458X : Seems that yesql is not actively maintained. Started evaluating hugsql instead.
+U34K4458X : Thanks anyway
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

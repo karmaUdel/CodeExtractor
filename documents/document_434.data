@@ -1,8 +1,66 @@
-```
-I'm using the elm vim formatter which is pretty ruthless in its enforcement of white space... a        L     O     T      of whitespace
-O  n  c  e     y  o  u     s  t  a  r  t     r   e  a  d  i  n  g     i  t     t  h  o     y  o  u     s  t  a  r  t     t  o     w  o  n  d  e  r     w  h  y     e  v  e  r  y  t  h  i  n  g     e  l  s  e     i  s     s  o     c  r  o  w  d  e  d
-:white_large_square:
-haha yes. I've found it also pushes me to write many small functions instead of nesting things deeply
-true, it doesn't really work with long functions
-definitely makes sense with the terse / dense idiom
-I feel like I"m getting closer and closer to a form of pure notation as my career goes on
+U5WS7CJLV : yeah, 5.1.1 seems to be the current.  So := is no more?
+U1ZFF0E5P : no more
+U1ZFF0E5P : with elm 0.18 the direction is to not use custom operators (such as :=)
+U5WS7CJLV : for the best it seems
+U5WS7CJLV : hard to keep track of all the operators
+U1ZFF0E5P : they are hard to google for help, confusing, not descriptive...
+U1ZFF0E5P : yeah I'm with you!
+U5WS7CJLV : :fire: :allthethings:
+U5WS7CJLV : all the operator things anyways :smile:
+U5WS7CJLV : I guess the math operators can live...
+U1ZFF0E5P : the new version looks like this for reference (out of one of my projects) ```studentCourseDecoder : Decoder StudentCoursestudentCourseDecoder =
+    decode StudentCourse
+        |&gt; required "id" Json.Decode.string
+        |&gt; required "startDate" (nullable date)
+        |&gt; required "endDate" (nullable date)
+        |&gt; required "signOffDate" (nullable date)
+        |&gt; required "comment" (nullable Json.Decode.string)
+        |&gt; required "studyReason" studyReasonDecoder
+        |&gt; optional "course" relationshipDecoder NotIncluded
+        |&gt; optional "courseDescriptor" maybeRelationshipDecoder NotIncluded
+        |&gt; optional "studentCourseClass" relationshipDecoder NotIncluded
+        |&gt; optional "studentCourseUnits" relationshipListDecoder NotIncluded
+        |&gt; optional "fundingScheme" relationshipDecoder NotIncluded
+        |&gt; optional "employer" maybeRelationshipDecoder NotIncluded
+        |&gt; optional "referralSource" maybeRelationshipDecoder NotIncluded
+        |&gt; optional "notifications" relationshipListDecoder NotIncluded
+        |&gt; optional "deliveryLocation" maybeRelationshipDecoder NotIncluded```
+
+U5WS7CJLV : you are using elm-decode-pipeline?
+U1ZFF0E5P : yes
+U5WS7CJLV : cool - thanks!
+U1ZFF0E5P : this is from a project not using pipeline: ```connectionDecoder : Json.Decode.Decoder ConnectionconnectionDecoder =
+    Json.Decode.map7 Connection
+        (Json.Decode.field "server" serverDecoder)
+        (Json.Decode.field "databases" databasesDecoder)
+        (Json.Decode.field "driverName" Json.Decode.string)
+        (Json.Decode.field "serverInfo" Json.Decode.string)
+        (Json.Decode.field "clientInfo" Json.Decode.string)
+        (Json.Decode.field "serverVersion" Json.Decode.string)
+        (Json.Decode.field "connectionStatus" Json.Decode.string)```
+
+U1ZFF0E5P : as you can see I have to use `Json.Decode.map7`
+U5WS7CJLV : yep, that's what I been doing so far.  Because I am a n00b.
+U1ZFF0E5P : which is not ideal as it only goes up to `map8`
+U1ZFF0E5P : yeah definitely use pipeline, it's really nice :stuck_out_tongue:
+U5WD40ZA9 : Anyone used keystonejs together with elm?
+U1ZFF0E5P : I havent personally, but in my experience the choice of backend doesnt really matter when using elm
+U1ZFF0E5P : everything has to go through elm decoders anyway
+U2SR9DL7Q : anyone else encounter an issue with fontawesome when setting up webpack in the elm tutorial?
+U663M2MB7 : Are records immutable in Elm? I have been doing `(Model x y z)` for now, when updating the model. `{ model | x = y }` just feels so wrong to me. What am I missing? :confused:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

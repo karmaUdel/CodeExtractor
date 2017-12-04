@@ -1,0 +1,50 @@
+U0702F2CE : yes
+U07SCV14J : hmm, that gives me an `identifier used out of context` error, though I could be doing something else wrong.
+U0702F2CE : really you want to put the identifier in some macro in the body of the lambda, and arrange for that macro to put it in the parameter
+U07SCV14J : yeah. I should probably explain the actual motivation behind this whole thing, since it's pretty gross and there might be a better way.
+U3NJS8H7C : <@U07SCV14J> Like this?```
+      [(#%plain-app @%bind-id ~! e:expr)
+       (let ([id-to-bind (generate-temporary 'the-binding)])
+         (exp #`(? (#,id-to-bind)
+                  (let-syntax ([result-transformer
+                                (make-variable-like-transformer
+                                 (parameterize ([current-id #'#,id-to-bind])
+                                   (exp (walk+expand #'e))))])
+                    result-transformer))))]
+
+```
+
+U07SCV14J : <@U3NJS8H7C>: Thanks, that works in that case, but it doesn't seem to work in my real situation. I'll fiddle with it a bit and see if I can make it work.
+U07SCV14J : All this is actually part of typeclass dictionary elaboration. I need to perform a sort of "delimited expansion” where I leave placeholders in the expansion where typeclass dictionaries will be inserted later. However, I can't call `local-expand` with a stop-list, since that won't recursively expand.
+U0702F2CE : right, what <@U3NJS8H7C> said, although I have often wrapped that pattern in a macro called something like `(put-in-parameter id-to-bind expr)`
+U07SCV14J : Yep, that seems to have worked. Thanks <@U0702F2CE> and <@U3NJS8H7C>. I think this `local-expand` abuse is probably not the best solution to what I'm doing, but I admit I am not 100% sure what I'm doing, and it seems to sort of work so far. :stuck_out_tongue:
+U07SCV14J : I think, with those changes, I have working typeclasses in Racket. :)
+U0G0JDQGZ : mflatt: I have a process that uses a lot of memory (more than system has) and I would expect it to give me an out of memory error. Instead, I get ```unmap failed: 7fda46834000, 16384, 12 [x100]
+U0G0JDQGZ : mprotect failed: 7fdb09ea0000, 16384, 1, 12
+U0G0JDQGZ : Seg fault (internal error during gc) at 0x7fdb09ea16c0
+U0G0JDQGZ : SIGSEGV SEGV_ACCERR SI_CODE 2 fault on 0x7fdb09ea16c0```
+U0G0JDQGZ : Why does racket not just abort when the unmap/mprotect fail? (As an aside, when I run without JIT, I don't get the segfault, but it appears to run forever.)
+U0G0JDQGZ : If I increase the number of mmaps, with: "sysctl -w vm.max_map_count=131060", then I run out of memory (as I would otherwise expect). [Reading the manual suggest that when you unmap in the middle of a region, then it has to make two, so munmap consumes resources.]
+U3NJS8H7C : <@U0G0JDQGZ> It would make sense to abort if `munmap` or `mprotect` fails; I guess the current behavior is misguided optimism
+U0G0JDQGZ : mflatt: k, i'll submit a pull request. I think the mprotect can be particular bad because it can cause the write barrier to not install.
+U07SCV14J : <@U3NJS8H7C>, <@U0702F2CE>, <@U3NGSC6AF>: Is there a recommended way to include a piece of syntax in the expansion of a macro for the purposes of letting DrRacket pick up origin and disappeared-use/binding properties without actually impacting the program in any other way?
+U07SCV14J : Right now I am producing a bunch of pieces of syntax that are basically nested invocations of `void`, so I end up with something silly like `(let () (void (void) (void (void) (void)))) my-real-expression)`.
+U07SCV14J : But I am not sure if Racket guarantees that those will get optimized away or not.
+U3NGSC6AF : I think they'll be gone. You can use raco decompile to check. 
+U0702F2CE : <@U07SCV14J> usually I use `(quote blah)` but I'm confident `void` works too
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

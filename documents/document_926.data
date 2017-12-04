@@ -1,0 +1,72 @@
+U3ZACTKTP : <@U2Y8JBMUJ> I thought there was one, but cannot find it, so I may have imagined it. There's `check-match` from `rackunit` for tests (it does not return a boolean). Otherwise, seems like you will have to roll your own.
+U2Y8JBMUJ : <@U3ZACTKTP>: Thank you for your answer.
+U2Y8JBMUJ : <@U3ZACTKTP>: I'm doing something about this: <https://github.com/racket/racket/issues/1690> :slightly_smiling_face:
+U0C55P16F : I read Fortifying Macros by Culpepper and Felleisen, where ports of `loop` and `parser` were made using `syntax-parse`. I can't seem to find the code for those, though. Does anybody know where/if they can be found?
+U3SEVDPJT : Answered by Alex Harsanyi on Racket Users listserv.
+U3NP867S6 : <@U0C55P16F>: I'd email <@U3VGR2S7Q> and ask.
+U3ZACTKTP : <@U0C55P16F> Wait, so there's (already) a Racket implementation of the CL `loop` hiding somewhere?_Throwing a glance at my early implementation draft which has been bitrotting for the last few weeks…_
+Be sure to post back here if you get an answer from <@U3VGR2S7Q> !
+
+U07SCV14J : <@U3ZACTKTP>: <http://planet.racket-lang.org/display.ss?package=loop.plt&amp;owner=jphelps>
+U3ZACTKTP : <@U07SCV14J> Sweet, thanks a lot!
+U462H29AR : Has anyone used, from `scribble/srcdoc`, any of `parameter-doc`, `thing-doc`, or `struct-doc`? All give me `"illegal use of syntax"` errors.  Whereas `proc-doc` works great.
+U462H29AR : For instance```
+#lang at-exp racket/base
+
+(require scribble/srcdoc
+         (for-doc racket/base
+                  scribble/manual))
+
+(define current-foo (make-parameter "bar"))
+
+(parameter-doc current-foo
+               (parameter/c string?)
+               v
+               @{Hi})
+```
+
+U3NJS8H7C : <@U462H29AR> A better error message would have been "must be used within a `provide` form" (and I'm guessing that you've used `proc-doc` successfully within `provide`)
+U462H29AR : <@U3NJS8H7C> Thanks! I'd wrapped `proc-doc` in a `define/doc` macro, long enough ago, that I forgot it was nested in a `provide`. Dang.
+U462H29AR : It would be neat if <http://pkgs.racket-lang.org|pkgs.racket-lang.org> showed, in addition to direct dependencies, direct dependents ("needed by") as for example <https://melpa.org/#/helm>
+U462H29AR : Meanwhile: <https://gist.github.com/greghendershott/b20effb9d9c48211e1c11d9486257918> ¯\_(?)_/¯
+U3ZACTKTP : <@U3PUZ2Z5K> Thanks for the tip about using `Regexp` instead of `-Regexp`!I'm checking that everything runs fine now, but I have issues with `tc-err`.
+The test `[tc-err (ann (ann #px#"abc" Byte-PRegexp) PRegexp)]` fails:
+```
+actual:     (tc-results (list (tc-result PRegexp (Top | Bot) -)) #f)
+expected:   (tc-results (list (tc-result Nothing (Bot | Bot) -)) #f)
+```
+I feel like I should supply one of the `ret:err-return` or `ex:expected` arguments to `tc-err`, but their exact meaning is not documented. Any hint?
+
+U3PUZ2Z5K : I don't know there exact meaning either and wish it was documented =( that code is really clever/cute and I always struggle re-parsing what exactly it does
+U3ZACTKTP : <@U3PUZ2Z5K> Seems like this does the trick (as I understand it, `tc-err` checks that the return type is correct, even if an error is there, and `ann` is clever enough to indicate its return type, even when it fails)```
+[tc-err (ann (ann #px#"abc" Byte-PRegexp) PRegexp) #:ret (tc-ret -PRegexp)]
+```
+
+U3ZACTKTP : <@U3PUZ2Z5K> Sorry for bothering you once more: in generalize.rkt, should I do `[(? (lambda (t) (subtype t -Base-Regexp))) -Base-Regexp]` (to generalize literals which are `regexp?` to `-BaseRegexp`), or should I generalize to `-Regexp`, i.e. `[(? (lambda (t) (subtype t -Base-Regexp))) -Regexp]` ?I tried to see if it made any difference in the way the type is printed when entering a literal `#rx"abc"` at the REPL, but it makes no difference.
+I also expected `(let ([x #rx"foo"]) (set! x #px"foo"))` to fail in the second case (generalizing to `-Base-Regexp`), but it still works (so it seems something else is further generalizing `-Base-Regexp` to `-Regexp`).
+Any preference? I feel this will matter only if/when we decide to make the `Base-Regexp` type "public" (for now it seems to be used internally only).
+
+U3PUZ2Z5K : <@U3ZACTKTP> sorry for the delay -- I'm not super familiar with typing regexps... my gut is to favor the more general Regexp, but like I said I don't have much experience working with those in practice
+U3ZACTKTP : <@U3PUZ2Z5K> Okay, thanks! I'll put Regexp then (I think if we expose Basic-Regexp at some point, the user could always force it with (ann #rx"abc" Basic-Regexp).
+U3ZACTKTP : I and others expressed concern in the past about Slack's logs, which are limited to 10K messages.Seems like we could do something about it: <https://github.com/mlegy/Slack-logger-bot>
+I don't have time to look into this right now, but it could be at some point a compromise between setting up a full-blown chat server (which some of the regulars rightfully expressed concerns about, since it increases the maintenance burden for the Racket team), and having a free-to-use-but-without-logs service like Slack.
+
+U4L6H669J : isn't this slack archived in that one public logging service for slack (forget the name)?
+U4L6H669J : <https://racket.slackarchive.io/>
+U4L6H669J : I don't know if the logs are exportable
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

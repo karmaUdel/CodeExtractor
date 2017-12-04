@@ -1,0 +1,135 @@
+U08JL5H89 : Just va_list.
+U08JL5H89 : Which is doable, as its just another value.
+U08JL5H89 : As long as it stays an opaque value to Racket, that is fine.
+U08JL5H89 : Trying to mimick va_arg, va_first, etc. or the `...` protocol, that sounds scary.
+U08JL5H89 : At least based on what I've ascertained at the moment.
+U086VDRBK : Iam clearly conflating those. Aren't va_list used to deal with variable arguments?
+U08JL5H89 : You are correct.
+U08JL5H89 : va_list however, can also be passed to another function as a type.
+U08JL5H89 : This is used if you, say, want to make a helper function.
+U086VDRBK : Ok. So va_list is also useful in other situations.
+U08JL5H89 : ```int myfunc(const char *str, ...) {
+    va_list ag;
+    va_start(ag);
+    helper(ag);
+    va_end(ag);
+}
+
+int helper(va_list ag) {
+    ...
+    va_arg(ag);
+    ...
+}
+```
+
+U08JL5H89 : Yup
+U08JL5H89 : in this case, I want to write `helper`
+U08JL5H89 : In particular…
+U08JL5H89 : I want to write `helper` that just passes the `va_list` to another (C) function.
+U08JL5H89 : Because I'm hooking up two libraries.
+U08JL5H89 : Through Racket….
+U08JL5H89 : Of course, this still isn't enough to duplicate va_copy, as that's  macro. To do that, we would need to make scheme_va_copy, or something like that.
+U08JL5H89 : Which does nothing but call the macro.
+U08JL5H89 : Of course, if we do that, it would make sense to do that for va_arg as well.
+U08JL5H89 : We couldn't do `va_start` and `va_end` though, because that would require supporting vaargs, and `...`, which, as you rightly pointed out, is terrifying.
+U08JL5H89 : At least, what it looks like anyway. Perhaps I'm wrong.
+U086VDRBK : Thanks for the example.
+U08JL5H89 : Any time. :slightly_smiling_face:
+U08JL5H89 : <@U3NJS8H7C> worksp/librktio/… vs librktio/… these two directories seem pretty similar. Is one of them deprecated?
+U3NJS8H7C : There should be a "rktio" directory with the rktio implementation and a "worksp/librktio" directory with MSVC projects
+U3NJS8H7C : I'm not seeing multiple "librktio" directories
+U08JL5H89 : err…ya, I mean worksp/rktio. That makes sense that one is for windows. Thanks.
+U08JL5H89 : <@U3NJS8H7C> oh wait, no
+U08JL5H89 : I do see a worksp/librktio.
+U08JL5H89 : racket/racket/src/worksp/librktio
+U3NJS8H7C : Just to be sure: there should only be one "rktio" and one "librktio" directory; the "librktio" directory should be in "worksp", and the "rktio" directory should not be in "worksp"
+U08JL5H89 : Although that one does look like a visual studio project.
+U08JL5H89 : Ah, okay.
+U08JL5H89 : That is correct.
+U08JL5H89 : So, since windows has `src/worksp/libffi`, does that mean it doesn't use `src/foreign`?
+U08JL5H89 : OH….
+U08JL5H89 : src/worksp/libffi probably is in pace of src/foreign/libffi.
+U3NJS8H7C : The `foreign.c` part of `src/foreign` is included directly in `libracket`, while `src/worksp/libffi` is the project for `src/foreign/libffi`
+U08JL5H89 : Okay
+U08JL5H89 : Also, I realized, adding a primitive for va_list is silly, since per the spec, its just an (undefined) struct type.
+U08JL5H89 : So it would make a lot more sense to just add a function to the core that calls `sizeof` (which I suspect already exists), and then define _va-list in racket.
+U3NJS8H7C : <@U08JL5H89> Is even `sizeof(va_list)` useful, since the calling convention can depend on more than the size? For example, `long` and `double` are often passed differently – though I'll grant that `va_list` is unlikely to be represented as a `double`. I still think it's best to use `(system-library-subpath #f)` and hardwire a representation in `ffi/unsafe` for various known results.
+U08JL5H89 : Ah, fair.
+U08JL5H89 : <@U3NJS8H7C> Actually, no. Since `va_list` is NOT a primitive in C (per the spec), it'll be handled just like any other struct will.
+U08JL5H89 : (Like, the size and field order of the struct is undefined, but the fact that it is a struct is.)
+U08JL5H89 : "The type declared is va_list which is an object type suitable for holding information needed by the macros va_start, va_arg, va_end, and va_copy”
+U3NJS8H7C : "object type" =&gt; "struct"?
+U3NJS8H7C : Even so, I thought the way a struct is passed could depend on its content beyond just its size, but I forget these details
+U08JL5H89 : That is how I interpret it. Although I admit I didn't make the spec so I'm not 100% sure.
+U3NJS8H7C : Ok. FWIW, I don't think "object" means "struct" in the C standard
+U08JL5H89 : Also ya, it certainly is true that structs are passed differently based on what is in them.
+U08JL5H89 : Hmm…okay.
+U08JL5H89 : I'll see if I can find an answer to that. Thanks. :slightly_smiling_face:
+U08JL5H89 : <@U3NJS8H7C> "object: region of data storage in the execution environment, the contents of which can represent values”
+U08JL5H89 : So I guess it _could_ be a primitive.
+U08JL5H89 : Just not a macro.
+U3VT0L7C5 : According to <https://www.openhub.net/p/racket> the last commit to Racket happened about a year ago - what happened a year ago that it doesn't include anything since then?
+U086VDRBK : <@U3VT0L7C5>   <https://github.com/racket/racket/commits/master>
+U086VDRBK : Oh! You are asking why OpenHub does update. No idea.
+U3VT0L7C5 : yes, that's what I was wondering about
+U086VDRBK : Do other projects show updates?
+U3VT0L7C5 : yes
+U3VT0L7C5 : maybe it doesn't redirect from plt/racket to racket/racket: <https://www.openhub.net/p/racket/enlistments>
+U086VDRBK : yep - that's it - can you change it?
+U3VT0L7C5 : I tried but got this: "You can view, but not change this data. Only managers may change this data. "
+U086VDRBK : who are the managers?
+U3VT0L7C5 : <https://www.openhub.net/accounts/elibarzilay>
+U3VT0L7C5 : Is he on Slack, can't find him?
+U086VDRBK : send him a mail
+U086VDRBK : <http://www.barzilay.org/contact.html>
+U3VT0L7C5 : will do, thanks
+U3VT0L7C5 : done
+U6F1KCK6Y : Hi I'd like to improve my Racket programming and abstraction/algorithm design in general. Can anyone suggest a good place to post Racket scripts and discuss how to improve it, other than Code Review on StackExchange? Thanks
+U086VDRBK : <@U6F1KCK6Y> Here would be ok. Use <http://pasterack.org|pasterack.org> then post url here.
+U08JL5H89 : <@U3VT0L7C5> Alternatively, he probably is on the <#C088CK7J6|irc> channel.
+U3VT0L7C5 : thanks <@U08JL5H89>
+U5KU1HNKY : I just had to rebuild a machine and things seem a bit wonky with my packages… is `raco setup --clean` sufficient to sanitize and sanity check everything?
+U6F1KCK6Y : <@U086VDRBK> thanks
+U6F1KCK6Y : <@U086VDRBK> pasted my code into paste <http://rack.org|rack.org>. The url is:  <http://pasterack.org/pastes/72152>. Thanks. Your feedback would be great.
+U3QF0EM0E : hi, here's a few comments:- `(let (....) (define ....))` can be `(define ....) (define ....)`, saves an indentation
+- `(eq? b #f)` is the same as `(not b)`
+- I'd use a helper function for the `(number-&gt;string ....)` 
+- I'd also put all the defines "within" the define for dialog, so overall structure is:
+```
+(define dialog
+  (let ()
+    (define ....)
+    ....))
+(send dialog show #t)
+```
+
+U08JL5H89 : <@U3NJS8H7C> The FFI docs have the following pseudocode for malloc:```
+(let ([p (malloc from-type)])
+  (ptr-set! p from-type v)
+  (ptr-ref p to-type))
+```
+
+U08JL5H89 : Errr….cast, they have the pseudocode for cast.
+U08JL5H89 : But in this example, shouldn't the `malloc` be apointer, given tht `ptr-set!` and `ptr-ref` are happening to it?
+U08JL5H89 : As shown here:
+U08JL5H89 : <http://docs.racket-lang.org/foreign/Miscellaneous_Support.html?q=cast#%28def._%28%28lib._ffi%2Funsafe..rkt%29._cast%29%29>
+U08JL5H89 : If so I'd be happy to fix that.
+U3NJS8H7C : <@U08JL5H89> I'm not sure what you mean, and I think that code is right. (It's the actual implementation in the simple case, as reflected by the `convert` helper function.) `malloc` does return a pointer, but the pointer refers to `from-type` content, where `from-type` isn't isn't necessarily a pointer type. Similarly, `pre-set!` and `ptr-ref` want a pointer to a `from-type`/`to-type` to cast between those.
+U08JL5H89 : <@U3NJS8H7C> Ah, right, okay, that makes sense. Thanks.
+U3PQ6GW3U : Which package provides `raco exe`?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,0 +1,63 @@
+U3ZNWN526 : Has anybody tried implementing a "don't use tuples" policy in one of your projects? :slightly_smiling_face:  It seems that for maintainability, records are basically always better, right?
+U3SJEDR96 : <@U4872964V> maybe we really _should_ create that package :smile:
+U4872964V : <@U3ZNWN526> we were joking around about making a “elm-no-tuples” library :slightly_smiling_face:
+U4872964V : <@U3ZNWN526> yes, except for one-offs I always use records
+U3ZNWN526 : Okay, cool - I think I'm going to go that way as well! Any by one-offs, you mean like... some piece of data that's only used within a single function or something?
+U3ZNWN526 : (Such that it would be more of a burden than a help to actually define a type for it, I suppose)
+U236M9FH9 : Pretty much the only time I use tuples is something like this:```
+let
+  (buttonClass, buttonText) = case someType of
+    Foo -&gt; ("btn-danger", "Quit")
+    Bat -&gt; ("btn-primary", "Start")
+in ...
+```
+
+U3ZNWN526 : Ahh, yes, okay.
+U4872964V : yes, and```
+case (oneThing, anotherThing) of
+    (Some match, SomeOther) -&gt;
+```
+
+U5ABF3BH7 : Hi, is there a way to write the following in a more condensed way?
+U5ABF3BH7 : ```placeId =   case model.place of
+   Nothing -&gt; 
+      “”
+   Just place -&gt; 
+     toString place.id```
+
+U0LPMPL2U : ```model.place
+  |&gt; Maybe.map (toString &lt;&lt; .id)
+  |&gt; Maybe.withDefault ""
+```
+(edit: got the pipes wrong)
+
+U5ABF3BH7 : <@U0LPMPL2U> Thanks you so much! You are awesome! :slightly_smiling_face:
+U0LPMPL2U : always glad to help :slightly_smiling_face:
+U0LPMPL2U : If you're using the `elm-community/maybe-extra` package, there's a function `Maybe.Extra.unwrap` that does the equivalent of the `Maybe.map` and `Maybe.withDefault` combo
+U5ABF3BH7 : <@U0LPMPL2U> where do you put  ```model.place```?
+U0LPMPL2U : just edited my response
+U5ABF3BH7 : <@U0LPMPL2U> thanks :slightly_smiling_face:
+U0LPMPL2U : You could also write it as:```
+placeId : Model -&gt; String
+placeId =
+  Maybe.withDefault "" &lt;&lt; Maybe.map (toString &lt;&lt; .id) &lt;&lt; .place
+```
+
+U0LPMPL2U : this is called "point free style" and is probably less readable in this case
+U4872964V : I must admit I often do the `case` even though I know about the `Maybe` helpers
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

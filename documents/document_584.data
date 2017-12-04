@@ -1,44 +1,89 @@
+U0JBSEGHY : The thing is having `HandleField String` throws errors on all my `onClick` handlers
+U0JBSEGHY : That is once I remove the `onInput`
+U0JBSEGHY : ```The 2nd and 3rd entries in this list are different types of values.
+325|                 [ Html.form []
+326|                     [ input
+327|                         [ onChange HandleField
+328|                         , value model.numberToCall
+329|                         , placeholder "Enter a Phone Number"
+330|                         , class "login-form"
+331|                         ]
+332|                         []
+333|                     ]
+334|                 , h4 [] [ text model.numberToCall ]
+335|&gt;                , button [ onClick (MakeCall model.numberToCall) ] [ text "Make Call" ]
+336|                 ]
+
+The 2nd entry has this type:
+
+    Html (String -&gt; Msg)
+
+But the 3rd is:
+
+    Html (Msg)```
+
+U14Q8S4EM : Thats weird. What is `MakeCall`?
+U14Q8S4EM : Whats the type?
+U0JBSEGHY : ```type Msg    = Answer String
+    | MakeCall String```
+
+U0JBSEGHY : ```update...            MakeCall number -&gt;
+            ( model, call number )
 ```
-<@U601ELFEG> what ever function produces the `Cmd` that sends to the `port` will be called by `update` it can require `update` to pass it an `Int`. `update` can store that `Int` somewhere in the `Model` for reference later
-okay here is a sketch
-there seems no good way for A and B to call into Midi to get a `Cmd` - and update any model Midi might try to keep... so that it can decode that `Int` back to Msg
-this is complicated because A and B have different Msg types - that only get combined back up at top
-like there is no good way for this mapping of `Int` to `Top.Msg` to get `AStuff` and `BStuff` wrapped around the `Cmd` from when A or B called into Midi
-I suppose I could pass up some `MidiCmd` type, from A and B's `update` (rather than `Cmd`), which could be `MidiCmd.map`'d "on the way up" , and then - finally in Top, have that converted to and actual `Cmd`
-you probably want an additional attribute in the values being sent and received to allow `update` to identify whether it’s for `AStuff` or `BStuff`
-`MidiStuff` probably isn’t specific enough for your usecase
-right - which would mean that `Midi` would sort of need to have an ADT that enumerated all the users... which is what I was trying to avoid
-You’ll want a function that can decode the incoming value and produce either a `AStuff A.Msg Int` or a `BStuff B.Msg Int`
-It's almost like what is needed is to pass back up during update, in parallel with `Model` and `Cmd Msg`, where the `Model` and `Msg` types get mapped "upward" along the way --- I need to pass up  `MidiCmd Msg` which also gets mapped, and then converted to `Cmd Msg` at the top.... so every class of effect needs it's own `Cmd` like thing - and the `update` functions get more and more complex:  `update : Msg -&gt; Model -&gt; (Model, Cmd Msg, MidiCmd Msg, LocalStorageCmd Msg)` etc...
-I assume Webpack can do this kind of thing as well. What do people typically use?
-I'll mull on all of this - frankly, I'm probably trying to solve a more general case than I need for the moment... but pretty sure I'll eventually have a dozen or so modules with a need to call into a low level MIDI facility. `WebSocket` and `Http` get to do this kind of thing more cleanly - and I'm a little sad I can write the same facility for WebMidi without getting into language kernel guts and native modules.
-<@U601ELFEG> with WebMidi you’re already in the language kernel guts and native modules
-right - I just thought I could do so using `port` - but seems not
-`port` is nice and clean and clear - and I already used it some
-well then .... seems like I'll have to sleuth out `effect module` after all  :stuck_out_tongue_winking_eye:
-well - later all... :sleepy:  zzzzzzz
-<@U17UX2B97>, I am working on improving how well Elm minifies for 0.19
-I'll share more of my results when it's closer to the alpha period
-The short version is that we can do better, and there are some extra configuration tricks. I only really know about 0.19 though, so nothing useful to share for now.
-<@U13H7FNDQ> No worries. Thanks for the answer :slightly_smiling_face:
-I was considering to decode and compare the innerHTML property, but that could easily be the same for unrelated elements.
-<@U0Z9TPK7S> i think if you leave the elements as `Json.Encode.Value` you can compare them
-That's a really good idea. How reliable is it tho?
-no idea, it’s just something to try
-== in Elm will try to compare by reference first
-Ok, thanks.
-looking at the source code for Json.Decode.value it seems like it should work :slightly_smiling_face:
-might want to be careful with that, though - in case the refs _don't_ match, you'll get pretty... unexpected results: if `a` and `b` are objects, `a == b` will be true when all keys from `a` exist in `b` and their values are considered equal. So if `b` happens to have an extra key that doesn't appear in `a`, there's no way to know :slightly_smiling_face: (<https://github.com/elm-lang/core/blob/5.1.1/src/Native/Utils.js#L56-L66>)
-that’s a pretty strange implementation
-would make sense if you compared the number of keys first
-<@U0Z9TPK7S> I’m guessing you’re making a package, so no native/kernel code?
-perhaps the most robust solution is to require an id for these nodes
-<@U4872964V> it's a reasonable implementation of "regular" elm types, though; where this would be used for records. But yeah, it's surprising :slightly_smiling_face:
-ah, yes
-(The same issue with frame 22, with the view)
-<@U3SJEDR96> interesting. Thanks.
-`a == b &amp;&amp; b == a` would work, though :stuck_out_tongue:
-unless there are functions in that object…
-Yup
-dom elements have functions
-it will crash
+
+U14Q8S4EM : I dont know why you are getting that error. Thats weird.
+U14Q8S4EM : This wont solve your problem, but you could also do `Msg = MakeCall | ..`
+U14Q8S4EM : and then in your update do `(model, call model.numberToCall)`
+U0JBSEGHY : This is my `onChange` ```onChange : msg -&gt; Attribute msgonChange message =
+    on "keydown" (JD.succeed message)
+
+```
+
+U14Q8S4EM : What happens if you exclude the second element, does it compile?
+U0JBSEGHY : I was hoping to simply pass whatever that gives me to `HandleField` then use debug to see what it gives me. But it keeps saying there is varying types
+U0JBSEGHY : Yes if I exclude the onChange it compiles
+U14Q8S4EM : Oh, thats interesting. I meant if you exclude the `h4` element tho.
+U0JBSEGHY : It starts throwing me everywhere :confused:
+U14Q8S4EM : Okay I think I see the problem.
+U0JBSEGHY : But it's not concerned about the h4
+U0JBSEGHY : until I remove the onInput
+U14Q8S4EM : change your `onChange` to `onChange : Msg -&gt; Attribute Msg`
+U14Q8S4EM : And tell me what happens.
+U14Q8S4EM : Capitalize the `Msg`
+U14Q8S4EM : When its lowercase it can be a variable for anything including `Msg` and `String -&gt; Msg`
+U0JBSEGHY : ```The argument to function `onChange` is causing a mismatch.
+328|                           onChange HandleField
+                                        ^^^^^^^^^^^
+Function `onChange` is expecting the argument to be:
+
+    Msg
+
+But it is:
+
+    String -&gt; Msg```
+
+U14Q8S4EM : Yeah, so maybe I dont understand what you are trying to do.
+U14Q8S4EM : Do you want the string of the new value in the field on `HandleField`?
+U0JBSEGHY : I was following this for the  Custom Event Handler <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html-Events#on>
+U0JBSEGHY : I was just trying to track a keydown and then I guess pass the string
+U0JBSEGHY : then I wanted to figure out how to track a cut and paste as well
+U0JBSEGHY : and backspace etc
+U0JBSEGHY : basically track anyway that the field could be modified
+U14Q8S4EM : Okay. I see.
+U14Q8S4EM : Ive never done this exactly, but I bet you could make a custom html event handle that returns `(KeyCode, String)`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

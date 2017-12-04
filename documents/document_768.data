@@ -1,0 +1,110 @@
+U17TXDBJR : Oops, there is a "Preview docs" on <http://package.elm-lang.org|package.elm-lang.org> that solves my use-case. :slightly_smiling_face:
+U0D4VR7BP : <@U3LUC6SNS> I think it's too early to say whether or not it's a code smell. In Elm generally almost all goes, until something gets painful -&gt; refactor
+I would say - don't think too much about it from the beginning :slightly_smiling_face:
+
+U3LUC6SNS : <@U0D4VR7BP> Sounds good to me.  My compile times are fine, and with structure I know where to find things.
+U17TXDBJR : How can I create a new public channel on Elm Slack?
+U17TXDBJR : The Slack docs state there should be a plus button next to channels in the left side bar. I don't have it.
+U6D41LX7Y : Hello, is there anyone working on elm on mobile ?
+U17P7CBFB : Broke it up into multiple functions; one for moving into an action, e.g. selecting a node, or moving the set of selected nodes. Then I have one function per action, e.g. for moving around a set of nodes. It ended up about 10 lines longer than before, but it feels a lot more readable now. Still a lot of boiler plate, but it's much better now.
+U17P7CBFB : If you list out the assumptions and goals you have before listing out as many reasonable implementations as you can think of, you have my ideal design phase for a larger project. This still feels small enough that small interations work; about 800 lines of code atm, counting whitespace and comments.
+U17P7CBFB : It's still an open question if I'll rewrite messages to be around what they do, instead of what state transition they represent, when I clean up the view
+U4872964V : You can't, it's disabled. Ask in <#C3FKL0A8H|admin-help> 
+U0X1G7NVD : Hi all… is there a cleaver way to do that?
+```
+format : Locales -&gt; Float -&gt; String
+format locale num =
+    num
+        |&gt; Helpers.parse locale
+        |&gt; Helpers.stringify locale
+```
+
+I mean… to avoid passing locale to `parse` and then to `stringfy`?
+
+U1CE9DL9H : <@U6D41LX7Y> there is a gsoc project going on that investigates elm on ios
+U17TXDBJR : I see. Thanks! :slightly_smiling_face:
+U1CE9DL9H : <@U0X1G7NVD> well, technically there is but in elm it's not that nice. we like to keep everything explicit
+U1CE9DL9H : if you're curious, read up on the "Reader monad"
+U0X1G7NVD : Ok <@U1CE9DL9H> _ a quick Google, learned something new but gonna keep it that way — as you already guessed ; ) Many many thanks!
+U3LUC6SNS : I am planning to add navigation to the app I am working on.  Any advice on what to use?  I’ve been looking at <https://github.com/rgrempel/elm-route-url>, which seems interesting.
+My update function has the usual signature: `update : Msg -&gt; Model -&gt; ( Model, Cmd Msg )` This is something I’d rather not change.
+
+And the program is `programWithFlags` ,that is, `main : Program Flags Model Msg`
+
+U2SR9DL7Q : <@U3LUC6SNS> I too have a Types file. I am already seeing an imminent refactor, where I migrate a large chunk of code to it's own sub folder. But having types right now works very well for me.
+U24HQ3RJ7 : i have a type `type Thing = A | B | C | D`..i need to store some struct `Data` for `A,B,C,D`.. what is a good way to store it ?
+Should i have 4 variables.. `aData, bData, cData, dData` ?
+
+U24HQ3RJ7 : Or a map with 4 keys - values.. ?
+U2SR9DL7Q : <@U3LUC6SNS> I'm doing a single page application so all my routing is handled with just `Navigation` and `UrlParser` libraries. It works well if you don't plan on having multiple html pages and if the app is fairly small. The user is none the wiser except for seeing the little _#_ symbol in the paths
+U3SJEDR96 : <@U24HQ3RJ7> I'm not following. Could you show some code of what you want to end up with?
+U2SR9DL7Q : <@U24HQ3RJ7> cant the union type just have the data as part of constructor? `type Thing = A Data | B Data ... ?
+U24HQ3RJ7 : <@U3SJEDR96> I have 4 quadrants.. so i have `type QuadrantType = QA | QB | QC | QD`..now each quarant in view can have toggled state of collapse : `type ViewData = { qaData = QuadrantViewData, qbData = QuadrantViewData ... }`
+
+U24HQ3RJ7 : Does this make question clear ?
+U24HQ3RJ7 : i can also have `type ViewData = { qDatas = Map QuadrantType QuadrantViewData }`
+U24HQ3RJ7 : <@U2SR9DL7Q> please see above.. Can you explain what should i do in `ViewData` ? I would not like to change `QuadrantType`..
+U2Q5GJNTB : Hi all. Does anybody have any recommendation for habits, tools or processes to keep elm-package.json and tests/elm-package.json in sync ? I am always painfully reminded by travis-CI that I did not add it to the tests file
+U23SA861Y : <@U6CAFUBM2> I'll see if I can find some time to give it a once over.
+U2Q5GJNTB : Hmm I guess I should just regularly take a look at my elm-test --watch output maybe. I guess that should do the job until it is changed in the future
+U6CAFUBM2 : thanks:slightly_smiling_face:
+U2SR9DL7Q : <@U24HQ3RJ7> to an extent, the most valid one is whatever is most rational for how the data is used and accessed in your application. I have a slight bias to Union types over records because they usually map my apps actual state the best. so `type QuadrantType = QA ViewData | QB ViewData | ... ` so each quadrant is built with everything it needs to represent itself. Then your views can just have a `viewQuadrant -&gt; QuadrantType -&gt; Html Msg` and you can use case statements to pattern match each one.
+U3SJEDR96 : <@U2Q5GJNTB> running tests before committing is always a good idea :wink:
+U4872964V : <@U2Q5GJNTB> this will be adressed in 0.19 i hear
+U2Q5GJNTB : yeah, I will just add it to my push hook so that I stop forgetting to look at the tests.
+U2Q5GJNTB : <@U4872964V> cool. That would be nice.
+U23SA861Y : one way is to prevent pushes to master directly and then require all tests in github to pass before you can merge in (provided you are using github)
+U24HQ3RJ7 : <@U2SR9DL7Q> provided i go the route of `qaData, qbData`..i donot understand how can i write :
+```
+toggleExpand : QuadrantType -&gt; ViewData -&gt; ViewData
+toggleExpand quadrantType viewData =
+    { viewData | case quadrantType of
+                     QA -&gt; { expanded : not viewData.q1Quadrant.expanded }
+                     QB -&gt; ...
+    }
+```
+`case` will return a `QuadrantViewData`.. but How do i get right variable name before it.. like `q1Quadrant or q2Quadrant`.. ?
+
+U2Q5GJNTB : <@U23SA861Y> yeah that is true as well. I should get into that habit for documentation purpose and for the reason you just mentioned. The curse of side projects I guess… laziness
+U23SA861Y : meh, if it's just a side project then setting up all that stuff takes more time than it saves
+U2D07QZN3 : Anyone interested in helping out with this? <https://github.com/smckissock/trump-conflicts>
+U2D07QZN3 : (please let me know if I shouldn't be posting this kind of thing here)
+U2SR9DL7Q : <@U24HQ3RJ7>  ```
+viewQuadrant -&gt; QuadrantType -&gt; Html
+viewQuadrant quadstuff =
+    case quadstuff of 
+        QA { expanded, otherparam otherparam } -&gt; actions
+        QB { expanded, otherparam otherpparam } -&gt; actions
+```
+
+U24HQ3RJ7 : i figured out i will need 2 case expressions..i want to change `ViewData`  itself.. which is part of Model.
+
+U2Q5GJNTB : yes, that is why i did not do it yet
+U2SR9DL7Q : <@U24HQ3RJ7> you want to change ViewData when it's not describing a quadrant?
+U2SR9DL7Q : <@U24HQ3RJ7> so your `QuadrantType` is the Unique name QA, QB, QC followed by the viewData record. You don't need two inputs. For example, I have a `type Game = NoGame | ActiveGame | WonGame Player` type. `WonGame` is just a unique name but `Player` is a record. In my view function, I have```
+viewGame game = 
+    case game of 
+        NoGame -&gt;
+        ActiveGame -&gt;
+        WonGame { data1, data2, data3} -&gt;
+``` 
+the { data1, data2, data3 } type here is the `Player` record. 
+
+I'm probably not understanding your use case clearly. In my head, it sounds like quadrants should be a union and all quadrants need viewdata on how to show them so the quadrant type should be Both a unique name and an accompanying vewData record. If you want to edit viewdata you can, but it would be within the context of updating a quadrant.
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

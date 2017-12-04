@@ -1,8 +1,185 @@
+U4PT7NG4V : I either saw a package that does it, or it was a dream I had... I'm not sure right now..
+U3SJEDR96 : That would have to expose implementation details (such as "how are elm datatypes represented at runtime") which isn't ideal
+U4SM7ECAG : ok, is there a plan to make a chrome extension to the developer toolbox that would allow us to browse the models arriving to our update functions? (I'm being really picky there :D)
+U3SJEDR96 : There is an ongoing project to investigate how we could improve the debugger. Oh, right, if you didn't know about it yet: there _is_ a builtin debugger that lets you inspect the model as it exits your update function already :slightly_smiling_face:
+U4SM7ECAG : by passing the debug flag to elm-make? I'm working on a project that use 0.16 and webpack, I'll check if I can get it to work with that :slightly_smiling_face:
+
+U4SM7ECAG : thanks for the reminder, Elm is often easy enough to work with to stay away from that tool :slightly_smiling_face:
+U3SJEDR96 : oh, not sure if that exists in 0.16 :stuck_out_tongue:
+U4SM7ECAG : ok well I'll keep fighting with `Debug.log` then :slightly_smiling_face:
+U5Y1YQD6Y : what's wrong with this? I am struggling hard with `Debug.log`
+U5Y1YQD6Y : this gives me an "I am looking for . . . an upper case name" error
+U3SJEDR96 : You probably want to add braces of a `&lt;|` like this:```
+historyLink content =
+    Debug.log "a in historylink" &lt;| a
+        [ onClick &lt;| ActivateTab History Nothing ]
+        [ content ]
 ```
-<@U0LPMPL2U> yep, just wanted to avoid this :wink:
-ilias: is it Time.sleep, or Process.sleep?
-somewhat more complete example: `Process.sleep (100 * Time.millisecond) |&gt; Task.andThen (\_ -&gt; buildRequest |&gt; Http.toTask) |&gt; Task.attempt GotResponse`
-Process, my bad :slightly_smiling_face:
-Cool! Just making sure
-So I can't still can't get unions working...
-<https://gist.github.com/allansideas/60658d50f4f6b5ab9738c05f419324a8>
+
+U2XRG0UKA : The problem is an kind of like an order of operations thing. Debug.log is a function that takes two arguments, and `a` is a function that takes two arguments. Without any parentheses or the `&lt;|`, Elm can't distinguish between the two function calls.
+U5Y1YQD6Y : thanks, <@U3SJEDR96> and <@U2XRG0UKA>
+U5XHTBFS6 : If elm-package does not allow modules with ports, what's the best way to get / publish bindings to JS libraries?
+U4872964V : what kind of bindings are we talking about?
+U5VTA57UN : An architecture question: I have an API module with functions that wrap Http POST and GET requests to my server.  The API module has an internal config state type, API.State, that it needs to create these request Cmds.  My app has several child modules, each of which needs to use the API to talk to the server.  How should I expose the API.State to the children so that they can make API calls?  It seems really clunky to keep a copy of API.State in each child's Model, and then propagate changes to API.State first up from API to the Main module, then down to each of the children.  Is there a better pattern?  In JS I'd just have an API object with internal state that was mutable, and have all the children have a reference to that object.  What's the right way in Elm?
+U5VTA57UN : i.e. <http://API.post|API.post> : (State -&gt; String -&gt; Body -&gt; Decoder a -&gt; (Result Error a -&gt; msg) -&gt; Cmd msg
+U23SA861Y : if you were going to do that, I would have the API module just return request and leave it up to other code how to handle it
+U23SA861Y : if you do that it become impossible to chain, or return two different messages
+U5VTA57UN : jonf: Ok, so "<http://API.post|API.post> : State -&gt; String -&gt; Body -&gt; Decoder a -&gt; Request a" but I still have the problem of how the child modules get up-to-date copies of State.
+U23SA861Y : like wise you can use dependecy injection and have your other code take a function of the form `String -&gt; Body -&gt; Decoder -&gt; Request`  and then you can pass it in that function of `<http://API.post|API.post> state`
+U0J1M0F32 : Do the child modules need to be the ones sending the API request? Could they instead kick off a message that causes the parent module to do that?
+U23SA861Y : that way your child libraries take as  a parameter just your run of the mill HTTP function
+U5VTA57UN : justin: that's it!  thanks.
+U23SA861Y : also true
+U60ED1KFT : I have a question on HTTP requests
+U60ED1KFT : I'm getting network error from Confluence API get call (Confluence is part of JIRA)
+U23SA861Y : what type of error
+U60ED1KFT : I has basic Authentication and these are my paramenters:
+U60ED1KFT : "Network Error"
+U60ED1KFT : no further info (makes trouble shooting hard)
+U0FP80EKB : Any information in the dev console?
+U0FP80EKB : in your browser
+U23SA861Y : yeah, F12
+U0FP80EKB : often the network tab will show what is coming back from the service
+U60ED1KFT : none
+U60ED1KFT : just "network error"
+U0FP80EKB : Can you curl to the endpoint?
+U0FP80EKB : Are you getting a response from Confluence, or is the error happening before that.
+U0FP80EKB : I'd try curling and see what you get
+U60ED1KFT : Ok let me see
+U60ED1KFT : I checked the JS console and saw an error there
+U23SA861Y : I think a CORs issue  with come back as a Elm network error, but the browser will tell you it's a CORs issue in the console
+U60ED1KFT : I think you're right
+U60ED1KFT : gettting this:
+U0FP80EKB : yeah, CORS errors are always fun :slightly_smiling_face:
+U60ED1KFT : XMLHttpRequest cannot load <https://sbaone.atlassian.net/wiki/rest/api/space/CKB>. Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. Origin '<http://localhost:8000>' is therefore not allowed access. The response had HTTP status code 403.
+U60ED1KFT : so yeah a CORS
+U0FP80EKB : yup
+U60ED1KFT : thanks!
+U60ED1KFT : let me figure that out
+U0FP80EKB : good luck!
+U5XHTBFS6 : norpan: In my case leaflet.js, but I imagine it's pretty common for people to need to use some JS library in Elm.
+U60ED1KFT : <@U0FP80EKB> any resources on handling CORS from elm you could point me to?
+U23SA861Y : you can't handle it from elm
+U23SA861Y : You either need the server to provide the appropriate headers or set up a proxy
+U60ED1KFT : ahh good to know thanks,
+U23SA861Y : TBH, you can't handle it in JS either
+U60ED1KFT : ok got it
+U0FP80EKB : yeah, it is a server thing
+U0FP80EKB : The browser will be sending out the preflight OPTIONS request
+U3SJEDR96 : <@U5XHTBFS6> basically Elm interpretations are preferred (rather than straight conversions of the JS api), if that's not possible, though, bindings could be acceptable, but not publishable. What you could do is write up everything needed to do the logic, conversions, all that; and tell users they need to add an outgoing port, and incoming port, and how to hook it up on the JS and Elm side. Port logic tends to be really app-specific rather than library specific, tho
+U0FP80EKB : then the server responds to that
+U3SJEDR96 : <@U5XHTBFS6> for example, elm-date-extra started as an effort to get moment.js like functionality in Elm. It's grown to be quite a different beast, by now, though
+U5XHTBFS6 : <@U3SJEDR96> yeah, in my case I only need a handful of functions, so I did make the ports app-specific. I was just thinking that it could be useful to have a leaflet&lt;-&gt;elm  binding with an elm-friendly api that anyone could use. But I can see how an example port module + small tutorial could be just as good.
+U4872964V : Indeed, and then you use ports. If you have significant code on the elm side you can publish that as a package with information on how to set the ports up.
+U5XHTBFS6 : Maybe it would be insteresting if packages on elm-package could be tagged and we could do `elm-package install foo/bar --allow-ports` at our own risk.
+U5XHTBFS6 : or something like that
+U23SA861Y : The problem with ports is that you need to register all your call backs when you init the app which doesn't play nice with a module like structure
+U5XHTBFS6 : Indeed, but one would need to register the ports as well if they were doing everything from scratch instead of using the module. The module could have some sort of init.js that the user would import on their html file (which they would need to do anyway) and do something like `init_module(elm_app)`.
+U3SJEDR96 : That, and it's become quite normal to deal with a single pair of inbound/outbound ports, taking care of encoding/decoding manually
+U0FP80EKB : Really? That seems like you are replacing the elm port routing with your own
+U0FP80EKB : I like having specifically named touch points
+U0FP80EKB : Same reason I have specific http endpoints (although I suppose graphql is a different take on that)
+U5XHTBFS6 : TBH though I'm very new to frontend and I'm not sure how people handle modules at all on the wider js world.
+U0FP80EKB : I skipped most all the js stuff with the newer stuff in it. :slightly_smiling_face:
+U0FP80EKB : Luckily jumped from js+jquery to elm :slightly_smiling_face:
+U3SJEDR96 : <@U0FP80EKB> well it minimizes the API surface between elm and the outside world. The idea is generally to have one `port emit : Json.Value -&gt; Cmd msg` and reversely, `port inbound : (Json.Value -&gt; msg) -&gt; Sub msg`. You can still create functions that use those to do specific things, but then on the JS side you only have one subscribe to do, and you can switch on, say `msg.type` - much like elm's update or a react reducer
+U0FP80EKB : Yeah, I could see that. I could understand people liking that. For me, the less code I have on the javascript side, the happier I am. :slightly_smiling_face: Definitely a personal preference.
+U0FP80EKB : To be honest, I try to minimize the amount of js interop. When we do, it generally is because we are interacting with a specific js library, such as an editor, and most of that is inbound listening to the events.
+U23SA861Y : I personally like the use of custom tags
+U3SJEDR96 : Yeah, sure, I can see that, too
+U0FP80EKB : I suppose if there was a lot of interop, then it could minimize that.
+U23SA861Y : there was a neat talk by <@U0CL0AS3V> about using them for google maps which seemed to glue all this together nicely
+U23SA861Y : <https://www.youtube.com/watch?v=ar3TakwE8o0&amp;t=1s>
+U5DJNFLUD : Anyone who's curious, I used <https://www.paramander.com/blog/using-ports-to-deal-with-files-in-elm-0-17> as a starting point and was able to implement CSV file/uploading/parsing based on it!
+U0JFGGZS6 : nice!
+U5QJW0DDE : hi folks. never written a line of elm in my life but watching some tutorials and presentations on youtube to get a high-level overview
+U611WQPL4 : Hello.  Learning here.  Still struggling with some stuff but I'm trying to get there.
+U5QJW0DDE : i'm trying to debate between elm and clojurescript (which I have used a lot) for a high-performance and complex SPA. I wrote a very large enterprise SPA in cljs last year for a company, but am thinking of making a switch on a new project
+U0LPMPL2U : :wave: Welcome both :slightly_smiling_face:
+U5QJW0DDE : i read somewhere (can't remember where) that Elm's creators have said that SPAs are not best suited for Elm, but I cannot recall where that was or why
+U3SJEDR96 : <@U611WQPL4> re your tweet, in elm it's basically due to three things: 1) nesting generally isn't how you abstract in a functional language generally 2) immutability means you create new records rather than updating records and 3) we don't really have concise "record update" syntax to mirror the getter syntax we do have (i.e. `.foo`)
+U611WQPL4 : Haha.  …. and my tweet got found. :stuck_out_tongue:    But 2) makes total sense.
+U0LPMPL2U : <@U5QJW0DDE> You can definitely write SPAs in Elm. I'd suggest writing a toy app in Elm to get a feel for what it can do well and what is more difficult. If you're making a big tech decision, it's probably better to have some first-hand experience rather than just going off someone's say-so online :slightly_smiling_face:
+U5QJW0DDE : of course, but all the same it's nice to know why others have succeeded or failed on doing something you have not yet done
+U3SJEDR96 : you can probably get some inspiration from <https://github.com/rtfeldman/elm-spa-example> though that's not exactly a beginner project :slightly_smiling_face:
+U0LPMPL2U : for sure :slightly_smiling_face:
+U611WQPL4 : I have a beginning question that's vexing me.  When you see things like `List Int` or `Node Int List` or `Html Msg` what's going on?
+U3SJEDR96 : `List Int` means you're dealing with a list where all the members are integers
+U3SJEDR96 : `Html Msg` means you're dealing with virtual-dom nodes that respond to events by emitting messages of type `Msg` (which is a type you provide yourself)
+U3SJEDR96 : `Node Int List` isn't really valid semantically
+U3HQVHERX : Is there anything to consider when using Elm with ADA compliance?
+U3SJEDR96 : there an a11y package that could be interesting
+U3SJEDR96 : but honestly I don't know much about accessibility in general, and even less about ADA :stuck_out_tongue:
+U5QJW0DDE : how has JS interop evolved in Elm, is it still fairly complex to use a JS numerics library, for example, in your Elm project?
+U0J1M0F32 : I'm not sure I know how to answer that question.
+U3SJEDR96 : <@U611WQPL4> every expression in Elm has a type; and some of those types can take "type parameters" to say something about their contents, generally relevant when dealing with some sort of container type, though not exclusively. For example, a `Maybe a` can be either `Just a` or `Nothing`. `a` is just a type variable there, which could also be any valid type. For example, you could be dealing with a `Maybe String` which could be `Just "a string"` or `Nothing`
+U611WQPL4 : ^^ <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/List#tail> is helping with that.  :slightly_smiling_face:
+U0CLDU8UB : <@U5QJW0DDE> Compared to ClojureScript, it is more work to use any existing JS code. The good side of the tradeoff is that in Elm, the integrations can never crash your applications.
+U0CLDU8UB : Basically you set up a border control between Elm and JS, and the border control will keep any unexpected things out of the runtime.
+U5QJW0DDE : i think i read that this "border" has gotten smoother over the last year or two, if i recall
+U3SJEDR96 : It helps to think of JS stuff as a "remote api", you can send stuff at it, and it can send stuff to you. You can't, for example, synchronously call something and get your value back, though.
+U0CLDU8UB : Hmm.. Well they're not Signals anymore, if that's what you mean. That's the main thing that has changed with ports within the past two years.
+U5QJW0DDE : do i understand that all interaction with JS is async?
+U5QJW0DDE : if that's what you meant
+U0CLDU8UB : it is
+U5QJW0DDE : interesting indeed
+U3SJEDR96 : yep, that's what it boils down to. On the other hand, this leads to people re-implementing stuff in Elm, rathr than provide simple bindings, which then leads to much more "natural" API's :slightly_smiling_face:
+U5QJW0DDE : i suppose it is not so easy to use an existing UI framework like Material Design or Bootstrap in Elm
+U3SJEDR96 : Both exist in Elm :smile:
+U3S3S7J06 : <@U5QJW0DDE> there is actually `elm-bootstrap` and `elm-mdl`
+U5QJW0DDE : now that's very interesting
+U0CLDU8UB : But for sure, their implementations are not trivial.
+U3S3S7J06 : there were some limitations last time i used `elm-mdl`, like non-material dropdowns, but someone created a pull request for it. it might be part of the library now.
+U3SJEDR96 : Personally, I don't really like using `elm-mdl`, it tends to permeate rather quickly through your entire app and state
+U3S3S7J06 : <@U3SJEDR96> yes. yes it does.
+U3SJEDR96 : But it's an impressive piece of work nevertheless, and it does what it says on the box. Strictly my personal opinion :slightly_smiling_face:
+U3S3S7J06 : when it comes to those large frontend frameworks, they really guide your view even outside of elm. they are just big, in general.
+U0CLDU8UB : Using the CSS parts of Bootstrap/Bulma/etc. is very simple, of course. Sadly you tend to need dropdown menus, accordions or what have you as well.
+U5QJW0DDE : are elm's data structures persistent in the way like they are in Clojure?
+U3SJEDR96 : Yes
+U5QJW0DDE : i'm watching this presentation about building and running an Elm app *inside* a React app, and I'm thinking, whaaa /?
+U5QJW0DDE : <https://watchyt.com/videos/elm-in-production-surprises-and-pain-points?v=LZj_1qVURL0>
+U3SJEDR96 : I think it's not the most common scenario, but the fact that it's possible makes it a nice candidate for gradual adoption :slightly_smiling_face:
+U5QJW0DDE : definitely some nice UI examples in that video
+U3SJEDR96 : Yeah, Kevin gives _really_ nice presentations :slightly_smiling_face:
+U0CQ254F5 : <@U5QJW0DDE> as for embedding elm within a react app, i agree with <@U3SJEDR96>, its relatively straightforward and a good way for teams to test it out
+U5P4FLYLE : Hi,  I would like to go elegantly from `values`:```type Poly                                                                                                                                                                                  
+     = Float Float                                                                                                                                                                          
+     | String String                                                                                                                                                                        
+     | Date Date.Date
+xval=List Poly
+yval=List List Poly
+values=(xval,yval) 
+```
+to  extractedValues which has type `(List Date, List List Float)`
+How do you pattern match something like that?
+
+U3SJEDR96 : easiest would be `List.unzip values |&gt; List.foldr (\val (dates, strings, floats) -&gt; case val of *pattern match and prepend it to the correct entry*) ([], [], [])`
+U3SJEDR96 : or you can do it in one go, too, if you write a function `Poly -&gt; (List Date, List String, List Float) -&gt; (List Date, List String, List Float)`
+U3SJEDR96 : Or wait, I totally misunderstood :smile:
+U3SJEDR96 : sec
+U3SJEDR96 : <https://ellie-app.com/3BNZD5X5DKKa1/0> <@U5P4FLYLE> something like that I suppose
+U5P4FLYLE : thanks, <@U3SJEDR96>
+U60DVU1PS : Is there any article/documentation covering the reasoning for using "-&gt;" in anonymous functions?  Apologies if this is an obvious matter.
+U2W8J47KQ : I would guess it's because Haskell does the same
+U5Y2S6SJF : is it possible to pass in a "none" function to main's update argument? similar to subscriptions?
+```
+ , subscriptions = (\_ -&gt; Sub.none)
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

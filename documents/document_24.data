@@ -1,19 +1,92 @@
+U090G4C05 : is the <#C0FM7N1SM|quil> channel dead?
+U04V70XH6 : <@U090G4C05> I'd say that it's just _quiet_…
+U28TJ0DDZ : how can I get the list of protocols which a type implements ?
+U1ALMRBLL : <@U28TJ0DDZ> `ancestors` will include protocols implemented, along with superclasses
 ```
-as you see, it can alias a Long array
-I see, any thoughts on my original question? :wink:
-if the collection might in some cases already be a vector, or it's an array that won't be aliased, use vec
-if you already have a vector and need to add to it, or if you need to do some transformation like mapping or filtering as you add things, use into
-if none of those conditions apply, it doesn't matter which you use
-when I mention transforms here, I'm talking about using the transducing arg to into btw
-Wonderful, thank you very much for this piece of advice.
-Hello,I am new here and to Clojure too,Is it okay if I post some code here to resolve an issue?
-yes <@U624VJ533>, you can ask it here -- there is also a <#C053AK3F9|beginners> channel that you may find helpful if your issue is not resolved here
-Hi <@U1ALMRBLL>, thank you for the response
-I have been exploring core.async
-and tried to implement <https://www.youtube.com/watch?v=f6kdp27TYZs&amp;t=1600>
-the gophers daisy chain whispering
-and am stuck someplace
-help would be appreciated
-i would recommend you ask in <#C05423W6H|core-async> -- providing some details as to how specifically you are stuck
-okay sure
-thank you
+(defprotocol Foo
+  (bar [this]))
+=&gt; Foo
+(deftype Baz [a b c]
+  Foo
+  (bar [this] nil))
+=&gt; user.Baz
+(ancestors (class (-&gt;Baz 3 4 5)))
+=&gt; #{user.Foo clojure.lang.IType java.lang.Object}
+```
+
+U28TJ0DDZ : <@U1ALMRBLL> nice, is there any way to get the methods for each interface or protocol ?
+U0GRKUGLQ : is there a version of `run!` to use with transducers? I mean, some fn `run2!` that you use like `(transduce xf run2! init coll)`
+U1ALMRBLL : ```(into [] (.getDeclaredMethods SomeClassHere))``` <@U28TJ0DDZ>
+U1ALMRBLL : you can `.getName` on those for just the name, you can also call them since you have reflected and have the `Method` objects
+U28TJ0DDZ : thanks
+U051SA920 : <@U0GRKUGLQ>  `(run! #(prn %) (eduction identity [0 1 2]))`
+U051SS2EU : if you look at the source of `run!`, I think `(transduce xf #(f %2) nil coll)` is the most parsimonious thing ```user=&gt; (source run!)(defn run!
+  "Runs the supplied procedure (via reduce), for purposes of side
+  effects, on successive items in the collection. Returns nil"
+  {:added "1.7"}
+  [proc coll]
+  (reduce #(proc %2) nil coll)
+  nil)
+```
+
+U0GRKUGLQ : yeah... I thought so too <@U051SS2EU> . and that's what I'm doing <@U051SA920> . I just wanted to know if there was some other fn to use directly, but thanks
+U067BPAB1 : I've been doing a bit of reading about functors recently and it just occurred to me that transducers might be exactly that. Only touched the tip of the iceberg so are they really the same thing or is there a counterexample of a transducer that cannot be classified as a functor?
+U051SS2EU : `(map f)` can't be mapped over, so it isn't a functor
+U051SS2EU : in fact I can't think of any transducer that you can map over...
+U050ECB92 : transducers exist outside of collections
+U067BPAB1 : functors are really type classes so they're not tied to concrete types from the get go either
+U051SS2EU : right, but functors are things you can map over, and though you can map over a function, I don't know how I would apply that to a transducing function
+U051SS2EU : perhaps that's my ignorance though?
+U067BPAB1 : (Or at least in their Haskell implementation they are. After years of Erlang and Clojure I feel a little bit like Alice in Wonderland reading about all that stuff.)
+U051SS2EU : doing some reading to refresh my knowledge of this stuff, supposedly mapping over a function is composing it, and transducers are functions that when called on another function return a function that will compose their transducing actions when applied in a transducing context
+U051SS2EU : but I don't know how to translate "transducing context" here
+U067BPAB1 : ^ yeah, that's the angle I was coming from
+U051SS2EU : because looking at typical haskell examples `(+) 3` doesn't get applied to `(*) 2` to return a new function, it gets composed to make something you can apply
+U051SS2EU : which isn't what transducers do...
+U051SS2EU : in fact they are inside out of that right? you apply them to get something that composes the two
+U051SS2EU : I feel like I'm over my head with all of this though honestly
+U067BPAB1 : _thinking this through_
+U11BV7MTK : apparently functors must preserve the identity mapping. ie identity in Category C maps to identity of Category D. If a transducer returns a non-empty list when given an empty list then it could not be a functor. (the categories being the collection of lists of the underlying set). This is my thinking.
+U051SS2EU : so does this mean transducing mapcat, filter, remove, etc. are not functors but transducing map is?
+U11BV7MTK : asking the wrong person. got undergrad and graduate background in math but no idea about this. but start see if it makes sense by definition. ie, are the domain and codomain categories to begin with? If not the term has no meaning. To be categories we need the "arrows" on them and make sure they compose. blah blah. All I was looking for was a single counter example where a transducer would not behave according to the definition of a functor.
+U051SS2EU : :thumbsup:
+U06BE1L6T : caio: you can also use something like this: <https://github.com/curiousprogrammer-net/clojure-repl/blob/master/src/clojure_repl/java.clj#L40>
+U1LCB75M2 : there's also state (<https://github.com/matthiasn/talk-transcripts/blob/master/Hickey_Rich/Transducers/00.36.36.jpg>) which suggests to me transducers are it's own thing (hence why a new name)
+U1LCB75M2 : ((or maybe multiple things under the same umbrela name))
+U051SS2EU : oh, right - functors can't be stateful like that
+U0W0JDY4C : with `defmethod` is there an idiomatic way to handle "dispatch on anything in this set" instead of a singular dispatch value?
+U0W0JDY4C : ```(defmulti foo :my-type)
+(demethod foo #{:a :b :c} [_] …)
+```
+instead of having to do 
+```
+(demethod foo :a [_] …)
+(demethod foo :b [_] …)
+etc
+```
+
+U051SS2EU : you could check for that set in your dispatch function and have that return ::foo
+U051SS2EU : remember your dispatch function doesn't have to just return the thing
+U0W0JDY4C : ah i see, then wire in a defmethod like :a-set and :b-set
+U051SS2EU : `(defmulti foo #(if (contains #{...} (:my-type %)) ::foo (:my-type %)))`
+U051SS2EU : then `(defmethod foo ::foo ...)`
+U051SS2EU : I think that is the simplest choice (with a better dispatch function of course, that's just the basic concept)
+U0W0JDY4C : great, that's much nicer than what I was planning to do
+U0W0JDY4C : any particular reason you use ::foo .. are defmulti's global or something?
+U051SS2EU : because who knows what value you would find, and namespaced things are safer? you can use any placeholder you like of course
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,0 +1,60 @@
+U3VGR2S7Q : <@U0702F2CE> should be fixed now
+U0702F2CE : <@U3VGR2S7Q> great
+U07SJGB4H : why does a plumber flush callback receive its flush handle as an argument? the docs say it's so it can conveniently unregister itself, but why would it need to do that? is it to guard against the plumber being flushed more than once, or to deal with the case where flushing is unsuccessful and should be retried?
+U3NJS8H7C : Yes, helping to avoid another flush was the intent. But I'm often unsure whether it's better to make a callback receive a relevant argument or have the callback be a closure as needed.
+U07SJGB4H : is there a reason flushing the callbacks doesn't automatically unregister them?
+U5KU1HNKY : `test-log` is documented as displaying by default, but that's not the case. I need to use `(void (test-log #:display? #t))` to get actual output. cc/ <@U07SJGB4H> (since you're in there a lot of late)
+U07SJGB4H : <@U5KU1HNKY> I think the docs are just wrong there. Based on the git history those two arguments have always defaulted to `#f` and been documented as defaulting to `#t`
+U07SJGB4H : doc patches welcome :)
+U5KU1HNKY : <@U07SJGB4H> <https://github.com/racket/rackunit/pull/62>
+U3NJS8H7C : <@U07SJGB4H> For things like flushing output ports, the callback should be preserved for future flushes
+U5KU1HNKY : How am I supposed to write this?
+```
+(define-syntax (function stx)
+  (syntax-parse stx
+    [(_ id:id)
+    #'(if (identifier-binding #'id)
+          (if (procedure? id)           ; blows up here for missing
+              id
+              (or 'ERROR (error 'function "~v is not a function" id)))
+          `(function ,'id)
+        )]))
+
+(define x 42)
+(define y (fn 'y (lambda (x) 42)))
+
+(function x)                            ; 'ERROR
+(function y)                            ; (function y)
+(function missing)                      ; missing: unbound identifier in module
+```
+
+U5KU1HNKY : aaaaah… I push the `#'` down to the true and false results…
+U5KU1HNKY : ```redex-check: /Users/ryan/Work/git/zenspider/schemers/racket-summerschool/driver.rkt:70
+no counterexamples in 1000 attempts
+```
+
+U07SJGB4H : <@U3NJS8H7C> I think I'm missing an understanding of when plumbers are flushed then. Wouldn't an output port's flush callback only be called just as a racket process was exiting or if someone manually called `plumber-flush-all`? Are there times other than exiting that plumbers are flushed automatically?
+U3NJS8H7C : <@U07SJGB4H> There are no other times that plumbers are flushed automatically, but the intent is that `plumber-flush-all` can be called at any time (in much the same way that a C program might call `fflush(NULL)`).
+U0702F2CE : <@U3NP867S6> we're now down to one pkg regression, in the `css` pkg tests
+U0702F2CE : (after the next build with the TR changes)
+U3NP867S6 : <@U0702F2CE>: Thanks, good to know.
+U07SJGB4H : What's the best way to take a thunk and make it run after the current thread dies?
+U07SCV14J : <@U07SJGB4H> I have no idea if this would work, but would `(let ([t (current-thread)]) (thread (lambda () (sync t) (thunk))))` do something useful?
+U07SCV14J : I realize I don't actually know what happens if a thread waits on the thread that spawned it
+U0702F2CE : that should work
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,4 +1,100 @@
+U3SJEDR96 : <@U2LAL86AY> you can do `set 0.1` and even `set 1` for a `Bounded Float`
+U3ZNWN526 : Or, if you really want users to be able to pass in `Int` variables, then you can accept a `number` and immediately convert it to a Float by multiplying it by 1.0 :slightly_smiling_face:
+U3SJEDR96 : since `1 : number`, not `1 : Int`
+U2LAL86AY : hmm you mean like this:`(1.0 * value)`
 ```
-I mean the module `racket/help`. it's in the `base` package; you won't have to install it.
-also, the snapshot should maintain its own set of packages.
-I can't figure this out… ¯\_(?)_/¯
+The right side of (*) is causing a type mismatch.
+
+(*) is expecting the right side to be a:
+
+Float
+
+But the right side is:
+
+number
+
+```
+pff this creates a lot of trouble than i need right now  - i will go with the float for now as <@U4872964V> mentioned - unthil that `number is not comparable` bug is fixed.
+
+U3LUC6SNS : Does elm-tools/parser have a way of displaying the unparsed portion of the input of successful parse?
+U4872964V : <@U3LUC6SNS> no, but you can perhaps trick it by pipelineing it with a fail parser to get the position
+U3LUC6SNS : <@U4872964V>, thanks!
+U1WJH1JU9 : I am trying to do some JSON decoding for a complex type that sometimes comes back null. When I get the types to match up, I only get back a Nothing type even when there is something there. Does anyone know what I am doing wrong?
+U1WJH1JU9 : This is the code: ```|&gt; Json.Decode.Pipeline.optional "Feature" (Json.Decode.maybe decodeFeature) Nothing```
+U4872964V : and the json is?
+U1WJH1JU9 : ``` { rallyAPIMajor : String    , rallyAPIMinor : String
+    , ref : String
+    , refObjectUUID : String
+    , objectVersion : String
+    , refObjectName : String
+    , createdAt : String
+    , severity : String
+    , changesets : ResultChangesets
+    , description : String
+    , formattedID : String
+    , name : String
+    , owner : ResultOwner
+    , project : ResultProject
+    , rtype : String
+    , c_DefectSource : String
+    , feature : Maybe ResultFeature
+    }```
+
+U4872964V : so, you have “Feature” instead of “feature”
+U1WJH1JU9 : That is for the record. But the actual JSON has it with the capital.
+U4872964V : well, if the decodeFeature fails, you’d get Nothing
+U1WJH1JU9 : I agree. But even when it succeeds I get Nothing. That is the issue that I am having.
+U4872964V : How do you know that it succeeds?
+U1WJH1JU9 : Because I am logging the JSON that is coming back and can see that it has the appropriate field.
+U4872964V : ok, so how does it look, and how does the decoder look?
+U1WJH1JU9 : The JSON looks just like what I pasted above when it succeeds. When it fails the Feature field has a null value.
+U4872964V : No that was the record, how does the json look, and how does the decoder look? If you get Nothing, that means your decoder failed
+U4872964V : maybe you want `Json.Decode.map Just decodeFeature` instead of `Json.Decode.maybe decodeFeature`
+U17MHJ12N : You know we typically refer to a component's state as the Model, well has anyone considered calling is State and also having something else called Props (a la React). Seems like a very useful distinction to me to separate stuff I own and should be managing from stuff that is handed to me by an ancestor.
+U4872964V : Sometimes we call it State
+U0FP80EKB : I generally only have `Model` at the top level. Modules that define records I try to use something more domain-specific than `Model`
+U17MHJ12N : more interested in the problem of ownership
+U17MHJ12N : I think replacing `update: Msg -&gt; Model -&gt; (Model, Cmd Msg)`
+
+U17MHJ12N : with
+U17MHJ12N : `update Msg -&gt; Props -&gt; State -&gt; (Model, Cmd Msg)`
+U17MHJ12N : might be a good thing
+U4872964V : where would the Props come from?
+U17MHJ12N : above
+U4872964V : what do you mean above?
+U0FP80EKB : yeah.
+U0FP80EKB : above is Elm
+U0FP80EKB : `Model` contains all the data
+U0FP80EKB : that’s your application state
+U17MHJ12N : point being it is then clear that it is not for you to control at your level, it is for another "component" to control above you
+U0FP80EKB : Oh, I don’t build that way. I’ll bow out of the discussion. :slightly_smiling_face:
+U17MHJ12N : No I mean in a hierarchy where you have many levels.
+U4872964V : This is a common pattern, but it usually looks something like this:```
+update : Config -&gt; msg -&gt; Model -&gt; (Model, Cmd Msg)
+```
+
+U1WJH1JU9 : You were right, my JSON was inconsistent with Decoder. Thanks.
+U17MHJ12N : Yes I'm just wandering whether anyone had borrowed the React vernacular. Thought it might help other people get the idea more easily.
+U4872964V : I’m not sure we want to do that
+U4872964V : Elm is not React
+U2U94G0QG : your update function is more analogous to Redux not React anyway
+U17MHJ12N : it is architecturally extremely similar to certain flavours of React
+U4872964V : So, thinking in terms of components and ownership often leads to complexity
+U4872964V : it’s much easier to think in terms of functions. there is only one update function that has a specific form, all other functions are free to be whatever you think they should be
+U4872964V : so, sometimes you don’t need to return a `Cmd`, then you don’t
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

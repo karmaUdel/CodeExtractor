@@ -1,13 +1,71 @@
-<@U5WNSLTT4> can you please format your code (add three backticks on each side: ` ``` `)
-read the intro doc for our standards :slightly_smiling_face:
-oh
-what the..
-Going to run into a loop with these bots competing. :slightly_smiling_face:
-haha, looks like we haven't deprecated the slack response
-<@U5NMSURAQ> everything is up (text data) except images
-did you try to log the variables while you upload an image?
-e. g. at which point the state becomes different from what you expect?
-I check in admin and there is no any
-does the for loop work alright?
-how many times does it iterate, log it too
-I bet you'll find something strange right away if you log
+U37HUSJ4R : is there an online tool where you can see the compiled JS elm creates?
+U37HUSJ4R : something like <https://lebab.io/try-it>
+U4F64AKQV : <@U37HUSJ4R> Not that I know of, but I will usually compile with elm-make and then look at the JS output in my text editor when I need to do that.
+U0EUHKVGB : There was something that luke hadmade a while ago to do just that.
+U0EUHKVGB : <@U37HUSJ4R> There is this documentation that I started writing to cover some of the info required: <https://github.com/eeue56/elm-ffi/tree/master/docs#elm-compiled-documentation>
+U3KSN5MAL : what was that library for checking an old model against the new model and discarding anything that doesn't match?
+U3KSN5MAL : oh, is it elm-validate?
+U5Q42DDMJ : Is it possible to combine union types and extensible records?
+U5Q42DDMJ : Here are my types:```
+type alias Entity a =
+    { a | uuid : String }
+
+
+type ApiState a
+    = Saved a
+    | Saving a Bool
+```
+
+U5Q42DDMJ : I can write something like that then : ```
+type alias ApiEntity a =
+    ApiState (Entity a)
+```
+
+U5Q42DDMJ : but I get errors such as ```Hint: Looks like a record is missing the `uuid` field.```
+U3SJEDR96 : I think that should work, yes
+U3SJEDR96 : <https://ellie-app.com/3BzRvvyshnya1/0>
+U5Q42DDMJ : yes it works but not in every case
+U5Q42DDMJ : I'll try to reduce my problem to a simple example I can share
+U3SJEDR96 : In every case where you actually _have_  a uuid field, that should work. If you can share something that doesn't, I'm sure we can help figure out what goes wrong :slightly_smiling_face:
+U5Q42DDMJ : it's when I try to use type constructor like Saved on an Entity for instance
+U5Q42DDMJ : bu yes I'm working on a small example
+U0CLDU8UB : Maybe this is the problematic situation? <https://ellie-app.com/3BzWtRXHTdJa1/0>
+U5Q42DDMJ : Here it is:
+U5Q42DDMJ : <https://ellie-app.com/3BzX7Fs78m5a1/2>
+U3SJEDR96 : `fromList` can't work on `users`, since that's a `List User`, not `List (Entity User)`
+U3SJEDR96 : OH wait
+U3SJEDR96 : nevermind that
+U5Q42DDMJ : yes but I thought that's what extensible records were for
+U1B8JE3Q9 : <@U5Q42DDMJ> I think the clue is in the error message:```The type annotation for userEntities says it is a:
+
+List UserEntity
+
+But the definition (shown above) is a:
+
+List (ApiEntity { username : String })```
+
+U1B8JE3Q9 : Since the type variable in `Entity a` is a row type, your type alias should be `type alias UserEntity = ApiEntity {username : String}`
+U5Q42DDMJ : I'm not sure to get it
+U5Q42DDMJ : Ideally I don't want to change my `User` type which contains an uuid already
+U5Q42DDMJ : and so is an `Entity` no?
+U1B8JE3Q9 : `User == Entity { username : String }`
+U0CLDU8UB : The only problem you have is the annotation on fromList. Change it to `fromList : List a -&gt; List (ApiState a)` and it compiles.
+U0CLDU8UB : <https://ellie-app.com/3BBdsVGkq6da1/0>
+U5Q42DDMJ : ok but that's weird
+U5Q42DDMJ : the type shouldn't be constrained on `a` ?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

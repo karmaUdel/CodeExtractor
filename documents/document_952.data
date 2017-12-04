@@ -1,0 +1,223 @@
+U5E5JUQ5B : what are the BASIC THINGS in ReactJS that we should remember before making any big project.. Plz tell me in detail
+U5E5JUQ5B : ```import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';import AppBar from 'material-ui/AppBar';
+import RaisedButton from 'material-ui/RaisedButton';
+import TextField from 'material-ui/TextField';
+class Login extends Component {
+constructor(props){
+  super(props);
+  this.state={
+  username:'',
+  password:''
+  }
+ }
+render() {
+    return (
+      &lt;div&gt;
+        &lt;MuiThemeProvider&gt;
+          &lt;div&gt;
+          &lt;AppBar
+             title="Login"
+           /&gt;
+           &lt;TextField
+             hintText="Enter your Username"
+             floatingLabelText="Username"
+             onChange = {(event,newValue)=&gt;this.setState({username:newValue})}
+             /&gt;
+           &lt;br/&gt;
+             &lt;TextField
+               type="password"
+               hintText="Enter your Password"
+               floatingLabelText="Password"
+               onChange = {(event,newValue) =&gt; this.setState({password:newValue})}
+               /&gt;
+             &lt;br/&gt;
+             &lt;RaisedButton label="Submit" primary={true} style={style} onClick={(event) =&gt; this.handleClick(event)}/&gt;
+         &lt;/div&gt;
+         &lt;/MuiThemeProvider&gt;
+      &lt;/div&gt;
+    );
+  }
+}
+const style = {
+ margin: 15,
+};
+export default Login; ```
+
+U5E5JUQ5B : In this code of reactjs i have following errors:   ``` 5:21  error    'Component' is not defined               no-undef  15:7   error    'React' must be in scope when using JSX  react/react-in-jsx-scope
+  16:9   error    'React' must be in scope when using JSX  react/react-in-jsx-scope
+  17:11  error    'React' must be in scope when using JSX  react/react-in-jsx-scope
+  18:11  error    'React' must be in scope when using JSX  react/react-in-jsx-scope
+  21:12  error    'React' must be in scope when using JSX  react/react-in-jsx-scope
+  24:23  warning  There should be no space before '='      react/jsx-equals-spacing
+  24:23  warning  There should be no space after '='       react/jsx-equals-spacing
+  26:12  error    'React' must be in scope when using JSX  react/react-in-jsx-scope
+  27:14  error    'React' must be in scope when using JSX  react/react-in-jsx-scope
+  31:25  warning  There should be no space after '='       react/jsx-equals-spacing
+  31:25  warning  There should be no space before '='      react/jsx-equals-spacing
+  33:14  error    'React' must be in scope when using JSX  react/react-in-jsx-scope
+  34:14  error    'React' must be in scope when using JSX  react/react-in-jsx-scope
+  34:65  warning  'style' was used before it was defined   no-use-before-define```   plz help
+
+U5ERXDRSQ : <@U5E5JUQ5B> you’re missing the import `import React, { Component } from 'react';`
+U5E5JUQ5B : thanks kenji
+U5E5JUQ5B : now only used
+U5E5JUQ5B : ```import React, { Component } from 'react';import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import RaisedButton from 'material-ui/RaisedButton';
+
+import Login from './Login';
+import Register from './Register';
+class Loginscreen extends Component {
+  constructor(props){
+    super(props);
+    this.state={
+      username:'',
+      password:'',
+      loginscreen:[],
+      loginmessage:'',
+      buttonLabel:'Register',
+      isLogin:true
+    }
+  }
+  componentWillMount(){
+    var loginscreen=[];
+    loginscreen.push(&lt;Login parentContext={this} appContext={this.props.parentContext}/&gt;);
+    var loginmessage = "Not registered yet, Register Now";
+    this.setState({
+                  loginscreen:loginscreen,
+                  loginmessage:loginmessage
+                    })
+  }```
+
+U5E5JUQ5B : 6:8  warning  'Register' is defined but never used  no-unused-vars
+U5ERXDRSQ : <@U5E5JUQ5B> It seems that you’re not using `Register` so remove the import. ```import Register from './Register';```
+U5E5JUQ5B : k
+U5E5JUQ5B : ```import React from 'react';import ReactDOM from 'react-dom';
+import './index.css';
+class Form extends React.Component {
+    render() {
+        return (
+        &lt;div&gt;
+              &lt;div className="form"&gt;
+      
+      &lt;ul className="tab-group"&gt;
+        &lt;li className="tab active"&gt;&lt;a href="#signup"&gt;Sign Up&lt;/a&gt;&lt;/li&gt;
+        &lt;li className="tab"&gt;&lt;a href="#login"&gt;Log In&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+      
+      &lt;div className="tab-content"&gt;
+        &lt;div id="signup"&gt;   
+          &lt;h1&gt;Sign Up for Free&lt;/h1&gt;
+          
+          &lt;form &gt;
+          
+          &lt;div className="top-row"&gt;
+            &lt;div className="field-wrap"&gt;
+              &lt;label&gt;
+                First Name&lt;span className="req"&gt;*&lt;/span&gt;
+              &lt;/label&gt;
+              &lt;input type="text" required autoComplete="off" /&gt;
+            &lt;/div&gt;
+        
+            &lt;div className="field-wrap"&gt;
+              &lt;label&gt;
+                Last Name&lt;span className="req"&gt;*&lt;/span&gt;
+              &lt;/label&gt;
+              &lt;input type="text"required autoComplete="off"/&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;div className="field-wrap"&gt;
+            &lt;label&gt;
+              Email Address&lt;span className="req"&gt;*&lt;/span&gt;
+            &lt;/label&gt;
+            &lt;input type="email"required autoComplete="off"/&gt;
+          &lt;/div&gt;
+          
+          &lt;div className="field-wrap"&gt;
+            &lt;label&gt;
+              Set A Password&lt;span className="req"&gt;*&lt;/span&gt;
+            &lt;/label&gt;
+            &lt;input type="password"required autoComplete="off"/&gt;
+          &lt;/div&gt;
+          
+          &lt;button type="submit" className="button button-block"&gt;Get Started&lt;/button&gt;
+          
+          &lt;/form&gt;
+
+        &lt;/div&gt;
+        
+        &lt;div id="login"&gt;   
+          &lt;h1&gt;Welcome Back!&lt;/h1&gt;
+          
+          &lt;form&gt;
+          
+            &lt;div className="field-wrap"&gt;
+            &lt;label&gt;
+              Email Address&lt;span className="req"&gt;*&lt;/span&gt;
+            &lt;/label&gt;
+            &lt;input type="email"required autoComplete="off"/&gt;
+          &lt;/div&gt;
+          
+          &lt;div className="field-wrap"&gt;
+            &lt;label&gt;
+              Password&lt;span className="req"&gt;*&lt;/span&gt;
+            &lt;/label&gt;
+            &lt;input type="password"required autoComplete="off"/&gt;
+          &lt;/div&gt;
+          
+          &lt;p className="forgot"&gt;&lt;a href="#"&gt;Forgot Password?&lt;/a&gt;&lt;/p&gt;
+          
+          &lt;button className="button button-block" &gt;Log In&lt;/button&gt;
+          
+          &lt;/form&gt;
+
+        &lt;/div&gt;
+        
+      &lt;/div&gt;
+      
+&lt;/div&gt; 
+		&lt;/div&gt;
+    );
+    }
+}
+ReactDOM.render( &lt;Form /&gt;, document.getElementById('root'));
+```
+
+U5E5JUQ5B : *invariant.js:51 Uncaught Error: Expected onClick listener to be a function, instead got type string*
+U5E5JUQ5B : ```import React from 'react';import ReactDOM from 'react-dom';
+import App from './App';
+import registerServiceWorker from './registerServiceWorker';
+import './index.css';
+
+ReactDOM.render(&lt;App /&gt;, document.getElementById('root'));
+registerServiceWorker();```
+
+U5E5JUQ5B : ```./src/index.jsModule build failed: Error: ENOENT: no such file or directory, open 'C:\Users\coolj\Desktop\cloudprint\src\index.js'
+    at Error (native)
+This error occurred during the build time and cannot be dismissed ```
+
+U5E5JUQ5B : below i have mention error plz help
+U5FGKEAF6 : Hello everyone else i just started ReactJs could you send me a link if there is a simple blog style code structure
+U5E5JUQ5B : i am new to `mongodb` . i have installed but in cmd when i run it shows   ` [thread1] Failed to connect to 127.0.0.1:27017 after 5000ms milliseconds, giving up.`
+U5E5JUQ5B : `C:\Users\coolj\Desktop\Projects\loginapp&gt;node app``Server started on port undefined`
+
+U5E5JUQ5B : second line shows when i try to run node app
+U5E5JUQ5B : pls help me resolve  the prblm
+U4BD57S2V : <@U4AHQD19D> Old question, but componentWillMount() is the best place for fetching data
+U4BD57S2V : instead of componentDidMount()
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

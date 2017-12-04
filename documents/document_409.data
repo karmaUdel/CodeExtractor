@@ -1,28 +1,137 @@
+U2LAL86AY : ```type alias NewsItem =    { id : Int    , content : List (Html Msg)    , userId : 1    , chatId : 2    }
 ```
-so I'm trying to pass an element to it via ports, but I just can't figure out how to get an actual dom element from Elm
-is that even possible?
-That's unlikely to play nice with Elm; since it changes the DOM in a way that Elm isn't aware of...
-As for getting an element, you'd assign it an id and extract it from the document using `document.getElementById(..)`, but I suspect you'll see unexpected behaviour using this with Elm...
-how are larger SPA type applications handled in Elm? It seems to me that the `update msg model` function needs to know how to handle/dispatch every type of message that could be generated? Which doesn't seem to allow easy use of components?
-You can nest messages inside one another and dispatch submessages to their own update functions
-"components" are typically just messages and update/view functions, if they require internal state, they'll provide a type &amp; the values for you to store somewhere in your model
-It's not as simple as `import antigravity` but I see it as an additional form of documentation
-<@U236M9FH9> OK.. I _think_ I understand… it does seem to me like there's a deliberate design decision to force you to think about this at the top-most `update msg model` point?
-in a larger SPA style application it feels like that function would attract a *lot* of code
-less so in a regular single page per URL scenario.
-At the top-most point, I'm usually just dispatching to other update functions
-ah,, I think this is falling into place..
-When building an SPA in Elm, each page will typically have each of state, update and view; with the "main" program just dispatching messages and otherwise gluing things together. The important insight is that this abstraction boundary works great for pages, but less so for other, "smaller" components
-<@U3SJEDR96> Ah!
-:bulb:
-If I remove the "domino" argument, then it compiles, which seems... odd.
-I dunno elm-mdl, but you probably want something like `Options.onClick &lt;| PlayResponse domino`?
-There used to be a time where "nesting TEA" (i.e. giving every piece its own state, messages, update and view) was the recommended approach. We've collectively changed our opinion, since, to find a nice balance. Is it a view? Make it a view, maybe pass in functions to construct messages to react to events. Does it need its own messages? Give it messages. Does it need encapsulated state? Add state :slightly_smiling_face:
-<@U3SJEDR96> <@U236M9FH9> Thanks :slightly_smiling_face:
-<@U236M9FH9> that prompts the "PlayerResponse is not a function" complaint. `onClick` btw has the type signature `msg -&gt; Property c msg` ... I've used it before for update messages _without_ parameters with no trouble.
-then something else must be going wrong, since your `type Msg` indicates that `PlayerResponse` really is a function :confused:
-<@U3SJEDR96> I've been working on this almost non-stop for a week now and this is the final step :neutral_face: ... I wonder if I need to maybe use a generic function that itself calls an update function? I shall test.
-<@U2SR9DL7Q> Yeah, so `onClick` takes one argument, but by saying `onClick PlayerResponse domino`, you are passing it two, `PlayerResponse` and `domino`. You need to apply domino to PlayerResponse first, then pass that to onClick, using parentheses `onClick (PlayerResponse domino)`
-and `onClick &lt;| PlayerResponse domino` is the same as `onClick (PlayerResponse domino)` &amp; `PlayerResponse domino |&gt; onClick`.
-for PlayerResponse is not a function, check your message type to make sure you added `Domino` back in
-<@U236M9FH9> I've tried that both ways unfortunately. Using parens or the '&lt;|' operator procs the "not a function" error. Without any of those is the "too many args to onClick" error. I sent you the version without (PlayerResponse domino) but I've already added it back. The PlayerResponse type message has Domino set in place.
+This should not compile
+
+U2LAL86AY : you have values mixed with types.
+U2LAL86AY : also is not so good to have `content : List (Html Msg) ` is better to just keep the data on your model , not html + data.
+U641LDZFU : Ah, that was causing me trouble :slightly_smiling_face:
+U2LAL86AY : i will do a rewrite here.
+U641LDZFU : Ah sorry, that was an progress update to: ``` type alias ChatMessage =
+    { id : Int
+    , chatId : Int
+    , userId : Int
+    , content : List (Html Msg)
+    }
+
+
+type alias Transition =
+    { transitionType : String, toStoryNode : Int, text : Maybe String }
+
+
+type alias ChatNodeItem =
+    { id : Int, nodeType : String, nodeContent : StoryNodeContent, state : Maybe String, transitions : List Transition }
+
+
+type alias NewsItem =
+    { id : Int
+    , content : List (Html Msg)
+    }
+
+
+type alias NewsNodeItem =
+    { id : Int, nodeType : String, nodeContent : StoryNodeContent, state : Maybe String, transitions : List Transition }
+
+
+type StoryNode
+    = ChatNode ChatNodeItem
+    | NewsNode NewsNodeItem
+
+
+type StoryNodeContent
+    = NewsItemContent NewsItem
+    | ChatMessageContent ChatMessage
+
+
+
+
+type alias Player =
+    { visitedStoryNodes : List StoryNode
+    , currentStoryNode : Maybe StoryNode
+    }
+
+
+type alias Model =
+    { player : Player
+    }
+
+```
+
+U2LAL86AY : i understand what you are going after.
+U2LAL86AY : why do you need to have `content : List (Html Msg)`
+U2LAL86AY : auch ! :smile:
+U641LDZFU : Vielen Dank!
+U2LAL86AY : ```type Msg
+    = NoOp
+
+
+type alias Model =
+    { player : Player }
+
+
+type alias Player =
+    { visitedStoryNodes : List StoryNode, currentStoryNode : Maybe StoryNode }
+
+
+type StoryNode
+    = ChatNode ChatNodeItem
+    | NewsNode NewsNodeItem
+
+
+type StoryNodeContent
+    = NewsItemContent NewsItem
+    | ChatMessageContent ChatMessage
+
+
+type alias ChatNodeItem =
+    { id : Int, nodeType : String, nodeContent : StoryNodeContent, state : Maybe String, transitions : List Transition }
+
+
+type alias NewsNodeItem =
+    { id : Int, nodeType : String, nodeContent : StoryNodeContent, state : Maybe String, transitions : List Transition }
+
+
+type alias ChatMessage =
+    { id : Int, content : List (Html Msg), chatId : Int, userId : Int }
+
+
+type alias NewsItem =
+    { id : Int, content : List (Html Msg) }
+
+
+type alias Transition =
+    { transitionType : String, toStoryNode : Int, text : Maybe String }
+
+```
+
+U2LAL86AY : i need that function causing the problem
+U641LDZFU : The problem is it's many :slightly_smiling_face:
+U641LDZFU : I think I will have another hack at it tomorrow
+U2LAL86AY : ```Hint: Problem in the `nodeContent` field. Looks like a record is missing these fields: chatId and userId
+```
+THis error has a line number
+
+U641LDZFU : yeah, that's why I thought I needed another union type for nodeContent
+U641LDZFU : so they could also be different-but-the-same
+U2LAL86AY : oh
+U2LAL86AY : no
+U2LAL86AY : :))
+U641LDZFU : I better get to bed, thanks again!!
+U5R6L5MT4 : Hi
+U5R6L5MT4 : At Elm Europe someone talked about compiling two Elm component at once to be able to load them after wards without compiling Elm twice
+U5R6L5MT4 : I also had another question about loading the same elm component multiple times on the same page
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

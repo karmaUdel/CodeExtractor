@@ -1,3 +1,128 @@
+U591R8WBZ : I felt quite ashamed that I sent the same advice hours later :grinning:
+U591R8WBZ : Is there a library that offers a worker-queue type of concurrency, i.e. enqueue work for a fixed-sized thread pool? I looked into `claypoole`, but it works on sequences.
+U236LQYB0 : hansen-pansen: if you're familiar with java, you can do it the same ways you would in java with clojure.
+If I'm not too worried about thread priorities and contention, then I'll just use core.async with a fixed number of "workers" (i.e. go-loops) that are pulling from a shared channel, and then write jobs to that channel
+
+U591R8WBZ : I already rolled a n00b-version with core.async, but it felt … too low-level. I looked into the amazing `manifold`, which offers backpressure and all the nice stream operators, but it lacks the pooling part.Just wondering whether somebody else stumbled over the same problem.
+
+U591R8WBZ : Ohh, and I have close to zero Java background, but if that is an option, I will take a look. I guess you mean something from `java.util.concurrent`?
+U051SS2EU : agreed you can just use an ExecutorService
+U236LQYB0 : depends on your requirements. the main problem with core.async for worker pools can be that it uses the same thread pool for *all* core.async related channels. So if this is supposed to be a background operation, and you also use core.async in something like handling production web requests, then your background jobs might be interfering with your web requests.
+If that's your case, you'll probably want to use ExecutorService
+
+U051SS2EU : but if you use core.async pipeline-blocking properly you can do it at a high level with clojure too
+U051SS2EU : where the queue is the buffer on the chan, and the thread count is the parallelism arg
+U087U9YG3 : So this function reflects
+U087U9YG3 : ```(defn test-reflect [^javax.servlet.http.HttpServletResponse resp]  (proxy [java.io.FilterOutputStream] [(.getOutputStream resp)]
+    (close []
+      (proxy-super close)
+      (println "hello"))))
 ```
-that's going to work
-I don't believe you see that error message on a fresh repl, you must have some stale state
+
+U087U9YG3 : specifically the call to proxy-super reflects
+U087U9YG3 : and I'm wondering why
+U087U9YG3 : it seems like it should be possible to resolve .close()
+U591R8WBZ : `pipeline-blocking` is what I used with my n00b version.And yes, I try to use concurrency mostly for background web requests.
+
+U591R8WBZ : Thanks to your ideas on this topic, I propably should just put more brains on the `core.async/pipeline-blocking` idea and think of some error-passing messaging or channel.
+U591R8WBZ : <https://stackoverflow.com/a/41448848/2068691> brings me to some ideas.Thank you very much for your ideas and inspiration!
+
+U051SS2EU : :thumbsup:
+U0NCTKEV8 : proxy doesn't type hint `this`
+U591R8WBZ : Thank you very much, guys! Your help is very much appreciated. This community is so cool!
+U4986ECDQ : <@U087U9YG3> I was about to make a PR with a fix for that.
+U4986ECDQ : Assuming you're in ring; looks like it to me.
+U087U9YG3 : beat you to it =)
+U4986ECDQ : Did you get the rest? :smile:
+U087U9YG3 : ring-servlet no longer reflects, didn't check the other subprojects
+U087U9YG3 : <https://github.com/ring-clojure/ring/pull/295/files>
+U4986ECDQ : <https://gist.github.com/jeaye/3b650b3b584056d6440aaf161832247e>
+U4986ECDQ : That's what I had locally.
+U087U9YG3 : hmm, lein check runs cleanly for me with just what I have
+U4986ECDQ : Did for me, too, but I see the reflection in my project using ring.
+U087U9YG3 : ah, yeah
+U4986ECDQ : So I chose not to trust `lein check`, since I can see in the source how it would be reflecting. :slightly_smiling_face:
+U087U9YG3 : huh
+U4986ECDQ : Interested in applying the other changes, as shown in my gist, to your PR?
+U087U9YG3 : I'll look into it =)
+U4986ECDQ : Cheers.
+U087U9YG3 : oh, you're in the jetty adapter, I see
+U087U9YG3 : ah, yeah, lein check reports problems
+U4986ECDQ : Ah, fair enough. Sanity is restored.
+U4986ECDQ : My approach to fixing the `proxy-super` is different, but the effect is the same.
+U087U9YG3 : <@U4986ECDQ> I also added a return type hint so my code wouldn't reflect
+U087U9YG3 : <https://github.com/ring-clojure/ring/pull/294>
+U4986ECDQ : Yep, saw that before I started on the reflection work.
+U4986ECDQ : That PR looks good; thanks for beating me to it and updating it for ring-jetty-adapter. :slightly_smiling_face:
+U087U9YG3 : =)
+U5XDR5QKS : can you use environ when making a war file and deploying via tomcat? for example when i run ` lein with-profile dev ring uberwar... ` does that do anything?
+U050MP39D : very occasionally, 'clojure.core doesn't appear in the list returned by `(loaded-libs)`. that would be a bug right?
+U0NCTKEV8 : hard to say
+U0NCTKEV8 : loaded-libs only contains namespaces loaded via require or use, if I recall
+U050MP39D : mmmm that's not really what the docstring implies
+U06DQC6MA : So I am using an exception tracker that has mediocre clojure support (Sentry), but I'm working to improve it. Exception "rollup" (grouping of exceptions based on their similarity) relies on the hash of "in-app" stack frames (frames that begin with com.myapp for instance) being equal to a previously seen exception's stack frames. I believe rollup is not working across runs of my application due to anonymous function names differing. So, for instance: `com.myapp$fn__12345` is the name right now, but on the next run it may be `com.myapp$fn__99999`. Are there other patterns in clojure stack traces beyond `foo.bar$fn__12345` that I should let the maintainers know about which are specific to clojure, so exception rollup works as intended?
+U1LCB75M2 : <@U06DQC6MA> check <https://github.com/hcarvalhoalves/raven-clj>
+U1LCB75M2 : the way its sending the tracebacks seems to make Sentry happy (it manages to group by Exception type nicely)
+U06DQC6MA : <@U1LCB75M2> I'm kind of meh on manually reading source files from disk with no cache and parsing the exception object by hand. This is something that can be accomplished on the server side.
+U06DQC6MA : As of a week ago or so, the `getsentry` folks picked up coda hale's wrapper around `raven-java`.
+U06DQC6MA : One other thing to add in case you're interested: I skipped the need to have `in-app` by simply setting the package names of my app as a param on the `DSN`
+U06DQC6MA : Finally, I spoke with the sentry maintainers and they said it would be no problem to just fix the hashing of the problematic frames.
+U06DQC6MA : <@U1LCB75M2> err maybe one more thing: I tried variations on what you're using, and I still managed to have mixed results. I fixed that same `nth` `IndexOutOfBoundsException` for `:context_line` for instance.
+Here's the "official" sentry-clj lib now -- PRs as I understand it, are welcome: <https://github.com/getsentry/sentry-clj>
+
+U1LCB75M2 : IMO the killer feature is having source code context around the error
+U1LCB75M2 : without that Sentry is just an expensive log aggregator
+U087U9YG3 : Would it be possible to arrange things so that `(when (instance? Foo x) (.fooMethod x))` wouldn't reflect?
+U087U9YG3 : ie special-case compilation of (if (instance? …) …) so that the then branch was automatically hinted?
+U087U9YG3 : …I guess this belongs in <#C06E3HYPR|clojure-dev>
+U06DQC6MA : <@U1LCB75M2> I was talking to the sentry folks and it sounds like the source code context will be something that's pulled from github in the near future. All of the data required to do it is there, just hasn't been plumbed into the product. I think it's better than a log aggregator, but I'm using an on-premises install which affords some extra flexibility you don't really get in the SaaS product.
+U0K0TFQLW : <@U06DQC6MA> interesting to see that the sentry folks picked up maintaining a clojure client. I'll have to give theirs a spin to see how it compares to the fork of raven-clj (which currently works very well for me).
+U067BPAB1 : G'day everyone, I have a macro puzzle question - how can I access an atom from within a macro? I have the following:
+```
+(def tatom (atom nil))
+
+(defmacro tmacro
+  []
+  `(let [t# (deref tatom)]
+     (if t#
+       (prn "tatom is nil")
+       (prn "tatom has value"))))
+
+(tmacro)
+"tatom is nil"
+=&gt; nil
+
+(reset! tatom 1)
+=&gt; 1
+(tmacro)
+"tatom is nil"
+=&gt; nil
+```
+
+Anyone got any ideas as to why the atom is not being correctly deref'd here?
+
+U067BPAB1 : The gist of the question is - I want to access mutable storage from within a macro, how do I do that?
+U060FKQPN : <@U067BPAB1> the branches on your if are the wrong way around
+U060FKQPN : also there's no need for that to be a macro
+U067BPAB1 : This is just a contrived example, not real production code which is what this question is really about - and I want that one to be a macro for various reasons.
+U067BPAB1 : Thanks for pointing out the ordering, I knew it had to be my morning idiocy. :facepalm:
+U5UP845LY : in which ns is the tatom ? the same as defmacro, or the same as its usage?
+U04VDQDDY : <@U067BPAB1> I can't repro. The first call to `(tmacro)` causes it to print `"tatom has value"` and after the `reset!` it causes it to print `"tatom is nil"`
+U067BPAB1 : Thanks guys, but as I mention above, this was just a morning brainfart on my part, with the branches reversed. This was just a contrived example that I quickly put together to verify that I can deref atoms (from the same ns, but it doesn't really matter if they're fully ns-qualified) and screwed up in the process.
+U04VDQDDY : <@U067BPAB1> Right, understood that the branches are reversed. I still can't repro what you pasted above.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

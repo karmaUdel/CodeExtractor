@@ -1,7 +1,69 @@
+U4RR7KX45 : ah that worked
+U0LPMPL2U : Json Decode Pipeline is used for decoding records with a lot of keys
+U6H9E1YS3 : Hello all :slightly_smiling_face: A bit stuck on something, I have an update branch that sends a Cmd Msg with the updated model but the Cmd Msg is sending before the model has updated. What's the best way to make sure the model has updated before I send the Cmd? I've just made a variable for the list I need at the moment, but thought there had to be a better way of doing it! Any advice would be appreciated
+U0LPMPL2U : I'm curious why you want to send yourself a `Cmd Msg`? Is it to prevent duplication in two branches of your `update` ?
+U6H9E1YS3 : I don't understand sorry I'm not sending myself one I'm using d3 so using it to send filtered data via a port :slightly_smiling_face:
+U6H9E1YS3 : I probably wasn't very clear
+U0LPMPL2U : inside your `update` function, `model` always refers to the _old_ version of the model
+U0LPMPL2U : All data is immutable in Elm so using the `{ model | ... }` syntax doesn't mutate `model`, but instead returns a _new_ record
+U0LPMPL2U : since you want the new filtered data, you should use the same value you are assigning to the model
+U6H9E1YS3 : Ah fair enough! Thanks for your help :grin:
+U0LPMPL2U : ```ChangeActiveYear year -&gt;
+    ( { model | currentYear = year, filteredData = filterDataByYear model.data year }
+    , updateGraphData (filterDataByYear model.data year) )
 ```
-so it seems like you can't have parametric types act as constructors
-Oh, no, I have `UserFields` as the constructor within that last function, not `WithUserFields`
- Let me try a few more things first
-Ooh, so you think even with `type alias Thing = MetaThing {}` maybe wouldn't give you the constructor?  I suppose that's possible... very unexpected though, and doesn't seem to be documented anywhere
-I would think with a `type alias Thing = ` I could put anything after the `=` and it would give me a constructor.
-You did not specify their order. So you can not construct one just like you wanted.
+
+U0LPMPL2U : if you don't want to calculate `filterDataByYear`, you could use a `let` to assign the result to a variable and then reference it in both places
+U0LPMPL2U : Alternatively, use a `let` to assign a variable `newModel` that has the new model value
+U0LPMPL2U : and then you can say `updateGraphData newModel.filteredData` if you want
+U6H9E1YS3 : Yay it looks a bit nicer now and working perfectly thank you!
+U0LPMPL2U : glad to help :slightly_smiling_face:
+U6FK062M7 : Greetings, hope I can get some tips here. I am trying to port a showcase app, simple, but more complex than to-do to elm, and started with the routing…it is over here… <https://github.com/flq/elmorse>
+
+U6FK062M7 : When I run the app, I can put any url into the browser location field, it will always end up in home
+U6FK062M7 : not sure where I am going wrong since it looks fairly similar to the tutorial
+U23SA861Y : This is the line between what your webserver is set up to do, and what your app is setup to do.
+U6FK062M7 : *facepalm* now I understand all that stuff about hash url, oh boy.
+U6FK062M7 : okay, never mind
+U6FK062M7 : sometimes it helps just to explain
+U23SA861Y : you can certainly setup your webserver to help you here
+U23SA861Y : but yeah, the hash allows you to have this sort of local path on top of the main server route
+U3HQVHERX : does anybody have experience with webpack in here? is this the right place to ask?
+U3HQVHERX : I'm following this tutorial: <https://elmseeds.thaterikperson.com/elm-webpack-extras>
+U3HQVHERX : ```WARNING in ./src/Main.elm
+(Emitted value instead of an instance of Error) Unknown Elm compiler option: debug
+ @ ./public/js/app.js 1:0-36
+```
+
+U3HQVHERX : ```"devDependencies": {
+    "elm-hot-loader": "^0.5.4",
+    "elm-webpack-loader": "^4.3.1",
+    "webpack": "^3.4.1",
+    "webpack-dev-server": "^2.6.1"
+  }
+```
+
+U6ECA0Q4D : What does the ! operator do?   I've been reading through the elm-datepicker code and came across some lines that look like this: ```prepareDates (prevMonth currentMonth) model ! []```
+U3HQVHERX : <@U6ECA0Q4D> it's short hand for `(model, Cmd.none)` ... it makes a tuple
+U3HQVHERX : <http://package.elm-lang.org/packages/elm-lang/core/latest/Platform-Cmd#>!
+U6ECA0Q4D : So what is valid in the array?  Just commands?
+U3HQVHERX : `List (Cmd msg)`
+U6ECA0Q4D : Ah, that's where it is in the docs!  I couldn't find it.  Thanks!
+U3HQVHERX : yeah.. searching for infix operators is weird i googled `elm "! []"` to find that
+U6ECA0Q4D : Thanks for the help <@U3HQVHERX>.  I'm trying to wrap my head around the elm architecture and functional programming and it's kicking my butt
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

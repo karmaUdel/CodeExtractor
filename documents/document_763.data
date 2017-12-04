@@ -1,0 +1,70 @@
+U3ZNWN526 : (Such that it would be more of a burden than a help to actually define a type for it, I suppose)
+U236M9FH9 : Pretty much the only time I use tuples is something like this:```
+let
+  (buttonClass, buttonText) = case someType of
+    Foo -&gt; ("btn-danger", "Quit")
+    Bat -&gt; ("btn-primary", "Start")
+in ...
+```
+
+U3ZNWN526 : Ahh, yes, okay.
+U4872964V : yes, and```
+case (oneThing, anotherThing) of
+    (Some match, SomeOther) -&gt;
+```
+
+U5ABF3BH7 : Hi, is there a way to write the following in a more condensed way?
+U5ABF3BH7 : ```placeId =   case model.place of
+   Nothing -&gt; 
+      “”
+   Just place -&gt; 
+     toString place.id```
+
+U0LPMPL2U : ```model.place
+  |&gt; Maybe.map (toString &lt;&lt; .id)
+  |&gt; Maybe.withDefault ""
+```
+(edit: got the pipes wrong)
+
+U5ABF3BH7 : <@U0LPMPL2U> Thanks you so much! You are awesome! :slightly_smiling_face:
+U0LPMPL2U : always glad to help :slightly_smiling_face:
+U0LPMPL2U : If you're using the `elm-community/maybe-extra` package, there's a function `Maybe.Extra.unwrap` that does the equivalent of the `Maybe.map` and `Maybe.withDefault` combo
+U5ABF3BH7 : <@U0LPMPL2U> where do you put  ```model.place```?
+U0LPMPL2U : just edited my response
+U5ABF3BH7 : <@U0LPMPL2U> thanks :slightly_smiling_face:
+U0LPMPL2U : You could also write it as:```
+placeId : Model -&gt; String
+placeId =
+  Maybe.withDefault "" &lt;&lt; Maybe.map (toString &lt;&lt; .id) &lt;&lt; .place
+```
+
+U0LPMPL2U : this is called "point free style" and is probably less readable in this case
+U4872964V : I must admit I often do the `case` even though I know about the `Maybe` helpers
+U0LPMPL2U : yeah, sometimes getting all fancy doesn't really help
+U0LPMPL2U : It's nice in pipelines
+U4G7CC18U : Good day fellow elmaholics.I am starting a new app that will be a SPA. I'll be honest and just say that I am very inspired by <@U0CL0AS3V> famous `elm-spa-example`. Everything was going fine, until the moment that I realized that I want to use `elm-bootstrap`. This means that my `Views\Page.elm` `view` must be able to "raise" its own `Msg`s. 
+
+I am having quite a hard time accomplishing this :( I can at least now understand why I am failing.. in `Main.elm` `viewPage` I need (for instance) `Home` to be able to "raise" its own `Msg`s (which get `Html.map`'d to `HomeMsg`), but now when I pipe it into `frame`, this `frame` would also need to potentially be able to "raise" its own messages..
+
+My code is getting really messy really fast, so I must discuss this with someone who has had a similar situation, because I might be getting tunnel syndrome.
+
+U4G7CC18U : I am going to pull my ""masterpage"" logic from `Views\Page.elm` into `Main.elm` and see if that helps
+U3L8MM10T : <@U4G7CC18U> Maybe think about using <http://package.elm-lang.org/packages/justgage/tachyons-elm/latest>, which itself is of functional nature.
+U4872964V : or <#C4F9NBLR1|style-elements> :slightly_smiling_face:
+U4G7CC18U : <@U3L8MM10T> <@U4872964V> thank you for the suggestions. :+1: :+1:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

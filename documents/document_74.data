@@ -1,44 +1,79 @@
+U04V4HWQ4 : `get-in`
+U0NCTKEV8 : I think most people prefer `get-in`
+U0NCTKEV8 : I like the uniformity of `-&gt;`
+U0NCTKEV8 : you can stick some functions in there
+U0NCTKEV8 : `-&gt;` may also be faster if you are dealing with nested records
+U0NCTKEV8 : `-&gt;` is a syntax short cut, it is gone at runtime, `get-in` is actually a function and will run and exist at runtime
+U0NCTKEV8 : and you have this key vector that has to exist at runtime
+U050ECB92 : I'll add one consideration: keyword accesses add quite a bit of bytecode `(-&gt; :a :b :c :d)`
+U050ECB92 : probably won't matter tho -- but if you care about jvm inlining i'd look into it
+U0NCTKEV8 : sure, but at that point do you want to be dealing with nested maps?
+U173SEFUN : <@U0W0JDY4C> you can do that with specter very easily:```
+(def L '(((:a :b (:c :d (10))))))
+(transform (nthpath 0 0 2 2 0) inc L)
+;; =&gt; (((:a :b (:c :d (11)))))
 ```
-<@U0GN0S72R> nice! that's actually a pretty common use case
-suggested usage: `(doseq [[x more?] (partition-all 2 1 coll)] ...)`
-<@U04V1HS2L> Cursive allows you to control this, _Settings-&gt;Editor-&gt;Code Style-&gt;Clojure-&gt;General-&gt;One space list indent_
-Recent versions of CIDER will also allow you to configure Emacs to do the opposite if you prefer that, I'm not sure what the setting is though.
-is there a way to get the emacs repl to display reagent/hiccup/react/dom/svg elements ? so I want to write sexps that return hiccup, then have emacs, instead of displaying the raw clojure data, to render it and display it
-if I had this, it'd give me most of ipython in eamcs
-So I'm thinking about writing a clojure desktop app. Does <https://github.com/halgari/fn-fx> seem relatively stable and usable?
-<https://ring-clojure.github.io/ring/ring.adapter.jetty.html>
-why is there no websocket option there?
-how do I specify a websocket (which, iirc, jetty9 supports)
-can anyone recommend me an async http client based on core.async?
-config: nomad, aero, environ, cprop, ... who uses which library and why? (it's always nice to have some kind of experience reports before deciding)
-<@U3QUAHZJ6> why should it be based on core async?
-<@U0E0XL064> We wrote our own. We haven't gotten around to open sourcing it yet tho'. It's partly inspired by `outpace/config` but does some specific stuff we needed, and it's Component-based. This is a good article comparing some of the config libraries: <http://realworldclojure.com/application-configuration/>
-Hmm, actually now I re-read that article, I suspect Sonian's `carica` is more likely the inspiration for what we ended up with.
-Not entirely sure. Define 'arbitrary'. But on the face of it, I would think the answer is 'yes'. However, like all such things, it is not miraculous - it does not provide totally open ended automated UI generation...
-<@U04V70XH6> right, thx
-<@U0E0XL064> we use aero, I like it's philosophy of centralising as much config as possible, and just separating out sensitive config
-Does clojure have any sort of plugin loading library? I'd like to create an application which loads plugins, but I haven't seen anything around.
-<@U1C03090C> <https://yogthos.net/posts/2015-01-15-A-Plugin-System-in-Clojure.html>
-<@U0E0XL064> we use <https://github.com/typesafehub/config> with a tiny clojure wrapper
-<@U0E0XL064> aero here too, it's just edn + some data readers. nothing too fancy, but quite powerfull. And you can extend it if you need it to do something it can't. It's quite lightweight.
-I am familiar with {:keys [...]} . What does the :or mean?
-if value is not present, use default
-<@U3JURM9B6> those are alternate values if not found
-note that it checks using `contains?` not nil/false
-[in (if (contains? args :in) (:in args) chan))]
-semantically yes
-great; thanks!
-Thanks!
-<@U0D33A4JF> any reason why you don't use one of the clojure config libs?
-no, I just like that config format
-well documented, does everything I want
-question: In Clojurescript it seems that the `&amp;env` passed to macros contains the `def` vars as well as locals. How do I get the same in Clojure?
-I need to filter this out by matching the inner vector for example this [[:x [3 2]] [:y [1 1]] [:z [3 2]] [:i [3 1]] should be [[:x [3 2]] [:y [1 1]] [:z [3 2]]]
-[:i [3 1]]  will be removed because the first element of the inner vector appeared before with a different value of the last element
-is there a clojure naming convention preference for a function which returns a predicate? Assumption here is that some extra data is required to create the predicate and we need a separate function taking that extra data and returning the predicate function
-I think `foo-fn`is quite common
-at least in clj.core
-did anyone try to call an external program with clojure with timeout? none of the examples (conch), (clojure.contrib.shell-out with java.util.concurrent.TimeUni) did work... stuff runs forever
-i mean a seperate process
-like call a windows exe and kill it after 10 seconds if it still runs
-I think you need to do the bookeeping yourself and call destroy on the Process instance if not completed
+
+U1CTH1TUY : I prefer `get-in` because it makes the intention clear, we know that the first argument is a map, and that the second argument is a path. That information is lost with `-&gt;`, also, that means you can't pull the path, `[:b :c :d]` from a data source or generate it without your own macro, because you can't apply to `-&gt;`
+U0NCTKEV8 : sure, that is the flip side to what I said about the key vector
+U0NCTKEV8 : if it is constant and known at compile time (which it seems like it almost always is) then keeping it around at runtime is (admittedly an insignificant) waste
+U050ECB92 : true that
+U0W0JDY4C : specter keeps popping up here and there with some nice solutions.. i'll have to look more closely around its api
+U3JURM9B6 : <https://aws.amazon.com/lambda/faqs/> &lt;-- java is listed as supporrted language; does this mean one can do "clojure -&gt; java" for lambda instead of "cljs -&gt; js" ?
+U050MP39D : <@U3JURM9B6> my guess is that startup times might be problematic for many lambda use cases
+U050MP39D : but yes, you definitely *could*
+U116D37KN : Both clj and cljs can be used, but yeah, startup times become a thing.
+U050MP39D : just a lot of the use cases I can think of for lambda, a very fast starting VM such as the js vm is more appropriate than jvm+clj
+U0NCTKEV8 : to be clear, by java they mean jvm, clojure doesn't compile to java like clojurescript compiles to javascript
+U0NCTKEV8 : clojure generates jvm byte code
+U050MP39D : and with the incredible support cljs has for the node ecosystem these days... I would choose whichever vm makes the most sense for the scenario. which is a pretty amazing thing to be able to choose while keeping the language constant :slightly_smiling_face:
+U3GJHS5DY : <https://aws.amazon.com/blogs/compute/clojure/>
+U3GJHS5DY : relevant ^ though im sure most have seen it
+U3JURM9B6 : zylox: thanks for link, first time I'm seeing it
+U1CTH1TUY : <@U3JURM9B6> <@U050MP39D> the data from this talk suggest it might not be as big of a deal as you'd assume (if you are running lambdas frequently enough to limit cold starts): <https://www.youtube.com/watch?v=GINI0T8FPD4>
+U0NCTKEV8 : <https://github.com/clojure/clojurescript/wiki/Differences-from-Clojure> just gets larger and larger
+U050MP39D : <@U1CTH1TUY> yes! true. my assumption is that most people using lambda are using it for reasonably infrequent operations (to take advantage of paying for only what you use). but if that's not the case then clj could be perfectly fine
+U0NCTKEV8 : somethings I know are different between clojure and clojurescript because I follow the jira issues aren't even on the list yet
+U3JURM9B6 : actually I'm using it to not think about scaling
+U3JURM9B6 : i.e. if my problem can be decomposed into an 'obviously parallel' setup, then AWS just scales everything for me
+U3JURM9B6 : and I no longer think at the grainualarity of machines
+U1ACUMJKX : if you create a language binding to a library written in another language
+U1ACUMJKX : how do you license it?
+U1ACUMJKX : do you keep the license of the source library?
+U1CTH1TUY : depends on the license of the source library. If you aren't distributing their library, you might be able to license it however you want. Not something that can be answered in the abstract
+U0LUEAS3Z : Hi all, I'd like to fan out the same input sequence to several transducers and collect the results into a single sequence... is there a function for that?
+U60259LCB : Any one experience with Lanterna?  I'm looking into making a snake game, and would like to know if it can do a non blocking ui
+U06CM8C3V : <@U60259LCB> I believe it does, haven't used it in a while, but I see from the docs it has both `get-key` and `get-key-blocking` — the first returns nil if there's no keypress waiting to be read.
+U5NAUMCAD : Hi all, Is there any way to mock a function in clojure. For example I have this function: ``` (defn a [x]
+        (utils/count x)) ```
+
+I need to write a test, but I do not know how to mock the utils/count  (for example)
+
+U5NAUMCAD : what if I have several functions inside the same function and I need to test it
+U5NAUMCAD : ``` (defn a [x]        (utils/count x)
+        (utils/count2 x)
+        (test/other x)) ```
+
+U1G9D4WE7 : <@U5NAUMCAD>, you can use `with-redefs` to "re-bind" a symbol
+U1G9D4WE7 : here is a useful testing pattern: <https://stackoverflow.com/questions/31157889/clojure-unit-testing-with-redefs#31309070>
+U11BV7MTK : but in that function there's nothing to test
+U11BV7MTK : it sounds like you want to test `utils/count`
+U5NAUMCAD : it is an example!
+U11BV7MTK : gotcha. just making sure
+U5NAUMCAD : :smiley:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

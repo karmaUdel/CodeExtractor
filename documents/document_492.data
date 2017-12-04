@@ -1,18 +1,274 @@
+U5ABF3BH7 : <@U3HQVHERX> The following code provides a string already
+U5ABF3BH7 : ```div [ class "col-xs-7" ]   [ select [ class "select form-control", onInput (config.toMsg (AddressMsg Address.ChgCountry)), value config.model.address.country ]
+       AddressHelper.countryOptions
+   ]```
+
+U5ABF3BH7 : since it is a select
+U3HQVHERX : what about `onInput (config.toMsg (AddressMsg Address.ChgCountry))` --&gt; `onInput Address.ChgCountry` and change type to `Html msg`
+U57KYFW67 : Ack. What is the command to genreate a new elm-package.json file?
+U5ABF3BH7 : It doesn't work either, it needs to be wrapped.
+U3HQVHERX : <@U57KYFW67> `elm-repl` will make one incidentally i think
+U57KYFW67 : oh, I had an elm-stuff directory!
+U3HQVHERX : i'll test this out and see what I find :slightly_smiling_face:
+U3HQVHERX : <https://gist.github.com/nqthqn/5843404710c279427203a582a1bef488>
+U3HQVHERX : So if you have a module `Foo` that exposes `Msg` and `update` you can do this in the place you are using the module
 ```
-<@U5LFUHH19> ^
-That's going to take me a while to parse!  Thanks.
-head == asplode :slightly_smiling_face:
-the only real complicated part is what I"m doing there with filterMap
-honestly I'm playing code golf here, that could easily be broken out to make it more readable
-I have to head home, but thanks, again, for your help!
-no problem <https://ellie-app.com/3xk5T6PDDNLa1/0>
-<@U2Q3QE54G> have you tested the same functionlity in js -  to make sure that what you have there is not a browser problem ?!
-Hi! Do you think it would possible somehow to use Elm as a desktop native application in order to get access to local files, directories, etc?
-`elm-native-ui` seems to be mobile oriented
-I never tried but maybe you should look at electon elm
-ho thanks, I found this <https://medium.com/@ezekeal/building-an-electron-app-with-elm-part-1-boilerplate-3416a730731f>
-Gnome3 extensions are in JS
-there might be some bridges there
-I need a crossplatform solution (at least windows and linux)
-<@U0JL9RPC4> See also <#C0K90DV3M|electron>. Recent discussion in <#C0K8VHA6B|help> too.
-OK, I assumed you knew about <#C0K90DV3M|electron> and was offering other ideas :smiley:
+type Msg
+    = Bar
+    | FooMsg Foo.Msg
+```
+
+then pattern match just as you are doing.
+
+And in the view:
+
+`button [ onClick (FooMsg Foo.Uno) ] [ text "Foo.Uno" ]`
+
+U3HQVHERX : oh wait, you have a string
+U3HQVHERX : my bad
+U3HQVHERX : <@U5ABF3BH7> try: `onInput (\s -&gt; AddressMsg (Address.ChgCountry s) )`
+U57KYFW67 : Why is `@docs` required at the top of a file for an exported binding?
+U57KYFW67 : What does `@docs` do that simply annotating the name with a `{-| ... -}` style comment not?
+U5ABF3BH7 : <@U3HQVHERX> Ah! I didn't think of doing that way!
+U5ABF3BH7 : Thanks
+U153UK3FA : <@U57KYFW67> <http://package.elm-lang.org/help/documentation-format>
+U57KYFW67 : Does that let you control the ordering and grouping of the docs then?
+U153UK3FA : yep
+U57KYFW67 : gotcha
+U57KYFW67 : And the answer to this is probably "no", but is there any way in Elm reactor to pass a JSON object for a `Program` that requires `Flag`s?
+U153UK3FA : there isn't
+U635238TG : has anyone done the two Elm tutorials by James Moore on knowthen? I'm going to start the elm for beginners course tomorrow. I'm wondering if this and the Elm Beyond the Basics are going to be good for someone not just new to Elm but actually mostly new to programming in general.
+U20K0C2G4 : <@U635238TG> they're good
+U20K0C2G4 : you've made a good choice choosing elm to start programming, although most of the benefits that elm provides may not be as relevant, you'll get to a working application much quicker than with anything in the JavaScript world
+U635238TG : thank you! I'm excited. $45 is a little rich in my present circumstances but there is just not that many Elm learning resources out there. I also just got the Elm in Action book by Richard Feldman. I'm just straight into this thing.
+U20K0C2G4 : yea Richard Feldman's resources are great too
+U57KYFW67 : <@U635238TG> If you have no programming experience, you may be at a small kind of advantage, too, over some other programmers.
+U57KYFW67 : Elm is very different than most languages (being what we call a pure functional language). And old hat programmers spend a lot of time having to unlearn a lot of what they expect when coming into such a language.
+U20K0C2G4 : honestly I'm curious, <@U635238TG> how did you find Elm?
+U635238TG : yeah, i kind of got that sense too. i did a little javascript stuff but I don't think enough to come away with any habits or modes of thinking yet.
+U635238TG : i basically wanted to explore web development but quickly grew to dislike this whole javascript landscape. all the criticisms people were saying made sense to me and then Elm just popped up as kind of solving all these in a neat package.
+U57KYFW67 : That sounds like a good situation to try using Elm, I'd say
+U635238TG : i figure it is a great language to learn good, safe habits of programming now and will make it easier going forward if I want to bring the functional programming mindset to other languages. the compiler is like my little robot buddy helping me along the way!
+U635238TG : i hope others find decent runarounds for using it on the server side by the time I get to that point so I can just keep getting better in this language before having to branch out. haskell seems way intimidating but I'm drinking the fp approach kool-aid. maybe elixir. the timeline talks on elm development make it seem like it might be years down the road before it is an official capability.  I totally buy into the slow, thought out development approach of the language though
+U57KYFW67 : There's lots of relatively easy server-side technologies you can use for Elm.
+U57KYFW67 : Elm can host simple pages on its own with Elm Reactor
+U57KYFW67 : The default output of elm make is just .html or .js files, so you could statically host them with, say, nginx or any other webserver
+U57KYFW67 : Or you can try out a simple framework like Python's Flask, and that would give you more than enough to get started.
+U635238TG : i was actually hoping there would be smaller use case simple solutions like that. i'm not even that far in my learning yet so that is good to hear.
+U57KYFW67 : (If you like the coolaid, I think there are also some simple Haskell web frameworks)
+U635238TG : and elm is supposed to be a great intro to fp so maybe i could do that. i think the one recommended is called scotty
+U20K0C2G4 : I'm doing F# with Azure Functions on the server
+U57KYFW67 : Yeah. Scotty is the one.
+U635238TG : i think it will be a lot of fun to grow with this language.
+U20K0C2G4 : but I'm coming from a .net work environment
+U57KYFW67 : <@U20K0C2G4> What seems to be the issue?
+U20K0C2G4 : I'm just chiming in, thought you were talking about server side technologies
+U57KYFW67 : ahh, sorry. I misread.
+U20K0C2G4 : as far as Elm though, I've started investigating style-elements package
+U20K0C2G4 : I think they are on to something
+U20K0C2G4 : I just don't fully understand it yet
+U20K0C2G4 : <@U57KYFW67> have you looked into it?
+U57KYFW67 : It's on my todo list.
+U635238TG : i am curious on why since Elm transpiles to js you can't use it to write code as node.js?
+U57KYFW67 : A long term goal of Elm is to develop it as its own platform. Even though it compiles to JS today, eventually, it might compile to something else.
+U57KYFW67 : So the problem isn't that it's not possible
+U57KYFW67 : In fact, the elm-node package does pretty much exactly that
+U57KYFW67 : But it does not meet the quality standards to be considered "part of Elm" quite yet.
+U635238TG : ahh. i was just coming at it with a mindset that if node is just js then you could just use Elm for everything you could use js for.
+U635238TG : also curious why someone can't take the js generated from Elm and edit it as if it was originally written in js and no one is the wiser.
+U57KYFW67 : The code generation is the easy part. The libraries are the tricky part.  :slightly_smiling_face:
+U57KYFW67 : You very well could. But machine-generated code is usually very hard to work with.
+U57KYFW67 : and once you change it, you might as well delete the Elm code, because recompiling will overwrite your changes
+U635238TG : thanks for the patient answers! i'm going to be talking you folks' ears off as I learn all this. all the beginner programmers I know are pretty much going the js or python route
+U0ZRNV5M3 : i think the "elm as its own platform" scenario is a really big deal
+U57KYFW67 : <@U0ZRNV5M3> It's an ideal lots of languages have tried. It's just a matter of sticking to your guns :slightly_smiling_face:
+U0ZRNV5M3 : exactly. a lot of the most exciting aspects of using elm werent features people were clamoring for necessarily
+U57KYFW67 : <@U635238TG> It's not a bad idea to know Javascript or Python. Javascript is central to web development, as it's currently the only language browsers universally understand. (And Python is just merciful for a language for beginners).
+U0ZRNV5M3 : i think evan's hope isnt to build a better way to write javascript, but a better way to create stuff
+U635238TG : i figure i will learn some javascript as needed while i progress along. i'm set on getting a solid foundation in Elm as my first language and focus on that first and foremost as I do believe in the approach and think it will make me a stronger developer at the foundation level over the long run.
+U635238TG : also taking html/css tutorials to get that down too
+U3SJEDR96 : Yes, actually. It requires some fiddling, tho - I wrote about it. <https://blog.ilias.xyz>
+U57KYFW67 : Thanks. I'll take a look.
+U61FZV5EK : Hey. I have a list of anchors i want to tab through or click on. When tabbing, I want the element to have an outline, but not when I click on them. Is there some clever way to achieve this without messing with the model?
+U2W8CSAQ7 : What's the easiest way to add copy-to-clipboard functionality in an Elm app these days?
+U57KYFW67 : afaik, I think you probably need a port and delegate it to JS, <@U2W8CSAQ7>
+U153UK3FA : I think there might be an issue with doing it like that due to browser restrictions
+U57KYFW67 : You mean an issue using a port?
+U153UK3FA : oh, I mean you'll need to use that port to attach an event handler to a DOM element before the user clicks it
+U153UK3FA : I think interacting with the clipboard can only be done while handling an event
+U3SJEDR96 : yeah, it can't happen asynchronously, which is how ports work due to the scheduler getting involved
+U57KYFW67 : ah, yeah
+U6A6Z5LMT : Anyone know How to declare a record type with optional keys see <https://www.reddit.com/r/elm/comments/6nwg53/record_type_with_optional_keys/>
+U3SJEDR96 : I think Evan's answer there is one of read carefully. The key point is that a type alias for a record describes a certain shape, and only that shape. If you want to be able to access those fields type-safely, they need to be in the record, with a given type.
+U3SJEDR96 : A datastructure that _may_ have a value of a certain type for a given key is also offered, and that would be a Dict or an Array (Array Foo)
+U604S603Y : I'm still having a brain knot in working with one part of The Elm Architecture:I'm storing my `Session` in the top-level model of my Elm app so I can pass it in to all the functions that need to run authenticated against the server.
+I have a `Login` submodule I'm using at different locations in my app.
+After logging in successfully I want to emit a (top level) Message in the `Login` submodule along the lines of `SetSession newSession` which I then want to handle in the top-level `update` function.
+But I have no idea how to "emit" a simple message I just constructed wrapped in a `Cmd` from my submodule's `update` function.
+Is this even possible in Elm? Is it advised? Are there better patterns for that?
+
+U3SJEDR96 : So basically, when you call `Login.update`, you wish to know something extra: did this action log me in or not. Right?
+U604S603Y : yes
+U3SJEDR96 : Right, so when you wish to get back some extra piece of info from a function, what would you normally do? (try to think of it as _just_ a function - `update` isn't special, and especially if it's in a sub-module, its signature doesn't need to conform to anything)
+U604S603Y : I was thinking of returning the `Session` data as another part of the `Tuple` of Login's `update`.  But then I have to return it from every branch of the update function in some way or another
+U604S603Y : which would result in a lot of branches with Nothing for the Maybe Session part of it
+U3SJEDR96 : true, but you also return `Cmd.none` from all the branches that don't happen to create side-effects. Adding a third piece of info, which could just be a `Bool`, shouldn't be that bad?
+U604S603Y : true
+U2W8CSAQ7 : Thanks! I tried <https://claytonflesher.github.io/2016/11/01/copy-to-clipboard.html> now, and it seems to work allright though.
+U604S603Y : but there's a second challenge I face going in the same direction:wanting to update the page's title from every page - I have a `ChangePageTitle String` message for that already, which I'd like to emit from all other pages. I could call the Port for that directly but then I'd duplicate the Port call to everywhere which I don't really want.
+
+U3SJEDR96 : Alternatively, you could change the structure alltogether and return a `{ model : Model, effects : Cmd Msg, loggedIn : Bool }`, and have functions to create that record from just a model, or a model and effects, or a model, effects and a bool
+U3SJEDR96 : do the titles change within a single page, or is it "1 page -&gt; 1 title"?
+U57KYFW67 : cool cool :slightly_smiling_face:
+U3SJEDR96 : in the second case, you can have a `title : String` function in every page module, and call that when switching to that page
+U3SJEDR96 : though personally, I feel like the page-title is part of the top-level state, rather than sometihng to be decided by the individual pages. I'm not sure, actually, I could see it going both ways.. :thinking_face:
+U604S603Y : problem is: I only know the page title after the page has loaded its data from the server - because I want something like 'Element XYZ @ MyCoolTool' as title - but the name of the element comes from the server
+U604S603Y : so at the moment I have a pattern matching on all the pages where I return the page's initial `Cmd` (either a `RemoteData.Http` call or `Cmd.none`) which is then returned as the "Command to run" in the UrlChanged message handler
+U3SJEDR96 : Right. Richard handled that type of thing using an `init` that returns a `Task` for the data-initialization, which was pretty neat. Thinking about this some more; I think this is how I would handle this:1. have a single `emit : Json.Value -&gt; Cmd msg` port
+2. create a `setPageTitle : String -&gt; Cmd msg` function, which adds the standard suffix to the title, json encodes it into an object like `{ "action" = "setTitle", "title" = "foo @ bar" }`
+3. have a single subscription to that port on the JS side, which  has a good ol `switch` case on `msg.action`
+4. call that `setPageTitle` function wherever you want to change the title
+
+U604S603Y : but wouldn't that spread the Port call throughout all my code? I still feel Ports are dirty and wanted to have the call only at one place in my code
+U604S603Y : your solution is nice and pragmatic (and I will probably do it that way)
+U3SJEDR96 : ports are an excellent way to consider JS a remote API. If you can have http requests in multiple places, you can have port calls in multiple places. Minimizing the API surface by using a single outbound port tends to ensure you have a clear code-path, and using a helper-function to get the data in the correct format ensures correctness
+U3SJEDR96 : `setPageTitle input = Json.object [ ( "action", Json.string "setTitle" ), ( "title", Json.string (input ++ " @ MyCoolTool") ) ] |&gt; emit`
+U3SJEDR96 : I think you could put that into a separate module together with `emit`, and simply not expose `emit`
+U3SJEDR96 : (if only to prevent yourself from calling `emit` directly somewhere down the line)
+U5R6L5MT4 : What can I do to solve a RangeError: Maximum call stack size exceeded
+U5R6L5MT4 : It happens at execution time
+U604S603Y : I will do that. Thanks a lot <@U3SJEDR96>
+U3SJEDR96 : <@U5R6L5MT4>: sudoku? I can have a look at it
+U5R6L5MT4 : Yes
+U5R6L5MT4 : In this repository: <https://github.com/Natim/elm-sudoku/compare/broken-one?expand=1>
+U5R6L5MT4 : The main works (with the same Sudoku as your example)
+U5R6L5MT4 : But then with the one I configured in broken-one it fails with the RangeError
+U5R6L5MT4 : s/main/master
+U3SJEDR96 : Yeah, it's probably a recursion issue - recursing too deep can result in that, especially if each stack-frame adds quite a bit of data
+U5R6L5MT4 : Yes it is probably that then
+U5R6L5MT4 : But recursion is what we want for functional languages :slightly_smiling_face:
+U3SJEDR96 : sure, but more importantly, you want tail call elimination, so it can compile to a `while` :wink:
+U5R6L5MT4 : Should I change some of the recursion to use <http://package.elm-lang.org/packages/Chadtech/elm-loop/latest> instead?
+U3SJEDR96 : no.
+U5R6L5MT4 : How shall I do to compilte to a while?
+U3SJEDR96 : <https://evancz.gitbooks.io/functional-programming-in-elm/recursion/tail-call-elimination.html>
+U4872964V : a reason could be that you have a bug that makes your recursion be infinite too
+U4872964V : if you look at the stack trace for the exception there may be a clue there
+U5R6L5MT4 : <@U4872964V> In that case I don't think so because other sudoku do solve themselves
+U5R6L5MT4 : <@U3SJEDR96> so basically it is about using case list of first :: rest -&gt; and then using foldr?
+U14Q8S4EM : Yeah dont use my package. It wont help you.
+U4872964V : <@U5R6L5MT4> maybe so but the stack trace might give a clue anyway. The big may be a special case for a certain board
+U5R6L5MT4 : <@U4872964V> Do you mean the stacktrace of the exception?
+U5R6L5MT4 : RangeError: Maximum call stack size exceeded    at sudoku/elm.js:7:40
+    at up (sudoku/elm.js:2997:16)
+    at up (sudoku/elm.js:3057:18)
+    at up (sudoku/elm.js:3032:18)
+    at up (sudoku/elm.js:3032:18)
+    at up (sudoku/elm.js:3032:18)
+    at Function.func (sudoku/elm.js:3084:14)
+    at A3 (sudoku/elm.js:98:11)
+    at Function.func (sudoku/elm.js:3099:10)
+    at A3 (sudoku/elm.js:98:11)
+    at Function.func (sudoku/elm.js:3242:4)
+
+U4872964V : Well it doesn't look like a simple case of that anyway. Recursion is tricky that way though
+U3SJEDR96 : brute_force -&gt; resolveSudoku -&gt; increment_sudoku -&gt; brute_force -&gt; ...
+U5V5B3F9N : Hi all :wave: a silly question perhaps, but I can't find the answer: does record update syntax `{ model | key = updated_value }` exist for *opaque* types `type MyType = MyType { key1 : String, key2 : Bool }`? I'd like to update the latter with something like `MyType { myType | key2 = True }` but I can't find a shorthand way to update my opaque type other than destructuring it in its entirety and then restructuring it.
+U3SJEDR96 : You have to destructure and restructure, though you can do so in a few ways that make it _not that painful_: <https://ellie-app.com/3MvVD38RbyDa1/0>
+U5V5B3F9N : Ah, the trick is in the additional `alias` declaration <@U3SJEDR96>? Many thanks!
+U3SJEDR96 : oh, no, the alias isn't relevant
+U3SJEDR96 : the trick is in destructuring :stuck_out_tongue:
+U3SJEDR96 : <https://ellie-app.com/3MvVD38RbyDa1/1> &lt;- getting rid of the type alias for that record doesn't change anything :slightly_smiling_face:
+U3SJEDR96 : pattern matching on `(MyType variableForTheContent)` is the trick
+U5V5B3F9N : Aha, I would have sworn I tried that syntax, buy apparently not :slightly_smiling_face: I like the Ellie editor by the way; hadn't come across that before
+U2M4VPZ9D : Hi <@U69EMCAKA> !!!
+U2D07QZN3 : If I have a list of widgets, should I call them "widgits" or "widgetList"?
+U4872964V : widgets
+U4872964V : (totally my own opinion of course)
+U2D07QZN3 : Thanks.  Do you think that is the common way?
+U57KYFW67 : I think either way is just as well
+U57KYFW67 : widgets is shorter. go with that.
+U4872964V : if you don't like the names, it's super easy to change them later, I do that all the time
+U30J8RTKJ : Hi, I'm working on simple board game, what is the best elm package for complex drag and drop stuff? I've found few but I'm not sure which one to pick, any hints?
+U3SJEDR96 : <@U5R6L5MT4> looking at it a little closer; you'll want to get rid of `brute_force` and `resolveSudoku`, and integrate their logic into `increment_sudoku`. It's running now, but certainly takes a while :slightly_smiling_face:
+U3SJEDR96 : (±136 seconds, apparently)
+U3SJEDR96 : fwiw, my published solver does it in 9, and I have an alternate solver (I should commit and push that, really) does it in &lt;1s
+U5R6L5MT4 : Nice
+U5R6L5MT4 : 136 seconds it is quite a while
+U3SJEDR96 : yeah, though that sudoku is a degenerate case that required a _lot_ of backtracking :slightly_smiling_face:
+U5R6L5MT4 : I actually found it in a book
+U5WD40ZA9 : Is it possible to run a command after the view function has run?
+U6ASZU4EB : if I have the following method declaration:checkboxConditional : List (Form ValidationError a, Html Msg) -&gt; String -&gt; String -&gt; Form ValidationError a -&gt; Html Msg
+checkboxConditional elements title name form 
+
+How can I output "elements" inside of a div? I've tried "div [] elements" but the compiler says:
+Function `div` is expecting the 2nd argument to be:
+List (Html msg)
+But it is:List ( Form ValidationError a, Html Msg )
+
+U4GU5J9JR : I've got this knot in my head. I am thinking that it should be possible to _resolve_ a list of maybes into a list containing only the values. If the initial list contains only Nothings then the output is the empty list. So I am thinking that it is possible to write a function of type `resolve : List (Maybe GreatStuffType) -&gt; List GreatStuffType`, but is it? I haven't yet found a solution in the stdlib and I am not able to get the compiler to accept that I have actually resolved by excluding Nothings.
+U3SJEDR96 : <@U4GU5J9JR> it's definitely possible :slightly_smiling_face:
+U3SJEDR96 : so, there is a function `List.filterMap : (a -&gt; Maybe b) -&gt; List a -&gt; List b` that applies a function, and only keeps the ones that result in a `Just`, discarding `Nothing`'s. Now, in your case, you already have a `List (Maybe a)`, so you need a function `Maybe a -&gt; Maybe a`.. or even more general, a function `a -&gt; a`, which happens to exist and be called `identity`.
+U3SJEDR96 : so you can implement resolve like this: `resolve = List.filterMap identity`
+U4GU5J9JR : I am thinking: `div [] &lt;| List.map second elements`
+U4GU5J9JR : greatstuff indeed, <@U3SJEDR96> thank you!
+U3SJEDR96 : There are some other options, too; for example <https://ellie-app.com/3MzcYwh9rRVa1/0>
+U0JBSEGHY : is anyone familiar with create-elm-app??
+U0JBSEGHY : Or just webpack in general?
+U681TBBUP : I believe create-elm-app is deprecated
+U0JBSEGHY : ok
+U3SJEDR96 : what? why would it be?
+U0JBSEGHY : whats the best way to create elm apps?
+U3SJEDR96 : <@U10P4FNMD> is still actively developing, maintaining and supporting `create-elm-app`
+U0JBSEGHY : Man I hate webpack lol
+U681TBBUP : <@U0JBSEGHY> yeah I lied I thought I read that somewhere
+U3SJEDR96 : Personally, I tend to just use `elm-reactor`, and occasionally go for `elm-live`
+U0JBSEGHY : it
+U0JBSEGHY : it just seems to be way more hassle than it is worth
+U0JBSEGHY : I really hope Evan creates some dope tooling so webpack isn't necessary
+U3SJEDR96 : What do you currently need webpack for?
+U3SJEDR96 : I wouldn't call it necessary by a long shot :stuck_out_tongue:
+U0JBSEGHY : I'm building something with Twilio.
+U2LC0U8JY : I am not sure if evan can keep up with the progress of webpack or whatever comes next :wink:
+U0JBSEGHY : So the hot module replacement is super handy. And it needs to work with ports.
+U2LC0U8JY : so its good to have these options
+U0JBSEGHY : Because twilio is useless and has a poorly designed client sdk
+U0JBSEGHY : I shouldn't be so harsh haha
+U0JBSEGHY : I'll rephrase that to the Twilio client is painful
+U0JBSEGHY : I'm basically confused by the generated index.js of `create-elm-app`
+U0JBSEGHY : This is the file ```
+require('./main.css');
+var logoPath = require('./logo.svg');
+var Elm = require('./Main.elm');
+
+var root = document.getElementById('root');
+
+Elm.Main.embed(root, logoPath);
+```
+Any variables of functions I define I can't get access to in the console on the browser
+
+U0JBSEGHY : I'm not quite sure how the magic works and am concerned about having to learn many hours of webpack for something so simple lol
+U5R6L5MT4 : <@U3SJEDR96> do you have your patch at hand?
+U5R6L5MT4 : The one merging everything in incrementSudoku
+U3SJEDR96 : <https://github.com/zwilias/elm-sudoku/commit/a8d490451f12d9329e34f10bd4dd9f5e62367139>
+U5WD40ZA9 : Is there anyway to run a command after elm is done with running the view function?
+U3SJEDR96 : you'll have to ignore the whitespace changes for that to make sense :slightly_smiling_face:
+U3SJEDR96 : <@U5WD40ZA9> what's your use-case?
+U3SJEDR96 : this feels a little like an xy-problem :slightly_smiling_face:
+U5WD40ZA9 : <@U3SJEDR96> I want to insert a chart with the help of javascript. This requires that the element already exists in the dom before I try to insert the graph.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

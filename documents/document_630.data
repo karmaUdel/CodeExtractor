@@ -1,111 +1,79 @@
+U0EUHKVGB : Are you generating the delete buttons via `List.map` and friends?
+U0GPGFQQY : yes
+U0EUHKVGB : I’m imaging you have something like this `List.map viewDeleteThing buttons`
+U0EUHKVGB : where `buttons : List Button`, and `type alias Button = { id : String, text : String, thing : a}`
+U0EUHKVGB : It can be anything which is uniquely identifiable about each element
+U0EUHKVGB : Avoid using `indexedMap` as the id - this can change each render! So if you need to, apply `indexedMap` when you _load_ the button data to get an id
+U0GPGFQQY : Ok, let's assume I got an id of each item from the backend. But this is only needed for the Delete message, and Confirm message is needed to confirm that Delete
+U0GPGFQQY : So my original plan was to dispatch `Confirm (Delete itemId)`, that would put `Delete itemId` into `confirm: Maybe Msg`, and that would result in the view, that shows a button with `onClick msgToConfirm` if it is `Just msgToConfirm`
+U0EUHKVGB : just store it as a maybe of the id :)
+U0GPGFQQY : I guess I can live with that, I was thinking that there may be more things to confirm, besides just deleting
+U1N4KAHT6 : Why does this compile? ```range : number -&gt; number -&gt; number -&gt; List numberrange start stop step =
+    let
+        n =
+            (stop - start)
+                / step
+                |&gt; ceiling
+                -- get rid of NaN
+                |&gt; Bitwise.or 0
+                |&gt; max 0
+
+        helper i list =
+            if i &gt;= 0 then
+                helper (i - 1) &lt;| start + step * i :: list
+            else
+                list
+    in
+        helper (n - 1) []
+```? Given that `/` says it’s arguments need to be `Float`, but the type declaration says it’s `number`?
+
+U0EUHKVGB : then you just change the onConfrim message you pass to the view 
+U0GPGFQQY : model field `confirm: Maybe String` should change then
+U0GPGFQQY : because I can confirm more things than just deleting by id
+U0GPGFQQY : Does it make sense to just use Msg there, or I should create my own union `type Confirm : Delete String | OtherThingToConfirm`
+U0EUHKVGB : Generally, I prefer to keep the Msg focused on UI interactions, rather than logic
+U0EUHKVGB : So I would make a new union
+U0GPGFQQY : ok, thanks, this was helpful!
+U3SJEDR96 : <@U1N4KAHT6> <https://github.com/elm-lang/elm-compiler/issues/1373> it shouldn't, and it's a bug (with some known variations)
+U1N4KAHT6 : I thought so
+U1N4KAHT6 : I wish there was a way to convert any number to Float, it would make sticking to your own type signatures a lot easier
+U3SJEDR96 : There is an issue for possibly changing `toFloat : number -&gt; Float` which would help :slightly_smiling_face:
+U3SJEDR96 : <https://github.com/elm-lang/core/issues/721> tracked in that meta issue
+U1N4KAHT6 : Thanks, you seem to remember all the GH issues :slightly_smiling_face:
+U1NME8MS8 : If you want to write down your ideas, I might be able to help. Its fun to dive into those topics
+U3LT1UTPF : I have a record Product which I need to convert to a Javascript object to pass it to a custom element as a property: node "leaflet-map" [property "product" (Json.Encode.object model.currentProduct) ][]. The compiler says: Function 'object' is expecting the argument to be List (String, Value), but it is Product. Any hint?
+U1NME8MS8 : What I mean by inlining is to move the data from the includes into the main attributes in the first plcae, so the includes are no longer needed
+U0EUHKVGB : You need to build up a list of (String, Value) from your product
+U0EUHKVGB : For example: ```
+encodeProduct : Product -&gt; Json.Encode.Value
+encodeProduct record =
+    Json.Encode.object
+        [ ("name",  Json.Encode.string &lt;| record.name)
+        ]
 ```
-The drawback is that because there is no type relation between `Embedding a` and how `a` actually looks like, `Embedding Author` could look like anything and be defined many times in different ways. To avoid that I will have to make sure to only define one function to generate each `Embedding`.
-Yes. If you have a top-level `DominoesMsg Dominoes.Msg`, then you can do this:
-`Dominoes.view model.dominoes |&gt; Html.map DominoesMsg`
-Html has a map...
-`Dominoes.view (\submsg -&gt; DominoesMsg submsg) model.dominoes`
-Sorry, taking time to respond, but I need to make sure I understand. So I can define `DominoesMsg` in the top level of my Main as The Msg type in dominoes, and pass it to my dominoes view
-but that's often used in 'reusable' sub-views which have generic `Html msg` return types, and are intended to be called from different 'parent' call sites.
-but i think my issue is that the compiler is saying that my main view function is emitting  a _Html Msg_ in one  and a _Html Dominoes.Msg_ in another
-that's what Html.map helps with. It wraps `Dominoes.Msg` in `Msg`.
-okay... looking at the type signature in the docs and its starting to click
-I think this is similar to what the Mdl library does
-This pattern used to be considered the hallmark of The Elm Architecture. It still is really, but is de-emphasized in the docs, because of causing much confusion for people coming from react/redux components.
-that toplevel defintion ... is that just `type DominoesMsg = Dominoes.Msg` ?
-no, `type Msg = DominoesMsg Dominoes.Msg | ...`
-Yeah, in the docs it wards away from Html.map, but this seems like the obvious way to go about it
-unfortunately this de-emphasis means people have to rediscover it on their own a lot of times...
-<@U0JFGGZS6> I realized a moment after I typed...
-there's also related `Cmd.map` and `Sub.map`
-i just completed the pragmatic studio tutorial and i think we just did something similar with cleaning up the main code into some submodules.
-Cmd.map I use. Subs are still a bit mysterious to me.
-but it had me changing everything from Msg to msg and fixing problems that come up with that change
-Yeah... I've done this big refactor, and all that's left is sorting out the view and the updates.
-yeah. it's like if you have multiple subscriptions that need routing to sub-modules, same basic idea
-it was cool seeing the compiler helping us along the whole time
-I'm not unconvinced the compiler is a tiny node of evan's brain living detached from the main host, yet connected through mysterious forces.
-<@U0JFGGZS6> Html.map totally worked, and makes sense.
-Now for my true fear... the update.
-update says I need to account for DominoesMsg...
-Again we have a case where I'm returning the Dominoes versions of model and Msg as opposed to the main versions. If I'm following right, I need a mapping function to take me from `( Dominoes.Model, Dominoes.Cmd )` to `( Model, Cmd )`. Not certain about the command part but am I on the right track?
-Hi folks. Is there a jsfiddle equivalent for Elm ?
-I’d like to show stuff to somebody but I don’t want him to install reactor etc
-<http://ellie-app.com>
-<@U1NKH2HDX> :point_up:
-it's awesome!
-yeah !
-I had forgotten the name !! thx a lot !
-Yep. Or just a `let` to grab that pair and merge them in. This is where `Cmd.map` comes into play.
-does it work with Html.program ?
-I have a single .elm file that works in reactor
-but not in ellie-app
-`Cannot read property ‘fullscreen’ of undefined`
-aaah
-module name my bad sorry
-there's also an <#C408UCWMN|ellie> channel
-interesting what the docs say about Html.map: "This should not come in handy too often. Definitely read this before deciding if this is what you want."
-but you cannot argue very hard against something that solves your problem
-if something works, it works
-Where or how would I define the function that goes `(a -&gt; Cmd a)` for `Cmd.Map`?
-I know the second argument is my _domiCmd_ (I hate that name but I'll change it after). But how would one define the first?
-<@U5WS7CJLV>  as far as i understand, this is a fairly common setup for elm projects so yeah, it confused me as well.
-If I've understood, seems you'd need some function that returns Cmds, but the only one I know of is Http.send
-Cmd.map is `(a -&gt; msg) -&gt; Cmd a -&gt; Cmd msg`
-right, so you need a Cmd, yes?  I don't think I've encountered anything that will return a Cmd.  Other than Http.send.
-so you have the `Cmd a`, that's your sub-Cmd from `Dominoes`. So you just need the `a -&gt; msg`, right?
-I think i got it
-if ericgj is on track then you probly just need one of your Msg constructors
-Maybe I didn't. This compiles but it shouldn't.
-why do you say it shouldn't?
-map _does_ need a message constructor... but we're _in_ DominoesMsg
-right. when it goes through the next update cycle, it ends up right here in this branch again
-*nods even though he doesn't understand.  Scrolls back up to review the code*
-but that's ok because the whole point of this branch is just to delegate messages back down to `Dominoes.update`.
-Heh. This... okay. step 1: message comes into DominoesMsg. It is a Dominoes.Msg. Step two.. evaluated in let block. step 3, model is updated. step 4... Cmd.map ... does a thing... and the result is a regular command.
-I may need to look at the source docs
-A command whose 'callback' is to update the Dominoes state again
-all roads lead back to the update function
-that may not help, but it's something I realized recently in one of those epiphany moments
-all commands are just trying to make messages for the update function
-all hail the update function!
-right
-messages with payloads from outer space :slightly_smiling_face:
-spaaaaaaace :slightly_smiling_face:
-rather than from user input back down on earth
-*nods*
-I'm really frustrapointed, but the *click moment is not happening.
-yeah, it will take some time
-I stared at Http.send for 5 minutes
-2 voices in my head
-I guess it's because I don't really know what commands _are_. I do what they do, but not how they do it.
-one saying "this sends a web request"
-and another saying, "No, it returns a Cmd!"
-Elm takes concepts you are familiar with and maps them into Elmspace, but everything looks weird at first in Elmspace
-have you read the Elm guide?
-Actually, this is fine. Or at least, it's not any weirder than Cmd.none I suppose.
-Elm guide explains it as a Cmd tells the "Elm runtime" to do something
-you don't actually make web requests.  You describe what your request looks like in Elmspace and "the runtime" is the one that actually gets its hands dirty
-just like you don't ever actually touch the DOM in Elm
-Yeah, i stopped freaking out once I put it in the perspective of 'cmds get things for update functions'
-there any known issues with WebSocket?
-I think I write a decoder that secretly exploded Elm (or something), and it manifest itself as a WebSocket that wasn't getting any messages.
-<@U0JFGGZS6> <@U5WS7CJLV> it compiles! it works! sweet success! thanks so much.
-about to commit the heck outta this bad boy.
-nope, but I've yet to touch the debugger.
-twas all you, fella!  I am in your same boat.  Trying to force my brain to think in Elm.  It is a constant battle.
-...and that is one fun thing about Elm.  For me anyways.  Once I've satisfied the compiler I have a high level of confidence my code will do exactly what I want.
-programming makes me feel very clever... when everything works and nothing is broken. So... for about 5 mins a day. The rest... I am but an inquisitive fool.
-haha
-glad you figured it out, I'd stepped out for awhile
-I know the feeling of being a fool most of the time very well..
-what character you are supposed to get instead of that thing:smile:?
-anyone ever made a circular zipper before?
-I know there's this one: <http://package.elm-lang.org/packages/maorleger/elm-infinite-zipper/latest>
-is it a bad idea to use routes for navigation, changing state?
-as in using a `a [ href &lt;| routeToString Route.Foo ] ]` instead of `a [ onClick LoadFoo ] []`
-<@U2BCXMGKW> cool. gonna look through the source docs
-<@U2LAL86AY> Some + and - symbols for expansion and what not
-If I remember correctly
-<@U6D1E91QV> Seems like that'd cause your app to re-init after every click... I use href + onClick w/ default prevented, so users can still middle click to open in a new tab
-it's supposed to be a `small triangle`.
-yes, my debugger has a small triangle
+
+U0EUHKVGB : If you want to get a better idea of what it might look like, paste your type alias into here: <http://eeue56.github.io/json-to-elm/>
+U3LT1UTPF : The type alias is actually nested. Is that a problem in this case?
+U3LT1UTPF : I mean, one of the fields of Product is a list of another record
+U3SJEDR96 : then you'll need to encode those, first :slightly_smiling_face:
+U3SJEDR96 : but yeah, eeue56's tool should help with tht
+U3LT1UTPF : Great! Thank you, <@U0EUHKVGB> and <@U3SJEDR96> :smile:
+U1KES8JGK : does anyone know of an auto-complete menu written in Elm? the one at <http://gregziegan.com/elm-autocomplete/> looked promising, but doesn't scroll the menu when the selection moves below what's currently shown.
+U57KYFW67 : It's not possible to include two .js files created by Elm on one page, is it? It looks like by default, elm-make defines the Elm object in Javascript without checking to see if it's already defined.
+U3SJEDR96 : I think it checks if it's already defined and merges them
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

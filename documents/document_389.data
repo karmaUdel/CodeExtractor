@@ -1,2 +1,60 @@
+U5FU80S06 : In <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html-Events#onMouseEnter>, what's the difference between `onMouseEnter` &amp; `onMouseOver`? Same question for  `onMouseLeave` &amp; `onMouseOut`.
+U0J8D9M2P : Enter happens one time when you enter, over happens many times when you move mouse
+U5FU80S06 : Thanks
+U0J8D9M2P : Leave will happen only once you live the element, and out will be triggered any time you leave child elements as well
+U0J8D9M2P : <https://developer.mozilla.org/en/docs/Web/Events/mouseout><https://developer.mozilla.org/en/docs/Web/Events/mouseleave>
+<https://developer.mozilla.org/en/docs/Web/Events/mouseenter>
+<https://developer.mozilla.org/en/docs/Web/Events/mouseover>
+
+U3HQVHERX : I have a utc date time that looks like this: `"2017-07-05T20:14:02.530471"` and I want to display it in us/pacific time zone. I started trying to do this with `elm-community/elm-time` but it seems the library does not keep track of the time, just dates
+U3HQVHERX : `ZonedDateTime { timeZone = TimeZone { name = "Etc/UTC", spans = [{ from = -Infinity, until = Infinity, abbreviation = "UTC", offset = 0 }] }, dateTime = DateTime { date = Date { year = 2017, month = 7, day = 6 }, offset = 11642530 } }`
+U3HQVHERX : That's what I'm currently getting
+U3HQVHERX : er - `Just` that.
+U3HQVHERX : after doing
+U3HQVHERX : ```Date.fromString m.created_at
+|&gt; Result.toMaybe
+|&gt; Maybe.map Date.toTime
+|&gt; Maybe.map (Time.ZonedDateTime.fromTimestamp &lt;| utc ())
 ```
-<@U48AEBJQ3> thanks, I will try that!
+
+U3HQVHERX : Oh maybe it does `text &lt;| Time.ZonedDateTime.toISO8601 d`
+U0LPMPL2U : It looks like you string is ISO8601 formatted?
+U0LPMPL2U : LOL :smile:
+U3HQVHERX : `2017-07-06T03:14:02.530+00:00`
+U3HQVHERX : <@U0LPMPL2U> actually it could not parse it :disappointed:
+U3HQVHERX : oh waut
+U3HQVHERX : wait*
+U3HQVHERX : `Date.fromString` i was passing the result of that function to the fromISO8601 function
+U3HQVHERX : maybe that's why, XD
+U0LPMPL2U : Also, going through `Date.fromString` may be what's truncating the time parts
+U3HQVHERX : ```, date =
+                        m.created_at
+                            |&gt; Time.ZonedDateTime.fromISO8601 (us_pacific ())
+                            |&gt; Result.toMaybe
+```
+
+U3HQVHERX : Now I am getting `Nothing`
+U3HQVHERX : `fromISO8601 : TimeZone -&gt; String -&gt; Result String ZonedDateTime`
+U3HQVHERX : `us_pacific : () -&gt; TimeZone`
+U3HQVHERX : and `m.created_at` is `"2017-07-05T20:14:02.530471"`
+U0LPMPL2U : Can you drop the `Result.toMaybe` so we can see the error?
+U3HQVHERX : good idea
+U3HQVHERX : "Errors encountered at position 26: expected \"Z\" or expected an integer"
+U0LPMPL2U : Does it not like the decimal seconds?
+U3HQVHERX : it wants a char `'Z'` at the end i think
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

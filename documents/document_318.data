@@ -1,14 +1,78 @@
-True : Bool```
-From the 0.18 repl :point_up_2:
-can somebody explain me in simple words how Fuzzer Shrinkers work and how to write them? I get that their role is to determine the closest value that makes test fail but do you know some more sophisticated examples of their definition? :slightly_smiling_face:
-<@U1RK41R0T> generally, they're built using `elm-shrink`, might want to have a look at the code of that project (it's not overly complicated)
-and generally, they work by defining a "lower" value, given a certain value. So for a list, this would be a shorter list. For an integer, this would be an integer closer to zero. For a `Just x`, this could be the `Just (shrink x)` or `Nothing`
-thanks! I didn't hit upon an idea of checking `elm-shrink` package itself :slightly_smiling_face:
-I've searched for ‘embed' on <http://github.com/elm-lang|github.com/elm-lang> - and to my surprise it's not there? Even so, a number of posts says it can be done like that - even <http://elm-lang.org|elm-lang.org> has it front and center in a piece of code? I am going crazy over this!
-Usually that `Elm.Main.embed(...)` is defined in the generated file by `elm-make`.
-So, how do you have compiled the Elm file?
-I did elm make Main.elm --output=elm.js
-Good.
-perhaps the problem is a `require` statement that must be translated/bundled into ES5 code runnable on the browser?
-:$
-And you added that elm.js to you HTML file, right?
+U5GSY0G9J : thanks <@U3SJEDR96> <@U17B2R554> ill look into those issues
+U3SJEDR96 : There aren't really any valid use-cases for doing it, though, better to split off the logic into separate functions and calling those when you need them :slightly_smiling_face:
+U17B2R554 : That is true
+U3SJEDR96 : (unless you're replaying history that you got from a remote source in order to restore a user session, but that's an edge-case)
+U3LUC6SNS : In `Main` I have the code```
+TogglePublic -&gt;
+            togglePublic model
+```
+where `togglePublic : Model -&gt; ( Model, Cmd Msg )` with `Cmd.none` in the cmd slot of the preceding tuple.  After `togglePublic model` runs, I would like to run 
+```
+updateCurrentDocument : Model -&gt; Document -&gt; ( Model, Cmd Msg )
+```
+How do I do that?
+
+U0FP80EKB : You could do something like```
+let
+     (updatedModel, _ ) = togglePublic model
+in
+    updateCurrentDocument updatedModel document
+```
+
+U0FP80EKB : Personally, I stick with the guidance of having the data structure being updated as the last parameter, so I'd change `updateCurrentDocument` to```updatedCurrentDocument : Document -&gt; Model -&gt; (Model, Cmd Msg)```
+
+U0FP80EKB : If you want to pipeline, you could then do```
+togglePublic model
+|&gt; Tuple.first
+|&gt; updateCurrentDocument newDocument
+```
+
+U0FP80EKB : Although I tend to go for the first version with the `let` clause to be explicit that it is ignoring the returned command
+U3LUC6SNS : <@U0FP80EKB> Thanks so much! -- and also for the guidance on the position of `model`
+U0FP80EKB : One thing is that you are also duplicating the knowledge that `togglePublic` returns `Cmd.none`, so I probably would do this```
+let
+    (updatedModel, togglePublicCmd) = togglePublic model
+    (updatedWithDocument, documentUpdateCmd) = updatedModel newDocument updatedModel
+in
+    (updatedWithDocument, Cmd.batch [ togglePublicCmd, documentUpdateCmd ] )
+```
+
+U0FP80EKB : (fixing the names a bit)
+U3LUC6SNS : What is the reason for having the data structure being updated as the last param?
+U0FP80EKB : Duplicating the knowledge about the `Cmd.none` can be a pain later down the line. I'm pretty aggressive at eliminating duplication.
+U0FP80EKB : It makes it better for pipelining, since `|&gt;` passes as the last parameter
+U3LUC6SNS : Got it!  thanks!
+U0FP80EKB : So, in general, the data structure being changed can be strung through
+U3HQVHERX : is `type alias Thing = {...}` creating an "opaque type"?
+U0RPQMZ9S : ^ no, but you're on the way to one
+U0LPMPL2U : an opaque type is like:```
+module Dollar exposing (Dollar)
+
+type Dollar = Dollar Int
+```
+
+U0LPMPL2U : Elswhere in your code, you can import the `Dollar` _type_, but you don't have access to the `Dollar` _constructor_
+U0LPMPL2U : that means you can't pattern match or otherwise reach into the internals
+U3HQVHERX : so `type Dollar = Dollar Int` not equivalent to `type alias Dollar = Int`?
+U0LPMPL2U : correct
+U0LPMPL2U : with the `type alias`, `Dollar` and `Int` are equivalent
+U3HQVHERX : `Int` is the constructor for Dollar
+U3HQVHERX : in `type Dollar = Dollar Int`
+U0LPMPL2U : `5` is both a `Dollar` _and_ an `Int` because they are aliases for each other (with the type alias)
+U3HQVHERX : How would I use the `Dollar` type in the `Dollar` module? And why are opaque types useful?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

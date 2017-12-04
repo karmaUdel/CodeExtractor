@@ -1,1 +1,68 @@
-with Specter: ```(s/setval [s/MAP-KEYS s/NAMESPACE] "your-ns" your-map)```
+U0CKDHF4L : please explain why!?
+U0NCTKEV8 : because odd? and even? as predicates aren't total, so they will throw exceptions when not passed numbers instead of returning false
+U0NCTKEV8 : s/and tries each predicate it order
+U0CKDHF4L : yes but why should they be passed non-numbers ?
+U0NCTKEV8 : because in order for s/* to stop matching it has to fail a match
+U0NCTKEV8 : otherwise it would match everything
+U0CKDHF4L : oh yes I see! ```(odd? {})IllegalArgumentException Argument must be an integer: {}  clojure.core/even? (core.clj:1383)```
+
+U0CKDHF4L : i had misunderstood how s/* worked
+U0CKDHF4L : thanks so much!
+U1ALMRBLL : serg: I saw you deleted this. I noticed if you removed `into []` and just used the seq instead of a vector, it works. Did you solve it?
+U0W0JDY4C : this is perhaps a little convoluted.. but now i'm curious just for curiosity's sake. if I had a function that maps over some collection, invokes a provided fn, and returns the value of that invoked fn as a different shape, how does this work with compose?```
+(defn do-map [f coll]
+  (map (fn [[foo val baz]] [foo (f val) baz]) coll)) ;; &lt;- notice the [a b c] 
+;; wont work unless xform-2 and xform-1 are "aware" of the [a b c] shape
+(do-map (comp xform-2 xform-1) coll)  
+```
+
+U0W0JDY4C : is there a generic way to compose transformations and, after each xform, re-shape the data?
+U0W0JDY4C : the `do-map` couldn't really know whether `f` was composed or not, it just sees a function. so it would be hard to do something like `(-&gt; coll f0 reshape f1 reshape ...)`
+U051SS2EU : <@U0W0JDY4C> sounds like you want `(fn [f] (fn [[a b c]] [a (f b) c])`
+U051SS2EU : then you can wrap your functions in it?
+U051SS2EU : and -&gt; isn't a composer of functions, it's a rewriter of forms, if you use `comp` it's easier to get the right behavior via wrapping functions without jumping through syntactic hoops
+U0W0JDY4C : not quite, but the more i think about it the less possible it seems. i essentially want an interface where I can pass in a single function (composed or not), and that function will be applied piecemeal. if the provided fn is a composed fn, it will invoke the first composed, reshape the results, invoke the second composed, etc… regardless of how many steps belong to that composed function.
+U0W0JDY4C : I think it's impossible to do it from the "inside"; there's no way to call 1 step of a composed function and "steal" the result before calling the 2nd step.
+U0W0JDY4C : i would have to make the interface something like `(do-map [coll f &amp; maybe-more-fns] (if maybe-more-fns (compose f reshape (first maybe-more-fns) reshape (second maybe-more-fns ...))` and do the composing on the inside, I think
+U0W0JDY4C : that is, unless i'm totally misunderstanding your answer (happens often i find)
+U051SS2EU : <@U0W0JDY4C> `#(apply comp (map (fn [f] (fn [[a b c]] [a (f b) c])) (reverse %))` will take the functions in the order -&gt; would accept them, and return a composed function that does what you describe
+U051SS2EU : or you could write a macro that inserts that function around or inside each function in the form
+U0W0JDY4C : that's pretty neat. i considered macros, too, but thats a whole 'nother can of worms i havent opened yet.
+U3L6TFEJF : ooooh boy, you're in for a treat! :smile:
+U051SS2EU : this becomes more clear if you name that function eg. ```(defn to-middle  [f]
+  (fn [[a b c]]
+    [a (f b) c]))
+
+(apply comp (map to-middle functions))```
+
+U0W0JDY4C : yea that's much more clear. funny now that you point that out I realize this is expressed in a protocol, which doesn't support variadic arguments. so either enforce a seq like `(do-map v [f])` and use the fn above^, or I think something like `(-&gt; coll (do-map xform-a) (do-map xform-b)` (though more inefficient) works too
+U0W0JDY4C : so much functional-ness, so little time
+U051SS2EU : that -&gt; form will break
+U051SS2EU : that's why I mentioned using comp to avoid syntactic hoops - since `-&gt;` is a form rewriter, it will put the coll in the wrong place
+U0W0JDY4C : hmm, ill have to look deeper at that. thanks for the warning
+U0W0JDY4C : so beautiful:```
+(map (apply comp (map reshape fns)) coll)
+```
+thanks a bunch !
+
+U5NAUMCAD : I am trying to rename the keys from a hashmap with rename-keysI have 
+``` (def a {a "A", b "B"} ```
+
+U5NAUMCAD : and use ``` (set/rename-keys a {:a :aa, :b :bb} ```
+U5NAUMCAD : but nothing changes
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

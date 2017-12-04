@@ -1,119 +1,111 @@
-Adding a div on the page with ```div [] [ text (toString model.rolodexlists)]```, where rolodexList is the array of the data I am getting takes that long to be updated
-I am wondering if it is better to get the data in batches later instead of in the initialModel through an initial Command
-<@U0FP80EKB> How do you load it in the background?
-The same way to load it, create a cmd to load the data
-don’t think of it as background, I guess, as much as thinking of it as loading it second
-Where do you add the command for it to be in the background? (I am pretty new to Elm)
-2) when the data arrives in your `update`, set it in your model, then return the cmd (next http request) from this `update`
-Make it work, make it right, make it fast (in that order)
-Ah right, we had discussed this. Writing down my ideas would be a useful exercise for me as well! Hopefully I have some time for higher-level design thoughts this Sunday.
-wow!  I've just seen `elm-benchmark` in action. I'm blown away - super useful library, thanks so much <@U19JQD9DF> Hicks :smile: . <https://elmseeds.thaterikperson.com/elm-benchmark>
-Hi all
-I have an app (dashboard with widgets) in which I'm constantly editing the model and then running PUT requests to save it
-I'm wondering what's the best way to be sure all the save requests are executed in the right order
-(with js I was storing a promise and chaining future requests to the globally saved promise inside a service)
-is it possible to have something like saving a Task is the model and adding andThen at each update ?
-and of course I also want to use debouncing and I'm wondering how to best implement it (there seem to be several libraries on the subject but do you have any recommandation?)
-you can store a `Task` in the model and andThen, but the task isn't actually evaluated when you do that
-<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Task#sequence>
-also, elm is fundamentally asynchronous, so you'll have to deal with that
-one solution could be to wait till the put request is finished before sending the next one
-yes that's what I want to do (what I'm doing actually in js today)
-when I need to save a new version, I get my promise and use a `promise = promise.then(() =&gt; { return model.put(); }`
-using Task sequence seems right in elm but the first task needs to start as soon as possible, but if a second one arrives it must wait for the first one to complete
-Are there any ways to create a nontrival Task (ie not one created through succeed or fail) in the core package?
-<@U57KYFW67> define non-trivial?
-I did :X
-well, you can combine primitives with `map` and `andThen`
-so, yes
-`map` and `andThen` both require you already have a `Task`... so I guess to be more precise, one which does not contain any reference to `succeed` or `fail`. So `map (\x -&gt; x) (succeed True)` wouldn't really count, either.
-<@U5Q42DDMJ> so I think you need to pick some nice data type to model what you want to do, for instance `type BackupRequest a = Sending { waiting : Maybe (Task Http.Error a) } | Done `
-it seems I need to chain Cmd, not Tasks, which is not possible without a custom manual implementation... ?
-for custom stuff, tasks are the way to go
-Ah, it looks like the `Process` module exposes a few
-<@U57KYFW67> well, `Time.now`
-yes but once the task is started (attempt ?), you can't use it any more for `andThen`
-true
-so you create a new empty task
-what for?
-actually, create a new task, that will be the next put
-Maybe I'm wrong, but `Task`s seem like they would be well-suited for working with random numbers.
-then as long as we're waiting for the server, swapping out that task with a newer version when the model is updated. once the request resolves, send the new task
-yes that's even an improved version
-but the implementation is completely manual, no help form the core library
-what would you like to see in core? it seems simple enough to implement and may give you material to publish a package
-not sure to be at the package level yet :wink:
-but yes ok I'll try something like that with a pendingModelToBeSaved, swapping it with a new one when an update is made
-If you want to have a way to say “I want to save it when finished” then you can add another state to it, something like `SavePending`
-So, the code only creates the PUT if it is in `Saved` state
-<@U0FP80EKB> Thanks for the explanations, they are helpful!
-<@U5ABF3BH7> Good luck.
-<@U0FP80EKB> Thanks!
-yes thx for the ideas
-<@U4F64AKQV> I’m wondering what the absolute timings in your benchmark are. I’ve found that for very short tasks things like requestAnimationFrame can add noise to Elm results
-another thing that chrome tools can help tell you…
-Can I get an _object id_ for an Elm _object_? I want to have a JS cmd pass back the id into Elm so I can locate a tree-node that needs highlighting.
-No, you have to create them.
-There are not objects in Elm in the same sense as elsewhere.
-Is there a library for generating ids?
-<@U0HMZCR5W> elm-benchmark uses interleaved samples of sufficient size, requestanimationframe isn't really that relevant here :slightly_smiling_face: (and the high-precision timing api)
-right on
-<https://github.com/BrianHicks/elm-benchmark#how-are-my-benchmarks-measured> it's pretty cool, actually
-If you are rendering a bunch of objects in a list or a tree or something, then likely you have some identifier you can tag each node with that the js can pass back.
-lohabuyshan: <http://package.elm-lang.org/packages/danyx23/elm-uuid/2.0.2/Uuid>
-a name perhaps
-The tree nodes can be identical in all respects, except ancestry of course.
-the they can be uniquely identified by a path then
-Would you go with that, as opposed to an id per-se?
-this does seem cool
-what's the difference between and uniquely identifing ID and a uniquely identifying path?
-aside from one being slightly more opaque
-<@U4F64AKQV> responding here since the conversation has moved on a ways. The things that cause high stddev are usually other processes running or window painting happening. Browser benchmarks are tricky since it's basically a miniature operating system inside another OS.
-so: quit browser tabs, run in an incognito window if you have a lot of extensions, and quit any electron apps (especially Slack, which spikes CPU randomly.)
-I'm happy to answer more questions in <#C3Y7SC0HF|elm-benchmark>; threads are a bit awkward :stuck_out_tongue:
-I may want to account for situation where in the interim the user can re-order the tree (for non-unique names of course), hence even though the path is fixed for now, path is not a universal solution.
-I see
-Random ids are going to require a task or some sort
-<http://package.elm-lang.org/packages/mgold/elm-random-pcg/5.0.0/Random-Pcg#step>
-I suppose a PRNG in your model would also work :stuck_out_tongue:
-Hi peeps! Just started out with Elm and I am trying to change the elm-styled module to collect css rules while rendering a view and emit them in a single virtualdom style tag at the end. I got really excited thinking I could use Mailboxes and foldp to achieve this nicely and then my text editor pointed out they no longer exist anymore. I can't create a closure with a mutable list to keep track of the rules, I can't traverse through the virtualdom nodes collecting data attributes - I'm about ready to give up! :slightly_smiling_face:
-Any suggestions, or is this a lost cause?
-Your're going to have to slow down there, what are you trying to do?
-This library uses a nasty impure function to inject styles into a style tag:
-<https://github.com/styled-components/elm-styled/blob/master/src/Styled.elm#L681>
-I am pretty sure the performance is not great, plus you could have hash collisions on rules
-I imagined a world where you passed in an address as an argument to style and it would collect them all up in a mailbox while rendering a view
-then at the end of the view render you could dump them into a virtualdom style tab
-Google Richard Feldman oslo elm day and watch that video
-That's about elm-css though right?
-Yes
-Uses the same approach.
-Well they use an npm module right?
-Or inline styles
-Inline styles via a style tag
-wait
-hang on
-No, it does things differently
-I thought they applied the styles to the actual dom nodes
-I don’t know why on earth they’re using a native function to inject css to the style tag.
-It’s not needed.
-<@U5YKRLXGT> Nope. We put styles into an explicit style tag.
-You _can_ use it for compiled CSS
-but if you watch the talk by Richard, he talks about the different approaches a bit in there.
-FWIW we tested performance with real, production code
-I'll take a look, but does that mean there is no pithy "replace mailbox/foldp with X" statement :slightly_smiling_face:
-And the approach that the styled-css thing is taking is actually slower than using a reguarl &lt;style&gt; in the body.
-That's what I'm trying to fix :slightly_smiling_face:
-what are you trying to fix?
-It’s easy to fix that - just use a style tag in the body.
-Collisions aren’t an issue, if you use namespacing (which is general best practice for large production sites)
-Ok, hang on  - let me try and explain this again one more time :slightly_smiling_face:
-Ignoring the CSS part, which I think is a bit of a red herring
-I have a view
-As it builds up the virtual dom, I would like to accumulate some state
-that I can then append in a new node at the end
-What state?
-In this case, CSS rules :slightly_smiling_face:
-What do you mean by “builds up the virtual dom”?
-Ok, so:
-This guy:
+U4872964V : a live variable? What is this magic
+U4872964V : I think you should take a step back and think about what it is you actually want
+U6ASZU4EB : Haha I'm using elm-form and I'm also very new to Elm so I feel that this should be super easy to accomplish, but that I'm tripping myself up
+U4872964V : ok, never used that, seems like advanced usage if you are new :slightly_smiling_face:
+U6ASZU4EB : Btw this is off topic but we are looking for Elm developers (freelancers/consultants). I saw that you're Swedish, you don't happen to available for work? We're based in Stockholm
+U3FJSB596 : <@U6ASZU4EB> We have a <#C0LUAGWRK|jobs> channel. You can try there?
+U4872964V : well, I am a consultant so it may be interesting, however I have plenty to do as it is right now
+U4872964V : check in <#C0HQ1ST0F|sweden> too
+U6ASZU4EB : Alright tack! I'll be in this channel trying to learn Elm all summer. Let me know if you have some time off spring/winter for consulting.
+U2GPAEU1L : <@U6ASZU4EB> Let the journey begin! :smile: I remember that moment
+It's been almost a year now, and I still love Elm. Great journey
+
+U2SR9DL7Q : Would anyone mind helping me understand the use of `andThen` ?I have two update functions:
+```
+ShuffleList -&gt;
+            ( model, Random.generate SetFirstPlayer &lt;| shuffle model.dominoes )
+
+SetFirstPlayer newSet -&gt;
+           ( model, Random.generate (SetGame newSet) (<http://Random.int|Random.int> 1 4) )
+```
+
+A button in my view calls `ShuffleList` which generates a value, but I need a second random value so `SetFirstPlayer` is then called and that finally passes both randomly generated values to `SetGame` where additional logic is performed and the model is updated. 
+
+I know there's a cleaner way to do this with `Cmd.batch` and I'm thinking `Random.andThen`, but I'm having trouble stringing it all together.
+
+U2SR9DL7Q : Alternatively, perhaps map may be more appropriate...
+U5J0H2NS2 : Random.pair ?
+U2SR9DL7Q : <@U5J0H2NS2> Oh! I somehow skipped over that one. That could work, but then I need to unpack the tuple for the SetGame function right?
+U5J0H2NS2 : Just deconstruct it when pattern matching in update I think
+U2SR9DL7Q : cool. Thanks!
+U5J0H2NS2 : RandomGenerated (rnd1, rnd2) -&gt;
+U2SR9DL7Q : I am readjusting to the flexibility of pattern matching in FP languages
+U65B9414J : Folks I'm a bit confused by nameGenerator : Generator String
+nameGenerator =
+  Random.Extra.sample ["Alice", "Bob", "Carole"]
+    |&gt; Random.map (Maybe.withDefault "Alice")
+
+U65B9414J : Here what is it that nameGenerator is returning.
+U65B9414J : I'm having trouble understanding type annotation of the function
+U4872964V : <@U65B9414J> what, the `Generator String` or something else?
+U65B9414J : yes what is `Generator String`. Is it returning Generator of type String
+U65B9414J : This is from reading of <https://robots.thoughtbot.com/elms-universal-pattern>
+U4872964V : It's an abstract data type, defined in <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Random>
+U65B9414J : Ah that helps. Thanks a bunch.
+U65B9414J : By the way I searched for Generator at <http://package.elm-lang.org/> and did not find any hit. Is there any other way to search which scans across various packages.
+U4872964V : Hmm, not sure
+U4872964V : I guess that could be improved for sure
+U0LPMPL2U : <@U65B9414J> on macOs, I use a combination of the Dash and Alfred apps to search documentation
+U0LPMPL2U : There's also <https://klaftertief.github.io/elm-search/> that allows searching by type signature
+U4872964V : <@U0LPMPL2U> yes, but not by data type
+U4872964V : which could be fixed I suppose
+U0LPMPL2U : it already allows searching for function names
+U0LPMPL2U : seems like searching for type definitions isn't too much of a jump
+U4872964V : it also allows things like "user:norpan" (reading the source code) :slightly_smiling_face:
+U4872964V : <https://github.com/klaftertief/elm-search/issues/16>
+U0CK8CJ5D : Regarding the elm-search… Yes, adding those features is not a problem. The exposed types and aliases are not contained in the index, though. I started a rewrite some time ago with a different focus and backlogged adding those features, and then I started a different pet project and backlogged working on elm-search. Maybe I should just hack in some features into the current version… Just for some context.
+U39DE7RQ9 : I need help. Im using rtfeldmans SPA example to build my own SPA. Instead of using http requests im using ports against firebase. Now I have a problem in my update function where my subscription returns a list of forms (my own type Form) and should be convertet / mapped to a model for a sub page holding a list of forms.```
+subscriptions : Model -&gt; Sub Msg
+subscriptions model =
+    let
+        getAllFormsSub =
+            Ports.gotAllPublicForms (Decode.decodeValue jsonFormListDecoder)
+    in
+        Sub.batch
+            [ Sub.map HomeLoaded getAllFormsSub
+            ]
+```
+And my update:
+```
+case ( msg, page ) of
+( HomeLoaded (Ok subModel), _ ) -&gt;
+                { model | pageState = Loaded (Home subModel) } =&gt; Cmd.none
+```
+And the compile error:
+```
+0:38:39 client.1   |  Function `Home` is expecting the argument to be:
+20:38:39 client.1   |      HomePage.Model
+20:38:39 client.1   |  But it is:
+20:38:39 client.1   |      List Form
+```
+How do I map the list of forms to the model HomePage.Model and where?
+
+U4872964V : What does `HomePage.Model` look like
+U39DE7RQ9 : ```type alias Model =
+    { forms : List Form
+    }
+```
+
+U4872964V : Ok, so maybe `Loaded (Home { forms = subModel })`
+U39DE7RQ9 : yay! Tanks <@U4872964V>
+U6ASXAHUZ : Hi there folks, first time here (:
+U6ASXAHUZ : I'm new to Elm, but I've worked a bit on some other functional langs
+U6ASXAHUZ : I've started reading a bit around how to use Protocols, like I'm used to do in closure, but I didn't get that far
+U6ASXAHUZ : I wonder how I could write the commented part of the code
+U6ASXAHUZ : <https://ellie-app.com/3NxLPYhDn43a1/4>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,22 +1,81 @@
+U2MLC3R4G : Hello all,I need a little thoughts on the below code 
 ```
-How function application is actually implemented? I'm still in researching phase now - so any hint is  a good one - not looking for a full blown explanation - just some point were to start wrapping my head around this :simple_smile:
-Sure, there's a way to see the 5. Just call `add 0` and you'll get `5`.
-I haven't seen the implementation code, but I'll bet function application in Elm is just implemented as function application in JavaScript.
-:smile:  that's a nice trick :smile: No i'm loking for a way to see inside partially applied functions in general. that only works will add 5 not with `Maybe.withDefault (SomeComplexDecoderwarped as maybe)`
-No, there's no way to do it in general. Closures are, well, closed.
-That is, function values
-If you want to "see inside", then you should represent it with a custom data type instead of a function.
-just to give you some context. I'm buliding a new elm debugger - i call it the x-ray debugger - and it'a all about seeing the computation pipeline. And for normal functions will work. Not 100% sure but pretty sure i can make it do what i want - but i'm stuck on this partially applied ones. No idea what to do. That `5` is stored somwere. Just need a good way to see it/grab it - even if it's not just in elm - meta elm/ JavaScript - or something.  I don't expect facts here - this is a unusual request - but just your thoughts on this issue.
-It's possible the 5 is just some jitted V8 code that is now assembly instructions somewhere.
-How would it work for normal functions?
-Hey, trying to figure out what `elm-test --watch` uses for monitoring disk changes, because it’s burning up my CPU. I’m guessing `chokidar`, but I’m not seeing a `package.json` in the repo and I’m not sure where to look.
-I guess the 5 is in the environment part of the closure in the JS.
-:grin: that sounds.. :grin: Anyway we'l see in the worst case i will just provide arguments for the normal functions and use &lt;function&gt; as the debugger does it for what it can't evaluate.
-If you analyze the original code, you could transform it to store the arguments somewhere where you can get at them later.
-Kind of dissapoinging but good enough for the first stage.
-when saving and compiling code - you don't see the same CPU spikes? It's only happening with `elm-test`?
-Hey, sorry, didn’t see this until just now, let me czech…
-Yeah, I mean, I can run `elm-make` on its own, but it’s barely a blip on the radar, whereas `elm-test --watch` runs at a constant 110-150% CPU even when idling.
-maybe we *should* be using chokidar :smile:
-mind opening an issue on <https://github.com/rtfeldman/node-test-runner/issues> ?
-ideally with system info and something small that reproduces it
+type Route
+         = Companies
+          | EditCompany String
+route : Route
+route = EditCompany "first"
+
+&lt;--After I set the route above How do I extract the "first" from variable route --&gt;
+&lt;-- I did use a case like below --&gt;
+
+companyId = case route of
+  EditCompany someString -&gt; someString
+  _ -&gt; Debug.crash "this will never happened" &lt;-- Is there another thing to use instead of Debug.crash here . Given we definitely know this will never happened.--&gt;
+```
+
+I wonder what to use in the case that will never happened. like in the above example.
+Now I could noly use Debug.crash
+
+U0EUHKVGB : You’re going to need to explain a bit more what thoughts you’d like to hear :slightly_smiling_face:
+U101G7VEX : <@U0EUHKVGB> It looks like this map thingy is doable with just CSS and SVG... <https://www.youtube.com/watch?v=2TM63ing6jY>
+U0EUHKVGB : Yeah, that map would be pretty easy to make in Elm.
+U101G7VEX : it would?
+U0EUHKVGB : <@U2MLC3R4G>, please use ``` ``` for code blocks
+U2MLC3R4G : thank you <@U0EUHKVGB>
+U0EUHKVGB : <@U101G7VEX> Yep, very easy. Make the SVG shapes in an editor as they did, then use `elm-svg`: <http://package.elm-lang.org/packages/elm-lang/svg/latest>
+U101G7VEX : interesting, I'll look into it... thanks
+U0LPMPL2U : <@U2MLC3R4G> the compiler can't guarantee that the other cases won't hapen
+U0LPMPL2U : same reason you need the `_` case here:```
+case 1 of
+  1 -&gt; "one"
+  _ -&gt; "other"
+```
+
+U2MLC3R4G : Yes <@U0LPMPL2U>. What would we use instead of Debug.crash here. Do you have any alternatives. To make it compiles.
+
+U5ABF3BH7 : hi everyone. I am getting a list ‘rolodexList’ from my decoder. From it I want to build my sub model location with the values I am getting to build the field hospitals, hospices, etc..  location should look like { location | hospitals = hospitals, hospices = hospices..}The following code gives me an error that I have the same variable used twice in my let—in statement.  ```Types.LoadRolodexLists (Ok rolodexList) -&gt;
+    let
+        hospitals =
+            getInstitutions rolodexList "hospital"
+        updatedLocation = Types.UpdateLocation (Location.ChgHospitals hospitals)
+
+        hospices =
+            getInstitutions rolodexList "hospice"
+        updatedLocation = Types.UpdateLocation (Location.ChgHospices hospices)
+
+  …….
+
+    in
+    ( { model | location = updatedLocation}, Cmd.none )```
+
+U5ABF3BH7 : If I use different name, I will not get all the updates I need. How can I update the submodels in one shot?
+
+U0LPMPL2U : <@U2MLC3R4G> based on the types, it looks like the case statement needs to return a string
+U0LPMPL2U : Is there some string that makes sense to return for that case?
+U2MLC3R4G : <@U0LPMPL2U> I might use some other strings. But If you use some strings there instead of Debug.crash "something".. Some reader might thinks that this branch will be possible to happen
+
+U0LPMPL2U : Hmm,  I think I see what you're trying to do. You want to get the string parameter out of the route?
+U2MLC3R4G : Yes
+U0LPMPL2U : Your problem is that `companyId` doesn't always exist. Only for certain routes
+U5ZKYURNY : hi all, I’d like to try to set focus on an input element but don’t care whether it succeeds or not, I know I could simply return the original model and Cmd.none in the update function for the result message but just curious is it possible to convert a Task to “Cmd Never”? So that I don’t need to handle the result message at all, something like ``` attemptIgnoreResult : Task x a -&gt; Cmd Never ```
+U0LPMPL2U : The signature should probably be:```
+companyId -&gt; Route -&gt; Maybe String
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

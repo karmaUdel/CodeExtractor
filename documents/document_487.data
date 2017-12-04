@@ -1,16 +1,111 @@
-    span [ property "innerHTML" &lt;| string dangerousHtml ] []```
-I ran into problems with `innerHTML`, as it didn’t seem Elm tracked changes to it. While using `Markdown.toHtml` creates actual virtual dom nodes.
-<http://package.elm-lang.org/packages/evancz/elm-markdown/3.0.2/Markdown>
-But I don’t have the source in the MarkDown format. It’s HTML.
-HTML is markdown
-hehe, right :slightly_smiling_face:
-:slightly_smiling_face:
-more or less
-I use this in several places in my app (across two products), and it works great
-And since it creates vdom nodes, elm can use it effectively for diffing and rendering
-I have `&lt;a href="foo"&gt;bar&lt;/a&gt;` inside. AFAIK, Markdown uses a different syntax`[foor](bar)`
-No, that works
-Html is a subset of markdown
-So, `Markdown.toHtml [] "&lt;a href="foo"&gt;bar&lt;/a&gt;"` will yield `&lt;a href="foo"&gt;bar&lt;/a&gt;`
-In fact, if you want to add things, such as `target` to the link, you have to use the html form, not the `[foo](bar)` form (with standard Markdown parsers, that is)
-Also, using `Markdown.toHtml` means you can pass in the sanitize option, if you want.
+U153UK3FA : `(,,,,,,,,)` is the limit
+U153UK3FA : it's also special syntax and not a definable operator
+U57KYFW67 : Are there any packages which expose access to local storage?
+U153UK3FA : <@U57KYFW67> <https://github.com/elm-lang/projects/blob/master/roadmap.md#where-is-the-localstorage-package>
+U57KYFW67 : tyty
+U2DF486HL : Hi, in my elm app I use this kind of Routes "/#/myroute". Can I start my app with one of this routes?Bear in mind that my app entrypoint is a url like "/pathto/elmView/" in django, from where I take some flags for initialization
+
+U1ZFF0E5P : you want to use a program from the Navigation package
+U1ZFF0E5P : `import Navigation exposing (program)`
+U1ZFF0E5P : this way the "current" location is sent to your init: `init : Location -&gt; (Model, Cmd Msg)`
+U2DF486HL : <@U1ZFF0E5P> I already using something like thismain : Program Flags Model Msg
+main =
+    Navigation.programWithFlags OnLocationChange
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = (\model -&gt; Sub.none)
+        }
+
+U1ZFF0E5P : I do this: ```init : Location -&gt; (Model, Cmd Msg)init location =
+
+    update (UrlChange location) initialModel```
+
+U2DF486HL : and my initinit : Flags -&gt; Location -&gt; ( Model, Cmd Msg )
+init flags location =
+
+U2DF486HL : But I think I'm not using in the right way the Location param then.
+U1ZFF0E5P : where exactly are you hitting an issue? it compiles but doesnt behave as expected?
+U1ZFF0E5P : what is the body of your init function?
+U4JT89FGB : <@U3LUC6SNS> <https://gist.github.com/zgohr/265123ae03c909f466d1a8960958b890> it's very paired back to the essentials. let me know if you have any q's!
+U2DF486HL : <@U1ZFF0E5P> yes, it compiles, but let me check because the initialModel always is taking the same page
+U3LUC6SNS : <@U4JT89FGB> Thanks very much.  It looks quite clear - I will see if I can integrate this into my app this week.
+U5WD40ZA9 : I just tried to make my first port which takes 3 arguments, this gives me a compile error but if I instead remove 2 of the parameters so there is only one it seems to compile. It also works making everything to a record, what am I missing?
+U3SJEDR96 : You're not really missing anything; ports can only take a single parameter
+U5WD40ZA9 : <@U3SJEDR96> So basicly the solution if I want to send more parameters is that I send a record?
+U3SJEDR96 : Yep. Or you encode your data using `Json.Encode` functions to create a JS object, and make your port accept a `Json.Encode.Value`
+U3SJEDR96 : btw, tuple should also work (and translates to an array on the JS side of things)
+U3SJEDR96 : you can find an overview here: <https://guide.elm-lang.org/interop/javascript.html#customs-and-border-protection>
+U5WD40ZA9 : <@U3SJEDR96> my hero! Thank you :happypanda:
+U69JKF6EN : Do you guys recommend ELM native UI for a production app?
+U57KYFW67 : What a greeting ^^;;
+U57KYFW67 : <@U69JKF6EN> It depends on the details, I'd say.
+U69JKF6EN : A lite clone of Uber.
+U57KYFW67 : Other people would know better, but it's robust enough to get the job done. But the language is not stable yet, so you might have to keep closer track of the changes to the language as it develops
+U3SJEDR96 : <https://robots.thoughtbot.com/elm-native-ui-in-production>
+U3SJEDR96 : they did it, might be interesting to read their opinion :slightly_smiling_face:
+U69JKF6EN : <@U3SJEDR96> I read that post. the elm-native-ui github page says it's not production ready. That's why I asked the question here.
+U3SJEDR96 : I don't think anyone here is going to recommend using it in production, in the <#C192T0Q1E|beginners> channel, while the project itself states it is not ready for production :slightly_smiling_face:
+U69JKF6EN : Thank You <@U3SJEDR96> , <@U57KYFW67> and everyone!
+U4872964V : I would probably use react native still
+U4872964V : but it's interesting to experiment
+U5R6L5MT4 : I am building a sudoku resolver
+U5R6L5MT4 : And I have a 4 functions that handle an Array Cell of 9 cells
+U5R6L5MT4 : isValid : Array Cell -&gt; Bool
+U5R6L5MT4 : getColumn : Int -&gt; Sudoku -&gt; Array Cell
+U5R6L5MT4 : getSquare : Int -&gt; Sudoku -&gt; Array Cell
+U5R6L5MT4 : getLine : Int -&gt; Sudoku -&gt; Array Cell
+U5R6L5MT4 : How can I be more precise about the types
+U5R6L5MT4 : And explcitely say that ArrayCell is a 9 cells array ?
+U1P6FFJ64 : <@U5R6L5MT4>, you can create your own custom type that limits the amount of items of the array to 9. You will also have to reimplement some of the functions of the array module
+U57KYFW67 : <@U5R6L5MT4> There's no good way to enforce the size of an array or list in Elm.
+U57KYFW67 : `Array (Array Int)` is probably the best way to do it.
+U3SJEDR96 : hah, I also made a sudoku solver in Elm; it's fun.
+U57KYFW67 : Solving a sudoku puzzle requires a backtracking algorithm, right?
+U3SJEDR96 : <https://github.com/zwilias/sudoku-solver> if you want to compare how I went about it
+U3SJEDR96 : The naive algos do, not sure if there is a way to do it without backtracking at all. I suppose you do be smart about it, and check for cells that can only have one possible input, and work your way through it that way.
+U57KYFW67 : I remember I gave it a try once and it could solve simple puzzles only.
+U57KYFW67 : It would explain my frustration whenever I try to do one :slightly_smiling_face:
+U5WD40ZA9 : I want to use a javascript lib for rendering a graph. My thought was to create the div that the library needs to render itself within and then simple load the javascript library with data provided from elm, through a port. However, since the div changes and the content within changes elm obviously doesn't recognise this when I swap page back and forth. This results in me rendering another graph, and another graph and so on every time I swap page. What is the way to go here?
+U4RR7KX45 : how can I `elm-format` automatically in `vim`?
+U3SJEDR96 : You can use `Html.Keyed` to ensure the vdom-diffing doesn't attempt to re-use that div. That would only work if that div stays at a similar place in the tree, though
+U4RR7KX45 : is there such thing at all?
+U57KYFW67 : <@U4RR7KX45> I use elm-format in vim. You've followed the install instructions already, I take it?
+U3SJEDR96 : <https://github.com/avh4/elm-format/#elm-vim-installation> there is :slightly_smiling_face:
+U4RR7KX45 : yes I have
+U57KYFW67 : Is it not working? Or are you trying to configure it differently than the default?
+U4RR7KX45 : does it have to be neovim or smth similar? I'm using vim8 at the moment
+U57KYFW67 : Is vim8 the "default" vim?
+U4RR7KX45 : yeah
+U57KYFW67 : Yeah. I just use whatever ubuntu gave me
+U4RR7KX45 : ok thanks, I'll try to uninstall plugins and re-install them
+U57KYFW67 : ```call plug#begin('~/.vim/plugged')
+  Plug 'elmcast/elm-vim'
+call plug#end()
+```
+
+U57KYFW67 : This is all it took me
+U57KYFW67 : which is just in the instructions on that github page, of course
+U1P6FFJ64 : <@U4RR7KX45> there is a <#C0SR8T090|vim> channel too where you can ask
+U57KYFW67 : Don't forget to run `:PlugInstall`
+U4RR7KX45 : thanks guys :slightly_smiling_face:
+U4RR7KX45 : thanks Elmers :slightly_smiling_face:
+U4RR7KX45 : lol
+U57KYFW67 : and to set the autosave flag: let g:elm_format_autosave = 1
+U57KYFW67 : Although the autosave command started screwing with me when I was trying to make changes to other people's repos (which aren't yet formatted by elm-format). I bound a key to do the format for me
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,113 +1,62 @@
+U3YDBDP4Z : Does Elm have default function parameter syntax?
+U1ECWM37W : Nope
+U0CK8CJ5D : Elm has automatic currying, so you can create functions with preset arguments. Maybe this fits your use case.
+U3YDBDP4Z : Creating unit tests that involves the model can become a bit cumbersome when model has a lot of properties after a while
+U0CK8CJ5D : You could provide a static default model then and use that to create more specialised ones.
+U3YDBDP4Z : You mean creating new ones by updating the default one with the needed properties?
+U3YDBDP4Z : That's an option :slightly_smiling_face:
+U0CK8CJ5D : yes
+U604S603Y : to call some function in my update function I need to create a let ... in ... block, don't I? But then I have to store the result of any function call in a value, even if I don't care for it?
+U3SJEDR96 : <@U604S603Y> if you don't need the result of the function, why would you call it? Since it can't have side-effects, it won't really do anything, will it? :slightly_smiling_face:
+U604S603Y : for example:```ChangeWindowTitle page -&gt;
+            let
+                pageInfo =
+                    getPageInfo page
+
+                _ =
+                    Ports.changeWindowTitle pageInfo.baseTitle
+            in
+                ( model, Cmd.none )```
+
+U3SJEDR96 : Oh, alright. So even that `Ports.changeWindowTitle : String -&gt; Cmd msg` function doesn't have a side effect; and doesn't actually change the window title. Rather, it returns a `Cmd` that describe to the runtime that it needs to call a function in JS
+U3SJEDR96 : so you probably want `ChangeWindowTitle page -&gt; ( model, Parts.changeWindowTitle (getPageInfo page |&gt; .baseTitle) )` or something like that
+U3SJEDR96 : the important part is that you must return that Cmd from your `update` to have it do anything
+U64D26Q95 : Hi. Can anyone help me with decoding the following JSON:```
+{
+  "hotels": [ ... ],
+  "deals": [ ... ]
+}
 ```
-you would probably want to get the target.value there too
-True. `JD.map tagger Html.Events.targetValue` it is :slightly_smiling_face:
-I see 
-So `succeed` was used because it didn't care about the contents of the event per sey
-yes
-Just that makes so much sense now 
-Thanks a bunch 
-on the other hand, you know the target value for the select, so maybe you don't need to parse it from the event :slightly_smiling_face:
-Yeah
-or wait
-anyway
-In this tutorial, it just uses the event to call a port 
-it's pretty low level, you need to know the DOM events etc
-<https://www.paramander.com/blog/using-ports-to-deal-with-files-in-elm-0-17>
-ah, right. I've done something vaguely similar, though I did decode the `target` in Elm to a `Value` so I'd have the `files` accessible: <https://ellie-app.com/3qpgdbQFFfqa1/0>
-(and with a small change, it can also display the image: <https://ellie-app.com/3qpgdbQFFfqa1/1> )
-Much clearer IMO 
-Thanks for the help 
-it's interesting that "change" is the event for file inputs, not "input"
-but it sort of makes sense
-But still inconsistent
-well, change is emitted from the other field also, when they lose focus for instance, so maybe not so inconsistent
- But technically, the file input received some input right? 
-yes, it sure did
-but the file input doesn't have the usual kind of value attribute that the others have
-it contains the file name, but generally you are after the file contents as well
-That makes sense also 
-What's wrong with it?
-`--` is probably reserved as starting a comment
-yes, - starts a comment
-(also you need braces around `num2 - num1` but that's a different matter)
-Ah. As always you're right. Thank you!
-Yeah. I removed braces right before posting it here, because I was trying to figure it out. Thanks!
-Probably, reserved-word-cases deserve their own general compiler message, though
-I'm referring to the `globalReader` assignment 
-Because it neither misses anything nor needs a whitespace before
-well, it actually starts a comment there
-I'm not sure if I agree. The error you get is pretty bad, but `--` starts a comment everywhere except within a string-literal. Since you can put comments anywhere and they're basically considered whitespace... I don't know if that's really worth the effort
-especially since you normally shouldn't define infix operators
-Hm. Indeed it should start a comment. In which case it's syntax highlighter problem
-Oh, right. Good point. I can't actually edit that ellie anymore, though, that's from a month or 2 ago, but I'll keep it in mind next time I link it, thanks!
-It's awesome, why shouldn't I? In scala it's considered to be a good practice.
-in some cases they are great, but normally you'd just make a function. operators have a global namespace (bug in Elm?) and they are not self-explanatory the way function names are
-also, there is the issue with precedence
-and elm-format does not know how to handle them
-Do you mean <https://github.com/elm-lang/core/issues/638> ?
-yes, things like that. Elm is dropping more and more operators (! and =&gt;). It makes sense to keep the traditional mathematical operators though
-That's sad. Thank you for the information!
-Sad? No
-Actually very good 
-It's easier to understand what's going on 
-Giving that searching for infixes on Google is damn hard 
-Fancy search solves that but still... 
-People have different preferences here, but Elm (Evan) is quite opinionated :slightly_smiling_face:
-And not in a bad way I feel 
-BDFL, as they say in python community
-But feel free to use them in your code though, just beware of the drawbacks.
-I understand. If there is a risk of deprecation, I don't think It's a good idea to use them in a production codebase, in my case at least.
-well, upgrading them will be automatic in most cases though
-just one more thing to do when moving to the next version
-never did an authomatic upgrade, but sounds frightening from js perspective
-indeed, but from an Elm perspective it's not :slightly_smiling_face:
-I guess as always it's a delight in elm
-yeah
-Thank you!
-Have a nice day.
-Is it possible to have inline custom types in record definitions or do i have to define the custom type before using it in the record?
-you mean in a type alias that describes a record? You need to define the type before you can use it in an alias :slightly_smiling_face:
-That's what I thought :+1:
-an alias is nothing more than "I have this shape and I want to refer to it by a shorter name". In the case of records, you also get a free constructor function for that shape.
-Thank you for the help :slightly_smiling_face:
-Hi, I have some nested data structure. I'm traversing this structure and I'm building view. My question is how to add unique id to each created html element?
-<@U30J8RTKJ> what would you be you using the unique id for?
-<@U153UK3FA> styling
-so how would you know what id to style?
-well, it looks like this approach doesn't make sense in elm ..., i have to think this through ...
-what do you actually want to do?
-I've just realized that when I've asked question
-I have some nested json which describes board game, in the view function I'm traversing this structure, I have just relized that I have to convert this json to some record and just modify this record to update the view ....
-and I have to use this record in the view function
-yes
-what is the difference between `number` and `int` and how can i cast one to the other?
-and is there anywhere in documentation that has this listed?
-`number` is a pseudo-type which could be both `Int` and `Float`
-you can't have an actual value of type `number` you can only have `Int` or `Float`
-except a literal number (`1 : number`)
-yes
-that's what's happening to me
-i have defaults that i create
-and the compiler thinks they're numbers instead of ints
-You generally want to use `Int` rather than `number`, if you're dealing with integers
-and `Float` when dealing floats
-<@U494Y62N7> add a type signature
-Can you show the code and the error?
-sure
-Oh, `Cmd Int`
-Okay, so that's actually a completely different error - you can't just "make" a `Cmd` like that
-ah
-any hints on how i should go about making the command?
-i see this `!` operator everywhere, i just don't know how to properly use it
-most likely, you actually don't want to do that - rather, you want to take the logic that is executed in response to that command, and execute _that logic_
-you don't need a Cmd, just call the function to generate the colors directly in your `init`
-or, if it's a random generator, put that Cmd there
-ok
-Hi!
-How would you store colors in a library? rgb(1, 2, 3) or triples/quadruples etc.?
-there is a `Color` type in Elm if that is sufficient
-but if there weren't I'd probably make a triple/quadruple or a corresponding single constructor union type
-or a record
-It depends on what you need them for and what you plan to do with them, really
-<@U3SJEDR96> personally I think the usecase would be css or SVG
-There are quite a few libraries that deal with that already, though. <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Color> in core, <http://package.elm-lang.org/packages/eskimoblood/elm-color-extra/5.0.0/Color-Convert> for blending, transforming, converting, manipulating, <http://package.elm-lang.org/packages/mdgriffith/elm-color-mixing/latest> for mixing and whatnot, ...
+into: ```List Hotel```
+where:
+```
+type alias Hotel =
+  { deals : List Deal }
+```
+, please?
+
+U3SJEDR96 : so each deal is valid for each hotel? or..?
+U3SJEDR96 : making a few assumptions here, but possibly something like this: <https://ellie-app.com/3FLMJtntJm8a1/0>
+U0ULRASLC : <@U3SJEDR96> I love those fancy resorts with free toilet paper ;D
+U3SJEDR96 : Don't we all?
+U604S603Y : with the elm debugger (seems to be builtin?) running in Chrome -&gt; is there a way to look into the Message contents?
+U0ULRASLC : if elm debugger is running you can just click on it and it will open a window with all the Messages and states
+U0ULRASLC : the thing in the bottom right corner of the page
+U3SJEDR96 : also, for quick-n-dirty msg logging, `case Debug.log "msg" msg of` in your `update` :wink:
+U604S603Y : yeah but the Messages part of it is so small so I can't see the data, even when hovering over it
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

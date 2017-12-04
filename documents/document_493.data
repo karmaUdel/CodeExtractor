@@ -1,34 +1,51 @@
-```undefined = Debug.crash "Undefined"```
-the joys of a strict language :slightly_smiling_face:
-Does anybody know when [this](<https://github.com/elm-lang/dom/blob/1.1.1/src/Dom/Size.elm>) will be included in the library?
-Has anyone had any experience with contentEditable divs? More specifically, in binding the value of the div to some content. It appears that whenever the value of the content is updated, the cursor moves to the beginning of the input element, meaning that you'd be typing in reverse.  This seems to happen whether you set the value with Html.text or if you set the innerHTML directly from Html.Attributes.property. Has anyone else experienced this, or worked around it? I'm trying to avoid porting out to JS if possible.
-<@U21QZSK36> I tried using one of those for a while and gave up on it.
-If you insist on using contentEditable, I’d recommend just catching the `input` events in JS and forwarding the current value through to Elm on a port.
-This kind of thing is a known issue with virtual-dom based renderers.
-Basically, the element is being re-created and the editing state (such as where the cursor is) is lost.
-You might be able to deal with it somewhat with `Html.Keyed.node`.
-I hadn’t seen this until after I moved on to the JS side.
-oh, cool. That's a good idea. Let me experiment with that
-Basically, I'm trying to build a WYSIWG type of editor, but a requirement is the formatted text has to be inside the editor, ala TinyMCE kind of thing. I tried to pitch a different div sort of like <http://Stackedit.io|Stackedit.io>, but no luck :stuck_out_tongue:
-Thanks for your help.
-<@U0K92QFST> aha is that not possible because it get executed on declaration and thereby you can not call `undefined` as a function?
-:point_up: correct
-because it's compiled as a variable, not a function
-Thanks <@U1CE9DL9H> <@U4872964V> <@U0K92QFST> that all makes sense
-So it is better to label `ten` in `ten = 10` as a Value
-With the distinction between value and function is that you fully applied all the arguments
-It's correct to call it a value. I'd call it a "constant" because it is a value that can never change.
-in another language, `ten = 10` might be called an assignment or a variable declaration; in Elm it's actually a declaration of equivalency. `ten` is ALWAYS equal to the value `10`.
-Alright thanks! :slightly_smiling_face:
-To be complete - Elm is strict, which means that expressions are evaluated as soon as all arguments are available. Say I have a function `foo : a -&gt; b -&gt; c -&gt; d`. That's clearly a function. If I define that function as `foo = Debug.crash "buh bye!"`, though, and have that in a top-level value, your program will still crash before even starting.
-Unless you use a let binding.
-In which case, it will crash on evaluation of the function
-Same goes for if you wrap something in a case statement, or an if statement.
-<@U3SJEDR96> ohw nice i did not know that is what strict mend. Useful thanks
-it's also where the subtle difference between `always "foo"` and `(\_ -&gt; "foo")` comes in
-Indeed, see number 4 in this: <https://medium.com/@eeue56/top-6-ways-to-make-your-elm-app-crash-at-runtime-562b2fa92d70>
-To pattern-match on an empty List, I use "[]."  So how do I match (in a "case") an empty Dict?
-yeah, regex... so infuriating
-<@U5LFUHH19> Use an if statement + `Dict.empty`
-or `case Dict.toList myDict of [] -&gt; "empty!"` (though, if it's not empty, that's a waste)
-<@U0EUHKVGB> you list function equality as a runtime crash, but shouldn't (wouldn't) the compiler catch that?
+U5WD40ZA9 : <@U3SJEDR96> I want to insert a chart with the help of javascript. This requires that the element already exists in the dom before I try to insert the graph.
+U3SJEDR96 : ah, so you're using a port, right?
+U3SJEDR96 : in your port, defer the actual code using `requestAnimationFrame` :slightly_smiling_face:
+U5WD40ZA9 : <@U3SJEDR96> Currently I've been using ports to provide javascript with some data from elm. The problem is that the command I run executes the javascript function before the view is actually rendered.
+U3SJEDR96 : yeah, so something like `app.ports.addChar.subscribe(function (chartData) { window.requestAnimationFrame(function () { *add your chart* }); });`
+U10P4FNMD : <@U681TBBUP> Create Elm App project is not deprecated, I'm maintaining it with <@U1083HNSF>
+U5WD40ZA9 : <@U3SJEDR96> Thank you very much!
+U681TBBUP : <@U10P4FNMD> my apologies I was incorrectly referring to this <https://github.com/evancz/start-app>
+U10P4FNMD : <@U0JBSEGHY> could you please give me an example of what is not working? Please feel free to hit me with a PM if I could help you in any way :slightly_smiling_face:
+U10P4FNMD : No probs! :slightly_smiling_face:
+U31FGNWCT : Hi everyone! Has anyone ever used gulp-elm? I'm having an issue with multiple elm files. Can't import one from another, specifically.There is rather big gulpfile in my project, so I'll just show you my elm-task:
+```
+gulp.task('elm', function() {
+   return gulp.src(appSrc.elm)
+       .pipe(plumber())
+       .pipe(elm({debug: true}))
+       .pipe(gulp.dest('someProjectDest'));
+});
+```
+
+U31FGNWCT : My elm folder currently is pretty simple:```
+elm/
+----Main.elm
+----Ports.elm
+```
+
+U3SJEDR96 : Where is your elm-package.json located and what is its source-directories defined as?
+U31FGNWCT : As far as I know, gulp-elm handles everything on it's own (and successfully compiles Main.elm, when there are no imports).
+U3SJEDR96 : so you don't have an `elm-package.json` anywhere?
+U31FGNWCT : it is in example folder of gulp-elm (in node_modules)
+U31FGNWCT : confusing
+U3SJEDR96 : oh. so in your project root, do `elm-package install --yes`
+U3SJEDR96 : then open that file, and set the `"source-directories": [ "elm" ]`
+U3SJEDR96 : and then try your gulp thing again :slightly_smiling_face:
+U4872964V : <@U30J8RTKJ> did you get an answer about drag and drop?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

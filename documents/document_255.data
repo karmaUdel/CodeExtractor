@@ -1,6 +1,94 @@
+U5H8JJP24 : actually I do it the same way as in the feldman spa example
+U0LPMPL2U : it looks like the `"` got escaped once as `\"` and then re-escaped as `\\\"`
+U3SJEDR96 : that looks like encoding to JSON twice... Possibly you're using `Json.Encode.encode` on the Elm side _and_ `JSON.stringify(..)` on the JS side? or .. something vaguely like that?
+U5H8JJP24 : ouh i am reading directly from the locastorage as a string :sleepy:
+U5H8JJP24 : yep JSON.parse on the js side fixed my issue... thx guys
+U5SJJD85B : So this might be a odd question, but do Elm users generally prefer to do function composition via `f &gt;&gt; g` or `g &lt;&lt; f`?
+U3LUC6SNS : I'be been using code like that below to update nested records.  Is there a better/more elegant way?```
+toggleMenu model =
+    let
+        appState =
+            model.appState
+
+        newAppState =
+            { appState | menuDropped = (not appState.menuDropped) }
+    in
+        ( { model | appState = newAppState }, Cmd.none )
 ```
-the function List.concat
-expected to have list type arguement of a list type not a list type of html msg
-i think its about parenthese here
-List.concat (List.map (renderWord words))
-try like thius
+
+U0LPMPL2U : <@U5SJJD85B> I've seen both used. Maybe a slight preference for `&lt;&lt;` ?
+U0LPMPL2U : `&lt;&lt;` can often read better such as `not &lt;&lt; .isActive`
+U0LPMPL2U : <@U3LUC6SNS> you could break out a function `toggleAppStateMenu`
+U0LPMPL2U : e.g.```
+toggleMenu model =
+        ( { model | appState = toggleAppStateMenu model.appState }, Cmd.none )
+```
+
+U0LPMPL2U : Alternatively you could flatten your model structure such that `menuDropped` was a key on the top-level `Model`
+U3LUC6SNS : <@U0LPMPL2U> Thanks!  I think I will go with the first suggestion.  My model is is already quite large
+U5SJJD85B : <@U0LPMPL2U> thanks!
+U5W4G2SQ5 : Would Elm / Electron be a good choice for xplat desktop app dev?
+U3SJEDR96 : You'll probably need some JS+ports to handle the electron-specific API's, but it's certainly feasible
+U3SJEDR96 : also, <@U0F7JPK36> has some experience with this. Probably not a good idea for your first elm project, though, but still.
+U5W4G2SQ5 : <@U3SJEDR96> thanks for the info. agree not for a first project, but it's what I'd use it for if I like Elm
+U3SJEDR96 : there are some resources, too - a cursory google for `elm electron` reveals some useful links, and quite a few outdated links
+U5C8AUE9F : Anyone here used elm-bootstrap?
+U5C8AUE9F : When my navbar collapses into a hamburger menu I cannot click to open it. And it does not generate any Sub Msg.
+U5W3JQW2W : Anyone have any luck using <https://github.com/ohanhi/elm-native-ui>? I have a choice between using ReactJS for this app I'm building, or Elm, which looks a lot more appealing from a language standpoint.
+U0F7JPK36 : <@U3SJEDR96> I'd defer to other folks like <@U3LGUAF54> at this point
+U0LPMPL2U : <https://robots.thoughtbot.com/elm-native-ui-in-production>
+U3SJEDR96 : Fair enough :) also, enjoy your first day at nri!
+U0F7JPK36 : thanks!! it's been way cool
+U5W4G2SQ5 : i found this, looks pretty good, <https://www.youtube.com/watch?v=FP4P7_c4meY>
+U2CL1FKDG : I'm trying to rewrite a react/redux version of Game Of Life in elm. I have a few buttons on the page that allow you to change the update speed, for example from every 350ms to every 50ms. I started to make a subscription like so: `Time.every (model.speed * Time.millisecond) NextGen`, but I'm wondering if I should use the AnimationFrame package instead. Is `Time.every` fine for my use case? If not, how do I set a specific update frequency using the AnimationFrame package?
+U59AF21LJ : Hi! I'm experiencing some problem while trying to load a local JSON file. I get a NetworkError and the console says "ross origin requests are only supported for protocol schemes: http, data, chrome, chrome-extension, https." It might be because the path I'm providing is interpreted as some `file://`.
+U0EUHKVGB : Yep. You need to use a server to serve the files
+U59AF21LJ : Do you have an idea of what is wrong?
+U23SA861Y : The animation stuff is to avoid jitter, but for a game of life I would expect `Time.every` to be fine
+U0EUHKVGB : A good way is to use python, which might be installed for you.
+U0EUHKVGB : Run `python2 -m SimpleHttpServer` in the folder where your json file and html files are
+U0EUHKVGB : or, `python3 -m http.server`
+U59AF21LJ : <@U0EUHKVGB> Oh, you mean it would work that way.
+U0EUHKVGB : <https://stackoverflow.com/a/21608670/2985975>
+U59AF21LJ : <@U0EUHKVGB> Thanks a lot it works
+U23SA861Y : I'm not even sure what problem CORS is trying to prevent.
+U2CL1FKDG : Ok, thanks <@U23SA861Y>. Just curious, do you know how to tweak the animation speed using AnimationFrame? Or are you pretty much locked into the browser's refresh rate?
+U23SA861Y : It seems to be locked to the re-renderspeed of the browser
+U3C4V6PMK : <@U2CL1FKDG> You could keep track of the last time you updated your game cells, and in your animationframe func if the time delta is less than your preferred framerate, then skip the update
+U2CL1FKDG : Ah ok, thanks <@U3C4V6PMK>, good to know…
+U5HM74BD0 : I read the Introduction to Elm and the section on ports, but I need help. I want to send a string to javascript when a button is clicked. How do I accomplish that on the Elm side?
+U5W9GTVDJ : :wave:
+U48AEBJQ3 : <@U5HM74BD0> Is there some part of it that is problematic?
+U5MKS6L80 : <@U5HM74BD0> in Elm:```
+port sendStringToJs : String -&gt; Cmd msg
+...
+update model msg = case msg of
+  IWantToSend s -&gt; (model, sendStringToJs s)
+...
+```
+
+U5HM74BD0 : Ah, I wasn't sure if I needed to add this in my update function, or some other way. Thanks, <@U5MKS6L80>.
+U5MKS6L80 : yeah, my understanding is that basically you can emit `Cmd`s in two places: either in your `update` or in your `init` function. If it's in your `update` then that has to be a reaction to a message that your application can receive, and and if it's in `init` then it will run once at the beginning
+U5MKS6L80 : in your case if would be a reaction to the message sent when the button was clicked
+U5HM74BD0 : <@U5MKS6L80> That worked! Thanks so much.  Next, I need to work on reading the string back from JS into Elm. I guess I need to do that in my init function.
+U153UK3FA : <@U5HM74BD0> <https://guide.elm-lang.org/interop/javascript.html> gives more information about ports and interop with JS
+U5MKS6L80 : yup, what jessta said. the part that applies to this question is the `suggestions` example on that page
+U1XL8FMAA : Any idea if there are more straightforward examples of pure component api design other than elm-sortable-table? Specifically, I am interested in how one folds in Cmds to the design, given the lack of an update function in the table api?
+U1XL8FMAA : I assume that you could store them in the component model and pull them out in the parent update…
+U1XL8FMAA : or not.. actually I don't really see how to handle Cmds…
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,0 +1,160 @@
+U2U94G0QG : I'm building a little thing to show off, it's still early but I have gotten some positive feedback already - we just shipped a React/Redux app and are now planning what will be used in a rewrite of an old flash app
+U2U94G0QG : it looks like it will be about the same + TypeScript, but I want to use Elm :smile:
+U2SR9DL7Q : i'm avoiding everything 'script'
+U2SR9DL7Q : typescript, coffeescript, closurescript, javascript...
+U2SR9DL7Q : I used to write python at work, which felt so safe and secure compared to JS... till I met elm.
+U177VRFJP : Is there a way to read response headers with `elm-lang/http`? I'm trying to use an API that uses response headers for pagination <https://docs.gdax.com/#pagination>
+U0EUHKVGB : <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#Response>
+U0EUHKVGB : <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#expectStringResponse>
+U177VRFJP : ah, somehow I missed `expectStringResponse`...thanks Noah :slightly_smiling_face:
+U0EUHKVGB : The name is not so obvious
+U5LFUHH19 : I would like to `Json.Encode` a `List String` but I'm clearly not understanding how it works:```
+&gt; E.list &lt;| List.map E.string ["foo", "bar"]
+{ 0 = "foo", 1 = "bar" } : Json.Encode.Value
+```
+
+U5LFUHH19 : I guess I'm expecting to see something that looks like `["foo","bar"]`
+U0EUHKVGB : <@U5LFUHH19> That is what is made.
+U0EUHKVGB : elm-repl uses `toString`
+U0EUHKVGB : `toString` does magic in order to represent things as strings.
+U0EUHKVGB : A JSON list gets iterated over as if it's an object
+U5LFUHH19 : Hmm, OK, let me pass it to my backend and see what is the what.
+U0EUHKVGB : What you have there is this json: `["foo", "bar"]`
+U0EUHKVGB : I promise you it's that :slightly_smiling_face:
+U5LFUHH19 : You are correct, sir!  :slightly_smiling_face:  Thanks bigly.
+U6B7NBTLZ : hello
+U6B7NBTLZ : i updated elixir to v 1.5
+U6B7NBTLZ : and now i get this error when i use mix ecto.create for example
+U6B7NBTLZ : could not compile dependency :postgrex, "mix compile" failed. You can recompile this dependency with "mix deps.compile postgrex", update it with "mix deps.update postgrex" or clean it with "mix deps.clean postgrex"
+U6B7NBTLZ : some help
+U6B7NBTLZ : somebody
+U6B7NBTLZ : ?
+U0EUHKVGB : <@U6B7NBTLZ> Erm, I think you asked in the wrong slack group :sweat_smile:
+U1AN4JRFV : i assume you ran the suggested commands and got other errors?
+U0EUHKVGB : This is the Slack group for Elm, a frontend web development language.
+U6B7NBTLZ : yes
+U6B7NBTLZ : those are the errors
+U6B7NBTLZ : == Compilation error in file lib/postgrex/extensions/calendar.ex ==** (ArgumentError) invalid Unix time 9224318016000
+    (elixir) lib/calendar/datetime.ex:136: DateTime.from_unix!/3
+    lib/postgrex/extensions/calendar.ex:113: (module)
+could not compile dependency :postgrex, "mix compile" failed. You can recompile this dependency with "mix deps.compile postgrex", update it with "mix deps.update postgrex" or clean it with "mix deps.clean postgrex
+
+U1AN4JRFV : what is the output of `mix deps.update postgrex`
+U6B7NBTLZ : Running dependency resolution...Dependency resolution completed:
+  base64url 0.0.1
+  comeonin 2.5.3
+  connection 1.0.4
+  cowboy 1.0.4
+  cowlib 1.0.2
+  csv 1.4.4
+  db_connection 1.1.2
+  decimal 1.4.0
+  distillery 1.1.0
+  earmark 1.0.1
+  ecto 2.0.5
+  edeliver 1.4.0
+  fs 0.9.2
+  gen_smtp 0.11.0
+  gettext 0.11.0
+  httpotion 3.0.1
+  ibrowse 4.2.2
+  joken 1.3.1
+  jose 1.8.0
+  junit_formatter 1.2.0
+  mailman 0.3.0
+  mime 1.0.1
+  parallel_stream 1.0.5
+  phoenix 1.2.1
+  phoenix_ecto 3.0.1
+  phoenix_html 2.6.2
+  phoenix_live_reload 1.0.5
+  phoenix_pubsub 1.0.0
+  plug 1.2.2
+  poison 2.2.0
+  poolboy 1.5.1
+  postgrex 0.12.1
+  ranch 1.2.1
+
+U1AN4JRFV : now try compiling again
+U1AN4JRFV : `mix compile`
+U6B7NBTLZ : same error
+U6B7NBTLZ : =&gt; postgrexCompiling 45 files (.ex)
+warning: String.strip/1 is deprecated, use String.trim/1
+  lib/postgrex/error_code.ex:9
+
+warning: module attribute @higher_types was set but never used
+  lib/postgrex/types.ex:20
+
+
+== Compilation error in file lib/postgrex/extensions/calendar.ex ==
+** (ArgumentError) invalid Unix time 9224318016000
+    (elixir) lib/calendar/datetime.ex:136: DateTime.from_unix!/3
+    lib/postgrex/extensions/calendar.ex:113: (module)
+could not compile dependency :postgrex, "mix compile" failed. You can recompile this dependency with "mix deps.compile postgrex", update it with "mix deps.update postgrex" or clean it with "mix deps.clean postgrex"
+
+U1AN4JRFV : if i was you, i'd try to a clean as well, and then head over to the elixir-slack, if nothing else helps
+U1AN4JRFV : just in case you haven't seen this, looks relevant: <https://github.com/elixir-ecto/postgrex/issues/300>
+U6B7NBTLZ : thanks a lot :d
+U1AN4JRFV : :v:
+U0LKXP19D : Hi y'all. I have a question for a scenario that should be fairly common:
+I have a reusable widget that has it's own model with default values. Optionally, a part of this model should be able to be overridden be the parent, by passing in a config.
+
+So i need a "copy property if exists, else use default value"
+
+U0LKXP19D : I really don't want to have to manually write `if config.prop then config.prop else defaultModel.prop` for every property...
+U0M9CNX1A : I've seen the `foo { defaults | prop = "override" }` pattern used a fair bit
+U0LKXP19D : ok thanks
+U0LKXP19D : wait.. I don't understand where the conditional part is
+U0LKXP19D : ok that's saying "start with the default, then override this one property to this value", in my case the value may not exist
+U0M9CNX1A : Sorry, typing on a phone so was terse :)There is no conditional. You just expose a default model record and the caller can pass that in with any overrides they desire
+
+U0LKXP19D : I'd rather not expose the entire model to the parent because it contains props that are only relevant internally (also, if I want to extend the internal model in future that would be a breaking change for all users of this widget)
+U0LKXP19D : in JavaScript i'd use something like `Object.assign(default, config)`
+U23SA861Y : yeah, you probably want to take a step back from this "reusable component with state" idea
+U0LKXP19D : I had a feeling I was doing it wrong.
+U23SA861Y : <https://www.youtube.com/watch?v=2ihTgEYiKpI>
+U23SA861Y : so all your state has live in the model, you can hide it behind opaque types if that's really what you want.
+U0LKXP19D : I see.
+U0LKXP19D : old habits and all that..
+U0LKXP19D : thanks
+U23SA861Y : you can have constants defined outside the model but any changing state needs to find it's way back there
+U2SR9DL7Q : hey all. Would anyone like to help with commands and a slightly complex update function? Is anyone willing to look through a small gist? One of my commands is triggering late and I can't figure out why.
+U2SR9DL7Q : <https://gist.github.com/tkshill/2c6f27b26938631f0028e210a8ffda8e> My `ResolveTurn` Msg doesnt seem to figure out who won the game until a full cycle after that player emptied all their cards, but I'm not sure why :disappointed:
+
+U0JFGGZS6 : I think this line references stale state -&gt; <https://gist.github.com/tkshill/2c6f27b26938631f0028e210a8ffda8e#file-update-elm-L81>
+U2SR9DL7Q : <@U0JFGGZS6> I suspect you're right, but I'm not sure how. The active player can only be incremented at the end of resolving the turn.
+U0JFGGZS6 : I was theorizing that the `hand` was the player's hand before s/he made the last play, somehow
+U0JFGGZS6 : would a `Debug.log` there help shed any light?
+U2SR9DL7Q : I guess I'm using debug.log for the first time
+U2SR9DL7Q : I'v ebeen live testing. At the time a player hits 0 dominoes first... it knows they hit zero, and the activeplayer seems to hit hand 0... but game does not become WonGame
+U0CL92DJN : Does a third party implementation of `Set` exist that isn’t limited to `comparable`? For example if I have a simple union type like:```
+type Thing = ThingA | ThingB | ThingC
+```
+And I want to do `Set.fromList [ThingA, ThingB]`
+The hack in the implementation would be to do `toString` on the values.
+
+U23SA861Y : how would you search a set if they aren't comparable....
+U0JFGGZS6 : <http://package.elm-lang.org/packages/eeue56/elm-all-dict/latest>  has a Dict implementation that does just that
+U23SA861Y : well then that implements set because a `Set a` is just `Dict a ()`
+U0JFGGZS6 : right
+U0JFGGZS6 : <@U2SR9DL7Q>  just curious why you need the `delay` mechanism, it seems to add confusion to me but then I don't know what you are trying to achieve exactly
+U2SR9DL7Q : <@U0JFGGZS6> I don't need it everywhere, but I was testing where was the best place to implement. without delay, players act too fast.
+U2SR9DL7Q : The whole thing seemed to be working properly until I refactored into those piped update messages... but cmds should only take effect _after_ all model updates are complete...
+U23SA861Y : yeah this whole thing (although compact) looks factored a little strange
+U0JFGGZS6 : it just seems like you could stick a `resolveTurn` at the end of the chain of updates when you need it, rather than going through a Cmd and back through the update cycle
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

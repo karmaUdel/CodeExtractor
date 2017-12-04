@@ -1,11 +1,129 @@
+U601ELFEG : but I see this crash anyway - does Elm evaluate the Nothing case anyway?
+U0CLDU8UB : Yes, it's an eager language
+U601ELFEG : even for `case`?
+U1CE9DL9H : no, case is lazy
+U601ELFEG : that is what I thought
+U601ELFEG : though I'm wondering if the `Nothing` branch is handled differently
+U1CE9DL9H : what is your actual code? the thing you typed will never evaluate the `Nothing` branch for a just
+U1CE9DL9H : but ```
+x = Debug.crash ""
+
+v = case ... of   
+    Just _ -&gt; ...
+   Nothing -&gt; x
 ```
-Spend a lot of time, and can't find solution:disappointed:
-Looks like you are trying to access the MySQL server through the socket, I think you need to set it to use the port and the hostname `my-db` (or whatever `link` arg you name)
-something like this?
-No, it's what you link it as, so the `docker run --name=test-app -p 8000:8000 -it -v $PWD:/app --link my-db --env-file=.env myapp:dev` The `--link my-db` would name the link `my-db`
-So I think you need to change your mysql connection string to be looking at the port, not a local socket
-this one;)? sorry, I :disappointed:confused
-that looks invalid, `--link` requires an argument
-I am saying, just use what you originally posted, but in your app code where you connect to the database, use the hostname `my-db`
-What lib are you using to talk to your DB?
-mysql-python
+
+U1CE9DL9H : will
+U1CE9DL9H : crash
+U601ELFEG : ```arrayMap2 : (a -&gt; b -&gt; c) -&gt; Array a -&gt; Array b -&gt; Array carrayMap2 f aArray bArray =
+  let
+    l = min (Array.length aArray) (Array.length bArray)
+    gen i = case Maybe.map2 f (Array.get i aArray) (Array.get i bArray) of
+      Just c -&gt; c
+      Nothing -&gt; shouldNeverHappen
+  in
+      Array.initialize 1 gen
+```
+
+U601ELFEG : oopps
+U601ELFEG : and yes - now I see it - `shouldNeverHappen` is a syn. for `Debug.crash` with a message
+U601ELFEG : and that is going to kill it
+U601ELFEG : Oy - miss my lazy language!
+U1CE9DL9H : just make it take unit as an argument
+U601ELFEG : TY - that worked - the app runs again.
+U3LUC6SNS : Hi all!  I am implementing a feature with channels so as to inform the user whether the backend program is online or not.  It is working, but has one big flaw.  When the server goes from the offline to the online state, the program immediately detects this change and responds accordingly.  In the opposite direction, from on to off, there is a big delay.   This because I am not trapping the right signal.  
+Here is the code:
+```
+SetMessage message -&gt;
+            Action.Channel.setMessage message model
+
+        -- ( { model | messageInProgress = message }, Cmd.none )
+        SendMessage -&gt;
+            Action.Channel.sendMessage model
+
+        ReceiveChatMessage raw -&gt;
+            let
+                messageDecoder =
+                    JsDecode.field "message" JsDecode.string
+
+                somePayload =
+                    JsDecode.decodeValue messageDecoder raw
+            in
+                case somePayload of
+                    Ok payload -&gt;
+                        Action.Channel.handlePing True model
+
+                    -- ( { model | messages = payload :: model.messages, info = payload }  Cmd.none )
+                    Err error -&gt;
+                        Action.Channel.handlePing False model
+
+        -- ( { model | messages = "Failed to receive message" :: model.messages }, Cmd.none )
+        HandleSendError err -&gt;
+            Action.Channel.handlePing False model
+
+        PhoenixMsg msg -&gt;
+            let
+                ( phxSocket, phxCmd ) =
+                    Phoenix.Socket.update msg model.phxSocket
+
+                appState =
+                    model.appState
+
+                status =
+                    if String.contains "Heartbeat" (toString msg) then
+                        False
+                    else
+                        True
+
+                updatedAppState =
+                    { appState | online = status }
+            in
+                ( { model
+                    | phxSocket = phxSocket
+                    , appState = updatedAppState
+                  }
+                , Cmd.map PhoenixMsg phxCmd
+                )
+```
+In the javascript console, I get this:
+```
+app.js:18881 WebSocket connection to '<ws://localhost:4000/socket/websocket>' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED
+```
+This is what I need to detect.  When I inspect the code, I get this:
+```
+function open(url, settings)
+{
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+	{
+		try
+		{
+			var socket = new WebSocket(url);
+			socket.elm_web_socket = true;
+		}
+```
+
+U0CLDU8UB : <@U3LUC6SNS> I'm not sure, but seems to me like you could use <http://package.elm-lang.org/packages/elm-lang/websocket/1.0.2/WebSocket-LowLevel> with a suitable `onClose`?
+U3LUC6SNS : <@U0CLDU8UB>, Thankyou!  I will give that a try.
+U17MHJ12N : Hi all, trying to get elm-test running for the first time and I have run elm-test init and followed the instructions but when I run elm-test I just get lots of errors like this:
+U17MHJ12N : I have elm-test installed globally via npm (on windows 10)
+U17MHJ12N : Anyone have any idea what the problem is?
+U17MHJ12N : Just tried the exact same repo on linux and it works correctly so I'm guessing perhaps it is a problem with elm-test running on windows?
+U3SJEDR96 : <@U17MHJ12N> more likely a version conflict. I.e. the node runner (which you install through npm) depends on specific version of some elm dependencies. I recommend checking output of elm-test --version, your tests/elm-package.json and posting in <#C0CLGCMMF|testing> :)
+U4Z4NEUQG : I'm trying to model something like this: <http://www.knowstack.com/wp-content/uploads/2015/05/NSPredicateEditor-Sample-Code-e1432106766151.png>
+U4Z4NEUQG : I have started to model the predicate like this: <https://gist.github.com/kuon/95b1bb43b7ec7f06c874e8f9975f7944>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

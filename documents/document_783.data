@@ -1,0 +1,77 @@
+U4872964V : Ok…but please understand that these are two different things
+U60SXAF96 : My point is that, if I could tell the Elm compiler how to decode my union type, then I wouldn't need all those extra decoders.
+U60SXAF96 : You get what I'm saying?
+U4872964V : Yes, please look at <https://github.com/norpan/elm-dynamic-types/blob/master/Dynamic/Json/Decoder.elm>
+U4872964V : This is one way it could be done, no type classes needed
+U4872964V : Just a way to traverse a type declaration
+U4872964V : But it’s certainly possible to have deriving of json decoders, and people are thinking hard about how to make this possible in Elm in the best possible way
+U60SXAF96 : Sure. What I'm seeing is that you've got something equivalent to Haskell's `Typeable` and/or `Generic`, depending on the particular use case.
+U60SXAF96 : It'll be really nice when something like that exists in Elm.
+U60SXAF96 : So I'm glad you're digging at it.
+U1PQJ4V32 : I'm having a problem with import statements:```
+import Data.Moment exposing (Moment(..))
+
+```
+
+`<http://Moment.At|Moment.At> x` fails. `<http://Data.Moment.At|Data.Moment.At> x` is OK.
+
+U23SA861Y : import type Moment and all it's constructors
+U1PQJ4V32 : <@U23SA861Y> i typed enter too early. I know what it's *supposed* to do.
+U1AN4JRFV : if you want that, you can give it an alias `import Data.Moment as Moment exposing (Moment(..))`
+U23SA861Y : did you try just `At`
+U23SA861Y : because thats what you are importing the constructors as
+U1AN4JRFV : or is it `Moment(At(..))`? lol
+U1PQJ4V32 : I was hoping to keep all functions fully namespaced except for the type and it's constructors.
+U23SA861Y : you might need two seperate import statements to accomplish that
+U1PQJ4V32 : ugh. `At x` works. That's a bit unintuitive. How can I do (what I wanted) with 2 import statements?
+U23SA861Y : well when you use exposing it pulls it in without namespacing
+U23SA861Y : you can use at to specify namespacing
+U23SA861Y : so you wanted Moment to be unnamespaced but the constructors to be?
+U60SXAF96 : (Other way around, I think.)
+U60SXAF96 : He doesn't want to have to say `Moment.Moment`.
+U1PQJ4V32 : all functions should be fully namespaced `Data.Moment.aFunction`. The type and it's constructors can be shorthand. `x : String -&gt; Moment` `<http://Moment.At|Moment.At> foo`
+U1PQJ4V32 : Hm. I think not possible. No worries.
+U23SA861Y : ```import Moment.Data as Moment exposing (Moment)
+import Moment.Data
+```
+
+U23SA861Y : you'll wide up having a double alias for Moment
+U5ZC6V535 : Quick question: What do you think its the best practise for importing modules? Currently, I expose only what i need but i am not sure if this is the right way.
+However  says: 
+
+_Import <https://github.com/ohanhi/elm-style-guide> only needed modules
+ Order of preference:
+    non-exposing imports
+    explicitly exposing imports
+    imports exposing everything
+ When feasible, explicitly define what to expose from current module_
+
+```
+import Best -- ? GOOD
+import Okay exposing (This, That)
+import NotGood exposing (..)
+```
+
+U1PQJ4V32 : <@U5ZC6V535> I'm writing code that uses core `Date` `Time.Date.Date` and my own utility `Local.Date`. The only thing I can do *consistently* is to fully namespace (and therefore do that everywhere). Any other style requires deciding on a case-by-case basis, and refactoring if details change :disappointed:. Seems like too much deciding for my little brain.
+U1PQJ4V32 : (but readability suffers a bit)
+U5ZC6V535 : <@U1PQJ4V32> Hmm, full namespaces lead to long lines and thus hinder readability, exposing only what you need again hinders readability. Difficult to define the golden ratio of the two cases.
+U1PQJ4V32 : <@U5ZC6V535> right. But at least with full namespaces you can be  unreadable with consistency!
+U1PQJ4V32 : :confused:
+U5ZC6V535 : <@U1PQJ4V32> Well be consistently unreadable doesn’t seem good right? :stuck_out_tongue: :slightly_smiling_face:
+U1PQJ4V32 : Unreadable and consistent. That's better.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

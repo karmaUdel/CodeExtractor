@@ -1,1 +1,49 @@
+U3HQVHERX : hmm
+U0LPMPL2U : The Z is usually optional though
+U0LPMPL2U : ISO8601 has more edge cases than you'd think :confused:
+U0LPMPL2U : So it does parse with the Z `2017-07-05T20:14:02.530471Z`
+U3HQVHERX : I tried hard coding it and it still wants the Z
+U3HQVHERX : "2017-07-05T20:14:02"                            |&gt; Time.ZonedDateTime.fromISO8601 (us_pacific ())
+
+U3HQVHERX : should I just tack on a Z?
+U0CLDU8UB : I thought the Z or timezone were mandatory
+U0CLDU8UB : One of those is needed, I mean
+U3HQVHERX : yay
+U3HQVHERX : ```(m.created_at ++ "Z")
+|&gt; Time.ZonedDateTime.fromISO8601 (utc ())
 ```
+
+U3HQVHERX : So now I need to convert it from utc to local time
+U0CLDU8UB : Z means it's UTC. Can ISO8601 ever be local datetime?
+U0LPMPL2U : ```&gt; ZDT.fromISO8601 (TZ.us_pacific ()) "2017-07-05T20:14:02.530471Z" |&gt; Result.map (ZDT.toISO8601)
+Ok "2017-07-05T13:14:02.530-07:00" : Result.Result String String
+```
+
+U0LPMPL2U : from the REPL (ZDT is ZoneDateTime and TZ is TimeZones)
+U3HQVHERX : (oh dear, production returns Z at the end, but not local dev environment, lol....)
+U3HQVHERX : Is there a way to subscribe to the users local browser time?
+U0LPMPL2U : `Time.now` or `Time.every` ?
+U3HQVHERX : Time.now returns unix epoch time though
+U0LPMPL2U : oh you want the user's machine time zone?
+U3HQVHERX : yeah
+U3HQVHERX : in js I can do
+U3HQVHERX : ```Date()
+"Wed Jul 05 2017 14:03:15 GMT-0700 (PDT)"
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

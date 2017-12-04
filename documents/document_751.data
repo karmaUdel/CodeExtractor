@@ -1,0 +1,59 @@
+U37HUSJ4R : can someone explain (very simply :D) what `uncurry` does?
+U0LPMPL2U : turns a function `a -&gt; b -&gt; c` into a function `(a, b) -&gt; c`
+U23SA861Y : its basically a function with the signature `uncurry: (a-&gt;b-&gt;c) -&gt; (a,b) -&gt;c`
+U0LPMPL2U : In this case, it allows us to pass a tuple to the `Date` constructor instead of passing two arguments
+U23SA861Y : it unpacks the tuple and passes it to the function as the first and second parameter
+U37HUSJ4R : also not sure its working correctly
+U37HUSJ4R : <https://ellie-app.com/3MKrJZXX9G9a1/0>
+U37HUSJ4R : look at `20170414`
+U37HUSJ4R : the `extra` shouldnt be a Nothing
+U0LPMPL2U : You changed your time decoder
+U0LPMPL2U : ```timeDecoder : Decoder Time
+timeDecoder =
+    Decode.map3 Time
+        (Decode.index 0 <http://Decode.int|Decode.int>)
+        (Decode.index 1 <http://Decode.int|Decode.int>)
+        (Decode.index 2 (Decode.maybe Decode.string))
+```
+
+U0LPMPL2U : This decoder will fail if any of these indices aren't present
+U37HUSJ4R : ah that needs to be wrapped in a maybe
+U37HUSJ4R : `        (Decode.maybe &lt;| Decode.index 2 Decode.string)`
+U0LPMPL2U : right
+U0LPMPL2U : the maybe needs to be around the `Decode.index`, not the `Decode.string` :thumbsup:
+U37HUSJ4R : I thought it was :stuck_out_tongue:
+U37HUSJ4R : it seems to work
+U37HUSJ4R : can’t work out if I love elm or think its crazy!!
+U37HUSJ4R : maybe it’s wrong to compare to JS
+U37HUSJ4R : but with JSON decoding seems so much code :confused:
+U37HUSJ4R : this slack so so helpful though :heart:
+U23SA861Y : for decoding yes, but all thats doing is pulling to the surface bugs that would be in your javascript code
+U23SA861Y : how would your javascript respond if the data didn't match
+U0LPMPL2U : ```undefined is not a function
+```
+
+U0LPMPL2U : The array index stuff is particularly vulnerable in JS
+U3LUC6SNS : <@U37HUSJ4R> re JSON decoding, did you check out this: <http://eeue56.github.io/json-to-elm/>
+U37HUSJ4R : <@U3LUC6SNS> I did, and its great for simple JSON. But this is quite a complex structure
+U4872964V : <@U37HUSJ4R> yes, it’s a lot of code for encoders (but only linear in the size of the json structure). This is the price you currently pay for type safety.
+U4872964V : json-to-elm can help you with parts of the decoder though
+U0U6ML22H : Turns out that, when one tries to do "Dict.fromList" directly, there IS a hint about comparable types: `Hint: Only ints, floats, chars, strings, lists, and tuples are comparable.`
+U0EUHKVGB : <@U37HUSJ4R> If you have a complex structure, give it the type-alias you are trying to make
+U0EUHKVGB : And if you have nested type aliases, give it those too -- it generates predicated names :slightly_smiling_face:
+U601ELFEG : Is there a common work around for the crash in `Array.slice`?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

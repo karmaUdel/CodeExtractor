@@ -1,3 +1,81 @@
+U236M9FH9 : "components" are typically just messages and update/view functions, if they require internal state, they'll provide a type &amp; the values for you to store somewhere in your model
+U236M9FH9 : It's not as simple as `import antigravity` but I see it as an additional form of documentation
+U2Q1KN06T : <@U236M9FH9> OK.. I _think_ I understand… it does seem to me like there's a deliberate design decision to force you to think about this at the top-most `update msg model` point?
+U2Q1KN06T : in a larger SPA style application it feels like that function would attract a *lot* of code
+U2Q1KN06T : less so in a regular single page per URL scenario.
+U236M9FH9 : At the top-most point, I'm usually just dispatching to other update functions
+U2Q1KN06T : ah,, I think this is falling into place..
+U3SJEDR96 : When building an SPA in Elm, each page will typically have each of state, update and view; with the "main" program just dispatching messages and otherwise gluing things together. The important insight is that this abstraction boundary works great for pages, but less so for other, "smaller" components
+U2Q1KN06T : <@U3SJEDR96> Ah!
+U2Q1KN06T : :bulb:
+U2SR9DL7Q : noob question time ... I have this menu item in my view (I'm using elm-mdl) 
 ```
-none of these functions exist though :stuck_out_tongue:
-So the issue is parsing the strings to create a tree structure?
+dominoToMenuItem : Domino -&gt; Menu.Item Msg
+dominoToMenuItem domino =
+    Menu.Item [ Options.onClick PlayerResponse domino ]
+        [ text &lt;| "(" ++ toString ((\(Domino x _) -&gt; x) domino)
+```
+This accepts a `Domino` and makes a menu button with it. When the menu button is clicked, it _should_ call the `PlayerResponse` update with the domino as a parameter.  
+
+When I try though, it says either `onClick` expects a single parameter, or `PlayerResponse` is not a function, so shouldn't accept any arguments. 
+`PlayerResponse` is implemented as 
+```
+type Msg
+    = NoOp
+    | Mdl (Material.Msg Msg)
+    | OnLocationChange Navigation.Location
+    | ChangeLocation String
+    | SetGame ( List Domino, Int )
+    | ShuffleList
+    | RunGame
+    | ResolveTurn Int
+    | PlayerResponse Domino
+```
+and in my update function as 
+```
+        PlayerResponse domino -&gt;
+            ( model, Cmd.none )
+```
+If I remove the "domino" argument, then it compiles, which seems... odd.
+
+U236M9FH9 : I dunno elm-mdl, but you probably want something like `Options.onClick &lt;| PlayResponse domino`?
+U3SJEDR96 : There used to be a time where "nesting TEA" (i.e. giving every piece its own state, messages, update and view) was the recommended approach. We've collectively changed our opinion, since, to find a nice balance. Is it a view? Make it a view, maybe pass in functions to construct messages to react to events. Does it need its own messages? Give it messages. Does it need encapsulated state? Add state :slightly_smiling_face:
+U2Q1KN06T : <@U3SJEDR96> <@U236M9FH9> Thanks :slightly_smiling_face:
+U2SR9DL7Q : <@U236M9FH9> that prompts the "PlayerResponse is not a function" complaint. `onClick` btw has the type signature `msg -&gt; Property c msg` ... I've used it before for update messages _without_ parameters with no trouble.
+U3SJEDR96 : then something else must be going wrong, since your `type Msg` indicates that `PlayerResponse` really is a function :confused:
+U2SR9DL7Q : <@U3SJEDR96> I've been working on this almost non-stop for a week now and this is the final step :neutral_face: ... I wonder if I need to maybe use a generic function that itself calls an update function? I shall test.
+U236M9FH9 : <@U2SR9DL7Q> Yeah, so `onClick` takes one argument, but by saying `onClick PlayerResponse domino`, you are passing it two, `PlayerResponse` and `domino`. You need to apply domino to PlayerResponse first, then pass that to onClick, using parentheses `onClick (PlayerResponse domino)`
+U236M9FH9 : and `onClick &lt;| PlayerResponse domino` is the same as `onClick (PlayerResponse domino)` &amp; `PlayerResponse domino |&gt; onClick`.
+U236M9FH9 : for PlayerResponse is not a function, check your message type to make sure you added `Domino` back in
+U2SR9DL7Q : <@U236M9FH9> I've tried that both ways unfortunately. Using parens or the '&lt;|' operator procs the "not a function" error. Without any of those is the "too many args to onClick" error. I sent you the version without (PlayerResponse domino) but I've already added it back. The PlayerResponse type message has Domino set in place.
+U236M9FH9 : Try this:```
+$ elm repl
+&gt; import Messages exposing (..)
+&gt; PlayerMessage
+```
+
+U236M9FH9 : Is it `Domino -&gt; Msg`?
+U2SR9DL7Q : Cool! All my other messages requiring input are functions like that... but PlayerResponse just comes out as Msg
+U2SR9DL7Q : Like it's not recognizing Domino at all
+U236M9FH9 : Huh... Try `rm -rf elm-stuff/` &amp; re-compile?
+U236M9FH9 : if `type Msg = ... | PlayerMessage Domino` then I'm out of ideas
+U2SR9DL7Q : If I change it to `type Msg ... | PlayerResponse Int` then it shows up as `Int -&gt; Types.Msg`
+U2SR9DL7Q : weird... Domino is defined in the same types module as `type Domino = Domino Int Int`
+U2SR9DL7Q : Could the constructor be confusing it?
+U236M9FH9 : Does `&gt; Domino` in repl return anything?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,11 +1,193 @@
+U3SJEDR96 : <@U0UGR7JTB> yeah, that's what we mean by "taggers" :slightly_smiling_face:
+U0UGR7JTB : sorry, didn't get that :slightly_smiling_face:
+U4872964V : or you could just make a ‘p-redraw’ patch if taggers are not the same.
+U4872964V : then you’d avoid type errors at least
+U3SJEDR96 : true, but at a possibly higher cost, though it's hard to measure real-world impact
+U4872964V : how often do taggers change is the question. not often is my naive answer :slightly_smiling_face:
+U4872964V : however, somebody has gone to the trouble of implementing a ‘p-tagger’ patch type, so what do i know?
+U3SJEDR96 : :smile: also true. Oh well, logging this as a separate bug should be a good start, and adding our findings in a condensed format can't hurt either.
+U4872964V : yes
+U4872964V : i’ll graciously let you do that
+U3LUC6SNS : <@U3SJEDR96>, I am doing this:```
+encodeDocument : Document -&gt; Value
+encodeDocument document =
+  [ ("content", Encode.string document.content), ("docType", Encode.string document.attributes.docType) ]
+  |&gt; Encode.object
 ```
-directory exists
-just noticed that what is in `COPY` is correct, but different from what error shows. Missing `/` at begining
-a `VOLUME` is a better option
-was just reading that... `-v` right?
-oh... VOLUME in the actual Dockerfile?
-and that will keep them synced so I can dev on local and updates container on the fly?
-just `VOLUME /usr/share/nginx/html`
-that'll map to whichever folder Dockerfile is in?
-and the `-v` option  when you run your container,something like `docker run -v /home/lex/Development/Web:/usr/share/nginx/html bla..`
-YOUUUUUUU!
+where 
+```
+type alias Value = {
+  content: String,
+  docType: String
+}
+```
+I am getting the error
+```
+The definition of `encodeDocument` does not match its type annotation.
+6:53:45 AM client.1 |  17| encodeDocument : Document -&gt; Value
+6:53:45 AM client.1 |  18| encodeDocument document =
+6:53:45 AM client.1 |  19|&gt;  [ ("content", Encode.string document.content), ("docType", Encode.string document.attributes.docType) ]
+6:53:45 AM client.1 |  20|&gt;  |&gt; Encode.object
+6:53:45 AM client.1 |  The type annotation for `encodeDocument` says it always returns:
+6:53:45 AM client.1 |      Value
+6:53:45 AM client.1 |  But the returned value (shown above) is a:
+6:53:45 AM client.1 |      Encode.Value
+```
+Should I change `encodeDocument : Document -&gt; Value` to `encodeDocument : Document -&gt; Encode.Value`?
+
+U4872964V : <@U3LUC6SNS> you don’t need to define your own `Value` it corresponds to a JSON value in javascript
+U4872964V : so, yes, the port should take a `Json.Encode.Value` as parameter
+U4872964V : then you can just read the values in javascript as .content and .docType of the object you’re getting
+U3LUC6SNS : Ah, ok.  I think I understand now.
+U3SJEDR96 : <@U4872964V> actually, wouldn't swapping these also work? <https://github.com/elm-lang/virtual-dom/blob/master/src/Native/VirtualDom.js#L633-L640>
+U3SJEDR96 : i.e. do the "inner" modifications before swapping the taggers
+U4872964V : don’t see how the patches would end up differently
+U3SJEDR96 : they're executed in order, so the inner node would be removed, the blur event sent with the old tagger, and then taggers would be swapped
+U3SJEDR96 : let me test that out, actually
+U4872964V : hmm, but the events wouldn’t come through until all patching is done
+U4872964V : testing is always good :slightly_smiling_face:
+U4872964V : actually, I can’t think of a reason why you’d patch taggers just because there are the same number of taggers.
+U1R5JCM55 : My build times have headed over 20s which makes tweaking layout/styling pretty tedious. Is there any general advice for reducing build times? I'm aware that I need to avoid complicated case statements but that's about it. Is there any way to profile a build to identify slow modules?
+U0K7EBT3J : <@U1R5JCM55> +1 to this question
+U3SJEDR96 : Hm. How about making sure that every file will emit a warning, and running elm-make with `--warn`? :thinking_face:
+U3SJEDR96 : not the sanest way, but it's simpler than compiling your own elm-platform :stuck_out_tongue:
+U4872964V : run it with `strace`?
+U1R5JCM55 : ilias: ha, I'll give that a go!
+U1R5JCM55 : I'm on OS X but it looks like DTrace will do the job
+U1R5JCM55 : Would unused imports have an impact on compile time?
+U4F64AKQV : <@U1R5JCM55> Probably? At the very least, it would need to include them in the dependency tree.
+U1R5JCM55 : yeah, that was my thinking, going through the project now...
+U1L1HMV9Q : <@U1R5JCM55> I reduced my times by creating my own private packages using <https://github.com/gdotdesign/elm-github-install>
+U4F64AKQV : <@U1R5JCM55> Another potential slowdown is having a lot of modules.
+U1R5JCM55 : casperlotter: I am using elm-github-install already, that seems like a good suggestion. Could at least split out some util modules. Do you have a good workflow for editing packages locally? i.e. are using local dependencies in elm-github-install?
+U1R5JCM55 : palmerpa: there's 143 modules which doesn't seem that many but could be worth exploring. I'm trying to use larger/less modules in general now anyway (advice from evan/rtfeldman).
+U4F64AKQV : Yeah, in general larger modules are better.
+U1R5JCM55 : I guess adding type annotations everywhere would also help?
+U1L1HMV9Q : Not really, I moved all the code with the least churn into util packages and just added that as a dependency. Every once in a while if I have to touch a package I just bump the version and rerun the install. If you come up with a good workflow let me know :smile:
+U1R5JCM55 : It's taken a while, but I think I can see the golden path, larger modules make sense now :slightly_smiling_face:
+U3YDBDP4Z : +20s build times sounds bad. Is it common for people to get?
+U14Q8S4EM : No in my experience <@U3YDBDP4Z>
+U14Q8S4EM : My build times are 0-2s.
+U14Q8S4EM : Im not really sure what explains the difference.
+U14Q8S4EM : Ive heard of 40s build times before. But I dont believe thats representative.
+U3SJEDR96 : Depends on size of project, number of files, project structure, number of dependencies, complexity of case-statements, and a whole bunch of other factors. It's not very common to have annoyingly high build-times, but it comes up every now and then. Should be a whole lot better in 0.19, too, judging by Evan's comments at elm-europe :slightly_smiling_face:
+U1R5JCM55 : yeah, that's definitely the thing I'm most excited about with 0.19. The other stuff sounds great, but faster build times you notice all day long :slightly_smiling_face:
+U5FU80S06 : Do I still need to use a UI framewok like Bootstrap or MDL if I use <http://package.elm-lang.org/packages/justgage/tachyons-elm/1.0.0/Tachyons>? Or is Tachyons all I need for UI?
+U41NK9BM4 : <@U5FU80S06> <http://tachyons.io/#features> Has a lot of stuff - it replaces Bootstrap. What is not clear to me is if the Elm version is “complete”
+U0H8PND27 : <@U5FU80S06> you just use Tachyons and then you can see different patterns on how to build UI work it at the main Tachyons website. 
+U0H8PND27 : The Elm version has a few issues of I've needed to resolve <@U41NK9BM4>. 
+U1432C733 : <@U17R26VR8> <@U0CLDU8UB> That is a correct, but not quite the use case. I have a platform in Elm with a bunch of different people making sub-apps in Elm. It's not realistic to have the "parent" import all the every-changing sub apps created by different teams and each sub app has very little coupling, if any, with each other.
+U1432C733 : So the thought was serve a picker Elm app in a template and the selected app inside a second template (or web components). Synchronization can take place with web sockets and a user interface can track the location of each sub-apps static and microservice backend.
+U1432C733 : This sounds close my use case:
+U1432C733 : <https://www.youtube.com/watch?v=U_5XKPe4fZM> [Elm Europe Microservices for the frontend]
+U45C5R6QP : Is there a list of expected new features in Elm 0.19 somewhere?
+U3SJEDR96 : <https://github.com/elm-lang/projects/blob/master/roadmap.md>
+U45C5R6QP : Thank you
+U0QS3QAS3 : does anyone expect much Elm semantics changes in the near future? seems that tooling will accumulate, but we're basically looking at Elm 1.0 now - or am I overly confident?
+U3SJEDR96 : <@U0QS3QAS3> I don't think there are _plans_ for semantics changes, but then again, I don't think most people saw "Elm drops FRP" coming, and that happened in the previous version. So yeah, who knows, really? People come to new insights and make breakthroughs, we can only hope we get to reap the benefits of that :
+U23SA861Y : I'm reading through the elm guide and I can't seem to find a place where it flat out says types must be capitalized and type parameters are lowercase.
+U17MNKY3H : It might... not?
+U23SA861Y : where does one submit a bug against the docs?
+U17MNKY3H : It's completely possible it just expects people to pick it up as a convention.
+U2SR9DL7Q : i'm not sure that i ever read it explicitly, I just saw everyone else doing it. peer pressure, y'know. :slightly_smiling_face:
+U17MNKY3H : To avoid spending space/reader's time explaining it.
+U23SA861Y : Its a really subtle distinction which is made all the more worse by the `Html msg` vs `Html Msg`
+U2SR9DL7Q : and perhaps `Model` and `model`  ?
+U23SA861Y : I suspect its was just overlooked because it was inherited from haskell.
+U0FP80EKB : one way to think about it is that, in Elm, variables start with lower-case, while types start with capital. That’s why `Html msg` is lower-case and `Html Msg` is upper-case
+U23SA861Y : yes, I understand the distinction. I'm more wondering why its not in the docs
+U23SA861Y : Is it intentionally omitted or just an oversight
+U0FP80EKB : That identifiers are lower-case and types are upper-case? I guess it isn’t explicitly in the documentation.
+U0FP80EKB : Interesting.
+U23SA861Y : It does seem to cause a fair amount of confusion to newcomers.
+U23SA861Y : Which is not unsurprising
+U0F7JPK36 : the compiler enforces capitalization for type names and variable names
+U23SA861Y : right, the compiler gets it correct
+U3SJEDR96 : it's _sort of_ mentioned here: <https://guide.elm-lang.org/types/reading_types.html>
+U0FP80EKB : So, it isn’t really the lower-case vs upper-case, it is the idea of type variables
+U23SA861Y : well it's both
+U23SA861Y : I know I've had to explain it more than once, I don't know about you guys
+U0FP80EKB : I don’t think I’ve ever had to explain “lower-case are variables, upper-case are types” but I’ve seen confusion around type variables for people who aren’t used to this level of a type system
+U3SJEDR96 : I have seen the question `Html msg` vs `Html Msg` (more than) a couple of times. It usually involves confusion around both type variables and "why is it named `msg` if it can be anything"
+U0FP80EKB : Having a concrete explanation in the docs of type variables with `Html msg` as an example could definitely be nice
+U3SJEDR96 : <@U4872964V> <@U0UGR7JTB> I logged that issue from earlier, btw: <https://github.com/elm-lang/virtual-dom/issues/103>
+U23SA861Y : like and example of `Html String` or something
+U0UGR7JTB : <@U3SJEDR96> thank you so much for that!
+U17MNKY3H : <@U3SJEDR96> That is a great issue title.
+U1R5JCM55 : Trying to get a feel for whether or not I have an abnormal compile time, how many LOCs does your project have and what's the compile time?
+U3SJEDR96 : <@U1R5JCM55> are your times for recompiles, clean runs, after editing an entry-point or a leaf module, ..?
+U1R5JCM55 : I get 90 secs for a clean build, just main module 2s, nested modules can be up to 20s (14k LOC, 143 modules)
+U1R5JCM55 : (reducing number of modules is on the list)
+U3YDBDP4Z : Having to reduce the number of modules seems like a bad thing to have to do.
+U3YDBDP4Z : You modularize hopefully for good reasons
+U3YDBDP4Z : :confused:
+U3YDBDP4Z : _14k LOC of Elm is impressive_ :slightly_smiling_face:
+U3SJEDR96 : That's the thing, though - _good reasons_ is entirely subjective: just because something _can_ live in its own module doesn't mean it makes life easier. Overabstracting is totally a thing :smile:
+U3YDBDP4Z : Sure but still
+U1R5JCM55 : I came from an ember background where you modularise heavily so I went with that for familiarity. Knowing what I know now there's definitely some modules which should be folded together anyway (I have modules for things like view/update/msg/model...).
+U3SJEDR96 : Hm, yeah, I'm going to assume you've done the regular things like preventing `case (t,u,p,l,e) of`, and I have nothing much to add :slightly_smiling_face:
+U1R5JCM55 : I think (a, b, c) is as far as I've ever been, and it's only ever when there's a very limited number of cases (maybe 4 tops)
+U1R5JCM55 : not sure if those would be enough to trigger the issue
+U3SJEDR96 : yeah, even in that case, try replacing it with a `Debug.crash "foo"` and see if that changes anything
+U1R5JCM55 : definitely worth a try, thanks
+U3SJEDR96 : But then again, that'd only matter if they're somewhere in the chain of modules that get recompiled when something changes
+U1R5JCM55 : now I just have to remember where they are :wink:
+U3SJEDR96 : (if it does change something, keep in mind that exhaustiveness checker (which suffers from that pattern) has seen performance improvements for 0.19 so changing those to nested cases might not be worth it)
+U1R5JCM55 : hmm, only one that has 3+ elements in the tuple
+U0EUHKVGB : I would estimate that 143 modules at that size taking 90 seconds to clean build is pretty good
+U0EUHKVGB : You probably are taking a bit of a hit from having many small files.
+U0EUHKVGB : But 90 seconds is pretty good
+U1R5JCM55 : it's the incremental builds that are killing me really, but I do find that the number of modules being rebuilt when I save a single file is in the 20-40 range
+U1R5JCM55 : (I've just pruned all unused imports which didn't help unfortunately)
+U4872964V : <@U3SJEDR96> did you try reversing the order of patching?
+U3SJEDR96 : Yeah, it's a little more involved than I thought it would be :sweat_smile:
+U1R5JCM55 : hmm, that sounds worth a shot, thanks
+U2LAL86AY : <@U1R5JCM55> is not clear to me what you mean by build - do you mean `compile` - when you save the file - or you mean `npm run build` with webpack or something.
+U1R5JCM55 : I'm just using elm-make to get those numbers
+U1R5JCM55 : (I normally use webpack, but I didn't want the overhead clouding the issue)
+U2LAL86AY : a ok - but if you just compile the code on save - with the live server turned off - how much does it take on average?
+U2LAL86AY : without doing the elm-make thing
+U1R5JCM55 : I'm seeing around 25secs on average
+U2LAL86AY : uh.. :smile:
+U1R5JCM55 : if I save a single file and do elm-make, then I see compile times in the 2secs - 60secs+ range (2 secs is for Main.elm)
+U1R5JCM55 : with webpack, it's obviously longer
+U1R5JCM55 : casperlotter suggested I split out a separate library for utils etc. going to try that next
+U2LAL86AY : just my two cents - couple days ago i worked on a project - and the update function was big - rely big - i wasn't building any update helpers - the compile times - with webpack truned off where about 12-15 secons sometimes. And the project was not that big actually. is just getting started. 
+Then i build a bunch of update helpers - making my update branches very very lean - moved everything inside helper functions - and now the compile time is around 1 second - and with webpack no more than 4-5 - live reload. So yeah - doing that it helped in my case - but what you have - 140 some modules is much bigger. Maybe this can't be improved :grin:
+
+U1R5JCM55 : hmm, that's interesting though
+U2SR9DL7Q : <@U2LAL86AY> when you say update helpers, what exactly does that entail? just less top level case statements in the update function?
+U2LAL86AY : i think elm only compiles the functions you change. it remembers the one had compiler previously. (not 100% sure but still) and if you have a bunch of helpers you change 1 - then just that one compiles - but with no helpers - the hole update function was compiling every time i was modifying something inside a case statement. And being so big was taken a lot of time. (nested dict updates in my case) not tuples.<@U2SR9DL7Q>
+Not rely - but if you have.
+```
+ case msg of 
+      Msg -&gt; model |&gt; someUpdateHelperFunction  =&gt; [] 
+``` 
+Instead of doing it without the helper.
+
+U2SR9DL7Q : gotcha
+U1R5JCM55 : &gt; i think elm only compiles the functions you changeinteresting theory, wonder if anyone can confirm?
+
+U2LAL86AY : i'm watching Elm Europe on youtube - lots of good talks - but i can't find the evancz talk - does anyone where can i find it? :smile:
+U2LAL86AY : how is it named at least
+U23SA861Y : do you remember what it's on?
+U2LAL86AY : this is the channel : <https://www.youtube.com/watch?v=U_5XKPe4fZM>
+U23SA861Y : he seems to have done the keynote
+U23SA861Y : hmm, your right don't see it
+U3SJEDR96 : The keynotes and mgriffith's talk are still being processed
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,9 +1,89 @@
-  <http://Decode.at|Decode.at> ["data", "image_url"] Decode.string ```
-i type my function as a Decode.Decoder String
-what it mean ?
-Decode.Decoder is a type alias ?
-if someone can explain to me how to reproduce it with a simple example
-Decode.Decoder is a type from the Json.Decode module
-ye i see it
-but even if i read the source code i dont understand the syntax here
-`Decode.Decoder String` is a type of json decoder that will produce a `String` when run using <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#decodeString>
+U4RR7KX45 : <@U48AEBJQ3> what should `mkThing` do?
+U3YA74FQD : I'm writing a spa so I put a key on the problematic pages
+U48AEBJQ3 : `mkThing : Int -&gt; String -&gt; String -&gt; String -&gt; YourFancyType`
+This could be (but doesn't have to be)
+
+`type YourFancyType = MkThing Int String String String`
+
+U4RR7KX45 : ah so it should be a type I get it now :smile:
+U4RR7KX45 : damn it's so confusing
+U48AEBJQ3 : It's... very different from what many people have experience with.
+U4RR7KX45 : so if I had 20 fields, do I need to write types for each?
+U4RR7KX45 : I mean, define all of them in the type
+U48AEBJQ3 : If you want to use all 20 fields to construct some type, you would need a function which could take all of those. Although, I might break it up into smaller pieces at that size.
+U300LJUAK : If you need to decode complex type aliases, you should look into elm-decode-pipeline <https://github.com/NoRedInk/elm-decode-pipeline> :wink:
+U4RR7KX45 : I guess that makes sense elm-way.
+Oh and also in this example:
+<http://elm-lang.org/examples/http>
+```
+decodeGifUrl : Decode.Decoder String
+decodeGifUrl =
+  <http://Decode.at|Decode.at> ["data", "image_url"] Decode.string
+```
+Why is this a constant? shouldn't it be a function?
+
+U4RR7KX45 : oh wait mine is the same :smile: nvm
+U48AEBJQ3 : One useful thing that you might not have noticed in the documentation is that:
+```
+type alias YourFancyRecordAlias =
+    { id : Int
+    , title : String
+    , content : String
+    , link : String
+    }
+```
+
+This gives you an auto-generated constructor `YourFancyRecordAlias : Int -&gt; String -&gt; String -&gt; String -&gt; YourFancyRecordAlias`
+
+U4RR7KX45 : yeah I saw that. But now I have tons of type related issues.so I created the type
+```
+type alias Content =
+    { id : Int
+    , content : String
+    }
+```
+
+and then my decoder
+```
+decodeQuoteUrl : Decode.Decoder String
+decodeQuoteUrl =
+    Decode.map2 Content
+        (Decode.field "ID" <http://Decode.int|Decode.int>)
+        (Decode.field "content" Decode.string)
+```
+but this gives me an error saying that it should be `Decode.Decoder Content`, not `String` for some reason. If I change that to `Decode.Decoder Content`, then this one goes crazy:
+
+```
+fetchRandomQuoteCmd : Cmd Msg
+fetchRandomQuoteCmd =
+    Http.send FetchRandomQuoteCompleted fetchRandomQuote
+```
+
+U48AEBJQ3 : Because `FetchRandomQuoteCompleted` is a constructor that takes a `String` not a `Content`?
+U4RR7KX45 : indeed it is :smile:
+U4RR7KX45 : damn it
+U4RR7KX45 : ok one more question please. I want to extract just the content fields from that list, to have a list of string. how can I do that? I tried this```
+    Decode.map String
+        (Decode.field "content" Decode.string)
+```
+
+U48AEBJQ3 : So, you have a list of objects which each have a "content" field, and you want those collected as a `List String`?
+U4RR7KX45 : yeah, I want to extract the content from them
+U23SA861Y : `Decode.list (Decode.field "content" Decode.string)`
+U4RR7KX45 : yes! that's it :smile:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

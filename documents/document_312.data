@@ -1,4 +1,97 @@
+U5V0HVAKB : and i just want to recreate this ``` 
+showME: Test String
+showMe= 
+"hello" ```
+
+its all about the syntax what "Test" is here
+
+U5V0HVAKB : what it mean
+U153UK3FA : ah, you're asking about type parameters
+U5V0HVAKB : yes
+U5V0HVAKB : :slightly_smiling_face:
+U153UK3FA : eg. `List Int` is a list of ints
+U153UK3FA : a good example is <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Maybe#Maybe>
+U153UK3FA : ```type Maybe a
+    = Just a
+    | Nothing
 ```
-<@U4872964V> <@U3HQVHERX> thanks
-<@U3HQVHERX> how can I integrate css file with elm-reactor?
-I'll try. ty
+
+U153UK3FA : the `a` in that type definition is a parameter, it can be any type
+U153UK3FA : You can have a `Maybe Int` or a `Maybe String` etc.
+U2FJ2D6M7 : Hello! I'm trying to output some HTML but having trouble breaking up my view. Essentially I would like an input/sentence like "This is a sentence" to be rendered like "&lt;span&gt;This&lt;/span&gt;&lt;span&gt;is&lt;/span&gt;&lt;span&gt;a&lt;/span&gt;&lt;span&gt;sentence&lt;/span&gt;" but having trouble extracting out a method and keeping the types correct. I think is probably a simple thing I'm missing, but if anyone has a spare cycle, would not mind some :eye:s.
+```
+renderWord word =
+    span [ myStyle ] [ text word ]
+
+renderWords sentence =
+    let
+        words = String.split " " sentence
+    in
+        List.concat (List.map renderWord words)
+
+
+view model =
+    div []
+        [ input [ placeholder "Text to proof", onInput NewContent, myStyle ] []
+        , (renderWords model.content)
+        ]
+```
+
+As more experienced devs might be able to tell, I'm getting an type mismatch:
+
+```
+The argument to function `concat` is causing a mismatch. - Function `concat` is expecting the argument to be:
+
+    List (List a)
+
+But it is:
+
+    List (Html msg)
+```
+
+U2FJ2D6M7 : I see why it's wrong, but I'm not sure what my option is.
+U5V0HVAKB : List.concat (List.map renderWord words)
+U5V0HVAKB : u are returning a list
+U5V0HVAKB : oh no!
+U5V0HVAKB : List.concat (List.map renderWord words)
+U5V0HVAKB : your renderWord
+U5V0HVAKB : return Html msg type
+U2FJ2D6M7 : <@U5V0HVAKB> yes, I take it back, I didn't understand why it was wrong! ‘Fixed' by
+```
+renderWords sentance =
+    let
+        words = String.split " " sentance
+    in
+        div [] (List.map renderWord words)
+```
+
+U5V0HVAKB : the function List.concat
+U5V0HVAKB : expected to have list type arguement of a list type not a list type of html msg
+U5V0HVAKB : i think its about parenthese here
+U5V0HVAKB : List.concat (List.map (renderWord words))
+U5V0HVAKB : try like thius
+U5V0HVAKB : or ``` 
+renderWord words
+  |&gt; list.map
+  |&gt; list.concat
+```
+
+U5V0HVAKB : <@U2FJ2D6M7> ?
+U2FJ2D6M7 : trying
+U5V0HVAKB : if it's working it's all about the left to right  (or maybe the right to left better ^^) reading
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

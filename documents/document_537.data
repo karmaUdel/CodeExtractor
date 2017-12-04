@@ -1,2 +1,107 @@
+U3SJEDR96 : Decoupling representations means _less_ work, at the cost of setting it up.
+U23SA861Y : if you were working in JS, were it automatically unmarhsalls it for you. You would still need to write a bunch of logic to validate every field.
+U4872964V : we can discuss this in <#C2QPJLU2X|elm-discuss> or somewhere else, this is not <#C3K1L92FP|beginner> stuff, I think
+U6D3ERLA1 : true
+U0J1M0F32 : Didn't see this until just now. I think you're misinterpreting my intent around saying decoders are a pain point. 
+My only point about bringing that up was that, decoders are where lots of beginners struggle, not because decoders shouldn't exist or that they're bad as a concept, but because its a complexity that they have to face and makes them come to grips with the reality of the data they are facing and that _many_ server side APIs are not held to the same scrutiny.
+
+U3LUC6SNS : I've been looking through the `Date` and `Date.Extra` packages to find an analogue of `Date.now` which returns a representation of the current Date-time with GMT offset = 0, i.e., UTC.  Does anyone know how to do this?
+U3SJEDR96 : Well, do you want to convert to UTC, or do you want to chop off the timezone info, and act as if the time you have is _actually_ UTC?
+U3LUC6SNS : convert to UTC
+U3LUC6SNS : independently of machine space-time coordinates
+U3SJEDR96 : Those statements conflict. If you're in TZ UTC + 1, and you get 11 AM. Do you want 11 AM or 10 AM?
+U6D3ERLA1 : ```module Main exposing (..)
+
+import Json.Encode
+import Json.Decode exposing (field)
+import Html
+import Debug exposing (log)
+
+
+type alias Guy =
+    { name : String
+    , age : Int
+    , hasPets : Bool
+    , petNames : List String
+    , favorites : Favorites
+    }
+
+
+type alias Favorites =
+    { colors : Maybe ComplexType
+    , musicians : List String
+    }
+
+
+decodeGuy : Json.Decode.Decoder Guy
+decodeGuy =
+    Json.Decode.map5 Guy
+        (field "name" Json.Decode.string)
+        (field "age" <http://Json.Decode.int|Json.Decode.int>)
+        (field "hasPets" Json.Decode.bool)
+        (field "petNames" Json.Decode.list Json.Decode.string)
+        (field "favorites" decodeGuy)
 ```
-I prefer the `let` `in` approach, *or* I'll usually use that opportunity to pull out a helper view function.
+
+Ugh Why do I keep getting this `Cannot find variable Decoder` message?
+
+U3SJEDR96 : `(field "petNames" (Json.Decode.list Json.Decode.string))` &lt;- needs some parens
+U6D3ERLA1 : lol this was from <http://eeue56.github.io/json-to-elm/>
+U3SJEDR96 : Yeah, it's an "approximation" so to speak :slightly_smiling_face:
+U6D3ERLA1 : ha
+U3LUC6SNS : <@U3SJEDR96>, I'd like 10AM
+U0CQ254F5 : can someone explain the benefits of single constructor types? i.e. `type Foo = Foo String` as opposed to, say, `type alias Foo = { foo: String }`
+U6D3ERLA1 : Where do I get `decodeComplexType` from this is undefined
+U6D3ERLA1 : Maybe I have to write this :thinking_face:
+U6D3ERLA1 : again, from the json-to-elm jawn
+U0EUHKVGB : <@U6D3ERLA1> I don't understand what you're asking. You need to show what gave you that.
+U0EUHKVGB : A `ComplexType` means that it couldn't figure it out.
+U0EUHKVGB : And that you may need to hand write it.
+U0EUHKVGB : Also, I'm not sure what jawn is, but it sounds rude. I hope it's not
+U0CQ254F5 : jawn, philly-slang for joint/thing/etc. not rude
+U2SR9DL7Q : <@U0CQ254F5> single constructors mean you can't accidentally pass something into a function that isn't what you intended. `type Name = Name String` means when I want a name I have to say `Name something` and regular strings will be rejected. It's an additional level of safety and prevents errors where you accidentally pass the wrong data but the function accepts it because it's the same type as something else.
+U4872964V : <@U0CQ254F5> also, you can hide the implementation if you have it in a module
+U4872964V : <@U0CQ254F5> also, you can have recursive types
+U0CQ254F5 : <@U4872964V> how do you hide?
+U4872964V : <@U0CQ254F5> by just exposing the type, not the constructor
+U0CQ254F5 : right
+U4872964V : but if you don't need any of those things, use an alias
+U0CQ254F5 : gotcha, thanks <@U4872964V> <@U2SR9DL7Q>
+U0WK5B4UF : Is there an existing elm package to display music sheets ?
+U0EUHKVGB : <@U6D3ERLA1> Basically, if there's a complex type it usually means you need to break up what you give to json-to-elm a bit. It works better if you give it a type alias, cause it has to guess less. But it can still have some issues with more complicated types. Generally meant as an aide to help you write 90% of the boilerplate, rather than 1-to-1
+U23SA861Y : It's one of those fine lines, the only way you can really avoid it and be strongly typed with with runtime type refection. Problem with that is your language needs to support runtime type reflection.
+U6D3ERLA1 : got it
+U6D3ERLA1 : (I don't know how to do that but I see what you mean)
+U0J1M0F32 : Yep
+U23SA861Y : And then people start to use runtime type reflection
+U23SA861Y : I shiver just thinking about it
+U6DBPU40Y : Hey everyone, where is this syntax documented? ```
+Msg -&gt; 
+     model ! []
+```
+
+U23SA861Y : it is, sort of but It is not preferred
+U23SA861Y : it can be found in Platform.Cmd
+U6DBPU40Y : Thanks <@U23SA861Y>, I saw it in the todomvc code, sort of confusing because I've also seen some people wrote an util function to do ```model =&gt; cmd```
+U23SA861Y : so `=&gt;` is an alias for (,)
+U23SA861Y : in both cases I would avoid the custom operator and just write plain code
+U23SA861Y : as you've just experienced, these clever™ operators just make the code harder to read
+U6DBPU40Y : haha alright, it's cool to see fancy operators but they do in fact confuse people
+U23SA861Y : you could write `model ! []` or you could have a simple funciton `prepCmds model []`
+U23SA861Y : little more typing but one is easier to look up (try looking up ! with ctrl+f) and has an explanation built in
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

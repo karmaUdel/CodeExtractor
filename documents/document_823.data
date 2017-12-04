@@ -1,0 +1,169 @@
+U07JGLLKF : something like that would have basic chainable class init and `Function` methods
+U5VEXNQE7 : like just the fuction needs something like this?''' 
+class CLASS(object):
+    _x = None
+    def __init__(self):
+        pass
+    
+    def something_to_do(self, var1, var2):
+        x = var1 + var2
+        return x
+    
+    @property
+    def toFloat(self):
+        return float(_x)
+    '''
+
+U1BP42MRS : ```class Foo:
+    def bar(self):
+        # do work
+        return self
+
+    def baz(self):
+        # do other stuff
+        return self
+
+    @property
+    def json(self):
+        return self.__dict__
+
+Foo().bar().baz().json
+```
+
+U5VEXNQE7 : Awesome!
+U5VEXNQE7 : I didn't try that ... why didn't I try that?
+U5VEXNQE7 : Hmm this didn't work. ```class CLASS(object):
+    _x = None
+    def __init__(self):
+        pass
+    
+    def something_to_do(self, var1, var2):
+        x = var1 + var2
+        return x
+    
+    @property
+    def toFloat(self):
+        return float(_x)
+    
+    
+print(CLASS().something_to_do(1,2).toFloat)```
+
+U5VEXNQE7 : ```Traceback (most recent call last):  File "Untitled 2.py", line 15, in &lt;module&gt;
+    print(CLASS().something_to_do(1,2).toFloat)
+AttributeError: 'int' object has no attribute 'toFloat'
+```
+
+U07JGLLKF : your `return x` needs to be `return self`
+U07JGLLKF : because `return x` is just returning the result of `var1 + var2`, which is just an int
+U5VEXNQE7 : ```class CLASS(object):    _x = None
+    def __init__(self):
+        pass
+    
+    def something_to_do(self, var1, var2):
+        _x = var1 + var2
+        return self
+    
+    @property
+    def toFloat(self):
+        return float(_x)
+    
+    
+print(CLASS().something_to_do(1,2).toFloat)
+
+```
+
+U5VEXNQE7 : ```Traceback (most recent call last):  File "Untitled 2.py", line 15, in &lt;module&gt;
+    print(CLASS().something_to_do(1,2).toFloat)
+  File "Untitled 2.py", line 12, in toFloat
+    return float(_x)
+NameError: name '_x' is not defined
+```
+
+U07JGLLKF : ahh, so `_x` in that scope doesn't exist
+U07JGLLKF : that will need to be `self._x = var1 + var2`
+U5VEXNQE7 : Wow .. ok .. that one I knew .. just too focused on other things ..
+U5VEXNQE7 : Just completely missed it like a noob.
+U5VEXNQE7 : yup .. perfect .. thanks man.
+U5VEXNQE7 : Returning the self was what I was missing.
+U5VEXNQE7 : thanks
+U07JGLLKF : no problem!
+U07JGLLKF : its okay, method chaining is a bit of an odd thing to work out at first
+U5VEXNQE7 : Yeah. Just didn't occur to me to pass the object along.
+U2Q2LMZ6D : If we know it unique, on that col, can we do it cleaner? Anyway i'm vnmese :wink:
+U4L4AH15L : Has anyone come across this issue while using `peewee` or `PyMySQL`?
+<https://github.com/coleifer/peewee/issues/1296>
+
+Help pls!!
+
+U3UR8LD18 : I have a file( test.txt ) which contains a no. and i want to store that no. in a variable
+U3UR8LD18 : new to python
+U2TQBG484 : <@U3UR8LD18> Can you declare your problem a bit?Like given a little example.
+
+U0L8Y8ZEW : <@U3UR8LD18> this sounds like you have quite a basic problem (opening and reading a file, finding the right value and storing it)
+U0L8Y8ZEW : But considering you are new to the language it is probably worth you doing an online tutorial to learn more about python. We could try and help you but there will  likely be more questions and you would be better served by a more formal resource.
+U3UR8LD18 : actually i want to write a script that mail me if root partition is motr than 90% in use...i am fetching that percentage using awk and then appending it to a file and i want to read that file and save that percentage in a variable.. so that i can do if elase on that
+U5SUV9BPD : hi. what is the most pythonic/efficient way to check for 2 conditions as in:
+i have 3 string-templates
+`template1 = 'Main'` 
+`template2 = 'Other'`
+`template3 = 'Final'` 
+
+- if `template1` is `Main` and its length &lt; 10, take `template1`, otherwise take `template2` and check its length and if thats too long, take `template3` (each string can be dynamic, so that sometimes `Main` is shorter and sometimes the last. but it should always start by checking `Main`)
+
+U5SUV9BPD : (it should be easy for the experts out there but i cant seem to get my head around it - ideally without a `Class` or `lambda` function)
+U5NMSURAQ : length &lt; 10?
+U5NMSURAQ : if it's main, then its length is 4, right?
+U5SUV9BPD : sorry for the confusion. i tried to include all necessary information. the templates are just names and part of a dict which contains the string --&gt; like: `main_template = {'string' = 'foo', 'template' = 'Main'}`
+`other_template = {'string' = 'bar', 'template' = 'Other'}`
+`final_template = {‘string' = ‘toto', ‘template' = ‘Final'}`
+
+U5SUV9BPD : <@U5NMSURAQ> makes more sense now?
+U5NMSURAQ : yeah
+U5NMSURAQ : ```def take_template(*args):
+    for template in args:
+        if template['Template'] == 'Main':
+            return template
+
+        if len(template) &lt; 10:
+            return template
+
+    return template
+```
+
+U5NMSURAQ : how about that
+U5NMSURAQ : change appropriately
+U5SUV9BPD : thanks <@U5NMSURAQ>. however i quite dont understand how the other templates are used here in their order. maybe very beginner question
+U5NMSURAQ : `for template in args` -- loop over all passed arguments (in order, as they are positional arguments)
+U5NMSURAQ : return the first found main template, or the first found "len&lt;10" template
+U5NMSURAQ : otherwise just return the last one
+U3UR8LD18 : No idea why i am getting two outputs........"""
+"""
+
+U3UR8LD18 : eccentric@debian:~/Downloads$ cat test.py 
+import os
+DISK_SPACE = os.system("df -Th | grep /dev/sda6 | awk '{print $6}' | cut -d'%' -f1")
+print DISK_SPACE
+eccentric@debian:~/Downloads$ df -Th | grep /dev/sda6 | awk '{print $6}' | cut -d'%' -f1
+80
+eccentric@debian:~/Downloads$ python test.py 
+80
+0
+eccentric@debian:~/Downloads$
+
+U5NMSURAQ : `os.system` returns 0
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

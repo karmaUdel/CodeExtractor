@@ -1,14 +1,96 @@
-```
-[silly] question for the slack bot experts: in many examples I keep seeing a variable named BOT_ID, what is this ID? All I get from slack is the bot token
-that's not a silly question. It's the id of your bot that slack return when you use <https://api.slack.com/methods/rtm.connect>
-or `rtm.start` it's useful to filter message coming from your bot
-but normally they shouldn't need it as they can easily retrieve it for you
-this is a pretty basic questions - but when an exception is thrown the rest of the code after where the exception occurred is not executed unless it was handled in a `try` `except`?
-I'm deciding whether I should test code with a context manager of an object that throws an exception, although I don't think I am correct in the what happens
-yes. you can add a `finally` if you want a piece of code to always be executed
-it depends on the what but in some case it can overlapp yes
-so let's say that's the code and we're expecting a new_object to be created based on the paramteters, but an exception can occur like a URLError or something
-what I'm trying to do is test the correct exception is thrown/handled
-so I was thinking...
-`as new_object` looks strange to me
-If you are testing code I believe both pytest and unitest have special context manager to test errors
+U601ELFEG : I want to code MIDI device access - so I can get SysEx. from a device
+U5FU80S06 : <@U0CLDU8UB>  I cannot get it to work, probably because I'm doing something wrong. This is what I have: ```    &lt;body&gt;        &lt;div id="app"&gt;&lt;/div&gt;
+        &lt;script src="/_compile/src/Main.elm"&gt;&lt;/script&gt;
+        &lt;script&gt;
+            Elm.Main.embed(document.getElementById('app'),
+                {randomInt: Math.floor(Math.random()*0x0FFFFFFF)});
+
+            // ...
+
+        &lt;/script&gt;
+    &lt;/body&gt;
+``` And I also tried record-free to no avail: ```Elm.Main.embed(document.getElementById('app'),
+                Math.floor(Math.random()*0x0FFFFFFF));```
+
+U0CLDU8UB : Is your Elm code in src/Main.elm?
+U0JFXEUCT : I haven’t touched MIDI yet, but would be very interested if you find any existing work
+U5FU80S06 : yes, it starts there, and the rest of the elm code is all under _src_.
+U5FU80S06 : Not to worry, it's not a biggie. I can always do a Debug.log...
+U2LAL86AY : what's the error message?
+U2GPAEU1L : Hey everyone, I was thinking _next remote meetup_, we could do a meetup targeted at people new to  Elm and managers who aren't sure that they want to use Elm.
+*How many people have managers that they have been trying to convince to switch to Elm (even just for a small project/feature)?*
+
+If there are enough people who would appreciate if we tried to convince their managers, then I think it would be well worth it for one meetup.
+
+Please comment in the thread so we have all the comments in one place for reference.
+
+I will post this in the general channel as well.
+
+U5FU80S06 : <@U2LAL86AY> ```Oops! Something went wrong when starting your Elm program.
+Trying to initialize the `Main` module with an unexpected flag.
+I tried to convert it to an Elm value, but ran into this problem:
+
+Expecting an Int but instead got: undefined``` I click on _Main.elm_ from _File Navigation_.
+
+U2GPAEU1L : <@U5FFVDC4W> can I see your flags defined in Elm?
+U5FU80S06 : ```main =  Html.programWithFlags 
+    { init = init
+    , view = view
+    , update = update
+    , subscriptions = subscriptions
+    }``` and ```init : Int -&gt; ( Model, Cmd Msg )
+init jsSeed = ...```
+
+U2GPAEU1L : Ah I see this is a reactor issue, nvm, I came in late :sweat:
+U5FU80S06 : Note that I am doing `elm-make Main.elm --output elm.js`
+U0CLDU8UB : Oh, you should run `elm-reactor` and then go to <http://localhost:8000/index.html>
+U5FU80S06 : <@U0CLDU8UB>  That gives me a totally blank page
+U0CL0AS3V : we use it at NRI via ports
+U5FU80S06 : Actually I can run my original index.html (no taco) via reactor and app comes up fine (at <http://localhost:8000/index.html>) -- I just don't see the state of the model anywhere.
+U3SJEDR96 : do you see a little "history" thing in the bottom right?
+U0CLDU8UB : A black "tab" of sorts
+U5FU80S06 : nope
+U3SJEDR96 : Wait a moment
+U3SJEDR96 : you compile with `elm-make Main.elm` right?
+U2LAL86AY : did you checked the output file? Sometimes i use an `old output file` without realizing -&gt; (from a previous run of elm make in another directory for ex).
+U3SJEDR96 : the index.html file you're using for the taco stuff, does it refer to `/_compile/src/Main.elm` or `/_compile/Main.elm`?
+U5FU80S06 : `&lt;script src="/_compile/src/Main.elm"&gt;&lt;/script&gt;`
+U3SJEDR96 : right, so what basically happens is it's trying to find a `src/Main.elm` but (judging by your compile command) your `Main.elm` is in the same directory as your `elm-package.json`
+U3SJEDR96 : so adapting that to simply `/_compile/Main.elm` should help a bunch
+U5FU80S06 : I still do not see the hoped-for widgetry
+U3SJEDR96 : Do you see your app at all, <@U5FU80S06>
+U2LAL86AY : please show us the relevant directory structure you have: the parent of the `elm-package.json` - and the path to `Main.elm`
+U2LAL86AY : i think you have
+U2LAL86AY : projectDirectory  //elm-package.json
+  // Main.elm
+
+U2LAL86AY : no src?
+U5FU80S06 : ```projectDirectory          src
+                    elm-package.json
+                    Main.elm``` and yes the app comes up and runs fine
+
+U3SJEDR96 : right. And you place your `index.html` at the same level as `elm-package.json` and run `elm-reactor` from that same directory, correct?
+U3SJEDR96 : so everything happens _within_ that `projectDirectory/src` folder
+U2LAL86AY : i don't think `elm-package.json` likes to be placed in src :smile:
+U5FU80S06 : yes yes, and I even deleted elm-stuff and elm.js to re-generate
+U2LAL86AY : can you please put it your code on ellie? i will try it here with elm-make see what comes up.
+U2LAL86AY : maybe not
+U5FU80S06 : ok, shall I bump up `elm-package.json` ?
+U3SJEDR96 : <@U2LAL86AY> as long as you run your `elm-*` commands from that directory and `elm-package.json` has `source-directories: ["."]` (which is the default), that should work fine
+U5FU80S06 : yes that what I do, and that's what it is.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

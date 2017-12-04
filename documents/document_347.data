@@ -1,29 +1,85 @@
-  }```
-<@U300LJUAK> Lol I've struggled a lot with this one. Was actually just coming to that conclusion myself (albeit 100x slower than you )
-I was trying to figure out how they used Mdl as a seeming constructor in the `Layout.render` function
-actually does let us use the `Mdl` name as a constructor
-as its then defined as a component of a union type?
-and thus fits neatly into the layout.render fn
-It creates a `Mdl` constructor that takes a string and returns a value (of type `Msg` in the first case, and of type `Mdl` in the second). These are the only two cases where you will have constructors automatically created for you.
-Thanks a ton :slightly_smiling_face:
-No problem :thumbsup:
-Is there some sugar in Elm to switch a Boolean?
-<@U663M2MB7> do you mean `if True then "blah" else "beep` ?
-`not &lt;| lastValue`
-<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Basics#not> it's just a regular function
-It was a pretty bad idea to begin with
-I'm trying to build a progress bar thing, how would I get the width of the element?
-<@U26LR8F4H> the best way is to set that width
-the other good way is use CSS percentage units so you don't need to know the width
-Thanks for the suggestion, that may just work
-<@U26LR8F4H> here's some junk you could consider: <https://ellie-app.com/3JgJBMXNxp4a1/2> but i would lean heavily toward jessta's answers
-oh thanks, that looks pretty useful as well.
-You can also use a port to get JS to query the DOM and pass it back to Elm, but that's quite a lot of effort
-how do i use a for loop in elm?
-there is no for loop, you'll need to check out `List.map`
-there are other functions too, but it depends what you want to do :slightly_smiling_face:
-i am trying to build a caesar cipher, for that i need to iterate through the strings
-<@U64MK7215> sounds like a perfect use of `List.map`
-a caesar cipher is mapping one character to a different character
-<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/String#map>
-how to a define a  custom function in elm and call it inside update?
+U3KSN5MAL : Hmm, in this case i use this sort of thing to take flags from photoshop to turn on and off things, i have no need for an argument for that
+U3KSN5MAL : So i've just been passing in a dummy value and not using it
+U3KSN5MAL : seems silly to have to do that
+U4872964V : This is because you can't call a function in Elm without a value
+U4872964V : However silly it seems, that's the way it works
+U5WS7CJLV : I think it was the red carets that threw me off
+U3KSN5MAL : i see thanks
+U5WS7CJLV : my brain shortcuts to saying "the problem is in the red carets"
+U4872964V : yes, sometimes it's hard for the compiler to figure out exactly what you meant
+U4872964V : However, Elm beats all other compilers I've used in the error message department
+U5FC7BE0G : is there a shortcut/something less verbose for doing this:
+```
+case model.something of
+                Just x -&gt;
+                    someCmd
+
+                Nothing -&gt;
+                    Cmd.none
+```
+
+U48AEBJQ3 : <@U5FC7BE0G> There is `model.something |&gt; Maybe.map (\_ -&gt; someCmd) |&gt; Maybe.withDefault Cmd.none`. If you really want to shrink things down in a particular place, though, make a function.
+U5FC7BE0G : thanks <@U48AEBJQ3> ! I thought maybe there's already something built in for this, but i'll create my own shortcut then
+U3YDBDP4Z : Wanting to unit test my `update` function, but I don't know where the `ChangeLocation` and `OnLocationChange` messages come from?
+U3YDBDP4Z : Need to import them in my tests
+U48AEBJQ3 : I'm not familiar with those constructors, are they from a package you are using, or something you defined yourself?
+U3YDBDP4Z : I'm not sure where they come from.
+U3YDBDP4Z : I would have assumed the Navigation package but it doesn't mention them
+U3YDBDP4Z : And the only other package I have is url-parser, which doesn't have them either
+U3YDBDP4Z : Which is confusing, since I use them in Update.elm but they are not imported from anything
+U48AEBJQ3 : If you are using them somewhere, they are either defined there or they are imported. This is a reason to not import `exposing (..)`, since it makes it more difficult to know where things come from. The navigation package doesn't define any constructors by those names.
+U3YDBDP4Z : Haha, you are absolutely correct
+U3YDBDP4Z : I was having a brain fart
+U4872964V : <@U5FC7BE0G> `if model.something == Nothing then Cmd.none else someCmd` perhaps. If you're not interested in the actual contents of the `Just`
+U5FC7BE0G : <@U4872964V> my example was actually a bit wrong. What I actually needed was this:
+```
+case model.something of
+                Just x -&gt;
+                    doSomething model.something
+
+                Nothing -&gt;
+                    Cmd.none
+```
+
+I ended up creating this helper:
+
+```
+maybeRunCmd : (a -&gt; Cmd msg) -&gt; Maybe a -&gt; Cmd msg
+maybeRunCmd f maybe =
+    maybe
+        |&gt; Maybe.map f
+        |&gt; Maybe.withDefault Cmd.none
+```
+... which works like a charm :slightly_smiling_face:
+
+U4872964V : great
+U0J8D9M2P : ```But the returned value (shown above) is a:
+
+    { altitude : number, azimuth : number1 }
+```
+
+Why does it says `number1`?
+
+U41NK9BM4 : IIRC it is a way to say: could be a different type than the other `number`
+U41NK9BM4 : (Int vs. float  - for example)
+U635238TG : i'm doing the intro guide and it had me clone over the code examples. however, i want to write these programs myself while I go along. Can I just open up an example.elm file in my text editor, write the code with the tutorial and then...what. Run elm-make to make an html file? and then I can just throw that in the browser to see if it worked?
+U0J8D9M2P : you can do it with elm-reactor as well
+U0J8D9M2P : which will compile elm files and serve them for you
+U635238TG : i see. i guess the examples in the tutorial also happen to be in the directory i installed so I can just open up those exact files with my text editor
+U2SR9DL7Q : <@U635238TG> i typically use elm reactor for every meaningful change to quickly test functionality in localhost. elm-make I save for when I'm pushing to remote repo. But I know a lot of folks use automated build tools that run elm-make on every save sometimes.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

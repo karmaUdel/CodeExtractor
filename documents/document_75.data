@@ -1,2 +1,77 @@
+U3JURM9B6 : and I no longer think at the grainualarity of machines
+U1ACUMJKX : if you create a language binding to a library written in another language
+U1ACUMJKX : how do you license it?
+U1ACUMJKX : do you keep the license of the source library?
+U1CTH1TUY : depends on the license of the source library. If you aren't distributing their library, you might be able to license it however you want. Not something that can be answered in the abstract
+U0LUEAS3Z : Hi all, I'd like to fan out the same input sequence to several transducers and collect the results into a single sequence... is there a function for that?
+U60259LCB : Any one experience with Lanterna?  I'm looking into making a snake game, and would like to know if it can do a non blocking ui
+U06CM8C3V : <@U60259LCB> I believe it does, haven't used it in a while, but I see from the docs it has both `get-key` and `get-key-blocking` — the first returns nil if there's no keypress waiting to be read.
+U5NAUMCAD : Hi all, Is there any way to mock a function in clojure. For example I have this function: ``` (defn a [x]
+        (utils/count x)) ```
+
+I need to write a test, but I do not know how to mock the utils/count  (for example)
+
+U5NAUMCAD : what if I have several functions inside the same function and I need to test it
+U5NAUMCAD : ``` (defn a [x]        (utils/count x)
+        (utils/count2 x)
+        (test/other x)) ```
+
+U1G9D4WE7 : <@U5NAUMCAD>, you can use `with-redefs` to "re-bind" a symbol
+U1G9D4WE7 : here is a useful testing pattern: <https://stackoverflow.com/questions/31157889/clojure-unit-testing-with-redefs#31309070>
+U11BV7MTK : but in that function there's nothing to test
+U11BV7MTK : it sounds like you want to test `utils/count`
+U5NAUMCAD : it is an example!
+U11BV7MTK : gotcha. just making sure
+U5NAUMCAD : :smiley:
+U11BV7MTK : how many dependencies are in it?
+U11BV7MTK : i'm saying that because if its not too many, i would make a function that accepts those and calls them inside it self, and you can create your production one with `(create-a [count count2 other] (fn a [x] (utils/count ...)))`
+U11BV7MTK : and then you can test that with just passing in your own mocks
+U11BV7MTK : but this doesn't work if there are quite a few functions required
+U0EHU1800 : I'm looking for a way to remove/clear protocol implementations during testing. Is there a common way of doing this? I came across mention in Stuart Sierra's LazyTest where he says his method is broken. <https://github.com/stuartsierra/lazytest/blob/master/modules/clojure-language-tests/test/clojure/test_clojure/protocols.clj#L18-L28>
+U0EHU1800 : Looking in Clojure core, I suspect something similar to that would work: <https://github.com/clojure/clojure/blob/f572a60262852af68cdb561784a517143a5847cf/src/clj/clojure/core_deftype.clj#L791>
+U0EHU1800 : I'd rather not reinvent the wheel if someone has something for this already.
+U051SS2EU : @grzrm so your test needs to eliminate the extensions of your protocol?
+U0EHU1800 : yup. The library I'm testing provides alternative implementations, so I'm testing each one. Right now I'm running separate test suites, but that's a bit of a hassle.
+U051SS2EU : why do other extensions need to be deleted? can't the individual extensions be tested independently of one another?
+U051SS2EU : do you mean it's two extensions of one type to a protocol?
+U0EHU1800 : If I have two different implementations on, say, IMap, only one takes effect.
+U051SS2EU : on one type?
+U0EHU1800 : yes.
+U051SS2EU : OK
+U051SS2EU : my temptation would be to either replace the type or protocol when testing
+U051SS2EU : because clearly both implementors can't own both the type and the protocol, which would be good reason to make it modular…
+U0EHU1800 : I'm not following. In this case the I'm trying to test specifically the implementation on that type. Swapping it out, like for a mock, would defeat the purpose in this case.
+U051SS2EU : it could be as simple as a proxy that uses proxy-super for every method you call
+U0EHU1800 : Can you elaborate?
+U0EHU1800 : Or point to a reference of what you're getting at?
+U051SS2EU : ```user=&gt; (str (proxy [Object] [] (toString [] (proxy-super toString))))"user.proxy$java.lang.Object$ff19274a@6e0ed78c"
 ```
-I have this function
+
+U051SS2EU : you extend the supertype, and call the supertype's method on method calls
+U051SS2EU : it's a different class, but has the same behaviors
+U051SS2EU : another alternative is to use composition (a deftype with a Foo, which re-calls every method on that Foo)
+U0EHU1800 : Thanks for the alternatives. I'll ponder those for a bit to see if I can make them work. Cheers!
+U0CKDHF4L : what's wrong with this spec expression that it doesn't return an explanation ? ```(s/explain (s/cat :this (s/* (s/coll-of :q/o)) :that :q/test-map) '((7 3 1) (9 7 3) {:q/b [2 4 6] :q/c ["abc" "xyz"] :q/d [:q :w] :q/a [1 3 5]}))IllegalArgumentException Argument must be an integer: [:q/b [2 4 6]]  clojure.core/even? (core.clj:1383)```
+
+U0CKDHF4L : ...each part of the s/cat works: ```(s/explain (s/cat :this (s/* (s/coll-of :q/o))) '((7 3 1) (9 7 3)))Success!```
+
+U0CKDHF4L : ```(s/explain (s/cat :that :q/test-map) '({:q/b [2 4 6] :q/c ["abc" "xyz"] :q/d [:q :w] :q/a [1 3 5]}))Success!```
+
+U0CKDHF4L : (where ```(s/def :q/test-map (s/keys :req [:q/b :q/a] :opt [:q/c :q/d]))``` and the various keys :q/a etc are simple ```odd? even? string? keyword?```
+U0NCTKEV8 : even? isn't total
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

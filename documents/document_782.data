@@ -1,0 +1,64 @@
+U0H3A9XLN : unfortunately I can’t just copy paste my code and it won’t be trivial to make it now
+U0H3A9XLN : maybe you can better point me to some advanced form examples?
+U4872964V : it’s hard when I don’t know what your pain is, or what your forms are, unfortunately
+U4872964V : but if you have multiple `RemoteData` it may help to use one of the `map` functions, or `andMap` on them
+U0H3A9XLN : ok, thanks
+U2LAL86AY : <@U0H3A9XLN> are you using the `_ -&gt;` pattern  in `case of` ?```
+case remoteData  of 
+   Success .. -&gt; 
+               showSomeHtml
+   _ -&gt; 
+        text "" 
+```
+
+U2LAL86AY : actually it's better to use <http://package.elm-lang.org/packages/bloom/remotedata/1.0.1/RemoteData#map> - for success and<http://package.elm-lang.org/packages/bloom/remotedata/1.0.1/RemoteData#mapFailure> -&gt; for failure
+
+U0H3A9XLN : no, I do not use wildcard
+U0H3A9XLN : That was not about `map`, I should have formed question better. I know about the libraries API, I was really looking into different way of data modelling, not into suggestions for methods to use :slightly_smiling_face:
+U4872964V : <@U0H3A9XLN> a different way than _what_ is the obvious question. If you can't provide an example on how your code looks now it's extremely hard to suggest improvements.
+U2LAL86AY : hmm i'm curious to understand why this is not considered a compile error: ```
+import Style.Color as Color
+import Color
+
+....
+someBackground = Color.background Color.red 
+```
+ where in fact is: 
+```
+someBackground = Style.Color.background Color.red 
+```
+Gets confusing to know if `red` is from `Style.Color` or from `Color` - elmjutsu shows intelisense for both combined. - i mean not so confusing for red - but i'm worried about the implications for other function names if this is allowed
+
+U3SJEDR96 : If there is real confusion possible, I think you do get a compiler error:```
+This usage of variable map is ambiguous.
+Maybe you want one of the following?
+
+List.map
+String.map
+```
+
+U2LAL86AY : aa ok. So only if `red` is defined in both packages... then i get that error.. hmm
+U3SJEDR96 : indeed
+U3SJEDR96 : aliasing multiple modules to the same name is intentional; and allows things like `import List.Extra as List` to "combine" modules
+U3SJEDR96 : I agree that it's occasionally pretty confusing, tho
+U170TNSTZ : Anybody using `create-elm-app`?
+U170TNSTZ : Anyways, I have some problems with the hot reloading. It works, and maintains the state of the model, until I encounter a compilation error. If I mess up the syntax or types, the reload will of course fail, but fixing the code afterwards will kill the state
+U0CL0AS3V : <@U0H3A9XLN> if you're looking for alternative ways to model data, <https://github.com/rtfeldman/elm-spa-example> does initialization on "page" load rather than using `RemoteData`. If you don't need parts of your page to load in pieces, this style makes your `Model` easier to work with.
+U170TNSTZ : Re: my own post - Seems it’s a “bug” in `elm-hot-loader`. I created an issue here: <https://github.com/fluxxu/elm-hot-loader/issues/34>
+U0H3A9XLN : <@U0CL0AS3V> yeah, I’ve seen it and I really enjoyed the idea. However I do now embed Elm into React application, so top level routing is done by React :disappointed:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

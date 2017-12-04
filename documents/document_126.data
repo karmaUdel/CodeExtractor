@@ -1,17 +1,78 @@
-true```
-that could be a sign of doing other things wrong I guess…
-that doesn't surprise me, a keyword is a function
-(What <@U050ECB92> said)
-I suppose the `fn?` stole the good name early, but had the wrong semantics
-yeah fn? really means "something that was created with `(fn ...)`"
-fn? was added when trampoline was added
-continue-trampolining?
-yeah, I guess the answer of `(defmulti foo first)` `(fn? foo)` can be a guide there
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-i looked at the version compare and it seems like it will return `1.1` &gt; `1.9`
-but i don't know how to crank it up since it's based on the pom file rather than a project file
-10541c0254973ce045305499d4b5622073ede622 (is the trampoline commit fyi)
-i'm not a java guy
-it also specifies its own deps in the new edn format. does that make it "self-hosted"?
-<@U11BV7MTK> if you have `mvn` installed you can crank it up using the commands in the README.  Use of mvn/pom is a one-time thing at setup.  (It will probably be handled by the package manager when this stuff filters over there)
-thanks. i'll get that going tonight
+U628K7XGQ : yeah, I'm feeling pretty clueless myself. But running `lein deps :tree` has interesting warnings. Looking at those now. Thank you!
+U5ZAJ15P0 : <@U628K7XGQ> make sure that the right version of cheshire appears first in the tree
+U5ZAJ15P0 : from what I have been told lein will pick the first version it finds in the list
+U628K7XGQ : there's only one
+U5ZAJ15P0 : ok…
+U5ZAJ15P0 : @mention me if you find a solution please, I am curious :slightly_smiling_face:
+U628K7XGQ : I will, thanks again
+U5ZAJ15P0 : <@U628K7XGQ> can you Gist me the output of `lein deps :tree` ?
+U628K7XGQ : <@U5ZAJ15P0> I was able to get it working. I had to exclude cheshire manually and then re-add
+U628K7XGQ : I have no idea why that fixed things
+U628K7XGQ : i.e. ```
+[cheshire "5.6.3"]
+[yada "1.2.6" :exclusions [ring-swagger cheshire]]
+```
+
+U5ZAJ15P0 : odd. Maybe some dependency cache going on
+U5ZAJ15P0 : no idea how those things work in clojure/java
+U5ZAJ15P0 : oh well
+U628K7XGQ : uberjar seems a bit brittle
+U628K7XGQ : but it looks like I can soon deploy something to Heroku and so my Sunday is complete
+U5ZAJ15P0 : :100:
+U628K7XGQ : thanks for your help
+U5ZAJ15P0 : You're welcome! Enjoy the rest of your evening
+U04V70XH6 : <@U628K7XGQ> AOT is the root of a lot of problems and is best avoided, if possible. As for dependency conflicts, that's pretty common the JVM world so I'm not surprised you had to add `:exclusions` -- Cheshire is a popular library and lots of other libraries depend on it so you can get any one of a whole bunch of different versions pulled in if you're not careful.
+U628K7XGQ : weird thing here: only yada really asked for it
+U5ZAJ15P0 : Hey, what is the go-to Ring logger? <https://github.com/nberger/ring-logger> ?
+U65U08BB4 : noob question: ((fn [a b] [a b]) 1 2) eval to [1 2], (#(vector %1 %2) 1 2) eval to [1 2] too, why (#([%1 %2]) 1 2) got clojure.lang.ArityException: Wrong number of args (0) passed to: PersistentVector
+U65U08BB4 : and what does (#(-&gt; [%1 %2]) 1 2) mean?
+U051SS2EU : just like #(+ %1 %2) expands to (fn [x y] (+ x y)) #([%1 %2]) expands to (fn [x y] ([x y])) - #() keeps the outer parens
+U051SS2EU : `-&gt;` is a macro also known as thread-first and it's being abused here to be able to use a vector literal where it would otherwise not work
+U65U08BB4 : I got it~ so (#(do [%1 %2]) 1 2) works too
+U051SS2EU : yes - do is better than -&gt; here (in this context do and -&gt; are the same)
+U65U08BB4 : so the [%1 %2] was evaled in place and used as the initial value of -&gt;, but there is no further functions, so it got returned
+U051SS2EU : with more forms,-&gt; would be writing each form into the one after it
+U051SS2EU : <@U65U08BB4> exactly
+U65U08BB4 : hmmm~ I thought about this, but was not very sure~ I thought it was kinda an abuse too~
+U65U08BB4 : thanks~ <@U051SS2EU>~!
+U5JEJN1CP : Is there any sane way of handling repeated date conversions between java.sql.date and java.util.Date or should I give up and use timestamps instead (if that would be better)?  Every sql update query rotates the date back a full day because of the time zone getting chopped off and re-added.
+U04V70XH6 : <@U5JEJN1CP> The only sane solution is to have all your servers set to UTC and your database set to UTC, and work entirely in UTC date/times -- and only convert to/from local date/times on the fringe.
+U5JEJN1CP : I was afraid it would be something like that.
+U04V70XH6 : Our data center is East Coast and we have _everything_ set to UTC across the board.
+U5JEJN1CP : Thanks
+U04V70XH6 : What database are you using?
+U5JEJN1CP : Postgres.  Wanted to use datomic, but my organization's purchasing rules wouldn't allow it without too many headaches.
+U04V70XH6 : I don't know about Postgres but with MySQL you have to explicitly set the DB to UTC separately from the O/S. Just FYI.
+U5JEJN1CP : Thanks, I'm digging into the docs now to figure it out.
+U3JURM9B6 : I'm not a big fan of how the javadoc UI works for browing java functions.
+U3JURM9B6 : Is there a clojure library for parsing javadocs into clojure data (so I can build my own search system) ?
+U050SC7SV : dont think so, that'd be a useful library tho :slightly_smiling_face:
+U051HUZLD : greetings,[finite state machines] can anyone describe the difference between "composite state" and "(sub) machine"?
+UML spec says those are basically the same thing, however, there are 2 names, which is suspicious:
+```A submachine State implies a macro-like insertion of the specification of the corresponding submachine StateMachine. It is, therefore, semantically equivalent to a composite State. The Regions of the submachine StateMachine are the Regions of the composite State.```
+
+U3TSNPRT9 : I'm trying to "live at the REPL" more. One common debugging issue is how to quickly evaluate forms within functions or let bindings, where the symbols are not defined. ProtoREPL has a whole feature around this, and it looks like Cider does too.... (We use Cursive as we've come from a Java shop and deal with lots of Java code still.) Is this something people use a lot? Is there a repl independent approach to this?
+U0567Q30W : <@U3TSNPRT9> You should be able to do this in Cursive - if there's something missing (or if you have a link to some doc about ProtoREPL's approach to this) I'd be very interested to see it.
+U0567Q30W : You can select any form and that will be sent, or there's the "Send form before caret" action. Cursive doesn't do anything clever with missing symbols though, is that what you're referring to?
+U3TSNPRT9 : Sorry I meant to quote this discussion <https://github.com/clojure-emacs/cider/issues/1809>
+U0567Q30W : <@U3TSNPRT9> So that's sort of what I had in mind. If you send a form for evaluation, I can check if any of its bindings are not defined in that form. I had envisioned a popup dialog when you evaluate the form which would allow you to enter a value for each one. Does that sound like what you had in mind?
+U3TSNPRT9 : That sounds nice :slightly_smiling_face:
+U0567Q30W : Definitely. Could you file an issue for that and I'll see what I can do?
+U3TSNPRT9 : I think this is related to tracing though. In protorepl (sorry to mention the competition!) you stick a (save) form in your code and it can remember values flowing through code as a test runs say, and then you can def these values so you can evaluate forms and debug as you go.
+U0567Q30W : No problem at all, ProtoREPL is awesome, it's by far my second favourite Clojure environment :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

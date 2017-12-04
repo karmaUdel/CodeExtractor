@@ -1,13 +1,111 @@
+U2D7NUGS1 : If I've run into an error message that IMO could be more helpful, where do I look for existing issues or file a new one?
+U0EUHKVGB : <https://github.com/elm-lang/error-message-catalog>
+U2D7NUGS1 : Thanks <@U0EUHKVGB> !
+U0U6ML22H : Just checking: there's no way to share the Elm runtime between many apps, right? We're serving many Elm mini-apps on the same page, and don't want to serve several megs of the same thing...
+U3SJEDR96 : What does "sharing the elm runtime" mean, exactly? They need a separate model, and update; but the actual functions and whatnot _are_ shared, they just get separate structures for what's actually _going on_
+U3SJEDR96 : shouldn't be several megs unless you have a large model, though
+U0EUHKVGB : You can compile it into a single bundle, <@U0U6ML22H>
+U0EUHKVGB : `elm-make A.elm B.elm`
+U3SJEDR96 : i.e. if you bundle multiple modules `elm-make Module1.elm Module2.elm --output bundle.js`, it's just one defintion for everything
+U0EUHKVGB : there is a PR for adding support to webpack: <https://github.com/elm-community/elm-webpack-loader/pull/119>
+U2D7NUGS1 : Hmm... now I'm confused. I have a following Elm module in file `View.elm`.
 ```
-Like Project, I have Deliverable, Contact, User, Team, TimeRecording.....
-oh
-so you could presumably do something like
-`ProjectStructure user company contact -&gt; String`
-Yes!
-and inside it pattern matches on the argument 3 times
-That's what I want.
-first one looks like this
-oh, sorry
-`type alias`
-hmm
-And here is the thing. If I'm decoding `Project String String String` I don't need to embed anything. But if I'm decoding `Project User String String` I need to embed "created_by" and "owner".
+ module View
+```
+
+There is an accidental whitespace before module definition. `elm-live` tells me this:
+
+```
+The module name is messed up for ././src/View.elm
+
+    According to the file's name it should be View
+    According to the source code it should be Main
+
+Which is it?
+```
+
+This IMO is a little bit confusing. I thought it's coming from `elm-make` and wanted to report this, but apparently it's not. :
+
+```
+$ ./node_modules/.bin/elm-make src/View.elm
+-- SYNTAX PROBLEM ------------------------------------------------- src/View.elm
+
+I need a fresh line to start a new declaration. This means a new line that
+starts with stuff, not with spaces or comments.
+
+1|  module View
+    ^
+I am looking for one of the following things:
+
+    whitespace
+
+Detected errors in 1 module. 
+```
+
+Where is the `elm-live` output coming from?
+
+U3SJEDR96 : might just be elm-live getting confused by files being created/renamed/..? not sure
+U2D7NUGS1 : The file was there when I started it. The space was new, so no rename there.
+U3SJEDR96 : what happens if you `elm-make src/Main.elm`, <@U2D7NUGS1> ?
+U0U6ML22H : <@U0EUHKVGB> <@U3SJEDR96> hmm OK, let me explain: our backend serves pages with different small Elm apps in them (one or more per page/route). These are all compiled to their own .js. They, I believe, all include the Elm runtime. The thing is, one page/route might embed several of those apps, and each of those will, as established, contain the Elm runtime. I'd like it if it was possible to have only the Elm runtime as one file, and the remaining apps as their own file. In the app, each page/route could theoretically need to embed one or more Elm apps (by that I mean it's important to keep the apps independent)
+U0EUHKVGB : No, you can’t do that
+U0EUHKVGB : You have to create one big bundle
+U2D7NUGS1 : <@U3SJEDR96> bingo!
+U0EUHKVGB : <@U2D7NUGS1>, when you run `elm-make` directly on a file, it will assume the name is `Main.elm` unless it finds a valid module decleration telling it otherwise.
+U0EUHKVGB : Hence why the errors are different.
+U2D7NUGS1 : Yeah, I get this. I just think the error could be improved.
+U0EUHKVGB : Yep. Just explaining how it works
+U2D7NUGS1 : Sure. Thanks.
+U0U6ML22H : <@U0EUHKVGB> yeah, the big bundle won't work in that case :smiley: Do you think that the compiler improvements in 0.19 could help with that use case, or is it completely out of scope?
+U2D7NUGS1 : I didn't find any issue about it, so I guess I can  file a new one at <https://github.com/elm-lang/error-message-catalog/issues> as you suggested <@U0EUHKVGB> .
+U0EUHKVGB : <@U0U6ML22H> Yes, but it would work based on compiling multiple entry points together, I suspect.
+U0U6ML22H : do you mean that the improvements are geared more towards optimizing "one big Elm app with several Elm-pages served by Navigation" instead of optimizing our use case of serving several small (but full-fledged) Elm apps in one single HTML page?
+U0EUHKVGB : We don’t know
+U0U6ML22H : OK
+U0EUHKVGB : I’m only guessing
+U0U6ML22H : all right, thanks for your help :smiley:
+U3SJEDR96 : <@U0U6ML22H> it will depend on how many of those apps exist in your ecosystem, but if you have, say, on average 60% of those active in a single user-session, it might be worth bundling _all_ of them in a single file and trying to send it to the user gzipped and minified. It's a trade-off; but perhaps it's better to have them download 1 larger file, rather than 20 slightly-less-large files over the course of a single session
+U3SJEDR96 : especially considering the sum of those files will be larger than the single large bundle (due to duplication)
+U0U6ML22H : yup, I agree with that kind of reasoning; I was just thinking it should be easy to share the Elm runtime as a side-dependency
+U3SJEDR96 : Yeah, I don't think that can be (easily) done
+U0U6ML22H : I'm probably not good enough to understand why ^^
+U0EUHKVGB : It can be done, but right now you will be fighting more than you are achieving.
+U0EUHKVGB : I _suspect_ that this is what is coming with 0.19.
+U5ZANGQ14 : :wave:
+U0U6ML22H : thanks <@U0EUHKVGB> and <@U3SJEDR96>
+U3R7CKQRX : does anyone know what the most elegant way is to conditionally render an attribute in elm?
+U3R7CKQRX : with html you can just do `if someBool then p [] [] else text ""`. what is the equivalent for attributes?
+U0U6ML22H : what we do is append to a list
+U3R7CKQRX : yeah that's why I asked for the most elegant way. That was the only one I could come up with and it not that nice to use. :confused:
+U0U6ML22H : so something like```
+let
+attrsForAll = [ onClick Bleh ]
+conditionalAttrs = if (cond) then [ class "condIsTrue" ] else []
+in
+div (attrsForAll ++ conditionalAttrs) []```
+
+U0U6ML22H : what do you think is not nice about it?
+U3R7CKQRX : I was hoping for a shorter solution. But I guess that's the only way to do it.
+U0EUHKVGB : `none = attribute "" ""`
+U0EUHKVGB : `if someBool then none else class "hello"`
+U3R7CKQRX : ah that's nice
+U3R7CKQRX : that's the shorty I was looking for :slightly_smiling_face:
+U3R7CKQRX : thank you <@U0U6ML22H> and <@U0EUHKVGB>
+U3SJEDR96 : I think that'll blow up
+U3SJEDR96 : empty string isn't a valid attribute name, so the eventual `setAttrbute` would blow up
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,8 +1,102 @@
+U23SA861Y : little more typing but one is easier to look up (try looking up ! with ctrl+f) and has an explanation built in
+U23SA861Y : you can also `(model, Cmd.batch [])`
+U23SA861Y : or
+U23SA861Y : `(model, Cmd.none)`
+U6DBPU40Y : :ok_hand: thanks for all the advice, really appreciate it
+U1P6FFJ64 : <@U6DBPU40Y> that syntax was used on elm 0.17 but they decided to remove it in future versions: <https://github.com/elm-lang/core/commit/3dab5974837bd350cbee9ce1ecf9ddab1d0f0ebf>
+U0CQ254F5 : could the type signature here <https://github.com/evancz/elm-sortable-table/blob/master/src/Table.elm#L155-L161> be written as?
 ```
-but I see this crash anyway - does Elm evaluate the Nothing case anyway?
-Yes, it's an eager language
-even for `case`?
-no, case is lazy
-that is what I thought
-though I'm wondering if the `Nothing` branch is handled differently
-what is your actual code? the thing you typed will never evaluate the `Nothing` branch for a just
+customConfig : Config data msg -&gt; Config data msg
+customConfig { ... } =
+  -- implementation
+```
+
+U6DBPU40Y : good to know <@U1P6FFJ64> , thank you, I guess I'll stick to plain code
+U0CQ254F5 : maybe im confusing it with an `alias`
+U2SR9DL7Q : <@U0CQ254F5> does Config accept data and msg as parameters?
+U2SR9DL7Q : If so, I think you can do```
+customConfig : Config -&gt; Config
+customConfig { data, msg } =
+    -- implentation -- 
+```
+and you would return ``` { new_data, new_msg } ```
+
+U2SR9DL7Q : Basically, you're free to deconstruct and pattern match in the actual function arguments, while keeping your type annotation high level and concise
+U4872964V : You'd have to return `Config new_data new_msg` or `{ data = new_data, msg = new_msg }` though
+U0CQ254F5 : yeah, i think i got confused, the function is taking a record and returning a type
+U663M2MB7 : What is the normal structure of a Elm application? Is it `src/` for the application and `tests/` for tests?
+U3FJSB596 : That's how I have it
+U663M2MB7 : I guess I will just do the same. It makes sense.
+U663M2MB7 : Thanks :slightly_smiling_face:
+U3FJSB596 : <@U663M2MB7> Remember to have the right directory in `source-directories` in `elm-package` : `src`
+U663M2MB7 : Like `"./src"` so?
+U3FJSB596 : `"src"`
+U663M2MB7 : Cool thanks :slightly_smiling_face:
+U635238TG : So I'm nearing the end of this tutorial and it just threw my brain for a loop. We just added this union type of two "states" is how he keeps describing it.
+U635238TG : so I'm reading on union types in the guide. I was coming along good when types were things like "int" and "string" and even getting this Msg thing down. But states?
+U635238TG : tbh, I'm not quite sure what I want to ask here
+U635238TG : basically, how can a "state" be a type and I thought functional programs were stateless but don't really know what that means yet
+U6DBPU40Y : Not an expert though but I guess you r talking about how these messages are defined as data in ELM
+U635238TG : yes. because with the experiences i've had with types so far or with type aliases they eventually end up being a int or string or something like that
+U635238TG : or a record containing them
+U6DBPU40Y : you only have to get the idea of how these messages defined as data flow through the app
+U6DBPU40Y : I kinda relate them to using constants in JS when switching cases
+U23SA861Y : so it's not a state as in it's keeping state
+U23SA861Y : its a type which you can put in your model that can only ever have two values
+U23SA861Y : in the same way that a boolean is defined as `type Bool = True | False`
+U23SA861Y : in this case you create a type with slightly more descriptive names
+U0RPQMZ9S : it might help to realize that the _type_ is `GameState`, and its _possible values_ are `EnteringName` and `Playing`
+U635238TG : ok, ok. starting to click. I like seeing it as a kind of boolean thing. and this todo example in the guide is helping.
+U23SA861Y : in this case it only has two possible states
+U0RPQMZ9S : you can use types to represent anything, in this case you're using one to represent possible states of the application, with each value of the type cooresponding to a possible state
+U236M9FH9 : Instead of a mutable global state, you pass the state through your application as arguments to functions, and modify the state by making functions return different values
+U635238TG : and then when you get down to defining what should happen with those different possible states (like when using the case of) it's going to eventually end up being data like int's or string's that I'm comfortable with? I feel like wrapping my head around "data" is what helps me grok this stuff.
+U14Q8S4EM : It sounds like you had some questions about what "state" is <@U635238TG>, but since we are talking about union types specifically. Yeah you can make them in a great variety of ways, which adds to their usefulness. I often make union types to represent mouse events like `type ClickState = NoClick | FirstClick Position | ReleaseClick Position Position`.
+U14Q8S4EM : So, to me, the phrase "what happens with state", is referring to things like _rendering_, or maybe _user data_ that might be sent through an http request. Thats what you _do_ with state.
+U14Q8S4EM : And yes, state _will be_ comprised of things like `Int` and `String`. In a big app it would certainly be a record with fields of those values. But your model could be any data type.
+U14Q8S4EM : I made an app a few weeks back where my messages and model were both type `Int`, which was kind of goofy.
+U14Q8S4EM : (I hope that helps you)
+U2SR9DL7Q : <@U635238TG> You can think of it as kind of like a boolean, but you get to define what those options are. `type MyType = CanBeThis | CanBeThat | CanBeThisLastThing`
+U4CDPP9HR : Hey, noob question: how do you destructure a tuple in a function definition?
+U635238TG : this all definitely helps. This convo has been much easier to follow than that last tutorial piece, I think I just let the "state" thing get to my head.  Time for a break and a nice, long walk to let some of this soak in. the tutorial/app was a little tough for me but I wanted to complete it before going back and reading the guide. Then I think Richard Feldman's book will be next. It's been a little tough ordering the Elm resources into a good beginner sequence.
+U0RPQMZ9S : <@U4CDPP9HR> `foo (a,b) = somethingwith a`
+U4CDPP9HR : Weird, that's what I have. Maybe the compiler is complaining about something else… anyway, thanks.
+U0RPQMZ9S : might be a syntax error in the lines above it
+U2SR9DL7Q : <@U635238TG> Are you building your own thing while doing the tutorials?
+U2SR9DL7Q : <@U4CDPP9HR> what error message are you seeing?
+U4CDPP9HR : I figured it out. I had `foo ( a,b ) = ...` and it didn't like the spaces.
+U635238TG : <@U2SR9DL7Q> Yes, I actually started a little bingo card generator project last night. I'm only like 3 lessons from finishing this tutorial though and wanted to see the mentality that went into constructing a full app first. i definitely want to get my hands dirty with my own projects asap. my family is mostly educators and they want me to build them a more robust, modern student progress tracking app as that is a big pain point for them. i can't determine what order of magnitude rise in complexity that will be but they did have a laugh at my bingo card idea starter instead (but they still want that. all of these apps must be free too according to them). and i'm trusting i can find a way to do these things (and my portfolio page) in Elm.
+U6ECA0Q4D : I'm totally new to Elm and trying to wrap my head around it by reading the official introduction to Elm.  I got to the Random section where the example is a program to roll a die.  I was good with everything right up until the result of the random number generation invoked the NewFace command.  ```NewFace newFace -&gt;
+  (Model newFace, Cmd.none)
+```
+My question is this:  how does Elm know to store the newFace value in the dieFace member of the model?  Is that simply because the Model record only has one element?
+
+U153UK3FA : <@U6ECA0Q4D> `Model` in this case is a function
+U153UK3FA : when you declare a type alias of a record type, Elm also automatically declares a function for constructing values of this type with the same name as the type
+U6ECA0Q4D : <@U153UK3FA> That makes more sense then!  So if I had a second member of the record I'd have to provide it something like (Model 1 2, Cmd.none), right?
+U153UK3FA : So `Model`(the function) take an `Int` and gives you a `Model`(the type)
+U153UK3FA : yep
+U6ECA0Q4D : Thanks, that helps
+U153UK3FA : You can also just use a record literal eg. `({dieFace: newFace}, Cmd.none)`
+U6ECA0Q4D : That looks a lot more friendly to my eyes since I've been spending all my time javascript and c# lately :slightly_smiling_face:
+U6ECA0Q4D : so if I had a model that was like this:``` { one: Int, two: Int } ```
+and I wanted to update just the 'two' value in the update I would do something like
+```(model | two = 123) ```
+?
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

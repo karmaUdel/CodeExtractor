@@ -1,0 +1,236 @@
+U5S8CNULD : Spend a lot of time, and can't find solution:disappointed:
+U1BP42MRS : Looks like you are trying to access the MySQL server through the socket, I think you need to set it to use the port and the hostname `my-db` (or whatever `link` arg you name)
+U5S8CNULD : ```docker run --name -p 3306 -h localhost  -e MYSQL_ROOT_PASSWORD=t123  mysql  
+```
+something like this?
+
+U1BP42MRS : No, it's what you link it as, so the `docker run --name=test-app -p 8000:8000 -it -v $PWD:/app --link my-db --env-file=.env myapp:dev` The `--link my-db` would name the link `my-db`
+U1BP42MRS : So I think you need to change your mysql connection string to be looking at the port, not a local socket
+U5S8CNULD : okay I'll try.```
+docker run --name=test-app -p 8000:8000 -it -v $PWD:/app --link -p 3306 -h localhost my-db --env-file=.env myapp:dev
+```
+this one;)? sorry, I :disappointed:confused
+
+U1BP42MRS : that looks invalid, `--link` requires an argument
+U1BP42MRS : I am saying, just use what you originally posted, but in your app code where you connect to the database, use the hostname `my-db`
+U1BP42MRS : What lib are you using to talk to your DB?
+U5S8CNULD : mysql-python
+U5S8CNULD : and uri for now```
+SQLALCHEMY_DATABASE_URI = '<mysql://root:t123@localhost/dstore>'
+```
+
+U1BP42MRS : So presuming you are using `--link my-db`, you should be able to change `localhost` to `my-db` for the host
+U5S8CNULD : One moment, I'll try.
+U5NMSURAQ : <@U1BP42MRS> unrelated question, but can you theoretically share the socket between containers? or is this too ridiculous?
+U5S8CNULD : <@U1BP42MRS> Thanks! it's working!!! beer from me:beers:
+U1BP42MRS : I am sure there is a way, since a container can declare volumes it provides. I would think that's possible
+U1BP42MRS : But I just use the ports, since it's just simpler
+U5S8CNULD : I spend all day for this:disappointed:
+U5NMSURAQ : I'm just thinking network might be slower, especially abstracted away by docker...
+U5S8CNULD : app was running, But when I checked in browser, I can't open the app.app running on 50 port, I think I need to add `EXPOSE 50` to the Dockerfile?
+<@U1BP42MRS>
+
+U1UFZTD4J : <@U1BP42MRS> :taco:
+U1UFZTD4J : <@U5S8CNULD> not enough info on "cant open the app"
+U1UFZTD4J : just port forwarding should expose
+U1UFZTD4J : but your docker run port forwards port 8000 not port 50
+U1UFZTD4J : so that might be your issue
+U5S8CNULD : no, 8000 didn't work too, I'll try rebuild image, and will add `EXPOSE`
+U5S8CNULD : <@U1UFZTD4J> thanks for help
+U5S8CNULD : !
+U5VGKQ2SY : The taco bot should be renamed to 'tacos y cervezas' or for a more relaxed/friendly label, 'tacos y chelas' or 'tacos y unas frías'
+U5VGKQ2SY : <@U5S8CNULD> FYI: <https://github.com/pyslackers/community/blob/master/introduction.md#taco-bot-taco>
+U5UQKCC06 : Question about os.stats().st_atime
+U5UQKCC06 : It's a timestamp representing the last time a file was accessed
+U5UQKCC06 : but its returning a negative number
+U5UQKCC06 : -11644473600
+U5UQKCC06 : which if I use the absolute value represents a Dec 31, 2338
+U5UQKCC06 : Does this mean the file has never been accessed?
+U1BP42MRS : Does `stat &lt;file&gt;` in your shell report the same thing?
+U5UQKCC06 : um, let me check.
+U5Q6YJEHJ : <@U5UQKCC06> shouldnt atime be an unsigned number?
+U5UQKCC06 : Sorry, took me a minute
+U5UQKCC06 : This is on a network shared drive
+U5UQKCC06 : 12/31/1600
+U5UQKCC06 : for all the tiles
+U5UQKCC06 : files*
+U5UQKCC06 : Weird
+U5Q6YJEHJ : it seems that you haven't accessed your files in a while :wink:
+U5UQKCC06 : haha I'm just wondering how they managed to access them back in 1600 with no computers
+U1NSCAY6R : That's Windows for ya
+U1NSCAY6R : (well, Active Directory)
+U5Q6YJEHJ : I wonder if it has anything to do with noatime family of mount flags. they are often used with ssds
+U1NSCAY6R : with AD, times are represented as tickts from midnight, Jan 1 1600 in active directory, powershell cant handle it
+U1NSCAY6R : it means it wasnt accessed
+U5UQKCC06 : Well I just opened the file
+U1NSCAY6R : Powershell and AD have different epochs as well
+U1NSCAY6R : 0001 vs 1600
+U5UQKCC06 : I think the network shared drive is doing something weird with the last accessed date
+U5Q6YJEHJ : I bet it doesn't update it to save drive's lifespan
+U1NSCAY6R : yeah since it's probably managed through AD
+U1NSCAY6R : basically, it's a combination of python, Windows, PowerShell, and Active Directory in a storm of a mess
+U5UQKCC06 : :sweat:
+U1NSCAY6R : AD permissions may also be preventing you (or the script) from seeing the last modified time
+U5UQKCC06 : That last accessed date was going to come in handy
+U5UQKCC06 : But it's all fucked
+U5UQKCC06 : There are like 100,000 files I'm trying to work with, and find out which ones need to be uploaded to a new server and which ones are trash
+U1NSCAY6R : have you tried disabling the archive bit on any of the files?
+U1NSCAY6R : its the checkbox marked “Archive” that comes up when looking at the info
+U5UQKCC06 : I noticed it, I haven't attempted anything yet
+U5UQKCC06 : What does that do?
+U1NSCAY6R : ah wait, is the network drive running on a windows server?
+U1NSCAY6R : its a bit that gets marked when the file is archived - which has some weird definitions
+U5UQKCC06 : I'd have to check our admin, I'm not sure what system we're using. I think it's hosted by another company
+U1NSCAY6R : sorry running out the door but if this isnt turned on on the share, you wont get back access times: <https://gallery.technet.microsoft.com/How-to-enable-File-and-af674be4>
+U5UQKCC06 : Thanks for the info <@U1NSCAY6R> 
+This is probably a silly question, but do you by chance know if this was enabled if it would retro date everything accessed previously? This is probably a pipe dream, but maybe the data is stored locally on everyone's own PCs?
+
+U3G7RJP61 : Anyone ever worked with Stripe to create a UK managed account?
+U1NSCAY6R : <@U5UQKCC06> if auditing is the issue and it wasn't on then you probably wont. Unless someone replaced a file with their local version then maybe
+U1NSCAY6R : Have you tried `os.path.getmtime(path)`?
+U5UQKCC06 : I haven't. I'll test it
+U5UQKCC06 : Same thing, pretty sure both methods are retrieving the same attribute
+U2BS4M1RV : Anyone on tonight? Or maybe tag me if you see this in the morning?
+How would I get the index of a namedtuple field through code without looking at the definition? This is so I can write a code that will use this named tuple by field name rather than index so if the indexes change later down the line with code changes it won't break, and for easier reading?
+
+```
+Query = namedtuple('Query', 'dt record_type query client')
+
+def _counts_generic(queries: list, index_to_count=0, include: list=None,
+                    exclude: list=None) -&gt; dict:
+    if include is None:
+        include = []
+    if exclude is None:
+        exclude = []
+
+    counter = Counter()
+    for entry in queries:
+        if _query_filter(entry.client, include, exclude):
+            counter[entry[index_to_count]] += 1
+    return counter
+
+def counts_client(queries: list, include: list=None, exclude: list=None) \
+        -&gt; dict:
+    return _counts_generic(queries, 3, include, exclude)```
+
+With the counts_client function, I am sending a hardcoded index right now, but I would like to send Query.client. As expected, using Query.client doesn't work here and raises a TypeError for tuple indices must be integers or slices, not property.
+
+U5VGKQ2SY : 1st, this:```
+ if include is None:
+        include = []
+    if exclude is None:
+        exclude = []
+```
+to:
+```
+if not include:
+   include = []
+if not exclude:
+   exclude = []
+```
+
+U2BS4M1RV : Oh, good catch. Oops. PyCharm should have told me that one.
+U5VGKQ2SY : ``` counter = Counter()
+    for entry in queries:
+        if _query_filter(entry.client, include, exclude):
+            counter[entry[index_to_count]] += 1
+    return counter
+```
+
+U5VGKQ2SY : walk me through this
+U2BS4M1RV : Counter is the Counter from collections. Queries is a list of the Query namedtuple. _query_filter is essentially grep and returns a boolean as to whether to include that entry in the counter or not.
+index_to_count is the index of the named tuple. That is where I would much prefer to say Query.query rather than entry[index_to_count]
+
+U2BS4M1RV : Or, Query.client, I think it was in that example.
+U2BS4M1RV : I have two functions, at present, that use the _counts_generic, rather than each repeating the whole function and specifying entry.query or entry.client from the namedtuple.
+U2BS4M1RV : ```def counts_query(queries: list, include: list=None, exclude: list=None) -&gt; dict:
+    """
+    Counts queries and returns a Counter of all domains queries
+    
+    Filters are literal and must match exactly
+    
+    :param queries: list of Query namedtuples
+    :param include: list of items to include, works as whitelist
+    :param exclude: list of items to exclude, works as blacklist
+    :return: Counter keyed to dns query
+    """
+    return _counts_generic(queries, 2, include, exclude)
+
+
+def counts_client(queries: list, include: list=None, exclude: list=None) \
+        -&gt; dict:
+    """
+    Counts client requests and returns a Counter of all clients
+    
+    Filters are literal and must match exactly
+    
+    :param queries: list of Query namedtuples
+    :param include: list of items to include, works as whitelist
+    :param exclude: list of items to exclude, works as blacklist
+    :return: Counter keyed to client ip query
+    """
+    return _counts_generic(queries, 3, include, exclude)
+
+
+def _counts_generic(queries: list, index_to_count=0, include: list=None,
+                    exclude: list=None) -&gt; dict:
+    if not include:
+        include = []
+    if not exclude:
+        exclude = []
+    counter = Counter()
+    for entry in queries:
+        if _query_filter(entry[index_to_count], include, exclude):
+            counter[entry[index_to_count]] += 1
+    return counter
+
+
+def _query_filter(entry: str, include: list = None, exclude: list = None)\
+        -&gt; bool:
+    if include:
+        if entry in include and entry not in exclude:
+            return True
+    else:
+        if entry not in exclude:
+            return True
+    return False
+```
+
+Don't know if more code helps.
+
+U5VGKQ2SY : ```    if include:
+        if entry in include and entry not in exclude:
+            return True
+    else:
+        if entry not in exclude:
+            return True
+    return False
+```
+Does this work the same if:
+```
+if include:
+        if entry in include and entry not in exclude:
+            return True
+elif entry not in exclude:
+            return True
+else:
+    return False
+```
+?
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

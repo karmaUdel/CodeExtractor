@@ -1,55 +1,206 @@
-```{municipios: [ `geometry`: [[[....]]] ] }```
-I'd just like to dump the entire json file as as string
-sadly, I haven't worked through the JSON tutorial yet, or I could probably help &gt;_&gt;
-How is the `Array` type implemented?
-<@U1L4GLFJ6> You just got the import slightly wrong. It should be `import Html exposing (Attribute)`
-Attribute being an opaque type is somewhat peripheral to the matter
-<@U1L4GLFJ6> You need to create a decoder. <http://json2elm.com> might be helpful.
-I'm not sure what you mean by "knowing the structure all at once." Don't you need to know that anyway in order to extract the parts of the data that you care about in JS.
-<@U1AN4JRFV> Thanks so much -- yes, it turns out that with <@U0JFXEUCT> 's 3.2 update to style-elements, the problem is solved for those using that package - code at <https://github.com/jxxcarlson/nanoedit> in case anyone else runs into this.  :slightly_smiling_face::+1:
-Folks, explaining what an opaque type in this context was not the right path to go down, and can lead to more confusion than aid. It's best to identify what the questioner is actually stuck on before answering in such situations
-Especially in this case since it was an import error :slightly_smiling_face:
-Yeah. I just kind of went into Wiki mode :X
-If that's the case, what's the best way of passing multiple values through ports? I thought maybe doing `port addSpotMarker : (Geolocation -&gt; String) -&gt; Cmd msg` and having the JS-side subscriber take an array, but that seems error-prone. I could also make `addSpotMarker` take a single record that "embeds" both parameters, but that seems too verbose. Is there a better way?
-<@U5XHTBFS6> yep, only one argument
-you can send a tuple or a list
-`port addSpotMarker : (Geolocation, String) -&gt; Cmd msg`
-the JS side will get it as an array
-hmmm that's what I thought, then. thanks!
-Because it's talking to JS it's error prone either way, if your JS callback to the subscription took less arguments than it was given those values would still be lost
-I want to have a global `Int` count which increments by one to give latest count. But everything is immutable, so I do not know what to do.
-<@U5FFVDC4W> See something like this: <https://ellie-app.com/D9Q8Xy9sdza1/2>
-Do you need to specify anything more than the "main" .elm file to elm-make?
-Oh nice. It looks like it.
-jdm06: `Json.Decode.field "municipios" Json.Decode.field "geometry" Json.Decode.list Json.Decode.list Json.Decode.list` .... :slightly_smiling_face: I would reccomend playing around in the repl for a good while and decoded small parts, then put them all together
-Hello. On this example <http://elm-lang.org/examples/binary-tree>, on 5th exercise is saying that `flatten: 21` - means that it's possible to write `flatten` function with `fold` so the length of function definition will be 21 character including function name and whitespaces.
-Which is 22 character. How I can do it with 21? Or is it typo?
-Hey, i would like to see how my elm code looks like after its compiled to JS. Whats the best way? When I compile with elm-make I cant find my own code.
-<@U5Q1H5XC2> look for `_user$project`. It will probably not be all in one place, but that's to be expected. Function names are preserved, so you can look for those, too. Be aware that the compiled JS is an implementation detail, though :slightly_smiling_face:
-Sweet, thanks :slightly_smiling_face:
-<@U0J8D9M2P> probably a typo, that looks correct
-Hi all, how can I pass multiple arugments to a `List.map` function? I currently am passing my type alias `Foo` but I also want to pass a float called `time`
-currently the type signature looks like `renderFoo : Foo -&gt; Html Msg`
-`List.map (myFun withArgs andMoreArgs) someList`
-assuming you have a list of `Foo`, you just have to make sure that's the last argument, so you can partially apply the others, first
-perfect
-thanks <@U3SJEDR96>
-After reading the guide for elm on the official page I'm concerned having 30+ input fields will result in a lot of Message Types and a quite unwieldy update function etc?
-maybe you could take a look at something like `<https://github.com/etaque/elm-form>`
-it could avoid some boilerplate code for complex forms
-wow, there really is a package for everything in elm already oO
-I already use it and I love it
-<@U604S603Y> Sort of :slightly_smiling_face:
-…and when there isn't there are ports.  But I tend to think to those as a last resort
-At first I was going to use socketio library for elm but it does not support elm 0.18 :confused:
-<@U5LHS71SM> For what it is worth, I am successfully using SocketIO with Elm by using a thin comm layer, written in JS, that talks to Elm via ports. NodeJS on the server. Working well.
-I was doing that, but I'm trying to get rid of that layer. Not for a special reason but I think without that js layer it would be more elegant actually.
-True, it would be, but Elm does not support SocketIO directly. I opted for the benefits of SocketIO over straight websockets, but it will depend how you see things in your project. I am not finding that extra layer much of an issue to manage though since I am keeping it thin.
-     ]
-`|&gt; Html.map TableMsg`
-in your view, that is
-<@U3SJEDR96>  thanks!!!
-Am I missing something?
-yeah, when you do `case foo of bar -&gt; ` you're essentially asking "can I describe this variable with this pattern", not "with this value". You can use a literal in a pattern, but not a variable, then it will just go "sure, I can put your `foo` in a variable named `bar`", and inside that branch, `xdim` is now your `input` :slightly_smiling_face:
-ok, so how to enforce xdim to be interpreted like pattern? Just use: if else construct?
-<@U5P4FLYLE> exactly :slightly_smiling_face:
+U0V93GE5R : <@U0K7U9LUC> feel free to create a channel here too!
+U55SZPX0T : <@U4MTCT79C> <@U5FPB0C9G> 50x responses are quite common on groups.list, users.list, im.list calls - reported to slack devs, hopefully they will allocate some time for this
+U5FPB0C9G : <@U55SZPX0T> in the short term was hoping for slackapi/node-slack-sdk to simply handle a 5xx and move on instead of waiting for a 300 second timeout :confused:
+U55SZPX0T : ahh not using that one, doesn't support persisten connection
+U5FPB0C9G : Right now I'm literally commenting out 3 lines in the npm module so that our dev team doesn't have to wait 5 minutes every restart
+U4ZPQHVJR : you can configure the retry
+U4ZPQHVJR : trying to get an example, I did this recently
+U4ZPQHVJR : <https://github.com/Codesleuth/Hack24-API/blob/remodel-relationships/src/server/server.ts#L41>
+U4ZPQHVJR : Here, I'm reducing the timeout to 1 second for tests - you can use any options as shown here <https://www.npmjs.com/package/retry>
+U4ZPQHVJR : You can see this in the code here: <https://github.com/slackapi/node-slack-sdk/blob/master/lib/clients/client.js#L55>
+U5FPB0C9G : I'm using <https://github.com/slackapi/hubot-slack>
+which pulls in:
+```
+"@slack/client": "^3.4.0",
+```
+
+U5FPB0C9G : trying to avoid making code edits to slack client
+U55SZPX0T : if you're in control of creating slack api client
+U55SZPX0T : and you can pass opts.retryConfig = 0
+U55SZPX0T : that might prevent retries
+U5FPB0C9G : what's the format of `SLACK_CLIENT_OPTIONS` ?
+U5FPB0C9G : JSON?
+U2JF5TZDZ : I am using `[GET] chat.postMessage` API to post an _interactive message_ which has 5 attachments. 4 of these attachments have 2 interactive menus each, and the last attachment is an interactive button (which is carrying a slightly large stringified context as its action-value). I get a ‘JSON parse error' as response if I use all the attachments. Are there any known *limitations* (size / number) to what `chat.postMessage` could handle. Reason i ask that is because when i send any 3 interactive menu attachments, the post goes thru fine, when i send the button with large stringified context as its action-value alone, the post goes thru fine. But any other combination doesn't go thru and keeps coming back with this `JSON parse error` message. Any pointers will be appreciated
+U0GT29N3A : It's not documented but in our experience the maximum payload size is 8kb total
+U2JF5TZDZ : thanks <@U0GT29N3A> for your reply, let me think of alternates to work around that
+U4ZPQHVJR : phillyhacks: The client is available at `robot.adapter.client`
+U4ZPQHVJR : See <https://github.com/TechNottingham/hubot-hackbot/blob/ca47747ab5b4b8fa26f4be506e48339d84376ed8/src/scripts/kick_username_from_team.script.ts#L7>
+U5HLW95T7 : Hi all! I am the founder of a VC-funded startup that is looking to hire devs to assist in the build of a Slackbot using Howdy. Would be great to connect to anyone interested!
+U5HKXF22G : How do I use a variable to inform another message in Botkit studio?
+U5HKXF22G : {{question_1}} isn't returning anythingU5J1D0CF5
+U5J1D0CF5
+
+U5J5VC2E7 : I'm trying to reference a bot-uploaded file (an image) in an attachment message, but can't seem to get it working. You can't make a url public as a bot, and referencing the permalink as the image_url is a no-op
+U07VCKRUK : The file/image needs to be shared into a public channel during the initial upload, then you can reference the  `url_private_download` in your attachment.
+U0V93GE5R : *Reminder* You can _never_ contact anyone on this slack with an unsolicited DM or email of any kind. Please respect our users privacy! If someone has contacted you, DM their info and I will pass this information along to them personally.
+U04SM6T2H : Access to email addresses in profiles has been disabled.
+U5J5VC2E7 : thank you!
+U04SM6T2H : Please don't post that kind of thing in general <@U0LLUCLP3>
+U04SM6T2H : There are 5200 people here, your unexplained self-tweet is not helpful to people joining the community.
+U0706A8RE : hey all, does anyone have experience with `chat.postMessage` by channel name not working because of `channel_not_found` inexplicably (channel does exist, API call worked yesterday but doesn't today, posting to other channels by name does indeed work)?
+U0Z1RH1QX : you can check if that channel id is found in the botkit storage when you call controller.storage.teams.get. I was getting this error when botkit coulnd't find the team info
+U5J6CH3EW : <@U0706A8RE> i've always needed to use channel ID rather than channel name when using `chat.postMessage` but maybe it depends on the method?
+U5J6CH3EW : also :point_right: <#C0K8617D5|slack-api> is probably a better place for this convo
+U0706A8RE : thanks, I'll go there..there are &gt;350 channels so I never would have found that
+U04S3JCH2 : we'll clean those up here soon! :slightly_smiling_face:
+U5F06J0JY : Currently, I am trying to integrate JIRA with Slack using Python. I have a problem. When I enter 3/4 slash commands per second, it takes quite a long time. It seems that it is working sequentially. How to fasten it up? Which Python library shall I use?
+U0K7U9LUC : I would be pleased to see some of you joining Aventus Slack team. Aventus is a fair, secure, and transparent blockchain-based event ticketing solution that practically eliminates fraud and unregulated touting. You can join and say hello after visiting this link: <https://slack.aventus.io/> I hope to see you there
+U0V93GE5R : <@U0K7U9LUC> please limit the amount of promotional posts you send to <#C04SM6TAK|general>. Feel free to post in <#C0JQ4TX7Z|announcements> or in a personal channel like <#C5KP91HKM|aventus>
+U0K7U9LUC : <@U0V93GE5R> please apologize.
+U35PF1DB5 : How can I run a google script from my slack app?
+U35PF1DB5 : I'm using botkit as my framework (so it's in Node.js)
+U4Y8PNP6V : <@U35PF1DB5>: We found the easiest way to tie into Sheets was their NPM (<https://www.npmjs.com/package/googleapis>), but your use case could be different.
+U5GSX4F8F : What solutions are people using for choosing conversational paths - let's say you have something simple - 3 possible conversations that could be started by a user… then those branch off obviously. Is anyone doing something like RiveScript or AIML? If so, how are you integrating it?
+U5GSX4F8F : Or… is it a lot of conditional logic? if.. if… if…
+U5GSX4F8F : Have you considered indexing the JIRA content yourself? Maybe even dumping it to something like elastic?
+U11H2RMTR : <@U5GSX4F8F> oh man that takes me back. I did a lot of fiddling with AIML way back in the day but it's just so clunky.
+U5GSX4F8F : <@U11H2RMTR> ya as soon as I saw XML I kind of thought “well… lets just keep this as a backup”
+U5GSX4F8F : I've been reading this:
+U5GSX4F8F : <https://chatbotslife.com/ultimate-guide-to-leveraging-nlp-machine-learning-for-you-chatbot-531ff2dd870c>
+U11H2RMTR : Nice! looks meaty
+U11H2RMTR : I came from the interactive fiction community and so I've built a couple things on top of twine, for instance
+U5GSX4F8F : This is more along the lines of what I was looking for. Its really explaining what I was having a hard time with - how do I model and match the chats to responses.
+U11H2RMTR : it's a tough question for sure
+U5GSX4F8F : sounds like you would be looking to have the bot backend call a google api, so if you're in node, whatever way you would normally approach calling an api. do that.
+U5GSX4F8F : For anyone using Amazon Lex, what's the standard way of handling “greetings”. For example, Hi, Hello, etc. Do people create greeting intents? Curious if I'm missing something.
+U16RE1JLF : matthew: look through all of these before rolling almost any intent on your own — there's a lot there (edit: this is still a useful list, but I forgot how limited Lex on its own right now, can't use Standard Built-Ins from Alexa): <http://docs.aws.amazon.com/lex/latest/dg/howitworks-builtins.html#howitworks-builtins-intents>
+U5GSX4F8F : Thanks for this!
+U2ST09C5V : is there any chatbot for websites
+U4T67EY1X : <@U2ST09C5V> there are a few tools like this: <https://botsify.com/>
+U4T67EY1X : And there have been some neat demos of 'hybrid' apps which seem pretty appealing in the support space: <https://chatbotsmagazine.com/keep-humans-in-the-loop-with-botkit-wordhop-bd295bec5cf9>
+U0V93GE5R : Everyone: What do you think about pruning some channels? I think unused channels are easy enough to ignore but I've heard some complaints that it makes it hard to find relevant channels.
+U5MJ11SAF : It is my first day today, when I saw 355 channels I sighed with relief my 23 are nothing in comparison with that...but I really didn't want to look :wink:
+U0AQ8GPGR : peterswimm: Are there any channels set to be joined by default? I don't know how others feel about this, but I find it tedious to have to always subscribe to all channels every time I join a new Slack group, so it's nice to be automatically added at least to a few of the bigger ones.    
+U0V93GE5R : Only general -that's why we are so strict about posting in it 
+U16RE1JLF : Wouldn't be crazy to pin a channel directory (for at least most active) in <#C04SM6TAK|general>
+U0V93GE5R : I usually recommend sorting by headcount to new members 
+U0V93GE5R : That's kind of our idea of <@U3NTT2Z3K> but also not bad idea to make some pinned posts. 
+U5MJ11SAF : Could someone please recommend an easy to use and FREE chatbot platform for beginners?
+U5MJ11SAF : We have been playing with <http://motion.ai|motion.ai> but when we wanted to deploy on SMS it asked to pay. Have just tweeted at CEO and they said it is not their cost, but telecoms. Sadly, teens don't use Facebook (otherwise we could have used Chatfuel), nor do they use Slack that often
+U5MJ11SAF : This is to teach teenagers btw :slightly_smiling_face:
+U0AQ8GPGR : elena_sinel: How about making a Twitter bot and interacting through DMs?
+U5MJ11SAF : Interesting! How do you do that, please <@U0AQ8GPGR> :slightly_smiling_face:
+U5MJ11SAF : Do you have a link to a good tutorial?
+U0AQ8GPGR : elena_sinel: Check out <https://botwiki.org/tutorials/twitterbots/>
+U0V93GE5R : Sadly you probably won't get a free SMS bot
+U0V93GE5R : Maybe you can talk to a provider and get some free credits 
+U5MJ11SAF : <@U0AQ8GPGR> you are a genius - thank youuuu :slightly_smiling_face:
+U5MJ11SAF : peterswimm: I have just asked <http://motion.ai|motion.ai> and their said no :disappointed: I think they would need to bear the cost
+U0AQ8GPGR : It's super simple to use node.js and the Twit module, if you can host the bot on something like DigitalOcean. If you need something simple and with less setup required, there's Glitch, but it has some limitations: <https://glitch.com/edit/#!/twitterbot-autorespond> 
+U5MJ11SAF : We are going to try and work out Twitter and if it gets too complicated, we will stick with Chatfuel and dreaded Facebook
+U5MJ11SAF : Have they not invented one for Instagram? Whatsapp? :no_mouth:
+U0AQ8GPGR : My pleasure :simple_smile: Let me know what kind of a setup you need and I can provide more guidance.
+U5MJ11SAF : Ah! I have just noticed Chatfuel does Whatsapp :slightly_smiling_face:
+U5MJ11SAF : <https://chatfuel.com/platforms>
+U04SM6T2H : you can use Twilio SMS for free for
+U04SM6T2H : a little while
+U04SM6T2H : they give you $20 credit
+U04SM6T2H : so that is a LOT of free sms
+U04SM6T2H : at 0.0075/per
+U04SM6T2H : fwiw
+U04SM6T2H : And there is a Botkit+Twilio branch :slightly_smiling_face:
+U04SM6T2H : <https://github.com/howdyai/botkit/pull/734>
+U5MJ11SAF : Thank you so much <@U04SM6T2H> - will study the link :slightly_smiling_face:
+U338CF0AC : Hi guys, I have been working on a lightweight django bot framework that currently integrates with Slack and <http://api.ai|api.ai>. Check it out :slightly_smiling_face: <https://github.com/shaileshahuja/django-bot>
+U5P7483JB : hello...I've been working with botkit and it's been great. I am new to it however and I'm not seeing documentation on conversations...specifically I'm trying to gather multiple pieces of information from the user and then use that info. I looked at the "pizza" example in the examples and it seems to be in line with what I need, but it's not clear how that information is used. How is the pizza ordered once we get that info? Where does it go? Sorry if that's a lot! Thanks!
+U3H7PR52P : andyg555: Hey Andy, the response from the user is in the “response” parameter of the callback function. Check out the <#C0AV5N8NA|botkit> for botkit specific questions
+U3UD6RY59 : Hey all we're live for Bot Hack Days: <https://www.facebook.com/radbotsapp/videos/303544360088686/>
+U1DM2B4SY : No bots in <#C04SM6TAK|general> !!!! <https://dev4slack.slack.com/archives/C04SM6TAK/p1452808300002084>
+U0V93GE5R : <@U1EPNDUJG> ^ please read the above 
+U5NT35P8R : chrisb_blueprinted: Hi Chris, did you get any help with this, or work out how to solve it? I'm having exactly the same issue with google app script too. cheers, Lisa
+U5PBRSZ3J : Hello folks, is there any way to disable botkit initialisation and it's functionalities (for example: ) during running unit tests or development?
+
+I have a project in nodejs which botkit is a part of it and during UTs it takes too much time to connect.
+so my question is, is there any way to disable/enable it based on environment? :thinking_face:
+
+U4T67EY1X : I've been using botkit-mock for unit testing
+U4T67EY1X : Which has been working really well for me
+U4T67EY1X : <https://github.com/gratifychat/botkit-mock>
+U4T67EY1X : Re: development, I don't have a great pattern there, but basically I have one key for prod and one key for development so I can run them both at once, and I only invite my dev bot to a special channel. Otherwise it is running the standard botkit setup.
+U4T67EY1X : And I will often turn off all but the skills I'm actively working on
+U5PBRSZ3J : I see. thanks. will look into botkit-mock :thumbsup:
+U3DPX9V1N : Anyone aware of any tools to use with BotKit that can help create and manage bot responses?  Example: responses to _Hello_ would be hi, howdy, hey, yo...
+U5MCLC8SC : script-kiddie: <https://studio.botkit.ai/docs>
+U5MCLC8SC : I was running through <https://github.com/howdyai/botkit-starter-slack> and got `OAuth Error: redirect_uri did not match any configured URIs.` at `<https://myteam.slack.com/oauth?client_id=2153311854.193742711073&amp;state=botkit&amp;scope=bot&amp;team=1>` when trying to perform the step where I open up the bot at `<http://localhost:3000/login>` and hit Log In. Any pointers, even if to a better place for asking tech questions or running into issues :wink:
+U3DPX9V1N : Thanks!  Took a quick look and the scripts capability seems to be what I was looking for but cant figure out how it would work with 3rd party NLP engines. Am I missing something or should I keep looking?
+U5MCLC8SC : I've seen some people using <http://API.AI|API.AI> for NLP but haven't dug into that yet.
+U0V93GE5R : <@U5MCLC8SC> are you hosting the bot locally ? Sounds like your endpoints are not accessible from the outside world. Try using ngrok or localtunnel (or run it on glitch!)
+U5QLPK03X : Hello.Where i can find any documentation for Slack API "Extra args"?
+<https://api.slack.com/methods/api.test/test>
+
+U5BRSSM5Z : The number of Slack communities increased  in 9 months by 2.5 times. <https://medium.com/standuply/the-full-list-of-1000-slack-communities-2c412054ea30>
+You will definitely find something new. Enjoy:v:
+
+U4HG47ZGD : glebl: this is awesome! thank you
+U0V93GE5R : We are going to start some spring cleaning! If your channel is public but dead for over a year, we will archive it. We want to cut down on confusion for new users, but still keep relevant info for our regular members.
+U0V93GE5R : If you have any questions, ask <@U04S3JCH2> or myself
+U55B1LA4S : <https://medium.com/@botmywork/collaborative-projects-and-tasks-management-for-slack-b7becc711d2a>
+U5MCLC8SC : Ok, more n00b questions. Where does one typically put application logic in botkit? i wanted to make a new application.js sitting next to bot.js but don't understand require and the controller situation well enough to know how that file should be set up
+U5MCLC8SC : Different issue, when I try and access controller.api.* in a skill, the application errors out `TypeError: Cannot read property 'channels' of undefined` … does controller.api need to be initialized or included somehow?
+U5S1V4UVA : Anyone can help me? I'm trying to follow the <https://github.com/slackapi/Slack-Ruby-Onboarding-Tutorial>, but it's always return NoMethodError at /events
+U5M16RYPN : Guys we are using "Sign in with Slack" and recently we found that Slack is doing authorisation ceremony every time, new user or returning user.
+U5M16RYPN : I that's happing for other bots/apps too ? Is this due to recent changes in oauth flow ?
+U1NU1BA2W : Hi, can anyone help me with setting up Hubot.
+U4HG47ZGD : unandipati: try <#C0J3B9M26|platform-hubot>
+U57TB4BMH : <@U07CW6N3A> Could you please take a look at <@U5M16RYPN>'s message above and help out. Thanks.
+U07CW6N3A : <@U57TB4BMH> <@U5M16RYPN>  We're still working out some kinks in our OAuth flow for sign in with Slack -- though it's possible the absolutely-zero-clicks variant might not make a reappearance.  Best way to direct feedback or report buggy behavior on this is to reach out to our support team directly with `/feedback` or <https://tinyspeck.slack.com/help/requests/new>
+U272P5K71 : <@U5C3P8PGT> where'd that come from?
+U5C3P8PGT : roach: I believe we found that on Behance when we were looking for isometric inspirations.
+If you checkout <https://slack.com/enterprise> you'll find more illustrations in the style
+
+U272P5K71 : Ah. Yeah, I love the illustrations for Grid
+U5C3P8PGT : Ah ha! I found it in a thread, it was in fact on Dribbble :familiar-bot:
+U5C3P8PGT : <@U272P5K71> &gt;  <https://dribbble.com/shots/3417574-THE-GRID>
+U5C3P8PGT : The Grid, by Brent Clouse
+U5C3P8PGT : cc <@U18HVKW5P>
+U5SCZGNM9 : Im looking for recommendations for a cheap/simple/lightweight ticketing system in slack. 
+I realize I can search the app directory, and look at reviews, feature lists, and pricing for each one.... But this could take hours... And I'm betting dozens of people here, already have done this and have well informed opinions on what ticket system/app might be best for my priorities.   Lightweight, cheap, super easy to make tickets, and have chats tied to tickets. Don't need a ton of features beyond that.... might get 1-5 tickets a day on average.  
+
+I appriciate any suggestions!
+
+U16RE1JLF : zerocool: my company happens to do just that!  We're in private beta right now, but I'd love to hear about your use case and can send you a demo video and invite.  don't want to be spammy in <#C04SM6TAK|general>, but if you (or anyone) wants to DM a followup I'll shoot you the deets.
+U5SL9NDRB : Hi, does anyone know of a easy way to grab a user's information (like first or full name) with only a slash command?
+U07CW6N3A : <@U5SL9NDRB> you'd need to use the web API in conjunction with your slash command to retrieve that kind of extended information. Most commonly, folks either have a bot user and use that token, or you ask for the `users:read` scope and use the user token you receive during installation to occasionally poll `users.list` and keep the maps in memory OR look up on demand by user ID with `<http://users.info|users.info>`.
+U5SL9NDRB : Yeah, I was trying to do that as well but I keep messing up somewhere and everything is always undefined. I don't suppose you know of a readily available example of such an API call?
+U272P5K71 : <@U5SL9NDRB> In Python:```
+from slackclient import SlackClient
+
+slack_token = "YOUR_BOTS_OAUTH_TOKEN"
+sc = SlackClient(slack_token)
+
+sc.api_call(
+  user="U1234567890",
+)
+```
+
+U5SL9NDRB : Thanks, that might help, using JS but should point me in the right direction.
+U4T0WR6EM : ```// Inside a controller hears method 
+
+<http://bot.api.users.info|bot.api.users.info>({ user: message.user }, (err,response) =&gt; {
+
+});
+```
+
+U5SR6P42Y : hi everyone. is this community for AI in general? Or for some specific field?
+U5TGL1Q78 : hi can someone help me sending a message ,with messagae-buttons using python/
+U5M16RYPN : Guys how to implement "Sign in with Slack" and "Add to slack" with bot kit. Looks like Botkit only takes one set of scopes.
+U5SS5GK36 : hi !! :slightly_smiling_face:
+U5BRSSM5Z : Hey folks! Just in case if someone missed this. Our team <http://Standuply.com|Standuply.com> has partnered with an awesome event for AI/chatbots enthusiasts - Chatbot Summit that will be held in BERLIN on the 26th of June. Now can offer you 30% discount. Visit their website at <http://bit.ly/chatbotsummit> and use the promo code STANDUPLYBOTS in order to get it. Enjoy :wink:
+U4KTWEHQC : The idea of cheap and easy MVP: <http://bit.ly/2sXUJws>
+U5SS5GK36 : I need some help
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

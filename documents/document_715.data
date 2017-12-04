@@ -1,3 +1,182 @@
-print(result.stdout)```
-is it just a subprocess with some helpers ?
-its like subprocess for humans
+U3SJEDR96 : Yeah, `beginnerProgram` is implemented in terms of `program`
+U4Z4NEUQG : Anybody here has experience managing elm-css on a medium/large project? I am wondering if I should do something like `Btn` `BtnPrimary` as classes, or `Btn` `Primary` primary being a generic class that will adapt if applied alongside btn or something else.
+U4Z4NEUQG : Usual bootstrap and co approach is `Btn` + `BtnPrimary` but I was wondering if `Btn` + `Primary` was not simpler.
+U4Z4NEUQG : So, I am wondering if any of you has any opinion on the matter after using elm-css.
+U4Z4NEUQG : It can also be another approach.
+U2LAL86AY : <@U4Z4NEUQG> there is an elm-bootstrap that will prevent you form making typos&gt;`elm-css` is ok for medium projects - large projects i didn't test it :smile: - but i didn't heard of any issues.
+but instead i suggest you try the tachyons library. is better than bootstrap - is another approach all together. <http://tachyons.io/>
+
+U4Z4NEUQG : I'll look into it, thanks
+U2LAL86AY : <https://github.com/AionDev/elm-pdf>
+U64MK7215 : hey, how do i write this in elm?any tips would be appreciated.
+
+U0JFGGZS6 : noobgamer: not sure what effect you're trying for. But most of that, with the possible exception of `.focus()`, can be done in Elm without going out to javascript.
+U0JFGGZS6 : You need a specialized decoder for your input handler, something like this:```
+import Json.Decode as JD
+import Html.Events exposing (on, targetValue)
+
+onInputWithHeight : (Float -&gt; Float -&gt; String -&gt; msg) -&gt; Attribute msg
+onInputWithHeight callback =
+  on "input" &lt;|
+    JD.map3 callback 
+      (<http://JD.at|JD.at> ["target", "offsetHeight"] JD.float )
+      (<http://JD.at|JD.at> ["target", "scrollHeight"] JD.float )
+      targetValue
+```
+
+U0JFGGZS6 : as for focus, there is <http://package.elm-lang.org/packages/elm-lang/dom/1.1.1/Dom#focus>
+U0JFGGZS6 : which you'd call in your update something like:  `(newModel,  (Task.attempt (always NoOp) (Dom.focus "input") ) )`
+U601ELFEG : Hmmm... did `fileReader` become something else?  I want to be able to read a .json file or write a .json file
+U23SA861Y : a file on disk?
+U601ELFEG : yeah - like if the user drags it onto the page, or if the user clicks a button - and gets a download
+U601ELFEG : I'm guessing some Port into JavaScript for the actual read/write
+U23SA861Y : i'm surprised it's not a thing already
+U0JFGGZS6 : someone put up an example of this the other day I think...
+U0JFGGZS6 : well not sure it's exactly what you're looking for but it does make use of a FileReader : <https://ellie-app.com/3DGY7DrMpDMa1/0>
+U601ELFEG : thanks - that's perfect!  Since this is my first use of ports, that code is spot on!
+U0JFGGZS6 : yeah, it's nicely documented too
+U4Z4NEUQG : Is there a way to know which packages are outdated?
+U4Z4NEUQG : I mean, I have some dependencies in my `elm-package.json`, I'd like to know if any package had an major update.
+U3SJEDR96 : I think `elm_deps_upgrade` from <https://github.com/NoRedInk/elm-ops-tooling> might do that
+U2Q5GJNTB : I wonder if this is intended behaviour?
+U2Q5GJNTB : &gt; String.toInt “+”Ok NaN : Result.Result String Int
+
+U4Z4NEUQG : thanks ilias
+U2Q5GJNTB : I would have expected Err “could not convert string ‘+’ to an Int”
+U4Z4NEUQG : <@U2Q5GJNTB>  this is the same as `parseInt` behaviour in js
+U2Q5GJNTB : yes. I assumed that. Just wondering that + and - are success and everything else is Err
+U4Z4NEUQG : I guess it means "I was able to convert all characters to a number, but the resulting number is NaN"
+U4Z4NEUQG : When reading `+` there is no "error", but the resulting number is "incomplete", so it is NaN.
+U3SJEDR96 : The annoying thing is that you can't check if it's `NaN` since `isNaN : Float -&gt; Bool`
+U3SJEDR96 : It's _probably_ tracked somewhere in here: <https://github.com/elm-lang/core/issues/721>
+U4Z4NEUQG : At least I understand it that way.
+U3SJEDR96 : but if it's not, I'd definitely log it as an issue
+U3SJEDR96 : Ah
+U3SJEDR96 : <https://github.com/elm-lang/core/pull/834>
+U3SJEDR96 : so in 0.19, that'll be fixed
+U4Z4NEUQG : Also, String.toInt "NaN" should return NaN and not an error
+U4Z4NEUQG : Same with Infinity
+U4Z4NEUQG : Don't you think?
+U3SJEDR96 : Definitely not for ints, perhaps for floats
+U4Z4NEUQG : My rational is that if you used toString on a number, you should be able to pass this to the reverse function.
+U4Z4NEUQG : Yeah, toFloat
+U4Z4NEUQG : I meant toFloat
+U3SJEDR96 : Maybe. I'm not entirely convinced that they should be valid input, since they're basically bottom values. I don't really want to have a field where a user can enter a decimal and suddenly I'm dealing with NaN and Infinity.. Not that it's invalid, but it would be a little surprising, too
+U4Z4NEUQG : I just made an app where the used could enter "Infinity", it's a scientific app.
+U3SJEDR96 : Although it already works for `Infinity`, actually
+U4Z4NEUQG : Maybe not NaN
+U3SJEDR96 : Agreed
+U4Z4NEUQG : Ho yeah it works, but only with toFloat
+U4Z4NEUQG : I tried toInt
+U4Z4NEUQG : But this NaN thing is a tought problem. It should be it's own type, but if it is it's own type,  all math function has to accept some union type "NaN|Int|Float"
+U3SJEDR96 : Alternatively, all functions that can result in NaN could return a `Result NaN Float`, with `NaN` essentially a bottom value. That would be pretty annoying, tho. Oh well, there's been quite a bit of discussion about this, I recommend checking some of the math related issues :slightly_smiling_face:
+U4Z4NEUQG : Yeah I'm sure I'm not the first one to thing about it:P
+U3SJEDR96 : (and I don't think `NaN` should be a `number`. It is, after all, Not a Number)
+U4Z4NEUQG : But int can produce NaN. like 0/0
+U4Z4NEUQG : So why is it a float?
+U3SJEDR96 : Currently, no. `0/0` isn't integer division, and always returns a float, so that's solid. Integer division is a little harder, and currently `0 // 0 == 0`
+U3SJEDR96 : but then again `rem 0 0 == NaN` as an Int.
+U3SJEDR96 : and `0 % 0` is a runtime error
+U4Z4NEUQG : Ok, good to know about those.
+U3SJEDR96 : also, `NaN` is part of the floating point spec, so it makes sense to consider it a `Float`, if it has to be a number. The thing is that JS basically _only_ has floats. This makes edge-cases a little hairy in Elm, without either an inconvenient API, worse performance, or both
+U4Z4NEUQG : Yeah I guess from this perspective it makes sense that `NaN` is `Float`.
+U2Q5GJNTB : hmm interesting. Bad thing about this from an app perspective is that whenever we want to read input from an input field and want to ensure it is a number we have to pattern match on Ok and we have to have a special case of + and - (and maybe other things that are not numbers but are parsed as Ok by String.toFloat and String.toInt
+U2Q5GJNTB : I guess regex are the cleaner approach for me in this case
+U4Z4NEUQG : user input can be hard
+U4Z4NEUQG : for example, I write 5000 as 5'000
+U4Z4NEUQG : and my french neighbors write 6.5 as 6,5
+U4Z4NEUQG : and if it is money, I'll write 5 000.-
+U4Z4NEUQG : And my wife would write ??
+U2Q5GJNTB : yes I agree on that, but that is additional complexity based on region/country. Regular numbers should be easier than formatted values
+U4Z4NEUQG : Yeah but if you put an input field for example "how much would you pay for that", people will enter values differently.
+U2Q5GJNTB : I see your point. And I don’t want to complain. I just wanted to know if this is known and intended/accepted behaviour.
+U2Q5GJNTB : In that case there are reasons and that is fine with me
+U4Z4NEUQG : Ho, I didn't mean to lecture you.
+U4Z4NEUQG : What I meant is that you might consider either a full parsing solution, or limit the input and use regex.
+U4Z4NEUQG : And just parse something like `\d+` and be done with it:)
+U2Q5GJNTB : I know. I did not get you wrong
+U4Z4NEUQG : :slightly_smiling_face:
+U2Q5GJNTB : However I was very negative in my sentences and wanted to make sure. that I just trying to understand. So we are all good here
+U2Q5GJNTB : Maybe the mindset of “just ensure it is a valid number” was a little too naive and I will start with a simple int / float regex
+U2Q5GJNTB : (no scientific notation and so on) and later will make the UX nicer with a more complete solution and proper information for the user
+U2Q5GJNTB : (simple int/float regex solution) …
+U4Z4NEUQG : I don't know your audience, but a fair amount of the planet uses `,` as decimal separator. Be sure to support that.
+U4Z4NEUQG : you might want to use something like that <https://stackoverflow.com/questions/1074660/with-a-browser-how-do-i-know-which-decimal-separator-does-the-client-use>
+U2Q5GJNTB : yes, and I am not sure what to do there either, since I am from germany and most users also (thus using , is the first approach) but I want to support non german speaking users now. so you are right
+U2Q5GJNTB : Interesting. thanks
+U4Z4NEUQG : In switzerland we use `.` and we speak german mostly:)
+U2Q5GJNTB : that is amazing. did not know people from your country use .
+U4Z4NEUQG : On german keyboard, on the numeric keypad, is it `.` or `,`?
+U2Q5GJNTB : ,
+U2Q5GJNTB : afair. it is quiet some time ago I had one
+U4Z4NEUQG : `.` here
+U2Q5GJNTB : good to know. I will give this question some thoughts. Thanks
+U4Z4NEUQG : I bumped hard into this issue in the past:)
+U3SJEDR96 : <@U2Q5GJNTB> as of the next version of `elm-lang/core`, `String.toInt` should match only valid integers, so `+` and `-` shouldn't give trouble there, anymore. In the current `String.toFloat`, these are already blocked. `Infinity` is accepted by `String.toFloat`, though, so perhaps that's one to be a little wary of :slightly_smiling_face:
+U0P088J1L : does anyone know how close we are to Elm 0.19? weeks, or quarters? :slightly_smiling_face:
+U4Z4NEUQG : I guess weeks, but this is just my feeling.
+U0F7JPK36 : No one knows
+U0P088J1L : Not even Evan Almighty himself? :slightly_smiling_face:
+U0F7JPK36 : nope! Releases happen on a "when they're done" basis
+U0F7JPK36 : which seems tautological, I just mean like if there's something important that should be in that isn't finished just yet the release will wait till it's ready
+U0F7JPK36 : right &gt; fast kind of thing
+U2Q5GJNTB : <@U3SJEDR96> thanks for the update. Great to hear
+U0P088J1L : Sure. that's fair.
+U0F7JPK36 : something I can share for sure though is that there will be a good month or so of alpha testing once 0.19 is nearing completeness, and that'll be announced on the elm-dev mailing list
+U0P088J1L : That's good to know. Thanks for sharing.
+U5FC7BE0G : Has the elm-lang project ever thought about accepting financial contributions for it's main developers? When I really like an open-source program I like to donate something as a token of appreciation for all the time that has been invested by talented developers. I would like to do the same for elm but doesn't seem to be possible.
+U3SJEDR96 : I suppose, if anything, the Elm Software Foundation _might_ accept donations, but I honestly don't know. Evan works as a full-time open-source developer at NoRedInk, so his costs are covered :slightly_smiling_face:
+U5FC7BE0G : That's really cool of NoRedInk
+U5FC7BE0G : but still, i think some people of this community would probably be willing to donate something to the foundation
+U5FC7BE0G : i certainly would
+U3SJEDR96 : True; though there are definitely others ways you can contribute, too: spreading the love, introducing Elm to friends, coworkers, at meetups, ... Organizing a meetup is a great way to get more people involved, and a huge learning opportunity, too!
+U4Z4NEUQG : I accept donations toward my holidays fund if you insist.
+U4Z4NEUQG : But if you can convince more people to use elm to make it mainstream, I guess that would be the best thing.
+U4Z4NEUQG : I still look like an alien when I say "elm".
+U4Z4NEUQG : But I remember people asking "some dance?" when I was introducing JavaScript.
+U2KE0P8DT : I upgraded Node.js and npm on my Mac yesterday, and moved to the latest version of elm-test.
+```
+$ elm-test --version
+0.18.7
+```
+
+I removed the tests/elm-stuff directory, updated all the “dependencies” in tests/elm-package.json to the latest, to be compatible with the latest version of elm-community/elm-test, removed my Main.elm, since the new elm-test auto-generates that to run either all exposed Test values or the ones you include on the command line.
+
+Still no luck, got errors of the forms:
+
+```
+Cannot find variable `Test.Runner.getFailure`
+Cannot find variable `Test.Runner.isTodo`
+```
+
+While compiling the source files in /usr/local/lib/node_modules/elm-test/src.
+
+I finally figured it out. I had to delete the top-level elm-stuff directory in my project, as its generated-code had cached an earlier version of the Test.Runner module.
+
+Whew!
+
+U2KE0P8DT : Oh, I also had to remove rtfeldman/node-test-runner from the “dependencies” in tests/elm-package.json
+U2KE0P8DT : I think I will like having the Main module auto-generated, but the upgrade was painful.
+U3SJEDR96 : <https://github.com/rtfeldman/node-test-runner/issues/151> &lt;- we've realized the same. For what it's worth, we do now have a changelog, and had a migration guide in there, too :slightly_smiling_face:
+U5FC7BE0G : <@U3SJEDR96> I already am spreading the love :slightly_smiling_face: I hope that my love spreading at my company will one day lead to an actual real-world elm project for a client.
+U5FC7BE0G : <@U4Z4NEUQG> In my company quite a few people have heard of elm or even worked with it. And with me rambling on about it even more will :wink:
+U3SJEDR96 : I also feel like Elm is getting name-dropped more and more often. Even when it's in a sentence saying "we didn't pick Elm because _xyz_", I still feel like it might encourage some people to play around with it and discover more about it. For example, <https://githubengineering.com/how-four-native-developers-wrote-an-electron-app/>
+U3SJEDR96 : Could just be the Baader-Meinhof phenomenon at work, tho
+U2KE0P8DT : My node.js upgrade was predicated on getting Electron to work, as a wrapper around a Lisp web server. I used Apache Cordova to wrap my Elm kakuro app for the iOS and Android app stores.
+U5FC7BE0G : Actually what convinced me to look closer at elm were the many talks at React-Conf that mentioned elm. After watching these I decided to have a go at it myself. No regrets :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

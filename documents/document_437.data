@@ -1,12 +1,103 @@
+U153UK3FA : `(Result Error a -&gt; msg)` can be any function that produces any `Msg`
+U153UK3FA : the simplest way to do that is `type Msg = FeedResponse (Result Error String)`
+U153UK3FA : and just pass `FeedResponse` to http.send
+U3LUC6SNS : <@U153UK3FA>, I think I am almost there.   I have this now:```
+type alias Environment =
+    { env : String
+    , body : String
+    }
+
+
+environment : Parser Environment
+environment =
+    succeed Environment
+        |. symbol "\\"
+        |. (keyword "begin")
+        |. symbol "{"
+        |= keep zeroOrMore (\c -&gt; c /= '}')
+        |. symbol "}"
+        |= keep zeroOrMore (\c -&gt; c /= '\\')
+        |. symbol "\\"
+        |. (keyword "end")
+        |. symbol "{"
+        |. keep zeroOrMore (\c -&gt; c /= '}')
+        |. symbol "}"
 ```
-<@U23SA861Y> Random.initialSeed needed to be an Int and so I used the round function. Was looking for something like Time.toInt, but just me being stupid ;D
-right, if you weren't using the actual time value then thats ok.
-so you went with array of array huh?
-y
-I am trying to construct a Result object with an error and Result.Result tells me that Result does not expose Result (Result by itself tells me that Result is not a variable)  How do you create a Result?
-well, because this putY if you used a dict would just be `Dict.insert (x,y) value grid`
-It seems a bit much, any other idea?
-<@U23SA861Y> I'm translating from an existing js app so the array map (pun intended) pretty directly I'll look at the Dict implementation as well I'm just trying to get some chops so not much to lose trying a couple ways
-if they are arrays you should be able to index directly
-setting a single value via a map is a bit clunky
-ha tru
+and I run
+```
+run XP.environment "\begin{foo}blah, blah\end{foo}"
+```
+but get the error 
+```
+-- SYNTAX PROBLEM -------------------------------------------- repl-temp-000.elm
+
+(line 1, column 24): unexpected "e" expecting space, "&amp;" or escape code
+
+4|   run XP.environment "\begin{foo}blah, blah\end{foo}"
+```
+Do you see what I am doing wrong?
+
+U601ELFEG : is there a way to build the HTML doc for the modules that my project imports - and say have them somewhere inside `./elm-stuff` --- I'm going to be offline for a vacation, and want the library docs at hand
+U1X5ZRJUX : Thanks! <@U153UK3FA>  I'll give that a think
+U601ELFEG : in general, I'm wondering where documentation on how to use elm-make and elm-project live... the web site doesn't really point to anything
+U153UK3FA : <@U3LUC6SNS> the ‘\' character in strings is used to escape the characters after it, eg "\"" is the way to make a string that has a `"` character, you'll need to do "\\begin{foo}blah, blah\\end{foo}"
+U3LUC6SNS : <@U153UK3FA> Thanks - got it!  Works now.
+U23SA861Y : oh god, you're not trying to parse latex are you?
+U1X5ZRJUX : Stupid question now, just for the sake of trying, I have the following update function```
+type Msg
+    = FeedResponse (Result Http.Error Model)
+
+
+update : Msg -&gt; Model -&gt; ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        FeedResponse result -&gt;
+            processFetch(result)
+
+
+processFetch : Model -&gt; Result Http.Error Model -&gt; ( Model, Cmd Msg )
+processFetch model result =
+    case result of
+        Ok bookmarks -&gt;
+            ( bookmarks, Cmd.none )
+
+        Err error -&gt;
+            ( model, Cmd.none )
+
+```
+
+U1X5ZRJUX : the compiler doesn't like the `processFetch(result)`
+U1X5ZRJUX : ```The type annotation for `update` says it always returns:
+
+    ( Model, Cmd Msg )
+
+But the returned value (shown above) is a:
+
+    Result Http.Error Model -&gt; ( Model, Cmd Msg )
+```
+
+U23SA861Y : well it should be `processFetch model result`
+U4JT89FGB : what is the rest of the error message? i think the hint should say it may be missing a parameter
+U1X5ZRJUX : meh stupid me
+U4JT89FGB : i try to outsmart the compiler error messages all the time and every time end up facepalming
+U23SA861Y : no brackets for function application
+U1X5ZRJUX : and yes the error message was telling me exactly this
+U1X5ZRJUX : <@U4JT89FGB> :facepalm:
+U4JT89FGB : :smile:
+U1X5ZRJUX : thanks guys
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

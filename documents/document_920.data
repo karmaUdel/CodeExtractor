@@ -1,0 +1,61 @@
+U4BMZ90T0 : The dll is literally in there with the `.exe` and it's attempting to pull it from somewhere else
+U4BMZ90T0 : Found a google group post regarding `vcredist`
+U2BS4M1RV : Are you compiling on Windows?
+U4BMZ90T0 : Yeah
+U4BMZ90T0 : I'm still wondering about the MEI thing because what happens is when I run it it says the DLL can't be found in c:/.../temp/pyinstaller/_MEIxxxx/python35.dll
+U2BS4M1RV : Are you expecting it will be there?
+U4BMZ90T0 : No I am not at all
+U4BMZ90T0 : I have no clue where it gets that path from
+U2BS4M1RV : pyinstaller with the onefile flag should really be including that with it.
+U2BS4M1RV : That path is where your files are extracted to.
+U2BS4M1RV : ```def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller
+     This is used to find included data files in pyinstaller version
+    pyinstaller makes an environment variable? that has path to the included data files
+    any hardcoded path should use this function as open(resource_path('/templates/my.template'))
+    Do not use this for user entered files, such as the mcot csv or for outputted files
+    """
+
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+
+    return os.path.join(os.path.abspath("."), relative_path)
+```
+
+This is what I've used to access included files, such as textfsm templates.
+
+U4BMZ90T0 : Where should this go?
+U4BMZ90T0 : Top of main file?
+U4BMZ90T0 : Or hook
+U2BS4M1RV : No, you use that in your open lines.
+U2BS4M1RV : Example:```
+        with open(resource_path('templates/jinja2/evc-map.jinja')) as f:
+            template = f.read()
+            jinja = Template(template)
+```
+
+U2BS4M1RV : But, with your missing dll, something else is going wrong.
+U2BS4M1RV : Have you tried to compile something simple to see if that works?
+U4BMZ90T0 : Yes I'm using a simple helloworld.py script it works fine
+U2BS4M1RV : That's really weird. The only issues I ran into with pyinstaller were that it wasn't ready for 3.6 and I had to use the dev version, and with one of my tools for some reason it couldn't figure out the imports so I had to manually specify every single import.
+U4BMZ90T0 : Yeah I had to downgrade to 3.5.3
+U4BMZ90T0 : Okay so given the code to grab the _MEIPASS envar, where exactly do I need to be putting the code within open lines
+U2BS4M1RV : The function I gave you is if you need to open an included file. For example if you have templates or html you include in the package.
+U2BS4M1RV : You can't use that for the python dll, because nothing is going to happen without that dll.
+U4BMZ90T0 : Yeah makes sense. But I just dont get this error at all. I've found so many posts on it in 2 hours and I'm just lost
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

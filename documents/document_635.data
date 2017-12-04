@@ -1,134 +1,166 @@
+U5YKRLXGT : I'm using the library because it handles hashing the contents of a stylesheet to create a namespace, which elm-css does not (yet)
+U5YKRLXGT : and because I think it could be wicked cool if I can get it to collect all the rules, emit one style at the end and leverage the virtualdom to no-op if no styles have changed
+U5YKRLXGT : No weird external build process, just pure elm
+U0EUHKVGB : The virtualdom will already do that for you.
+U5YKRLXGT : Yes, exactly :slightly_smiling_face:
+U0EUHKVGB : This is premature optimization for sure.
+U5YKRLXGT : I'm not saying I will do that - I'm saying it does that :slightly_smiling_face:
+U0EUHKVGB : There is no need to collect all the rules, is what I am saying.
+U5YKRLXGT : If I don't collect the rules, I have to emit one style per element:
+U0EUHKVGB : I’ve benchmarked it :wink:
+U5YKRLXGT : ```nodeWithClassName =            node (classNameProperty :: properties) ((VirtualDom.node "style" [] [Html.text (String.join "\n" css)]) :: children)```
+
+U0EUHKVGB : It does not need to be one per element.
+U5YKRLXGT : That's the level this library emits rules at
+U5YKRLXGT : when it renders a component, it emits the rules
+U5YKRLXGT : Hence trying to gather them up :_)
+U0EUHKVGB : What I am saying is that this library does not follow good Elm best practices
+U5YKRLXGT : The only thing it seems to do wrong is use a nasty native function
+U0EUHKVGB : Any kind of trying to manpiluate and collect styles will be counter productive, since that will happen _on every re-render_
+U5YKRLXGT : Yup
+U0EUHKVGB : So, why are you trying to collect the styles?
+U0EUHKVGB : Here’s another tact
+U5YKRLXGT : Because as I understand it, having lots of &lt;style&gt; tags is bad, but you cant do @keyframe animations using javascript properties
+U5YKRLXGT : this namespaces those too
+U0EUHKVGB : Having benchmarked it, in Elm, lots of style tags does not have negative performance impacts.
+U5YKRLXGT : ok
+U0EUHKVGB : New statement: let’s forget all about that library
+U0EUHKVGB : Have a look at this example: <https://github.com/mdgriffith/style-elements/blob/3.1.0/examples/Chat.elm>
+U0EUHKVGB : And read this README: <http://package.elm-lang.org/packages/mdgriffith/style-elements/latest>
+U0EUHKVGB : Does that seem more like something you would like?
+U5YKRLXGT : I found the documentation on that library to be a bit obtuse to be honest :slightly_smiling_face: But yeah, it looked promising
+U5YKRLXGT : It feels like a lot of the documentation floating about is out of date or ... terse :slightly_smiling_face:
+U0EUHKVGB : Well, here’s a little secret
+U5YKRLXGT : I'm not complaining! haha
+U5YKRLXGT : I'm just trying to explain why I went to all this batshit trouble instead of just using that library
+U0EUHKVGB : <@U0JFXEUCT> seems to sit on slack and watch <#C4F9NBLR1|style-elements> like a hawk, and answers everyone’s questions about it there
+U0EUHKVGB : Including “How do I get start with style-elements?”
+U5YKRLXGT : Ok, that's a good suggestion thanks. :slightly_smiling_face:
+U0EUHKVGB : My recommendation would be this: play around with style-elements for a bit. Try elm-css out too, to see how it feels. Once you have a practical understanding of how those libraries work, come back here and let’s chat about it
+U0EUHKVGB : I recommend watching this video: <https://www.youtube.com/watch?v=n5faeSW71ko> and the video about style-elements when that gets released.
+U23SA861Y : I get the feeling that <@U0JFXEUCT> is watching this right now
+U5YKRLXGT : My neck is tingling
+U5YKRLXGT : OH GOD HE IS BEHIND ME
+U5YKRLXGT : Oh, thank christ - it's just my pet house ghost
+U5YKRLXGT : NOT NOW DEAD GHOST
+U5YKRLXGT : BAD GHOST
+U0EUHKVGB : Hmmm :thinking_face:
+U5YKRLXGT : Does the elm virtual dom implementation have any performance shortcuts deep down like react-id / key
+U0EUHKVGB : Generally, if you’re asking questions like that before writing any Elm, then you’re asking them at the wrong time entirely
+U0EUHKVGB : But yes: `Html.Lazy` and `Html.Keyed`
+U5YKRLXGT : Ok, great
+U5YKRLXGT : I'm just looking for common ground :slightly_smiling_face:
+U5YKRLXGT : Ah, great
+U5YKRLXGT : I've written a looooot in react :slightly_smiling_face:
+U0CL0AS3V : &gt; I've written a looooot in react
+in my experience, this is unfortunately a disadvantage in coming to Elm
+
+U0CL0AS3V : a tiny bit of React experience can be a springboard in that you already are familiar with the Virtual DOM concept
+U0CL0AS3V : but that's all they have in common
+U0CL0AS3V : and everything after that is more and more knowledge that no longer applies, and is challenging to unlearn :disappointed:
+U0CL0AS3V : so as far as looking for common ground goes - I'd say "the idea of a Virtual DOM data structure that describes how you want the page to look" and then absolutely nothing else
+U0CL0AS3V : and trying as hard as possible to mentally reset :slightly_smiling_face:
+U5YKRLXGT : I don't know, redux isn't that dissimilar to the Elm Architecture right?
+U0EUHKVGB : Redux was based on the Elm architecture.
+U0CL0AS3V : &gt; I don't know
+this is a good mindset to have
+
+&gt; redux isn't that dissimilar to the Elm Architecture right?
+
+I think this mindset is going to make life harder :wink:
+
+U0EUHKVGB : However, it heavily relies on mutation and the lack of type safety to achieve some things
+U0EUHKVGB : Such as how reducers get merged, etc.
+U0EUHKVGB : And every time you have some localized state, then you are fighting against the principles that Elm tries to stick to.
+U0EUHKVGB : In Elm, it’s best to stick to functions whereever possible, and just take a model, an update loop, and a view, and work with that.
+U0EUHKVGB : Just like Elm is not ML or Haskell, Redux is not Elm
+U5YKRLXGT : Oh, <@U0CL0AS3V> hi you are the guy from the video
+U5YKRLXGT : :slightly_smiling_face:
+U0CL0AS3V : :wave:
+U5YKRLXGT : That is very weird, I am on the other side of the world from you
+U0CL0AS3V : hello and welcome!
+U32H3RA87 : My brother, who has never done any programming or anything similar, asked me today to help him learn. Obviously going with elm, going to be fun to see if he takes to it at all!
+U0CL0AS3V : the Internet is a great thing :smile:
+U5YKRLXGT : A great and Terrible thing :slightly_smiling_face:
+U0CL0AS3V : depending on how it's used, yes :wink:
+U5YKRLXGT : Well, for what it is worth I have been doing a prototype for work and I've implemented it in Typescript React Styled-Components and Mobx and it was quite similar to pulling teeth
+U5YKRLXGT : and then I did it in Elm, and the only thing that hasn't been literally perfect is the out of the box CSS answer
+U5YKRLXGT : :shrug:
+U5YKRLXGT : Oh shit, you don't even have the non-commital emoji. That's how pure you guys are
+U5ABF3BH7 : Hi, has anyone implemented select2 type dropdown in Elm (<https://select2.github.io/examples.html>) . I am still struggling with it and would appreciate an example if you have done something similar.
+U32H3RA87 : at least twice a day now I say to my colleagues "this would not be an issue if we used elm instead of react"
+U5ABF3BH7 : I am supposed to create something similar in Elm and struggling a big
+U0EUHKVGB : <@U5ABF3BH7>, does this example help you much? <https://ellie-app.com/3tm2WSV9JTza1/0>
+U5ABF3BH7 : It is helpful thanks,  as toggling is part of what I need.
+U5ABF3BH7 : Someone must have already implemented a select2 in Elm though.
+U5ABF3BH7 : Thanks <@U0EUHKVGB>
+U0EUHKVGB : I don’t really know what you mean by select2
+U0EUHKVGB : which particular feature do you need?
+U0EUHKVGB : there’s this too: <https://sporto.github.io/elm-dropdown/>
+U0EUHKVGB : and this: <http://package.elm-lang.org/packages/jschonenberg/elm-dropdown/latest>
+U0EUHKVGB : and this: <http://package.elm-lang.org/packages/ericgj/elm-autoinput/1.0.0/Autoinput>
+U5ABF3BH7 : <@U0EUHKVGB> Thanks. By select2, I mean an example exactly like in the first example in the link (<https://select2.github.io/examples.html>).  Clicking on the bar gives you a search bar and selections that can be arranged in subcategories,  instead of a regular select dropdown. So there are 3 elements: dropdown, search bar and clicking on the input selects the element in the main input
+U5ABF3BH7 : the elm-dropdown gives me the dropdown but not the search ability
+U5ABF3BH7 : I don't really get autoinput
+U5ABF3BH7 : That may be what I need. Does anyone have an example of auto input?
+U5LFUHH19 : Are there any good example for merging two Dicts?  I actually have a List Dict that I want to merge into one giangantor Dict.
+U23SA861Y : I believe there is a function for that
+U23SA861Y : `Dict.merge`
+U23SA861Y : you can also use `Dict.union`
+U5LFUHH19 : Sorry, I meant I'm looking at `Dict.merge` and not grokking the type signature, was hoping for example code.
+U23SA861Y : depending on how you want to merge the dicts you can do `List.foldl Dict.union Dict.empty yourlist`
+U23SA861Y : it gives you a description of what those functions do right in the doc
+U23SA861Y : you need to manually specify what happens when a key is in the the left, both, and the right
+U3SJEDR96 : <@U5LFUHH19> `Dict.merge` basically takes functions for all cases: an element that only appears in the left dict, one that lets you choose what to do when an element appears in both dicts, and one that lets you handle an element that only appears in the right dict
+U23SA861Y : in this case result need not be a dict, so it's more like a fold
+U5LFUHH19 : Right, but I'm just not following what `result` means <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Dict>
+U23SA861Y : you get total freedom as to what type it is
+U3SJEDR96 : but yeah, if you just want to merge them all into to one, you can do sometihng like `List.foldl (Dict.union) Dict.empty [ dict, otherDict, moreDict ]`
+U5LFUHH19 : I would like to go from `Dict String a` to `Dict String (List a)` or something where I have all the values together.
+U23SA861Y : right so then you need merge for that
+U23SA861Y : ```Dict.merge
+    (\key a -&gt; Dict.insert key [a])
+    (\key a b -&gt; Dict.insert key [a,b])
+   (\key b -&gt; Dict.insert key [b])
+  first
+  second
+  Dict.empty
 ```
-<@U5ZC6V535> oh, I see, you have to use something like `(GeneratorMsg &lt;&lt; BoidsGenerated)`
-<@U4872964V> Hmm, so we are combining `GeneratorMsg` and `BoidsGenerated` messages together. That makes sense :slightly_smiling_face: Thanks
-(seeing answers *click* like that makes me so happy)
-That last part is the one that is bending my mind.. any pointers would be greatly appreciated :)
-I have been looking into List and List.Extra, but I don't see anything too obvious
-if you had the array `[c1, c2, c3, c4, c1]` could you solve it easily then?
-That came across my mind. It would then reduce the problem to something a little simpler. Now I would need to find the highorder function that applies a function to every 2 items of an array
-highorder midpoint [c1, c2, c3, c1]  &lt;-- looking for the correct `highorder`
-because I can create an `appendHeadAsLastItem` to get my list into that state
-if you had the arrays `[c1, c2, c3, c4]` and `[c2, c3, c4, c1]` and the function `map2` perhaps
-Ohh! I like your thinking
-I'll give that a try, if I can find something like a shift function
-<@U4G7CC18U>: i can help there. that sounds exactly like the one question i had a while back: <https://stackoverflow.com/questions/36485819/map-list-onto-shifted-self>
-<@U1AN4JRFV> even easier is `drop 1 list ++ take 1 list`
-indeed!
-and double `reverse` if you do it the other way
-alternatively, <https://ellie-app.com/3SZgnyK64WGa1/0>
-but it serves as an example for pattern matching with lists, which was a great lesson for me back then.
-so, `List.map2 midpoint list (drop 1 list ++ list)` :slightly_smiling_face:
-heh, true :smile:
-It actually worked, I got a little further down the road, but I must now re-challenge my model, because maybe the one I have isn't being too useful haha :D ELM is such great fun :) :)
-Being able to confidently challenge yourself and knowing that the compiler has got your back.. :)
-then ELM might after all be an acronym for: Elm Loves Muckers
-(or something.... but it's not, it's either elm or Elm, sorry for being pedantic)
-ELM = Entry Level Mathematics.. I read that somewhere official enough
-what is the best way to approach concurrency; if I have a long-running calculation that is easily broken up into joined parts and I want it to process without hogging the UI, how best to approach?
-(without using web worker)
-<@U5QJW0DDE> make a state model of the calculation and do each part and send a message for the next part, put that state model as part of your application model
-so it will run a part on each requestAnimationframe ?
-yes
-is there a higher-level library for handling this automatically, like a calculation queue, etc
-or more, not sure of how the runtime schedules that, actually
-this is where the purescript people come in to say that they can do `map2` on `Cmd`s, right?
-because I believe multiple Cmd`s are already ran concurrently, so the tricky bit is putting your individual results back together into something you want in your model
-i'm trying to find a similar abstraction to core.async where you can have multiple channels reading, writing and processing data on queues simultaneously
-i suppose i could try to do it manually with the models and messages as you say
-well, you can do it with tasks and `Process.spawn` I suppose, I’ve just never used that
-you can't get the result out of those tasks
-maybe not, when I look at ti
-so if they are http requests that hit a server somewhere, that's fine, but you cannot actually access the result of those tasks, for now
-hm ok
-which is a shame, because any sort of scatter/gather you create will right now be very specific to your application
-it is not re-usable
-i find that asynchronous programming has changed my mode of thinking as much as functional programming did
-and they are great in combination
-in many cases functional programming can make the asynchronicity an implementation detail, which is really nice
-that is true
-is there an Elm idiom for downloading Json files without clicking on anything?
-so they should download on page load?
-i am drawing a map, but the shapefiles are stored in json
-yes so you'll need to load these, probably when the elm app loads. The http package allows that <http://package.elm-lang.org/packages/elm-lang/http/latest>
-the cmd that you eventually get should probably go in your `init`
-and - if we're talking patterns - it's nices to store the data you fetch in your model as a `WebData WhateverYouNeed`, rather than as a Result or a Maybe, see <http://package.elm-lang.org/packages/krisajenkins/remotedata/latest>
-i got it
-Elm just works!!
-In <http://package.elm-lang.org/packages/yotamDvir/elm-pivot/2.0.0/Pivot>, what is the meaning of `type alias Pivot a = Pivot a`
-`type alias Pivot a = Pivot.Types.Pivot a`
-this is a commonly used trick to re-export types
-so, it’s not actually an alias of itself, which is what it looks like in the docs :smile:
-<@U1CE9DL9H> Please explain the advantage of this _trick_.
-I use it in my packages when I have an internal type where other modules in my package need access to constructors, but I don’t want to expose the constructors to the user
-however I also want to be able to expose the type name so they can write annotations if they want
-unlike some other languages, in elm a module cannot expose a value that is not defined in that module, so if a type (alias) is defined somewhere else , and it should be exposed then re-exporting in this way is the only option
-is it ok to compare dicts for equality?
-<@U17P7CBFB> if they don't contain functions, should be
-Naming question: if I have a container of things, do I call it "thingContainer" or "thingsContainer"? (ie, plural or singular?)
-singular
-usually
-thingContainer = container of things
-thingsContainer = container of collections of things
-i prefere singular to, note though  i try hard to not have an identifer of 'somethingXYZ' and 'somethingsXYZ' cause i just know i will misread it later at least  afew times
-like, if you have `arrows` as type which is a collection of `arrow`, I'd use `arrowsContainer` for a container of `arrows`, but not for a container of `arrow`
-also, that extra s could be slightly annoying if you're doing search/replace
-so if I have a dictionary of targets, I'd call it "targetDictionary" rather than "targetsDictionary"?
-yep
-targetsDictionary : Dictionary targets
-targetDictionary : Dictionary target
-Cool, thanks
-:smiley:
-aaand bam! Just committed unlimited undo/redo using ctrl+z / ctrl+shift+z for my app!
-this is one of those times you really love functional programming, and persistent data structures
-<https://github.com/kfish/elm-shadertoy>
-Hi nzleemann, my understanding is that the glsl handling is baked into the elm compiler
-Yeah, I saw that too. I was just hoping for another possibility.
-correct, only GLSL quasiquotes are supported. I don't think supporting others is anywhere on the roadmap, though. What's your use case, <@U4XT6TB7F>?
-<@U3SJEDR96> I would like to create records based on another specification format
-Hi! Can I set CSS variables in Elm? I had no luck setting them as `Html.Attributes.style [("--my-margin", "1rem")]`. In JS I would set the variable like so: `domNode.style.setProperty('--my-margin', '1rem')`.
-That's currently not supported. It's certainly not impossible to support it, but there hasn't been a very strong/compelling use case for it, given that Elm supports variables :slightly_smiling_face:
-I am porting a CSS/JS framework to Elm by keeping the CSS and re-writing the JS in Elm. The upstream framework uses CSS variables.
-Thanks for the info though! :slightly_smiling_face:
-<@U17TXDBJR> so you’d like to set the css variable on a specific dom node, from within Elm?
-I’d be curious to know how that framework works actually (even though it’s probably not a good match for Elm)
-<@U4872964V> Yes. I would like to set them like I do set attributes/styles. I am porting <https://github.com/material-components/material-components-web/>. It uses CSS variables for theming and animations.
-oh i see, so the animations would be handled in Elm by changing the values of these variables
-<https://github.com/elm-lang/html/issues/129#issuecomment-313608729> this is relevant.
-Yes. For instance, Ripple's animation uses CSS variables (<https://github.com/material-components/material-components-web/blob/master/packages/mdc-ripple/_keyframes.scss>). So my two options are to wait for CSS variable support or rewrite the CSS animation in Elm, I guess.
-<@U3SJEDR96> Thanks! :slightly_smiling_face:
-and <https://github.com/elm-lang/virtual-dom/pull/44>
-Thanks! I think I will share my use-case in one of those discussions.
-yes, that’s good1
-Great that there's already a PR for it. :slightly_smiling_face:
-Did anyone else notice stack overflows (size exceeded) errors going from Chrome 57 to Chrome 58+ (i.e.60)?
-my elm apps won't run anymore =(
-Huh, I haven't ran into that. Can you verify that those exact same apps in the same circumstances (i.e. with or without the debugger, ..) still work on chrome 57 ?
-you might want to give your apps a try on browserstack. i'm running Chrome 59 myself
-<https://news.ycombinator.com/item?id=14889605>
-<@U3SJEDR96> yes. or rather, some customers have. the apps works on all our machines, but none use chrome on windws &gt;58
-<@U3SJEDR96> debian stretch, chromium 57 works. 58 doesn't, 58 on win doesn't, 60 on win doesn't (so i'm told).
-Do they report the app crashing on startup or during use?
-<@U6D1E91QV>  i strongly recommend browserstack if you have lots of customers on different systems. you can test different versions of every browser, and also different operating systems, including mobile. great not just for the problem you are having but also to ensure good cross-platform css and html. you can confirm the reports you are hearing very quickly that way.
-<@U3SJEDR96> startup
-<@U5QJW0DDE> checking it out right now
-can i post pictures in this slack?
-you can post images here
-<@U6D1E91QV> do you have any large list literals in your code? I.e. `[ a, b, c (...), z ]` where you have either very large items or a sufficiently high number of entries?
-<@U3SJEDR96> how large is large? i think the largest are still &lt; 15 entries
-It would depend on how large the entries are..
-i have some fairly large case statements that caused the compiler to get OOM killed
-and it's also browser-dependent, but would manifest itself at launch-time
-nah, it's really about list literals, as they are built-up recursively in the compiled code of 0.18
-literals are only types. like a list of folders to be shown. no (or almost no) fields
-a large source file shouldn't be a problem, should it?
-No, or at least it shouldn't lead to a stack overflow on startup
-for reference - <https://github.com/elm-lang/elm-compiler/issues/1521>
-(note that a fix was commited for 0.19)
-i'm well away from 1521 :smiley:
-Sure, but every call that can create a stack-frame can make this problem rear its ugly head, unfortunately.
-so, what you can do is open up the compiled code in an editor and look for `ctor: '::',`. If you find a place where it looks like it's going "deep", that's one to investigate. Splitting it up into multiple smaller lists and concatenating those using `++` is the suggested workaround for now...
-if you're able to load that page with the chrome dev-tools on, it should pause before exploding, and this might also give you some information on where to look
-<@U3SJEDR96> i'll give it a shot, thanks
-ping me if you run into anything, I'd love to help out :slightly_smiling_face:
-<@U6D1E91QV> updated us later if you figure out what the problem is, i'd like to know
-that sounds awesome!.:smile: I'm curious about memory consumption :simple_smile:
+
+U5LFUHH19 : Why are there two `result`s at the end of `merge`?
+U3SJEDR96 : `Dict.merge (\key val dict -&gt; Dict.insert key [ val ]) (\key val otherVal dict -&gt; Dict.insert key [ val otherVal dict ]) (\key val dict -&gt; Dict.insert key [ val ]) leftDict rightDict Dict.empty`
+U3SJEDR96 : the first one is your "initial" result, much like you have with foldl and foldr
+U3SJEDR96 : the second is your return value
+U5LFUHH19 : Oh!
+U5LFUHH19 : Makes sense now.
+U2LAL86AY : elm reactor doesn't work with native modules??
+U2LAL86AY : ```Example.elm:12095 Uncaught ReferenceError: _user$project$Native is not defined
+    at Function.func (Example.elm:12095)
+    at A2 (Example.elm:92)
+    at Example.elm:12210
+    at Example.elm:7
+    at Example.elm:3187
+    at A2 (Example.elm:93)
+    at Function.func (Example.elm:11553)
+    at A4 (Example.elm:104)
+    at Example.elm:11605
+    at Example.elm:26
+```
+
+U0EUHKVGB : your native code does not match your project name
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,50 +1,100 @@
+U2U94G0QG : though personally I prefer <https://ellie-app.com/new?vim=true>  :wink:
+U6DQCTZT2 : <@U14Q8S4EM> thanks!
+U23SA861Y : <@U6DQCTZT2> what value do you want out, there are conversion functions to give you an number in a relavent unit
+U6D3ERLA1 : Hmmm well this seems to do what I want (map a coordinate and key to a grid) but it seems like too many args for the inner function not sure if there is  a better way```
+mapGrid f grid =
+    Array.indexedMap (mapRow f) grid
+
+
+mapRow f y row =
+    Array.indexedMap (mapDatum (f y)) row
+
+
+mapDatum f y x =
+    f x y
+
+
+putY p k x v y =
+    if p.x == x &amp;&amp; p.y == y then
+        k
+    else
+        v
+
+
+debug =
+    mapGrid (putY { x = 0, y = 0 } "*") initBoard
+        |&gt; log "Map"
 ```
-it still fails on a clean compile
-You don't have any custom effect modules, right?
-david_hernandez: Maybe installing a  version in `yarn.lock` and have the team configure their editors to use `node_modules/.bin/elm-format` could be one solution?
-I guess that doesn’t ‘enforce’ though.. :smile:
-That could be a solution. But there is a problem if anyone is working in two different projects. But don't worry, we found a different solution: a elm format check on the CI to block PRs that don't follow the formatting of the last version of elm format
-<@U3SJEDR96> no I don't have any custom effects
-(don't even know how to do that :slightly_smiling_face: )
-alright. Curious. I don't suppose that code is available somewhere by any chance?
-not really sorry this is work stuff
-Right. Does it work if you comment out the subscriptions? Does it work with only one? If so, can we pinpoint which one?
-let me check
-so it's def not hot releading I commented that out
-and amazingly the error still occurs with a Sub.none
-weird
-but I kind of have the feeling that it's more related to a port going into JS
-<@U1N4KAHT6> Quick comparison between elm-visualization and elm-plot? It would help to have it, if possible.
-That is… Is the approach fundamentally different from Elm-plot?
-<@U3R7CKQRX> ah, reproduced it. It's a JS side thing, indeed - subscribing `undefined` to a port triggers that. <https://ellie-app.com/3DW84DP65tBa1/0>
-or even just `app.ports.foo.subscribe()`
-oh wow <@U3SJEDR96> thanks
-that fixes it
-Anyone got any suggestion on how to track whether the current browser tab is the active one? I believe checking window.blur/focus is a common way in JS land. But in Elm..? :slightly_smiling_face:
-i'll remember that for next time
-<@U4PT7NG4V> you mean something like this: <http://package.elm-lang.org/packages/elm-lang/page-visibility/latest> ?
-Sounds exactly like it! :slightly_smiling_face: That's super
-i’ve never used it though, but it’s maintained by `elm-lang` :smile:
-<@U41NK9BM4> the approach is fairly different, although elm-plot has changed a lot recently. elm-visualization is meant to be a fairly low-level toolkit suitable for implementing fairly custom visualizations (for example something like <https://ellie-app.com/3DR8Yd6sHBQa1/0>), whereas elm-plot roughly fits the charting library bill. So in summary, if you need a pretty standard chart, elm-plot makes that pretty easy, whereas if you need some help building something new, than elm-visualization should be a good friend
-<http://caniuse.com/#feat=pagevisibility> That's promising too :slightly_smiling_face:
-Thanks, <@U17J54S2U> ! I'll give it a go
-<@U1N4KAHT6> Crystal clear. Thank you
-How do you peeps work with CSS files in your projects?
-<@U17R26VR8> <@U3SJEDR96> . Sorry, I've just gone out. I don't touch anything on DOM. I add material design lite css with elm and webpack. When I work on menu and I click on menu, the error appear.
-<@U3U2EA14G> do you have this code anywhere on github?
-sorry,  It only have on my computer
-let me take a picture
-<@U3YDBDP4Z> We use a combination of css files and elm-css
-we store the css files in our server code (we use rails)
-this is gist <@U3SJEDR96>
-what is `layout.js`?
-ah, it's material design lite module.
-Does the error still appear if you comment that out from HTML for a minute?
-wait a minute. let me try :smile:
-wow, it work
-so it conflict with material desgin js file.
-:tada:
-well, the material design JS seems to add/change/remove/replace DOM elements, which tends to really confuse Elm and can give very unexpected results
-Thank you so much <@U3SJEDR96> . I think i need to change material design js file.
-btw, if i build a website with elm and golang. So I will use golang for build html and url, elm only used for single page. Is it ok ?
-But I don't know how to pass parameter or session via elm.
+
+U6DQCTZT2 : <@U23SA861Y> Random.initialSeed needed to be an Int and so I used the round function. Was looking for something like Time.toInt, but just me being stupid ;D
+U23SA861Y : right, if you weren't using the actual time value then thats ok.
+U23SA861Y : so you went with array of array huh?
+U6D3ERLA1 : y
+U4H406NET : I am trying to construct a Result object with an error and Result.Result tells me that Result does not expose Result (Result by itself tells me that Result is not a variable)  How do you create a Result?
+U23SA861Y : well, because this putY if you used a dict would just be `Dict.insert (x,y) value grid`
+U5ABF3BH7 : I have a designing question. In my view, I have different persons ( of Person.Model) used in my Model, for example model.caller, or as element of the list model.other People
+Each person has a list of roles of  
+```
+type alias Person = 
+  { firstName : String
+  ….
+ , roles : List PersonRole
+} 
+
+type PersonRole = 
+   Informant
+  | PrimaryPurchaser
+  | NextOfKin
+  | SurveyRecipient
+  | CoPurchaser
+```
+ 
+The different roles are presented as checkboxes in the personview person. 
+Some roles can go to only one person some have no restriction. For example, there can be only one informant , some roles like nextOfKin don't have that restriction.
+so you can have ``` person1.roles = [Informant, NextOfKin] person2.roles= [PrimaryPurchaser, NextOfKin]```  but not ```person1.roles = [Informant], person2.roles = [Informant, NextOfKin]```
+so Informant can be used only for 1 person.
+
+I have been going back and forth with different ideas on how to model that and would appreciate advice. 
+One idea is to create a dict of unique roles in my model
+uniqueRoles = { (Informant, Maybe Person.Model), (PrimaryPurchaser : Maybe Person.Model), …}
+
+On a person view  the checkbox ‘informant' needs to be disabled if the person is not the informant, but it needs to be enabled if the person has that role or no informant has been selected yet, I am thinking of adding  ```[disabled (Dict.get Informant model.uniqueRoles == Nothing || Dict.get Informant model.uniqueRoles == person)]```
+
+It seems a bit much, any other idea?
+
+U6D3ERLA1 : <@U23SA861Y> I'm translating from an existing js app so the array map (pun intended) pretty directly I'll look at the Dict implementation as well I'm just trying to get some chops so not much to lose trying a couple ways
+U23SA861Y : if they are arrays you should be able to index directly
+U23SA861Y : setting a single value via a map is a bit clunky
+U6D3ERLA1 : ha tru
+U5ABF3BH7 : I meant to write ```[disabled not (Dict.get Informant model.uniqueRoles == Nothing || Dict.get Informant model.uniqueRoles == person)]
+U6D3ERLA1 : Assuming however I wanted to operate on the entire grid, I'm guessing it is bad practice to write functions with so many arguments
+U6D3ERLA1 : as the inner function has
+U6D3ERLA1 : I guess if we were operating on the whole grid I could strip a couple args off (for finding the indexes...)
+U23SA861Y : so typically your map would just take the value and you may have and indexed map of the form `(Int,Int) -&gt; value -&gt; newValue`
+U5ABF3BH7 : sorry for the long explanation, I am trying to give the context and it ends up being a bit long
+U23SA861Y : it might be that the role of the person belongs in where the person is placed in a higher level datastructure
+U5ABF3BH7 : <@U23SA861Y> can you explain more what you mean?
+U23SA861Y : ```{
+informant: Maybe Person
+,nextOfKin : List Person
+,etc
+}
+```
+
+U23SA861Y : rather then type be a property of person
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

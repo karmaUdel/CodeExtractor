@@ -1,2 +1,76 @@
+U153UK3FA : but it will be nonsense if you don't yet have a good basic knowledge of Elm
+U6DQCTZT2 : Is there a way to transform a UrlParser to a string without redefining the path like this? <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Route.elm#L66>
+It feels quite error prone to accidentally introduce a missmatch.
+
+U3SJEDR96 : Not really. Parsing is a lossy transformation, though you _could_ potentially build an alternative that could do url &lt;-&gt; route. Though to be honest, this would easily be caught by tests. Logic errors and typos in string are always possible
+U6DQCTZT2 : <@U3SJEDR96> thanks!
+U5XTM8C4V : hey everyone! Could you point me to the article/doc where I can see how I can subscribe on something like `Ctrl+Up`?
+U6FRSKD54 : guys, seriously
+U153UK3FA : <@U5XTM8C4V> <http://package.elm-lang.org/packages/elm-lang/keyboard/1.0.1/Keyboard>
+U5XTM8C4V : yeah, I've found it already. But it doesn't let you listen to key combinations. The only way I see there is to store what was pressed in state and then handle this list somehow. is there any better way?
+U2AHAPQUV : <@U5XTM8C4V> perhaps <http://package.elm-lang.org/packages/scottcorgan/keyboard-combo/latest> ?
+U5XTM8C4V : Was about to check, thanks)
+U31FGNWCT : Hi folks!I need to get such JSON:
 ```
-I've installed it via npm quite a while ago, so it's not a new location.
+{ "bla" : { "blo": "blu" } }
+```
+Trying to compose Encode values like this:
+```
+ Encode.object
+            [ ( "bla"
+              , Encode.object [ ( "blo",  Encode.string "blu"  ) ]
+              )
+            ]
+```
+But get this error:
+```
+Function `withQueryParams` is expecting the argument to be:
+
+    List ( String, String )
+
+But it is:
+
+    List ( String, Encode.Value )
+```
+
+U31FGNWCT : What am I doing wrong?
+U3SJEDR96 : `withQueryParams` doesn't want JSON ¯\_(?)_/¯
+U6F1MNKB4 : Just get rid of "Econde.string"? Encode.object doesn't expect you to convert the second element of the tuple.
+U3SJEDR96 : It does, acutally
+U6F1MNKB4 : Oh, it's happening further up
+U3SJEDR96 : `withQueryParams` I'm assuming you're using `elm-http-builder`. Now, queryparams there talk about the url, not the body
+U3SJEDR96 : I'm not sure what a json object in an url would actually look like?
+U3SJEDR96 : so yea, <@U31FGNWCT> you'll need to figure out if you want a JSON body using `withJsonBody` or query params using `withQueryParams` which needs strings as key-value pairs
+U31FGNWCT : It's legacy code. I'm doing this: ```
+|&gt; withQueryParams [ ( "filter", queryParams byColumn.order ) ]
+```
+I guess I'll just make JSON like string.  It looks like this, btw: 
+```
+?filter=%7B%22bla%22:%7B%22blo%22:%22blu%22%7D%7D
+```
+
+U3SJEDR96 : Ah, so you want to encode that json object to a string :bulb:
+U31FGNWCT : Yeah
+U3SJEDR96 : so basically you'd do `Json.Encode.encode 0 &lt;| queryParams byColumn.order`
+U3SJEDR96 : which "encodes" a json value to a string without extra spaces
+U3SJEDR96 : <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Encode#encode>
+U31FGNWCT : Well. <@U3SJEDR96> , I hope you'll find a big bag of money by the corner in the near future!
+U31FGNWCT : Thank you.:)
+U3SJEDR96 : I keep hoping that'll happen :simple_smile:
+U1C2DDDGD : Where is the best place to learn about Tasks since 0.18 docs are under construction (<https://guide.elm-lang.org/error_handling/task.html>)?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

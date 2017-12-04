@@ -1,106 +1,73 @@
+U3SJEDR96 : as an aside; it doesn't hurt to point out that they're monads, but involving category theory isn't necessary to understand how to use them
+U0LPMPL2U : Yeah, the monad-iness of `Maybe` and `Result` is not really relevant to how the types work
+U6D3ERLA1 : (I'll p[ost a gist of what I'm working on - installing vim-gist a minor detour :blue_car: )
+U0LPMPL2U : <https://ellie-app.com/new> is a great place to put live Elm snippets
+U5E99RPK6 : is there an equivalent `rails new` for elm? like an officially-sanctioned way to bootstrap a new project w/ a directory structure and default files?
+U5XC2FJ1Y : a `Maybe` is either `Nothing` or `Just` a value, you use pattern matching to operate on it based on which it is (and extract the value if it has one)
+U6D3ERLA1 : <https://gist.github.com/9d90524a44777979e9ba3c441711d998>
+U0LPMPL2U : <@U5E99RPK6> there isn't a single way to organize files / directories in an elm app
+U0LPMPL2U : I have used <https://github.com/simonewebdesign/elm-new> but it is very bare bones
+U6D3ERLA1 : (Ignoring the typo, what I get here is)
+U6D3ERLA1 : ```-- TYPE MISMATCH -------------------------------------- daily_programmer_xml.elm
+
+The 2nd argument to function `tag` is causing a mismatch.
+
+42|        Query.tag "lastName" string value)
+                                ^^^^^^
+Function `tag` is expecting the 2nd argument to be:
+
+    Value -&gt; Result String a
+
+But it is:
+
+    Decoder String
 ```
-I should be able to fix that, but gotta go grab lunch
-And indeed:
-`    | FilesUploaded List`
-Whoops!
-Yep
-:smile:
-It’s a tricky one to debug
-Is it worth reporting that, or is this particular instance of the bug known?
-It is known
-<https://github.com/elm-lang/elm-compiler/issues/1238>
-<@U5GSVKPJS> Actually, I think it’s worth reporting again. There’s no open issue related to it, and your example is _slightly_ different to the problem the other people have run into (though it is the same core problem)
-it's related with this? <https://stackoverflow.com/questions/44228017/specifying-parametric-type-is-not-enforced-by-the-compiler-is-this-a-bug-or-is>
-Eh, yes
-Somewhat
-I've logged that already, tho
-<https://github.com/elm-lang/elm-compiler/issues/1598>
-It’s hard to find that issue since it doesn’t contain the error message we got in this case, which means it’s hard to point people to it
-Perhaps you can add another example which gets the error that ocharles was seeing?
-I'll attempt to create SSCCE's for those errors <@U5GSVKPJS> mentioned, though if I fail at that, I might resort to just mentioning how this can lead to those errors further down the line
-Thanks <@U3SJEDR96> !
-don't know where to start untangling this!
-Hi folks, I'm gonna teach functional programming at the university and I want to use Elm for that. Any good resource you would recommend?
-I'd take a look at this: <https://github.com/rtfeldman/elm-workshop>
-<@U17MHJ12N> yikes! Might I recommend looking at each individual pair, seeing if there exists a pair that could have a single thing pulled out that they both rely on. That would break the chain.
-Not sure if that makes sense.
-It does, but this is the thing, that's what led me to having so many modules!
-Often there will be a pair in that chain that can be broken easily by identifying a small extraction, perhaps a record that is shared
-It seems to most often be the Msg type. That's why I ended up pulling those out of Update in the first place I think.
-I'm going back a step and try to go a bit more incrementally this time ...
-cool. Thanks for keeping us updated; this is an interesting procedure.
-I kind of wish I worked with you, so I could dive in together. :slightly_smiling_face:
-I wonder why a "component" would relyon the viewmodel ofa specific page, tho... As for `Msg`, passing in a configuration record with msg's to use for specific actions allows breaking things up, too
-It is really hard to provide any info on good refactoring here without seeing some of the code. I suspect there is a lot that could be stripped down into just a single file and function
-Yes I appreciate the moral support at least! I think I just need to back up a bit and go a bit more slowly to try to avoid the dreaded circular refs.
-A great thing is that you can just compile things to see if you untangled it correctly :slightly_smiling_face:
-<https://www.reddit.com/r/elm/comments/4avsh1/how_do_you_chain_tasks/>
-Hey there. I'm working at <http://getbeewell.com> and we are using Elm on Cordova for our mobile app development.
-<@U60SXAF96> sounds great! how's that working out for you?
-So far, Elm is the best part of that plan. :smile:
-=P
-we're gonna need to go mobile at some point, and I'm not sure how to do that
-so obviously, any feedback is great :smiley:
-I'm happy to discuss that with you. Our apps are very simple for the time being, and we're building out the mobile app and a web app at the same time using Cordova.
-<https://play.google.com/store/apps/details?id=com.getbeewell.beewellorthoknee&amp;hl=en>
-<https://itunes.apple.com/us/app/beewell-orthopaedic-knee/id1181056767?mt=8>
-interesting, thanks!
-The tricky/hard/interesting part is how to integrate with the sensors and the like. Right now, we're using ports to JS to really frustrating JS code.
-I'd much prefer to be able to subscribe to the sensors, but now you're going to be in the game of developing and maintaining a whole world of plugins with "Quirks" based on platforms: e.g. <https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-battery-status/index.html>
-Better example: <https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-file/index.html>
-And you won't even have the W3C standards to piggyback on, which JS does.
-yeah, we probably won't need that yet, so that's OK :smiley:
-If you don't need that, then Elm has already "gone mobile" -- webpack + Cordova + Elm is fine.
-you used a boilerplate of some kind?
-We spun  it up ourselves, but it's pretty simple.
-I'd be happy to publish it.
-(As a Cordova template, or whatever.)
-we're not going down that road yet, but we'll need it at some point, soonish
-I was gonna look into Elm Native UI or Fuse, but if you say Cordova is also a decent contender, then sure
-Feel free to ping me when the time comes. I'm happy to extract the MVP out of it.
-Fuse?
-The userspace filesystem?
-not a great choice of name from their part, eh? ^^
-<https://www.fusetools.com/>
-I believe <@U0EUHKVGB> was talking about some kind of tooling to use Elm with it, but I don't know the current state of that
-for now, it's not on Linux, so I haven't tried it
-Yeah, that's a nonstarter for us.
-"Elm Native UI"?
-<https://github.com/ohanhi/elm-native-and> <#C11N4S6QK|elm-native-ui>
-and <https://robots.thoughtbot.com/elm-native-ui-in-production>
-Elm on top of React Native was tempting, but 1) I found integrating Elm to be much harder, and 2) I didn't see an easy way to get at the sensors.
-Conceptually, it seems to be a nicer match with Elm.
-(kinda disappointed that the article about "Elm Native UI in production" is mostly about "Elm Native UI is not ready for production" =P)
-Just use cordova and use ports
-That's exactly what we're doing. :smile:
-:thinking_face: I don’t know what this means
-dealing with cordova sensons and whatnot tends to be quite hairy
-It is. But it's possible and at least moderately documented.
-One of the first projects I did with Elm in production was with Cordova :wink:
-Which is better than the alternatives that I've been looking into.
-<@U0EUHKVGB> was I wrong about you saying Fusetools had Elm tooling coming?
-:scream: I have never made such claim
-You can use Elm with fuse today
-Via workers and ports.
-You can also try out elm-fuse, which is my PoC repo to show off how pure-Elm might work with Fuse.
-(I made a prezi-like animation in it the other day)
-Here it is. All written in Elm, compiled via Fuse (which means it runs on Android + iOS at 60 FPS)
-sadly the animation looks slow on the gif because I recorded it at a low framerate
-OK, so I hadn't dreamed that "Fuse + Elm" was a thing and it was related to you somehow =P
-thanks for the gif
-Until tomorrow, I work at Fuse, so that’s why it exists :slightly_smiling_face:
-But yeah, totally easy to use Elm with Fuse.
-OK, cool! you know when Linux support is coming? =P
-It’s not on the roadmap, but some people are pretty keen to move it there. But I’ll send along the requests as extra data points.
-thanks a bunch :smiley:
-+1
-<@U0EUHKVGB> You’re on an answering spree :slightly_smiling_face: I once asked a question during a Q&amp;A stream with Luke. It was about hot reloading code. And you mentioned you had hooked up Elm to Firebase to sync the app model to Firebase so it would retain the state through refreshes. Do you have this available somewhere?
-We build our iOS apps on old mac in the corner; otherwise, our development team is all adamantly Linux FOSS.
-<@U17J54S2U> I’ll see if I can find it when I get home
-But it was like 30 lines of code or something
-Maybe.Extra.unwrap (<http://package.elm-lang.org/packages/elm-community/maybe-extra/4.0.0/Maybe-Extra#unwrap>) takes a default value.  Is there a way to lazily calc the default value? Most times it may not be needed altogether, and the default value may be expensive to derive.
-<@U3L8MM10T> You will have to write your own function which takes `() -&gt; b` as an arg
-<@U3L8MM10T> `() -&gt; b` is known as a thunk
-I see.
-this is a function which will produce an value, but is unevaluated until you call it
-cool
+
+U6D3ERLA1 : I'm at the bottom of the learning curve regarding these more complex (?) types...
+U0LPMPL2U : no worries, we've all been there at some point :slightly_smiling_face:
+U5E99RPK6 : <@U0LPMPL2U> that's unfortunate :confused: i found create-elm-app, now you mention elm-new... now there's one extra decision i wouldn't want to make as a beginner. do you know if this is something the core devs are concerned about? i mean, elixir went ahead and added `mix new` to the language itself, so for phoenix it's a simple `mix phoenix.new`. anyway, any i'll give both a try and see what i find, thanks!
+U0LPMPL2U : The thing is, Elm is a language, not a framework. So the equivalent of a start app is super minimal
+U5E99RPK6 : why not have a bit of both? i assume elixir must also allow one to just do `elixir &lt;file&gt;` or something like that, but if you're starting something bigger, it has the tooling and, most importantly, the _conventions_ for it. even if it's optional, it would be nice to have a blessed official starter cli thing, imho :slightly_smiling_face:
+U0LPMPL2U : I think elm apps tend to vary more though. An SPA with routing is different from an embedded widget or a non-routed SPA
+U0CQ254F5 : <@U6D3ERLA1> is the `string` function from the `Json.Decode` lib or from the `Xml.Query` lib?
+U0CQ254F5 : it looks like <http://package.elm-lang.org/packages/eeue56/elm-xml/2.2.2/Xml-Query#string> would satisfy that particular type mismatch
+U3SJEDR96 : Agreed on principle, but not in practice - I feel like the language and conventions are still a little too much in flux to present this type of "this is how to do it." The very very basics are there already, tho - `elm-package install` will create a package file and install minimal dependencies for an HTML app. Creating a `Main.elm` or whatever and starting elm-reactor is the bare minimal to get started.
+U5E99RPK6 : that makes sense. i guess for now it's better to let the community come up with different and possibly overlapping generators and see which ones get traction. later the winning strategies can be adopted upstream.
+U5E99RPK6 : also, i didn't know i could start a project with just `elm-package install` so thanks for that :grin:
+U6D3ERLA1 : <@U0CQ254F5> Indeed that fixes the type mismatch - thanks! What led you to that conclusion?
+U0LPMPL2U : `Decoder String` is a type from `Json.Decode`
+U0CQ254F5 : following the compiler messages is super helpful…it's helped me out of a lot of pickles```
+Function `tag` is expecting the 2nd argument to be:
+
+    Value -&gt; Result String a
+
+But it is:
+
+    Decoder String
+```
+
+U0CQ254F5 : its saying that "Hey that `string` value you provided is of type `Decoder String`, but I expect a function of type `Value -&gt; Result String a`
+U0CQ254F5 : the more you work with Elm and it's compiler the more these messages will makes sense…don't get discouraged <@U6D3ERLA1>, it may seem over the top now (or too restrictive), but it'll be worth it once it clicks
+U6D3ERLA1 : It's pretty foreign :slightly_smiling_face:
+U0CQ254F5 : also, once you get more and more comfortable working with types and satisfying the compiler, <https://klaftertief.github.io/elm-search/> may prove to be a helpful tool
+U0CQ254F5 : for example, i just plugged in `Value -&gt; Result String a` and saw that there was a function in the `Xml.Query` lib
+U6D3ERLA1 : aah
+U5WD40ZA9 : I'm trying to create a binary tree in elm with an unknown amount of child nodes. The special thing about it is that I want to be able to handle onClicks on the elements and update that specific node, any guides or ideas on how you could possible do that?
+U0CQ254F5 : <@U6D3ERLA1> i totally get it, hang in there, take it slow, go through the elm docs, even a few times if necessary
+U0CQ254F5 : my guess is you'll really start to love working within the constraints that types provide
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

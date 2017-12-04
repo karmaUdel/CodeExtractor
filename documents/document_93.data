@@ -1,31 +1,79 @@
+U0ALQHJRF : uses edn and a template to generate a default UI or you can provide an alternate template or final cljs file for the ui
+U5Z4ECHCM : Hate to interrupt, but I'm having trouble splitting up the middleware for my different routes in Compojure
+U5Z4ECHCM : Anyone have information / a blog post / etc on the topic?
+U46LFMYTD : I have a question about structural sharing in nested maps. Suppose I have a map called mymap that looks like this```
+mymap
+=&gt; {:mykey [{:A 1, :B 2} {:A 2, :B 2} {:A 3, :B 2}]}
 ```
-Duct is a backbone, and all the web/else related logic is handled by other librairies, e.g. Compojure
-Right. It provides a template, a bunch of integrant-compatible libraries, and "modules" which are essentially pure functions that transform the Integrant configuration.
-Modules provide a way of automating gluing together libraries
-<@U0BKWMG5B> do you have an example of how a module would work?
-An example, or an explanation?
-explanation, or an explanatory example :slightly_smiling_face:
-Okay, let me find something quick…
-Actually, I wrote a blog post about this, which might be more useful: <https://www.booleanknot.com/blog/2017/05/09/advancing-duct.html>
-<@U0BKWMG5B> ah that's perfect, thank you!
-One module is `:duct.module/web`. That sets up a handler and middleware, and looks through the configuration for a web server. If it finds one, it connects the handler to the existing web server. If none exist, then it creates a new one.
-There's also: <https://www.booleanknot.com/blog/2017/05/29/building-web-services-with-duct.html>
-The explanation I find myself often using for modules are web sessions that are stored in a SQL database.
-how does it "find the web server" in the config? based on the name of popular web servers?
-or a special key?
-Keyword inheritance. The `:duct.server.http/jetty` key is derived from `:duct.server/http`.
-So to find all the web servers in a Duct config, you just run `(ig/find-derived config :duct.server/http)`
-The idea is to use `derive` a little like a dictionary definition or a thesaurus. It allows us to describe what a keyword is, to give it some meaning.
-keyword inheritance is just based on the name + namespace of the keywords? e.g. a keyword X inherits from a keyword Y if X's namespace is Y's namespace plus its name?
-No, it's its own thing. Any namespaced keyword can `derive` from any other.
-Namespaced keywords have multiple inheritance in Clojure.
-ah, I wasn't familiar with Clojure's `clojure.core/derive` function. I'll look into it before bothering you further
-Thanks!
-It's not often used, but I feel like it has some important niches
-<https://clojure.org/reference/multimethods>
-mmh, so `derive` is effectful from what I gather
-Where does it hold the relationship data between keywords? A global registry? I can't see it setting metadata on the keywords themselves
-A global registry. Derive *can* be used functionally if you supply a hierarchy, but mostly it's used globally.
-To my mind it's like vars, or specs.
-Oh, I think I get what you meant by a "grammar" then. You use keywords + derive to build a sort of ontology?
-Exactly :slightly_smiling_face:
+I want to write a function that goes down and increments each value for :A
+I can do this with
+```
+(assoc mymap :mykey (map #(assoc % :A (inc (:A %))) (:mykey mymap)))
+{:mykey ({:A 2, :B 2} {:A 3, :B 2} {:A 4, :B 2})}
+```
+do the keys :B "point to the same place in memory" after this modification as the original maps? That is, is there structural sharing going on between the maps in the vector before and after this modification?
+
+U0CHY4VNW : Asymmetry in `string/split` and `string/join` makes me sad : ( ```        parts (string/split kafka #":")        host (string/join ":" (butlast parts))
+```
+
+U5NAUMCAD : Hi all, I am trying to write some test in clojure and I need to do some Mocks and proxies, however I cannot figure out how to proxy some java objects and methods
+I have this function
+
+U5NAUMCAD : ``` (defn singletest  [cert]
+  (let [x500principal (.getSubjectX500Principal cert)
+        dn (.getName x500principal)]
+    (apply str "abcdefg"))) ```
+
+U5NAUMCAD : cert is a java object of type X509CertImpl
+U5NAUMCAD : I know that I am not using x500principal and dn; but it is an example
+U5NAUMCAD : However I am having a hard time trying to do the test
+U5NAUMCAD : ``` (deftest singletest  (let [cert (.X509CertImpl)
+        x500principal (proxy [X509CertImpl] []
+                       (getSubjectX500Principal [] nil))
+        dn (proxy [X500Principal] []
+                       (getName [] "works"))]
+       (is (= "" (c/singletest cert))))) ```
+
+U5NAUMCAD : throws me java.lang.IllegalArgumentException: Malformed member expression, expecting (.member target ...)
+U5NAUMCAD : any idea??
+U5NAUMCAD : someone has worked with certificates before :sob::sob:
+U050MP39D : what is c?
+U050MP39D : c/singletest looks like a syntax error
+U050MP39D : oh sorry no it's not
+U050MP39D : god I'm tired
+U5NAUMCAD : no worries
+U050MP39D : this (.X509CertImpl)
+U050MP39D : is invalid syntax
+U050MP39D : I think you want (new X509CertImpl) or (X509CertImpl.) (latter preferred generally)
+U5NAUMCAD : I change it to ``` (deftest singletest
+  (let [cert (proxy [X509CertImpl] []
+               (getSubjectX500Principal [] nil))
+        x500principal (proxy [X500Principal] []
+                       (getName [] "works"))]
+       (is (= "" (c/singletest cert))))) ```
+
+U5NAUMCAD : but I am getting
+U5NAUMCAD : java.lang.VerifyError: Cannot inherit from final class
+U5NAUMCAD : this is because X500Principal is a final class
+U5NAUMCAD : then how can I work around that
+U050MP39D : I think you want to implement java.security.Principal not X500Principal
+U5NAUMCAD : the problem is that I have everything working!
+U050MP39D : ditto you probably want to implement X509Certificate not X509CertImpl (program against abstractions, not concretions)
+U5NAUMCAD : I mean, the only thing left is the test
+U050MP39D : ok, test code is still code though
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

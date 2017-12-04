@@ -1,3 +1,64 @@
+U0LPMPL2U : same reason you need the `_` case here:```
+case 1 of
+  1 -&gt; "one"
+  _ -&gt; "other"
 ```
-<@U1N4KAHT6> I don't think we can make this work without some really nasty stuff (toString, then parse or something like that)
-Yeah, you would have to make `toNumber : (a -&gt; comparable)` and then use `toString` with `String.toInt`
+
+U2MLC3R4G : Yes <@U0LPMPL2U>. What would we use instead of Debug.crash here. Do you have any alternatives. To make it compiles.
+
+U5ABF3BH7 : hi everyone. I am getting a list ‘rolodexList’ from my decoder. From it I want to build my sub model location with the values I am getting to build the field hospitals, hospices, etc..  location should look like { location | hospitals = hospitals, hospices = hospices..}The following code gives me an error that I have the same variable used twice in my let—in statement.  ```Types.LoadRolodexLists (Ok rolodexList) -&gt;
+    let
+        hospitals =
+            getInstitutions rolodexList "hospital"
+        updatedLocation = Types.UpdateLocation (Location.ChgHospitals hospitals)
+
+        hospices =
+            getInstitutions rolodexList "hospice"
+        updatedLocation = Types.UpdateLocation (Location.ChgHospices hospices)
+
+  …….
+
+    in
+    ( { model | location = updatedLocation}, Cmd.none )```
+
+U5ABF3BH7 : If I use different name, I will not get all the updates I need. How can I update the submodels in one shot?
+
+U0LPMPL2U : <@U2MLC3R4G> based on the types, it looks like the case statement needs to return a string
+U0LPMPL2U : Is there some string that makes sense to return for that case?
+U2MLC3R4G : <@U0LPMPL2U> I might use some other strings. But If you use some strings there instead of Debug.crash "something".. Some reader might thinks that this branch will be possible to happen
+
+U0LPMPL2U : Hmm,  I think I see what you're trying to do. You want to get the string parameter out of the route?
+U2MLC3R4G : Yes
+U0LPMPL2U : Your problem is that `companyId` doesn't always exist. Only for certain routes
+U5ZKYURNY : hi all, I’d like to try to set focus on an input element but don’t care whether it succeeds or not, I know I could simply return the original model and Cmd.none in the update function for the result message but just curious is it possible to convert a Task to “Cmd Never”? So that I don’t need to handle the result message at all, something like ``` attemptIgnoreResult : Task x a -&gt; Cmd Never ```
+U0LPMPL2U : The signature should probably be:```
+companyId -&gt; Route -&gt; Maybe String
+```
+
+U0LPMPL2U : since the company id only exists in some cases
+U0LPMPL2U : Alternatively, have some top-level "dispatching" case statement that destructures all routes and then passes the unwrapped string into other functions
+U0JFGGZS6 : <@U5ABF3BH7>  are you sure those lines shouldn't be `updatedLocation = Types.updateLocation ...`  (i.e. you are calling the `updateLocation` function in `Types` correct?)
+U0LPMPL2U : <@U5ZKYURNY> no because `Html.program` expects your `update` function to return commands of the same type as the messages it takes as input
+U0LPMPL2U : `update : msg -&gt; model -&gt; ( model, Platform.Cmd.Cmd msg )`
+U2MLC3R4G : <@U0LPMPL2U> I could do that. But the laid down logic for the rest program have to change. I think I have to avoid your recommended function signature.Workaround could be I could create another function and send it the route to get an id.
+But as it's a functional language you should everything should return some value. It's not a good code to use Debug.crash to handle the never happen case.
+
+U5ABF3BH7 : @ericgi, it is Types.UpdateLocation, it is a msg in my Types model (it is the upper model)
+U2MLC3R4G : @joeql I think. I could use the Never type. but after look into that. I didn't understand it well.  I think it's use with some Html Never. Html that doesn't has a message
+U0LPMPL2U : <@U2MLC3R4G> right. I think the problem comes from the way your code is probably structured
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

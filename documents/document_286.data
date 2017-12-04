@@ -1,4 +1,122 @@
+U5Z6Q8Q9L : do you happen to have any resources on that subject?  I can't seem to find much of use but perhaps I'm looking in the wrong places/with the wrong keywords.
+U0PBSF05S : <@U5Z6Q8Q9L> Are you talking about ports? I would start here if you haven't read this already: <https://guide.elm-lang.org/interop/javascript.html>
+U5Z6Q8Q9L : Ah, thanks!
+U0JL9RPC4 : that reminds me this Elm Europe talk about microservices
+U2M8ER12B : elm noob, so i have no idea... dropbox marketing page has this code:```
+window.addEventListener('click', function(event) {
+    'use strict';
+    for (var elm = event.target; elm; elm = elm.parentElement) {
+        if (elm.id &amp;&amp;
+            window._goch_.hasOwnProperty(elm.id) &amp;&amp;
+            window._goch_[elm.id].call(elm, event) === false) {
+            event.preventDefault();
+        }
+    }
+}, true);
 ```
-<@U3SJEDR96> I see, thanks
-Writing SPA in elm is quite hard :disappointed: Any ideas when elm 0.19 will get released?
-BTW, `=&gt;` operator will be available in 0.19 by default
+
+U2M8ER12B : is that an elm signature?
+U3SJEDR96 : no, that's just `elm` as short for `element`
+U2M8ER12B : ha, ooops
+U3SJEDR96 : yeah, their website is mostly react
+U5YJVL3B7 : hey elmos
+U5YJVL3B7 : I'm trying to understand this:```
+type alias Html msg = Node msg
+```
+from the Html package
+
+U5YJVL3B7 : where does `Node` comes from?
+U3SJEDR96 : from the `VirtualDom` package
+U3SJEDR96 : similarly, `type alias Svg msg = Node msg`. That is to say; they both use virtual-dom nodes under the hood :slightly_smiling_face:
+U5YJVL3B7 : Oh I see
+U5YJVL3B7 : but the documentation don't link Node with VirtualDom.Node
+U3SJEDR96 : yeah, it's a little annoying that it doesn't do cross-package links
+U3SJEDR96 : I think there's a bug for it
+U5YJVL3B7 : thanks so much
+U5YJVL3B7 : now, `type Node msg = Node`
+U5YJVL3B7 : what is `msg` ?
+U3SJEDR96 : That's because it uses Native. So basically, it's a combination of phantom types and native magic; through which you can save information in structures in an "non-type-safe" manner
+U3SJEDR96 : `msg` in this case is a type variable for the message type that can be "emitted" from your dom-nodes through events
+U3SJEDR96 : so you can do `onClick MyMsg` which is an `Attribute Msg` (because `MyMsg` is of type `Msg`). A dom node can have multiple attributes, and all of its children can have attributes, but they have to match types, so your final structure can only emit *one* type of events
+U5YJVL3B7 : <@U3SJEDR96> thanks !!
+U5QPUBDQR : hi can someone advise on List mapping?
+U5QPUBDQR : this is my code:
+U5QPUBDQR : updateVideo entry =            if entry.ident == caption.ident then
+                { entry | video = caption.video, status = "video" }
+            else
+                entry
+        List.map updateVideo model.captions
+
+U5QPUBDQR : and the error is
+U5QPUBDQR : I ran into something unexpected when parsing your code!
+134|         List.map updateVideo model.captions
+                  ^
+I am looking for one of the following things:
+
+    an upper case name
+
+U59AF21LJ : Hi, there is something that I quite yet don't understand with elm: how `&lt;textarea&gt;` or `&lt;input&gt;` are handled. In the examples, the `&lt;input&gt;` are left blank in the view, without using the model: `input [ onInput Change ] []` while I'd think something like `input [ value model.something, onInput Change ] []` would be more appropriate.
+U5QPUBDQR : Why does the compiler want an uppercase name?
+U3SJEDR96 : <@U5QPUBDQR> I think you're missing a `let ... in` around that first part
+U5QPUBDQR : <@U3SJEDR96> that code is already nested in a let … in
+U5QPUBDQR : can i nest again?
+U3SJEDR96 : <@U59AF21LJ> the DOM (in your browser) keeps it own state. _Usually_ we'll make sure that the dom reflects our model by using `value model.something` in the view, but this in't always required (and actually, not always what you want)
+U5QPUBDQR : let         b = "hasRecorded"
+        newCaptions = caption :: model.captions
+        updateVideo entry =
+            if entry.ident == caption.ident then
+                { entry | video = caption.video, status = "video" }
+            else
+                entry
+        List.map updateVideo model.captions
+    in
+        ({ model | captions = newCaptions, debug = b }, Cmd.none)
+
+U3SJEDR96 : hm, but where do you expect the result of that `List.map` to go?
+U5QPUBDQR : <@U3SJEDR96> i have a list and i want to update one element of that list
+U5QPUBDQR : i need a specific element with a certain ident
+U3SJEDR96 : ```let
+        b = "hasRecorded"
+        newCaptions = caption :: model.captions
+        updateVideo entry =
+            if entry.ident == caption.ident then
+                { entry | video = caption.video, status = "video" }
+            else
+                entry
+    in
+        ({ model | captions = List.map updateVideo newCaptions, debug = b }, Cmd.none)
+```
+
+U3SJEDR96 : maybe that's what you mean? or closer to it?
+U5QPUBDQR : isn't that the same? ie List.map still calling updateVideo?
+U5QPUBDQR : i'll try…
+U3SJEDR96 : yeah, but now that expression is used, rather than just sitting there.
+U5QPUBDQR : <@U3SJEDR96> yep!
+U3SJEDR96 : in a `let..in`, you have a place to declare values for use in the `in..` part. However, just an expression by itself doesn't do much, and isn't allowed there. You still have immutability, so just saying, imperatively "change my values", won't work :slightly_smiling_face:
+U5QPUBDQR : thx! the silly variable was trying stuff out. This is the result:
+U5QPUBDQR : let        b = "hasRecorded"
+        updateVideo entry =
+            if entry.ident == caption.ident then
+                { entry | video = caption.video, status = "video" }
+            else
+                entry
+    in
+        ({ model | captions = List.map updateVideo model.captions, debug = b }, Cmd.none)
+
+U3SJEDR96 : alright, great :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

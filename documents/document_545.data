@@ -1,14 +1,57 @@
+U1C2DDDGD : <@U153UK3FA> Yeah I saw that. I'm assuming I want to use map2 (since I have two tasks and I don't care about sequence/order) so what does it look like to replace Cmd.batch with Tasks
+U153UK3FA : You can't, there isn't a way to convert Cmds to tasks
+U153UK3FA : <@U1C2DDDGD> what Cmds are you trying to sequence?
+U1C2DDDGD : Two Http.send calls
+U153UK3FA : <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#toTask>
+U153UK3FA : You can do http requests as tasks
+U3SJEDR96 : `Task.map2 (\first second -&gt; *make them into a record or whatever) firstRequest secondRequest |&gt; Task.attempt MsgWhichTakesTheAppropriateResultType`
+U1C2DDDGD : I think I'm starting to understand now… and if not then I will soon with the above info
+U1C2DDDGD : Thank you <@U153UK3FA> and <@U3SJEDR96> !
+U31FGNWCT : Do you have to specify all fields in HttpBuilder even if you don't need all of them?
+U31FGNWCT : It's complaining:```
+(|&gt;) is expecting the right side to be a:
+
+    RequestBuilder () -&gt; a
+
+But the right side is:
+
+    RequestBuilder (List row) -&gt; Cmd (Tables.Msg row)
 ```
-Hi all, I'm in a situation where i have to decode a json array that has mixed types.  They're in a predictable pattern.  `[Int, Int, Int, String, Int]`
-But in my limited experience, I create an type alias, and use that with decode pipeline.  however, i have no idea how i'd describe this.
-you'll have to do this in two phases: decode the array, then decode the items
-the first phase can use a `Decode.list Decode.value`
-yes, but you keep the elements as undecoded values
-ah, ok.  going to look at Decode.value right now.  that one is new to me.
-Since you will be building an Elm data structure out of this, do you know what you want that to look like?
-i would love to!
-I assume a record with 5 fields of the correct type?
-close, i was going to tuple with the string, then list int.
-but the result will be the same either way.
-You should avoid using a `List` when you want things to be a specific length.
-ok, `Array` better?
+
+U31FGNWCT : God, I feel like I'm not learning anything. I haven't made a single move without getting into 3-hour-to-solve issue.
+U41NK9BM4 : I'm not familiar with HttpBuilder  :white_frowning_face:
+U31FGNWCT : Maybe you understand why it's complaining about types?
+U31FGNWCT : Why on earth it takes unit as a first param
+U6EV3H0N7 : could you post the code it's complaining about <@U31FGNWCT> ?
+U31FGNWCT : ```getSortedList byColumn =
+    HttpBuilder.get "someValidUrl"
+        |&gt; withQueryParams [ ( "filter", Encode.encode 0 &lt;| queryParams byColumn.order ) ]
+        |&gt; send handleSortedList
+```
+
+U6EV3H0N7 : the type param to `RequestBuilder` looks like it's the type of the response it expects. So using `()` is just to say "I don't expect any response from this request"
+U6EV3H0N7 : (I think)
+U6EV3H0N7 : ah okay, so I guess the type of `handleSortedList` is `Result Error (List row) -&gt; Tables.Msg row`?
+U31FGNWCT : Yeah
+U6EV3H0N7 : the type error is that:`HttpBuilder.get "someValidUrl"` has type `RequestBuilder ()`, `withQueryParams` adds query params to the request, but doesn't change the type
+
+U6EV3H0N7 : so you're not telling the RequestBuilder what kind of response to expect
+U6EV3H0N7 : so it's still the default `()`, but you want it to be `List row`
+U6EV3H0N7 : So i suspect you want a `withExpect`
+U6EV3H0N7 : <http://package.elm-lang.org/packages/lukewestby/elm-http-builder/latest/HttpBuilder#withExpect>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

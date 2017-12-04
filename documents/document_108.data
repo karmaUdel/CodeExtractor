@@ -1,44 +1,76 @@
- (try (something) (finally (clojure.core/pop-thread-bindings)))) ```
-<@U04V70XH6> so deftest sets a dynamic var which is available anywhere within the callstack during its execution?
-thanks for checking it!
-do you have a better suggestion to do what I was trying to do? (split a test in this way)
-is it "not ok" for some reason to split a test in multiple functions that way?
-it seems that it improves composability
-I haven't seen it done that way before -- so it looks unfamiliar -- but if `clojure.test` manages all of its testing context dynamically, I guess it's fine. I guess I would have a specific test for each creation function that asserted whatever behavior I expected (and cleaned up after itself), and then in the main test I'd just call the creation functions without worrying about `testing` or `is`...
-In other words, I'd only have "one" test for those common things, rather than repeating the tests every time they are called.
-Ah, I see.
-How should a regex look for the `:aot` option in leiningen?
-The way I used it seems to have no effect
-are you sure you want to aot compile?
-if you don't have :gen-class in a ns form, compile is a nop, and if you don't have gen-class I doubt you really want to aot compile
-<@U0NCTKEV8> I'm sure. I'm trying to minimize startup time in resulting jar.
-I noticed that most ns don't necessarily get aot'd, when I stripped out clj files jar started to fail
-does anyone know of a library for doing set-like operations (`intersect`, `union`) on possibly infinite sets?
-f.e. `(set/union inf/all #{1}) =&gt; inf/all` or `(set/intersect inf/all #{1}) =&gt; #{1}`
-I'm crawling through a clojars search but figured I'd ask
-I suspect what you want is a symbolic logic library
-how so?
-I didn't find anything in my quick searching, but rolling my own shouldn't be too hard
-just gotta figure out what infinity looks like
-oh, just because that is a more logic based representation of a set vs. a datastructure
-ah
-for my use case, 95% of the time it'll fall back to regular set ops
-can you recommend a good primer on the topic of symbolic logic programming?
-the core.logic readme mentions _The Reasoned Schemer_
-core.logic isn't really that, the little prover (which shares an author) would be more like it
-thanks
-I actually have enough time to read this before I have to tackle this problem for real
-<@U5ZAJ15P0> re: tests, you may want to watch this: <http://2017.clojurewest.org/full-stack-teleport-testing/>
-youtube video: <https://www.youtube.com/watch?v=qijWBPYkRAQ>
-does anyone have any idea how to encode the `::selection` selector in `garden` ?
-ah.. need to define a pseudoselector.
-I have seen it. Mind-blowingly awesome. It's on my todo-list to implement something similar :slightly_smiling_face:
-cljr for Clojure CLR
-Is it a common/recommended practice to add tests as metadata directly on functions?
-I can't `apply` macro, can I?
-what my options are?
-write a macro to do it :disappointed:
-or eval
-Nope. See <https://stackoverflow.com/a/9273469>
-pick your poison :slightly_smiling_face:
-oh, wait, there is a ~@
+U07HVL0F7 : may not fit your requirements, but <https://github.com/wiseman/leaflet-gorilla> could be relevant
+U0NA370RG : generative testing code is not in there yet, right?
+U0E0XL064 : right, that's one of the reasons why I keep it quiet and it's still in `SNAPSHOT`. I have to add more specs, testing and some benchmarking.
+U0NA370RG : awesome.  Thanks for the link
+U6BEL7FPC : Okay <@U0BKWMG5B>, right now i'm trying to integrate `buddy`'s authentication middleware with `ataraxy` and `duct`, and looking at the ataraxy module docs, it says that for finer control i should use `duct.router/ataraxy` instead of `duct.module/ataraxy`. I was wondering if there was a way to add other middleware using the `module` instead of `router`?
+U0BKWMG5B : <@U6BEL7FPC> you can use both. Use the module to create the routes, then add the middleware to the router key.
+U6BEL7FPC : <@U0BKWMG5B>, oh what would that look like? Would `duct.module/ataraxy` and `duct.router` be keys in the edn file?
+U085HE1PB : Hi, how do I write a response directly in http-kit? I'm building a tunneling proxy and need the very first response to be exactly `"HTTP/1.1 200 Connection established\r\n\r\n",` but it seems http-kit renders that as a *body*, even if I do something like `{:status "HTTP/1.1 200 Connection established"}`
+U051SS2EU : sounds like what you want is to supply a :headers map? but I thought :status would automatically be lifted into the headers
+U085HE1PB : <@U051SS2EU> Oddly, it's not a header, it's a `status-line` in the HTTP spec
+U085HE1PB : ```status-line = HTTP-version SP status-code SP reason-phrase CRLF```
+U051SS2EU : oh, OK - I don't know how to override that via ring (assuming if you're handing it a hash-map like that you're using it via ring)
+U051SS2EU : sounds like you'd be better off using a TCP library rather than an http library if you want to specify that kind of thing by hand?
+U051SS2EU : I might be wrong
+U085HE1PB : Ya, I'm not sure it's possible with ring. I'd rather not have to use a TCP library, as I don't want to have to glue reqeusts and responses together. But you're right. I may just fork httpkit/ring and kludge something in there
+U051SS2EU : there's also aleph which has an http server but also supports using tcp sockets in the same lib
+U051SS2EU : i'd hazard a guess it would be more flexible
+U051SS2EU : <https://github.com/ztellman/aleph#tcp>
+U053QM94L : i'm surprised something is depending on that specific reason phrase and forcing you to not use "OK" :crying_cat_face:
+U053V4R5N : what an obtuse corner of the spec – you learn something every day
+U085HE1PB : Yup, oddly enough, Ring or every HTTP server hard-codes an [int string] pair
+U051SS2EU : <@U085HE1PB> also - thinking outside the box for a minute - it's probably a good idea to reverse-proxy any jvm webserver behind nginx anyway, and I bet there's a four line snippet to rewrite your status lines via nginx
+U085HE1PB : <@U053V4R5N> suppp
+U053V4R5N : a quick web search reveals a lot of "why would you ever want to do that? lol" by library authors in general
+U053V4R5N : <@U085HE1PB> hiii
+U085HE1PB : <@U051SS2EU> That's interesting. Hm...
+U66SFLTPT : looks like it could be for using http `CONNECT` requests?
+U051SS2EU : possible terrible kluges include "run server sockets through netcat / sed shell pipeline"
+U053V4R5N : I'm not saying anyone in clojure-land would ever give that response, just seeing it in general for searching "set status-line http" :stuck_out_tongue:
+U051SS2EU : (don't actually do that)
+U66SFLTPT : <https://textslashplain.com/2015/11/19/understanding-connect-tunnels/> seems relevant
+U0BKWMG5B : <@U6BEL7FPC> Something like:```
+{:duct.module/ataraxy {"/" ^:foo [:index]}
+ :duct.router/ataraxy {:middleware {:foo #ig/ref :foo.middleware/auth}}}
+```
+
+U66SFLTPT : specifically:&gt; Upon receiving such a request, the proxy is expected to establish a TCP/IP connection to the requested hostname and port and signal its success by returning a HTTP/200 response indicating that the requested connection was made:
+```
+  HTTP/1.1 200 Connection Established
+  Connection: close
+```
+
+U0BKWMG5B : Come to think of it, I think middleware of `:foo` assumes a key of `:project.middleware/foo` already.
+U6BEL7FPC : <@U0BKWMG5B> so if i wanted to use a 3rd-party middleware i'd replace `:foo.middleware/auth` with `&lt;3rd party ns&gt;.wrap-auth`?
+U085HE1PB : <@U66SFLTPT> ahhh thanks!
+U0BKWMG5B : <@U6BEL7FPC> You'd need to create an `init-key` method for it. Say your project name is "foo". What I tend to do is have a `foo.middleware` namespace where I dump all the init-keys for middleware.
+U0BKWMG5B : ```(ns foo.middleware
+  (:require [integrant.core :as ig]
+            [buddy.middleware.auth :refer [wrap-auth]])
+
+(defmethod ig/init-key ::auth [_ options]
+  #(wrap-auth % options))
+```
+
+U0BKWMG5B : And then in my config:```
+{:duct.module/ataraxy {"/" [:index], "/private ^:auth [:private]}}
+```
+
+U085HE1PB : Lol you have to set "Connection: close" but leave the socket open
+U66SFLTPT : yeah lol
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

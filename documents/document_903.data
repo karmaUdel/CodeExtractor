@@ -1,0 +1,85 @@
+U63VCB8AH : What is an pythonic way to specify class dependencies?
+U13L8J76J : ```class Foo:
+    def __init__(self, dependency_a, dependency_b):
+        ...
+```
+
+U63VCB8AH : How would I inject those dependencies? Are there any good DI package?'
+U63VCB8AH : <@U13L8J76J>
+U13L8J76J : <@U63VCB8AH> `foo = Foo(dependency_a, dependency_b)`
+U13L8J76J : You don't need DI framework in python, really
+U63VCB8AH : I'm used to strictly typed languages
+U63VCB8AH : haha
+U63VCB8AH : So I just need to rely on duck typing?
+U13L8J76J : Yep, just pass arguments around
+U63VCB8AH : ```class User():
+    name = ''
+    email = ''
+
+    def __init__(self, name, email, json):
+        self.name = name
+        self.email = email
+        self.json = json
+
+    def toJson(self):
+        return self.json.dumps({
+            'name': self.name,
+            'email': self.email,   
+        })
+```
+
+U63VCB8AH : is this pythonic? <@U13L8J76J>
+U5NMSURAQ : `self.json = json`I think there is a better name for this parameter
+
+U63VCB8AH : Or would you just use the `json` module without specifying it as a dep in the constructor?
+U5NMSURAQ : yes, this!
+U63VCB8AH : why? just interested :slightly_smiling_face:
+U63VCB8AH : because it is a built-in?
+U5NMSURAQ : `to_json` only makes sense with json, and json is always available
+U63VCB8AH : ```import json
+
+class User():
+    name = ''
+    email = ''
+
+    def __init__(self, name, email):
+        self.name = name
+        self.email = email
+
+    def to_json(self):
+        return json.dumps({
+            'name': self.name,
+            'email': self.email,   
+        })
+```
+
+U63VCB8AH : like this?
+U5NMSURAQ : I think it's quite nice
+U5NMSURAQ : btw, you don't need```
+    name = ''
+    email = ''
+```
+in your class definition
+
+U5NMSURAQ : `self.name` sets an attribute for every new instance already
+U63VCB8AH : I know but I think it it's more explicit
+U63VCB8AH : What would I use if I would to serialize SQLAlchemy model result?
+U63VCB8AH : would like to be able to encode the results as JSON or cast it to a dict
+U63VCB8AH : Is `marshmallow` any good or is there anyway to it with pure python easily? Can I implement a special attribute like `__json__`?
+U5NMSURAQ : marshmallow is the tool to go
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,0 +1,137 @@
+U5LNXQHN3 : just don't use dateutil for parsing, because it often guesses wrong
+U0NRYQNAZ : this way i was able to style it differently in css.
+U5LNXQHN3 : <@U0NRYQNAZ>  Looks like a good approach. Something I'll consider if I find myself doing this again
+U1UFZTD4J : whats the cleanest/shortest way to check if any value in a tuple is in another tuple?
+U1UFZTD4J : for example:```
+for i in tup1:
+  for j in tup2:
+    if i == j:
+      return True
+return False
+```
+
+U1UFZTD4J : I have a feeling there are some built in's I can use...
+U5NMSURAQ : <@U1BP42MRS> they needed an offset in months (see thread)
+U5NMSURAQ : ```&gt;&gt;&gt; start = datetime(2016, 12, 29)
+&gt;&gt;&gt; end = datetime.today()
+&gt;&gt;&gt; (end - start).total_seconds() / (3600 * 24 * 30)
+6.065205603584491
+&gt;&gt;&gt; delta = relativedelta(end, start)
+&gt;&gt;&gt; pprint(vars(delta))
+{'_has_time': 1,
+ 'day': None,
+ 'days': 30,
+ 'hour': None,
+ 'hours': 22,
+ 'leapdays': 0,
+ 'microsecond': None,
+ 'microseconds': 924491,
+ 'minute': None,
+ 'minutes': 56,
+ 'month': None,
+ 'months': 5,
+ 'second': None,
+ 'seconds': 52,
+ 'weekday': None,
+ 'year': None,
+ 'years': 0}
+&gt;&gt;&gt;
+```
+Using seconds is just wrong :confused:
+
+U1BP42MRS : <@U5NMSURAQ> then convert back
+U5NMSURAQ : you can't count how many months passed if you only have unix timestamp 1 and unix timestamp 2
+U29163YQH : ```[ x for x in tup1 if x in tup2]
+```
+
+U1BP42MRS : `any(x in y for x in (1, 2, 3, 4))`
+U1BP42MRS : I guess you said any value, so `any`
+U1BP42MRS : the perk of `any` over the list is it will short circuit itself on the first found one
+U1UFZTD4J : ya.. that works. Is it possible without an explicit loop? (im getting picky, but im challenging myself)
+U1BP42MRS : since at least 1 is true
+U1BP42MRS : probably operator
+U1UFZTD4J : basically I want `if anything_in(some_list) in other_list)`
+U1UFZTD4J : but I dont think thats possible
+U1BP42MRS : I think you could do a fancy with intersections or unions
+U29163YQH : there is intersections for set not sure for tuple
+U1UFZTD4J : oo now we are getting somewhere
+U1BP42MRS : :thinking_face:
+U1UFZTD4J : `len(set(tup_1) &amp; set(tup_2)) &gt; 0`
+U1BP42MRS : Yep, that looks like where i was trying to get
+U5NMSURAQ : downside: no short circuiting
+U1UFZTD4J : true.
+U1BP42MRS : probably fine if your dataset is always little
+U1BP42MRS : <@U5NMSURAQ> Sorry, sarcasm doesn't always translate to text
+U5NMSURAQ : `takewhile(lambda x: x not in b, a)` :stuck_out_tongue:
+U5NMSURAQ : no loop
+U5JQ700C8 : Hello
+U5JQ700C8 : ```
+U5JQ700C8 : ```import jsonimport urllib
+from pprint import pprint
+from urllib import request, parse
+
+import pytest
+
+
+class TestApp(object):
+    TEST_URL = '<http://0.0.0.0:5001/>'
+
+    def test_create_user(self):
+
+        values = {
+            "data": {
+                "email": "<mailto:cicciopizzo20@gmail.com|cicciopizzo20@gmail.com>",
+                "password": "test",
+                "first_name": "ciccio",
+                "last_name": "pizzo",
+                "role": "1",
+                "address": {
+                    "country": "Italy",
+                    "address_line": "Test Address, 1998, WXDJI Neverland",
+                    "coordinates": {
+                        "lat": "41.0914808",
+                        "long": "16.8672337"
+                    }
+                }
+            }
+
+        }
+
+        headers = {
+            "Content-Type": "application/json"
+        }
+        data = urllib.parse.urlencode(values)
+        data = data.encode("ascii")
+        url = self.TEST_URL + 'api/user'
+        req = urllib.request.Request(url, data, headers)
+
+        with urllib.request.urlopen(req) as response:
+            the_page = response.read()
+
+        assert the_page.status == "success"
+```
+
+U5JQ700C8 : Sorry to disturb you... I am doing TDD for the first time and I have an error that I cannot solve
+U5JQ700C8 : I did not find many textbooks covering the topic even though it's a must have nowadays...
+U5JQ700C8 : This was made using some common sense rather than textbooks...
+U5JQ700C8 : It's the base case scenario... db set up correctly with the needed data for booting the app, etc.
+U5NMSURAQ : &gt; I did not find many textbooks covering the topic
+U5NMSURAQ : that's the issue anyway?
+U5JQ700C8 : The issue is that I get request.py:1320: URLError
+U5JQ700C8 : <@U5NMSURAQ> , I am using flask anyways
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

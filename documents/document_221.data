@@ -1,12 +1,51 @@
-```
-<@U0LPMPL2U> yep, that works - I had to change my `toActualValue` function to handle Maybes but after that I was able to just use your `sumMaybes`
-<@U29JSAR9S> The original `toActualValue` was `Int -&gt; Int -&gt; Int`? You should be able to go `Maybe.map &lt;&lt; toActualValue`
-I should ask more questions in this channel, getting lots of good suggestions :slightly_smiling_face:
-in this case though I tried that and I think the function is cleaner moving the Maybe.map inside the `toActualValue` function
-I would suggest against that. If you want to clean it up, make another helper function to give it a cleaner name.
-the function name for `toActualValue` is a bit rubbish though, I know :slightly_smiling_face:
-Regardless of that, you are mixing concerns by having it deal with `Maybe`. It's good practice to write the function that doesn't need to know about how to take the `Maybe` apart and then inject that information using `map` or `andThen`
-Also, I think that you can go `Bitwise.shiftLeftBy &lt;&lt; (*) 4` to raise something to the appropriate power.
-that makes sense
-instead of indexed map I'd probably use a fold there
-`foldr (\v (p,a) -&gt; (p*16,a+p*v)) (1,0) digits`
+U04SM6T2H : right
+U04SM6T2H : you first have to log in and get the token
+U04SM6T2H : via oauth
+U04SM6T2H : another way to do it
+U04SM6T2H : fwiw
+U04SM6T2H : would be to limit logins to a specific team ID
+U04SM6T2H : which you will have once you log in the first time :slightly_smiling_face:
+U3PCMK1AA : good hint on removing the endpoints later though or limit the logins to a specific ID. I'll definitely want that, will try first with the team ID
+U04SM6T2H : :thumbsup::skin-tone-4:
+U0D1YNBEE : :wave: Hi everyone, happy Monday! I just wanted to let you know we just launched a new scheduling API (think cron-as-a-service webhooks) and a key/value persistence API for <@U2RNTQRN3> <https://blog.beepboophq.com/new-scheduling-and-data-apis-for-beep-boop-98c2afcb5b62#.rx0u3nazb>
+U3PCMK1AA : Having problem getting post request from the events API. I created an Slack app, authorized it sending the GET requests manually ```<https://teamnameyyy.slack.com/oauth/authorize?client_id=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&amp;scope=bot>``` and sent (manually) the oauth.access GET request to get the token ```<https://slack.com/api/oauth.access?client_id=xxxxxxxxxxxxxxxxx&amp;client_secret=yyyyyyyyyyyyyyyy&amp;code=zzzzzzzzzzzzzzzzzz&amp;pretty=1>``` but I'm still not receiving any POST request to my redirect url I configured in the app. Any ideas?
+U3PCMK1AA : I got the same kind of respond that the one in the doc ```{    "access_token": "xoxp-XXXXXXXX-XXXXXXXX-XXXXX",
+    "scope": "incoming-webhook,commands,bot",
+    "team_name": "Team Installing Your Hook",
+    "team_id": "XXXXXXXXXX",
+    "incoming_webhook": {
+        "url": "<https://hooks.slack.com/TXXXXX/BXXXXX/XXXXXXXXXX>",
+        "channel": "#channel-it-will-post-to",
+        "configuration_url": "<https://teamname.slack.com/services/BXXXXX>"
+    },
+    "bot":{
+        "bot_user_id":"UTTTTTTTTTTR",
+        "bot_access_token":"xoxb-XXXXXXXXXXXX-TTTTTTTTTTTTTT"
+    }
+}```
+
+U3FGRUSLT : what events are u listening for?
+U3FGRUSLT : <https://api.slack.com/apps/yourid/event-subscriptions>
+U3PCMK1AA : events subscription is set to <http://message.im|message.im> and team_join for bot events
+U3FGRUSLT : and this:
+U3FGRUSLT : green verified?
+U3PCMK1AA : yes
+U3PCMK1AA : Does the bot need to start the communication, or should it just get post request events right away?
+U3FGRUSLT : "a message was posted in a direct message channel"
+U3PCMK1AA : tried to send a DM to the bot, but nothing arrived on the other side ;(
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

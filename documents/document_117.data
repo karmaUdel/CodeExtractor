@@ -1,31 +1,62 @@
+U5ZAJ15P0 : In my default, production implementation, the multimethod would return a Redis connector wrapped inside a record obeying the kv-store protocol
+U5ZAJ15P0 : Which I think is what you're describing as "boundaries" in Duct
+U5ZAJ15P0 : However I am still unclear as to how I would swap that implementation for my own in-memory version during testing
+U5ZAJ15P0 : I suspect this is due to my lack of knowledge on Clojure itself, rather than Integrant/Duct…
+U61KCTX8S : you're the master!
+U61KCTX8S : that's far more elegant than my solution
+U0567Q30W : Sure, no problem - thanks!
+U3L6TFEJF : I'd love to hear more about this as well, I'm going to try out Integrant in a project in the coming weeks and I've been wondering the same thing
+U0BKWMG5B : So there are two ways to do this.
+U0BKWMG5B : First, if you're testing a single key, then you can use `init-key` directly and pass the stubbed/mocked connections.
+U0BKWMG5B : For example, say you have a key `:foo.handler/user` that takes a database option. You could test it with:```
+(ig/init-key :foo.handler/user {:db (-&gt;StubbedDatabase)})
 ```
-What happens when you rename it to `some-other-conn#`?
-tried that, didn't work. Trying again now just to make sure
-is that a real pound sign, or some unicode nonsense?
-Well the second usage of `conn#` expands properly. (in the map)
-yeah, which makes me  suspect the first has some weird shenanigans
-Wait, I think I found the issue
-`some-other-conn# (:conn datomic#)]`
-the "space" between # and ( has charcode 160
-instead of 32
-oh lol. :slightly_smiling_face:
-hah!
-unicode malarky
-did you copy past some of this from a github page?
-nope, I wrote it myself
-no idea what happened there
-well, I copied an earlier version of that code, which worked
-then added that line myself
-from where?
-it might have picked up a character from somewhere
-github
-oh
-weird
-I just checked and none of the characters from the snippet I copy/pasted had character 160
-oh well
-sorry for the trouble
-there is actually an open jira issue that has had some recent activity about changing how clojure handles unicode whitespaces
-`char code 160 would be &amp;nbsp;`
-the fun thing about this is, thats 160 is not even considered whitespace by java
-oh, I guess the issue it got declined
-Probably what happened is that OS X and/or Atom (the editor I am using) has some shortcut or some way to enter this type of whitespace, and it fat-fingered on the shortcut
+
+U0BKWMG5B : Because the database isn't accessed directly, but via protocol methods, we can create a stubbed or mocked version with the same interface. Shrubbery is a test tool that streamlines this process.
+U0BKWMG5B : If you're testing the configuration in a wider context, then you can take advantage of keyword inheritance.
+U0BKWMG5B : For example, say you had a configuration like:```
+{:duct.database.sql/hikaricp
+ {:jdbc-url ...}
+ :foo.handler/user
+ {:db #ig/ref :duct.database.sql/hikaricp}}
+```
+
+U0BKWMG5B : One feature of Integrant is that you can reference *derived* keys, so you could write the above as:
+U0BKWMG5B : ```{:duct.database.sql/hikaricp
+ {:jdbc-url ...}
+ :foo.handler/user
+ {:db #ig/ref :duct.database/sql}}
+```
+
+U5ZAJ15P0 : <@U0BKWMG5B> oh, so in that case you wouldn't swap any implementation, you would simply instruct the system to use a different implementation based on the config (different derived key)
+U0BKWMG5B : So if you want to stub out the key directly, then change the database key to a fake one that derives from the same base:```
+(derive :duct.database.sql/fake :duct.database/sql)
+```
+
+U5ZAJ15P0 : Thank you, I'll try both of those approaches :slightly_smiling_face: I had a follow up question but you answered it. It was going to be: "in your talk you mention how you can instantiate two systems with different configurations, but how can I instantiate two systems with different implementations?"
+U0BKWMG5B : Right: you could update the configuration to replace the real database with a fake one:```
+{:duct.database.sql/fake
+ {:jdbc-url ...}
+ :foo.handler/user
+ {:db #ig/ref :duct.database/sql}}
+```
+
+U5ZAJ15P0 : From what I gather the answer to this would be "you only have one implementation per keyword; you just use a different config"
+U0BKWMG5B : Right. Just take the base config and alter it with `assoc`. Or use `duct.core/merge-configs` to merge in new options.
+U0BKWMG5B : It effectively amounts to the same thing.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,19 +1,93 @@
-    String -&gt; Msg```
-Yeah, so maybe I dont understand what you are trying to do.
-Do you want the string of the new value in the field on `HandleField`?
-I was following this for the  Custom Event Handler <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html-Events#on>
-I was just trying to track a keydown and then I guess pass the string
-then I wanted to figure out how to track a cut and paste as well
-and backspace etc
-basically track anyway that the field could be modified
-Okay. I see.
-Ive never done this exactly, but I bet you could make a custom html event handle that returns `(KeyCode, String)`
-Where the keycode is an `Int`
-So you can get the value and the key code of what happened most recently in one go.
-Yea there is this <http://package.elm-lang.org/packages/elm-lang/keyboard/1.0.1/Keyboard>
-But I still don't know where to go from here :confused:
-Thats a little different I think.
-So that listens to all mouse events in the whole window.
-Thats not what you want right?
-True
-Hold on a second
+U23SA861Y : you always need to choose between one or more things
+U23SA861Y : you don't get the option of a case/if returning nothing
+U23SA861Y : what they return could be an empty `div` or a `text ""`, but it has to be something
+U2SR9DL7Q : spoiled for choice
+U2SR9DL7Q : <@U23SA861Y> thank you *very* much, and <@U0FP80EKB>_  as well
+U64M3DF1B : <#C12KMAYJX|elm-mdl> I'm on elm 0.18 and using debois/elm-mdl - and this piece will not agree with me at all :cry: 
+```
+menuItemView : AppState -&gt; String -&gt; Html Msg
+menuItemView appstate name =
+    <http://List.li|List.li>
+        []
+        [
+            List.content
+                [
+                    Options.css "cursor" "pointer"
+                ,   Options.attribute &lt;| Options.onClick (ShowMenuItemPane name)
+                ]
+                [
+                    text name
+                ]
+        ]
+
+```
+
+I have the imports, the `type Msg = ... | ShowMenuItemPane` - but she tells me: 
+
+```
+The right side of (&lt;|) is causing a type mismatch.
+
+167|                     Options.attribute &lt;| (Options.onClick (ShowMenuItem name)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(&lt;|) is expecting the right side to be a:
+
+    Attribute m
+
+But the right side is:
+
+    Options.Property c Msg
+```
+
+U23SA861Y : do you even need the `Options.attribute &lt;|`
+U64M3DF1B : ? perhaps no! I'll tell you in 2sec :slightly_smiling_face:
+U2SR9DL7Q : depending on the mdl element, I've had to use Options.attribute... since mdl expect a `Style a` type
+U64M3DF1B : :partyparrot3: you're amazing! thx!
+U64M3DF1B : for reference - this is what works (thx to <@U23SA861Y>)```
+            List.content
+                [
+                    Options.css "cursor" "pointer"
+                ,   Options.onClick (ShowMenuItem name)
+                ]
+                [
+                    text name
+                ]
+
+```
+
+U64M3DF1B : that - at least - is NOT obvious if you scout the package documentation :slightly_smiling_face:
+(well - perhaps it is obvious and I'm just not totally converted to reading the Elm way of typing and spec'ing the syntax)
+
+U5ABF3BH7 : Hello! Does anyone have a very basic example in Elm of an app with new page, edit page, index page, etc.. (ruby on Rails platform with controllers, etc..). I am getting a bit lost in the complexity of the examples I see.
+U5ABF3BH7 : I have all the data from the backend, that I decode into my Model.  I want to use the view of my FirstCallNew, I don't know how to enter that in
+U5ABF3BH7 : ```main =    Html.programWithFlags
+        { init = init
+        , view = FirstCallNew.view
+        , update = FirstCallNew.update
+        , subscriptions = FirstCallNew.subscriptions
+        }```
+
+U5ABF3BH7 : Can I do something like  ```view = FirstCallNew.view Model.initwithParams(case_id)``` or something like that. The case_id being the params that help me retrieve my data
+U5ABF3BH7 : ?
+U23SA861Y : so, the way you handle the initial render is you appropriately set init you init state such that view renders correctly with that data
+U5ABF3BH7 : Let's say I have my record with all the fields with the values from extracting them with decoding. Is there a simpler way then having to write
+U5ABF3BH7 : all the values. I must be stuck on something stupid.
+U23SA861Y : I don't follow you, you need to be explict about how your data maps to your view
+U5ABF3BH7 : can I write something like init = FirstCallNew.view.init model (where model is what I got from decoding)?
+U5ABF3BH7 : <@U23SA861Y> let me try again
+U23SA861Y : no, your code hasn't even run by that point so how have you decoded anything
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

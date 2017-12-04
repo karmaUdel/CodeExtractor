@@ -1,52 +1,56 @@
-```update: Payload (Err "Expecting an object with a field named `error` but instead got: {\"themeUri\": ...```
-strange
-Try exchanging `|&gt; required "error" string` in payloadDecoder with `|&gt; optional "error" string ""`
-If you use the `required` function, it will fail the decoding with the error you are seeing (unless you actually add a property called "error" to the data sent through the port)
-uff, works!! (I only needed to rename “class_” to “class” because my data uses “class”)
-That was good lesson. Thanks all for help
-it seems strange to use `Model` as your payload type though
-sounds like documentation would take all the fun out of it then :wink:
-It seems fairly straight forward if you want to make js functions available to elm, just need to set a name mangled variable with a record of function pointers. But the when it comes to creating something at main, there are a few compiler defined functions I can't track down like `F2` and `A2`
-Hello, I am looking for advice on how to organize my views. I have a very long complex page which is the page I am working on (Views.FirstCall). Right now, this view is divided into different views representing the different sections in the page (PersonInfo.elm, Location.elm, Caller.elm, Appointment.elm...etc..). I am trying to re-organize them as we had the data and views all mixed up.  I am wondering if I should structure all the sub-views related to FirstCall page into a special folder or if it is un-necessary and I should just put them all under the Views folder? Any advice of people who have experience?
-one looks like a cast of a 2 parameter function into the elm type and the other seems to act similarly for evaluation.
-how many LOC are we talking
-<@U23SA861Y> What do you mean by LOC?
-lines of code, how big is all of this?
-<@U23SA861Y> 1500 to 2000
-main view plus sub views
-<@U23SA861Y> Any suggestion?
-Its hard to say
-how reusable is this code
-maybe one fourth is reusable
-then only about one fourth should be factored out into a seperate package
-also in general fewer files is better, so see if you can combine some of those files.
-<@U23SA861Y> <@U1CE9DL9H> Thanks!
-it might be a long file but that's more a stigma more than a rule
-I think this project is structured really nicely <https://github.com/rtfeldman/elm-spa-example/tree/master/src>
-evan describes the fear of long files as based on "javascript folk knowledge" in his elm europe talk; as elm is a pure language, we don't need modules as much to split up code
-because there can never be weird interactions, no matter how long our file is
-I agree elm-spa-example is nice, but I wonder about using it as a "template".  In some sense it's too many files to begin with isn't it?  Unless you are confident the way you eventually will divide up your app is the same way the example app does it.
-<@U5ABF3BH7> I like to split code into files so that one file considers one thing. I know this is kind of vague, but I think about it something like this: "the sidebar is a thing, I'll make that have its own file - it only has a single menu for now though, so it's still just a single thing". Does that make sense?
-<@U5ABF3BH7>  Do you know ahead of time these sections "PersonInfo.elm, Location.elm, Caller.elm, Appointment.elm...etc."  are going to need to be used in several places, not just in this FirstCall view?  Then it makes sense to split them out from the beginning. But if you only know that you need them for FirstCall, I'd start with them all in FirstCall.elm.
-I don't have any sort of "lines of code" or other metric to tell if a view file is too long. This vague idea has worked pretty well for us in a couple of year-long projects, though.
-<@U0JFGGZS6> Yes, I know which parts are reusable, only a small portion is reusable. Thanks
-There are two aspects to splitting view code into several modules in my opinion: one is reusability, the other is managing mental overhead.
-<@U0CLDU8UB> In other languages, it seems wrong to have a file with 800 lines of code, but in Elm, it seems like the practice differs.
-Yes. At some point, it becomes too much of a hassle to find what you're looking for in the file. This is when it makes sense to split out some of the "implementation details" even if there's no real case for reuse.
-That's true. It's sometimes "is this too much pain to tolerate" feeling.
-In OO languages, breaking into separate files is about encapsulation and long files are a smell typically pointing to a class that has too many responsibilities.
-I think following the elm-spa-example from the start is fine too, in a sense it's using the same principle, it's "I know I'm going to want to load data separately for each page, and the type of this data is shared between pages in some places, so might as well split out separate page views and split data models and request APIs from views"
-<@U0JFGGZS6> yes, that makes sense
-Also, in OO long methods are discouraged because they likely do a bunch of things, and it is very hard to gain a quick overview of _what does this code do_ since you can mutate things and cause side effects in the middle.
-I'd say that "long functions are confusing to read" can also apply to Elm
-but not always
-they can be, particularly if you have a few lets in flight
-The difference is that in Elm, you can look at `User -&gt; Html msg` and immediately write off that this function or any helper function that it might be using *cannot* do anything but produce HTML without any event listeners.
-a long `update` that just proxies a lot of `Msg` values to a function are actually very readable
-Sure, I'm not advocating 200-line functions.
-hey does anyone experience a slack memory leak - every time i open slack my ram goes form 500MB to 2.2Gb - just Firefox. When i close slack it goes back to normal.. is this common? Because  it doesn't sound very performant :smile: ..
-Is there a way to see an auto generated changelog of an elm package? It seems like it would be feasible given the auto versioning.
-just to look at api changes, not necessarily the commit message or whatever that are related
-`elm package diff`
-amazing, thanks :slightly_smiling_face:
-Is there more straight forward way? IMO `elm package diff` should have an option to display it in machine friendly format, but apparently it does not.
+U3SJEDR96 : no, you probably have a function `model : Model`
+U3SJEDR96 : When using `beginnerProgram`, that is the exact reason I name it `initialModel` :slightly_smiling_face:
+U4872964V : Yeah, it's a bit odd that it's `model` in `beginnerProgram`, but `init` in `program`
+U4F64AKQV : <@U24HQ3RJ7> Are you generating a stylesheet or using it inline?
+U4872964V : `model` is just plain wrong naming, in my opinion
+U4F64AKQV : I think it's like that to match up with MV*.
+U6GFNSEPR : ah yeah, it's a bit clearer to name it `initialModel`
+U6GB56346 : <@U3SJEDR96> hmm,  do you mean `text` 's signature is *not* a free type variable?
+U3SJEDR96 : No, it is. And that can be unified with `Never`. You could have `foo : Html Msg` and define `foo = text "hello"`, too. That would be completely valid. The type of the expression `text "hello"` is still `Html a`.
+U3SJEDR96 : It's no more special than saying `foo : List String` with a definition of `foo = []`. That empty list doesn't really "hold" anything, so it could be a `List Never`, too, but since it has type `List a`, the compiler is fine with you saying it is a more specific thing than that, even though the implementation doesn't _need_ to be that constrainted
+U3SJEDR96 : ```htmlNever : Html msg -&gt; Html Never
+htmlNever elem = elem
+```
+
+U3SJEDR96 : the same reasoning for why that doesn't compile is that you can't do this:
+U3SJEDR96 : ```foo : List a -&gt; List Never
+foo xs = xs
+```
+
+U6D3ERLA1 : This is confusing:
+U6D3ERLA1 : ```Function `foldr` is expecting the 1st argument to be:
+
+    Point -&gt; Array.Array Row -&gt; Array.Array Row
+
+But it is:
+
+    Point -&gt; Grid
+```
+
+U6D3ERLA1 : But my Grid type is:```
+type alias Grid =
+    Array.Array Row
+```
+
+U3SJEDR96 : right. And the function you give to `Array.foldr` takes an entry of the array you provide as input, as well as the value to accumulate into. For example `List.foldr (\x sum -&gt; sum + x) 0 (List.range 1 4)`
+U3SJEDR96 : in your case, it seems like you may be providing a `Point -&gt; Array Row` function, but that's not something `foldr` can work with
+U6D3ERLA1 : Hmm... I'm trying to loop through an array of coordinates and return a new updated grid with each iteration...
+U6D3ERLA1 : [{x=1,y=2}, {x=2,y=2} ...] &lt;| forEach (\point -&gt; getUpdatedGrid point)
+U6D3ERLA1 : Maybe I just missed the accumulator..
+U3SJEDR96 : hold up, I'm not sure I'm following. It feels like you want to transform each point in your grid, in which case you'd want a function `Point -&gt; Point` and use `Array.map`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

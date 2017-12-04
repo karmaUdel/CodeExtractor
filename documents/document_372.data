@@ -1,1 +1,60 @@
+U3SJEDR96 : <http://package.elm-lang.org/packages/elm-community/list-extra/6.1.0/List-Extra#maximumBy>
+U3LT1UTPF : Then it would be `List.maximumBy cycleList.cycleList.cycle cycleList` ?
+U62PV9CPN : So I have a validation function which checks the length of a String, what type would I use such that I could provide a type `a` which I know supported `length`? So my function could take more than `String` (say `List`, `Set`, etc)
+U62PV9CPN : ```isLongerThan : Int -&gt; String -&gt; Bool
+isLongerThan minLength subject =
+    (String.length subject) &gt; minLength
 ```
+
+U3SJEDR96 : <@U3LT1UTPF>  close - it would be `List.maximumBy .cycle cycleList.cycleList` - though if you name your type alias "somethingList", it would make senseif it were an alias for a list, not a record. You can use `type alias CycleList = List Cycle` and get rid of the extra step that way :slightly_smiling_face:
+U3LT1UTPF : <@U3SJEDR96> Yes, I know. I did it so because it is info from a JSON decoding.
+U3SJEDR96 : <@U62PV9CPN> unfortunately, there is no such thing - that would be a typeclass
+U3SJEDR96 : <@U3LT1UTPF> Ah, okay. If you want, I'm pretty sure we can make your json-decoder return just that list, rather than a record, tho...
+U3SJEDR96 : the nice thing about json decoders is that they can decouple representations
+U3LT1UTPF : Ok, let's try
+U3LT1UTPF : ```cycleListDecoder : JD.Decoder CycleList
+cycleListDecoder =    
+    succeed
+    CycleList        
+    |: (field "cycleList" (list cycleDecoder))
+
+cycleDecoder : JD.Decoder Cycle
+cycleDecoder =
+    succeed
+        Cycle
+        |: (field "cycle" string)
+        |: (field "productList" (list productDecoder))
+```
+
+U3SJEDR96 : ```cycleListDecoder : JD.Decoder (List Cycle)
+cycleListDecoder =    
+   field "cycleList" (list cycleDecoder)
+```
+
+U3LT1UTPF : I don't know how to get that beautiful formatting...
+U3SJEDR96 : try three backticks, newline *code* newline, three backticks
+U3SJEDR96 : anyway, just removing the `succeed CycleList |:` part should do the trick, since that's essentially saying "decode into this function", and `CycleList` is a function which creates a record :slightly_smiling_face:
+U3LT1UTPF : Thank you so much, <@U3SJEDR96>
+U2FL3ARLG : I read that as cyclist at first :bicyclist: Shouldn't have watched the tour de france…
+U3LT1UTPF : It has more to do with weather forecast models :blush::wink:
+U638BAUJZ : Hi everyone. I'm a beginner and need some help with controls that are ignoring my inputs on a specific page of my web app.On 10:10 of the video, <https://www.youtube.com/watch?v=qFaFL7G2ijs>, I explain the bug.
+The source code can be found here: <https://github.com/Lambda-Cartel/Nikeza>
+
+U623QK78C : Is it possible to merge types?
+U623QK78C : Without composing, I mean.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

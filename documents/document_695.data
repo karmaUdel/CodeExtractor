@@ -1,40 +1,81 @@
+U17R1GD96 : I don’t want to subscribe to Model. It contains more things. I only want to load from JS some data.
+U3LT1UTPF : Hi. I need a dropdown select. I've seen several examples, but I don't know which one to take. Do you think this one is a good example to base mine on?: <https://github.com/wintvelt/elm-dropdown/blob/master/examples/Single/Main.elm>
+U3SJEDR96 : <@U17R1GD96> you don't subscribe to model, but the `subscriptions` call that you have to `program` takes your `model` as the first argument by default, so you can decide _what_ to subscribe to based on the state of your model
+U3SJEDR96 : so basically, you could have `subscriptions _ = payload Payload`
+U3SJEDR96 : and then whenever you calll `ports.payload.send(whatever);`, your update will be called with a `Payload` message
+U17R1GD96 : OK. I understand. Thanks.
+U17R1GD96 : I have related question to that. I want to pass more complex JSON object from JS to Elm. The full init data for the Model. Do I need  to create some decoder for that? I did not need to create any decoder for passing simple JSON object  `{message:'HI!'}`.
+U3SJEDR96 : the automatic conversion can handle a decent amount of things (with a notable lack of support for union types). Also, the automatic conversion doesn't let you handle errors gracefully. As such, it _is_ generally recommended that you make your `port payload : (Json.Encode.Value -&gt; msg) -&gt; Sub msg`
+U3SJEDR96 : which means that, indeed, you would write a JSON decoder in Elm. For example, if you had a `payloadDecoder : Decoder Data` and a `type Msg = Payload (Result String Data)`, you could set up a subscription `subscriptions model = Json.Decode.decodeValue payloadDecoder &gt;&gt; Payload`
+U1D7SLE4Q : So, I have a Hugo generated static website and I want to use Elm for small interactive pieces here and there in it. I have a separate prototype of these small apps boilerplated with create-elm-app. Now I want to merge it all together in a nice way, but not sure how to set up the whole assets pipeline in a reasonable way. If you have any related experience or suggestions, let’s start a thread!
+U17R1GD96 : <@U3SJEDR96> I am trying yo write full decoder. I’m stuck with subscriptions and update. The code is : ```
+
+U17R1GD96 : I also need to rename the original theme_uri to themeUri used in  my Model.
+U17R1GD96 : and class to class_
+U3SJEDR96 : alright, so, - `port payload : (Model -&gt; msg) -&gt; Sub msg` should be `(Json.Decode.Value -&gt; msg ) -&gt; Sub msg`
+- the type of `Payload` is a little wonky, should be `Payload (Result String Model)`
+- subscriptions needs to handle the JSON decoding AND hand the function to go from `Value -&gt; Msg` to your subscription itself: `payload (decodeValue payloadDecoder &gt;&gt; Payload)`
+
+U3SJEDR96 : `class` is allowed in elm, btw, no need for an underscore there :slightly_smiling_face:
+U17R1GD96 : well, when I extract it I have a conflict with class from Html
+U3SJEDR96 : oh, okay
+U17R1GD96 : ```subHeaderMenuView : List Subheader -&gt; Html msgsubHeaderMenuView items =
+    let
+        build : Subheader -&gt; Html msg
+        build { class_, url, title } =
+            li [ class class_ ]
+                [ a [ href url ] [ text title ] ]
+    in
+    div [ class "sub-menu" ]
+        [ ul [ class "flex-grid" ] (List.map build items) ]
 ```
-let me try it out. Thank you for that. I really appreciate the help.
-I agree that the *from future* is quite useful for all of the people who use Python 3 already, but I'm less convinced of the *with open() as f* context manager. I think the file object will be closed anyway when it goes out of scope; the context manager seems to add extra complexity and an extra indentation level. However I _do_ think a file context is useful when writing a file as part of a larger operation, so you can indeed force it to close (and flush to disk).
-I did try python 3 earlier but a lot of the scripts/recipes were written in 2.7, so I had to downgrade
-Uh-uh. I see.
-Well, it's not forbidden to use Python 2 ;-)
-I used it for 25 years and I'm still using it.
-i understand :slightly_smiling_face: Apologies for being a bit slow here
-the script worked
-Great! And now?
-i can run that in the command prompt and save the output.
-would i be able to edit the code and add some more to it? as in to get other data from it?
-What is your ultimate goal? To extract the tweets from the file?
-Oh yeah sure you could extract anything and everything from it
-Basically I just need to make the file easier to read so I can count the number of tweets, retweets, see who tweets the most, and do a word cloud.
-<@U69HXQZJ9> Ah, you want to do some statistics on the data.
-Yup. That's what the plan is. I just need to get a better idea of what people are doing and saying
-Well, counting the tweets is not hard: that's just the number of tweet objects in your stream file.
-yeah i mean that was just the easiest part :slightly_smiling_face:
-there was another script which had the functions i needed but it gave me the same error
-Counting the number of retweets is somewhat harder, is that mentioned in the Tweet object? If so, you could fetch it and do something with it. Retweets always belong to one specific tweet, no?
-well i could skip that. just would prefer to see who the most prolific ones are
-You mean, you are only interested in tweets that get a lot of retweets?
-well i am analysing twitter trends. have four big files. want to see who tweets the most, which ones got the most RTs, geotag them, and make a word cloud.
-Why do you have 4 big files, and not 2 or 6 or 35?
-the script i followed didn't give me the option to make smaller ones
-so basically i collected a lot of tweets for trends
-the four files are for four trends
-Ah, every trend gets its own stream file!
-yes
-and those files are around 1 gb to 1.5 gb each
-*who tweets the most* -&gt; Every tweet has a 'user' object, and in there is a 'name' attribute with the name of the user who made the tweet. You could use a dictionary to store all usernames and the tweet count. You know, going from the beginning to the end of the tweets and storing the username in a dict, or incrementing the tweet count if the user is already in the dict.
-The when the counting is done, you could convert the dict to a list of (name, tweetcount) tuples and sort that on decreasing tweetcount. Then print out the first 10 items of the result and you have a TOP 10 of most prolific tweeters.
-Or is it twitterers?
-:stuck_out_tongue_winking_eye:
-Either name works :)
-<@U69HXQZJ9> Dont worry about the file size because the construction 'for line in f: ...' doesn't load the entire file into memory.
-Ahh
-So no need to iterate 
-Would I be too lazy if I asked someone here how I can do that? 
+
+U3SJEDR96 : either way, your json representation doesn't need to match the elm structure word for word
+U17R1GD96 : ```subscriptions : Model -&gt; Sub (Result String Model)subscriptions model =
+    payload (Json.Decode.decodeValue payloadDecoder)
+```
+still some errors for main ```main : Program Never Model Msg
+main =
+    Html.program
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }```
+
+```Function `program` is expecting the argument to be:
+
+    { ..., subscriptions : Model -&gt; Sub Msg }
+
+But it is:
+
+    { ..., subscriptions : Model -&gt; Sub (Result String Model) }```
+
+U3SJEDR96 : yeah, because you removed `&gt;&gt; Payload` :stuck_out_tongue:
+U3SJEDR96 : which is the part the says "take the result of the function on the left and apply this function on that; with `Payload : Result String Model -&gt; Msg`
+U17R1GD96 : Like this? ```subscriptions : Model -&gt; Sub (Result String Model)subscriptions model =
+    payload (Json.Decode.decodeValue payloadDecoder) &gt;&gt; Payload
+```
+
+U3SJEDR96 : `payload (Json.Decode.decodeValue payloadDecoder  &gt;&gt; Payload)`
+U3SJEDR96 : you could alternatively write that like so: `payload (\json -&gt; Json.Decode.decodeValue payloadDecoder json |&gt; Payload)` if that makes more sense to you :slightly_smiling_face:
+U0CLDU8UB : and also, `subscriptions : Model -&gt; Sub Msg`
+U17R1GD96 : It’s OK. I understand &gt;&gt;. This has no errors: ```subscriptions : Model -&gt; Sub Msgsubscriptions model =
+    payload (Json.Decode.decodeValue payloadDecoder &gt;&gt; Payload)```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

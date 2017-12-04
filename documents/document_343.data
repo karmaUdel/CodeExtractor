@@ -1,19 +1,116 @@
+U2SR9DL7Q : Briefly. I never concerned myself with it too much, because well... It's got that hard to read nature of generated code, and elm is so performant, I never thought to consider the size of the document.
+U5QJW0DDE : except it is not hard to read at all. it has regular, readable definitions for all functions, like foldl and foldr
+U5QJW0DDE : function xor(a, b){
+	return a !== b;
+}
+
+U5QJW0DDE : have no idea how to format code on here
+U2SR9DL7Q : Perhaps. Maybe I should say I never attempted to read it beyond skimming through after my first elm-make attempt.
+U2SR9DL7Q : `test`
+U2SR9DL7Q : enclose the code in the " ` " symbol and it will format it appropriately
+U5QJW0DDE : try it with multiple lines
+U2SR9DL7Q : ` multiplelines
+`
+
+U2SR9DL7Q : ``` once 
+more 
 ```
-You want all `Currency` to be created by external code calling `intToCurrency`
-Then, you want to support adding them together
-There is no need to expose the constructors
-<@U5QJW0DDE> An example I like is you could have a `Url` data type, you want only validated urls, so the only way to construct it is using a function which validates it first. If the constructors were exposed, one might be working with invalid data.
-That's a good one, too
-<@U48AEBJQ3> i see. you mean, the function which builds your Url is accessible, and the Urls' constructors are accessible only to that function's definition, but they are not accessible in the place where you call that function
-right
-any idea why this page says to avoid installing Elm globally, and only do it per project: <http://www.romanzolotarev.com/elm/>  &gt;"if you are working with multiple projects or with other developers, avoid installing Elm globally."
-maybe so you can work with different versions on different projects?
-different versions of the elm language?
-yeah
-oh ok
-maybe? I haven't read that page, though. ¯\_(?)_/¯
-he made that statement but did not provide a reason why
-do i understand correctly that the only place you'd write a type variable would be in the declaration of a union or record, but nowhere else?
-Not sure what that measn <@U5QJW0DDE>
-I write them in case statements all the time
-Like
+
+U2SR9DL7Q : use triple for multi-lines " ``` "
+U2SR9DL7Q : it's kind of like python, where triple quotes let you use multi-line strings
+U0J1M0F32 : Yes <@U5QJW0DDE> the entire Elm core language is compiled with your Elm logic at this point. That puts a certain "floor" to the size of current elm applications. However, cutting down that size is being worked on in coming elm versions, with DCE, tree shaking, and generally improving support for after compilation compression and minification.
+U5QJW0DDE : i heard a bit about that earlier
+U5QJW0DDE : can't wait to see how that develops
+U0FP80EKB : Also, we have a 2.5KLOC elm app that sits around 52k. This isn't with too much stuff other than uglify and gzip. As we add code, this shouldn't grow much.
+U0FP80EKB : just for reference
+U0FP80EKB : This contains all our embed code that gets embedded on customer sites (example <https://www.wuft.org/findoutflorida/> you can see the What do you wonder? and Help us out). We just put all our embeds into the same app, so we only have to load the elm app once
+U0FP80EKB : It will be great when it gets a bit of the DCE, etc, but otherwise it isn't too big, relatively speaking.
+U0FP80EKB : (also, according to hitting refresh a bunch, it loads on average around 100ms to my machine)
+U635238TG : going through the intro to elm book using the repl. it says when moving down a line (using \) include a whitespace on the new line. the example looks like it uses two spaces though. is that what I should be doing, two spaces in my code? is this way to beginner'y for this slack channel?
+U0SES5Y3T : using two spaces is fine
+U0SES5Y3T : <@U635238TG>
+U0SES5Y3T : I think the convention in the community is when you start using Elm in your code editor to use elm-format, which will automagically format the code for you
+U0SES5Y3T : on save
+U635238TG : nice. i'm also going to be using vim and i see there is a elm plugin that i will figure out how to install. that probably helps me too
+U0SES5Y3T : i am not familiar with vim but I am sure there is
+U2SR9DL7Q : <@U635238TG> no question is too 'beginnery' btw. the slack is here for everyone to have a space to ask about what seems confusing.
+U635238TG : and pertaining to the discussion above about what the js looks like after transpiling...does that mean in the far future if I'm building out a project for someone and they want it in js, can I still write it in elm, transpile to js and give them that code and no one is the wiser?
+U0SES5Y3T : <@U635238TG> sure, as long as they don't have to change it :slightly_smiling_face:
+U5QJW0DDE : presumably Elm would offer an option to compile with and without DCE so you can have it in its current form if you want
+U0J1M0F32 : I wouldn't put money on it.
+U5QJW0DDE : but if you hand a client the current transpiled JS, they will not get much use out of that even in its current form.
+U0J1M0F32 : chasote: If you're building someone a "JS" app and you build it in Elm , thats fine, but if they literally want JS code to edit, then the compiled Elm code is useless to them, even though its in JS.
+U5QJW0DDE : we were talking about this earlier today but it doesn't really make sense for the Elm devs to reinvent the wheel on this. it would be much better to leverage existing DCE like Google Closure rather than waste precious development time on something that is already done so well by other tools
+U5QJW0DDE : it would probably involve much less effort to make Elm Closure compatible for its DCE than to actually implement DCE directly in the Elm compiler
+U635238TG : ok thanks. i'm going all in with elm right now but realize it probably doesn't help my employment chances if I decide to go professional in 6-12 months or later.
+U635238TG : although I'm a former English teacher...sounds like a perfect match for future NoRedInk employment...just saying.
+U0J1M0F32 : idk, theres a lot of assumptions in there.
+U0J1M0F32 : :thumbsup:
+U2SR9DL7Q : hey all. i'm building an app that will require me to draw 'tiles' on the screen. essentially lots of rectangles stacked in a myriad of ways. is this a job for the SVG library?
+U4BJ8UDCP : As far as I understand, SVG is great for simple geometry that might need to be manipulated dynamically - what are you trying to do with your tiles? can you think of some properties of your tiles that won't ever change?
+U2SR9DL7Q : i'm making a domino game (i make a version that runs in the terminal in python)
+U2SR9DL7Q : so the tiles are always the same size, but are sometimes horizontal or vertical
+U2SR9DL7Q : the terminal version simply represented each domino as a tuple like `(2|3)`
+U2SR9DL7Q : and the board state was a deque which grew as players put down tiles
+U2SR9DL7Q : the python version works pretty well, but I want to make a proper UI and let people play it. the code will be on github as well so hopefully it can serve as an example for anyone interested.
+U153UK3FA : <@U5QJW0DDE> You can currently use Google Closure compiler with the output of the Elm compiler and you do get DCE. But you can do far more DCE with Elm code than with Javascript.
+U635238TG : what does DCE mean?
+U2SR9DL7Q : Dead Code Elimination
+U14Q8S4EM : <@U2SR9DL7Q> I bet you could do it with just html. That would be my go-to, and I doubt it would be any more difficult than SVG. There is also `evancz/elm-graphics`
+U2SR9DL7Q : i'll check that out <@U14Q8S4EM> so long as html can make rectangles with dots in them ( which sounds very possible when I say it out loud )
+U5VD8S0HZ : I am running into an issue with Msg types with components. I have a parent component that defines a Msg type. I want to call a view function on a child component and pass a `Html Msg` as a parameter. The child view function will return `Html ChildComponent.Msg`, which I can pass to `Html.map` to get a `ParentComponent.Msg` type. But... the compiler is complaining that the child view function is expecting a `Html ChildComponent.Msg` parameter but getting a `Html ParentComponent.Msg` instead (which is, of course, true). 
+Is there a way to get the message types working together in this way?
+
+U0JFGGZS6 : do the `Html.map` in the parent instead of the child ?
+U153UK3FA : <@U5VD8S0HZ> when doing that pattern the ChildComponent module shouldn't need to know about the ParentComponent modules Msg type, the translation between the ChildComponent.Msg and it's meaning in the ParentComponent module's update function should be done there.
+U153UK3FA : Ie. Define a ChildComponent.Msg constructor for the action you want to happen and translate it to it's ParentComponent.Msg equivalent in your update function 
+U153UK3FA : It's the price you pay for the encapsulation you want
+U153UK3FA : If you don't actually need that encapulation then you can save yourself a lot of pain by just having a single Msg type that you use everywhere
+U153UK3FA : If you're new to Elm then definitely try having just a single Msg type and don't follow the 'components' pattern
+U153UK3FA : New devs tend to over use the pattern and get themselves in to a mess
+U5VD8S0HZ : <@U153UK3FA> the specific case I am working on is creating a general-use modal dialog component that I can pass content to. The way I am thinking about this, messages such as CloseDialog would be declared as part of the Dialog component and translated to the ParentComponent.Msg equivalent as you mentioned.
+The problem is that messages that belong to the content (such as SelectCheckbox-type messages) belong to the parent component and remain unknown to the dialog component. Because of this, I haven't figured out a way to pass the content to the dialog component since the dialog component won't know about the content's Msg type.
+
+U153UK3FA : Ah, you need to wrap the content Msgs in a Dialog Msg and have the caller unwrap them
+U5VD8S0HZ : I am trying to parse what you just said. I'm not sure I completely get that.
+U5VD8S0HZ : So, for example, right now in my content view, which exists in the parent component, I may have something like:```
+li [ onClick SelectCheckbox checkbox.id ] []
+```
+where `SelectCheckbox : String` is a parent component Msg type
+
+U5VD8S0HZ : Are you saying that I do something like:```
+li [ onClick (DialogMsg SelectCheckbox checkbox.id) ] []
+```
+where DialogMsg is message type that is declared in the child component?
+(sorry, my syntax is probably off here... not using an editor)
+
+U5VD8S0HZ : or can you point me to an example of what you mean?
+U3YDBDP4Z : Are there any good sources on good unit testing setups or strategies?
+U5QJW0DDE : This is not correct. DCE is part of the advanced optimizations in Closure which Elm does not support. But you can use the simple optimizations of Closure, which don't do DCE. 
+U5QJW0DDE : Check out the Dev mailing list from yesterday if you want to see some of the issues regarding supporting the advanced optimization mode. 
+U0J8D9M2P : I'm implementing functions which uses latitude/longitude. The value range for latitude is from 0 to +/- 90. Is there a way to limit value e.g. with union type so that when I have incorrect value compiler will tell that it's not allowed?
+U4872964V : No, there are no bounded number types in Elm. However, you can make your own module and wrap the number in a type and just expose the operations you need, and check the value inside the operations.
+It depends on what kind of usage of those coordinates you have
+
+U0J8D9M2P : I have```
+getPosition : Date -&gt; Float -&gt; Float -&gt; { azimuth : Float, altitude : Float }
+getPosition date latitude longitude = ...
+```
+
+U0J8D9M2P : So the best will be to check latitude/longitude values in function implementation and return Result, either with Ok or with Error.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

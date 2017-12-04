@@ -1,29 +1,77 @@
-                |&gt; Array.append array```
-<@U1ZFF0E5P>: the current implementation of Array in Core has some issues
-oh
-it’s kind of broken, the next Elm release will include a rewrite
-you can use that version now by using <http://package.elm-lang.org/packages/Skinney/elm-array-exploration/latest>
-should I still add this to an existing github issue or just ignore it
-try using `Skinney/elm-array-exploration` and see if it solves your problem
-ok that fixed it, thanks <@U153UK3FA>
-got really confused there for a bit lol
-yeah, it’s been broken for a while, it’s tripped up a few people
-just out of interest, it's the native implementation in js that has bugs?
-yep
-Yep, lots of JS in that Array module
-It’s now only 150 lines of JS rather than the 1000 lines it was.
-<@U0FP80EKB> <@U23SA861Y> what was the question?
-There was a string permutation problem that was popping the stack even though it didn't explictly use recursion, only maps
-we couldn't figure out where it was recursing so deep as to pop the stack
-<https://ellie-app.com/3FY8YRHcqvka1/1> this one
-it seemed like when the list was approaching 6k or so it was causing the issues
-and an early riser I see
-It's because your model is too big for the debugger to play nicely
-he, so it is the debugger causing issues, interesting
-The debugger uses a bunch of customized thing for the virtual-dom in order to display things usefully
-If you disable the debugger, or just compile it locally, then your file works
-<https://github.com/elm-lang/virtual-dom/blob/master/src/VirtualDom/Expando.elm#L130>
-this function does not seem to be TCO'd.
-that'll do it
-<https://github.com/elm-lang/virtual-dom/issues/98>
-<@U64A0BYHH> ^
+U3SJEDR96 : ```foo : List a -&gt; List Never
+foo xs = xs
+```
+
+U6D3ERLA1 : This is confusing:
+U6D3ERLA1 : ```Function `foldr` is expecting the 1st argument to be:
+
+    Point -&gt; Array.Array Row -&gt; Array.Array Row
+
+But it is:
+
+    Point -&gt; Grid
+```
+
+U6D3ERLA1 : But my Grid type is:```
+type alias Grid =
+    Array.Array Row
+```
+
+U3SJEDR96 : right. And the function you give to `Array.foldr` takes an entry of the array you provide as input, as well as the value to accumulate into. For example `List.foldr (\x sum -&gt; sum + x) 0 (List.range 1 4)`
+U3SJEDR96 : in your case, it seems like you may be providing a `Point -&gt; Array Row` function, but that's not something `foldr` can work with
+U6D3ERLA1 : Hmm... I'm trying to loop through an array of coordinates and return a new updated grid with each iteration...
+U6D3ERLA1 : [{x=1,y=2}, {x=2,y=2} ...] &lt;| forEach (\point -&gt; getUpdatedGrid point)
+U6D3ERLA1 : Maybe I just missed the accumulator..
+U3SJEDR96 : hold up, I'm not sure I'm following. It feels like you want to transform each point in your grid, in which case you'd want a function `Point -&gt; Point` and use `Array.map`
+U6D3ERLA1 : ```placeBoat : Point -&gt; Int -&gt; Dir -&gt; String -&gt; Grid -&gt; Grid
+placeBoat p l d k grid =
+    List.foldr
+        (\pt outputGrid -&gt; putGridVal pt k outputGrid)
+        grid
+        (getCoords p l d [])
+```
+
+U6D3ERLA1 : This seems to do it - I think I was missing the accumulator `outputGrid`
+U3SJEDR96 : Alright, gotcha :slightly_smiling_face:
+U6D3ERLA1 : And coords is a list not an array :facepalm:
+U3SJEDR96 : Luckily, those functions works the same way :wink:
+U6D3ERLA1 : yeah
+U6D3ERLA1 : This does what I expected once the syntax is correct - I don't know if it's best practice but I've been using reduce in js to generate complex objects
+U3SJEDR96 : Folding is all over the place :slightly_smiling_face:
+U3SJEDR96 : Plenty of functions are directly or indirectly defined as a fold, and they're a very basic "construction" block. So that's totally fine :slightly_smiling_face:
+U6D3ERLA1 : Curious why they chose not to call it 'reduce'
+U3SJEDR96 : You _may_ wish to `foldl` by default, though. It's sort of the natural direction of folding lists :slightly_smiling_face:
+U3SJEDR96 : Might as well wonder why they call it `reduce` in js
+U3SJEDR96 : And yet other languages call it `inject`, `accumulate`, `aggregate` and even `compress` ¯\_(?)_/¯
+U3SJEDR96 : I think `reduce` as a name implies your making something smaller, which makes sense for stuff like `foldl (+) 0 xs` but less so when you're doing something like you're doing - manipulating a data-structure. I believe F# defines `reduce` as a `fold` where the initial "accumulator" value comes from the input itself, which also makes sense as a way to distinguish
+U0JFGGZS6 : So your bulk updates would look something like this?```
+type Msg
+    = SendToTrash (List ItemId)
+    | LabelSelected Label (List ItemId)
+```
+
+U6D3ERLA1 : Sure
+U6D3ERLA1 : I guess `reduce` implies turning a list of values into a single value...
+U0JFXEUCT : you could easily `reduce` into a larger list :slightly_smiling_face:
+U6D3ERLA1 : The random module is weird
+U6DQCTZT2 : I feel like I'm using message passing wrong. Anybody want to have a look? I'm not sure how to explain it other than this gist: <https://gist.github.com/vikfroberg/31e1c0eae7bc425c632987b0d64e07da>
+U6D3ERLA1 : I need to provide a random seed in order to get a random number?
+U0JFXEUCT : <@U6DQCTZT2> you could use `Html.map`
+U0JFXEUCT : wait, you mention that, nvm
+U6DQCTZT2 : <@U0JFXEUCT> maybe I don't understand how Html.map fully. But wouldn't that forward AddTodo to Page.update?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

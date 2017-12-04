@@ -1,0 +1,182 @@
+U5X2ZRFDF : I guess the 5 is in the environment part of the closure in the JS.
+U2LAL86AY : :grin: that sounds.. :grin: Anyway we'l see in the worst case i will just provide arguments for the normal functions and use &lt;function&gt; as the debugger does it for what it can't evaluate.
+U5X2ZRFDF : If you analyze the original code, you could transform it to store the arguments somewhere where you can get at them later.
+U2LAL86AY : my plan is to see the `arguments evaluated`, and see the `internalValues evaluated`. and i do that by wrapping code in Debug.log - on the AST level. Didn't test it but form what i've read online seems this can work. 
+and for internal functions - the ones defined in let in statement - i just show them as normal function the moment they get evaluated. 
+
+And when one of this can't be evaluated- for now i will just use the `&lt;function&gt;` placeholder as the debugger does it.
+
+Kind of dissapoinging but good enough for the first stage.
+
+U2LAL86AY : when saving and compiling code - you don't see the same CPU spikes? It's only happening with `elm-test`?
+U4CDPP9HR : Hey, sorry, didn’t see this until just now, let me czech…
+U4CDPP9HR : Yeah, I mean, I can run `elm-make` on its own, but it’s barely a blip on the radar, whereas `elm-test --watch` runs at a constant 110-150% CPU even when idling.
+U0CL0AS3V : maybe we *should* be using chokidar :smile:
+U0CL0AS3V : mind opening an issue on <https://github.com/rtfeldman/node-test-runner/issues> ?
+U0CL0AS3V : ideally with system info and something small that reproduces it
+U0CL0AS3V : you could also use a pattern match for this:
+```
+let
+    roomNumber =
+        case String.words room of
+            first :: second :: others -&gt;
+                first
+
+            _ -&gt;
+                room
+```
+
+U4CDPP9HR : I’ll see if I can isolate a test case.
+U4CDPP9HR : Did a little bit more digging and this seems to be the issue: <https://github.com/webpack/webpack/issues/701>
+U4CDPP9HR : Doing an `npm install fsevents` inside my `lib/node_modules/elm-test` directory fixed it.
+U4CDPP9HR : I’ll still see if I can come up with a reproducible test case without dumping you my entire repo if you want though. :slightly_smiling_face:
+U0S6BNVNY : I'm running into an issue where elm-extra's innerHtml is not seemingly placing the Html I think should be there in there
+U0S6BNVNY : sometimes a portion of the HTML arrives
+U0S6BNVNY : it's...fascinating
+U0S6BNVNY : it's like the last node is always missing
+U0S6BNVNY : oh it's definitely something weirder than that
+U0S6BNVNY : I think using keyed will sort it out but I'm completely unsure
+U0S6BNVNY : yup that was it
+U0S6BNVNY : super weird
+U0S6BNVNY : some li were being reused as I moved through the SPA :slightly_smiling_face:
+U0S6BNVNY : anyone up and doing things at this hour? :slightly_smiling_face:
+U1G51S63S : I am asked about google maps polymer yesterday. I found an issue - it was in `api-key` attribute. it works w/o api key at all (50/50. sometimes it fails with error that api key is required and not just warning).
+U1G51S63S : So it's really looks like some timing issue. Looks like node is created w/o attributes first time and then attributes are added
+U3SJEDR96 : Totally up.
+U3SJEDR96 : <@U1G51S63S> that's actually correct. Node creation and setting attributes can't happen atomically
+U37HUSJ4R : has anyone used this? <https://github.com/ktonon/elm-serverless>
+U37HUSJ4R : looks really cool
+U2LC0U8JY : still waiting for a reason to try it :slightly_smiling_face:
+U0S6BNVNY : huh...the instagram oEmbed won't work by just shoving innerHtml into Elm
+U0S6BNVNY : and twitter's oembed doesn't look fantastic
+U0S6BNVNY : something quirky's going on with trying to jam oEmbed stuff in with innerHtml, should've guessed :slightly_smiling_face:
+U0S6BNVNY : handling the oembed on the server isn't necessarily the best idea there anyway
+U0S6BNVNY : youtube's video embed works fine but tweets don't. I find that hilarious
+U3SJEDR96 : huh, that's pretty weird!
+U1G51S63S : <@U3SJEDR96> :disappointed: do you think there is some workaround around this to use webcomponents?
+U3SJEDR96 : Hmm. You could do a test to check what the behavior is like when the webcomponent node is create within a documentfragment before being added to the DOM. If that behaves differently, creating a wrapper webcomponent that waits until the next animation frame before replacing itself with the documentfragment is an option.
+U1G51S63S : Yep, just found Angular have exactly the same problem and solution is only to create wrapper component
+U1G51S63S : there is even <@U0CL0AS3V> google maps example fork with wrapper :thumbsup: <https://github.com/lisardo/elm-google-maps/commit/8c5c83d58445524d01d81592bf6bf1557a71066e>
+U1G51S63S : will try it now :slightly_smiling_face:
+U3SJEDR96 : :thumbsup:
+U42FYKFRN : hey - If I have a string which is a timestamp e.g. 1501750359529 - how can I convert that to an Elm Time so I can format it?
+U1A4GSPT4 : <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Date#fromTime>
+U3SJEDR96 : Elm `Time` is just a `Float`, so you'd turn that into a float and multiply it with `Time.seconds`
+U42FYKFRN : got it thanks :slightly_smiling_face:
+U0GR62XBP : Hey there! When embedding Elm into a JS app, is there a straightforward way to catch all runtime errors and have a central handling for this?
+I know, I know, there simply are no runtime errors, but actually there could be, like stack overflow on infinite recursion or the things outlined by Noah in “Top 6 ways to make your Elm app crash at runtime” etc. Personally, I would not care too much about these cases but my current client made delegating all JS runtime errors into the central error handling routine a strict requirement for introducing Elm into the stack.
+
+U66RFDZ8F : I was developing and hit this error out of the blue.My project fails to compile with the following error 
+`elm-make: getFileAttributesExStandard: does not exist (The system cannot find the path specified.)`
+
+U66RFDZ8F : It was working till I installed `elm-json-extra`
+U3SJEDR96 : (`elm-community/json-extra` is preferred) You may want to remove `elm-stuff` and `elm-package install --yes` after that
+U66RFDZ8F : let me try
+U3SJEDR96 : did you install that package by editing `elm-package.json` or by issuing `elm-package install circuithub/elm-json-extra`?
+U3SJEDR96 : <@U0GR62XBP> I suppose a `try/catch` around your whole app might.. do.. something. Haven't tried that, tho
+U66RFDZ8F : I actually installed `"elm-community/json-extra": "2.3.0 &lt;= v &lt; 3.0.0",` but I used the VS Code package manager which calls `elm-package install --yes` under the hood
+U66RFDZ8F : <@U3SJEDR96> worked! thanks
+U3SJEDR96 : ah, alright... That error seems more prevalent when editing elm-package.json rather than using the proper `elm-package` command, not sure what gives, tho
+U3SJEDR96 : and alright, cool, that's the proper package :thumbsup:
+U66RFDZ8F : well, VS Code terminated with `failed to run command`ish message so
+U66RFDZ8F : maybe something happened
+U66RFDZ8F : thanks again
+U66RFDZ8F : does elm `Int` cover 64 bit integers?
+U66RFDZ8F : Also, where can I find more information on the behaviour of `float`? I need to handle some decimals from C#
+U3SJEDR96 : both `Int` and `Float` are 64bit floats under the hood, i.e. regular JS numbers
+U3SJEDR96 : <https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER> a little more info there
+U66RFDZ8F : awesome! thanks
+U3SJEDR96 : (so you don't actually have 64bits for the integer part)
+U0GR62XBP : <@U3SJEDR96> No, unfortunately just wrapping the embed in try/catch does nothing. The Elm code is not executed in the context of the embed call.
+Here is a stack trace:
+
+U3SJEDR96 : seems to work if it's an actual run-time error: <https://ellie-app.com/3VDBXx3MkTxa1/0> (check the console)
+U3SJEDR96 : If the regex is a top-level value, you'll get the error while the JS is actually loading, so before you even do the embed. Not sure how to handle that, tbh
+U3SJEDR96 : But then again, that can't just _slip through_
+U0GR62XBP : Funny, I also tried that and it did not catch the runtime error (I produced the Regex error in my update but that should not make a difference). Not sure what’s going on here. Maybe Ellie does things slightly different or my webpack build makes for a difference. Good to know that it _should_ work (at least in some cases).
+U0GR62XBP : When debugging, the top level function call for me was the event handler function in Elm core (in makeEventHandler).
+U0GR62XBP : Oh, look: <https://ellie-app.com/3VF78MYHyHva1/1>
+U0GR62XBP : When the error is in the update function, it goes through uncaught. The difference was that you produced the error in the init.
+U63E8NR33 : Hi everyone! My first question on Elm-Slack! Yeah! Here it goes: Is there an elm equivalent of ramdas anyPass or allPass <http://ramdajs.com/docs/#anyPass> ?I have written it myself but I'm wondering if it already exists and I'm not able to find it.
+
+U0GR62XBP : <@U3SJEDR96> So, that’s not an option, but thanks for the discussion :slightly_smiling_face:
+U17MSA88M : <@U63E8NR33> you'd probably map your predicate over the list and then use the `any`/`all` function
+U17MSA88M : Oh nvm. I just saw what that function actually does. sry
+U3SJEDR96 : <http://klaftertief.github.io/elm-search/?q=List%20(a%20-%3E%20Bool)%20-%3E%20a%20-%3E%20Bool>
+U3SJEDR96 : though I'd probably do what <@U17MSA88M> suggested. Give a `List (a -&gt; Bool)`and an `a`, - `predicates |&gt; List.map (\f -&gt; f a) |&gt; List.any identity` for `anyPass`
+U17MSA88M : I wanted to see what I'd have to do in PureScript and typed it in: <http://try.purescript.org/?gist=4f542a569c9001dd3afd1f5a3cde7014&amp;backend=core|try.purescript.org/?gist=4f542a569c9001dd3afd1f5a3cde7014&amp;backend=core>
+U17MSA88M : funnily enough the usual `and` is polymorphic enough in PureScript to combine a bunch of predicates
+U3SJEDR96 : Seems like your code didn't save
+U17MSA88M : why not? does it not show the right solution in the error pane?
+U0LL6NC1K : looking for <http://package.elm-lang.org/packages/powet/elm-funfolding/2.0.1> ?
+U3SJEDR96 : <@U0LL6NC1K> that package is an option (and linked from that search :point_up: ) but it's a pretty un-elm-ish package. I think a simple `map` and `any`/`all` should suffice without needing a package that creates an abstraction of that
+U63E8NR33 : Thank you for the answers!elm-funfolding almost does what I want. But I stick with my solution:
+`allPass predicates x = List.foldl (\f acc -&gt; acc &amp;&amp; f x) True predicates`
+
+U3SJEDR96 : That, of course, also works :slightly_smiling_face:
+U63E8NR33 : I guessed such a basic function is defined somewhere. Maybe in a future elm release. But klaftertief's elm-search is an awesome hint! Thanks for that!
+U0EUHKVGB : My advice: if you need a function and the type is simple, stick with the simple solution rather than introducing a new data structure. Only use a new data structure when you need _that_ data structure.
+U42FYKFRN : hi - what’s the best way to turn an Encode.Value into a pretty json string?
+U3SJEDR96 : `Json.Encode.encode 2 yourValue`
+U42FYKFRN : thanks
+U63E8NR33 : <@U3SJEDR96> , <@U17MSA88M> , <@U0LL6NC1K>: regarding my previous question, I made a pull request.  <https://github.com/elm-community/list-extra/pull/79>
+U1AP08WV6 : <@U0GR62XBP> I had good results with <https://github.com/getsentry/raven-js>, which is basically subscribing to `window.onerror`. Perhaps digging in its source code could be helpful for you. BTW it has "breadcrumbs" functionality, which works really well for recording incoming messages to your `update` through a port. Thanks to this you have a stack trace and a pretty good idea what user might have been doing when something bad happened.
+U0GR62XBP : I know about window.onerror. That would indeed be a solution. That part of the code is not mine, so I was looking for an Elm specific solution. But it’s probably better to convince the folks responsible to add a general window.onerror handler.
+U1CE9DL9H : Does someone have a trick to make this snippet typecheck? The problem is that in 0.18, a `number` is not `comparable` (fixed in 0.19). Here `(+)` needs a number and `List.sortBy` needs a comparable. ```
+sortByInsideOut : (a -&gt; number) -&gt; List a -&gt; List a
+sortByInsideOut toNumber items =
+    let
+        withSum =
+            List.map (\element -&gt; ( element, toNumber element )) items
+
+        folder ( element, sum ) ( bottom, bottoms, top, tops ) =
+            if lt (top - bottom) then
+                ( bottom, bottoms, top + sum, element :: tops )
+            else
+                ( bottom + sum, element :: bottoms, top, tops )
+
+        ( _, bottom, _, top ) =
+            withSum
+                |&gt; List.sortBy Tuple.second
+                |&gt; List.foldl folder ( 0, [], 0, [] )
+    in
+        List.reverse bottom ++ top
+
+```
+
+U1CE9DL9H : <@U1N4KAHT6> I don't think we can make this work without some really nasty stuff (toString, then parse or something like that)
+U0EUHKVGB : Yeah, you would have to make `toNumber : (a -&gt; comparable)` and then use `toString` with `String.toInt`
+U1CE9DL9H : things we do for nice type signatures...```
+
+accursedUnutterableNumberToFloat : number -&gt; Float
+accursedUnutterableNumberToFloat value =
+    case toFloat (toString value) of
+        Err e -&gt;
+            Debug.crash "a number could not be parsed as a float"
+
+        Ok v -&gt;
+            v
+```
+
+U1N4KAHT6 : oh dear
+U1CE9DL9H : the thing is, if we resort to `(a -&gt; Float)`for now, then upgrading to `(a -&gt; number)` with 0.19 is a breaking change
+U1N4KAHT6 : Because of these sort of issues, I’ve been designing a lot of apis now to just use floats
+U1N4KAHT6 : If the user has Ints, they can convert them pretty easily themselves
+U1N4KAHT6 : The loss of generality kind of pains me, but avoiding `accursedUnutterableNumberToFloat` is worth it
+U1CE9DL9H : sure, we might be able to slip it in with some other breaking change once 0.19 is around
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

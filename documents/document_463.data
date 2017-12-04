@@ -1,3 +1,69 @@
-    Html (Msg)```
-Thats weird. What is `MakeCall`?
-Whats the type?
+U23SA861Y : <https://ellie-app.com/3KwcVmNZ8X5a1/1>
+U23SA861Y : <https://ellie-app.com/3KwcVmNZ8X5a1/2>
+U0FP80EKB : YOu can do this <https://ellie-app.com/3Kw6DQKfzKPa1/0>
+U0FP80EKB : Use `text ""` to not render
+U0FP80EKB : oh, my link didn't work
+U0FP80EKB : <https://ellie-app.com/3Kwf735ngRWa1/0>
+U23SA861Y : *cough* fork *cough*
+U0FP80EKB : Here we go
+U0FP80EKB : :slightly_smiling_face: I haven't used ellie much
+U0FP80EKB : <@U2SR9DL7Q> using `text ""` is a placeholder for nothing <https://ellie-app.com/3Kwf735ngRWa1/0>
+U2SR9DL7Q : those look good. The original code is
+```
+iewBoardCanvas : Model -&gt; Html Msg
+viewBoardCanvas model = 
+    let canvas =
+        Options.div [] [] if model.game == Nothing else 
+    Options.div []
+        [ if model.game == Nothing then Options.div [] [] else &lt;| text "I'm a canvas!"
+        , Button.render Mdl
+            [ 0 ]
+            model.mdl
+            []
+            [ text "Start Game" ]
+        ]
+```
+
+U23SA861Y : yeah, I'm used to the go playground flow
+U2SR9DL7Q : essentially, the user should click start game, and the game board should appear.
+U23SA861Y : in that case you should have some sort of state variable `type State = Pregame | Playing | Results`
+U2SR9DL7Q : Button onclick will eventually do the necessary updates
+U23SA861Y : or something and have the view conditional on that
+U23SA861Y : rather than just an explicit `showBoard: Bool`
+U2SR9DL7Q : game is a `Maybe Game` type so the button triggers to update function that sets up the required state
+U23SA861Y : right so you would use a case instead then
+U23SA861Y : and do a pattern match
+U2SR9DL7Q : I considered case... but I've never used it with a list element... since the only thing changing is one item in the main div's list of Html
+U23SA861Y : ```viewBoardCanvas model =
+case model of
+   Nothing-&gt;
+      renderStartGame
+  Just game -&gt;
+    renderGameBoard game
+```
+
+U23SA861Y : case just returns the branches
+U23SA861Y : it could be any value even a list
+U2SR9DL7Q : Interesting. So Just make them two entirely different view functions
+U23SA861Y : sure, the screens are probably going to look pretty different
+U2SR9DL7Q : Yes but, can you put a case statement _inside_ a list?
+U23SA861Y : you can, but you can also use a let
+U23SA861Y : but I would suggest some helper functions, more clear
+U23SA861Y : you can also have the case return a list
+U3SJEDR96 : you can put a case expression just about anywhere, for Elm, in the end, it's just another expression
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

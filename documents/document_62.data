@@ -1,4 +1,114 @@
-(where ```(s/def :q/test-map (s/keys :req [:q/b :q/a] :opt [:q/c :q/d]))``` and the various keys :q/a etc are simple ```odd? even? string? keyword?```
-even? isn't total
-it throws an exception if something isn't a number
-so you need something like (s/and number? even?)
+U65NWMNN5 : Name
+```Your Name```
+
+Email
+
+```Your Email```
+
+Password
+
+```Enter your password```
+
+`Send`    `Cancel`
+
+U3QUAHZJ6 : hello everyone, im trying to figure out uncessary dependencies on my project (im using lein)
+searching the webs ive found `lein deps :tree` but its output is quite large and im not sure where exactly to look
+
+U3QUAHZJ6 : does anyone has any suggestion?
+U050MP39D : so I have a project, which has :aot :all in the :uberjar profile (in this scenario compiling at runtime was significant, trust me, I measured) but I'd prefer not to have that accidentally interfere with dev if a dev creates an uberjar on their machine. is there any way to either have leiningen delete the .class files after the uberjar is created, or exclude target/classes from the classpath?
+U087U9YG3 : I'm a little bit confused — ^bytes is supposed to be a valid type hint and I'm supposed to be able to type hint the return value of a function by hinting the function name, right?
+U087U9YG3 : but if I do
+U087U9YG3 : ```(defn ^bytes foo-bytes []  (.getBytes "foo"))
+
+(defn foo-string []
+  (String. (foo-bytes)))```
+
+U050MP39D : <@U087U9YG3> I didn't know ^bytes was a valid type hint. I've been using ^"[B"
+U087U9YG3 : I get an error
+U087U9YG3 : I can use it on arguments and it works fine
+U087U9YG3 : ```(defn string-from-bytes [^bytes b]  (String. b))```
+
+U087U9YG3 : gives me no problem
+U087U9YG3 : it seems odd that I can use it to hint arguments but not return type
+U087U9YG3 : <@U050MP39D>
+U060FKQPN : <@U087U9YG3> don't type hint the var name
+U087U9YG3 : maybe create an alias that creates an uberjar outside the target folder, then runs lein clean?
+U060FKQPN : type hint the argvec
+U087U9YG3 : <@U060FKQPN> cool, thanks, that works
+U087U9YG3 : how come type-hinting the name sometimes works?
+U060FKQPN : type hints on the var name don't work in case of primitive/"special" type hints
+U060FKQPN : because they get resolved
+U060FKQPN : so you're type hinting using the `bytes` function rather than the bytes type
+U087U9YG3 : right
+U060FKQPN : there's a number of other pitfails when you type hint no the var name
+U060FKQPN : everything that you acn express by type hinting on the var name you can express by type hinting on the argvec, and more
+U060FKQPN : so I always suggest to only type hint on the argvec
+U060FKQPN : and avoid having to know about the edge cases
+U087U9YG3 : …would it make sense to print a deprecation warning when type hinting the var-name for a release or two, and then disallow it?
+U064X3EF3 : var meta is resolved, meta on args and argvec is not and the "special" hints can be used in those locations
+U064X3EF3 : we have no plans to stop allowing meta on vars
+U050MP39D : ah, so type hinting the return with ^"[B" would work?
+U064X3EF3 : as it would break existing code
+U060FKQPN : correct <@U050MP39D>
+U060FKQPN : but again, there are other issues when you're typehinting on the var name
+U060FKQPN : like, type hinting primitive hints won't cause the funcntion return type to be optimized
+U060FKQPN : if you type hint the argvec it will
+U087U9YG3 : huh, ok, I'll try to remember to do that =)
+U060FKQPN : I think eastwood might complain about bad type hints
+U087U9YG3 : huh, ok, I'll check if it complains about hinting the var name, if it doesn't it probably should
+U060FKQPN : it might complain about bad type hints, not about all hints on var names
+U060FKQPN : can't remember
+U060FKQPN : it's been a while
+U087U9YG3 : <@U050MP39D> did you see my aliasing suggestion? would that work for you?
+U060FKQPN : <https://dev.clojure.org/jira/browse/CLJ-790> upvote this maybe
+U0J9LVB6G : <@U3QUAHZJ6> You should check out <https://github.com/walmartlabs/vizdeps> It draws a graph of the info found in lein deps :tree.
+U060FKQPN : and <https://dev.clojure.org/jira/browse/CLJ-1863>
+U050MP39D : <@U087U9YG3> it would work, but looking for a solution that won't require me to change anything other than the leiningen project.clj. getting an alias rolled out to all devs, all deploy boxes etc is a chore
+U087U9YG3 : oh, you can have aliases in project.clj
+U050MP39D : <@U3QUAHZJ6> as sad as it is, I'm not actually sure all the information required to know whether a dependency is used or not exists statically
+U050MP39D : I think I actually just need to understand :target-path and :compile-path a bit better and I can make this work
+U0W0JDY4C : this isnt really a clojure specific question, but I'm curious to hear how to handle it idiomatically (if one exists) in clj. how does one evolve data (domain entities in an application) over time with minimal changes and minimal complexity? <https://groups.google.com/forum/#!topic/clojure/hA0so8Fp8lg>
+U050MP39D : namespaced keys and addition over destruction :stuck_out_tongue:
+U051SS2EU : also - generally keep your data as flat as possible
+U050MP39D : ^ oh yeah and that
+U0W0JDY4C : just keep accreting the changes, leaving the old keys there?
+U050MP39D : finicky nested over "organized" data models are magnets for repeated restructures into a new "better, more organized" structure
+U051SS2EU : you can deprecate keys - move them from required to allowed but not mandatory
+U1LCB75M2 : <@U051SS2EU> any arbitrary nested object can be seen flat w/ namespaced keys, so things go hand in hand
+U0W0JDY4C : more specifically, say I have some client entity```
+{:thing ""
+:schedule {:start "" :end ""}
+```
+are you saying instead to 
+```
+{:thing ""
+:schedule/start ""
+:schedule/end ""}
+```
+
+U051SS2EU : <@U1LCB75M2> right - it's not an absolute but a tendency - and I would discourage using namespaces as if they were a series of nested keys…
+U0W0JDY4C : then maybe evolving end to "completed" would equal`{:thing "" :schedule/start "" :schedule/end "" :schedule/completed}`?
+
+U050MP39D : <@U1LCB75M2> what about (s/def ::tree-node (s/keys :req [::left ::right]))
+U0W0JDY4C : or perhaps more appropriately `{:thing "" :schedule_start "" :schedule_end "" :schedule_completed}`
+U0W0JDY4C : to avoid namespaces being a series of nested keys
+U0W0JDY4C : but at some point code that renders a view by looking at an entity's `(get-in x [:schedule :start])`, or in a better organized entity `(:schedule_start x)` would have to be changed either way, no?
+U1LCB75M2 : `(:schedule/start x)`
+U1LCB75M2 : <@U050MP39D> by "nested" I'm thinking document-oriented representation. this tree-node definition is more like a memory model (you're describing the shape of a tree vs. a tree that represents anything in particular - e.g. company org chart)
+U0J9LVB6G : <@U051SS2EU> Can you elaborate on what you mean by "using namespaces as if they were a series of nested keys"
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

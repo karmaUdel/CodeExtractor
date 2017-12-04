@@ -1,5 +1,133 @@
-    WebSocket.listen model.hostname Msg``` No need to create a task to get the hostname, just initialise the app with flags instead.
-Also, if <@U36C7SUAX> is using the `Navigation.program` instead of `Html.program` then the programs init function already gets a `Navigation.Location` object which the hostname could be plucked out from.
-hiya. two unrelated newbie questions here
-1. looking at <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Maybe> and it shows int he example for `andThen` an operator `|&gt;` . what is that operator supposed to do?
-2. is type annotation not available in the REPL? also, is there a way to create multiline functions on the REPL?
+U0LR6R73K : Users needs to start DM with your bot or you have no DM ID
+U0KECURAT : bots can start dms through the api
+U0LR6R73K : Oh? <@U0KECURAT> what endpoint?
+U0KECURAT : <https://api.slack.com/methods/im.open>
+U0LR6R73K : Oh thanks! That is good to know
+U28S48UN7 : Hi all! I just joined because I have a lot of free time on my hands at work so I'm tinkering with building bots. I look forward to building with y'all!
+U21UGU36Z : Can anyone help me with a question about responding to the slash commands / message buttons `response_url`?
+U21UGU36Z : I have two POSTs going to the response_url, one which is ephemeral and one which is in_channel. The in_channel is meant to replace original, but what happens is the “ephemeral” message is sent as in_channel, and the in_channel replaces it immediately
+U21UGU36Z : My action URL responds 200 immediately
+U21UGU36Z : and the ephemeral message replaces original, too
+U21UGU36Z : Hmmmm```
+This field cannot be specified for a brand new message and must be used only in response to the execution of message button action or a slash command response. Once a response_type is set, it cannot be changed when updating the message.
+```
+
+U21UGU36Z : Does that mean I cannot POST to `response_url` with ephemeral and in_channel responses?
+U21UGU36Z : I want to update the message everyone sees (it increments a count on the buttons) and send a link only to the person who clicked the button
+U21UGU36Z : Okay, so yeah, you have to specify `replace_original` explicitly in at least the ephemeral message
+U21UGU36Z : I did it in both just in case
+U2908LWTY : Hi there, I'm having a trouble when I try to use interactive messages with a bot user, because when I press an option automatically slack bot says "Oops something went wrong". Has anyone knows whats going on?
+U1116QM2Q : <@U2908LWTY> u probably need to setup your intereactive messages endpoint on your slack app
+U1116QM2Q : if you are using botkit, and use the `controller.createOauthEndpoints` method
+U1116QM2Q : then it will setup the interactive messages endpoint at `yourhost:3001/slack/receive`
+U1116QM2Q : so you go to yourslack app menu... go to the interactive messages option and set up the endpoint there
+U0HBN0L9M : are you sure that would work <@U1116QM2Q> ? I don't think it's a redirect
+U0HBN0L9M : I would think you'd need to use ngrok or localtunnel to expose the endpoint
+U1116QM2Q : usually when slack gives you the `something went wrong` its causet he endpoint is not set :stuck_out_tongue:
+U1116QM2Q : and yes i didn't mention that detail
+U0HBN0L9M : like <http://mylocaldev.localtunnel.me/slack/receive|mylocaldev.localtunnel.me/slack/receive>
+U1116QM2Q : but your "host" needs to have SSL enabled
+U1116QM2Q : so usually what we do
+U1116QM2Q : is use either localtunnel or ngrok to setup a tunnel to your server
+U0HBN0L9M : localtunnel is HTTPS
+U1116QM2Q : and that handles the SSL part
+U1116QM2Q : yep
+U0ZCQS8QN : with localtunnel you can save a subdomain with your bot name so you don't have to keep changing it in slack: `lt --port 4115 --subdomain yourbot`
+U0TGHKPEU : btw guys where can i get invites for my colleague to join this team.. i forgot the link :grin:
+U28E8RWE9 : <http://dev4slack.xoxco.com|dev4slack.xoxco.com>
+U28E8RWE9 : <@U0TGHKPEU>
+U0TGHKPEU : <@U28E8RWE9> thanks
+U1P3Q8JKV : Hey I'm writing a wee android app that wants to send an image and some summary text to slack via intent.
+I was thinking that the EXTRA_TEXT would show up as the initial file comment, and the EXTRA_SUBJECT would be the upload title.
+
+Instead, the EXTRA_TEXT is being put in the upload title field.
+I can see how that makes sense, but is there any way to get it into the format I want using intents?
+(Image, subject, comment)?
+
+U1P3Q8JKV : Oh yeah.. It's not specifically for slack, but slack is one of the apps I'm testing against :slightly_smiling_face: 
+U0KECURAT : <@U1P3Q8JKV> attachments have special fields for all those things yeah
+U1P3Q8JKV : Carefully reading the android docs, it looks like I'm asking too much by sending EXTRA_TEXT and EXTRA_STREAM in the same intent, and recipients are just doing what they can with my weird intent :laughing: 
+Thanks <@U0KECURAT>
+
+U2908LWTY : <@U1116QM2Q>  Thanks man! I'll try that.
+U2908LWTY : <@U1116QM2Q>  Yes, I'm using botkit and I went to the docs and they explain the same thing that you tell me. So really apreciate it. Thanks man
+U1116QM2Q : no problem! :slightly_smiling_face:
+U29GZAFCL : Hi all, I have a question about bot authorization. On my website I have a button "Add to Slack" that requests oauth authorization with 'bot' scope. Works perfectly, except when a team integration limit is reached and Slack displays `You can't authorize X because your team has reached the integration limit` error to the user.  Which is okay in general, but I would like Slack to allow user through in scenario, when the app was already added to the team previously (for example, by another user). It looks like Slack checks for team integration limit before it checks if a bot/app has already been authorized for the team. Question is: how can I avoid error message about team integration limit to the user when a bot has already been authorized before? One option is to have two steps, "Add to slack" first and then "Sign in with Slack" (without bot scope) when first one fails, but it's not good user experience.
+U0M3CFEJV : <@U29GZAFCL> post in <#C0K8617D5|slack-api>
+U0M3CFEJV : :slightly_smiling_face:
+U29GZAFCL : oops :slightly_smiling_face: okay, will post there
+U20RE7QSW : <@U29GZAFCL> are you sure? I think we're at our integration limit, but I don't get that when adding my own bot (again)
+U29GZAFCL : Yes, tried it with different (free plan) teams.
+U1RL6RTCY : hey, i'm building a bot with botkit in slack *
+U1RL6RTCY : i'd like to make it publish
+U1RL6RTCY : what's the easiest way ?
+U1RL6RTCY : can someone help ?
+U1GTE56R4 : a friend of mine is compiling a complete guide to the entire Bot Dev Stack ecosystem. Are your tools listed here, or did they miss anything?
+<http://bit.ly/BotStackcompendium>
+
+U1GTE56R4 : Some folks PMd me about the Bot Stack Compendium, so I'm just going to leave the full table here: <http://bit.ly/BotStackTable>
+U2806KW0J : thanks mylogan for that compendium
+U29PG4HNX : <@U1GTE56R4>: thanks for the compendium. You helped me in selecting a framework 
+U200UBJSJ : Compendium is great. Thanks for that
+U29SUUB0S : Hi, a quick question. I want a easy way of exiting a conversation with my bot. So i thought i could listen for `exit` when I start the `bot.startPrivateConversation()` but how do i remove that `controller.hears` listener after the conversation is over?
+U0ND8KMFG : <@U29SUUB0S> is this what you are looking for <https://api.slack.com/events/im_close> ?
+U29SUUB0S : no, not really. i just want to have a way of exiting a flow of questions.
+U1116QM2Q : not sure i follow... there's the `conversation.stop` method why do you want to remove teh controller hears listener?
+U0ND8KMFG : ok, so you need to know when a conversation is over. in Microsoft's Bot Framework they have similar behaviour. You can check it in GitHub and see how they do it.
+U29SUUB0S : but maybe i should ask this in the <#C0HNPFAF2|botkit-conversations> channel instead... :wink:
+U29SUUB0S : <@U1116QM2Q> yes, exactly. but how do i remove it
+U29SUUB0S : some pseudocode ```    controller.hears(['new player (.*)'],'direct_message',function(bot, message) {        bot.startPrivateConversation(message, initConv);
+    });
+
+    var initConv = function (response, convo) {
+
+        controller.hears(['exit'],'direct_message',function(bot, message) {
+            convo.stop();
+        });
+
+        convo.on('end',function(convo) {
+
+            if (convo.status=='completed') {
+                // do ya thing
+            }
+
+            if (convo.status === 'stopped') {
+                // here i want to remove the controller.hears(['exit']);
+                bot.reply(_message, "okay, c u l8r")
+            }
+
+        });
+
+        convo.ask({
+            ...```
+
+U1116QM2Q : i'm not sure if you can... remove it actually never had to do that as i don't use the `controller.hears` listeners like that
+U1116QM2Q : i usully just use them as top level "conversation" or "feature" starting listeners
+U1116QM2Q : that the bot always responsds to
+U1116QM2Q : if you want to ask a question or wait for a player input you can use the `convo.ask` method and parse the answer of the player, and repeat the question if it doesn't fit what you want the player to answer to
+U1116QM2Q : that way you don't need to setup listeners inside the conversation method
+U1116QM2Q : <@U29SUUB0S>
+U29SUUB0S : yes, this is how I do it today ```if (response.text.toLowerCase === 'exit') {                convo.stop();
+            } else {
+                askFirstParentName(response, convo);
+                convo.next();
+            }``` I just wanted to clean up the code a bit...
+
+U1116QM2Q : i think the way you have it on that snippet is fine, is there a problem still?
+U29SUUB0S : just that i have to have it on every question :wink:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

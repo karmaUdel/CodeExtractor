@@ -1,0 +1,119 @@
+U2UP91YLE : help me setting elasticsearch-dsl for n-gram!
+U2UP91YLE : done!
+U5W7MEVHR : hi, all! I have dict with oldstring as key and newstring as value. I need replace strings in file according to that dict. What is the best way to do that?
+U1BP42MRS : What have you tried <@U5W7MEVHR> ?
+U5W7MEVHR : <@U1BP42MRS> Well, I think to do it like this:```
+for key, value in dict.items():
+    with open(filename, 'r+'):
+        for line in f:
+            line = re.sub(key,value, line)
+            f.write(line) # &lt;-- possible mistake
+     f.close()
+```
+
+U1BP42MRS : Does that work?
+U1BP42MRS : you could probably simplify it a little for yourself if you can fit the whole file in memory and then re-write it
+U5W7MEVHR : I thought there is more simple way...
+U1NSCAY6R : Also, if you use `with open` it handles closing the file for you. For those newer pythonistas, these are called context managers and are awesome
+U5W7MEVHR : <@U1NSCAY6R> cool)
+U1BP42MRS : Yeah, the simplest:
+```
+with open(my_file) as f:
+    content = f.read()
+
+for k, v in dict.items():
+    content = re.sub(k, v, content)
+
+with open(my_file, 'w') as f:
+    f.write(content)
+```
+
+Though there probably is a "better" way.
+
+U5W7MEVHR : <@U1BP42MRS> oh! that's really simple) thanks a lot, forget that it's possible to replace in the whole text not just in line
+U1BP42MRS : It saves a few iterations, but it will load the whole file in - so be aware of how large the file is!
+U5W7MEVHR : Oh, it's just hundreds of lines, it will be ok.
+U1UFZTD4J : You can make rabbitmq faster by using the HiPe compile. But I doubt that's the problem, as you wont notice a difference there until you hit scale.
+U0NRYQNAZ : so has anyone tried to setup travis with a public python repository that has a private repository as a dependency? From what I can tell I need to have a private travis accnt to even do this =(.
+U29163YQH : well it make sense
+U0NRYQNAZ : this wouldn't be an issue except that my org has run out of private repos.
+U0NRYQNAZ : i think if i used a dependency link in my setup.py with the env_var of a user token that has access and format the dependency link url with the token it should be able to pull the dependency down.
+U0NRYQNAZ : a lil hacky.
+U29163YQH : well if the repo is public people would have access
+U29163YQH : not sure if that's ok for you
+U0NRYQNAZ : not with the env var
+U29163YQH : oh sorry I miss env var
+U29163YQH : yeah it could work
+U0NRYQNAZ : yea, i'll have to create a new user and give them read access but it sounds feasible. something for the morning!
+U0NRYQNAZ : ok, i found a good resource. i think this will do the trick. <https://github.com/blog/1270-easier-builds-and-deployments-using-git-over-https-and-oauth>
+U1BP42MRS : I'd guess you can just use an ssh key with access to the repo
+U0NRYQNAZ : <@U1BP42MRS> travis isn't letting me put in an ssh key.
+U0NRYQNAZ : it shows me where i can in the docs but it looks like that's the spot for a travis pro account.
+U1BP42MRS : Oh yeah I'm thinking of your hack, make it an envvar, echo it to a file and then clone 
+U1BP42MRS : Travis is pricey
+U0NRYQNAZ : oh ok.
+U1BP42MRS : Maybe make a basic auth user and use https 
+U1BP42MRS : Then in the before process stripe in the creds 
+U0NRYQNAZ : yea i found this too. i think you commented @nerdwaller. <https://stackoverflow.com/questions/4830856/is-it-possible-to-use-pip-to-install-a-package-from-a-private-github-repository#comment55105837_27901245>
+U1BP42MRS : And it's too late to edit to fix the error
+U1BP42MRS : <@U5KUA7XPG> please don't cross post 
+U1BP42MRS : Give the question in <#C0LMFRMB5|django> some time before broadening the ask
+U5KUA7XPG : Okey, I will delete one. Should I delete in Django or here?
+U1BP42MRS : If it's Django specific, I'd leave the question there. If you don't get any traction within a few hours, then you can share the question here (note the share tip, per the intro doc, vs copy/paste).
+U1BP42MRS : In case you need the intro doc :point_up::skin-tone-4: 
+U5KUA7XPG : Okey, so in the future I will post my question in <#C0LMFRMB5|django> at first. After some time without response I will paste it here. Is it a good habit?
+U29163YQH : :thumbsup:
+U5KUA7XPG : Thanks for quick intro.
+U1BP42MRS : minor correction, "share" it here :slightly_smiling_face: <https://get.slack.help/hc/en-us/articles/203274767-Share-messages-in-Slack>
+U1PCHFXMH : Hmmm... I have a list of dictionaries that I need to merge but sum one of the keys. Need some direction. My Monday brain is not working efficiently.Something like this
+```
+# start with
+[
+    {'first': 'Frank', 'val': 12, 'last': 'Jones', 'id': 2},
+    {'first': 'Jane', 'val': 12, 'last': 'Jones', 'id': 3},
+    {'first': 'Frank', 'val': 12, 'last': 'Jones', 'id': 2}
+]
+
+# end with
+[
+    {'first': 'Frank', 'val': 24, 'last': 'Jones', 'id': 2},
+    {'first': 'Jane', 'val': 12, 'last': 'Jones', 'id': 3}
+]
+```
+
+U1BP42MRS : <@U1PCHFXMH> - is the merge based on the `id` field (or a grouping of the values)? Also does order matter?
+U1PCHFXMH : order does not matter, i just need to sum the "val", every other piece of data is the same, the id will always be the same
+U1PCHFXMH : so yes, on the `id` field
+U1PCHFXMH : With my real data, I am merging on a unique string code
+U1BP42MRS : I would probably use a dict if the dataset is small enough:
+```
+cache = {}
+for item in my_list:
+    if item['id'] not in cache.keys():
+        cache[item['id']] = item
+    else:
+        cache[item['id']]['val'] += item['val']
+```
+
+U1PCHFXMH : That complicates things later on when I split the list in two by a column value of True/False, but I suppose I can work around that.Thanks for taking a look <@U1BP42MRS> :taco:
+
+U1BP42MRS : Yeah it's a little awkward, but at the end I meant to print `cache.values()` 
+U1PCHFXMH : <@U1BP42MRS> Right of course... it's been a long day for me too.That works great, when the data gets too large I'll adjust as necessary.
+
+U1BP42MRS : Good call on not pre-optimizing too much! I am sure there is some really terse and cool trick, but I like simple :smile:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

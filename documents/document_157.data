@@ -1,48 +1,96 @@
+U07TDTQNL : as opposed to sending the request over the websocket?
+U09FEH8GN : yeah, I suppose we could send the request over websockets instead.
+U09FEH8GN : the only reason we send it over http is for legacy reasons
+U07TDTQNL : so your current pattern would have problems with a loadbalancer out-of-the-box, but most load balancers also support things like routing all requests from a single client to the same server
+U09FEH8GN : hmm yeah that might work, then the websocket and the http requests would be guaranteed to be connected to the same instance
+U07TDTQNL : another approach I've used, which might work with smaller numbers of clients, is that you maintain a message queue for each connected websocket. When a user connects to the system they start receiving messages from their queue. That way if the websocket connection breaks, they can reconnect via a different server, and pick up where they left off by reading from the same queue, but on a different server.
+U07TDTQNL : then your HTTP requests can also go into a message queue with a "response queue" name as part of the request.
+U07TDTQNL : That's a rather complex model that works quite well, but has more moving bits.
+U09FEH8GN : and what would you use for the message queue bit?
+U07TDTQNL : I've used RabbitMQ for this, but Id probably use Kafka these days since it's immutable
+U050TNB9F : ```;; breaks with EOF while reading
+(some-&gt;&gt; (identity [:#something])
+         (filter identity))
+;; works
+(some-&gt;&gt; (identity [:#something]) (filter identity))
 ```
-the same kind of event will have different results right now and after the change
-I love how a discussion with Slack devs turns into an API feature a few weeks later
-incredible platform team :simple_smile:
-Hey guys, has anybody tried doing a delayed bot response? Consecutive bot.reply makes the bot post so fast that it doesn't seem too... organic?  Delayed replies could make it seem more human
-<@U0XEXKYSV>: <https://dev4slack.slack.com/archives/general/p1460133394001097>
-<@U0CS6NSF5>: Thanks!
-np :simple_smile:
-<@U0XEXKYSV>: Yes, I'm doing that with the bot I've been working on (<http://getyoursidekick.org|getyoursidekick.org>). I actually also use the "is typing" indicator, and then I delay the message based on its length, but with a maximum 2 or 3 seconds.
-That way, the responses are not so robotic/abrupt, but also, the user doesn't have to wait for a big chunk of data to load for the sake of "realism".
-(Although I'd like to note that I belong to the school of thought that says you shouldn't make your bots appear to be humans, the delay is really just about the abruptness.)
-Hey all, does anyone have any experience with load testing on Botkit? I've used services like <http://blitz.io|blitz.io> in the past for http testing, but simulating messages coming in through Botkit's ws connection seems tricky... any thoughts?
-I am trying to use Slack APIs  search.messages  - it says you can have boolean queries, but doesnt give an example of the format.  Has someone used it for boolean queries ?  I am trying to do a query for a channel AND user.   This works :  <https://slack.com/api/search.messages?token=xxx&amp;*query=from%3AJohn.Doe*>  and so does    <https://slack.com/api/search.messages?token=xoxp-xxx&amp;*query=in%3A%23channelfoo*>
-But how do I do both query=in:channelfoo&amp;from:John.Doe ?
-Just use a space to separate them :simple_smile:
-`in:#channel from:john.doe`
-thanks !   how to do OR ?
-I'm running into an issue that when integrations are disabled for non-admins on the Slack org level, I can't even have the user use Identify scope. Is there a work around? Right now it seems like all or nothing :cry:
-*anyone*?
-Anyone from *Slack* itself have any insights on this?
-Hey there!  Just dropped in.  We're working on a 'Sign in with Slack' feature that will address this.
-Until then there's no workaround. :confused:
-Thanks, would that give the equivalent of “identify” scope?
-Also, any high level ETA? (this month, 90 days etc)?
-<@U0MUZB415> someone posted about their hack for this a few days ago
-looking
-<@U07VCKRUK>: Will ‘sign in with slack' send users who authorized in the past right to my app instead of showing the scopes permission screen every time? That is a pain point right now and seems unnecessary to show every time if they already granted permissions.
-thanks Alex
-<@U0MUZB415> <https://dev4slack.slack.com/archives/general/p1460483117001266>
-<@U07VCKRUK>: When I heard slack was adding an “add to slack” button, I thought it would be more like Facebook, for easy one click login to enterprise apps.
-<@U0MUZB415>: ETAs are difficult, but I believe we're targeting release in the next couple months.
-<@U0H9CA2MS>: thanks for some reason that link doesn't work
-just dm'd you the text
-<@U07VCKRUK>: - appreciate it
-<@U0554MQJB>: 'Sign in With Slack' will address this as well.
-prepping for launch of my Pomodoro Bot: <https://tomatobot.win/>
-Thanks in advance
-<@U0GPSB7V1>: just heads up, your about page has the “add to slack” button but your home page says “coming soon"
-<@U0GPSB7V1>: is that you? <https://slack.com/apps/A0QMVCPAR-tomatobot> The two things looks different but they have the same name.
-Hey!
-Is it possible to start a conversation without revieving a message before with botkit?
-<@U1108D77Y>: maybe ask in <#C0AV5N8NA> :simple_smile:
-ahhh thanks! :simple_smile:
-<@U0Z1RH1QX>: thanks, forgot about that one!
-<@U0GT29N3A>: no, that's a different one :disappointed:
-i like that tomato though :laughing:
-Hey guys, my app hit the directory story, feel free to share you thoughts <https://www.slashnotes.com>
-Thank you!
+whhyyyy? :smile:
+
+U07TDTQNL : so when a client reconnects they can say "I last read from message #4434" and then they can start getting data from that point on.
+U09FEH8GN : i see
+U09FEH8GN : yeah the load balancer approach might be most appropriate for us
+U09FEH8GN : This has been really helpful, thank you.
+U051SS2EU : I'd blame that on :#anything being invalid
+U07HZ0JGL : is there a predicate equivalent to `(or (fn? %) (and (var? %) (fn? (var-get %)))` ?
+U051SS2EU : no
+U5ZAJ15P0 : Is there a project (more specifically a web application) which lets you search the std lib by giving one (or many) input-output samples?
+U051SS2EU : <@U5ZAJ15P0> there's findfn which is a lib
+U5ZAJ15P0 : e.g. give it `#(* 2 %), [1 2 3] [2 4 6]` and it would tell you it's map
+U5ZAJ15P0 : by trying it out on very clojure.core function
+U051SS2EU : <https://github.com/Raynes/findfn>
+U050ECB92 : look at <https://crossclj.info>
+U050ECB92 : not exactly what you're asking
+U5ZAJ15P0 : <@U050ECB92> ha, still cool!
+U050ECB92 : good for finding examples out in the wild.
+U5ZAJ15P0 : exactly what I was look for; thanks! I thought about building a web app for this but if it already exists…
+U051SS2EU : findfn gives really surprising results sometimes (eg. the long list of clojure.core functions that are effectively identity if called on one arg)
+U051SS2EU : but history shows I'm easily amused, so there's that
+U050ECB92 : is there a vim repl plugin that works *without* nREPL?
+U050ECB92 : similar to emacs/inf-clojure
+U051SS2EU : the newer vim can do socket comms - so it *should* exist even if it doesn't
+U051SS2EU : <@U050ECB92> using this to connect to clojure socket server would be a fun weekend hack I bet <http://vimhelp.appspot.com/channel.txt.html>
+U1CTH1TUY : <http://blog.cognitect.com/blog/2017/4/17/clojure-for-neovim-for-clojure>
+U1CTH1TUY : and <https://github.com/jebberjeb/clojure-socketrepl.nvim>
+U051SS2EU : oh, nice
+U050ECB92 : interesting, thanks!
+U5ZAJ15P0 : Hi! Is there a "test reporter" for plumatic schema (or another schema lib?)?
+U5ZAJ15P0 : usecase: I want to validate API responses in tests against a schema and have a nice test report if things fail
+U051SS2EU : <@U5ZAJ15P0> what I do is call s/check on the schema and the object, and fail if the result isn't nil with the output of check in the failure
+U5ZAJ15P0 : <@U051SS2EU> how should I configure clojure.test to have a nice output for "expected" and "actual" on the report?
+U051SS2EU : <@U5ZAJ15P0> test/is lets you put anything you want in the second arg's string
+U051SS2EU : <@U5ZAJ15P0> umm that's kind of what clojure.test does when you run the tests
+U051SS2EU : are you talking about doing this outside unit tests?
+U5ZAJ15P0 : it only seems to work fell for some predicates
+U5ZAJ15P0 : no, running the tests
+U5ZAJ15P0 : for example, if the predicate is any arbitrary function it won't report much
+U5ZAJ15P0 : I wrote a dumb, poor "schema" toy lib
+U5ZAJ15P0 : and getting a report such as:```
+expected: (v (get flat-target k))
+  actual: false
+```
+
+U5ZAJ15P0 : (v is a predicate function)
+U5ZAJ15P0 : I'll try with the approach you suggest
+U5ZAJ15P0 : (that's running it with `test/is`)
+U051SS2EU : ```Clojure 1.9.0-alpha15+user=&gt; (require '[clojure.test :as t] '[schema.core :as s])
+nil
++user=&gt; (t/is (nil? (s/check [Number] ["a"])) "expected a number")
+
+FAIL in () (NO_SOURCE_FILE:2)
+expected a number
+expected: (nil? (s/check [Number] ["a"]))
+  actual: (not (nil? [(not (instance? java.lang.Number "a"))]))
+false
+```
+
+U5ZAJ15P0 : Maybe I could call do-report manually instance
+U5ZAJ15P0 : mmh
+U5ZAJ15P0 : hang on
+U5ZAJ15P0 : seems to work, ok, nevermind
+U051SS2EU : if you test a predicate, all you get in the error is that the predicate didn't return the true/false you expected
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

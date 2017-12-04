@@ -1,26 +1,62 @@
+U0JMKBZL0 : If I remove the symlink in checkouts, everything seems to work fine.
+U064X3EF3 : frameworks are things that call you, rather than things you call
+U064X3EF3 : (which are more likely components)
+U064X3EF3 : <@U0LGCREMU> ^^
+U0LGCREMU : hmm, seems a reasonable defn
+U064X3EF3 : not something I made up and probably not 100% satisfying, but I think it's about right
+U0NBGRGD6 : <https://github.com/technomancy/leiningen/blob/master/doc/DEPLOY.md>I'm trying to deploy to private repo according to this tut, but every time I use lein deploy, It will ask for username and password. 
+I mentioned it's said there's a bug for gpg, it that mean the username and password in credentials.clj.gpg will not work, orI have to do something?
+
+U0S3YK6HK : Hey all, I am running into what I think is a bug with how clojure's java interop works
+U0S3YK6HK : I am trying to wrap <https://github.com/lokra/seaweedfs-client> for use in clojure
+U0S3YK6HK : but when I try to port the example upstart code
+U0S3YK6HK : ```FileSource fileSource = new FileSource();
+// SeaweedFS master server host
+fileSource.setHost("localhost");
+// SeaweedFS master server port
+fileSource.setPort(9333);
+// Startup manager and listens for the change
+fileSource.startup();
+
+FileTemplate template = new FileTemplate(fileSource.getConnection());
+template.saveFileByStream("filename.doc", someFile);
 ```
-are you aware that clojure never optimizes tail calls?
-generally with list processing, you don't want to use recur (which acts like an optimized tail self call) but instead make a lazy-seq, which works with your current code if you wrap the else `(lazy-seq (cons h (flat t)))`
-yeah, but the loop-recur ( looks like uses go-to ) can help me with that, isn't ?
-you could use recur, but that tends to be clumsy for sequences
-yep
-especially with a function that has a tree call structure
-what you mean by tree call structure ?
-every call leads to 0 or more self-calls
-as opposed to 0 or 1, which is linear, 0 or more means you end up with a tree of calls
-and a linear series of calls is neccesary for tail call  -you can't have two tail calls
-you can force it by adding a state accumulator which makes the code more complex and moves data out of the stack and into the heap
-I see
-yeah
-correct me if I'm wrong, but all tail call function they have some kind of accumulator, isn't ?
-not always - but it's very common
-actually I think a tail call function with no accumulator would be pretty weird
-i can't see
-but I could see it for eg. something that repeatedly accesses a resource and eventually returns a result
-yeah
-clojure is not lazy by default, like haskell right, how the lazy works on clojure , `(lazy-seq (cons h (flat t)))`
-right - but many functions are lazy
-Lazy is only there when you don't want it to be &gt;.&gt;
-including concat
-&gt; LAZY SEQ HELLO
-that's only if you call str - just printing won't do that
+
+U0S3YK6HK : to clojure
+U0S3YK6HK : ```(defn connect!
+  [host port]
+  (let [client (FileSource.)]
+    (.setHost client host)
+    (.setPort client port)
+    (.startup client)
+    (reset! client-atom client)
+    (let [value (.getConnection @client-atom)]
+      (reset! file-template-atom (FileTemplate. value)))))
+```
+
+U0S3YK6HK : I get an error similar to `IllegalAccessError tried to access class org.lokra.seaweedfs.core.Connection from class &lt;class info&gt;`
+
+U0S3YK6HK : I have found <https://groups.google.com/forum/#!topic/clojure/zr2N0dbidAI> and <https://dev.clojure.org/jira/browse/CLJ-1243> that seem to point to this being a problem
+U0S3YK6HK : Any suggestions or workarounds I can try?
+U0S3YK6HK : Plot thinkens, I can use the code without problems on my Mac but on Windows it breaks
+U0S3YK6HK : :thinking_face:
+U061HGP8C : <@U0S3YK6HK> What's the Java version on both? `lein version` should print it
+U061HGP8C : Also possibly compare the outputs of `lein deps :tree`
+U064X3EF3 : I don't see any signs that CLJ-1243 has anything to do with it
+U0JL9D0E9 : hey guys! I want to read a stream with unknown number of lines (e.g. a file) and fire an async get request per each line (lets say using an http-kit async get with `(go (&gt;! c response))` as a callback). then, read the responses one by one into another file. is there an elegant way of closing the channel making sure I am not missing any async puts into the channel? I can do so with putting my own guard msg at the end but it feels awkward.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

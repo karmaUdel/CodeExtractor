@@ -1,6 +1,62 @@
+U23SA861Y : ```scanl: (a -&gt; a -&gt; b) -&gt; List a -&gt; List b
+scanl fn l =
+    List.tail l
+        |&gt; Maybe.withDefault []
+        |&gt; (\x -&gt; List.map2 (,) x l)
+        |&gt; List.map (uncurry fn) 
 ```
-yes, exactly <@U0CLDU8UB> !
-Okay so what is the problem you are facing?
-so this is my first attempt with json decoders.  and i'm able to correctly decode all other data.
-but as far as i know i need to specify an alias, so the decoder, can use it to create the Elm object.
-in my ex. above.  after Decode.map5.
+
+U5AEH3L05 : I like that -- split it into two lists and then operate on those
+U48AEBJQ3 : How about```
+    List.Extra.zip
+        xs
+        (List.tail xs |&gt; Maybe.withDefault [])
+        |&gt; List.map (uncurry f)
+```
+
+U23SA861Y : what you doing with List.extra in there
+U23SA861Y : you don't need that
+U48AEBJQ3 : Because `List.Extra` already implements zip?
+U4F64AKQV : <@U48AEBJQ3> That last implementation is probably as nice as it will get.
+U23SA861Y : zip is just map2
+U23SA861Y : I wouldn't pull an import just for (,)
+U4F64AKQV : In all likelihood you'll be using other stuff from List.Extra anyway
+U23SA861Y : ```scanl: (a -&gt; a -&gt; b) -&gt; List a -&gt; List b
+scanl fn l =
+    List.tail l
+        |&gt; Maybe.withDefault []
+        |&gt; List.map2 (flip fn) l 
+```
+
+U5DDM498S : what tools would you recommend to mock RESTful APIs?
+U48AEBJQ3 : I would still at least go```
+    List.map2 f
+        xs
+        (List.tail xs |&gt; Maybe.withDefault [])
+```
+
+U2UGVS24E : <@U5DDM498S> do you mean a path that you can send data to?
+U2UGVS24E : and get a response from?
+U5DDM498S : yes, responses can be hardcoded
+U23SA861Y : then just a static webserver
+U5DDM498S : but handle different HTTP verbs and URLs
+U5AEH3L05 : man y'all cut that function down real good. thanks for showing me how nice it can get!
+U2UGVS24E : You should be able to make a single file Flask (Python) app or Express (nodejs) app without much work
+U2UGVS24E : I just googled and found this example:
+U2UGVS24E : you can probably define more paths user `<http://router.post|router.post>`, `router.put`, etc in the middle section
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

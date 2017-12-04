@@ -1,67 +1,131 @@
+U0JBSEGHY : My model contains other stuff... which isn't in the Json response
+U180KMGRE : Can ReceiveToken take a string and then in your update you can update it in your model?
+U0JBSEGHY : OH!!
+U0JBSEGHY : Damn Types.... haha
+U0JBSEGHY : still getting used to it :sweat_smile:
+U153UK3FA : Look at the type of Http.send
+U0JBSEGHY : I had this `| ReceiveToken (Result Http.Error String)`  saying Model. Which I have now changed.
+U0JBSEGHY : Ok I'm getting an error / not getting anything back when I make the request :disappointed:
+U3SJEDR96 : Try logging the `Err` case to the console using `Debug.log`, or inspecting the messages in the debugger
+U0JBSEGHY : Where would that fit into code like this? ```type Msg    = Answer
+    | HangUp
+    | FetchToken
+    | ReceiveToken (Result Http.Error String)
+    | Err
+    | NoOp
+
+
+update : Msg -&gt; Model -&gt; ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        Answer -&gt;
+            ( { model | log = Connected }, Cmd.none )
+
+        HangUp -&gt;
+            ( { model | log = Disconnected }, Cmd.none )
+
+        FetchToken -&gt;
+            ( model
+            , fetchToken
+            )
+
+        ReceiveToken (Ok newToken) -&gt;
+            ( { model | token = newToken }
+            , Cmd.none
+            )
+
+        ReceiveToken (Err _) -&gt;
+            ( model
+            , Cmd.none
+            )
+
+        Err errorMessage -&gt;
+            let
+                _ =
+                    Debug.log "Error in HTTP response: " errorMessage
+            in
+                NoOp
+
+        NoOp -&gt;
+            ( model, Cmd.none )
+
+
+fetchToken =
+    Http.send ReceiveToken (Http.get apiEndpoint tokenDecoder)
+
+
+tokenDecoder =
+    Decode.field "token" Decode.string```
+
+U0JBSEGHY : yea I ended up with something similar.         ```ReceiveToken (Err errorMessage) -&gt;            let
+                _ =
+                    Debug.log "Error " errorMessage
+            in
+                ( model
+                , Cmd.none
+                )```
+Says that `Err` has too many arguments.
+
+U0JBSEGHY : Ok think I got it compiling now
+U3FJSB596 : Can you paste the log message?
+U0JBSEGHY : My beginner web programming experience is showing xD
+U0JBSEGHY : `XMLHttpRequest cannot load <http://localhost:4000/api/twilio/token>. No 'Access-Control-Allow-Origin' header is present on the requested resource. Origin '<http://localhost:3000>' is therefore not allowed access.`
+U3SJEDR96 : Ahh, good old CORS.
+U0JBSEGHY : On MDN now :laughing:
+U3SJEDR96 : you'll have to configure your server to allow ajax requests from `localhost:3000`
+U0JBSEGHY : dope
+U0JBSEGHY : got it working now :slightly_smiling_face:
+U0JBSEGHY : Funny all these small things trip me up and the project I am working on seems like Everest compared to this stuff!
+U68471J6P : Is it possible to pass multiple values to transform in elm-css, just as you would in regular css? (i.e. "transform: translateY(4deg) rotateX(20%)" )
+U3SJEDR96 : There is a `transforms` function for that :slightly_smiling_face:
+U3SJEDR96 : <http://package.elm-lang.org/packages/rtfeldman/elm-css/9.1.0/Css#transforms>
+U68471J6P : Read about it just a second before your message, but thanks for the help!
+U2GPAEU1L : Hey everyone, in case you're struggling with `type alias`, I just made a tutorial here that goes over everything you need to know - this is a tutorial targeting beginners.
+<http://codetidbit.com/#view/snipbit/596fa4497890d775c05191f9/introduction>
+
+Cheers :smile:
+
+PS. I'll be making a tutorial on `type` shortly, so if that confuses you don't worry, I'll post the tutorial in this channel
+
+U3SJEDR96 : amilner42: Not sure I'd call it common to type alias primitives :thinking_face:
+U2GPAEU1L : Perhaps not too common, I was just trying to explain to people _why_
+U3SJEDR96 : Personally not a fan, it isn't more self-documenting than clear argument names, and requires me to keep in mind that `Name` is actually a `String` so I can use the correct functions to work on it. ¯\_(?)_/¯
+U2GPAEU1L : That's a fair opinion. There are spots in my code where I like it, and there are spots where I don't.
+I wouldn't say it's the same as documentation. 
+- For example you may have your types separate from your implementation. In that case you'd have to document right about the type annotation what the types are - at that point it seems to make more sense to just write it in one line, in the type itself.
+- Documentation tends to go stale faster than code/type-annotations, people are more likely to remember to update it.
+- My IDE only shows the types, so if I hover over something it'll only say "String -&gt; String -&gt; String -&gt; Bool" if I don't use type aliases, it's nice to have it say "Name -&gt; Bio -&gt; etc etc…" directly in my IDE. Saves me time.
+
+So I wouldn't say "you should never use type aliases for primitives", I'd say that it is situational
+
+U3HQVHERX : I agree with <@U3SJEDR96>. furthermore, aliasing the String is not needed since the name of the arguments make it clear what the "intention" of the strings are.
 ```
-Nice, thanks.
-<https://github.com/elm-community/list-extra/blob/6.1.0/src/List/Extra.elm#L315>
-with evan saying 0.19 was going to be all about SPA, what happens to elm-ui and elm-mdl
-<@U1SQLHY1G> can you say more about how those are related
-What does a high std dev mean in terms of elm-benchmark? What would make a function perform so inconsistently?
-kyclark: There’s also `List.Extra.zip`, which is implemented as `map2 (,)` iirc.
-Also note that the implementation I am comparing it against has a very small std dev.
-<@U4F64AKQV> just a wild guess but maybe the one function causes more memory allocation/deallocation and is therefore more likely to trigger garbage collection while it's running? If sometimes the GC ran and other times it didn't that could explain it...
-<@U1TMAG4FK> that sounds reasonable. The function with high std dev is creating more intermediate data structures.
-<@U4F64AKQV> might be able to check it with something like Chrome dev tools performance monitoring - it calls out GC pauses separately
-yeah, that would be my guess, too. Is the stddev higher than the performance diff, tho, <@U4F64AKQV> ?
-The moment of shock you realize there is not a single JS library doing something an elm library solves already quite well
-<@U0K92QFST>++
-Is there a way to know how many packages elm-package have? How many of them are up-to-date with language version?
-<http://package.elm-lang.org/new-packages> &lt;- 0.18 compatible
-so 607 currently
-Cool!
-How much in total?
-Sorry, I am from the phone, can't try it myself
-926
-Ok, thanks!
-Good day everybody!
-If I've run into an error message that IMO could be more helpful, where do I look for existing issues or file a new one?
-<https://github.com/elm-lang/error-message-catalog>
-Thanks <@U0EUHKVGB> !
-Just checking: there's no way to share the Elm runtime between many apps, right? We're serving many Elm mini-apps on the same page, and don't want to serve several megs of the same thing...
-What does "sharing the elm runtime" mean, exactly? They need a separate model, and update; but the actual functions and whatnot _are_ shared, they just get separate structures for what's actually _going on_
-shouldn't be several megs unless you have a large model, though
-You can compile it into a single bundle, <@U0U6ML22H>
-`elm-make A.elm B.elm`
-i.e. if you bundle multiple modules `elm-make Module1.elm Module2.elm --output bundle.js`, it's just one defintion for everything
-there is a PR for adding support to webpack: <https://github.com/elm-community/elm-webpack-loader/pull/119>
-Where is the `elm-live` output coming from?
-might just be elm-live getting confused by files being created/renamed/..? not sure
-The file was there when I started it. The space was new, so no rename there.
-what happens if you `elm-make src/Main.elm`, <@U2D7NUGS1> ?
-<@U0EUHKVGB> <@U3SJEDR96> hmm OK, let me explain: our backend serves pages with different small Elm apps in them (one or more per page/route). These are all compiled to their own .js. They, I believe, all include the Elm runtime. The thing is, one page/route might embed several of those apps, and each of those will, as established, contain the Elm runtime. I'd like it if it was possible to have only the Elm runtime as one file, and the remaining apps as their own file. In the app, each page/route could theoretically need to embed one or more Elm apps (by that I mean it's important to keep the apps independent)
-No, you can’t do that
-You have to create one big bundle
-<@U3SJEDR96> bingo!
-<@U2D7NUGS1>, when you run `elm-make` directly on a file, it will assume the name is `Main.elm` unless it finds a valid module decleration telling it otherwise.
-Hence why the errors are different.
-Yeah, I get this. I just think the error could be improved.
-Yep. Just explaining how it works
-Sure. Thanks.
-<@U0EUHKVGB> yeah, the big bundle won't work in that case :smiley: Do you think that the compiler improvements in 0.19 could help with that use case, or is it completely out of scope?
-I didn't find any issue about it, so I guess I can  file a new one at <https://github.com/elm-lang/error-message-catalog/issues> as you suggested <@U0EUHKVGB> .
-<@U0U6ML22H> Yes, but it would work based on compiling multiple entry points together, I suspect.
-do you mean that the improvements are geared more towards optimizing "one big Elm app with several Elm-pages served by Navigation" instead of optimizing our use case of serving several small (but full-fledged) Elm apps in one single HTML page?
-We don’t know
-OK
-I’m only guessing
-all right, thanks for your help :smiley:
-<@U0U6ML22H> it will depend on how many of those apps exist in your ecosystem, but if you have, say, on average 60% of those active in a single user-session, it might be worth bundling _all_ of them in a single file and trying to send it to the user gzipped and minified. It's a trade-off; but perhaps it's better to have them download 1 larger file, rather than 20 slightly-less-large files over the course of a single session
-especially considering the sum of those files will be larger than the single large bundle (due to duplication)
-yup, I agree with that kind of reasoning; I was just thinking it should be easy to share the Elm runtime as a side-dependency
-Yeah, I don't think that can be (easily) done
-I'm probably not good enough to understand why ^^
-It can be done, but right now you will be fighting more than you are achieving.
-I _suspect_ that this is what is coming with 0.19.
-:wave:
-thanks <@U0EUHKVGB> and <@U3SJEDR96>
-does anyone know what the most elegant way is to conditionally render an attribute in elm?
-with html you can just do `if someBool then p [] [] else text ""`. what is the equivalent for attributes?
-what we do is append to a list
-yeah that's why I asked for the most elegant way. That was the only one I could come up with and it not that nice to use. :confused:
+validNameAndBio : String -&gt; String -&gt; Bool
+validNameAndBio name bio =
+```
+
+U3HQVHERX : and if you have something like `String -&gt; String -&gt; String -&gt; String` where the strings are related, maybe it's time to put them into a type aliased record anyway
+U1J83SK9N : is there an easy way to convert a .svg into some virtual svg dom?
+U3HQVHERX : great tutorial though!
+U23SA861Y : sry?
+U3SJEDR96 : <https://mbylstra.github.io/html-to-elm/> might support that
+U23SA861Y : you can also embed the file with an object tag
+U1J83SK9N : well, I need the nodes for events and stuff.
+U1J83SK9N : ah, looks good! <@U3SJEDR96>
+U3SJEDR96 : <@U3HQVHERX> <@U2GPAEU1L> let's take it out of the thread :slightly_smiling_face: I realize this is just a case of differing opinions, and you're free to use type aliases all you want; however in the context of a tutorial aimed at beginners, I'd be careful in expressing that opinion without labelling it as such. As for documentation and it going stale, so can a type alias, say `name : FirstName -&gt; LastName -&gt; String` and I refactor the implementation to be `name lastName firstName = ...`. Since they're type aliases, I'm just making your life more difficult, compared to if it had been `String -&gt; String -&gt; String` and you had to look at the argument names to figure out what they refer to.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

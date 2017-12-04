@@ -1,5 +1,92 @@
+U5ABF3BH7 : sorry might need
+U0EUHKVGB : <@U5ABF3BH7>, what you are asking is a issue to do with the user experience and single page application design in general.
+U5ABF3BH7 : Right
+U0EUHKVGB : First, identify the minimal amount of data required to display something useful to the user.
+U5ABF3BH7 : I am wondering what is the best practice
+U0EUHKVGB : This might be nothing, this might just hospitals.
+U0EUHKVGB : The initial request should as small as possible. 5-7 seconds is a long time to wait for a page to load.
+U2JA29EKF : can you page through the data? I have a page that fetches 10 items, which is pretty quick, then fetches 100, then collects the rest in chunks of 1000. user sees something quickly, but all the data gets pulled eventually
+U5ABF3BH7 : I was a bit unclear, the page doesn't take that long to load but the data takes that long to be fetched.
+U0FP80EKB : Like <@U0EUHKVGB> is saying, I’d load the minimal amount to show something on the page, then load the rest in the background.
+U5ABF3BH7 : Adding a div on the page with ```div [] [ text (toString model.rolodexlists)]```, where rolodexList is the array of the data I am getting takes that long to be updated
+U5ABF3BH7 : I am wondering if it is better to get the data in batches later instead of in the initialModel through an initial Command
+U5ABF3BH7 : <@U0FP80EKB> How do you load it in the background?
+U0FP80EKB : The same way to load it, create a cmd to load the data
+U0FP80EKB : don’t think of it as background, I guess, as much as thinking of it as loading it second
+U5ABF3BH7 : Where do you add the command for it to be in the background? (I am pretty new to Elm)
+U0FP80EKB : Sort of a process like this1) from `init` return the cmd (http request) to load the initial data
+2) when the data arrives in your `update`, set it in your model, then return the cmd (next http request) from this `update`
+
+U0FP80EKB : My first pass would be to load it all initially, though, not sorry about it.  Get the system working even with the 7 seconds. Then, once you have it working (slowly), then you can start peeling it away. I like the old sayingMake it work, make it right, make it fast (in that order)
+
+U0K92QFST : Ah right, we had discussed this. Writing down my ideas would be a useful exercise for me as well! Hopefully I have some time for higher-level design thoughts this Sunday.
+U2LAL86AY : wow!  I've just seen `elm-benchmark` in action. I'm blown away - super useful library, thanks so much <@U19JQD9DF> Hicks :smile: . <https://elmseeds.thaterikperson.com/elm-benchmark>
+U5Q42DDMJ : Hi all
+U5Q42DDMJ : I have an app (dashboard with widgets) in which I'm constantly editing the model and then running PUT requests to save it
+U5Q42DDMJ : I'm wondering what's the best way to be sure all the save requests are executed in the right order
+U5Q42DDMJ : (with js I was storing a promise and chaining future requests to the globally saved promise inside a service)
+U5Q42DDMJ : is it possible to have something like saving a Task is the model and adding andThen at each update ?
+U5Q42DDMJ : and of course I also want to use debouncing and I'm wondering how to best implement it (there seem to be several libraries on the subject but do you have any recommandation?)
+U1CE9DL9H : you can store a `Task` in the model and andThen, but the task isn't actually evaluated when you do that
+U2LAL86AY : <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Task#sequence>
+U1CE9DL9H : also, elm is fundamentally asynchronous, so you'll have to deal with that
+U1CE9DL9H : one solution could be to wait till the put request is finished before sending the next one
+U5Q42DDMJ : yes that's what I want to do (what I'm doing actually in js today)
+U5Q42DDMJ : when I need to save a new version, I get my promise and use a `promise = promise.then(() =&gt; { return model.put(); }`
+U5Q42DDMJ : using Task sequence seems right in elm but the first task needs to start as soon as possible, but if a second one arrives it must wait for the first one to complete
+U57KYFW67 : Are there any ways to create a nontrival Task (ie not one created through succeed or fail) in the core package?
+U1CE9DL9H : <@U57KYFW67> define non-trivial?
+U57KYFW67 : I did :X
+U1CE9DL9H : well, you can combine primitives with `map` and `andThen`
+U1CE9DL9H : so, yes
+U57KYFW67 : `map` and `andThen` both require you already have a `Task`... so I guess to be more precise, one which does not contain any reference to `succeed` or `fail`. So `map (\x -&gt; x) (succeed True)` wouldn't really count, either.
+U1CE9DL9H : <@U5Q42DDMJ> so I think you need to pick some nice data type to model what you want to do, for instance `type BackupRequest a = Sending { waiting : Maybe (Task Http.Error a) } | Done `
+U5Q42DDMJ : it seems I need to chain Cmd, not Tasks, which is not possible without a custom manual implementation... ?
+U1CE9DL9H : for custom stuff, tasks are the way to go
+U57KYFW67 : Ah, it looks like the `Process` module exposes a few
+U1CE9DL9H : <@U57KYFW67> well, `Time.now`
+U5Q42DDMJ : yes but once the task is started (attempt ?), you can't use it any more for `andThen`
+U1CE9DL9H : true
+U1CE9DL9H : so you create a new empty task
+U5Q42DDMJ : what for?
+U1CE9DL9H : actually, create a new task, that will be the next put
+U57KYFW67 : Maybe I'm wrong, but `Task`s seem like they would be well-suited for working with random numbers.
+U1CE9DL9H : then as long as we're waiting for the server, swapping out that task with a newer version when the model is updated. once the request resolves, send the new task
+U5Q42DDMJ : yes that's even an improved version
+U5Q42DDMJ : but the implementation is completely manual, no help form the core library
+U1CE9DL9H : what would you like to see in core? it seems simple enough to implement and may give you material to publish a package
+U5Q42DDMJ : not sure to be at the package level yet :wink:
+U5Q42DDMJ : but yes ok I'll try something like that with a pendingModelToBeSaved, swapping it with a new one when an update is made
+U0FP80EKB : For the data that changes, we usually have it in a type like (simplified)```
+type Savable a
+    = Saved a
+    | Saving a
 ```
-that's to put the type tag so it returns SomeCompositeTye
-it does that already
-<http://package.elm-lang.org/packages/NoRedInk/elm-decode-pipeline/3.0.0/Json-Decode-Pipeline#custom>
-if I'm reading this correctly
+Then, when a save is triggered, we don’t do it until it makes it back to `Saved`
+If you want to have a way to say “I want to save it when finished” then you can add another state to it, something like `SavePending`
+
+U0FP80EKB : So, the code only creates the PUT if it is in `Saved` state
+U5ABF3BH7 : <@U0FP80EKB> Thanks for the explanations, they are helpful!
+U0FP80EKB : <@U5ABF3BH7> Good luck.
+U5ABF3BH7 : <@U0FP80EKB> Thanks!
+U5Q42DDMJ : yes thx for the ideas
+U0HMZCR5W : <@U4F64AKQV> I’m wondering what the absolute timings in your benchmark are. I’ve found that for very short tasks things like requestAnimationFrame can add noise to Elm results
+U0HMZCR5W : another thing that chrome tools can help tell you…
+U5FU80S06 : Can I get an _object id_ for an Elm _object_? I want to have a JS cmd pass back the id into Elm so I can locate a tree-node that needs highlighting.
+U0EUHKVGB : No, you have to create them.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

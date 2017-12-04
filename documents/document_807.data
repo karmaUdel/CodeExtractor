@@ -1,0 +1,94 @@
+U2LC0U8JY : :disappointed:
+U2LC0U8JY : also, this makes it much harder to work with
+U2LC0U8JY : right?
+U2LC0U8JY : using a record would be easier, but is not possible in a recursive way
+U4872964V : what could you not figure out? It would be exactly the same using a record (though you can’t define recursive records of course)
+U4872964V : <@U2LC0U8JY> first, what is the difference between `elements = Just []` and `elements = Nothing`?
+U2LC0U8JY : with a record i would write it like this:```
+elDecoder : Decode.Decoder Element
+elDecoder =
+    Decode.map2 Element
+        (Decode.field "uuid" <http://Decode.int|Decode.int>)
+        (Decode.field "elements" (Decode.list (Decode.lazy (\_ -&gt; elDecoder))))
+```
+
+U3SJEDR96 : `Decode.map2 (\uuid elements -&gt; Element { uuid = uuid, elements = elements } )` would be the "opaque" translation of that
+U2LC0U8JY : thx <@U3SJEDR96>
+U1G7E1P9S : hello
+U1G7E1P9S : I need some help with this error. ```The 3rd argument to function `foldr` is causing a mismatch.
+166|                     List.foldr insertPermit [] fimps
+                                                    ^^^^^
+Function `foldr` is expecting the 3rd argument to be:
+
+    List
+        { building : String
+        , elevation : String
+        , location : String
+        , permitNumber : String
+        , room : String
+        , roomDescription : String
+        }
+
+But it is:
+
+    List FIMP```
+
+U1G7E1P9S : ```type alias FIMP =    { permitNumber : String
+    , watchType : String
+    , room : String
+    , roomDescription : String
+    , building : String
+    , elevation : String
+    , routeChanges : String
+    , permitStatus : String
+    , location : String
+    }```
+
+U1G7E1P9S : insertPermit should work on two types of permits having some common fields, but I get this error and I don't understand why.
+U6EV3H0N7 : what’s the type signature of insertPermit?
+U1G7E1P9S : ```insertPermit :    { permitNumber : String
+    , room : String
+    , roomDescription : String
+    , building : String
+    , elevation : String
+    , location : String
+    }
+    -&gt;
+        List
+            { room : String
+            , building : String
+            , roomDescription : String
+            , elevation : String
+            , permits : List String
+            }
+    -&gt;
+        List
+            { room : String
+            , building : String
+            , roomDescription : String
+            , elevation : String
+            , permits : List String
+            }```
+
+U6EV3H0N7 : ah, so that doesn’t let the first argument have any extra fields in it
+U6EV3H0N7 : you want `{ a | permitNumber : String, ... }` to allow “any record including these fields”
+U6EV3H0N7 : (rather than “this exact record”)
+U1G7E1P9S : ah.
+U6EV3H0N7 : it’s a super useful feature I didn’t discover for ages
+U1G7E1P9S : This is how you make a function work on similar types?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

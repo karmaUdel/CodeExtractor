@@ -1,1 +1,75 @@
+U04V70XH6 : Speed of lookup over plain strings. In theory.
+U0NCTKEV8 : maybe
+U04V70XH6 : `(identical? :abc (keyword (str "a" "bc")))` =&gt; true
+U04V70XH6 : So map lookup will be faster if it can check for `identical?` before falling back to "equal".
+U0NCTKEV8 : but do you want to be interning json coming in over the wire?
+U3L6TFEJF : what am I missing here?```
+user=&gt; (defn foo [args] (apply hash-map args))
+#'user/foo
+user=&gt; (binding [*data-readers* {'foo #'user/foo}] #foo [1 2 3 4])
+
+             java.lang.RuntimeException: No reader function for tag foo
+clojure.lang.LispReader$ReaderException: java.lang.RuntimeException: No reader function for tag foo
+             java.lang.RuntimeException: Unmatched delimiter: )
+clojure.lang.LispReader$ReaderException: java.lang.RuntimeException: Unmatched delimiter: )
 ```
+
+U0NCTKEV8 : the whole form is read before the binding is run
+U04V70XH6 : Good question, given that converting arbitrary strings to keywords can open you up to a denial of service attack.
+U0NCTKEV8 : I mean, you will likely be fine, and keyword's intern a weakreference, so the they will get cleared
+U04V70XH6 : Ya, but... :slightly_smiling_face:
+U051SS2EU : ```user=&gt; (defn foo [args] (apply hash-map args))#'user/foo
+user=&gt; (binding [*data-readers* {'foo #'user/foo}] (read-string "#foo [1 2 3 4]"))
+{1 2, 3 4}```
+
+U3L6TFEJF : <@U0NCTKEV8> ahh, so you need this? `(binding [*data-readers* {'foo #'user/foo}] (read-string "#foo [1 2 3 4]"))`
+U3L6TFEJF : haha, timing :smile:
+U0NCTKEV8 : yes
+U3L6TFEJF : while on the topic of tagged literals: is there anything special you need to do to get it to work with `tools.namespace`?
+U3L6TFEJF : I've placed a `data_readers.clj` in my classpath root, but when I try to use it in the REPL I get something like "Can't call unbound Var"
+U3L6TFEJF : lemme dig up the exact exception
+U0NCTKEV8 : you need to require the namespace before you can use the reader
+U0NCTKEV8 : data_readers.clj sets up the tag, but doesn't actually cause the namespace where the function is defined to load
+U3L6TFEJF : I'm pretty sure I did that, but let me double check
+U3L6TFEJF : ok, so my `data_readers.clj` contains `{foo kleinheit.pg.impl/foo}`
+U3L6TFEJF : `(defn foo [vs] (apply hash-map vs))`
+U3L6TFEJF : wait a minute!
+U0NCTKEV8 : and every place where you read something using that tag, before that does a require of that namespace execute?
+U3L6TFEJF : okay, I see the problem: if I use `(require 'kleinheit.pg.impl :reload)` first thing in the REPL, it works
+U3L6TFEJF : but if I do `clojure.tools.namespace.repl/refresh`, it doesn't
+U3L6TFEJF : yep, `tool.namespace` clobbers it somehow
+U3L6TFEJF : the prevailing wisdom on the internet when having problems with data readers is to call `(#'clojure.core/load-data-readers)`, but then I get: ```dev=&gt;   (#'clojure.core/load-data-readers)
+clojure.lang.ExceptionInfo: Conflicting data-reader mapping```
+
+U051SS2EU : if you look at the ex-data on *e that should show you what went wrong, right?
+U3L6TFEJF : I'm getting a conflict with my own data reader file :neutral_face:
+U051SS2EU : OK - so the data readers are already loaded, you have to reload the code they refer to, right?
+U0NCTKEV8 : (which refresh would do if you properly required that code before using the readers)
+U3L6TFEJF : still get the error after calling `refresh`
+U0NCTKEV8 : right, because somewhere you aren't properly doing the require
+U0NCTKEV8 : so find all the places you use the tag, ensure in that namespace you require the namespace where the function the tag maps to is
+U3L6TFEJF : ```dev=&gt; (dev/refresh):reloading (... kleinheit.pg.impl ...)
+:ok
+
+dev=&gt; #foo [1 2 3 4]
+        java.lang.IllegalStateException: Attempting to call unbound fn: #'kleinheit.pg.impl/foo
+clojure.lang.LispReader$ReaderException: java.lang.IllegalStateException: Attempting to call unbound fn: #'kleinheit.pg.impl/foo
+```
+
+U3L6TFEJF : and it works if I just skipped the `refresh` and do the regular `(require ...)`, so I'm at a loss ¯\_(?)_/¯
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

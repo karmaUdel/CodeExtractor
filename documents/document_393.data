@@ -1,12 +1,121 @@
+U3SJEDR96 : and generally, they work by defining a "lower" value, given a certain value. So for a list, this would be a shorter list. For an integer, this would be an integer closer to zero. For a `Just x`, this could be the `Just (shrink x)` or `Nothing`
+U1RK41R0T : thanks! I didn't hit upon an idea of checking `elm-shrink` package itself :slightly_smiling_face:
+U64M3DF1B : hi - being noob to Elm - I have (totally c/p'ed) this
 ```
-nope
-so it has to be explicit
-yeah thought so
-You can't prove at compile-time that your record will have a field with that name, and that changing the value will result in the correct record shape being returned
-yeah makes sense elm-way :smile:
-thank you
-If you have things like that, maybe a `Dict` is what you are after
-If the order of keys in a record doesn't matter, how can `Model` be used as a constructor function [here](<https://guide.elm-lang.org/architecture/user_input/forms.html>)? How would it know which argument goes with which key?
-Thanks to you I know have a working version :slightly_smiling_face:
-Also it would benefit of some refactoring
-At least it works :slightly_smiling_face:
+module Main exposing (..)
+```
+and a ports.js saying `Elm.Main.embed(container)` - only it doesn't :cry: - all it does is complain about Elm.Main.embed not being a function
+
+I've searched for ‘embed' on <http://github.com/elm-lang|github.com/elm-lang> - and to my surprise it's not there? Even so, a number of posts says it can be done like that - even <http://elm-lang.org|elm-lang.org> has it front and center in a piece of code? I am going crazy over this!
+
+U41NK9BM4 : Usually that `Elm.Main.embed(...)` is defined in the generated file by `elm-make`.
+U41NK9BM4 : So, how do you have compiled the Elm file?
+U64M3DF1B : <@U41NK9BM4> that would be the elm.js - 
+I did elm make Main.elm --output=elm.js
+
+U41NK9BM4 : Good.
+U1RK41R0T : perhaps the problem is a `require` statement that must be translated/bundled into ES5 code runnable on the browser?
+U64M3DF1B : :$
+U41NK9BM4 : And you added that elm.js to you HTML file, right?
+U64M3DF1B : this is the ports.js - all of it
+```
+‘use strict'
+const Elm = require(‘./elm.js')
+console.log(Elm);
+// get a reference to the div where we will show our UI
+let container = document.getElementById(‘container')
+
+// start the elm app in the container
+// and keep a reference for communicating with the app
+let mandarinClient = Elm.Main.embed(container)
+```
+
+U41NK9BM4 : Yes, could be you need a more exotic way to include that JS in our app like vviktor said
+U64M3DF1B : ohh
+U1RK41R0T : generally there are some project starting boilerplates that make build process easier
+U64M3DF1B : what I am trying is building an app that will compile into electron - and be runnable from browser - using this: <https://medium.com/@ezekeal/building-an-electron-app-with-elm-part-1-boilerplate-3416a730731f>
+U41NK9BM4 : Quite advanced stuff! :slightly_smiling_face:
+U64M3DF1B : and that works
+U64M3DF1B : well - it's not like I have not done any programming before :wink:(but my Elm is of recent date) :smile:
+
+U41NK9BM4 : Advanced for me, that's for sure.
+U64M3DF1B : but when I change the Main.elm from being a 2-liner into being a module - it kind'a gets out of hand with the embedding stuff
+U64M3DF1B : I don't think that is an issue - I'm concerned with the browser
+U64M3DF1B : but vviktor may be on to something
+U41NK9BM4 : So that example works in your machine?
+U64M3DF1B : yep
+U64M3DF1B : only - when I change the Main.elm to being a module - this embed thing happens
+U41NK9BM4 : IIRC: it must be called `Main` BTW in order to write `Elm.Main.embed`. Otherwise `Elm.YourName.embed`.
+U64M3DF1B : yes - the `module Main exposing (..)` right? Or does it go for the filename too?
+U41NK9BM4 : The naming must be consistent
+U41NK9BM4 : so `module YourName exposing (..)`. But Elm will catch that.
+U41NK9BM4 : I'm just exploring the obvious gotchas :slightly_smiling_face:
+U64M3DF1B : due to the `const Elm = require('./elm.js')` I had to add Browserify - so my build looks like this:
+`elm make Main.elm --output elm.js &amp;&amp; browserify ports.js -o ports.js`
+
+U41NK9BM4 : What does that console.log(Elm); says?
+U3SJEDR96 : that should do the trick, indeed, <@U64M3DF1B> :slightly_smiling_face:
+U3SJEDR96 : I'm a little surprised it didn't blow up on the `require` before, actually
+U64M3DF1B : what? :wait:
+U64M3DF1B : no - it isn't
+U41NK9BM4 : Ah, nevermind.
+U64M3DF1B : funny you mention it - I've totally forgot about it
+U64M3DF1B : the console.log says nothing !?!
+U41NK9BM4 : Really weird.
+U3SJEDR96 : can you explain _what_ goes wrong? Also, where do you use `ports.js` and how? Does `elm-make Main.elm --output elm.js` give any output at all?
+U64M3DF1B : if I change Main.elm to```
+import Html
+
+main = Html.text "hello"
+```
+
+U64M3DF1B : upps
+U3SJEDR96 : yeah, that should do the trick. Well, that and having `module Main exposing (..)` at the very top
+U3SJEDR96 : as in, that's a valid module
+U64M3DF1B : all is well
+U3SJEDR96 : On a general note, I would focus on learning how to use Elm before focusing too much on having it run both in electron _and_ the browser. Getting it running in the browser first, should make it quite easy to getting it to run in electron after
+U64M3DF1B : ok - so now I am really confused!
+I tried your suggestion - that works!
+
+```
+module Main exposing (..)
+import Html
+main = Html.text "hello world"
+```
+
+U3SJEDR96 : (lacking a module at the top will default to `module Main`, afaik)
+U64M3DF1B : but 
+if I do this:
+
+```
+module Main exposing
+  ( Model
+  , Msg
+  , init
+  , update
+  , subscriptions
+  , view
+  )
+
+
+```
+
+stops the fun! And leaves me with `..embed bla bla undefined`
+
+U3SJEDR96 : But do you have a `Model`, `Msg`, and those functions defined?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,2 +1,86 @@
+U1CFBCD4J : i think it's just a haskell based convention that people carried with them to elm &amp; purescript, honestly
+U4872964V : since we already have significant whitespace with `let` and `case` it’s not surprising to have it in more cases
+U4872964V : ```    [
+        item1
+        item2
+    ]
 ```
-aaaaah… I push the `#'` down to the true and false results…
+etc
+
+U4872964V : otoh having a comma is a nice visual cue to where an element starts
+U3R7CKQRX : Hi everybody, I got a question about destroying elm apps and possible conflicts.
+U3R7CKQRX : As far as I know there no real API to `destroy` an elm app so I am assuming it continues to live even if the container it has been `embed()`ded  in is no longer in the DOM.
+U3R7CKQRX : If that is correct I am kind of worried that the app will still listen to some on the page and might cause weird behaviour.
+U3R7CKQRX : Scenario:
+U3R7CKQRX : I have 2 elm apps on my page. Both use the Navigation package to listen to a route that ends in `/home`. Of course only one of the apps is mounted in the DOM at the same time. Will both listen to the urlchange?
+U1EQAULH2 : I asked for articles and you sent me awesome videos. Thanks :raised_hands:
+U14Q8S4EM : Hey <@U3R7CKQRX> , Im not sure, but I wonder if something like…```
+var pageState = { elmApp : Elm.embed(document.getElementById("elm-container") };
+delete pageState.elmApp;
+```
+.. would be a safe approach.
+
+U14Q8S4EM : It really depends on whether the event listeners in Elm that are tried to the window would prevent the Elm app from getting garbage collected. But if it doesnt, deleting the Elm object entirely might help since those event listeners are a part of that.
+U14Q8S4EM : Or it could just mean the window is calling `undefined`. Not sure really.
+U3SJEDR96 : deleting the `app` doesn't do much of anything. Deleting the nodes would help, but even then, subscriptions would stay active, I believe
+U3SJEDR96 : <https://ellie-app.com/3LnCfW6kGmQa1/0> (as illustrated there)
+U14Q8S4EM : Ah, cool. I tried my idea here, and it keeps ticking after you delete the `pageState.elmApp`
+U14Q8S4EM : <https://ellie-app.com/3LpCZQjszCxa1/0>
+U14Q8S4EM : I guess that doesnt really delete the object.
+U3R7CKQRX : yeah, I also tried something like `app =null` before. But just like calling `delete` this only removes the reference and should lead to garbage collection.
+U3R7CKQRX : But the subscriptions stay :confused:
+U3R7CKQRX : As a workaround I guess one could have a js-to-elm port which will do something like this:```{model | destroy = True}
+-- and then ...
+subscriptions model = if model.destroy then Sub.none else ...(some subscription)
+```
+
+U14Q8S4EM : Yeah, I was just thinking, I wonder if you just set `subcriptions model = Sub.none` before you destroy it would work.
+U3R7CKQRX : yeah
+U3R7CKQRX : me too :slightly_smiling_face:
+U3R7CKQRX : I think it would
+U3R7CKQRX : for subscriptions that would help
+U3R7CKQRX : But for `Navigation.program` and this that would work(if my assumption is correct that is listens to urlchanges and keeps the handlers)
+U3R7CKQRX : I should take a look into the code for the navigation package. Having elm apps on a page and them doing stuff even when they shouldn't anymore is a little scary.
+U0CLDU8UB : <@U1EQAULH2> Here's an article I wrote <http://futurice.com/blog/elm-in-the-real-world>
+U3VH7AN30 : Hi there! I have a question about the update architecture. Let's say I have such code:```
+type alias Model = {
+    popup : Popup
+}
+type alias Popup = {
+    isActive : Bool
+}
+type Msg 
+    = PopupMsg Bool
+    | SomeOtherMsg
+```
+When I handle `SomeOtherMsg` with my update function I then want to hide my popup. And now I have 2 ways of doing this:
+1. Directly change my models popup in `SomePtherMsg` case branch like this:
+```
+let
+    popup = model.popup
+    updPopup = { popup | isActive = False }
+in
+    { model | popup = updPopup } ! []
+```
+2. Send a command with `Task.perform` like this:
+```
+model ! Task.perform PopupMsg (Task.succeed False)
+```
+So, what's the more correct way to do this? Thank you.
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

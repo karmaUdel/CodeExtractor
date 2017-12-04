@@ -1,38 +1,85 @@
+U5GJ5FEAU : i do something like `Task.map2 (\posts friends -&gt; updateModel posts friends) Data.getPosts Data.getFriends` not sure if they are parallel or not. never thought of that
+U5GJ5FEAU : <@U217F5W11> ^
+U3SJEDR96 : they're not
+U217F5W11 : but you may be hitting an intrinsic semantic question (leading to needing to deal with it in update) - is there ever a time when you want to get the user but not the posts? if they are always together, is there a reason not to just handle it in the update function?
+or, maybe that’s the question: what is it that leads you to not want to deal with it in the update function?
+
+U0H3A9XLN : Yeah, they are not :slightly_smiling_face:
+U5GJ5FEAU : dang! good to know :smile:
+U5GJ5FEAU : i always thought the Tasks were just sent off one after the other without waiting for the results
+U0H3A9XLN : Is there a way to pattern match on list field inside record which is inside union type tag? Something like:
 ```
-I have two pages in a SPA, “Home” and  “Asset”, both of them have the same structure html wise. On Home I render a chart using ports (I give javascript some values and lets the lib insert itself, Elm has with other no idea that the dom is updated). If I then swap to the page with the same structure html wise, Elm is a little bit too smart and doesn’t re-render the html, but instead just change the classes of the divs which means that the chart is displayed on the Asset page. With other words, if I go from Home -&gt; Asset I get this problem. If I go to Asset from any other page I don’t have this problem and I don’t have the problem with any other page getting the chart displayed when I move from Home -&gt; other pages. My current solution is to add a wrapping div around the container where the chart is going to insert itself, this to trick Elm to re-render the html. This seemed like a better solution than using javascript to remove the chart itself when the url changes or something like that. Anyone else had this problem before and have some thoughts on a better solution? I don’t want another poor soul having to debug this issue in the future which is the type of issue that could take 8hrs to understand what is going on. In react I could have done something like “onComponentDidUnmount” to remove the chart when the Home page is swapped. Is there any Elm version of that?
-<@U5WD40ZA9> Elm doesn't like foreign things touching its DOM. So what you'd do in Elm is used `Keyed` nodes so that you can control how the DOM is/can be reused
-hmm- I deleted elm-stuff, and it rebuilt.  I'm using elm 0.18.0.  Still the same problem - IE ok, chrome no
-Does your built version work on chrome?
-Anybody here that implemented touch or gesture support for small screen in elm? Looks like the packages are either outdated or don't support simple swipe. Any recommendations?
-<@U2Q5GJNTB> I recently reverted to port and zingtouch (<https://github.com/zingchart/zingtouch>)
-which was easier to configure than hammer.js
-Thanks , I will try that
-Thank you in advance, have a great day.
-Elm is a functional language, so it’s all about functions, what inputs they take and what result they give.
-I understand that, but having read some of Richard's SPA source I found that every "page" has its model and update, this is sort of the source of my confusion.
-yes, that’s because each page is sort of independent from the other pages, is your app also based on “pages”?
-So basically each page acts like a separate app?
-yes, basically
-Ah that never crossed my mind
-Is it your case also?
-I think I willl have 2-3 parts that can be separated
-it’s tricky to give general advice because apps don’t all look the same. but starting from the model is always good advice, I think :slightly_smiling_face:
-Yeah I understand
-Thank you for the insight
-I will start with a single model and refactor when necessary
-if you look at the elm-spa-example, you can see that the model is a union type for all the pages, basically, so only one page is “active” at the same time
-(and some common state, the session)
-I totally missed that one
-Gotta read it more carefully
-Thank you very much
-This was my first question here, I didn't expect such quick answers
-So now I have no excuse to postpone coding
-:grinning: 
-We are fast as lightning. :upside_down_face:
-No, you should start coding and not think too much about the structure etc. You can always refactor later. Elm is the best refactoring experience yet
-It’s almost impossible to get the structure right from the start anyway, I never do
-I see
-Is there a way to pattern match list within some tagged type?
-Something like `RemoteData.Success x :: xs`
-Sure
-though that would match if you were matching a list of remotedatas, rather than a remotedata of a list, so you may want `Success ( x :: xs )` instead
+Just { list = x :: xs } -&gt;
+```
+
+U0U6ML22H : I don't think you can pattern match on Records, no
+U4872964V : depending on your other matches, you can match on something like `case Maybe.map .list x of x :: xs -&gt; ` though
+U4872964V : I sometimes do things like this to reduce duplication in `case`:```
+case (someFun x, someOtherFun x) of
+```
+
+U0U6ML22H : it's a nice, handy trick, indeed
+U4872964V : but it would be great with more expressive case patterns, although i see the implementation problems with detecting  missing cases etc.
+U2LAL86AY : <https://gist.github.com/druzn3k/d1ce5eda51a5398e0e93> - here is a cheat sheet about destructuring.
+U0LFFASSV : am I the only one who has issue with installing elm 0.18.0 from npm on Linux (CI)?
+U5U2SN24D : Is there a specific error message you're getting?
+U0LFFASSV : yeah it's `incorrect header check`
+U0LFFASSV : on `Downloading Elm binaries from <https://dl.bintray.com/elmlang/elm-platform/0.18.0/linux-x64.tar.gz>`
+U1CE9DL9H : here we go again
+U3SJEDR96 : retry. It's bintray having hiccups
+U1CE9DL9H : for context: bintray has been spotty for some weeks, some solution is being worked on
+U0LFFASSV : I'm tying to `wget` it on laptop now - seems to be working
+U0LFFASSV : btw CI is circleci
+U0LFFASSV : will try rebuild for 5th time :stuck_out_tongue:
+U3SJEDR96 : Might want to wrap the `npm install` in a retry script for now :disappointed:
+U3SJEDR96 : something like <https://github.com/NoRedInk/elm-ops-tooling/blob/master/with_retry.rb>
+U0LFFASSV : thx for tip. unfortunately it works this time
+U177VRFJP : can anyone help me understand the difference between `Html.Lazy` and `Html.Keyed` and when to use them?
+U0EUHKVGB : lazy is to reduce render time. Keyed is to make rendering more consistent.
+U0EUHKVGB : Use lazy when your views are slow to render. This will be rarely.
+U0EUHKVGB : Use keyed when you have lists of items, e.g in an `select`, to help Elm’s virtual-dom render things in the right way.
+U0EUHKVGB : This will also be rarely, but it depends a lot on your view.
+U177VRFJP : so if for example I have a list of 100 items that can be filtered based on an input field, will keyed help speed up rendering the filtered nodes?
+U17R1GD96 : How to insert HTML into Elm? I have to do that because some chunks of HTML code comes from the database. I tried to follow this article <https://www.reddit.com/r/elm/comments/49w48m/inserting_html_from_api/> but Elm complains it cannot find VirtualDom package…
+U0EUHKVGB : Yes. But benchmark, always benchmark
+U177VRFJP : great, thanks noah
+U17R1GD96 : found another solution at <https://groups.google.com/forum/#!topic/elm-discuss/icpKL-AgRlg>, checking…
+U0EUHKVGB : <@U17R1GD96> you have to install virtualdom
+U0EUHKVGB : `elm-package install elm-lang/virtualdom`
+U3SJEDR96 : <https://ellie-app.com/3x9wfvL5DKVa1/0> and then use it something like this
+U0FP80EKB : <@U17R1GD96> I use `Markdown.toHtml` to insert html
+U17R1GD96 : <@U0EUHKVGB> I don’t need it. This works: ```module DangerousHtml exposing (innerHtml)
+import Html exposing (Html, span)
+import Html.Attributes exposing (property)
+import Json.Encode exposing (string)
+
+
+innerHtml : String -&gt; Html msg
+innerHtml dangerousHtml =
+    span [ property "innerHTML" &lt;| string dangerousHtml ] []```
+
+U0FP80EKB : I ran into problems with `innerHTML`, as it didn’t seem Elm tracked changes to it. While using `Markdown.toHtml` creates actual virtual dom nodes.
+U0FP80EKB : <http://package.elm-lang.org/packages/evancz/elm-markdown/3.0.2/Markdown>
+U17R1GD96 : But I don’t have the source in the MarkDown format. It’s HTML.
+U0FP80EKB : HTML is markdown
+U17R1GD96 : hehe, right :slightly_smiling_face:
+U0FP80EKB : :slightly_smiling_face:
+U17R1GD96 : more or less
+U0FP80EKB : I use this in several places in my app (across two products), and it works great
+U0FP80EKB : And since it creates vdom nodes, elm can use it effectively for diffing and rendering
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,1 +1,103 @@
+U1FCZNA7R : Additional info: I had to run `npm install -g elm-test` using `sudo` (otherwise I was getting errors). Another observation: It seems to work when I run the tests using `sudo elm-test` but this doesn't seem desirable
+U236M9FH9 : <@U1FCZNA7R> I used to do `npm i -g --prefix ~/.node_modules elm-test` along w/ `PATH="~/.node_modules/bin:$PATH"`, but now I either use NVM or if I have a `package.json` I do `npm i -S elm-test` &amp; add a `"test": "elm-test"`script to `package.json`.
+U0D4VR7BP : I don't know if anybody here plans to visit *Colours of Ostrava* (music festival in Czech Republic), but we're going to do an Elm meetup right before the festival starts! So feel free to come, and/or ping me with any questions :slightly_smiling_face:<http://blog.newired.com/2017/06/27/3rd-javascript-meetup-ostrava-19-7-2017/>
+
+U2LAL86AY : if i have a union case with many constructors. and inside a function i do:```
+case union of
+    Constructor 1 -&gt; 
+    Constructor2 -&gt; 
+    ...
 ```
+If my `Constructor 1` is the most `frequent case` for this union. Meaning 95% of the time a value of this type (`union`) will be `Constructor 1`
+
+Does it matter form a performance standpoint to put`Consructor 1` first in the case statement. or is more preformant to add it to the back? - or it doesn't matter? 
+
+So doing this is less performant:
+```
+case union of
+  Constructor2 -&gt; 
+  Constructor 1 -&gt;  -- or course i'm talking about 10 -13 constructors here. not just 2. 
+  ...
+```
+
+U4SM7ECAG : julianjelfs: I am! I come from the ember world so I tend to split everything into small bits like I did with Ember out of habits :slightly_smiling_face:
+U0EUHKVGB : Benchmark.
+U17MHJ12N : OK I'm just averaging some baseline build times now and then will try to incrementally squash things up and see how I can improve it
+U4SM7ECAG : Ok, that will be an interesting "study", I'm curious of how it turns out :slightly_smiling_face:
+U3SJEDR96 : And once you've done that, figure out if it really matters. If you're writing application code, it seems unlikely that this would make a perceptible difference, and will most likely be completely dwarfed by the cost of rendering..
+U17MHJ12N : Gaaa it's a fine line between consolidating modules and entering into circular reference hell
+U5GSVKPJS : ```The 1st branch has this type:
+
+    elm-make: Type applications without concrete names should not get here.
+```
+
+U5GSVKPJS : amazing.
+U0EUHKVGB : If you want help, you’re going to have to share code :wink:
+U5GSVKPJS : haha, it was more me laughing at the error message
+U0EUHKVGB : <https://github.com/elm-lang/elm-compiler/issues/1390>
+U3SJEDR96 : Feels like a result of no kind checking <https://github.com/elm-lang/elm-compiler/issues/1373>
+U3SJEDR96 : :smile:
+U5GSVKPJS : ```
+createFirmware apiContext projectId url name =
+    Http.postJson
+        (let
+            opts =
+                Http.defaultJsonArgs apiContext
+         in
+            { opts
+                | path =
+                    [ "project-firmware", toString projectId ]
+                , value =
+                    Just &lt;|
+                        EncodeJson.object []
+            }
+        )
+```
+
+Seems to do it. If I comment out the `value` assignment, all is well
+
+U5GSVKPJS : Now I've got```
+-- TYPE MISMATCH ----------------------------- ././src/Page/Project/Firmware.elm
+
+The right side of (|&gt;) is causing a type mismatch.
+
+69|               Task.sequence (createFirmwares apiContext model.projectId files)
+70|&gt;                |&gt; Task.perform (always FirmwareChanged)
+
+(|&gt;) is expecting the right side to be a:
+
+    elm-make: type applications should start with a type atom
+```
+
+U5GSVKPJS : And I'm truly stuck. I'm not sure what to do next, is there any obvious code to look at?
+U5GSVKPJS : I moved `createFirmwares` (and `createFirmware`) to a separate module, and that module now compiles just fine
+U5GSVKPJS : I'll rip out other code from this module and see if it's something else interacting badly
+U0EUHKVGB : <@U5GSVKPJS> My advice when debugging things like this: use more type annotations
+U0EUHKVGB : Put things into let bindings, and write the type signature by hand
+U5GSVKPJS : yea, I did that, and now I'm at this, which is super suspicious:
+U5GSVKPJS : ```Function `createFirmwares` is expecting the 3rd argument to be:
+
+    List { a | name : String, url : String }
+
+But it is:
+
+    List
+```
+
+U5GSVKPJS : I should be able to fix that, but gotta go grab lunch
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

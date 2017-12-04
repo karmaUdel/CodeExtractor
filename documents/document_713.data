@@ -1,6 +1,75 @@
+U23SA861Y : well here is where the types are telling you to consider it
+U0JFGGZS6 : Well.. it really depends on thinking through the UI. So it's a little like bumping around in the dark for me :slightly_smiling_face:
+U5LFUHH19 : Exactly.  I'm finding I can't cut corners!  :slightly_smiling_face:
+U23SA861Y : because `String.toInt` returns a result its telling you it can fail and you should handle it
+U23SA861Y : do you want it to be zero, perhaps its and optional Maybe type
+U0JFGGZS6 : but generally speaking, if you are just rendering a view with no user interaction (no msgs), you can do stuff like the first model and make it super easy for yourself
+U23SA861Y : or maybe you want this behaviour where someone gives you bogus data you just fail to decode it
+U0JFGGZS6 : but with user interaction, you often need more structured data
+U5ABF3BH7 : There are messages, I am not just rendering a view.
+U0JFGGZS6 : like you said, if you expect to be building up a model to be encoded, the second is easier to deal with
+U5LFUHH19 : If it's a Maybe, then it has to be part of my `Person` record?  ```
+type alias Person =
+    { name : String, age : Maybe Int }
 ```
-then you can run `cp .env.example .env`
-and fill out the values
-then run `source .env` and be good to go.
-But  for current day, it's not working.. I understand in which way I need to move..:disappointed:
-I think you either want `&lt; get_today() + 1day` or to do `&lt;= get_today()`
+
+U5LFUHH19 : Is that right?
+U23SA861Y : yep, because thats the only way to successfully create the record without an age
+U5LFUHH19 : OK, I'm going to meditate on this for a while.  Thanks very much.
+U0JFGGZS6 : do you have an existing UI for editing the thing you described -&gt; _Both the organization and person have a contact information which in turn has phone numbers... And all those fields are in one view. A person and an organization have an address._
+U5ABF3BH7 : I might have been a bit unclear, you have the Elm  Model that represents the view and all the changes I want to record. Some of those fields need to be saved to the database through different database models(Person, ContactInformation, etc..). I am wondering what is the best way to collect them thinking about the encoding, etc...
+U0JFGGZS6 : so, you could be making changes to multiple database models in one save, is that what you mean?
+U5ABF3BH7 : yes, that is what I mean
+U5ABF3BH7 : You said it in a much more concise manner :slightly_smiling_face:
+U63RN12FJ : Hi!  Is anyone working on a Visual Studio 2017 editor for Elm?
+U0JFGGZS6 : well, IMO it's kind of complex because it depends both on how your UI works and on what your server needs
+U0JFGGZS6 : your choices might be very different depending on if you have a REST backend, GraphQL, websockets... etc.
+U0JFGGZS6 : I assume you have some kind of REST thing if you are using Rails ?
+U5ABF3BH7 : Sorry, I missed your message. Yes, it is REST for the main part.
+U0JFGGZS6 : so do you have endpoints for things like "create a new person with also this contact info" and "change the contact info for this existing person"?
+U0JFGGZS6 : "change the person info and his or her contact info"
+U0JFGGZS6 : "change the person info and create new contact info for them" etc.
+U0JFGGZS6 : or is it like `POST /person`, `PATCH /person/1`, `PUT /person/1/contact`, etc.
+U0CJA7BLJ : I'm not maintaining that `autocomplete` package. Please see <https://github.com/sporto/elm-select> instead
+U0JFGGZS6 : oops, thanks!
+U0JFGGZS6 : it's a lot easier if you have just one endpoint for every type of update you want to make from your Elm app. Even if this means less fine-grained endpoints like `POST /person-contactinfo/1` etc. with a complex JSON payload that the server can figure out what to do with.
+U0JBSEGHY : Is there a styletron like library for elm?
+U2LAL86AY : not that i'm aware of - but you can check out the`Tachions` library if you need high performance - and easy to reason about css. <http://tachyons.io/> - is not what you want - but its worth looking into it..
+U0JBSEGHY : Yea I'm definitely thinking of just using that
+U2LAL86AY : if i want to command js to do something without having any argument to give it - is this how my type annotation should look like?
+U2LAL86AY : `printDocument: () -&gt; Cmd msg`
+U3SJEDR96 : Yep
+U2LAL86AY : works like this: ```
+
+port commandJsTo_printDocument : () -&gt; Cmd msg
+printDocument : Cmd msg
+printDocument =
+    commandJsTo_printDocument ()
+
+```
+
+U0U6ML22H : is there a way to "precompile" `elm-stuff` without my modules, first, so that when I do want to compile my modules it goes faster?
+U3SJEDR96 : <@U0U6ML22H> hm, what's the actual goal? Is this for caching on CI or something?
+U0U6ML22H : maybe it's a XY thing: we have several `Main`s, for as much apps. We have a webpack script for each. We also, sometimes, want to start them all at the same time, still serving all the files on port 3000. So we build them all at the same time. When we do that normally, it's quite fast. When we do that after cleaning elm-stuff, it takes forever (almost literally: i never lasted enough to see it go through, because it took too long). When that happens, we build one individually, then another, then start the entire thing again, and it works fast enough
+U0U6ML22H : I'm thinking that when we start all the builds in parallel, they all try to build core/third-party elm-stuff at the same time
+U0U6ML22H : but that's speculation, I have a limited understanding of the compilation phase
+U0U6ML22H : I'm just thinking that if we could prebuild the elmi/elmo files not relating to our modules before starting our parallel thing, it'd work much better
+U0U6ML22H : whaddaythink?
+U3SJEDR96 : hm, I suppose you can test if it would even have impact before actually figuring out how to do it: build all one by one, remove the relevant folder from build-artifacts and trigger the `build-all` script again
+U2LAL86AY : <@U0U6ML22H> that sounds .. :grimacing: i'm trying to understand what's the value of having all this elm apps sharing the same elm-stuff folder ?? Why not keep them separate apps in the first place?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

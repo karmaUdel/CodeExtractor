@@ -1,11 +1,86 @@
+U3SJEDR96 : which waits 2 seconds, then succeeds with `"hello world"`, which you perform with a tag for your `msg` that takes that parameter
+U4RR7KX45 : ah so `Task.perform UpdateText (Task.success "hello world")` would've worked I guess
+U4RR7KX45 : *succeed
+U3SJEDR96 : Yeah, but it would execute immedeatly, since it's not chained with your timeout
+U4RR7KX45 : yeah
+U4RR7KX45 : ok I get it now, thank you :slightly_smiling_face:
+U4RR7KX45 : so for example's sake, if I do```
+Task.succeed (2 * Time.second)
+   |&gt; Task.andThen Process.sleep
+   |&gt; Task.perform (\_ -&gt; UpdateText "hello world") 
 ```
-it's actually used in almost every core lib function
-right because the core library _can't_ depend on your custom `Msg` type
-<@U5ABF3BH7> have you been to the SF Elm meetup? I hear it's really good :slightly_smiling_face:
-I have, it was good, I should have asked then.
-I went to the last 2
-You could hop on flight up to vancouver, Canada. :stuck_out_tongue:
-oh ok interesting
-<@U23SA861Y> :slightly_smiling_face:
-As I transition to Elm from Perl, I'm finding my JSON encoding is wacked.  From my existing Perl JSON API, what should be Ints have `""`s around them, so they look like strings.  Is there a way to decode them with a `String.toInt` kind of thing so I can match the JSON to my (proper) objects?
-Yes but you'll have to worry about `Result` because the string might not be a valid integer
+that should work too
+
+U3SJEDR96 : Yap
+U4RR7KX45 : nice!
+U4RR7KX45 : thank you so much :slightly_smiling_face:
+U4RR7KX45 : one more question please :slightly_smiling_face:
+```
+updateText : List Project -&gt; Cmd Msg
+updateText projects =
+     projects
+         |&gt; List.map
+             (\p -&gt;
+                 if p.published then
+                     Task.succeed p.title
+                  else
+                     Task.fail p.title
+             )
+         |&gt; Task.sequence
+         |&gt; Task.perform SetProjects
+```
+Again I get a type mismatch:
+
+expected:
+`Task String (List String) -&gt; a`
+
+actual:
+`Task Never (List String) -&gt; Cmd Msg`
+
+how should I search where I'm making a mistake?
+
+U3SJEDR96 : `Task.fail` means you no longer have a task that can never fail
+U3SJEDR96 : so you need to use `attempt` to attempt executing it
+U3SJEDR96 : which means `SetProjects (Result String (List String)`
+U3SJEDR96 : to capture either the `Err "I failed"` or the `Ok [ projects ] `
+U4RR7KX45 : I wanted to see how `sequence` works, but I guess I cannot do it without actually using HTTP
+U3SJEDR96 : sequence performs the tasks one by one, and gathers up the results. As of `0.19`, it will be a simple `List.foldr (Task.map2 (::)) (succeed []) tasks`, I think
+U3SJEDR96 : though that's an implementation detail at best
+U6EV3H0N7 : is there a reason there's no Task.parallel <@U3SJEDR96>?
+U6EV3H0N7 : (while we're discussing Task.sequence…)
+U3SJEDR96 : Not really; other than it's not super-straightforward to implement, and it isn't insurmountable to live without it.
+U64FYS317 : Anyone have any links regarding setting up the elm-overlay debugger with webpack dev server?
+U4RR7KX45 : so shouldn't this work then?```
+Task.sequence [ Process.sleep (2 * Time.second) ]```
+
+U3SJEDR96 : <@U4RR7KX45> it should, and it does. It would return a `Task x (List ())`
+U2SR9DL7Q : I've encountered a problem that's happened before, but I'm not exactly sure why.```
+updatePlayers : Player -&gt; Players -&gt; Players
+updatePlayers player players =
+    Zipper.mapCurrent (\x -&gt; player) players
+```
+The compiler complains that mapCurrent wants a `Zipper.Zipper Player` but got `Players`. `Players` _is_ `Zipper.Zipper Player` though.
+
+U153UK3FA : <@U2SR9DL7Q> `Players` is a type alias for `Zipper Player`?
+U2SR9DL7Q : <@U153UK3FA> yup
+U3SJEDR96 : I'm not sure what `(\x -&gt; player)` does, tho?
+U3SJEDR96 : (or is supposed to do)
+U2SR9DL7Q : mapCurrent applies a function to the 'current' element in the zipper. So `(\x -&gt; player)` just updates the current player to a new player.
+U3SJEDR96 : ah, alright, gotcha. hm. In that case, ¯\_(?)_/¯
+U153UK3FA : <@U2SR9DL7Q> so you've got `type alias Players = Zipper.Zipper Player` somewhere?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,0 +1,121 @@
+U2D07QZN3 : (please let me know if I shouldn't be posting this kind of thing here)
+U2SR9DL7Q : <@U24HQ3RJ7>  ```
+viewQuadrant -&gt; QuadrantType -&gt; Html
+viewQuadrant quadstuff =
+    case quadstuff of 
+        QA { expanded, otherparam otherparam } -&gt; actions
+        QB { expanded, otherparam otherpparam } -&gt; actions
+```
+
+U24HQ3RJ7 : i figured out i will need 2 case expressions..i want to change `ViewData`  itself.. which is part of Model.
+
+U2Q5GJNTB : yes, that is why i did not do it yet
+U2SR9DL7Q : <@U24HQ3RJ7> you want to change ViewData when it's not describing a quadrant?
+U2SR9DL7Q : <@U24HQ3RJ7> so your `QuadrantType` is the Unique name QA, QB, QC followed by the viewData record. You don't need two inputs. For example, I have a `type Game = NoGame | ActiveGame | WonGame Player` type. `WonGame` is just a unique name but `Player` is a record. In my view function, I have```
+viewGame game = 
+    case game of 
+        NoGame -&gt;
+        ActiveGame -&gt;
+        WonGame { data1, data2, data3} -&gt;
+``` 
+the { data1, data2, data3 } type here is the `Player` record. 
+
+I'm probably not understanding your use case clearly. In my head, it sounds like quadrants should be a union and all quadrants need viewdata on how to show them so the quadrant type should be Both a unique name and an accompanying vewData record. If you want to edit viewdata you can, but it would be within the context of updating a quadrant.
+
+U24HQ3RJ7 : yes.. each quadrant-type will have a `QuadrantViewdata`..but to keep data separate, i am putting them in different types.. `type QuadrantType = QA | QB | QC | QD` and `type alias ViewData = { qaData = QuadrantViewData, qbData = QuadrantViewData ... }` as all quadrants are in view.. so they will have `QuadrantViewData`. which is `type alias QuadrantViewData = { enabled : Bool } `
+
+U24HQ3RJ7 : so, given a quadrant type if i have to toggle its view.. i.e. for function with signature : `toggleExpand : QuadrantType -&gt; ViewData -&gt; ViewData`
+U2SR9DL7Q : um, so qaData and qbData have the same fields?
+U24HQ3RJ7 : yes..
+U2SR9DL7Q : I guess if you have operations that work only on ViewData independent of quadrants you could keep separate. But I rather just have them together `type Quadrant  = QA QuadrantViewData | QB QuadrantViewData | QC QuadrantViewData | QD QuadrantViewData` So to toggle a quadrant view you just go```
+toggleQuad quadrant = 
+    case quadrant of 
+       Qtype Qview -&gt; Qtype { Qview | toggle = False} 
+``` 
+and your views know not to display quadrants with toggle set to False
+
+U3LUC6SNS : <@U2SR9DL7Q> Thanks for the comments.  I will check out `Navigation` and `UrlParser`.
+U2SR9DL7Q : if there's a view for every quadrant, why allow them independence? Just have a type that is both the Qtype and the QViewData. Then that becomes the one source of truth for your quadrants.
+U2SR9DL7Q : .... of course, I could be totally wrong. That's the nice part about elm. If you can get it to compile then whatever you choose will probably work, regardless.
+U24HQ3RJ7 : the problem has now moved to upper level.. which will need to have data for 4 quadrants..
+U2SR9DL7Q : `type Thing = Quadrant Quadrant Quadrant Quadrant` ?
+U2SR9DL7Q : or `type Thing = QA QB QC QD`
+U4GEVRVAL : The elm-spa-example and accompanying article are a fascinating read, but it is rather hard to know where to begin when trying to build something along the same lines from scratch =\
+U4GEVRVAL : There are just so many moving pieces in different files
+U23SA861Y : well, there is a massive disclaimer on it that it isn't a gentle introduction to elm
+U24HQ3RJ7 : what information will the button send to identify which Quadrant in `Thing` to change ?
+U2SR9DL7Q : <@U4GEVRVAL> I tend to reference it piecemeal for very specific things at different times.
+U23SA861Y : You're really trying to write this like haskell, which probably isn't the best plan.
+U4872964V : is there an easy way to see the published packages in order of last updated/published?
+U4872964V : just trying to get a feel for what’s rolling
+U3SJEDR96 : <https://libraries.io/search?order=desc&amp;platforms=Elm&amp;sort=latest_release_published_at>
+U4872964V : great!
+U4872964V : lot of things happening :slightly_smiling_face:
+U1AN4JRFV : there's also this, that might be up, or it mightn't. <http://52.233.199.184/>
+U1AN4JRFV : (currently working on making it update after discovery)
+U3SJEDR96 : Heh, cool. Also, if you're interested in parsing signatures, <https://ellie-app.com/3PSwcRDd9L3a1/1>
+U1AN4JRFV : bookmarked!
+U6CCW4KV1 : Hi everybody, I have an `Elm.fullscreen` app and want to render a c3 chart into it (the code already existed), but the app is just freezing. I guess the elm rendering mechanism gets in the way. Is there an easy workaround for this, or do I have to use `Elm.embed` and render the charts in a not managed html element?
+U2W28MK6K : X-post from <#C192T0Q1E|beginners> :
+Hi all! I've been struggling with being able to send a request that returns a 204 No Content.
+
+I've explored creating a low level request like so:
+
+```
+myRequest msg payload =
+    let
+        req =
+            Http.request
+                { method = "POST"
+                , headers = []
+                , url = "/my-url"
+                , body =
+                    (Http.jsonBody &lt;|
+                        Encode.object
+                            [ ( "field1", Encode.string &lt;| payload.field1 )
+                            ]
+                    )
+                , expect = Http.expectStringResponse (\response -&gt; Ok response.body)
+                , timeout = Nothing
+                , withCredentials = False
+                }
+    in
+        Http.send msg req
+```
+
+i've also tried:
+
+```
+expect = Http.expectString
+```
+to no avail
+
+and the result that I always get is an Error regarding not being able to parse invalid JSON
+
+U1SF6G7PA : <@U0CL7EPPG> that is how i did it, too :slightly_smiling_face: sorry, for the delay, didnt have my computer on me for the weekend
+U1AN4JRFV : <@U2W28MK6K> : does this link apply to your case? <https://stackoverflow.com/questions/41884524/http-delete-with-empty-body>
+U1AN4JRFV : specifically I wonder, if this would do the trick: ```expectUnit : Expect ()expectUnit =
+    Http.expectStringResponse &lt;&lt; always &lt;| Ok ()```
+
+U2W28MK6K : ~still getting `BadPayload`~ I think I just didn't have my latest code
+U1AN4JRFV : what is the error exactly?
+U2W28MK6K : <@U1AN4JRFV> that worked, thanks!
+U1AN4JRFV : awesome!
+U4Z4NEUQG : How would you parse date in json?
+U1CE9DL9H : <@U4Z4NEUQG> <http://package.elm-lang.org/packages/elm-community/json-extra/2.3.0/Json-Decode-Extra#date>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

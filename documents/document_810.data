@@ -1,0 +1,114 @@
+U3SJEDR96 : dope!
+U0UKSE1SP : Can someone help me understand some syntax? `type alias Thing` makes sense to me at first glance, but I'm having a hard time wrapping my brain around the meaning of `type alias Thing msg`? (The appended ` msg`, as in `type alias Html msg`)
+U0J1M0F32 : The `msg` part could be `a` or `t`, its a stand-in for a generic "other" type.
+U0J1M0F32 : At least, that is my understanding of it.
+U0J1M0F32 : ```type alias Post = { title: String, body: String }
+
+type alias Comment thing = { on : thing, content: String }
+
+somePost = { title = "Amazing!", body = "etc etc etc..." }
+
+postComment = { content = "Cool Post!", on = somePost }
+
+commentComment = { content = " I disagree!", on = postComment }
+
+```
+
+U3SJEDR96 : Alternatively, say I'm using a list to represent a stack of things, I could `type alias Stack a = List a`, where `a` just means it's not constrained to any specific type. If I were to say `type alias Stack = List String`, You don't need a variable because a `Stack` will _always_ be a list of strings.
+U1G51S63S : Hi folks! is anyone used google maps polymer within Elm?
+U62KVQVD1 : <@U0F7JPK36> great. Btw, I am elm newbie so can you update README.md with some example, please?
+U0LPMPL2U : <@U1G51S63S> check out <https://www.youtube.com/watch?v=ar3TakwE8o0>
+U1G51S63S : <@U0LPMPL2U> yep, I saw it. I have strange problem - just tried to use polymer within server-side rendered template (Elixir/Phoenix) and it works. Then added a map to my view and it don't :disappointed:
+Got this errors ```No Google Maps API Key or Client ID specified. See <https://developers.google.com/maps/documentation/javascript/get-api-key> for instructions to get started with a key or client id.
+You have included the Google Maps API multiple times on this page. This may cause unexpected errors.```
+
+U1G51S63S : and code looks like ```googleMap                    [ attribute "api-key" "..."
+                    , attribute "latitude" "37.790"
+                    , attribute "longitude" "-122.390"
+                    , class "listing-neighborhood__map"
+                    ]
+                    []
+
+
+googleMap : List (Html.Attribute msg) -&gt; List (Html msg) -&gt; Html msg
+googleMap =
+    Html.node "google-map"```
+
+U1G51S63S : so everything looks the same as html version or rtfeldman one
+U0LPMPL2U : Are you sure the attributes are named correctly?
+U0LPMPL2U : it sounds like it's not able to read the api key
+U1G51S63S : yes, I am sure, it's just copied from the same html `&lt;google-map api-key="..." latitude="37.790" longitude="-122.390" style="height: 400px; width: 600px;"&gt;&lt;/google-map&gt;`
+U0LPMPL2U : That's copied from the talk?
+U1G51S63S : no, this code is from my webpage where I tested it (w/o elm, within the same template where Elm is embedded)
+U0LPMPL2U : ah, I see
+U4872964V : “You have included the Google Maps API multiple times on this page. This may cause unexpected errors.”
+U1G51S63S : so I am just disabled elm app at all, tested this html. then embedded Elm app again and converted this code to Elm
+U1G51S63S : yep, but they isn't
+U1G51S63S : just looking at webpack config - maybe because of HMR or something like this
+U0UKSE1SP : Looking at the HTML library, I see `type alias Html msg = Node msg` and `type alias Attribute msg = Property msg` are passing along the generic to `Node` and `Property` respectively. Following those to the source, I found:
+<https://github.com/elm-lang/virtual-dom/blob/2e4f74331d010c7199d803bd9a5c244e1939ef55/src/VirtualDom.elm#L46>
+
+<https://github.com/elm-lang/virtual-dom/blob/2e4f74331d010c7199d803bd9a5c244e1939ef55/src/VirtualDom.elm#L126>
+
+I'm still not understanding what passing that generic all the way down allows for?
+
+U62KVQVD1 : <@U0F7JPK36> I made it working, thanks for writing this.
+U1S70NKFF : what event am I looking for to capture a selected option in a drop down?
+U4872964V : <@U1S70NKFF> “changed” is the on, but “input” should also work in most browsers
+U1S70NKFF : thx!
+U4872964V : sorry, “change”
+U1S70NKFF : roger that
+U4872964V : if you are talking about the &lt;select&gt; element, that is
+U3SJEDR96 : They're special in that they are actually implemented in native code, which is why you see the generic suddenly being "swallowed". Nevertheless, they are useful in that they make sure that, at the end of the day, the `view` in your main can send out a consistent message-type, and that this can be guaranteed at compile time
+U1G51S63S : thats really strange :disappointed: still not working even w/o any webpack config (just elm-loader only). and I am absolutely sure there is no 2 google maps imports, etc.
+my html looks like this: ```&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="IE=edge"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+    &lt;meta name="description" content=""&gt;
+    &lt;meta name="author" content=""&gt;
+    &lt;%= render "_favicon.html", conn: @conn %&gt;
+    &lt;script src="&lt;%= static_url(@conn, "/bower_components/webcomponentsjs/webcomponents-lite.min.js") %&gt;"&gt;&lt;/script&gt;
+    &lt;link rel="import" href="&lt;%= static_url(@conn, "/bower_components/google-map/google-map.html") %&gt;"&gt;
+  &lt;/head&gt;
+  &lt;body class="body" id="body"&gt;
+    &lt;div class="loading" id="loading"&gt;&lt;/div&gt;
+    &lt;script src="&lt;%= static_url(@conn, "/js/app.js") %&gt;"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+``` and app.js is a just ```import '../css/app.scss';
+import Elm from '../elm/Main';
+
+Elm.Main.fullscreen({
+  devicePixelRatio: window.devicePixelRatio,
+  now: + new Date()
+});
+```
+
+U0UKSE1SP : The specialness is good to know! The "swallowing" of the generic is what was really throwing me off. Thanks for helping me understand
+U3SJEDR96 : Now, there _are_ cases where you have a type variable that _only_ appears on the left-hand side of a definition, too. They're called "phantom types" and they have their use, too; but they're definitely not very common, and you can safely ignore their existence for now :wink:
+U1S70NKFF : <@U0S6BNVNY> as soon as I drop in MDL css I can't reach the debugger tab. It's like it's shadowed by some element with a higher z value. Any thoughts on how get around that?
+U3SJEDR96 : Adding extra css to bump the z-val of the debugger tab is a good first step
+U3SJEDR96 : I think there's an issue for fixing it, too
+U1S70NKFF : will try thx
+U3SJEDR96 : <https://github.com/elm-lang/virtual-dom/issues/98> "#100 - Controls get covered by elements with a higher z-index"
+U3SJEDR96 : so all good :slightly_smiling_face:
+U4872964V : is 999 enough? :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,11 +1,72 @@
-```
-that is getting called even after i removed the task from the update
-yeah it would get called on load
-elm is eager
-so it will be called when the let is evaluated and thats when the program loads
-oh, interesting
-scrollToTop is  a value not  a function
-it gets constructed on program start
-well, that is super helpful to know, thank you.
-This sounds remarkably close to what I did with elm-demystifyin-decoders :grin: excited to see what you come up with!
-What is the best way map a `Maybe String` to the an attribute value of an input?
+U41NK9BM4 : It's all there, really
+U41NK9BM4 : Even we you do an HTTP request inside a function you are writing a pure function. Go figure! :slightly_smiling_face:
+U285A8S8H : are you sure?
+U41NK9BM4 : Of course. Because you return a *description* of what to do and pass that the Elm runtime.
+U41NK9BM4 : A description cannot fail or return something different each time.
+U41NK9BM4 : A decription is "Hey Elm runtime, grab that URL and return to me the payload". Elm does the job and call your `update` function.
+U285A8S8H : sure, that makes sense
+U285A8S8H : I thought you meant that literally making http requests still gives you a pure function
+U41NK9BM4 : Ah sorry. Indeed "you do an HTTP request" is not precise :slightly_smiling_face:
+U3SJEDR96 : (hence why you can only trigger side-effects by returning them from `init` or `update`; both which "happen" to be called by the runtime)
+U62KVQVD1 : How should I implement ```init : Session -&gt; Task PageLoadError Model``` to return empty Model?
+U62KVQVD1 : <https://gist.github.com/korczis/9b3c8449c1f8cc5d008f6bec560df67d#file-home-elm-L19>
+U62KVQVD1 : I am trying to rip off parts of the spa-example and integrate it with my phoenix/elm SPA.
+U0J8D9M2P : I'm making public package. I have a function from a module which returns an extensible record and the type alias for that record is defined in the same module. Do I need to expose that type record in order to use it outside of the module?
+U3584SW4R : This is not be related to elm directly, but can someone help me in deciding between webpack and brunch? Which one would you prefer for a new project today?
+U48AEBJQ3 : <@U62KVQVD1> That seems like a not very good idea at first glance, but you can do it by going `Task.map (always {})`. However, the standard thing to use in this sort of case is `()` a.k.a. unit.
+U48AEBJQ3 : <@U0J8D9M2P> It's a good idea to expose at least the top level of all types that your exposed types use in their type signatures. You can expose type aliases too.
+U62KVQVD1 : <@U48AEBJQ3> What is not good idea? To rip off the parts of spa-example?
+U48AEBJQ3 : <@U3584SW4R> Brunch is a more accessible design, but webpack has a lot more mind-share behind it. Depends on one's experience, tolerance for learning a system, and need for more interesting things.
+U48AEBJQ3 : <@U62KVQVD1> No, making a special type for unit and throwing away any data the `Task` is producing on success seems a bit strange.
+U62KVQVD1 : I just want to make it working and later add more fields and connect it with REST API
+U2D7NUGS1 : I'm about to push my first package to the registry :scream: :scream_cat: and want to preview docs with <http://package.elm-lang.org/help/docs-preview>. But executing `elm-make --docs=documentation.json` produces `[]` in the file and a message: `Success! Compiled 0 modules.`. Here is the code: <https://github.com/lzrski/elm-polymer/tree/pre-publish>
+U2D7NUGS1 : What am I doing wrong?
+U48AEBJQ3 : Right, but `Request.Article.tags` returns a specific type. It's generally preferable to dump that back into an `update` function and work with the result there.
+U0J8D9M2P : <@U2D7NUGS1> you need to add exposed modules to list of exposed modules in elm-package.json
+U2D7NUGS1 : Aha! Makes sense. Thanks <@U0J8D9M2P> !
+U2D7NUGS1 : Haha! I love you people. You just helped me before I've asked question. I wanted to paste a big chunk of code to ask why it's not working, and as I was selecting it, I've spotted the bug :slightly_smiling_face:
+U2D7NUGS1 : It's only possible because of your super friendly attitude.
+U62UFEG4D : Hello Elm people !
+U2D7NUGS1 : But I've also learned something interesting. If one just define a value, like that: ```fetchData =
+    let
+        url =
+            Debug.log "Getting analysis" "<https://www.example.com/some-data.json>"
+    in
+        Http.get url Decode.value
+            |&gt; Http.send DataFetched
+``` then the `let` clause will be eagerly executed, even if I don't reference it anywhere. In this case the `Debug.log` did it's effect despite the fact that `fetchData` was not called. I was expecting it to be lazy.
+
+U2D7NUGS1 : Hello, <@U62UFEG4D> !
+U62UFEG4D : hey <@U2D7NUGS1>
+U2D7NUGS1 : To finish my though: That got me confused.
+U62UFEG4D : I am doing the elm tutorial, I am struggling at the section Random : <https://guide.elm-lang.org/architecture/effects/random.html> . I am trying to to have 2 die rolling at the same time. My  first idea was to have to have message with 2 payloads e.g.```type Msg
+    = Roll
+     | NewFace Int Int ```
+but then I could not figure out how to have my random generator returns 2 value.
+
+My second attempt was to change the view to have the button click generates 2 events like this :        `     , button [ (onClick Roll1), (onClick Roll2)] [ text "Roll" ]` , but this update only one die.
+
+Can you provide hint on how to solve this using my knowledge of the previous part of the tutorial.
+Thanks in advance
+
+U62UFEG4D : I have shared in this snippet my second attempt...
+U48AEBJQ3 : <@U62UFEG4D> `Random.map2`
+U48AEBJQ3 : `Random.map2 (,) (<http://Random.int|Random.int> 1 6) (<http://Random.int|Random.int> 1 6) |&gt; Random.generate (uncurry NewFace)`
+U62UFEG4D : <@U48AEBJQ3> it works now, thanks a lot!
+U604S603Y : is there a way with elm-package to "restore" packages that are already mentioned as dependencies in my elm-package.json?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

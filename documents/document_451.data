@@ -1,3 +1,72 @@
+U48AEBJQ3 : <@U17P7CBFB> There seems to be something else going on here.
+U17P7CBFB : ok, I'll try to fix the other errors first
+U68RXKS5D : Is there a way to define a subscription port that doesn't have input. I'm thinking of it more as a "command" from the JS side. Does that make sense?
+U68RXKS5D : e.g. `app.ports.doAThing.send()`
+U0J1M0F32 : Yah, that makes sense, but I'm not sure I've ever done it. :thinking_face:
+U68RXKS5D : i ended up sending along an empty string, but that feels pretty icky
+U68RXKS5D : tried things like `port doAThing : (Nothing -&gt; msg) -&gt; Sub msg` but that's not even valid
+U23SA861Y : typically no data would be a unit type
+U23SA861Y : ```port doAThingWrap : ( () -&gt; msg) -&gt; Sub msg
+doAThing : msg -&gt; Sub msg 
+doAThing msg = doAThingWrap (\_ -&gt; msg)
 ```
-`
-commented out line works
+
+U68RXKS5D : ah hah, i'll try!
+U68RXKS5D : that made the compiler happy! still had to do something icky to make the subscriptions compile. thoughts on this?
+```
+subscriptions model = doAThing (\() -&gt; AnMessage)
+```
+
+U23SA861Y : see wrapper above
+U68RXKS5D : ah hah, funky (and sorry i missed that reply). not sure how i feel about that. are my alarm bells valid?
+U23SA861Y : it's not that ugly
+U68RXKS5D : w/ that wrapper, i'd still access it on the JS side by the wrapped name, correct? `app.ports.doAThingWrap.send()`
+U23SA861Y : yeah
+U23SA861Y : might have to work on the names
+U68RXKS5D : cool. thanks for helping clear that up for me! helps unblock my brain :smile:
+U68RXKS5D : <@U23SA861Y>++ :heart:
+U68RXKS5D : this unit type is a new idea on me. either i missed it in reading or it's not covered well. here's a thing i found to read if others are interested <https://gist.github.com/sporto/401afc781341a55fbfa7>
+U23SA861Y : it's the base case of the tuple
+U23SA861Y : It basically just says there exists a tuple with no values, there is an equivalent one for records `{}`
+U23SA861Y : although unit `()` is more common
+U68RXKS5D : makes sense :+1:
+U68RXKS5D : haha this is a bummer :laughing: ```
+&gt; app.ports.onSubmit.send()
+Error: Trying to send an unexpected type of value through port `onSubmit`:
+Expecting null but instead got: undefined
+&gt; app.ports.onSubmit.send(null)
+undefined
+&gt; lolwat: []
+```
+
+Apparently `null` is nothing, not `undefined` :facepalm:
+
+U4JT89FGB : thanks <@U0FP80EKB> re: animations
+U2GPAEU1L : <@U68RXKS5D> 
+`null != undefined`…actually that's a lie, freaking javascript, rather `null !== undefined`.
+
+Null and undefined are different, what's the bummer?
+
+U68RXKS5D : just a bummer that you have to explicitly pass along `null` to send that message
+U68RXKS5D : not calling it wrong by any means
+U2GPAEU1L : Well is the Elm on the other side expecting `null`?
+U68RXKS5D : unclear, see above. the port is defined w/ a unit type
+U2GPAEU1L : How are you decoding?
+U68RXKS5D : so i guess it's technically expecting `()`?
+U68RXKS5D : not sure what you mean exactly
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

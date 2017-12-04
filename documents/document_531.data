@@ -1,2 +1,60 @@
+U0CQ254F5 : have you read / seen <https://guide.elm-lang.org/> <@U6D3ERLA1> ?
+U6D3ERLA1 : <@U0CQ254F5> Yes, I've familiarized myself - also trying to get some practical stuff working I tend to learn best by example
+U6D3ERLA1 : So... my updated code works! I have imported an XML string and turned it into a `List Participant -&gt; a`
+U6D3ERLA1 : This gives me a return value (I think) of type `List Participant`
+U6D3ERLA1 : However, there is no function in the world, I think, that accepts this type of paramater
+U0CQ254F5 : right, you have to handle the `Result` manually…
+U6D3ERLA1 : For instance if I am trying to encode this as JSON (I am) I need to make it into a List Value -&gt; a type
+U6D3ERLA1 : I think
+U0CQ254F5 : so are you getting a return type of `Result error (List Participant)`?
+U23SA861Y : `List Value -&gt; a` or anything to a variadic parameter should be impossible? because you can never construct `a`
+U6D3ERLA1 : ```The type annotation for `participants` says it is a:
+
+    List Participant
+
+But the definition (shown above) is a:
+
+    Int -&gt; Json.Encode.Value -&gt; String
 ```
-Now `someExpensiveDefault 5 6` will only be evaluated when there is a `Nothing` called.
+
+U6D3ERLA1 : Basically, how do I get List Participant into Json.Encode
+U23SA861Y : so you want to write a Json encoder?
+U6D3ERLA1 : If need to be, yes
+U6D3ERLA1 : This `List Participant` thing looks to me a lot like a javascript object :smile:
+U6D3ERLA1 : already
+U23SA861Y : you have a Participant encoder? `Participant -&gt; Json.Encoder.Value`
+U0CQ254F5 : <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Encode#encode>
+U23SA861Y : If you do then to create a function of `List Participant -&gt; Json.Encode.Value` simply requires calling `Json.Encoder.list`
+U6D3ERLA1 : I think this is the piece I am missing, if I have a type Participant, and a List Participant, I don't understand how to write the Json encoder to handle this custom type
+U0CQ254F5 : do you mind pasting in the type you created for `Participant`?
+U23SA861Y : what does `Participant` look like
+U6D3ERLA1 : <https://gist.github.com/starsinmypockets/9d90524a44777979e9ba3c441711d998> <@U23SA861Y>
+U23SA861Y : ```participantEncode p = 
+  JE.object [("first_name",JE.string p.firstName),("last_name",JE.string p.lastName)]
+```
+
+U23SA861Y : will give you a `Participant -&gt; Json.Encode.Value`
+U23SA861Y : sry one sec
+U23SA861Y : there fixed
+U23SA861Y : daily programmer... someone is a redditor
+U0CQ254F5 : also, are you using `Json.Decode` lib? if not, you can delete that import
+U0CQ254F5 : that's why `string` defaulted to `Json.Decode.string` instead of `Xml.Query.string` for example
+U23SA861Y : to make a list encoder `participantListEncoder pList = List.map participantEncoder pList |&gt; JE.list`
+U23SA861Y : if I want to transform a List of some type into a list of another type you use `map`
+U23SA861Y : In this case you would have a list of participants and you want a list of values
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

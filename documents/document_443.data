@@ -1,21 +1,80 @@
+U3LUC6SNS : <@U3SJEDR96>, thanks again!  Got it working like I want with `identity`
+U663M2MB7 : Okay, thank you guys. So nesting is not a recommended representation of data in Elm?
+U0CLDU8UB : Nested records are fine as long as the data isn't updated often.
+U0CLDU8UB : When you do want to update a nested record, it's nice to make that into a function: `{ model | favoriteCat = updateCat "meow" model.favoriteCat }`
+U663M2MB7 : Right, this is data that is updated pretty much constantly though.
+U663M2MB7 : But only certain parts of it, so I guess a function that updates the stuff I want to update, makes sense
+U604S603Y : are different cases of a discriminated union interchangeable, like base class and derived class in OOP?
+U604S603Y : I'm trying to have only one field in the top-level model of my SPA which then "contains" the page data of the currently active page. So I tried making a DU with all the different page data types I have, one case for every page. But then I have problems calling the different pages' update functions, because they expect the correct data and not the top-level DU
+U604S603Y : Then I tried pattern matching on the DU and only calling the update function when the case is the right one - but that results in problems with the overall return value of the top-level update function branch
+U3SJEDR96 : you'd need to "rewrap" that return value with the correct tag
+U3SJEDR96 : ```LoginModel model -&gt;
+  (Login.update model msg) |&gt; Tuple.mapFirst LoginModel |&gt; Tuple.mapSecond (Cmd.map LoginMsg)
 ```
-Is this ok ?
-quick question: is there named unpacking/pattern matching, like Haskell's `xs@(x:xss)`
-<@U6GFNSEPR> yeah, it's "as" `(x::xss) as xs` in that case, IIRC
-oh, excellent, thanks :slightly_smiling_face:
-can't seem to manage to do it with a record though
-<@U6GFNSEPR> `foo ({ bar, baz } as whatever) = ` should work
-it does! I always forget the brackets
-thank you very much, this makes some things nicely readable
-on a related note, I noticed a bit of magic when you forget to name the record. in my `view : Model -&gt; Html Msg`, the compiler doesn't throw an error if I forget to name my argument `model`
-so I can use `model`, even though I wrote `view { basePolygon, top, height } = '..`
-no, you probably have a function `model : Model`
-When using `beginnerProgram`, that is the exact reason I name it `initialModel` :slightly_smiling_face:
-Yeah, it's a bit odd that it's `model` in `beginnerProgram`, but `init` in `program`
-<@U24HQ3RJ7> Are you generating a stylesheet or using it inline?
-`model` is just plain wrong naming, in my opinion
-I think it's like that to match up with MV*.
-ah yeah, it's a bit clearer to name it `initialModel`
-<@U3SJEDR96> hmm,  do you mean `text` 's signature is *not* a free type variable?
-No, it is. And that can be unified with `Never`. You could have `foo : Html Msg` and define `foo = text "hello"`, too. That would be completely valid. The type of the expression `text "hello"` is still `Html a`.
-It's no more special than saying `foo : List String` with a definition of `foo = []`. That empty list doesn't really "hold" anything, so it could be a `List Never`, too, but since it has type `List a`, the compiler is fine with you saying it is a more specific thing than that, even though the implementation doesn't _need_ to be that constrainted
+
+U3SJEDR96 : or something along those lines
+U604S603Y : now there's only one error left.The code is:
+``` SchnellcheckMsgs msg -&gt;
+            let
+                ( schnellcheckViewModel, cmd ) =
+                    case model.subpageData of
+                        SchnellcheckModel sm -&gt;
+                            (Schnellcheck.Update.update msg sm)
+                                |&gt; Tuple.mapFirst SchnellcheckModel
+                                |&gt; Tuple.mapSecond (Cmd.map SchnellcheckMsgs)
+
+                        _ -&gt;
+                            ( None, Cmd.map SchnellcheckMsgs Schnellcheck.Types.NoOp )
+            in
+                ( { model | subpageData = schnellcheckViewModel }
+                , Cmd.map SchnellcheckMsgs cmd
+                )```
+where `None` is a case of the DU stored in `model.subpageData` and `NoOp` is a case of the same Message DU stored in `SchnellcheckMsgs`.
+The error is in the `( None, Cmd.map SchnellcheckMsgs Schnellcheck.Types.NoOp )` line: 
+```The 2nd argument to function `map` is causing a mismatch. - Function `map` is expecting the 2nd argument to be:
+
+    Cmd Schnellcheck.Types.SchnellcheckMsg
+
+But it is:
+
+    Schnellcheck.Types.SchnellcheckMsg```
+
+U604S603Y : the code resides in the top-level update function in my Main.elm
+U3SJEDR96 : How about `Cmd.none` instead? :slightly_smiling_face:
+U604S603Y : BLACK MAGIC
+U604S603Y : it's working now! thanks <@U3SJEDR96>
+U62PV9CPN : in elm-html is there a way to get the `&lt;em&gt;` tag to evaluate in this example:
+```
+span [] [ text "Some &lt;em&gt;emphasized&lt;/em&gt; text" ]
+```
+
+U3SJEDR96 : The proper way would be `span [] [ em [] [ text "emphasized" ] ]`
+U3SJEDR96 : 2 workarounds exists; using elm-markdown on the string or using an unsafe hack
+U180KMGRE : ```span 
+    [] 
+    [ text "some "
+    , em [] [ text "emphasized" ]
+    , text " text"
+    ] 
+```
+
+U180KMGRE : unsafe hack way: ```
+span [ property "innerHTML" (string "Some &lt;em&gt;emphasized&lt;/em&gt; text") ] []
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

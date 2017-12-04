@@ -1,22 +1,370 @@
-                                                ]```
-<@U3SJEDR96> is it possible to create a `Value` in elm? Without it being passed in from outside?
-<@U5US3G22C> Look at `Json.Encode`
-Thanks. Another question. I realized you can pass in arbitrary json to elm through ports and handle it as long as you have a record that represents that json. Is it possible to do the same with http request json? Or must I decode it manually?
-You have to provide your own decoder to the `Http` functions.
-So I cant just pass in the `value` decoder and then later on apply that value onto a `type alias`?
-Nope, you have to make your own decoder if you want to avoid hacky work-arounds.
-(e.g. passing the value out of and back in via a port)
-That's interesting, but hacky as well. Thanks for the help
-One more random question. What are some tips for being productive with elm?
-I hope this isn't a FAQ. If so, a link to existing notes would be great also
-<@U5ABF3BH7> :thinking_face:
-That's a pretty vague question :slightly_smiling_face: Could you be more specific?
-Let me try to be clearer
-If I'm working on a module, how can I try it out without integrating it into my existing code? Unit tests?
-When I make a new feature, I usually have to rewrite it a few times to make it nice and elegant (including making it work first). Having to make a Main for each one is kinda tedious. Is there a better workflow?
-I personally prefer to see it as a part of the whole. i.e. "Chase compiler errors until the feature is done". But unit tests sounds reasonable to me
-Maybe I don't have enough experience with the different features and how everything works. I see a bunch of errors and fall back on the workflow i just described.
-It's an interesting question for sure :slightly_smiling_face:
-<@U5US3G22C> Code organization in Elm is likely going to be different from what you are accustomed to. I would advise not worrying so much about organization until after at least one round of refactoring. Don't go making a bunch of modules before you know that you need them.
-It's not usually the organization that's the issue more along the lines of, "I've got this piece of json i need to get from the server, but I need to handle it in this way and how do I setup the decoding pipeline and etc to make it all work correctly (what records will I need, what unions types, etc.). I think this might just stem from a lack of understanding and experience with functional languages and elm
-<@U5US3G22C> Probably. I think that starting from "I've got this piece of json" is often the wrong approach. I usually start by thinking of the data structures that I want and then figuring out how to build one given the API requests I have available to me.
+U0ND8KMFG : ok, so you need to know when a conversation is over. in Microsoft's Bot Framework they have similar behaviour. You can check it in GitHub and see how they do it.
+U29SUUB0S : but maybe i should ask this in the <#C0HNPFAF2|botkit-conversations> channel instead... :wink:
+U29SUUB0S : <@U1116QM2Q> yes, exactly. but how do i remove it
+U29SUUB0S : some pseudocode ```    controller.hears(['new player (.*)'],'direct_message',function(bot, message) {        bot.startPrivateConversation(message, initConv);
+    });
+
+    var initConv = function (response, convo) {
+
+        controller.hears(['exit'],'direct_message',function(bot, message) {
+            convo.stop();
+        });
+
+        convo.on('end',function(convo) {
+
+            if (convo.status=='completed') {
+                // do ya thing
+            }
+
+            if (convo.status === 'stopped') {
+                // here i want to remove the controller.hears(['exit']);
+                bot.reply(_message, "okay, c u l8r")
+            }
+
+        });
+
+        convo.ask({
+            ...```
+
+U1116QM2Q : i'm not sure if you can... remove it actually never had to do that as i don't use the `controller.hears` listeners like that
+U1116QM2Q : i usully just use them as top level "conversation" or "feature" starting listeners
+U1116QM2Q : that the bot always responsds to
+U1116QM2Q : if you want to ask a question or wait for a player input you can use the `convo.ask` method and parse the answer of the player, and repeat the question if it doesn't fit what you want the player to answer to
+U1116QM2Q : that way you don't need to setup listeners inside the conversation method
+U1116QM2Q : <@U29SUUB0S>
+U29SUUB0S : yes, this is how I do it today ```if (response.text.toLowerCase === 'exit') {                convo.stop();
+            } else {
+                askFirstParentName(response, convo);
+                convo.next();
+            }``` I just wanted to clean up the code a bit...
+
+U1116QM2Q : i think the way you have it on that snippet is fine, is there a problem still?
+U29SUUB0S : just that i have to have it on every question :wink:
+U28S48UN7 : Hello! I'm new to building bots (I'm attempting <https://github.com/DFieldFL/slack-beer-search-bot/blob/master/README.md>)but I have a question concerning slash commands. Everything seems to be connected from Tera Term to EC2 however when I try the URL (http://[domain name]:[port]/) it tells me there's a problem connecting to the data base. Do I need to specify a database in MySQL? Thank you!
+U28S48UN7 : The EC2 was first made for WordPress but I've deleted the files and data bases. Idk if this helps:sweat_smile:
+U2A4LELSV : is there a way to transfer ownership of a bot between devs?
+U0YJLV67P : <@U2A4LELSV> unfortunately there isn't a way to self-manage that transfer right now. you'll just need to put in a request to transfer from the primary owner of the team the bot is associated with. if you send in a support request with the request Slack can deal with it pretty quickly.
+U055FHACC : Want to build something and looking for an idea? Here's what I need, I imagine other bot builders need that too:*Dialogue manager* to manage the bot's responses in various situation. Ideally it would support:
+-Branching (if this then say that, otherwise say the other thing)
+-Multiple responses for the same situation (so that bot won't repeat himself)
+-Nice: Smart way to pick the best response right now (eg based on sentiment analysis from previous users)
+-Multi platform support (because *bold* is “*” in Slack and &lt;strong&gt;&lt;/strong&gt; in HipChat)
+-Multi language support, because not everyone speaks English
+-Allow the dialog team to work separately on their side, and hot-deploy changes into the bot without bothering the devs for anything
+-Some kind of light simulation - run the dialog inside the editor to get a feel for how it looks inside Slack, Facebook etc.
+[Does anyone know a tool that comes close to doing this?]
+
+U0HBN0L9M : <@U055FHACC> _-Allow the dialog team to work separately on their side, and hot-deploy changes into the bot without bothering the devs for anything_ is the most important IMHO
+U0HBN0L9M : I just finished a freelance gig where we worked at separating the bot engine and the content structure into two separate modules
+U0HBN0L9M : it shows great promise, but I think what would be great would be a CRM for bot dialog
+U0HBN0L9M : dev could work on the bot engine while content managers could change the wordings, and the two services would talk to each other like an API
+U055FHACC : <@U0HBN0L9M>: exactly what I mean, separate the wording from the engine. Why do you call that thing a CRM?
+U0HBN0L9M : sorry, CMS
+U0HBN0L9M : content management system
+U0HBN0L9M : <@U055FHACC>
+U055FHACC : yes! but should support multiple languages and multiple platform-specific formatting
+U0V93GE5R : <@U055FHACC> might want to sign up on our list here <https://howdyai.typeform.com/to/JNTm22>
+U055FHACC : I signed up, but what is it? <@U0V93GE5R>
+U0CNYC404 : By multi language do you mean multi language parsing of inbound queries, ability to set locale (and thus content for outbound responses) or both?
+U0CNYC404 : Interesting idea though <@U0HBN0L9M> got me thinking
+U055FHACC : <@U0CNYC404> I meant outbound. Inbound is prob. much more difficult to do, possibly culture-dependent too (at least in our case it is)
+U0V93GE5R : <@U055FHACC> tools inbound that may help you!
+U0HBN0L9M : signed up too <@U0V93GE5R>
+U26L82BRQ : <@U055FHACC> I found a tool the other day that *kind of* does what you're saying, or at least could facilitate it… but doesn't quite cut it. <http://smooch.io|smooch.io>
+U26L82BRQ : Needs some love and additional pieces to make it sing (i.e. a bot platform like <http://meya.ai|meya.ai> that could be programmed to respond based on context, etc.)
+U2342HVKM : <@U055FHACC>: I want the same. Many bots are just decision trees (ordering pizza for example) and it should be possible to create a simple GUI editor to create questions and answers and then assign an outcome to the end of the tree. I have looked but cannot find anything (even a decision tree editor not related to bots). The difference between a Dev changing content and a business user is huge.. Cause after a while when the project matures no one is starting an it project or begging for a developer to make a few small changes or do AB testing on text.  
+U055FHACC : looks like the majority of products aim for the “build a bot with no coding” crowd. That's okay for fun projects or small businesses experimenting. But for the bigger, more serious projects this is like offering you WordArt when you need Photoshop. When you have to manage thousands of branching response strings, these tools are not the answer.
+U0KH7478W : &gt; <@U0HBN0L9M> _we worked at separating the bot engine and the content structure into two separate modules_We've done pretty much the same at <http://MailClark.ai|MailClark.ai> a few months ago :wink: 
+Writing bot conversations and coding the bot engine are indeed two different things so a Dialogue Manager as you described <@U055FHACC> would be a great tool. A Conversation Management System.
+For the back-office UI, I reckon scriptwriting software (e.g. Adobe Story or Highland) could provide an interesting source of inspiration. Writing for bots—which is all about flows—doesn't relate much to writing for websites—which is all about pages—so I believe traditional CMS interfaces wouldn't do the job.
+
+U0KH7478W : &gt; <@U055FHACC> _Allow the dialog team to work separately on their side, and hot-deploy changes into the bot without bothering the devs for anything_The COPE model invited by Daniel Jacobson at NPR back in 2009 could apply to what you describe here. <http://www.programmableweb.com/news/cope-create-once-publish-everywhere/2009/10/13>
+
+U0HBN0L9M : There's the issue of formatting, platform-specific flows, ...
+U055FHACC : you could ask for “bold” and it will translate to **bold** in Slack. Or a carousel, and it will translate to whatever's possible on that platform (with maybe some fallback for where it's not supported?)
+U055FHACC : That's why you need a simulator to show how it'll render on every platform
+U0HBN0L9M : or with a platform selector
+U0HBN0L9M : so that the outbound content is always properly formatted
+U0HBN0L9M : and within the editor, you can customize each platform independently
+U055FHACC : wouldn't that be a beautiful product?
+U0HBN0L9M : :smile:
+U0HBN0L9M : your next venture I'm sure
+U0HBN0L9M : and that thread was just market research
+U0HBN0L9M : :white_check_mark: interest confirmed
+U055FHACC : We don't have time! The interest is confirmed for sure.. it's a classic “scratch my own itch"
+U0CNYC404 : @mattheiu thats how we do it today for different platforms, you can add the plain text responses in, and then add separate ‘modules' for FB etc, and it will only trigger the relevant one depending on which network that particular conversation is going through.
+U0CNYC404 : <@U2342HVKM> would love to get your feedback on what we've built then, a quick video: <https://blog.converse.ai/messenger-bots-without-code-using-converse-ai-chatflow-7efd8ca311c1>
+U0CNYC404 : <@U055FHACC> I do appreciate your point though about ‘simple' projects, I think seperating the content from the design is still a good idea in those scenarios :slightly_smiling_face:
+U055FHACC : <@U0CNYC404> multiple responses X multiple formats X multiple languages. Anyone with a serious bot in the air, after a year will hit this wall. Having too many strings to manage.Simple case: user says “hello”. Bot chooses from one of 20 different responses, if it has a *bold* word in it, need to format it correctly to the platform, multiplied by the number of human languages supported.
+You can see how this adds up and gets out of control
+
+U0CNYC404 : <@U055FHACC> oh I totally can
+U0CNYC404 : Previous job we had a UI, which could be reskinned/customised/internationalised by resellers, so each could have their own, so been down this road before :confused:
+U0CNYC404 : I'm glad you brought it up, it's given me some interesting things to think about :slightly_smiling_face:
+U055FHACC : As the industry matures, this will be needed even more
+U055FHACC : maybe entire content teams working on the same file (each doing his own specialty part in his own language..)
+U0CNYC404 : Companies like Smartling do some clever things here with content translation, but it's not a perfect fit as it's not designed with the challenges of a conversation
+U04SM6T2H : <@U055FHACC> just read this thread
+U04SM6T2H : i think you will like what we've built for the botkit studio tool!
+U055FHACC : <@U04SM6T2H> I signed up, ball is in your court :slightly_smiling_face:
+U04SM6T2H : :slightly_smiling_face:
+U2AN14W4Q : Hey guys!  I'm working with botkit to build out a slack app for other teams; I'm at the point to deploy the app and can think of a few different approaches, just wondering if there's a pattern or recommendation that people have found for serving multiple instances of botkit for each team that integrates
+U0YQS1FAR : welcome <@U2AN14W4Q>! I'd head over to <#C0AV5N8NA|botkit> and ask some more specific questions.
+U0YQS1FAR : I'm not sure I follow what you mean re: multiple instances of botkit per team which is why I asked for more specifics
+U2AN14W4Q : got it, will do.  Thanks! :+1:
+U04SM6T2H : <https://messengerblog.com/bots/messenger-platform-1-2-link-ads-to-messenger-enhanced-mobile-websites-payments-and-more/>
+U04SM6T2H : Big announcement from Facebook today
+U04SM6T2H : Payments can now be integrated right into your messages!
+U0HBN0L9M : boom
+U0HBN0L9M : "enhanced mobile websites" is big, isn't it? going towards partial html views?
+U0HBN0L9M : and... payment
+U0HBN0L9M : :dollar:
+U0D1YNBEE : yeah, really interested to see examples of "enhanced mobile websites” :slightly_smiling_face:
+U21UGU36Z : I just regenerated a new client secret and configured it on my server, but slack oauth is responding “bad client secret” :disappointed:
+U21UGU36Z : I'm using the ueberauth-slack plugin for phoenix
+U21UGU36Z : Anyone know what I should check?
+U21UGU36Z : the secret in the params for the client in the logs is correct
+U2AV6217A : the botkit github readme links to here, but is this the right place to ask botkit questions :X ?
+U0HT1NBLH : Yep, try the <#C0AV5N8NA|botkit> channel
+U2AV6217A : thanks!
+U235HG07K : Hi peeps, not sure if this is the right forum, it being <#C04SM6TAK|general> and all but we want to get the timezone of the user. Can't seem to be able to do it via any of the slack APIs
+U235HG07K : How have other people dealt with timezones
+U235HG07K : In our case, we are building a bot that sends reminders at  particular times like 9am local
+U235HG07K : The keyword being "local"
+U055FHACC : <@U0DT0AH47> the main problem I need to address is the huge amount of text fragments that need to be managed (multiple responses X multiple platforms X multiple languages) in a way that's manageable, accessible to a team of writers, and separate from the bot engine.These are mainly the bot's outgoing messages, not related to training or NLU
+
+U0HBN0L9M : <@U055FHACC> there's Walkie on Product Hunt right now
+U0HBN0L9M : might fit your bill
+U0HBN0L9M : Totally didn't mean to do a shameless plug, it was really because Walkie might solve your problem :slightly_smiling_face:
+U0KNN1SBV : <@U055FHACC> <@U0HBN0L9M> Walkiebot is super nice, has helped out team designing the message flows and scenarios. Also really easy to share with the team even has Json export for dev. to impl.
+U110D6UR5 : And a lot easier to debug than sending actual JSON as a Slack message to see what it looks like
+U055FHACC : Already using Walkie, it's very nice, great work! (not related to what I need at all..)
+U0KNN1SBV : what you are looking for is a some type of CMS for that can be tapped into the bot(s) right?
+U055FHACC : yes.
+U0KNN1SBV : <@U110D6UR5> ^^^
+U0M3CFEJV : <@U055FHACC> something we have thought about looking at building.. just no real feel for market size of bots making money + big enough to need this kind of tool for real
+U0M3CFEJV : and if possible to make in meaningful generic way
+U055FHACC : <@U0M3CFEJV>: we're 1.5+ years in the air, things just build up over time and get more and more complicated to manage.Also once we begin to see more multilingual projects, they'll need a tool for sure. Something like a hyper PO editor.
+If you believe this is where the market is trending, then being first has value.
+
+U055FHACC : if no one picks this up we'll eventually have to do it ourselves..
+U0M3CFEJV : <@U055FHACC> def -.. have a few ideas inspired by PO editors
+U0HBN0L9M : Dear all, my Botkit-powered Facebook bot RemindMe is on ProductHunt. If you wanted to :arrow_up: it or even participate in the comments, it would mean a lot to me! :heart: :heart:<https://www.producthunt.com/>
+
+U0HKDKHD4 : :up: ‘d
+U0KECURAT : Hey guys, just saw your conversation re: walkiebot on producthunt earlier today :slightly_smiling_face: I'm one of the creators, if you have any questions feel free to shoot them my way!
+U2342HVKM : <@U055FHACC>: just want to +1 everything you have said re conversation editor. 
+U0KECURAT : <@U2342HVKM> did you check out <http://walkiebot.co|walkiebot.co> ? :slightly_smiling_face:
+U0HBN0L9M : <@U0KECURAT> was not aware you created it
+U0HBN0L9M : good job
+U0KECURAT : Thanks!
+U2342HVKM : <@U0KECURAT> looking at it now.. It seems at first glance a nice way to construct short conversations but not sure if it is the best UI to do decision tree type bots in?
+U0KECURAT : <@U2342HVKM> yeah no, the initial focus has been to build something to replace slacks message builder :slightly_smiling_face:
+U2342HVKM : yeah and its cool... certainly something we would look at for kind of Bot UX design
+U2B9RF1CN : So, when building a Slack App, does it have to go through the app directory to use for a private team?
+U0HBN0L9M : nop
+U2B9RF1CN : I'm trying to utilize interactive messages for an internal app, not looking to build something that others can use
+U2B9RF1CN : but I don't see a way to enable it for my team, only how to submit it to the app directory
+U07CW6N3A : You can create a slack app and never submit it to the directory. You could provide the installation URL or sign in URLs only to members of your team. You could further limit which teams could install your slack app within your own app, by revoking tokens/ignoring installation attempts from any team IDs not matching your whitelist. 
+But there's no way right now to completely limit who can attempt to install your app, provided they had the client ID corresponding to your app.
+
+U07CW6N3A : It shouldn't be too hard to limit installation to only your team and I can imagine Slack providing better ways to do so in the future.
+U2B9RF1CN : so, I set up the slash commands and bot users, which is all I need
+U2B9RF1CN : do I have to setup the oauth piece? even though I'm not going to use it? I get a big warning on every page
+U2B9RF1CN : also, I still don't see any url or anything to install the thing, just the ability to submit to the app directory, how do I actually get to the install url?
+U07CW6N3A : You will have to go through the OAuth process -- someone will need to install the app and your app will have to answer the redirect, process the verification code, and negotiate that access token, which then gives your app access to your team's goodies via the scopes you ask for.   It's easier than it all sounds.   The installation URL is actually the "oauth authorize" step of the OAuth 2.0 flow -- you can easily generate one over on the "Add to Slack Button" documentation: <https://api.slack.com/docs/slack-button#add_the_slack_button>
+U2B9RF1CN : yeah, just found that
+U2B9RF1CN : thanks for the help
+U0SPQ5PDY : Hi everyone :wave: ! My company is running *quick, 30-minute usability tests* next Tuesday (20th Sept) for our Slack bot. We're recruiting 8 people and you should come participate, because:
+:one: You love Slack but are aware of the problems your team faces while using Slack day-to-day. You've been testing different bots to solve some of those problems!
+:two: You want to meet a team of people who are committed to building bots that can unlock a lot of value for your team!
+:three: We'll offer $25 Amazon gift cards in return for your time and insights. We'll also answer any questions you might have about bots, startups, design, engineering.
+
+*DM me if you're interested.*
+
+U0HERRQR1 : and your company is? <@U0SPQ5PDY>
+U0SPQ5PDY : I'm working for <http://pogo.ai|pogo.ai>  :slightly_smiling_face:
+U2BCVR129 : why we call ourselves dev4slack if we are focusing on botkit?
+U0G6S49AS : <@U2BCVR129> because Slack helped create botkit
+U1EP0GH2T : The "add to slack" button allows a slack user to deploy a bot in a team through oauth protocole, is it possible during that deployment to request data from the user (username, password, etc of some backend system used by the bot) befor the bot is fully deployed in the team ? some kind of interaction during deployment process ?
+U0KECURAT : <@U1EP0GH2T> see my reply in <#C0AV5N8NA|botkit>
+U0RRCPDK9 : Quick Q: is there a way to get a user's timezone from Slack?
+U1DM2B4SY : <@U0RRCPDK9> this was asked yesterday in <#C0AV5N8NA|botkit> : <https://dev4slack.slack.com/archives/botkit/p1473742261000242>
+U1DM2B4SY : good answer there
+U21U8SZ2P : <@U0RRCPDK9> if you get the user list you should see something like this:
+U2BMWQHA5 : Hi. I am working on a project which spawns Facebook and Slack bots on the same Express server. How can I distinguish between the bots? Is there an id property associated with it which tells me the source? I have a GH issue for this. <https://github.com/howdyai/botkit/issues/414> If someone can help, it will be greatly appreciated. :slightly_smiling_face:
+U0LR6R73K : <@U2BMWQHA5> try in <#C0AV5N8NA> 
+U2BMWQHA5 : Thanks. Just shared there.
+U0J06SNR3 : There was a conversation back on June 9 asking if user_id is globally unique. As I understand from the response,  the user_id + team_id is guaranteed to be globally unique. In that case, why do we identify users only by user id in storage? Thank-you :slightly_smiling_face: (This is a follow-up to your conversation <@U0CS6NSF5> <@U0D7LHNTX>)
+U0CS6NSF5 : <@U0J06SNR3>: you must not identify users in storage by just `user_id` unless you only have one team
+U0J06SNR3 : Thanks <@U0CS6NSF5>
+U0CT32R88 : Hey guys, anyone here familiar with developing apps on Electron? We're looking for a developer to bring <https://plutio.com/> on desktop and mobile apps.
+U2C28CRDY : Hi all! We using slack app for authentication users. ('sign in with Slack'). When user signins for the first time, slack sends a email notification with subject - "New Slack app installed".  Is it possible to disable  or customize this notification? Thanks
+U0KECURAT : <@U2C28CRDY> nope, that's a “security” thing from slack :slightly_smiling_face:
+U2C28CRDY : <@U0KECURAT> thanks for quick answer!
+U2C28CRDY : We wonder why notification says  "New Slack app installed",  but all we need is just sign in.
+U0KECURAT : I can't answer that, probably because the app is still added albeit with a smaller scope I can imagine
+U0554MQJB : <@U0KECURAT> <@U2C28CRDY> Slack needs to change the copy in that email - If a user signs up for an app they already get a confirmation that the app has been installed for their team. Sending that copy to everyone in the company who signs in is confusing as they think they installed something.
+U0554MQJB : Instead of "you just installed *app* for the X Slack team” better copy would be: “your X Slack team identity was used by *app*” - google does something similar to this
+U25F5P2MN : Hey guys, I need your help!I have a question about permissions. Our bot asks for permission to create a channel and when a new team member has joined. Once you download the integration the bot creates the channel but after that for some reason we don't get notifications when a team member has joined. Is this some sort of limitation from Slack?
+
+U0KECURAT : <@U25F5P2MN> make sure you're listening for the `team_join` event <https://api.slack.com/events/team_join>
+U2BU0A9A5 : Hi! I have a question… Is there a way to use buttons in messages in a custom integration or to migrate to a slack app without publishing it?
+U0KECURAT : <@U2BU0A9A5> just don't submit it to the app directory :slightly_smiling_face:
+U2BU0A9A5 : Awesome! thanks :slightly_smiling_face:
+U2CC83EET : hey, is anybody here playing with interactive message buttons and willing to answer a question below?
+U2CC83EET : Is there a way to allow only one action (out of all presented) to be taken? I mean I send notification to channel with e.g. 4 actions and would like to allow only the first action to be invoked and subsequent to be discarded
+U2CC83EET : I was thinking on doing this on my side with something like `runningActions` bag, where I'd put `ts` of original message on callback arrival and'd clean this up upon finishing
+U0HBN0L9M : I don't really understand
+U0HBN0L9M : why would you present 4 buttons?
+U2CC83EET : there are 4 possible actions and I want sth like 'first hit wins'
+U2CC83EET : I could update the message as soon as action gets run (remove buttons to prevent from subsequent clicks), but that's always the network... cannot rely on it
+U2CC83EET : also it doesn't work well when there is confirmation dialog attached to button (action gets executed upon confirmation even if message was updated and buttons were removed)
+U2CC83EET : that's why I was thinking on doing this by keeping list of ids of messages for which callbacks are running, but again - it fails with confirmation e.g. in the following scenario:
+U2CC83EET : 1. user A hits button 'foo'2. user A gets confirmation and hits 'ok'
+3. in the meantime user B hits 'bar'
+4. user B gets confirmation and waits a bit
+5. A's action finishes (and running callback gets removed from the list)
+6. user B hits 'ok'
+ result =&gt; B's action gets executed
+
+U2CC83EET : hmm, now I'm thinking about that and maybe it's not an issue... I do checks on my side anyway whether an action can be run or not...  :rubber_duck:
+U2CCKNCLR : Hello everybody.
+U1ZMN2FD1 : <@U2CC83EET> this doesn't really help you, but note that the buttons will be disabled for the user who clicked them until Slack receives your response. So if you remove the buttons via your response then the same user can never click a second button. But a different user can, as you've said.
+U1ZMN2FD1 : so I would suggest using your response to remove the buttons if you aren't already, rather than making a separate call to the Web API — it will minimize network time
+U0SPQ5PDY : On this page (<https://get.slack.help/hc/en-us/articles/218478688-Slack-for-executives>), there is a line:
+&gt; Comments on posts are threaded so you can see work and feedback all in one place.
+
+Can anyone please point me towards something more about threaded comments?
+
+U1AQ8MY3U : anyone else seeing gateway timeouts from slack ?
+U2CR7AXEG : Hey everyone!  In what channel would it be appropriate to ask questions?
+U0V93GE5R : Depends on the questions :)
+U2CR7AXEG : For a bot I'm working on, more specifically the json file db
+U0V93GE5R : We do have <#C0AV5N8NA|botkit> and <#C0HGSHT7T|botkit-storage> 
+U2CR7AXEG : perfect thanks man
+U2CS340DQ : Hi everyone!
+U2CS340DQ : i have a simple question, can i make a conversation and save the responses with botkit but when im developing a facebook bot?
+U2CS340DQ : it's the same?
+U2C2T1STT : Hi all, Anyone have a predict of how may chatbots are going to be? We are building a solution for chatbots developers and we are looking for some numbers.
+
+U2D0A2SJU : how do I get the channel name of the channel I message my bot from?
+U0XN8E1EY : Hi! Anyone had done load testing on Botkit-based Slackbots? Where trying to test how  well our bot will manage when the load increases. Mocking won't really do as it'll only test the flow not the load. Any inputs or direction will be greatly appreciated! :smile:
+U1MAWBL01 : <@U2D0A2SJU> use *message.channel* to extract the channel name
+U11D4G6QJ : <@U1MAWBL01> is there a list of all those variables anywhere?
+U1MAWBL01 : <@U11D4G6QJ> <https://api.slack.com/events/message>
+U11D4G6QJ : Cheers <@U1MAWBL01>
+U0HERRQR1 : hey guys, sourcebot for slack is out with 52% test coverage (only for now) you can look at the producthunt from <https://www.producthunt.com/tech/sourcebot-for-slack-is-out>
+U2D0A2SJU : <@U1MAWBL01> I did that but how would I change it to the actual channel name and not the id
+U0KECURAT : <@U2D0A2SJU> out of curiousity, what do you need the name for?
+U2D0A2SJU : I need to know what channel a message is coming from <@U0KECURAT>
+U0KECURAT : <@U2D0A2SJU> that's what the id is for though, names are only really there for humans to read
+U0XN8E1EY : <@U2D0A2SJU> check `<http://channel.info|channel.info>` providing the channel id you got. refer to <https://api.slack.com/methods> for others as well, all calls are mapped in that. :slightly_smiling_face:
+U2D0A2SJU : well the bot has to print out the channel name and printing out a weird combination of numbers and letters would look weird and be confusing
+U2D0A2SJU : I actually used <http://bot.api.channels.info|bot.api.channels.info> in my slackbot using botkit but whenever I did bot.reply(message,response); it did nothing.
+U2D0A2SJU : Guys If you want to see my slackbot src code go here <https://github.com/yash-1337/Team-Bot>
+U0KECURAT : <@U2D0A2SJU> where is it supposed to happen exactly?
+U0F9T9KPH : Hey everyone. Thanks to botkit we have released Standup Bot - SPEED this morning. Now with fully async standups, filtering and more. On Product Hunt right now. <https://www.producthunt.com/tech/standup-bot-speed>
+U2D0A2SJU : <@U0KECURAT> where it says "controller.hears(['list'],['direct_message','direct_mention','mention'],function(bot,message) {" it should be inside that function.
+U2D0A2SJU : <@U0KECURAT> <@U1MAWBL01> never mind guys I figured it out! Thank you for your help though!
+U1A72QLGL : <http://api.ai|api.ai> just announced that they've been bought by Google
+U11D4G6QJ : Incredibly stupid question, but what am I doing wrong for urls not to work as described in the API docs: `&lt;http://www.foo.com|www.foo.com&gt;`
+U1BPBKXK5 : <@U11D4G6QJ> <#C0K8617D5|slack-api>
+U0GT29N3A : Does anyone else is starting to see their own bot messages received without the `user` property (ID of the bot user), but rather with the `username` property (the name of our bot)? This kinda broke how we exclude/filter our own messages... :confused:
+U0HBN0L9M : really ?
+U0HBN0L9M : that'd be problematic <@U0GT29N3A>
+U0GT29N3A : Yes <@U0HBN0L9M> really :disappointed:
+U2DNR10KV : hello :slightly_smiling_face:
+U2DNR10KV : I'm very interested in what the Slack developer community is doing, especially developers from Slack.
+U1ZS3JJUS : who are you an evangelist for?
+U2DNR10KV : I am an evangelist for Cisco. A competitor for Slack, but I'm here to share knowledge. Plus, I use Slack, and a lot of us use Slack at Cisco :stuck_out_tongue:
+U2DNR10KV : Don't quote me on that haha.
+U2DNR10KV : We want to support more open source communities, but I'm interested on how Slack supports open source communities as well.
+U2DNR10KV : :slightly_smiling_face: :slightly_smiling_face: :slightly_smiling_face:
+U04SM6T2H : welcome <@U2DNR10KV>
+U1ZFG84E4 : This is the first time I've heard of Cisco Spark.
+U04S3JCH2 : :wave: <@U2DNR10KV> nice to have you
+U2DNR10KV : Cisco Spark is more designed for enterprise companies, and comes with almost no features, as it's more for creating a custom platform.
+U04S3JCH2 : would suggest the <#C0AV5N8NA|botkit> and <#C0K8617D5|slack-api> channels (those are my favs)
+U2DNR10KV : But, I'm not here to promote or talk about that unless people really want me to. I am passionate about open source communities and want to do more for them.
+U2DNR10KV : So, that's where I want to find people to talk to and share knowledge of what Slack is doing and what we're doing and see if we have ideas to share :smiley:
+U2DNR10KV : And I'm a very honest and transparent person so hopefully that does good more than bad :stuck_out_tongue:
+U2DNR10KV : Thanks <@U04S3JCH2>  I joined those channels. Woot.
+U0V93GE5R : <@U2DNR10KV> also created <#C2DR1AJD7|cisco_spark> for you!
+U0V93GE5R : welcome!
+U0V93GE5R : no bots in general please
+U0554MQJB : Hey @twiliobot
+U0554MQJB : :point_up: it's lame that you can't @ mention incoming integrations that look like bots
+U0554MQJB : confusing for users
+U0554MQJB : something slack should fix
+U2DR5L2JU : added an integration to this channel: <https://dev4slack.slack.com/services/B2DQRP7GB|outgoing-webhook>
+U2DR5L2JU : @twiliobot tes
+U0V93GE5R : <@U2DR5L2JU>: dont you do it :slightly_smiling_face:
+U0V93GE5R : test in a private channel please
+U2DR5L2JU : lol
+U2DR5L2JU : ok
+U21U8SZ2P : on the subject, what is the proper place to to advertise your bot or ask for testers?
+U2DR5L2JU : disabled an integration in this channel: <https://dev4slack.slack.com/services/B2DQRP7GB|outgoing-webhook>
+U2DR5L2JU : removed an integration from this channel: <https://dev4slack.slack.com/services/B2DQRP7GB|outgoing-webhook>
+U04S3JCH2 : <@U21U8SZ2P> probably <#C04SPC24T|bots> channel
+U0V93GE5R : <#C0JQ4TX7Z|announcements> is good too
+U0HBN0L9M : awesome news <@U0GRGF85N>
+U0HBN0L9M : it's been really interesting to follow your progress so far
+U0MUZB415 : Hey guys! Our SlackBot is live and open to the public! Would love any feedback and thoughts :heart: <https://www.producthunt.com/tech/troops>
+
+U0KNN1SBV : nice <@U0MUZB415> :+1:
+U0MUZB415 : Thank you!!!!!! <@U0KNN1SBV>
+U0KNN1SBV : :slightly_smiling_face: <@U0MUZB415> say hi to <@U0QUB3NRY> from me :slightly_smiling_face:
+U0MUZB415 : He says hi!!!
+U0KNN1SBV : :champagne:
+U0HUZ214H : Congrats on both things <@U0MUZB415>!
+U0MUZB415 : <@U0HUZ214H> Thank you!!!
+U2DNFG26B : Hi all, I was wondering if someone was able to communicate in DM with the incoming webhooks integration.
+U0LR6R73K : I think the integration owner needs to be in the chat for the webhook to work.
+U0XRM115M : I've actually used an incoming webhook to pm a user
+U0XRM115M : I just put the user id for the “channel"
+U2DNFG26B : <@U0XRM115M> Nice! Only by using the ID instead of the "@username" ?
+U0XRM115M : yessir
+U2DNFG26B : oh nice, I will try it, thank you
+U0XRM115M : in my main use case
+U0XRM115M : I use an outgoing webhook in a public channel that listens for “ticketwizard"
+U0XRM115M : our support team uses it to capture a slack convo and generate a zendesk support ticket
+U0XRM115M : so they don't have to summarize
+U0XRM115M : anyhoot, I grab the user id from the outgoing webhook payload
+U0XRM115M : and use it when ready to notify the user of the ticket creation
+U2DNFG26B : nice, I should be able to reply in private then. My use case looks like yours a lot. Currently, we enter a command in a private channel like ".find test" where test can be anything. Then, we search in or update a google sheet. Then the result or the confirmation is printed in the same channel that the command was entered. That's working really well but the thing is, we are only 6 people so It's fine for now. Soon everyone will be able to input those commands, so the channel will be a mess. So my perfect idea would be to have a private conversation directly with the bot, then I will execute my command, and return the output. All in DM.
+U2DNFG26B : I hope to find a solution soon!
+U0XRM115M : gl!
+U2DNFG26B : <@U0XRM115M> did you use the #id or @id or only id as the channel ?
+U0XRM115M : let me pull up my file
+U0XRM115M : only id, I grab it from the outgoing webhook payload like this ```$slackuserid = $_POST['user_id'];```
+U0XRM115M : and when I create the payload for the incoming: ```$payload = array(   		"channel" =&gt; "$slackuserid",
+   		"username" =&gt; "Support Ticket",
+   		"text" =&gt; "Ticket created: $linktoticket",
+   		"icon_emoji" =&gt; ":iceking_cart:"
+	);```
+
+U0XRM115M : so no # or @
+U0XRM115M : <@U2DNFG26B> ^ sorry forgot to tag you in the answer
+U2DNFG26B : thank you. For a reason unknown if my user id is in a variable, it doesn't work, but if I input the user id value myself in channel, it's working. The only thing is, I get the response the Dm with slackbot. is this what's you also have ?
+U2DSW08UU : Is it possible to mute a specific user in a channel?
+U2EHWA8NM : hello guys, I have a question. I integrated our web api with the slack team channel and I am sending messages with buttons. I want that button to lead me to external url when I click it? Is that possible, I tried a lot of options but there are not working
+U2EHWA8NM : thanks :slightly_smiling_face:
+U0KECURAT : <@U2EHWA8NM> that's not supported (yet)
+U0HBN0L9M : need to fall back to links in text/fields
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

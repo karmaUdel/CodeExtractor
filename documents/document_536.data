@@ -1,23 +1,144 @@
-init jsSeed = ...```
-Ah I see this is a reactor issue, nvm, I came in late :sweat:
-Note that I am doing `elm-make Main.elm --output elm.js`
-Oh, you should run `elm-reactor` and then go to <http://localhost:8000/index.html>
-<@U0CLDU8UB>  That gives me a totally blank page
-we use it at NRI via ports
-Actually I can run my original index.html (no taco) via reactor and app comes up fine (at <http://localhost:8000/index.html>) -- I just don't see the state of the model anywhere.
-do you see a little "history" thing in the bottom right?
-A black "tab" of sorts
-nope
-Wait a moment
-you compile with `elm-make Main.elm` right?
-did you checked the output file? Sometimes i use an `old output file` without realizing -&gt; (from a previous run of elm make in another directory for ex).
-the index.html file you're using for the taco stuff, does it refer to `/_compile/src/Main.elm` or `/_compile/Main.elm`?
-`&lt;script src="/_compile/src/Main.elm"&gt;&lt;/script&gt;`
-right, so what basically happens is it's trying to find a `src/Main.elm` but (judging by your compile command) your `Main.elm` is in the same directory as your `elm-package.json`
-so adapting that to simply `/_compile/Main.elm` should help a bunch
-I still do not see the hoped-for widgetry
-Do you see your app at all, <@U5FU80S06>
-please show us the relevant directory structure you have: the parent of the `elm-package.json` - and the path to `Main.elm`
-i think you have
-  // Main.elm
-no src?
+U6D3ERLA1 : <@U153UK3FA>
+U153UK3FA : because if you don't know the type of a value you can't really use it
+U6D3ERLA1 : What about errant values - we just use 'Value' &amp; `toMaybe` to handle the exceptions?
+U6D3ERLA1 : It's true for instance that we expect types, just that the api doesn't enforce them, so we are on our own
+U6D3ERLA1 : dirty data
+U153UK3FA : yep, it's just parsing. The fact that they can be ‘errant value' indicates that there is an expectation of their type.
+U153UK3FA : Elm's Json.Decode provides lots of ways to handle parsing and decoding json and converting it to some static types
+U23SA861Y : <@U6D3ERLA1> there is a `oneOf` decoder that allows you to decode data that is of one of a set number of types. You can also decode into a Dict for runtime detection (but of course you lose all that nice type checking your compiler is doing)
+U23SA861Y : long and the short of it is, the less you know about the data you are receiving, the less useful it is.
+U6D3ERLA1 : <@U23SA861Y> Yes -  definitely preferable to parsing with regex!
+U6D3ERLA1 : From the docs:```
+Why would someone generate JSON like this? Questions like this are not good for your health.
+```
+
+U23SA861Y : ahh yes, I see you've encountered my day job
+U6D3ERLA1 : lol you wrote that?
+U23SA861Y : no
+U23SA861Y : just sounds very familiar
+U6D3ERLA1 : OK, the struggle is real
+U23SA861Y : at least its in JSON
+U23SA861Y : all the data formats I need to parse are poorly specified and ad-hoc
+U55890VFT : does everyone here use a linter for elm? I am having problems for the second time just setting up linter-elm-make with atom, and its stopping me from getting into elm...
+U6D3ERLA1 : <@U23SA861Y> I think most of the internet and much software are poorly specified and ad hoc, but I'm a pessimist (read: realist)
+U23SA861Y : I was a realist, then I tried reading the C++ spec. Now I'm a nihilist.
+U2GPAEU1L : Hahahahahahahahahahhahahahaha
+U1AN4JRFV : <@U55890VFT> : what kind of problems are you having? is elm-make in the path or specified in the settings of linter-elm-make?
+U2GPAEU1L : I will be quoting this
+U55890VFT : yea I have the correct path, basically my file has an error that it doesnt find
+U55890VFT : im following a tutorial and the linter finds this problem in the video
+U1AN4JRFV : do you have the elm-format package installed?
+U55890VFT : yea
+U55890VFT : thats got the path to elm-format.exe
+U55890VFT : maybe elm and windows dont mix?
+U1AN4JRFV : can you post the file you talk about as is?
+U55890VFT : module Main exposing (..)
+import Html
+
+
+add a b =
+    a + b
+
+
+result =
+    add 2 5
+
+
+main =
+    Html.text result
+
+U55890VFT : in the browser it properly tells me that result needs to be a string
+U1AN4JRFV : yep, works here
+U1AN4JRFV : do you have an elm-package.json in that same folder?
+U55890VFT : awe I thought I could do an image inside a thread
+U55890VFT : but guess not
+U1AN4JRFV : here's a workaround: use vs code, it has good quite good support for elm too
+U1AN4JRFV : i need to go to sleep :wink:
+U55890VFT : okay, I was in vscode originally but some stuff wasn't working so I went to atom
+U55890VFT : I will give it another go
+U55890VFT : thanks for the help!
+U1AN4JRFV : that's unfortunate, but i am sure, it's just a small thing. good luck!
+U5WD40ZA9 : Is there any way to log the model is a json object format that looks good in dev tools? It all seems to become such a mess…
+U31FGNWCT : <@U5WD40ZA9> Have you tried built in debugger? It shows your model prettified.
+U5WD40ZA9 : What do you mean? Debug.log ?
+U31FGNWCT : No, when you compile your elm app with --debug flag there is a special debug tool on your page
+U5WD40ZA9 : Thanks :slightly_smiling_face: Not a huge fan of it however. But it seems to be great for the problem at hand!
+U23QS8ETZ : Do we have something similar to <https://github.com/elm-lang/mouse> for touch events? :thinking_face: I want to subscribe to `touchmove` events.
+
+U1ZCL9GAX : <@U23QS8ETZ> there's <http://package.elm-lang.org/packages/mpizenberg/elm-touch-events/3.0.1>
+U1ZCL9GAX : I haven't used it (yet) but I'd be interested to hear how you go
+U3SJEDR96 : as it happens, I'm currently doing a mobile app, and wasn't quite satisfied with the existing libs. <http://package.elm-lang.org/packages/zwilias/elm-touch-events/1.0.1/Touch> is what I'm using for now
+U3SJEDR96 : though I'll admit that it currently doesn't expose the details of move events
+U3SJEDR96 : if you can let me know what you need from those, we can figure out a good way to expose it?
+U3SJEDR96 : mpizenberg's package is very complete, though. I just found it a little unwieldy for my use-case, I suppose
+U23QS8ETZ : Thanks <@U1ZCL9GAX> and <@U3SJEDR96> I should've been more clear, I would like an actual Elm subscription.
+That is, a function with a signature like this -&gt; `moves : (Position -&gt; msg) -&gt; Sub msg`
+
+I've looked at all the touch-event libraries out there (that are listed on <http://package.elm-lang.org|package.elm-lang.org>) but none of them seem to have this.
+Whereas the mouse package does have this for mouse events.
+
+U1ZCL9GAX : <@U3SJEDR96> I'd love to see higher-level gestures like in <https://zingchart.github.io/zingtouch/> :slightly_smiling_face: multi-finger tap, rotate, pinch etc.
+U3SJEDR96 : <@U23QS8ETZ> yeah, the mouse library has a subscription because it can register an event listener on the window. Sadly, the only way to do that is using special code which isn't available to regular packages. Having an event-listener on a "wrapper"-div around your view gives mostly the same result, but certainly less elegantly
+U3SJEDR96 : <@U1ZCL9GAX> that's the end-goal; if I can find enough time to implement it all :slightly_smiling_face:
+U23QS8ETZ : Aight cool, thanks <@U3SJEDR96> :v:
+U3LUC6SNS : <@U4872964V>, thanks for the suggestion re asciidoctor and markdown.   I'll look into it.
+U3LUC6SNS : I wonder if it would be possible to add a search feature to Ellie - search on title, author, and user-supplied tags.  Ellie is a fantastic resource and this would IMHO make it even more so.
+U6D3ERLA1 : Not to be crass, but what is the easiest way to decode this json based on this type ailas:
+U6D3ERLA1 : <https://ellie-app.com/3R9wXjy2zyca1/0>
+U6D3ERLA1 : I'm looking for
+U6D3ERLA1 : `Json.Decode.decode Alias """ {foo: "x", bar: "y"} """`
+U4872964V : <@U6D3ERLA1> not sure what you are looking for exactly, but this should cover your needs I think: <https://guide.elm-lang.org/interop/json.html>
+U6D3ERLA1 : I guess my question is - can I decode a json string using a type alias
+U4872964V : you have to write a decoder - json is not the same as Elm types
+U4872964V : but you can have a look at <http://eeue56.github.io/json-to-elm/>
+U6D3ERLA1 : It seems like a lot of boilerplate - if the type alias describes the expected types, not sure why we write it twice..
+U6D3ERLA1 : as a type alias and as a decoder
+U4872964V : because json is not Elm types
+U6D3ERLA1 : right - that's the work we're expecting the decoder to do
+U4872964V : for simple examples, it may be the same, but sooner or later you want something to be slightly different
+U6D3ERLA1 : if json was elm types we could use it directly :wink:
+U4872964V : well, that's javascript
+U6D3ERLA1 : I understand that it has to be converted to elm types, what I don't understand is why it can't use a type definition to do this...
+U6D3ERLA1 : ex:
+U23SA861Y : You can't use the type definition because elm doesn't have runtime type reflection
+U4872964V : or compile-time, for that matter
+U23SA861Y : the quickest way is to map those field decoders over your type constructor
+U6D3ERLA1 : ```str = """
+{
+  hello: "world"
+}
+"""
+
+type alias Hello {
+  hello: String
+}
+
+hello =
+  decode Hello str
+```
+
+U4872964V : Because the type of your `decode` will take a type as argument, which you cannot do in Elm
+U23SA861Y : decode (field "hello" string) str
+U4872964V : however, people are thinking about these things, you are not the first. It's a matter of making a good solution, though
+U6D3ERLA1 : I guess I rankle against having the data represented in three ways - as raw data, type definitions and as decoder schema...
+U4872964V : for now, we write our decoders and be happy
+U6D3ERLA1 : If anything changes it needs to change in two places instead of one
+U4872964V : indeed, but the compiler tells you where
+U6D3ERLA1 : I guess I'm looking for the notion of a schema, and let the other business happen without so much "typing" (heh)
+U23SA861Y : well typing happens only once, reading happens many times
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

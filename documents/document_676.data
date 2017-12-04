@@ -1,11 +1,59 @@
+U3YDBDP4Z : Also using Atom, so the elm-format plugin needs to find elm-format
+U61V125H6 : Hey, is anyone here working on an Elm in-browser editor or WYSIWYG. Something similar to [stackedit](<https://stackedit.io/editor>). I'm aware of [Dreamwriter](<https://dreamwriter.co/>), but I found simplifying and taking out sections a little tricky. If possible, more of a WYSIWYG library that you can integrate into your elm code
+U2M17S85D : Why does the `List` package has the functions `sum` and `product`? They are only working for `numbers`. It seems to me they are unrelated to the package.
+U2D7NUGS1 : <@U3YDBDP4Z> if you install it with Brew it should *just work*. First you need to install Brew of course: <https://brew.sh/>
+U2D7NUGS1 : Then ```brew install elm elm-format
+``` should do the trick.
+
+U3YDBDP4Z : <@U2D7NUGS1> Thanks for that! Now I need to solve the next issue of atom-elm-format not finding the elm-format binary
+U2D7NUGS1 : Hmm. I have it working. Let me look at my config.
+U2D7NUGS1 : It's probably because there is no executable named `elm-format` anymore. Use `elm-format-0.18`.
+U3YDBDP4Z : <@U2D7NUGS1> That did it. :slightly_smiling_face: Thanks mate!
+U2D7NUGS1 : Cool :slightly_smiling_face:
+U2D7NUGS1 : I'll repeat my question from beginners here in hope for a quick answer:How can I handle Error result of `Json.Decode`? I have a snippet like this: ```
+, on "opened-changed"
+    (Json.Decode.string
+        |&gt; <http://Json.Decode.at|Json.Decode.at> [ "detail", "value" ]
+        |&gt; Json.Decode.map StringHappened
+    )
 ```
-<@U1BP42MRS> Do you know why sometimes they dont get credited even though they were sent? not a big deal just curious - there were a couple that I "received" but last I checked they never got tallied
-<@U42LCHFD2> it only works in public channels, if they don't send you may need to `/invite <@U1PS72N20>`
-cool thanks
-Getting this annoying error — requirements are satisfied, chromedriver in the right place, this error comes upon launching a chrome window
-it implies there's a problem with the server, but it could also just be that the package doesn't handle that situation properly. It's unlikely to be your fault
-<@U5LNXQHN3> how can I fix it?
-That depends on what you mean by fix. If the server is broken and you don't control the server, it's unfixable. If the package just doesn't understand something the server is doing, it's probably possible to patch the package, but that would probably be a job for the package maintainer
-the reason being is `str(None)` results in `'None'`, which is a string
-open up a python shell
-enter in `str(None)`
+where `StringHappened` is a constructor for my `Msg`. It just so happens that the `detail.value` is a `bool`. Currently in my app nothing happens. I want another variant of `Msg` to be used, say `ErrorHappened`. How can I do it?
+
+U2D7NUGS1 : It's been addressed at <#C192T0Q1E|beginners> .
+U37HUSJ4R : Is there an elm version of something like classnames? <https://github.com/JedWatson/classnames>
+U4872964V : looks like it would work poorly with Elm’s type system
+U1CE9DL9H : what do you want to achieve with it?
+U4872964V : Elm-html merges class attributes automatically, if that’s what you want. So you can use multiple class attributes
+U37HUSJ4R : ```isActiveFilter : FilterType -&gt; FilterType -&gt; String
+ isActiveFilter filterType currentActive =
+     if filterType == currentActive then
+         "selected"
+     else
+         ""
+```
+
+U37HUSJ4R : and getting used `[ class ("note-change " ++ isActiveFilter System activeFilter)`
+U1CE9DL9H : I think you want <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html-Attributes#classList>
+U37HUSJ4R : perfect
+U0S6BNVNY : alkstal: I put it in ~/.bin and add that to my path
+U0S6BNVNY : alkstal: and if it's in your PATH atom will find it I think (might need a restart, I forget...but you can also tell the plugin where it is explicitly
+U3YDBDP4Z : Thanks. I used `brew` to install it, and then I had to specify the name as `elm-format.0.18` instead of `elm-format`
+U3R7CKQRX : I have seen it a couple of times for example in <@U0CL0AS3V> 's SPA (<https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L340>) that the `!` operator is not used but `(,)` is aliased as `(=&gt;)` and used to create a pair. Can anybody tell me what the motivation behind that is?
+U3SJEDR96 : `=&gt;` is a nice way to express association, or "leads to", or even "with these effects". The `!` bang operator is much less expressive.
+U3SJEDR96 : `=&gt;` is also great when working with inline styles or `Dict.fromList` for example
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

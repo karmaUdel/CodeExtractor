@@ -1,5 +1,83 @@
+U3SJEDR96 : this may be a lot clearer to illustrate rather than explain :slightly_smiling_face:
+U5P4FLYLE : Hi, I need an advice how to achieve following:I have input where there may be multiple occurrences of "a":
+```input = ["a", "b", "a"]
+          |         |
+          0         1       occurrence of a
+``` I need to use `foldl`:
+```input
+       |&gt; List.foldl myfolding []```
+But I need also somehow to inform myfolding about  which is the occurence of "a" (if it happens) as it proceeds.  So instead of 
+```myfolding : String -&gt; List String -&gt; List String
+myfolding item stack```
+I would like to have 
+```myfolding : Int -&gt; String -&gt; List String -&gt; List String
+myfolding occurenceNumber item stack```
+How to enrich folding like above?
+
+U48AEBJQ3 : <@U5P4FLYLE> I'm not really following. You have a list of items and you want a count and a list of positions of the item?
+U5P4FLYLE : I would like to have something that would realise:```input
+       |&gt; List.foldl (myfolding consecutiveNumberOfAOccurenceCountingFromLeft) []```
+
+U48AEBJQ3 : So, you want a count of all occurrences of the item at the provided index?
+U5P4FLYLE : yes, and my question is if I can achieve this using standard functions of List | List.extra or I should implement specialized version of foldl
+U48AEBJQ3 : If you provide an index that is out of bounds, do you want `[]` or `Nothing`?
+U5P4FLYLE : can be []
+U6D3ERLA1 : Pattern for optional paramaters?
+U6D3ERLA1 : Looking for something like:
+U6D3ERLA1 : ```nextLargest num next =
+    case next of
+        Just val -&gt;
+            if listify (val) == listify num then
+               val
+            else
+                nextLargest num (val + 1)        
+        Nothing -&gt;
+            if listify (num + 1) == listify num then
+                num + 1
+            else
+                nextLargest num (num + 1)
 ```
-can’t save it in ellie with errors :disappointed:
-oh, I forgot a `List.map` in there somewhere
-We've got a `Decoder (List (String, Maybe Time))` so to do stuff with that tuple we need to map both the decoder and the list
-wait, you can't save on ellie with errors :confounded:
+
+U48AEBJQ3 : I meant 0 or `Nothing` dur.
+U6D3ERLA1 : Use `next` val if present, otherwise use `num`
+U6EV3H0N7 : looks like maybe you could use` Maybe.withDefault` <@U6D3ERLA1> ?
+U48AEBJQ3 : <@U5P4FLYLE> <https://ellie-app.com/3VgrGzcLNJKa1/0>
+U48AEBJQ3 : If you want 0, just pass it to `Maybe.withDefault 0`
+U6EV3H0N7 : ```nextLargest num maybeNext =
+    let
+        next = Maybe.withDefault (num + 1) maybeNext
+        notSureWhatThisShouldBeCalled = 
+            next |&gt; Maybe.map (\x -&gt; x + 1) |&gt; Maybe.withDefault (num + 1)
+    in
+        if listify next == listify num then next else nextLargest notSureWhatThisShouldBeCalled
+```
+<@U6D3ERLA1>
+
+U6D3ERLA1 : If the second paramater is nothing I want to use the first paramater
+U6EV3H0N7 : (sorry about the var names…)
+U6D3ERLA1 : But this creates a type mismatch
+U3SJEDR96 : alternatively, you can build up the number of previous occurences _while_ folding (like so: <https://ellie-app.com/3VgsQX5q9Nga1/0> )
+U1VH0J8HM : Hello! I am trying to figure out, what would be the easiest way to load SVG files inline from external SVG files during runtime (we use inline to apply different styles to different shapes inside the file)? We were using ng-include for that purpose before (our app is written in Angular)... I would appreciate any help on this matter
+U6D3ERLA1 : <@U6EV3H0N7> Maybe I'm missing something - it seems like the `nextLargest` call in the  `in` section uses a number value not a maybe value, causing a type mismatch
+U6D3ERLA1 : (working with Maybe is still breaking my brain a little bit)
+U31FGNWCT : Hi folks! Here is my case:I have a list. I need to receive another, based on the first one, list : List (Html msg). 
+(_use List.map!_) I wish I can! The thing is I need to make last element's Html different.
+I solve this with recursion, but maybe there is another way? I found List.indexedMap, but not sure what to do with it. Example is awful.
+
+U3JSGAK7B : Hi, folks. Long time no see. But I'm trying to brush up my Elm once again.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,14 +1,196 @@
+U2JKVK83S : <@U1DM2B4SY> thanks I will try it. OK next question will be there :+1:
+U0HBN0L9M : what are reasons for `token_revoked` ? My app Smooz is _not_ removed from a given team, and the bot token is still valid, but the _user_ token with channels:write permission is no longer valid.
+U0HBN0L9M : hypothesis : user left the team ?
+U0HBN0L9M : ping <@U07CW6N3A>
+U07CW6N3A : <@U0HBN0L9M> for these it's best to go right to support -- the reason might be subtle. your hypothesis is definitely a good one, but since multiple users might install a bot, yielding multiple user tokens but just one bot user token, it could be that the originally installing user has removed the app but some other existing user that installed it is still puttering along
+U0HBN0L9M : <@U07CW6N3A> interesting. I knew user A and B could both install my app, yielding two user tokens, so I should do a better job of storing older user tokens to alleviate this issue of `token_revoked`. But I thought that if _either_ A or B uninstalled the app, the app would be uninstalled. You mean it needs to be uninstalled by _both_ A and B ?
+U0HBN0L9M : I won't be able to go to support with that issue, because it's not in my team. it's really an API issue, isn't it
+U07CW6N3A : The support team helps both team admins and app developers pretty well. I suggest them because they're best equipped to give you the answer that's right for this particular situation and might be able to tell you exactly how that team's lingering install is modeled.     The Slack app install and uninstall model can be a little complex still, with all the actors and pseudo-actors involved.
+U2G6XRJ5V : is it possible to implement conversations in slack without using a Slack App? Say, in response to a slash command?
+U0HUTFBHS : <@U2G6XRJ5V> Sort of.  Your slash command would have to do the persistence between requests, but you do get a user id so you know you're talking to the same person.
+U0HUTFBHS : ```token=aWoE7Ofc9FQGKbizrs6FM5wfteam_id=T0001
+team_domain=example
+channel_id=C2147483705
+channel_name=test
+user_id=U2147483697
+user_name=Steve
+command=/weather
+text=94070
+response_url=<https://hooks.slack.com/commands/1234/5678>
 ```
-I am an Elm beginner, but I think this might be possible using the union types?
-Arbitrary keys: {foo = ‘1', bar = ‘2'} or {fuzz = ‘3', bazz = ‘2'}. It doesn't matter what the keys are called, nor how many of them are present.
-<@U5TQ5FZA5> have you seen this package? <http://package.elm-lang.org/packages/eeue56/elm-all-dict> It has an EveryDict that allows the Dict keys to be of any type
-Eh, I don't think that's what they want
-<@U5TQ5FZA5>, i think you just want a plain dictionary
-So the key can be of type `String`
-Here's how your example would look: `Dict.fromList [ ("foo", 1), ("bar", 2) ]`
-<@U0EUHKVGB> but don't I have to declare the keys and types then in my model?
-Yes. You cannot have varying keys in a record in Elm, because it makes the types impossible to figure out.
-You can have multiple different records
-But that's different from varying keys.
-<@U0CLDU8UB> yeah - the keys are String and the values are String | Dict
-I think you might be confusing how Dicts and records work. Records have certain named fields, with specific types per field. Dicts are collections of for key and value pairs, where the keys need to be of one single type (strings are fine), and the values need to be of a single type, but that includes the union type <@U4872964V> showed earlier.
+
+U0HUTFBHS : So if you take the team_id + user_id you have a unique presence.
+U0HUTFBHS : even + channel_id if you want it to be channel-specific.
+U299DJKKL : Hey guys, I have a stupid question:  whats the best practice when running a RTM slackbot on multiple servers? Currently, I get a response for every running server (so if I have 2 servers running, I ll get a two repeated response) .
+U2ATR2KV1 : Hello there! How can we set a profile pic to a bot user through code?
+U2LGQFAHJ : Can anyone help me on this?<http://stackoverflow.com/questions/39917272/implement-delayed-slack-slash-response-in-python>
+
+U23KZ4R8V : Sure, I can -- I will DM you
+U2LJS1E2Y : if you use lambda with python you will probably hit the &gt;3sec issue as well
+U2LJS1E2Y : one way around it in lambda is to have two functions fronted by an API gateway.. have the first lambda take the request ... lets call that the dispatcher.. and then immediately respond back with a 200.. then using the slack response_url you can have your second lambda take up to 5 mins to process and it can post back remotely
+U1KH878SJ : <@U2LJS1E2Y>, that's how we have been using to send delayed responses so far. works like a charm. Return 200 immediately and later use the response_url to update or add the message.
+U2LGQFAHJ : <@U23KZ4R8V> thanks
+U2DLYR3B9 : <@U2ATR2KV1>: from what I remember from reading the Slack API yes
+U07CW6N3A : <@U2ATR2KV1> for bot users that aren't part of a Slack app, you can specify an `icon_url` as part of your message, to give that specific message a different profile image. bot users that are part of Slack apps can't change their icon on demand that way though. And in neither case  does changing the icon go beyond the message in question.    There is a Web API method to update a user's profile image, but it won't let you update a bot user's. There is no other way to programmatically update a bot user's image, whether as part of a Slack app or otherwise.
+U2ATR2KV1 : thanks <@U2DLYR3B9>
+U2ATR2KV1 : thanks <@U07CW6N3A>
+U235HG07K : <@U07CW6N3A> , following up on bhaskar's question. Our bot is part of an app. How do we set the icon for the bot user within the app? We already set the icon for the app store (we haven;t submitted yet)
+U07CW6N3A : <@U235HG07K> the icon for your app and the icon for your bot will be one and the same.
+U235HG07K : hmm, not showing up in convos
+U235HG07K : Can I DM you?
+U07CW6N3A : It may take some time after updating in the app mgmt tool to propagate out (and in some cases may even require a client-side refresh to see the change). Also make sure that the bot user you're checking with is the same one that's part of your Slack app (and not a similarly named custom integration-based bot you have on the sidelines). Sure, OK to DM.
+U235HG07K : So we have set up the app icon - <https://www.dropbox.com/s/hmuocwtqd1o0mis/Screenshot%202016-10-07%2011.01.19.png?dl=0>
+U235HG07K : But icon not showing up on the bot - <https://www.dropbox.com/s/bfj1tvr6pm7c31v/Screenshot%202016-10-07%2011.06.31.png?dl=0>
+U07CW6N3A : <@U235HG07K> it definitely looks like your upload took. When you're posting that message, is it originating from an incoming webhook, slash command, RTM POST, or `chat.postMessage` API call using credentials received when the app was installed? (It looks like you have flexbot installed twice in some way in that environment and just want to make sure you're calling from the right context)
+U235HG07K : closing this out here for other people. <@U07CW6N3A> was right. the icon _is_ getting set correctly for the bot . some mess up on my set up cc <@U2ATR2KV1>
+U2LV01KEJ : Hey all! So MHacks (University of Michigan's hackathon) is holding their hackathon right now and they're using Slack for communication but in attempting to invite all 2,000 attendees to the Slack team, they had their invites frozen, does anyone know how they could remedy the situation?
+U2LV01KEJ : <@U04S1QCPC> ^^
+U04SM6T2H : Not cool <@U2LV0HDQU> 
+U0HKDKHD4 : The old fashioned auto-dm. /giphy said it wasn't no fun 
+
+U0Y1UC0A3 : Why even ask "Would you like to subscribe?" if the only option is Yes <@U2LV0HDQU> :thinking_face:
+U1AQ8MY3U : yeah, you spammed me once, why not just keep it rolling :joy:
+U0K4TM8N8 : It was <@U2BE5FL82> that added the <@U2LV0HDQU> bot, just sayin….
+U0K4TM8N8 : And isn't this Slack instance a kind of free for all playground?
+U0K4TM8N8 : There's ~130 bots/apps connected to this Slack instance….
+U1AQ8MY3U : true, this is the first one to DM me though
+U0K4TM8N8 : If that's the purpose of the said Slackbot, then yeah, could be kind of cool
+U1AQ8MY3U : I really don't care that much tbh, I just thought the lack of a “no” button was funny more than anything else
+U0K4TM8N8 : Not so cool is only giving the bot a single answer of `Yes` though ¯\_(?)_/¯
+U0HBN0L9M : <@U0K4TM8N8> this is a playground to showcase your app / get feedback. I think it's well deserved that we give <@U2BE5FL82> a feedback as one of the most spammy and agressively designed bot around there :smile:
+U2BE5FL82 : Apologies! Please feel free to ignore it if it's not useful. 
+U2BE5FL82 : Thanks for the feedback! Will take it to improve the user experience. To address the lack of the "no" button, if it's ignored nothing happens. Def agree "no" helps. 
+U1116QM2Q : it just doesn't make sense a button for yes  when you're asking a yes or no question :stuck_out_tongue:
+U1116QM2Q : if that's the case change either the question into a sentence that says  Ìf you'd like to subscribe please click below`
+U04SM6T2H : And don't DM everyone on the team that is a big big no no
+U2HHWP7V4 : wfwe
+U0D7LHNTX : DMing everyone on install is an instant disqualification from the Slack App Directory, FWIW.
+U2M6GULN4 : Hi ! I'm writing a function for my bot to clean all the messages in the direct messages group . To avoid mess , users can invoke commands for this bot only in DM with it.  But it seems I have some permissions trouble with the chat.delete. Using the bot token , I can only delete its own messages. Using my dev token I can only delete my own ones. Is it possible to give the bot admin rights and allow it to delete ALL messages of a DM group ?
+U2M7LE3E2 : Hey all, I am creating a bot which will help my users interact with my SaaS HR app. Problem is, I really need some way to relate my Slack user to my HR app user login, so I know their permissions and what they are permitted to look at etc. Are there any 'best practice' guides out there for authenticating, or matching up a Slack user who interacts with a bot, with an external third party app?  I know asking for passwords etc. within a channel conversation is an absolute no-no, so was thinking my SaaS app has to generate a unique token for each user or similar, that can be given to the bot when asked?
+U1BPBKXK5 : <@U2M7LE3E2>: I was doing this with a deployment app a little while back. The usual answer is to record a Slack-user-id &lt;=&gt; HR-app-user-id mapping in a database somewhere. It obviously can't be Slack, but it can be in your HR app's db, or in your bot's db. It helps if your HR app does some thing where you can store a token instead of username/password, but it all depends on the app.
+U1BPBKXK5 : But yeah, don't communicate credentials in Slack. Use HTTPS instead, and preferably OAuth so your app never sees username/password.
+U2M7LE3E2 : <@U1BPBKXK5> Thanks Ben! I was thinking along the token method - generate a unique "Slack Token" in my HR app, and when a user asks the bot for information, the bot will check its database for a Slack User -&gt; HR All Slack Token match, and if not found, will DM the Slack user and ask for their token, which it then stores in the bot database for future use.  Not 100% I know, and I will look into oAuth a little more, but I am unsure if I can obtain the Slack user and team IDs as part of the oAuth handshake (on my app side, so I can match and save the info in the HR app db.
+U1BPBKXK5 : They're available through the API. If your app asks for the `team:info` permission, you can do lookups.
+U1BPBKXK5 : Also, whenever a user sends you a message, you get their Slack user id  as part of the payload.
+U1BPBKXK5 : That's the ID I was talking about. No need to generate a new one for the Slack side.
+U1BPBKXK5 : Oh, and you get Team and User IDs as part of (I think) every Slack-app auth dance, even if it's just a /command.
+U2M7LE3E2 : <@U1BPBKXK5> Thanks for the clarification Ben.  I will look into the permissions a little more.  Just to confirm my assumption - the Slack USER ID stays consistent no matter how many Slack teams/organisations the user is interacting with or issuing bot commands via?
+U1BPBKXK5 : I think the rule of thumb here is (team ID + user ID) is globally unique. There's no guarantee that user IDs are unique across teams.
+U2M7LE3E2 : That's a key factor for us that I will need to confirm.  Our web app is designed for HR consultants who may be working for several companies, hence may be in several Slack groups as part of their role. Getting a SlackTeamID and SlackUserID is crucial for us to ensure the bot they use is talking to the right HR dataset as the right user.  It's pretty critical to us that the SlackUserID remains the same for the same user signed on to different Slack groups.
+U0HBN0L9M : <@U2M7LE3E2> you should not rely on that
+U0HBN0L9M : you should map your consultant's HR app ID to an array of teamID + UserID, I think
+U0HBN0L9M : one way to avoid the token issue you discussed earlier, is to use the sign in with slack feature
+U0HBN0L9M : within your HR app, you provide a SIWS button that will confirm the ID of the consultant within that team
+U2M7LE3E2 : Hi <@U0HBN0L9M> , thanks for your input. I've been experimenting today, and you are correct, it looks like the Slack User ID can differ for the same user on different teams depending on their login details.  I am going to try and work around this using the 'Slack Sign On' App to implement oAuth2.0 and store a set of mappings from Slack User ID to my HR app, with the team ID included.  That should still work if the consultant is jumping from team to team (I hope).
+U0HBN0L9M : yep
+U2M7LE3E2 : The bot passes the team and user ID for each request, so I will use that to do the mapping to work out which user and company I need to pull data from in my HR app.
+U0HBN0L9M : that's how i'd do it :stuck_out_tongue:
+U2M7LE3E2 : :+1:
+U2AQYMAQP : anyone know what the timestamp from FB means? for example this is a timestamp from a recent convo with my bot 1476105106138 and im curious to convert it to 24 hour time?
+U0KECURAT : divide it by 1000
+U0KECURAT : it has miliseconds
+U2AQYMAQP : u r my hero
+U1TAT1DMY : <@U2AQYMAQP> since you're using JS, just use the `Date()` object
+U2M6GULN4 : Hello ! I'm writing a function for my bot to clean all the messages in the direct messages group . To avoid mess , users can invoke commands for this bot only in DM with it.  But it seems I have some permissions trouble with the chat.delete. Using the bot token , I can only delete its own messages. Using my dev token I can only delete my own ones. Is it possible to give the bot admin rights and allow it to delete ALL messages of a DM group ?
+U0HUTFBHS : <@U2M6GULN4> <https://api.slack.com/methods/chat.delete>
+U2MTZ4UQG : Hi everyone. I manage a slack team for all the trumpet students at my university. We're doing a thing where every day we play the next page out of this really big book for trumpet.  I have a pdf of the book and I'm looking for a way to make a bot to publish the page of the day at 6am every day. Can anyone help with that or point me in the right direction? I've never written a bot before.
+U0V93GE5R : you can probably get slackbot to dump a reminder to visit a website everyday, and have it update on the website side with the new page? <https://get.slack.help/hc/en-us/articles/208423427-Set-a-reminder>
+U0V93GE5R : Howdy is good for this, if you prefer it to be a DM to a fixed url
+U0V93GE5R : <https://howdy.ai/>
+U2MTZ4UQG : The problem I see with that is that I would have to update the webpage daily, and if I had to do that I could just as well manually post the page to slack every day. 
+U0HUTFBHS : I was just looking to see if botkit has the notion of a timer.
+U0HUTFBHS : I know how to do it with Lita.
+U0KECURAT : <@U2MTZ4UQG> it's relatively simple to keep a pagenumber in a database and pull information out of a pdf and make the bot ship that to a channel :slightly_smiling_face:
+U0KECURAT : <@U2MTZ4UQG> I have something parsing a pdf here for another kind of bot, but it's the same concept really — <https://github.com/Dinoshauer/slack-wod-bot/blob/master/wod.js>
+U1LQ4MEKE : Announcing the next Meetup!October 25th @6pm at Slack HQ
+More info over at <#C0LDY2E2X|sf-meetup>
+
+U2N5DP7LP : Hi all! Wanted to share this announcement for anyone that has a great startup! ERA is now accepting applications for it's Winter 2017 accelerator program. Apply here: <http://eranyc.com/apply;|eranyc.com/apply;> Early admissions - Oct 15; Deadline Nov 9
+ERA is NYC's leading accelerator program and provides companies with $100K in funding, hands-on program with full-time staff, venture partners and industry experts, and access to NYC's largest mentor network (300+) and NYC's strongest post-program support w/ alumni network of 110+ companies. ERA alumni have raised $225M+ w/ a combined valuation of $1.2B+, and 40%+ of startups from it's first class have been acquired.
+
+Feel free to let me know if you have any questions!
+
+U0V93GE5R : feel free to share both of the above in <#C0HJYTUQ2|events> and <#C0JQ4TX7Z|announcements> if you have updates!
+U2M7LE3E2 : Hey all - having an issue with the OAuth2.0 redirect_uri with trying to get people to authenticate with my bot.  The issue is, my web app uses subdomains to identify company entities, so a user may be logged on to _company1.mydomain.com_ or _company2.mydomain.com_ etc. I have set up just _mydomain.com_ as an redirect URL within my app but the redirect keeps reporting "OAuth Error: redirect_uri did not match any configured URIs". Is there a workaround for this? I thought the redirect URI did a simple string match on a partial, but it looks like it does something different.
+U0GT29N3A : Did anyone else already rotated their verification token and still received the final reminder to do it?
+U17BEF4UR : <@U0GT29N3A> yes.  i asked them about it and they said everyone got that message even if you already rotated
+U0HBN0L9M : <@U2M7LE3E2> : the left-hand part must match
+U0HBN0L9M : you can use `<http://mydomain.com/slack/whatever|mydomain.com/slack/whatever>` in your case
+U0GT29N3A : <@U17BEF4UR> Thanks for the info. Was afraid all my interactive buttons could stop working when the deadline hits!
+U2N5DP7LP : <@U0V93GE5R> awesome, thanks for the note!
+U0HBN0L9M : alright folks. Is there a good webinar app in Slack ?
+U0HBN0L9M : like, if I have a community Slack, something with `/webinar start` and boom everybody gets a link ?
+U0ZCTNABS : <@U0HH00DS7> there is a google hangouts app
+U0ZCTNABS : <https://tunnelai.slack.com/apps/A0F7YS351-google-hangouts>
+U1P3Q8JKV : <@U0KB2E7TQ> do you get much feedback on kyber?With google bashing its g+ events?
+
+U2M7LE3E2 : <@U0HBN0L9M> Thanks - had to create a workaround with a fixed address in the end.  All good now.
+U2M7LE3E2 : Anyone work out a way to send reminders to bots? I would have thought the /remind command would be ideal for bots to trigger them to perform a task every day etc., but it seems Slack prevents bots from being recipient of /remind commands.  Anyone worked out a way to do it within Slack, or an easy way to set them up using Zapier or other external trigger?
+U0KB2E7TQ : <@U1P3Q8JKV> - what do you mean google bashing g+ events?
+U1P3Q8JKV : <@U0KB2E7TQ> google+ allows people and communities to create and invite people to events. Which can be calendar events with specific places and times and attendees.But they are rolling out a new interface that doesn't allow use of the feature and they seem to be retiring it
+
+U2LJS1E2Y : I though they were retiring google+ completely as a failed beta?
+U0KB2E7TQ : <@U1P3Q8JKV> we are getting tons of traffic these days thanks to Slack, but I don't expect an uptick because of Google+ retiring their calendaring functionalities... We did see when sunrise shut down though... people were looking for good alternatives
+U0HBN0L9M : <@U0ZCTNABS> thanks! would you use hangout for a large-ish webinar ? I thought it was for a handful of people only
+U0HBN0L9M : I thought of something like Youtube live or Facebook live perhaps ?
+U21U8SZ2P : hey all — small thing, but anyone have suggestions on best practices for where you redirect users after they've installed a bot?
+U21U8SZ2P : feel like ideal thing would be back to the installation page on our site with some kind of state change to say “yes, bot has been installed, good job” but i don't think that's possible?
+U1116QM2Q : thats what we did with our bot
+U1116QM2Q : i have a page for the user to view while im setting up the bot and stuff and at the end a final page where i inform them that the bot has been setup and if they go back to slack they can now start using it
+U1116QM2Q : <@U21U8SZ2P>
+U21U8SZ2P : <@U1116QM2Q> makes sense to me. Thanks!
+U1116QM2Q : no problem :slightly_smiling_face:
+U0HBN0L9M : would be interesting to redirect using slack deeplink
+U0HBN0L9M : to redirect to the right channel :slightly_smiling_face:
+U1116QM2Q : yep that would be very nice
+U1116QM2Q : although probably impossible with the current apis
+U1116QM2Q : but an idea for the future i'm sure
+U04SM6T2H : This is kinda crazy:
+U04SM6T2H : As we've built and expanded and scaled Howdy
+U04SM6T2H : over the last year
+U04SM6T2H : it has gone from something that runs 2 different services (web and bot) on 3 servers
+U04SM6T2H : to something that has 13 microservices!
+U04SM6T2H : Bots are complicated!
+U0HBN0L9M : they are
+U0HBN0L9M : 13 looks huge, but it's true that howdy has many sub-systems, right
+U235HG07K : did anyone else get an email from an email address @bestofslack ?
+U0LRQFGV9 : Does anybody know why the channel specified in <https://api.slack.com/docs/oauth> incoming_webhook.channel sometimes starts with a # and sometimes not.
+U23KZ4R8V : ^^ chatted in dm -- if someone else runs into that -&gt; private channels don't start w #
+U0HERRQR1 : hey guys docs for sourcebot is out! <https://sourcebot.github.io/docs/>
+U1ZFG84E4 : Hey <@U0HERRQR1>, how does SourceBot differ from BotKit? The interface is chained methods but outside of that it appears to be about the same functionality, correct?
+U0HERRQR1 : it is a bot framework
+U0HERRQR1 : it aims to do the same thing
+U0HERRQR1 : botkit uses promises and ES6
+U0HERRQR1 : which is supported by node 4, 5, 6
+U0HERRQR1 : sorry sourcebot uses promises and es6
+U0HERRQR1 : on the other hand botkit uses ES5 and callbacks
+U0HERRQR1 : the aim of sourcebot is to solve one problem: write code once and use it on multiple platforms
+U1ZFG84E4 : I get that. You're saying the major difference is promises instead of callbacks?
+U0HERRQR1 : yes, the chance of your process to be exited on error is 0 if you use sourcebot
+U0HERRQR1 : also we have a command line interface
+U0HERRQR1 : ```npm i sourcebot-cli -g```
+U0HERRQR1 : and then u can make this:
+U0HERRQR1 : ```sourcebot create hello-world```
+U0HERRQR1 : it will create a folder with a starter pack
+U1ZFG84E4 : I'm guessing there's no chance of those changes being merged upstream, or some kind of ES6 shim in front of botkit?
+U0HERRQR1 : i am actually a contributor of botkit itself, i've been merging botkit's pull requests for the past year
+U0HERRQR1 : it is pretty hard at the moment to refactor all of the code to ES6 and enable promises
+U1ZFG84E4 : Ahhhh
+U0HERRQR1 : therefore, a new an a cleaner approach to bot framework itself, seemed a better idea for me
+U0HERRQR1 : currently, it is just an experiment
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

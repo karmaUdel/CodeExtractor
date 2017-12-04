@@ -1,51 +1,65 @@
+U06HHF230 : michaellindon: I'd suggest using the dispatch function you have and just changing the dispatch value to 
+`[Object ClassC]`
+
+Remember dispatch values use `isa?` and work across each argument in a vector form.  multimethod hierarchies are underused IMHO.
+
+U0HM5MJ5V : <@U06BQJTHQ> if you end up having to get lots of data in and out of java beans you might try this: <https://github.com/uwcpdx/bean-dip/>
+U0BB79MMJ : Hi! Can someone give me a hint on how to add error handling to my logic programs? I already asked in <#C0566T2QY|core-logic>, but it's all tumbleweeds and cricket noises there... I'd like to receive a little more information than `()` when my program fails to produce a result :slightly_smiling_face:
+I was thinking about a fall through case that unifies an error parameter to something meaningful, but I am not sure if that is a good idea or even how to do it well
+
+U65P37N83 : is anyone eager to help me? pretty new to clojure so the question is pretty basic :slightly_smiling_face:
+U5ZAJ15P0 : <@U65P37N83> I am new to clojure too but that might be even better as I am familiar with some of the beginner's struggles. Shoot :slightly_smiling_face:
+U0E0XL064 : Transit seems to be the way to go for transmitting clj datastructures. ... but it seems to be work in progress:
+
+&gt; NOTE: Transit is a work in progress and may evolve based on feedback. As a result, while Transit is a great option for transferring data between applications, it should not yet be used for storing data durably over time. This recommendation will change when the specification is complete.
+
+... and it's been over a year since there was a commit
+
+U0E0XL064 : So I wonder: is it stable? Is it still maintained? Is it still wip? ...?
+U0J9LVB6G : What I understand from that warning is that the details of how it encodes edn as json or messagepack is subject to change, so if you save something to disk today, there's no guarantee that you can read it back with a future version of transit. If you want to transmit data, you're good.
+U0J9LVB6G : I wouldn't worry about a lack of commits, that probably just means it's stabilized.
+U0E0XL064 : allright, thx.
+U0E0XL064 : another transit question: in order to be able to read json data, it seems one has to stringify it first. Here's a function receiving a `POST` request and handling the request (using express/node.js)```
+                                        (-&gt;&gt; req
+                                          .-body
+                                          (.stringify js/JSON)
+                                          (t/read (t/reader :json))
+                                          str)
 ```
-what is the best data format for exchanging data between clojure and python?
-depends on what your needs are, but you should look at <https://github.com/cognitect/transit-format>
-hey, has anybody ever had trouble requiring clj-time.types in a ns? I have the latest version from clojars but I get an exception when I compile complaining the ns clj-time.types doesn't exist or can't be found on the class path.
-the namespace clearly exists tho in the github repo
-yeah, but the latest in git doesn't have to match the latest jar on clojars
-there are also a few clj-time artifacts on clojars, are you sure you are using the one that maps to the github repo you are looking at?
-you should check `lein deps :tree`
-if any of your dependencies require one of these other clj-time artifacts (which unfortunately likely have the same namespace names) you will get all kinds of weird behavior
-I followed the clojars link on github, maybe they just didn't push a newer artifact to maven?
-er
-clojars
-ahah
-that's exactly
-could be, you also haven't shared the exception you are getting, clj-time.types could be failing to load because something is
-it
-Nah, the last push to clojars was in Dec. 2016, the change I want was added in march 2017
-crisis averted, I guess.
-<@U1Z5X06NP> We'll be releasing a new `clj-time` very soon. I've been meaning to get to that for a week or two!
-<@U04V70XH6> , oh cool, I didn't even realize you we're in this channel! :stuck_out_tongue:
-Here's all the fun new stuff <https://github.com/clj-time/clj-time/compare/86acab8a122e3229a2e5337075f52b6f75ae4584...master> -- I think I'll make it 0.14.0 when I do it (hopefully in the next few days).
-clojure and jdbc... there seem to be 2 libs: `clojure.java.jdbc` and `clojure.jdbc`. Anyone any experience reports? Reasons why using one over the other? ...?
-the first one is the standard one.  the second one's name is unfortunate
-<@U0E0XL064> I'm the maintainer of the standard (contrib) one: `clojure.java.jdbc` and we use it extremely heavily at work (with MySQL) for large volumes of data/queries.
-It's also tested against MS SQL Server (both MS driver and jTDS), PostgreSQL (both Postgres and Impossibl drivers), and H2, SQLite, Derby etc. There are Oracle and Terabase(?) users of it too. It's what most other JDBC wrapper libraries use under the hood.
-If you run into any issues with it, feel free to ask in the <#C1Q164V29|sql> channel.
-Right... Thx.
-:)
-You can also see from this initial commit that the author basically copied `clojure.java.jdbc` (without permission and without attribution -- I took him to task on the mailing list for that!): <https://github.com/funcool/clojure.jdbc/commit/dfb16894734c2a95838cd5f5b3fef3e63ac1c4bf>
-In later commits he added some acknowledge of code he'd taken from `clojure.java.jdbc` and he did, over time, substantially rewrite the code base.
-(but, yeah, years later I'm still pretty annoyed about it)
-now it's easy to do if the lists are vectors… but given that most-everything defaults to a list after running some process (map filter reduce etc.), I wonder whats the better way to do this that works for a more general `seq`?
-if you need associative updates, don't use lazy operations for modification - map, filter, etc all provide transducers that can make vectors
-so pour things `into []` or use `vec-*` for map/filter/etc.?
-<@U1Z5X06NP> `clj-time` 0.14.0 is available <https://github.com/clj-time/clj-time/releases/tag/v0.14.0>
-<@U0W0JDY4C> right - but especially when chaining operations into with composed transducers is a better option
-and I don't think it's vec-*, it's *v
-(and not all of the foov exist - but filterv and mapv do at least)
-<@U04V70XH6> awesome!
-ah, it's `*v` yea … but why is into a better option? does it preserve laziness?
-no - vectors cannot be lazy
-by composing transducers you avoid creating intermediate data (which does nothing but create gc churn)
-hm, not totally following you but that's okay. i know `(comp a b c)` will produce a transducer. are you saying there's a way to do `into [] some-fn` where it doesnt use a transducer?
-no - and comp doesn't generate a transducer unless its args are transducers
-if you call `(filterv pred? (mapv f coll))` that generates a vector you don't need
-if you use `(into [] (comp (map f) (filter pred?)) coll)` you get the same result without creating a data structure nobody uses
-ooof. so much to learn I do have. thanks for the tips :yoda:
-you can still get the right answer without composing the transducers, and it's easy to change once you know how they work
-but back to the original question, if you need to do updates by index, keep things in associative collections, there are good options for making them but you don't need to do it the optimal way on the first pass through
-what's your favorite logger library and why ?
-I tend to use tools.logging on top of log4j2. it works great, just about every other routing framework can be rerouted to log4j2
+It feels a bit weird to have to stringify first, but that's how it's supposed to work? (Or am I missing something?)
+
+U050MP39D : that seems wrong
+U050MP39D : you're going json-&gt;data-&gt;json-&gt;data there
+U0E0XL064 : right... my feeling as well, but how to make it work properly? ```
+                                        (-&gt;&gt; req
+                                          .-body
+                                          (t/read (t/reader :json)))
+```
+doesn't work - oh, that last `str` can be omitted, that's just to print it in a readable way.
+
+U0E0XL064 : `transit` does seem to take a json-string, not a json-object, if I'm right.
+U08FM7RL1 : So, here's a question I had over in <#C053AK3F9|beginners> about namespace-qualified keywords, if anyone has any thoughts.  Thanks.  <https://clojurians.slack.com/archives/C053AK3F9/p1499543674615216>
+U08FM7RL1 : Just wondering where they are "tragically underused" and where/why I should be using them.
+U0E0XL064 : <@U050MP39D> found it: express parses json if you add `(.use app (.json body-parser))`. I changed that line to: `(.use app (.text body-parser #js {:type "*/*"}))`. (I'll have to refine it a little... having type `*/*` doesn't seem a good idea, but at least, it works now.)
+
+U0GC1C09L : has anyone had success serving '206 partial content' responses with their favourite clojure http server? i'm trying to serve streamable videos (where 206 responses are required), however <https://github.com/remvee/ring-partial-content/blob/master/src/ring/middleware/partial_content.clj> doesn't seem to respond with an 'Accept-Ranges: bytes' header.
+U07QKGF9P : Is there a decent Clojure HTTP client that mimics browser cookie behavior? Aleph doesn't support cookie stores, it does… something with cookies but there's no docs so it's not clear what — clj-http cookie handling is totally broken if the cookies get set on a redirect request
+U07QKGF9P : I would like to not have to have a headless browser and instrument it with selenium, but that's lookling like an increasingly viable option
+U0NCTKEV8 : have you looked at htmlunit? it might be slightly easier to stomach than going full selenium
+U0NCTKEV8 : I don't know, but clj-http unit has an option to automatically follow redirects or not, and I wonder if turning it off and handling redirects manually might unbreak the cookie stuff
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

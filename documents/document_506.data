@@ -1,3 +1,134 @@
+U6B7NBTLZ : \pos
+U1P6FFJ64 : <@U6B7NBTLZ> that's an anonymous function
+U1P6FFJ64 : <@U6B7NBTLZ> basicaly it's creating something like:```
+functionName pos chance =
+  { position = pos
+  , chance = chance
+  }
 ```
-It only happens at top level though. Single or multi-line comments within function bodies or type definitions do not get that treatment.
-Pay attention to the `|` in the comment above the function. That's the difference. Same thing applies to type definitions as well.
+
+U1P6FFJ64 : <@U6B7NBTLZ> it's on the syntax page, just above the infix operators: <http://elm-lang.org/docs/syntax#infix-operators>
+U6B7NBTLZ : this is all the code
+U6B7NBTLZ : it a code for a snake game
+U6B7NBTLZ : and i still can t undestand what is with that \pos
+U6B7NBTLZ : i started learning elm now 3 days :slightly_smiling_face:
+U1P6FFJ64 : With `\` you create anonymous functions. Basically what is between the `\` and the `=` are the variable names.
+U1P6FFJ64 : For example:
+`(\a b = a + b) 2 4` will return `6`. What is between the parenthesis is the function and the next two numbers are the arguments being passed to the function.
+
+U4F64AKQV : <@U6B7NBTLZ> For example, it would be equivalent to write this on lines 418-420.```
+let
+    toPixelStr x =
+        round x |&gt; toString
+    …
+in
+    …
+```
+
+U4F64AKQV : Just to be clear, the ellipsis are not part of the code. Just using them to show that there is more there that doesn't matter.
+U6B7NBTLZ : so why is it used?
+U6B7NBTLZ : if u just can simply write round i |&gt; toString
+U6B7NBTLZ : why? \i -&gt; round i -&gt; toString
+U6B7NBTLZ : and a quick recap
+U6B7NBTLZ : \i is the name of the function
+U6B7NBTLZ : round i is what has to do
+U6B7NBTLZ : and |&gt; toString is function toString that gets aribute result of round
+U153UK3FA : the function has no name
+U153UK3FA : `i` is the name of the first parameter of the function
+U6B7NBTLZ : ohhh
+U6B7NBTLZ : undestood
+U41NK9BM4 : Sometimes it's just more simple *not* to name a function
+U153UK3FA : anonymous functions are useful when you need to pass a function to a function but the function you're passing isn't useful elsewhere
+U6B7NBTLZ : Makes sense
+U6B7NBTLZ : :slightly_smiling_face:
+U0ULRASLC : but it's usually kept simple, If the anonymous function is too big it can usually be more clear to declare a regular function but within the function scope (the function that calls your anon func)
+U41NK9BM4 : Yes, move that on a let block, give it a meaningful name and your code is more clear :slightly_smiling_face:
+U6B7NBTLZ : thank you :smile:
+U601ELFEG : what happens if there are two subscriptions to the same `port`? When the JS sends a value, do both fire?
+U3FJSB596 : How would you implement this?
+U601ELFEG : I don't know how the runtime ties Subscriptions to ports - so I can't answer this.... but it is not inconcievable that it could queue the Msg objects and cycle them through....
+U601ELFEG : I grant that that raises "issues" with what happens while processing the first Msg ... vs. the second
+U601ELFEG : Saddly, it is very hard to compose low level things made of ports - like I can build ports to read/write `localStorage` - but seems impossible to use it from more than one place.
+U601ELFEG : So, sigh, I build more `ports`
+U4872964V : sounds like something that's easy to try :slightly_smiling_face:
+U4872964V : Re: localstorage, the best way to handle this is to only have one subscription port that sends all localstorage data, tagged appropriately in the value object
+U0LPMPL2U : <@U601ELFEG> yes both will fire
+U0LPMPL2U : I coded up an example: <https://ellie-app.com/3NXjZdPrxyJa1/0>
+U601ELFEG : oh - thanks!
+U6734UL1Z : hey!   so i've been tinkering with elm a bit... and i wonder, what happens when the model gets huge and complica- er, sophisticated? is there advice on how to decompose a large model?
+U23SA861Y : depends on how the model is getting complex
+U4F64AKQV : <@U6734UL1Z> Check out elm-spa-example. <https://github.com/rtfeldman/elm-spa-example>
+U23SA861Y : thats for when you really are making an SPA. What sometimes happens though is that people see a model with 10 fields and think "oh no this is too big" as a sort of instinctive reaction.
+U23SA861Y : How big is your model getting?
+U2SR9DL7Q : <@U6734UL1Z> evan czaplicki has a great talk on growing an elm file. trying to find it now. Richard Feldman has a good one as well.
+Richard's talk <https://www.youtube.com/watch?v=DoA4Txr4GUs&amp;t=2s>
+
+U23SA861Y : I don't know if that is published on youtube yet, but there is a direct link in random somewhere
+U2SR9DL7Q : Yeah, I think it's still unlisted on Elm Europe.
+U23SA861Y : <https://www.youtube.com/watch?v=2ihTgEYiKpI>
+U23SA861Y : boo yeah
+U2SR9DL7Q : awww, I just got it.
+U6734UL1Z : thanks for the resources :slightly_smiling_face: i don't yet actually have a real model to worry about.  i was just following along with someone's youtube videos... and started imaginging the possible features i might add, and wondered at how the model might grow.
+U2SR9DL7Q : <@U6734UL1Z> the advice typically given is to not rush to compartmentalize your code. As you add more and more features, at some point it becomes apparent that you have a collection of related data and functions that interact with that data that would make sense as its own module. But the threshold for "large and unwieldy" will likely be much higher than what you're used to if you're coming from a non-functional background, because the type system makes it really easy to see what everything is doing.
+U4872964V : <@U6734UL1Z> number one advice, and hardest to follow, is: don't worry for now. If you run into trouble we'll help you :)
+U635238TG : just curious, are the folks that help create libraries and modules for Elm doing so using Elm or Haskell?
+U635238TG : total beginner (doing the Pragmatic Studio course btw and things are really finally starting to click!) and am wondering if you also have to learn Haskell before you can ever contribute
+U2GPAEU1L : <@U635238TG> 
+People who want to contribute by writing Elm *libraries* write them in Elm, 0 haskell involved.
+
+People who want to contribute to the Elm *compiler* use Haskell, 0 elm involved.
+
+U635238TG : makes total sense. thank you. i see this place dies on a friday night while I'm just over here amped to be learning Elm (and vim, git, the command line, and html/css)
+U23SA861Y : Well it picks up with bad advice after everyone is nice and liquored.
+U2SR9DL7Q : The cool kids are still here. :neutral_face:
+U23SA861Y : :beers: I can do both
+U2SR9DL7Q : after an entire day... everything compiles.
+U23SA861Y : Ship it
+U2SR9DL7Q : I... don't know how to run this update message...
+U23SA861Y : What is it?
+U2SR9DL7Q : So I have these update messages...```
+ShuffleList -&gt;
+            ( model, Random.generate SetGame &lt;| Random.pair (shuffle model.dominoes) (Random.int 1 4) )
+
+        SetGame ( newSet, first_num ) -&gt;
+            let
+                players =
+                    mapDominoesToPlayers model.players newSet
+            in
+            ( { model | dominoes = newSet, game = ActiveGame, players = players, starter = first_num }, Cmd.none )
+
+        RunGame start_num -&gt;
+            if start_num == 4 then
+                ( model, Cmd.none )
+            else
+                let
+                    activePlayer =
+```
+So a button in my view calls `ShuffleList` which calls `SetGame` ... Now `RunGame` is the driving logic for the robot players. So I need to get RunGame going... but Rungame also needs to call itself when it's done.
+
+U23SA861Y : If you want a delay, Task.sleep 
+U23SA861Y : Sry Process.sleep
+U2SR9DL7Q : Is that command I can pass in `SetGame`? If I use commands in `SetGame`, do they take effect before or after the model is updated?
+U23SA861Y : The model updates when update returns
+
+U2SR9DL7Q : <@U23SA861Y> I'm guessing that means the model takes effect after commands? But to be sure, in the case of `Message -&gt; ( { model | canChange = change }, DoAThing )` , the thing is done before the model is updated.
+U23SA861Y : After each msg
+U23SA861Y : No the model is updated immediate and do a thing gets queued up to happen
+U2SR9DL7Q : Oh. Good. I need to look up this Process.sleep
+U2SR9DL7Q : ... And learn to use tasks
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

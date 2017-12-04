@@ -1,3 +1,92 @@
+U4RR7KX45 : yeah I saw that. But now I have tons of type related issues.so I created the type
 ```
-the `a` in that type definition is a parameter, it can be any type
-You can have a `Maybe Int` or a `Maybe String` etc.
+type alias Content =
+    { id : Int
+    , content : String
+    }
+```
+
+and then my decoder
+```
+decodeQuoteUrl : Decode.Decoder String
+decodeQuoteUrl =
+    Decode.map2 Content
+        (Decode.field "ID" <http://Decode.int|Decode.int>)
+        (Decode.field "content" Decode.string)
+```
+but this gives me an error saying that it should be `Decode.Decoder Content`, not `String` for some reason. If I change that to `Decode.Decoder Content`, then this one goes crazy:
+
+```
+fetchRandomQuoteCmd : Cmd Msg
+fetchRandomQuoteCmd =
+    Http.send FetchRandomQuoteCompleted fetchRandomQuote
+```
+
+U48AEBJQ3 : Because `FetchRandomQuoteCompleted` is a constructor that takes a `String` not a `Content`?
+U4RR7KX45 : indeed it is :smile:
+U4RR7KX45 : damn it
+U4RR7KX45 : ok one more question please. I want to extract just the content fields from that list, to have a list of string. how can I do that? I tried this```
+    Decode.map String
+        (Decode.field "content" Decode.string)
+```
+
+U48AEBJQ3 : So, you have a list of objects which each have a "content" field, and you want those collected as a `List String`?
+U4RR7KX45 : yeah, I want to extract the content from them
+U23SA861Y : `Decode.list (Decode.field "content" Decode.string)`
+U4RR7KX45 : yes! that's it :smile:
+U4RR7KX45 : thank you
+U5H8JJP24 : Hi, I've struggeling with a problem for a while now. I got a subscription which decodes an object as a string from the localstorage. I struggle quite some time with this issue, since my compiler gives me following error:```
+Error: "Expecting an object with a field named `id` but instead got: \"{\\\"id\\\":3,\\\"name\\\":\\\"12d3\\\",\\\"locations\\\":[{\\\"index\\\":1,\\\"description\\\":\\\"\\\",\\\"city\\\":\\\"\\\",\\\"country\\\":\\\"United Kingdom\\\",\\\"name\\\":\\\"Reigate Hill Golf Club\\\",\\\"state\\\":\\\"Surrey\\\",\\\"coordinates\\\":{\\\"lat\\\":51.263834,\\\"lng\\\":-0.161863}}, ...
+```
+I tried to make every fiel optional except name, and it seems he cannot parse the object.
+
+U0LPMPL2U : This string looks doubly escaped?
+U5H8JJP24 : so the \\\ are not normal
+U0LPMPL2U : right
+U5H8JJP24 : actually I do it the same way as in the feldman spa example
+U0LPMPL2U : it looks like the `"` got escaped once as `\"` and then re-escaped as `\\\"`
+U3SJEDR96 : that looks like encoding to JSON twice... Possibly you're using `Json.Encode.encode` on the Elm side _and_ `JSON.stringify(..)` on the JS side? or .. something vaguely like that?
+U5H8JJP24 : ouh i am reading directly from the locastorage as a string :sleepy:
+U5H8JJP24 : yep JSON.parse on the js side fixed my issue... thx guys
+U5SJJD85B : So this might be a odd question, but do Elm users generally prefer to do function composition via `f &gt;&gt; g` or `g &lt;&lt; f`?
+U3LUC6SNS : I'be been using code like that below to update nested records.  Is there a better/more elegant way?```
+toggleMenu model =
+    let
+        appState =
+            model.appState
+
+        newAppState =
+            { appState | menuDropped = (not appState.menuDropped) }
+    in
+        ( { model | appState = newAppState }, Cmd.none )
+```
+
+U0LPMPL2U : <@U5SJJD85B> I've seen both used. Maybe a slight preference for `&lt;&lt;` ?
+U0LPMPL2U : `&lt;&lt;` can often read better such as `not &lt;&lt; .isActive`
+U0LPMPL2U : <@U3LUC6SNS> you could break out a function `toggleAppStateMenu`
+U0LPMPL2U : e.g.```
+toggleMenu model =
+        ( { model | appState = toggleAppStateMenu model.appState }, Cmd.none )
+```
+
+U0LPMPL2U : Alternatively you could flatten your model structure such that `menuDropped` was a key on the top-level `Model`
+U3LUC6SNS : <@U0LPMPL2U> Thanks!  I think I will go with the first suggestion.  My model is is already quite large
+U5SJJD85B : <@U0LPMPL2U> thanks!
+U5W4G2SQ5 : Would Elm / Electron be a good choice for xplat desktop app dev?
+U3SJEDR96 : You'll probably need some JS+ports to handle the electron-specific API's, but it's certainly feasible
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

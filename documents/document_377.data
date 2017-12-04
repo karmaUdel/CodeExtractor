@@ -1,28 +1,70 @@
-Can I do something like  ```view = FirstCallNew.view Model.initwithParams(case_id)``` or something like that. The case_id being the params that help me retrieve my data
-?
-so, the way you handle the initial render is you appropriately set init you init state such that view renders correctly with that data
-Let's say I have my record with all the fields with the values from extracting them with decoding. Is there a simpler way then having to write
-all the values. I must be stuck on something stupid.
-I don't follow you, you need to be explict about how your data maps to your view
-can I write something like init = FirstCallNew.view.init model (where model is what I got from decoding)?
-<@U23SA861Y> let me try again
-no, your code hasn't even run by that point so how have you decoded anything
-init isn't the intial view, it's the initial model and the initial command
-also why are all your TEA functions in a module called `FirstCallNew`?
-<@U23SA861Y>. I already have a module FirstCallNew,  we started with the new page (how to create a new case). Now I want to create the edit page for a case, which is pretty similar to the new page but with info pulled from the database.
-It should be something rather simple, but I don't know how to link my new view to the Elm new view.
-My explanation is a bit long... Sorry
-are you doing serverside routing or client side?
-I am using rails
-I get the data from the database
-typically what you'll have is some manner of restful endpoint to retrieve and update records via web request and then the app pulls it down and decodes it when it wants to use it
-I am doing server side for now, hoping to do client side later.
-<@U23SA861Y> Do you have any simple examples?
-not off hand no.... at least nothing I can release
-Ok, thanks anyways.
-Hola <@U23SA861Y> ! Hope you're well. I'm new to Elm and i really love it! How can i limit the result of a List.map? Say i just want 50 results out of 200?
-well List.map with operate on the whole list, but you can List.take to grab up to a certain number of elements
-`someList |&gt; List.take 50 |&gt; List.map myFunc`
-this will take only 50 items from the list and then call map on them
-Thanks a lot <@U23SA861Y>. List.take, noted!
-<https://ellie-app.com/3KyxztC5J2pa1/0>
+U3SJEDR96 : yeah, though I think I'd rather work with functions that _know_ how to calculate the `right` based on the current state.. And perhaps even better, if I change the `width` through the proper function, I'd expect the model to be in a consistent state afterwards
+U5Q1H5XC2 : cool thanks for the help, I shall experiment a bit further.
+U0CLDU8UB : Thanks :slightly_smiling_face:
+U284ZSVSN : Hi, can anyone recommend elm-return over elm-response or vice versa? Or recommend not using them? Or any alternatives? I'm starting to think I might be starting to see the gains but I'm not sure which to go for
+U4872964V : <@U284ZSVSN> they look identical to me :slightly_smiling_face:
+U4872964V : <@U284ZSVSN> but I've never had the need for those abstractions, I don't have that many "sub-components"
+U284ZSVSN : Good to hear :slightly_smiling_face: I can avoid it I imagine but I've not really done much 'chaining' with the model in the update and have one situation where I've got an operation that comes up a few times that I'd like to make a function for and wondered if I should start using one of these.
+U3LT1UTPF : I want to add a dropdown select so that when the value is changed the page is updated. I thought it would be easier to do it myself, but I've found that it's necessary to keep an eye on the state of the dropdown. I've found some "components" in elm packages, like this one <http://package.elm-lang.org/packages/jschonenberg/elm-dropdown/latest> , but I don't know if I should go on that road. Any advice on how I should face the issue?
+U64D26Q95 : Hi guys,
+I am trying to replicate of my existing React/Redux application in Elm. I am struggling with the following part: I need to fetch data from few different urls (asynchronously) and as soon as I will get all responses back I need to dispatch an action (for example: LoadCompleted). As far as I understand I need to use Cmd.batch for many asynchronously requests, however how can I dispatch an action as soon as everything fetched?
+
+It is probably stupid question, but I am struggling find any information about this kind of case. Can anyone help me, please?
+
+U3LT1UTPF : <@U64D26Q95> I learned a lot from this article series: <http://codeloveandboards.com/blog/2017/02/08/phoenix-and-elm-a-real-use-case-pt-2/> I link to the second chapter because you probably don't need the Phoenix stuff (the backend that gives the json). You probably need from "The Messages" on.
+U3EPLC6A0 : <@U64D26Q95> Have you seen RemoteData? It helps you keep track of the "download-state" of your data. It even forces you to do so. So, as soon as everything is ```Success a``` you're there. <http://package.elm-lang.org/packages/krisajenkins/remotedata/latest>
+U3LT1UTPF : The info is fetched in the init:```
+init : ( Model, Cmd Msg )
+init =
+    initialModel ! [ fetch ]
+```
+
+`fetch` lives in Commands, fetches the info and triggers `FetchResult` in `update`
+
+U3LT1UTPF : Yes, RemoteData seems a good option.
+U0FBZ4J5V : And have a look at the docs for `RemoteData.andMap` for a neat way to merge data-loads into a single result. 
+U0CLDU8UB : With RemoteData, you would have a Msg for each of the responses. 
+So in your model, you have a field for the responses
+```
+type alias Model =
+    { a : WebData Thing
+    -- ...
+    }
+```
+This means that in the update, you simply go
+```
+ResponseA webData -&gt; { model | a = webData }
+```
+
+Now, there's no need for an action when all of the responses are in: 
+
+```
+view model =
+    RemoteData.map resolvedView model.a
+        |&gt; RemoteData.andMap model.b 
+        --...
+        |&gt; RemoteData.withDefault notResolvedView
+```
+
+U62PV9CPN : Is there a way to compile elm and see the error messages in the terminal rather than opening a browser?
+U3SJEDR96 : I assume you're using elm-reactor? `elm-make` shows errors on the CLI
+U62PV9CPN : Yeah I've been using `elm-reactor`. So I just intentionally changed a functions signature to something wrong and ran `elm-make` and it says it compiled successfully
+U62PV9CPN : But running `elm-reactor` I see several errors
+U64D26Q95 : Thank you very much everyone! Really appreciate that. `RemoteData` sounds good so far. I will check all links in depth soon and hope it will work for me :slightly_smiling_face:
+U4872964V : <@U62PV9CPN>, are you passing the same file to elm-make as to elm-reactor?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

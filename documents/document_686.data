@@ -1,3 +1,87 @@
+U3SQ42JJW : Anyone any experience with using Chris Jenkins RemoteData with a custom post request? I can’t figure it out … :disappointed:
+U48AEBJQ3 : That might be simpler as```
+f list =
+    Decode.map5 MyTypeAlias
+        (Decode.index 0 <http://Decode.int|Decode.int>)
+        (Decode.index 1 <http://Decode.int|Decode.int>)
+        (Decode.index 2 <http://Decode.int|Decode.int>)
+        (Decode.index 3 Decode.string)
+        (Decode.index 4 <http://Decode.int|Decode.int>)
 ```
-api = Api(app) is registering api with app, no?
-Ah, yes, that's right. I guess it's the "you have to register the `api` with your app"...this is what I'm already doing, right? I'm not sure if it was meant that I need to do this (e.g. I haven't done it) or if it's just being stated that I was required to do this...
+
+U3SQ42JJW : There is this example in the docs ````
+
+getNews : Cmd Msg
+getNews =
+    Http.get "/news" decodeNews
+        |&gt; RemoteData.sendRequest
+        |&gt; Cmd.map NewsResponse
+````
+
+U17PWHU4D : ok, i think i get what you're both saying here.  this is a ton of good stuff for me to look through and figure out.  didn't realize about value, or mapping through.
+U17PWHU4D : Thanks so much <@U48AEBJQ3> and <@U1CE9DL9H> !!
+U3SQ42JJW : So I need something that responds with an Http Request msgAnd just use RemoteData.sendRequest with it…. 
+But what makes this Cmd.map and where do I put my msg ?
+
+U48AEBJQ3 : <@U3SQ42JJW> Ignoring remoteData for a moment, are you able to make your `Http.Request a`?
+U3SQ42JJW : yes - thats my function```
+requestToken : String -&gt; String -&gt; Http.Request State.ValidationResponseType
+requestToken password endpoint =
+    let
+        decoder : JD.Decoder State.ValidationResponseType
+        decoder =
+            JD.map State.ValidationResponseType
+                (JD.field "token" JD.string)
+
+        json =
+            JE.object
+                [ ( "password", JE.string password ) ]
+                |&gt; JE.encode 0
+                |&gt; Http.stringBody "application/json"
+    in
+        Core.Helpers.Utils.customPostRequest
+            (endpoint ++ "/api/getPollToken")
+            []
+            json
+            decoder
+```
+
+U3SQ42JJW : Works fine when using it with Http.send
+U48AEBJQ3 : So, you pass that to `RemoteData.sendRequest` which gives you a `Cmd (WebData State.ValidationResponseType)`
+U3SQ42JJW : yes, like this ```
+RD.sendRequest &lt;| (requestToken string apiEndpoint)
+```
+
+U48AEBJQ3 : Then you need a```
+type Msg
+    = &lt;your existing messages...&gt;
+    | ReceiveResponse (WebData State.ValidationResponseType)
+```
+
+so you can go `Cmd.map ReceiveResponse _____`
+
+U48AEBJQ3 : The name of that constructor can be anything. Naming things is difficult.
+U3SQ42JJW : <@U48AEBJQ3> Wooohoooo :smile: Thank. Works now. I had defined my response message as ReceiveResponse (RemoteData State.ValidateionResponseType) instead of WebData … uh… what a bad mistake :wink:
+U3SQ42JJW : If you hadnt written down the msg type, i would have overseen this totally :slightly_smiling_face:
+U3SQ42JJW : (But  I still did not get why I use Cmd.map here…. hmmm)
+U5MEJDV34 : Just created a new Atom package that lets you run Elm Tests on Save and show the result in the Linter window. Might still be unstable so feedback is very welcome: <https://atom.io/packages/atom-elm-test>
+U0H3A9XLN : Let’s say I have a union type which represent tabs: `type Tab = TabOne | TabTwo`. Then in my view code I do render them. Is there a way to ensure that once I add a new tab I won’t forget to add view piece for it?
+U41NK9BM4 : If you use a case/of Elm will complain it misses the new one.
+U1P6FFJ64 : Yep, and be sure not to use `_ -&gt;` in your case/of :smile:
+U41NK9BM4 : AKA: the lazy coder :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

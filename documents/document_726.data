@@ -1,6 +1,102 @@
+U5QJW0DDE : I frankly don't see how that is possible in TEA so I will send more thoughts your way later. 
+U0CL0AS3V : :thumbsup:
+U0CL0AS3V : it definitely requires a mindset shift coming from OO :smile:
+U0CL0AS3V : it's all good! happy to talk
+U5QJW0DDE : Cool, I will ping you in a few hours. I have dinner plans. I keep hearing remarks from people here saying "it's not a problem in Elm" but yet no one can actually provide simple solutions to common problems in very large apps that my company builds. I watched your keynote conference talk where you discussed this a little bit, but did not come away from it feeling like the issue I'm referring to has an obvious solution in Elm. Will chat with you later!
+U2LAL86AY : what's so wrong about this function? :smile:```
+
+numberToFloat: number -&gt; Float 
+numberToFloat number = 
+    if typeof number == Int then  -- is not valid elm - but not sure how to construct it.
+        toFloat number 
+    else 
+        -- is already float, don't bother.
+        number 
 ```
-<@U3NJS8H7C>: Thanks, that works in that case, but it doesn't seem to work in my real situation. I'll fiddle with it a bit and see if I can make it work.
-All this is actually part of typeclass dictionary elaboration. I need to perform a sort of "delimited expansion” where I leave placeholders in the expansion where typeclass dictionaries will be inserted later. However, I can't call `local-expand` with a stop-list, since that won't recursively expand.
-right, what <@U3NJS8H7C> said, although I have often wrapped that pattern in a macro called something like `(put-in-parameter id-to-bind expr)`
-Yep, that seems to have worked. Thanks <@U0702F2CE> and <@U3NJS8H7C>. I think this `local-expand` abuse is probably not the best solution to what I'm doing, but I admit I am not 100% sure what I'm doing, and it seems to sort of work so far. :stuck_out_tongue:
-I think, with those changes, I have working typeclasses in Racket. :)
+Why can't i find it anywhere in Basics or using elm search?
+
+U0CL0AS3V : sounds good!
+U2LAL86AY : `toFloat: Int -&gt; Float` <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Basics#toFloat>
+U2LAL86AY : seems i can't have `toFloat: number -&gt; Float`
+U3ZNWN526 : I think you could actually just return number...
+U3ZNWN526 : ```numberToFloat : number -&gt; Float
+numberToFloat n = n
+```
+
+U3ZNWN526 : Maybe not...
+U3ZNWN526 : But certainly you could do something like multiply it by `1.0`
+U4872964V : toFloat could certainly be `number -&gt; Float` but I’d be interested in seing your particular use case
+U3ZNWN526 : Which may illustrate why the function doesn't exist - because in most cases it wouldn't be useful (that I can think of anyway)
+U3ZNWN526 : My mistake!  I guess you *can't* multiply by 1.0 :slightly_smiling_face:
+U3ZNWN526 : But I guess the thing is if you have a `number` you can just use it as a `Float` rather than converting it to a `Float`
+U3ZNWN526 : (i.e. it basically is a Float already - for practical purposes)
+U2LAL86AY : <@U4872964V> yeah, i want to build another abstraction on top of Bounded library. So will be `Izer1` defined as a number between `0 and 1` -- `Interval Zero 1` and i defined this as:
+```
+type Izer1
+    = Izer1 (Bounded Float)
+```
+Where `Bounded` comes form the bounded library.  And i want to build another function over `set`. like this:
+```
+-- set : number -&gt; Izer1 -&gt; Izer1
+-- set value (Izer1 bounded) =
+--     BoundedNumber.set value bounded
+--         |&gt; Izer1
+```
+now this doesn't work - because 
+```
+The 1st argument to function `set` is causing a mismatch.
+
+Function `set` is expecting the 1st argument to be:
+
+comparable
+
+But it is:
+
+number
+```
+Then i build it like so:
+```
+set : number -&gt; Izer1 -&gt; Izer1
+set value (Izer1 bounded) =
+    BoundedNumber.set (toFloat value) bounded -- here i added a toFloat - to make it comparable - because Float is considered comparable but number is not considered comparable. Which is kind of crazy because i think it should...
+        |&gt; Izer1
+```
+then the error is:
+```
+	
+The argument to function `toFloat` is causing a mismatch.
+
+Function `toFloat` is expecting the argument to be:
+
+Int
+
+But it is:
+
+number
+```
+
+U3ZNWN526 : Oh wait, I was trying to multiple an `Int` by 1.0.  Haha.  You *can* multiply a `number` by 1.0 to get a `Float` :slightly_smiling_face:
+U2LAL86AY : <@U3ZNWN526> check out this: <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Basics#*>
+U4872964V : <@U2LAL86AY> why not just use Float everywhere?
+U3SJEDR96 : `number` not being `comparable` is a bug - <https://github.com/elm-lang/elm-compiler/issues/1581>
+U2LAL86AY : aaa that makes sense. and that creates this problem i guess.
+U3SJEDR96 : <@U2LAL86AY> `1.0` is a Float, so `number * Float` means that the `number` is also a Float :slightly_smiling_face:
+U5QJW0DDE : I'm not coming from OO but from clojurescript which has had a UI pattern in years past that resembles TEA, but has been largely replaced due to the problems I will explain later. 
+U3SJEDR96 : and `toFloat : number -&gt; Float` is also tracked somewhere, iirc
+U0CL0AS3V : it's also been fixed <https://github.com/elm-lang/elm-compiler/commit/5fe9bb9602163927295a6b37a64fd47f982d502a>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

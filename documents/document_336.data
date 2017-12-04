@@ -1,32 +1,98 @@
+U3KSN5MAL : lol ok
+U48AEBJQ3 : The next exercise will have you use it for something more useful.
+U3KSN5MAL : I'm still not convinced of the format of this sort of exersize when there is no place to really go but to ask people if you get stuck.
+U3KSN5MAL : I tried exercism for a while and kept running into the same thing
+U3KSN5MAL : am i supposed to be using the decodeString on it?
+U3KSN5MAL : nvm got it
+U3KSN5MAL : supposed to use succeed
+U3HQVHERX : redroyal: how often do you use the `elm-repl`? i found myself slowly understanding things after doing small things and guessing at the output.
+U3KSN5MAL : It's not a case of that, it's more lack of not knowing the tools they want me to use
+U3KSN5MAL : the hell, my code is compiling with elm-make but it's failing when compiling with elm-test
+U3KSN5MAL : ```type Color    = Green
+    | Blue
+    | Red
+
+
+decoder : String -&gt; Decoder (Result String Color)
+decoder colorString =
+    succeed &lt;| fromStringColor colorString
+
+
+fromStringColor : String -&gt; Result String Color
+fromStringColor string =
+    case string of
+        "blue" -&gt;
+            Result.Ok Blue
+
+        "green" -&gt;
+            Result.Ok Green
+
+        "red" -&gt;
+            Result.Ok Red
+
+        _ -&gt;
+            Result.Err ("I don't know a color named " ++ (toString string))
 ```
-I keep staring at this and don't see the issue -- am I just blind or is something weird going on?
-hmm, I'm not seeing it either...
-my initial guess was that Elm didn't like numbers in identifiers (e.g. `week4` as the field in `Model`), but the REPL didn't seem to mind them
-ohh the issues is where you are creating the model
-record assignment uses `=` not `:`. The colon is used for the type declaration but in the assignment you need to use equals
-Oh, :facepalm:
-just looking at the wrong line
-yep, blind then. Thanks
-line 18
-happens to all of us
-Error: BadPayload "Expecting an Int at _.Aufgaben[1].aMinuten but instead got: \"1\"" { status = { code = 200, message = "OK" }, headers = Dict.fromList [("Cache-Control","max-age=300"),("Content-Type","text/plain; charset=utf-8"),("Expires","Sun, 09 Jul 2017
-<https://raw.githubusercontent.com/Tegshigzugder/somethingnew/master/newfile.json>
-you are using an int as your elm type but you are encoding it as a string in the json message
-.. i dont follow
-what do you mean?
-should i take these " " away?
-yeah, "1" is a string
-1 is an int
-in json anyway
-well number
-should i take "" also from date?
-no, because those are strings and your decoder is expecting them to be
-holy shit
-it worked..
-and by date a presume you mean aTermin and aDeadl
-there you go
-i believe that one day, i will be able to use the full potential of coding
-:))
-thanks to you guys, for making this possible
-getting your code types to align with your data types can be one of the more infuriating experiences.
-its garunteed to manifest as a runtime error
+
+U3KSN5MAL : the code in qustion
+U48AEBJQ3 : What is elm-test saying?
+U3KSN5MAL : `Compilation failed while attempting to build C:\Users\muzzo\Documents\elm-demystify-decoders\tests\Exercise08\Tests.elm`
+U48AEBJQ3 : Oh, you changed the type of `decoder`
+U48AEBJQ3 : It should be `String -&gt; Decoder Color`. I think the talk about `Result` caused some confusion.
+U3KSN5MAL : yes
+U3KSN5MAL : it did
+U48AEBJQ3 : You shouldn't need a helper function here and you should use `succeed` and `fail`.
+U48AEBJQ3 : Don't use a `Result` for anything.
+U3KSN5MAL : oh ok
+U3KSN5MAL : aaah
+U3KSN5MAL : ok got it
+U48AEBJQ3 : woot!
+U5GAFT2AW : how do I initialize `Date` with a default value? if I have something like this below:```
+-- MODEL
+type alias Model =
+  { date : Date
+  , time : String
+  , entryId : String
+  }
+
+init : (Model, Cmd Msg)
+init =
+  (Model &lt;what goes here?&gt; "" "", Cmd.none)
+```
+
+U153UK3FA : <@U5GAFT2AW> what do you consider a default date?
+U153UK3FA : perhaps you want a `Maybe Date`
+U153UK3FA : ```-- MODEL
+type alias Model =
+  { date : Maybe Date
+  , time : String
+  , entryId : String
+  }
+
+init : (Model, Cmd Msg)
+init =
+  (Model Nothing "" "", Cmd.none)
+```
+
+U153UK3FA : is `""` a valid usable value for an `entryId`?
+U153UK3FA : you might want to wrap the whole thing in a `Maybe`
+U5GAFT2AW : Ohhh, I definitely don't understand `Maybe`
+U3HQVHERX : `Maybe` is `Nothing` or `Just something` and you can pattern match it to get your value
+U3HQVHERX : maybe date's default value would be `Nothing`
+U3HQVHERX : and if it gets updated, it would be `Just date`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

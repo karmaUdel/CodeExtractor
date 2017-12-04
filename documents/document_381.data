@@ -1,9 +1,77 @@
+U3YDBDP4Z : Wondering if it's possible to see what the error was
+U17MNKY3H : It'll have a string message AFAIR.
+U17MNKY3H : An error `Result` can't really be created without a value.
+U3YDBDP4Z : ```getResultValue result =
+    case result of
+        Ok value -&gt;
+            value
+
+        Err err -&gt;
+            err
 ```
-It still has the ../src that I tried.
-This is the one in `tests` ?
-I'm assuming that the modules are in `../src`
-Can you paste the package json from the root? non-tests?
-All of my Elm files except tests are in `src`
-And the app compiles, which is one check
-Hmm…. And you are running `elm-test` from within `tests` (sorry for the basic questions)
-(just going over some of the things I've accidentally done)
+Says the type annotation should be `Result a a -&gt; a`
+
+U3YDBDP4Z : Would have thought it could say `Result String String -&gt; String` or something
+U17MNKY3H : Elm does that. It finds the most general type it can for a function.
+U17MNKY3H : It will accept a less general one though.
+U3YDBDP4Z : Ah, my annotation worked just as well :slightly_smiling_face:
+U23SA861Y : your annotation can be more specific
+U17MNKY3H : Better wording. :slightly_smiling_face:
+U3YDBDP4Z : Hmm… Invalid JSON : Unexpected token t in JSON at position 53.```
+json =
+                        """
+                        {
+                          target: {
+                            elements: {
+                              email: {
+                                value: "<mailto:jane@mail.com|jane@mail.com>"
+                                }
+                              }
+                            }
+                          }
+                        """
+```
+
+U17MNKY3H : JSON needs to have string keys.
+U17MNKY3H : `{ "target": ... }` vs `{ target: ... }`
+U3YDBDP4Z : Doh
+U17MNKY3H : :slightly_smiling_face:
+U3YDBDP4Z : :clap:
+U3YDBDP4Z : Sweet. Things are moving along!
+U2DF486HL : Hi, how can convert a list of strings, into a single string with its values separeted by ", " ?
+U2DF486HL : or a list of int to a single string separated by ","
+U2DF486HL : I think this can work but not sure if it is the best... String.join "," (List.map (toString) a)
+U23SA861Y : I believe there is a single built info for what you want
+U4872964V : <@U2DF486HL> it's the best! 
+U23SA861Y : ahh, yeah String.join is exactly what you want
+U23SA861Y : the List.map is you constructing the list of stringsyou might also try:
+```
+List.map toString a
+   |&gt; String.join ","
+```
+
+U23SA861Y : <@U2DF486HL> ^
+U23SA861Y : becareful with toString though, if you thing is already a string it will insert quotes
+U2DF486HL : Ok, I understand.. thank you <@U23SA861Y> and <@U4872964V>
+U3YDBDP4Z : To pluralize or not pluralize module names…
+U3YDBDP4Z : :thinking_face:
+U23SA861Y : the stdlib seems to go with not pluralizing
+U23SA861Y : with the exception of `Basics`
+U3YDBDP4Z : I started with pluralized names, but now I'm leaning towards not
+U23SA861Y : non-plural also reads nice when it's included in the signature like `Msg.map` as opposed to `Msgs.map`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

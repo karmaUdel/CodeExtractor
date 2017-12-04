@@ -1,17 +1,93 @@
+U06C1JGHX : I'm trying to navigate a blob of XML and parse out a map of information
+U06C1JGHX : this gives me a list of the names of all the interesting nodes in my XML:```
+(xml-&gt; zipped :parameters :parameter (attr :name))
 ```
-question: how to find a dependency a leiningen plugin pulls in at runtime?  I've run `lein deps :tree` on the most obvious dependencies, and I don't see where a particular version of ring is coming from.  I've sprinkled `:exclusions` all round.  Yet I find the dependency in `target/stale/leiningen.core.classpath.extract-native-dependencies` ...
-(context: trying to upgrade gorilla repl to 1.9, but  it barfs on an old version or ring)
-happens when I do `lein gorilla :port 9000`, yet neither gorilla-repl nor lein-gorilla seem to need it
-have you tried deleting `target`?
-I've deleted all the content yes
-`lein deps :tree` should work, unless gorilla-repl does something funky
-you can issue a global exclusion for ring
-<https://github.com/technomancy/leiningen/blob/master/sample.project.clj#L86>
-hm.  the problem being that lein-gorilla does need ring, just not that old one ...
-that's ok, you can specify the latest version
-exclusion just means "ignore whatever transitive dependencies there are relating to this"
-thank you, will try that :slightly_smiling_face:
-to look at plugin deps there's a separate plugin tree command `lein deps :plugin-tree`
-<@U051SS2EU> did not know that
-<@U051SS2EU> nice one, that should help
-thank you!
+
+U06C1JGHX : this works for me since I know how many `:parameter` nodes I have and I know they all have `:name`
+U06C1JGHX : these work similarily: ```(xml-&gt; zipped :parameters :parameter :description text)
+(xml-&gt; zipped :parameters :parameter :default text)
+(xml-&gt; zipped :parameters :parameter :options :option text)
+```
+
+U06C1JGHX : I get a list of descriptions, default values or options…
+however!  not all my paramater nodes have a :`description`, `:default` or `:options` sub tag.
+
+So the lists don't have the same ordering as the `:name attr` we pulled out earlier…
+
+U06C1JGHX : Is there a simple way to pull out these values for each parameter? with say `nil` returned if it's not present?
+U0BKWMG5B : <@U06C1JGHX> Perhaps something like:```
+(for [p (xml-&gt; (z/xml-zip xml) :parameters :parameter), :let [z (z/xml-zip p)]]
+  {:description (xml-&gt; z :description text)
+   :default     (xml-&gt; z :default text)
+   :options     (xml-&gt; z :options :option text)})
+```
+
+U0BKWMG5B : Or alternatively:```
+(defn parse-parameter [z]
+  [{:description (xml-&gt; z :description text)
+    :default     (xml-&gt; z :default text)
+    :options     (xml-&gt; z :options :option text)}])
+
+(xml-&gt; zipped :parameters :parameter parse-parameter)
+```
+
+U08UTJ5PB : <@U5YHX0TQV> It's actually a docker container I use for my dev environment. I have set that environment variable to no avail. Have you had this issue?
+U051SS2EU : <@U08UTJ5PB> is it something that happens to leiningen regardless of the project code? is it a specific network operation in the code that is getting that error?
+U08UTJ5PB : <@U051SS2EU> It seems to only happen when running on my docker-container. The repl is being started with this function:
+```(defn start-repl-server []
+  (loop [port (get-repl-server-port)]
+    (if-let [server  (try (nrepl-server/start-server :port port
+                                                     :handler cider-nrepl/cider-nrepl-handler)
+                          (catch java.net.BindException _ nil))]
+      (reset! repl-server server)
+        (recur (inc port)))))```
+
+U08UTJ5PB : If I start it using `lein repl` it starts fine just fine (please excuse the indentation, slack appears to have messed it up)
+U051SS2EU : what I'm asking is that if it's only with your project in the container that lein gets the error, or if other projects give a similar error
+U051SS2EU : there's two likely failure points here, one internal to leiningen, the other specific to your project...
+U051SS2EU : another thing you could test is whether an uberjar of your project, run without leiningen gets this error
+U08UTJ5PB : <@U051SS2EU> it is the only project I've experienced with this error. But I don't usually do things this way. (with starting the repl in that way)
+U08UTJ5PB : That's a good idea
+U08UTJ5PB : I'll try that now
+U051SS2EU : do you need to whitelist the ports your process in the container can use?
+U08UTJ5PB : <@U051SS2EU> I do, and I have whitelisted those ports
+U08UTJ5PB : The uberjar didn't work either
+U08UTJ5PB : As that repl function is still unable to run to whatever ip restrictions
+U051SS2EU : how does `(get-repl-server-port)` pick a port?
+U051SS2EU : it might be worth trying to just listen to the port it should be listening on using `nc`
+U051SS2EU : eg `nc -l 8888` should listen on port 8888 and wait for one connection and print whatever gets sent to it
+U08UTJ5PB : That's another good idea
+U08UTJ5PB : It picks it from an environment variable:```(defn- get-repl-server-port []
+  (let [repl-port-string (get env :repl-server-port "7888")
+        maybeNumber (clojure.edn/read-string repl-port-string)]
+    (if (number? maybeNumber)
+      maybeNumber
+      (do
+        (log/warn "Unable to parse port number for REPL_SERVER_PORT")
+        nil))))```
+
+U08UTJ5PB : Let's move this to a thread, if you don't mind? <@U051SS2EU>
+U08UTJ5PB : I'm unable to start the server while listening to that port. The address is already in use
+U051SS2EU : what I meant was to test if you could open the port with nc - that rules out another point of failure
+U08UTJ5PB : Oh yes, the port is definitely open. The api serves traffic. The nrepl server just won't start
+U051SS2EU : I'm talking about the nrepl port not the api port, but OK
+U08UTJ5PB : Ah, let's make sure of that
+U08UTJ5PB : Yep, the nrepl port is definitely available as well
+U051SS2EU : OK - that verifies it's an nrepl problem then?
+U08UTJ5PB : That's my guess
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

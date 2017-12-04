@@ -4,7 +4,7 @@
 	<xsl:template match="/">
 		<!-- TODO: Auto-generated template -->
 		<xsl:for-each select="//message">
-		<xsl:value-of select="concat(ts,',::',text,',::','&#xA;')"/>
+		<xsl:value-of select="concat(user,',::',text,',::','&#xA;')"/>
 		</xsl:for-each>
 	</xsl:template>
 </xsl:stylesheet>

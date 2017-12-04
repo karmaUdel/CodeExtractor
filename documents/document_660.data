@@ -1,88 +1,112 @@
+U17MHJ12N : I will try to document my steps to improve things and see if it's of interest to anyone.
+U0FBZ4J5V : `RemoteData.map (List.filter f) yourRemoteData` should do it. 
+U5DJNFLUD : Ooh thanks <@U0FP80EKB> I'm looking forward to watching that
+U37HUSJ4R : ah perfect, my issue was with my `f` function
+U37HUSJ4R : great thanks <@U0FBZ4J5V> and <@U23SA861Y>
+U37HUSJ4R : love this slack, so helpful!
+U0J1M0F32 : coreyhaines: I'd be very interested in a state-of-elm style survey that only asks for LOCs, modules, and 3rd party packages.
+U37HUSJ4R : is there a tried and tested pattern for handling something like a reset button? Say I had a Msg that filtered all the even ids, I want to then reset back to all again. I could have two props on my model, `data` and `originalData` and just never update `originalData` but kind of feels wrong
+U0FP80EKB : I would have `data` and `filteredData` as a first pass
+U23SA861Y : either that or a seperate view mask
+U0FP80EKB : Although, I’d probably do something like (very much pseudo code to get the names there)```
+type Data = Data original filtered
 ```
-should equal 3.0
-very good man
-so easy
-ahauuaa
-<@U57JJD5S8> virtualenv won't change the underlying problem, unfortunately. It just changes where the final packages get stored
-yeah
-i cant edit setup.py to remove #include io.h for some reason
-Why do you think there is that include inside setup.py?
-#include is a C/C++ construct, setup.py is Python
-idk, tbh
-this is my first time setting up a python environment
-some cursory googling makes this sound like a VS issue
-yeah
-ive installed all i can
-llo
-lol
-i believe its vs2015_runtime because anaconda automatically installs that one for me
-however when i try to install it myself in venv i am getting the io.h issues
-or maybe that is still a completely separate issue
-the fact that it cannot detect bitfield in anaconda even though i am looking right at the package is weird to me
-because VS doesn't know where to look for the header: <https://stackoverflow.com/questions/40018405/cython-cannot-open-include-file-io-h-no-such-file-or-directory>
-yeah i remember trying that two days ago
-i forgot why it wasnt working
-should try again today
-I know I mentioned it earlier but references to io.h are usually a bad sign on Windows, and references to unistd.h are almost certainly wrong
-It implies that something is not picking up the platform correctly; or just isn't designed to build on Windows at all
-we also have <#C5XHHMXHB|os_windows> and someone may know there, or maybe a linux VM would be easier at this point ¯\_(?)_/¯
-ugh, looks like pyconfig.h is usually output by the configure script... so who knows what state it might be in when a Windows compiler gets hold of it
-yeah i believe that is one of the problems
-read in another thread that windows has a tendency to mishandle the script
-if i put Linux Bash on Windows, am I able to set up an environment that way?
-or linux VM yeah like joe suggested
-why don't you skip windows entirely
-and go straight to linux vm?
-you've been bashing your head against this issue for, what, two days now?
-I'd say you've given it an honest effort, now use something that _works_
-yeah. i think im just stubborn
-its a side project so im not rushed for time
-but its time to admit defeat lol
-if i remember correctly, there are vms that are basically terminal only right?
-the VMs just run whatever image you give them, and most linux images are the full OS. why do you ask?
-You could do `vagrant`
-Pretty easy to set up and reproduce your dev env that way
-i was just thinking of minimalistic options
-but i guess i'd like IDEs and guis and such
-hello
-anyone know regex that find url link with specific type eg:<http://eg.com/asd.pdf>
-type of what?
-what is specific about that that you need to match?
-specific extension
-like .pdf
-.mp4
-Are you more concerned with the extension itself or what kind of file it is?
-Because you can get a lot from the `Content-Type` header when you make a request to it
-Unless you only have strings that are the URLs
-And if you go that route the `mimetypes` module can guess and extension from that
-<https://raw.githubusercontent.com/EbookFoundation/free-programming-books/master/free-programming-books.md>
-im trying to get only pdf link
-im already used mimetypes but its iterates all link,all i want is find url with .pdf extension then download it
-So only save the ones with the correct mimetype. <@U0LSCQQNR> if I'm missing anything feel free to step in this is more your wheelhouse
-yea correct
-install <https://pythonhosted.org/Markdown/> and beautiful soup
-and requests
-use requests to get that link you posted above, put it into python-markdown to convert to html
-Yes thank you I'm on my phone and scraping is a lot to type
-then use beautifulsoup to extract all `&lt;a&gt;` tags ending in `.pdf`
-that'll give you a list of URLs
-you can then use `requests` to get the content of each link, then use basic python file IO to write the response data to a file on your machine
-a possibly simpler version would be to get the text content of that link
-split each line by `(`, and check if each result ends in .pdf
-but not sure how accurate it would be, since there are different ways a `(` can appear in markdown
-ok, i'll try the first solution
-thanks you very much
-good luck
-going through the jquery tutorial, and i'm a bit confused about this lesson: <http://try.jquery.com/levels/2/challenges/4>
-when switching between the descendant and direct child selectors, i don't see a difference between the two on the html
-as in, the same bit of code is being highlighted regardless of which one i choose
-if that's the point, then ignore this, but i was under the impression that it would highlight a smaller subset of the code
-Here is my solution for <http://www.practicepython.org/exercise/2014/01/29/01-character-input.html>
-4) Open to any suggestions on how to improve/optimize that code.
-Good day Pythonist, does anyone can help me about my django template varaible {{SITE_NAME}} because i can't see it from the template even in view by request.SITE_NAME
-thanks in advance
-Is there a generally-accepted 'best' unit-testing package? Or is it a subjective choice between nose, py.test, etc?
-`pytest`!
-no thinking required
-What are the advantages? I'm not a big fan of the setup/teardown syntax, but I could get used to it.
-really easy fixtures, parametrized tests
+
+U0FP80EKB : Yeah, or do the filtering at the view level, which is what I would start with.
+U0J1M0F32 : Or `data` and a `filter` which is a union type of the kind of filter, then the filter is applied dynamically. (Only works if its a small data set)
+U0FP80EKB : Ask why you need to keep the filtered data vs just the filters and apply them when rendering
+U0J1M0F32 : `type Filter = All | Unread | Replied | None`
+U0FP80EKB : caching the filtered data feels like an optimization that leads to this potentially unnecessary complexity
+U23SA861Y : yeah this, apply the filter at render time
+U37HUSJ4R : so don’t have a filter msg?
+U0FP80EKB : We have a situation like this in our system, and we just store which filter they want (since we have a set number)
+U0FP80EKB : I would have a filter msg `Filter FilterType`
+U37HUSJ4R : instead of doing it in the update, do in a view type function?
+U0FP80EKB : Then, in your model, store the `currentFilterType : FilterType`
+U0FP80EKB : Save what filter they are looking for, not the filtered data.
+U0FP80EKB : Then, when rendering the view, filter the data
+U37HUSJ4R : nice
+U37HUSJ4R : I like it!
+U0FP80EKB : `filter : FilterType -&gt; Data -&gt; Data`
+U0FP80EKB : The general approach is to calculate everything you can until you need to optimise. Then insert a cache.
+U37HUSJ4R : just implemented that soluition <@U0FP80EKB>, really nice and elegant!
+U3SJEDR96 : It's basically also how elm-sortable-table works, fyi.
+U3SJEDR96 : if time comes to optimize, a light salting of `lazy` and possible `keyed` should do the trick
+U0FP80EKB : yup
+U3GHR2G91 : hey everyone.  i have a quick question.  does Elm have any particular solutions for problems related to windowing, a la Reacts `fixed-data-table` or `react-virtualized`?
+U0FP80EKB : what are those?
+U0FP80EKB : Just something like `List.filter` ?
+U0LPMPL2U : From a quick look at `react-virtualized`'s GitHub page, it seems kinda like Elm's `Html.Lazy` ?
+U0FP80EKB : <@U3GHR2G91> what do they do?
+U0JFGGZS6 : is it something like  <http://package.elm-lang.org/packages/FabienHenon/elm-infinite-list-view/latest> ?
+U3GHR2G91 : let's say you have a long list
+U3GHR2G91 : with sorting or something like that
+U3GHR2G91 : ahh, hold on, brb
+U0FP80EKB : I bet the answer is `List.filter` :slightly_smiling_face:
+U0EUHKVGB : don’t jump to conclusions, folks
+U0EUHKVGB : <@U3GHR2G91>, what are you trying to do?
+U3GHR2G91 : let's say you have a very long list, it doesn't make sense to pay the cost of rendering every item
+U3GHR2G91 : these solutions give you an aperture (i.e. calculate the portion of you rlist that is visible in browser)
+U3GHR2G91 : it can vastly improve perf
+U0EUHKVGB : <@U3GHR2G91> have you run in to this as a real issue in Elm yet?
+U3GHR2G91 : nope
+U3GHR2G91 : but i have in React, using immutable data structures
+U3GHR2G91 : i could put together a POC pretty easily
+U0EUHKVGB : That would be best :slightly_smiling_face:
+U0EUHKVGB : There are many possible ways to solve a problem like this, hence why you got three different answers.
+U0EUHKVGB : However, the best way to know how to solve your problem is to have an example of _your_ problem :slightly_smiling_face:
+U0JFGGZS6 : has anyone worked on a stats package in elm?  even basic descriptive stats?
+U0JFGGZS6 : I found <http://package.elm-lang.org/packages/myrho/elm-statistics/latest>  but it looks like just a bare beginning
+U5DJNFLUD : <@U0JFGGZS6> I'm using that for R7 but would appreciate more :slightly_smiling_face:
+U0JFGGZS6 : I played around with implementing quantiles last night off the wikipedia page
+U0JFGGZS6 : (amazing how little stats you need to know if you have some formulas/algorithms!)
+U0JFGGZS6 : but ended up with a lot of questions in my mind about api design. which is maybe where I should ask these questions -&gt; <#C2MFMKHDX|api-design>
+U0JFGGZS6 : <https://runelm.io/c/66v>
+U3SJEDR96 : You probably don't need a phantom type there, tbh. It doesn't really add anything at this point :slightly_smiling_face:
+U0JFGGZS6 : OK, this was one of my basic questions. With stats functions you often need a sorted list/array. And often you need it at several different points. So rather than sort multiple times, it makes sense to require that the calling context pass it in sorted.
+U0JFGGZS6 : The phantom type there was a way of enforcing that the passed in list is sorted
+U0LPMPL2U : I'm not sure I understand how that type enforces that the list is sorted? :slightly_smiling_face:
+U0JFGGZS6 : you would have to call `Quantiles.sort myData`  to pass your data in to `quantile`
+U23SA861Y : at present it doesn't but if this was in a module and the FVector constructor was not exported then it would have to be obtained by that modules sort call
+U0JFGGZS6 : right exactly
+U0LPMPL2U : Ah, so it's a way to tag data to say "this has already been through our sort function" ?
+U0JFGGZS6 : right
+U0LPMPL2U : nice!
+U0LPMPL2U : that's clever, I wouldn't have thought of that :thumbsup:
+U0LPMPL2U : What is the advantage of:```
+type Sorted= Sorted
+
+type FVector sorted = FVector (List Float)
+```
+
+versus something like:
+
+```
+type Sorted = Sorted (List Float)
+```
+
+U0LPMPL2U : does it give you flexibility to tag with multiple different sortings/non-sortings?
+U3SJEDR96 : Basically you can also write function that work on an `FVector`, regardless of if its sorted or not
+U0JFGGZS6 : well I guess I was thinking for other purposes (not here) you might want a sorted `(List String)` etc.
+U0JFGGZS6 : right that too.
+U0JFGGZS6 : the other question that seems to come up often with stats function is whether you are acting on a `List (Maybe Float)` or `List Float`.
+U0JFGGZS6 : i.e. dealing with missing values
+U23SA861Y : umm, doesn't nan exist for that reason
+U0JFGGZS6 : Well `R` distinguishes null and NaN I think... and anyway looking at their quantile function, they deal with missing values and NaN within the function rather than force you to strip them out first.
+U0JFGGZS6 : so there are a whole set of concerns that a stats library would have to work out...
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

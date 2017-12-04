@@ -1,0 +1,72 @@
+U0702F2CE : discussion about 2d syntax on Hacker News: <https://news.ycombinator.com/item?id=14657857> (cc <@U3NGSC6AF>)
+U3NGSC6AF : whee!
+U0702F2CE : it's actually pretty positive
+U086VDRBK : There has been some Racket talk on HN lately.   <https://hn.algolia.com/?query=racket&amp;sort=byDate&amp;prefix&amp;page=0&amp;dateRange=pastWeek&amp;type=all>
+U5KU1HNKY : are there macro forms of IO that don't take thunks? (iow, use `expr ...`) just feels klunky
+U5KU1HNKY : also, I'm trying to do <@U3NJS8H7C>'s suggestion of using `input-port-append` to prepend a `#lang` line … Will location info be for the concatenation or for each port being used? IE, will error info be off-by-one?
+U5KU1HNKY : Hrm… actually:
+```
+UNKNOWN::0: read: #lang not enabled in the current context
+```
+
+U5KU1HNKY : … that must be from C? I can't find it in the racket source
+U07SD9T7W : <@U5KU1HNKY>  `#lang not enabled in the current context` usually means you want `with-module-reading-parameterization`
+U5KU1HNKY : looking… I used `(read-accept-reader #t)` and feel like I'm going down a rabbit hole
+U5KU1HNKY : same rabbit hole:
+```
+dynamic-require: name is not provided
+name: 'read
+module: #&lt;resolved-module-path:(submod "/Users/ryan/Work/git/zenspider/schemers/br/basic/main.rkt" reader)&gt;
+```
+
+the only dynamic-require I use anywhere is for the colorer, which shouldn't be invoked at this point
+
+U5KU1HNKY : also, `syntax/modred` vs `syntax/module-reader`? :confused:
+U5KU1HNKY : ok. Stole some code from <https://github.com/AlexKnauth/postfix-dot-notation/blob/master/postfix-dot-notation/lang/reader.rkt> and have it reading in correctly. Don't understand why `read` is the wrong approach but `read-syntax` works just fine
+U5KU1HNKY : can somebody help me with this last bit? I clearly don't understand something in the glue of racket's `#lang` handling:
+<https://gist.github.com/6c4e50cdea9925f706ac1ff0019e3105>
+
+outputs:
+
+```
+code:
+(module basic-mod basic/expander
+  (b-program
+   (b-line ...lots of stuff...)))
+define:
+run:
+dynamic-require: unknown module
+  module name: #&lt;resolved-module-path:'basic-mod&gt;
+  context...:
+   /Users/ryan/Work/git/zenspider/schemers/br/basic/basic: [running body]
+```
+
+U3NJS8H7C : The module is declared in `ns`, but `ns` isn't the current namespace when `dynamic-require` looks for a module.
+U5KU1HNKY : but if  I declare the module in current-namespace then it blows up because `module` and `#%app` aren't defined
+U3NJS8H7C : I recommend using `dynamic-wind` with `ns`:```
+(parameterize ([current-namespace ns])
+    (dynamic-require ''basic-mod #f))
+```
+
+U5KU1HNKY : and not using `make-resolved-module-path` ?
+U5KU1HNKY : that was it…
+U5KU1HNKY : how could I have figured that out??
+U0702F2CE : <@U5KU1HNKY> what led you to use `make-resolved-module-path` originally? was that described in Beautiful Racket?
+U3NJS8H7C : Using `woot` in place of `''basic-mod` (uncommenting out the two earlier lines that set it up) is a fine idea. Usually the goal is to use a path instead of a symbol, though.
+U3NJS8H7C : <@U0702F2CE> I think I earlier recommended using `current-module-declare-name`, which needs a resolved module path
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,0 +1,80 @@
+U0LSCQQNR : your second example would work with json, with some property name changes
+U5ZPMJA06 : <@U1S0UD5DH> I'd call it a list of attributes and their values.
+U6BM4GY0G : Does anyone here have any experience using prompt_toolkit library? <https://github.com/jonathanslenders/python-prompt-toolkit>
+U5ZPMJA06 : <@U6BM4GY0G> Looks interesting. Why are you looking for someone with experience with this module?
+U6BM4GY0G : I would love to see what others have built using that library just for inspiration <@U5ZPMJA06>. Found it while exploring "Haxor-News" source code on github but that source code is a bit too complicated for me to understand since I dont have several years of experience in Python.
+U6BM4GY0G : I am currently building myself a cli password manager just to learn more python and I would love to utilize prompt_toolkit for this project.
+U5CGPBF0U : I'm not sure why I'm getting this error. Do I need to manually import geoalchemy2 in the auto-generated migration script?
+U1UFZTD4J : <@U5CGPBF0U> yes
+U5CGPBF0U : <@U1UFZTD4J> Thanks! Did the trick :smile:
+U5CGPBF0U : I still can't get PostGIS's `ST_DWithin` to work. I followed this tutorial <https://www.compose.com/articles/geofile-everything-in-the-radius-with-postgis/> step by step and my query still returns no results. I don't see any difference between what I'm doing and what's going on in the tutorial...
+U5VGKQ2SY : Hey guys. Just posted this: <https://github.com/khdc-me/citi-bikes/tree/master/01-num_bikes_to_purchase> and was wondering if you guys had any suggestions on how to speed up this part of it```
+def get_num_mf(fn, kt):
+    """ Get gender of riders who are between the ages of 50 (inclusive) and 90 (exclusive),
+            and whose 'tripduration' is longer than 60 seconds.
+            -  Don't trust that data provider has eliminated all &lt;1min rides.
+            
+        return string
+    """
+    now = datetime.datetime.now()
+    with open(DATA_FOLDER + fn) as csvfile:
+        reader = csv.DictReader(csvfile)
+        if kt:
+            csv_keys = ['Trip Duration', 'Birth Year', 'Gender']
+        else:
+            csv_keys = ['tripduration', 'birth year', 'gender']
+        num_m = 0
+        num_f = 0
+        for row in reader:
+            if (row[csv_keys[0]] and row[csv_keys[0]].isnumeric() and int(row[csv_keys[0]]) &gt; 60
+                and row[csv_keys[1]] and row[csv_keys[1]].isnumeric()
+                and now.year - float(row[csv_keys[1]]) &gt;= 50 and now.year - float(row[csv_keys[1]]) &lt; 90
+                and row[csv_keys[2]] and row[csv_keys[2]].isnumeric()
+                and (int(row[csv_keys[2]]) == 1 or int(row[csv_keys[2]]) == 2)):
+                # from citi bike web site: Gender (Zero=unknown; 1=male; 2=female)
+                if int(row[csv_keys[2]]) == 1:
+                    num_m += 1
+                else:
+                    num_f += 1
+return num_m, num_f
+```
+
+U5VGKQ2SY : csv file that it looks through has between 500K and 600K records. There are 12 files, roughly same size that it gets fed one at a time. Takes anywhere from 5 to 7 seconds per file.
+U13L8J76J : <@U5VGKQ2SY> try this one:```
+for row in reader:
+    try:
+        duration, birth_year, gender = [int(row[key]) for key in csv_keys]
+    except ValueError:
+        continue
+    if duration &gt; 60 and 50 &lt;= now.year - birth_year &lt; 90:
+        if gender == 1:
+            num_m += 1
+        elif gender == 2:
+            num_f += 1
+```
+
+U5VGKQ2SY : So simple.. so elegant.
+U5VGKQ2SY : Gonna give it a shot.
+U5VGKQ2SY : <@U13L8J76J> :taco:
+U5VGKQ2SY : Looks really nice and condensed... Runs at about the same speed though. But am definitely subbing this into my repo. :smile:
+U13L8J76J : <@U5VGKQ2SY> then it's time to <https://docs.python.org/3/library/profile.html> your code
+U4PRU7MPD : Good morning.  I am working with Socket for the first time. I have hit on an error and it is so generic google is not very useful this morning.  I was hoping to get some direction I get error 54 connection reset.   I am going to supply the full script as a snip right after this message.  This is a super basic thing to download some RFC as a test of learning Sockets a bit.
+U5LNXQHN3 : "socket" is lower-case, by the way... it's not a package, it's just a low-level networking concept. Error 54 / "connection reset" is just an obscure way of the operating system telling you that the connection was closed.
+U5LNXQHN3 : It is usually helpful to know which line the error came from (it'll be in the traceback). It also looks like your HTTP request is missing a blank line after the header, but maybe I've misremembered that part
+U5NMSURAQ : True
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

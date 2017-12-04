@@ -1,12 +1,58 @@
+U41NK9BM4 : But really, there's no need to upgrade to 0.19 the day after it will be released. Or there is?
+U3SJEDR96 : oh, wait, you changed things :smile:
+U3SQ42JJW : yes, sorry. It was jus aquick example. I updated this
+U3SQ42JJW : (too quick ;-))
+U62KVQVD1 : Of course there is not
+U41NK9BM4 : If model changes, you get a different results. If model doesn't change you get the same results. :slightly_smiling_face:
+U41NK9BM4 : So it's pure :slightly_smiling_face:
+U3SJEDR96 : Calling a pure function is pure. If you only _ever_ need to get the usernames of all users in your model, use the funciton you wrote. If you suddenly need the names of an arbitrary list of users, write `usernames : List User -&gt; List String`
+U5J08KX0D : Thanks <@U3SJEDR96> 
+U3SJEDR96 : Write the functions and abstractions you _need_ - refactoring is so easy in Elm anyway. Abstracting before you need it could quickly become counter-productive, and make it more difficult to change things when they no longer fit your previous model
+U3SQ42JJW : I would think it is only real pure if I declare it like this:```
+getAllUserNames: (Model -&gt; List User) -&gt; List String
+getAllUserNames getUsers = 
+    List.map (...) (getUsers model)
 ```
-or something of that ilk
-<@U26LR8F4H> do you want to re-render before scrolling to the top?
-that would be a nice touch :slightly_smiling_face:
-mm, also a good question. It might make sense to bounce through an update
-and just have a `Pageupdate` message
-which then issues a scroll
-thanks, i think  i have some fiddling todo.
-<@U26LR8F4H> if you want to re-render then you need to go through `update` which you can't do by chaining Tasks
-So the first task issues an http request then the andThen will run before the update function is called?
-yes, when you chain with `andThen` the tasks are carried out in sequence behind the scene
-only dispatching a message when the chain is complete and returning early if any issues an error
+I then call it like this:
+```
+getAllUserNames getUsers
+```
+
+U3SQ42JJW : <@U3SJEDR96> Well, probably. Yes. If it works it works… Maybe I overcomplicate things or take this purity thing too serious :confused:
+U41NK9BM4 : I would say it is more flexible, since you can swap `getUsers` implementations
+U3SJEDR96 : This seems contrived. If you feel like `Model -&gt; List String` doesn't really make sense, go with `List User -&gt; List String` and pass in the users. You could then go on and say "I should pass in a `User -&gt; String` function", and then...
+U2D7NUGS1 : Hello! I have a type with single constructor like this: ```type Locality
+    = Locality String
+``` Now I want to pass it to the function that will output `Html.text` with the `String` value. I know I can extract the `String` using pattern matching like this: ```
+listItem : Locality -&gt; Html Msg
+listItem locality =
+    case locality of
+        Locality name -&gt;
+            item [ style [ ( "cursor", "pointer" ) ] ] [ text name ]
+``` but it seems pretty silly given there only one constructor. Is there another way? Or is my approach wrong?
+
+U153UK3FA : <@U3SQ42JJW> you can only write pure functions in Elm, if it compiles then it's a pure function
+U41NK9BM4 : Well… `type alias Locality = String` <@U2D7NUGS1>  It is not the same thing, though
+U3SJEDR96 : <@U2D7NUGS1> `listItem (Locality foo) = ...`
+U41NK9BM4 : Dang, pattern matching to the rescue :slightly_smiling_face:
+U3SQ42JJW : <@U153UK3FA> Thanks… Maybe I have to study this whole purity thing a bit more. Feel like I still did not get it.  :slightly_smiling_face:
+U2D7NUGS1 : Awesome. Thank you.
+U41NK9BM4 : <@U3SQ42JJW> "A pure function is a function where the return value is only determined by its input values, without observable side effects"
+U41NK9BM4 : It's all there, really
+U41NK9BM4 : Even we you do an HTTP request inside a function you are writing a pure function. Go figure! :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

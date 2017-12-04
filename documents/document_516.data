@@ -1,17 +1,56 @@
+U39DE7RQ9 : A more specific question. Im trying to reach a plain html page I created in the root of my app next to index.html and index.js called auth.html but I get a 404 when opening localhost:3000/auth.html. Why is that and how can go around it?
+U6AU4N1HR : Can I use Http.send and send a command message containng additional data aside from result of the actual send?In the example here: <http://lpaste.net/357143>, I need to send the user record in UserBooksFetched msg, but however i try, the compailer complaints
+
+U6AU4N1HR : I hope it at least makes sense
+U4872964V : Well, Elm does not really work that way. I know <@U0L8LGP9U> is working on a library to do this, and I put together this ugly beast over my html5 dragdrop library, but we are still figuring these things out unfortunately
+U4872964V : Check out <https://ellie-app.com/KvQXcHVwGfa1/2> for my attempt
+U39DE7RQ9 : Webpack help anyone? I have copy and pasted the code in webpack.config.js from the Elm tutorial (<https://www.elm-tutorial.org/en/04-starting/03-webpack-1.html>) and now I need it to output some additional .html files. How do I do that? The files are placed in the src folder of my app
+U236M9FH9 : <@U39DE7RQ9> Pretty sure you just run `webpack` instead of webpack-dev-server &amp; it should be available in your `output.path`
+U39DE7RQ9 : When i develop my app I run yarn start. So how do I just run webpack <@U236M9FH9> ?
+U236M9FH9 : node_modules/.bin/webpack
+U39DE7RQ9 : OK will try
+U236M9FH9 : Usually I add add something like this to package.json:```
+"scripts": { "build": "webpack" } 
 ```
-oh wait
-that elm-package should not be there
-there’s your problem
-elm-reactor uses the elm-package.json closest to the source file you use
-delete that and you should be good to go :slightly_smiling_face:
-WOOO
-it worked
-i probably ran it inside src at one point and it generated that
-Yeah, easy mistake to make
-how do you humans break up your Msg when you start getting a lot of them? I have almost 15 now and I feel like it's going to grow out of proportion
-<@U40QW928G> Mine are broken into modules.  However, I wouldn't say 20-30 is necessarily... something that needs to be broken up, unless you feel like you want to break them up (if there's a clear distinction by which you can separate them and it would make maintenance easier)
-Might be that you just need to break up your update function?  (i.e. into several separate functions, possibly even modules)
-yeah I have actions I'd much rather limit to players
-that sounds like a potential solution, how do you break up your update function?
-Well, step 1 would be to separate the logic into smaller functions (if it's all inline in the update function currently)
-I like to extract everything in my `update` to other functions so that `update` is just dispatching
+then just run `npm run build` or `yarn run build`
+
+U39DE7RQ9 : Mine looks like this:```
+"scripts": {
+    "build": "webpack",
+    "client": "webpack-dev-server --port 3000",
+    "start": "nf start"
+  }
+```
+
+U39DE7RQ9 : When I run webpack it outputs the same as when I run the dev-server. I need it to include som extra files from the src folder. How do I do that?
+U39DE7RQ9 : Shouldn't this copy all of my .html files to the output folder?```
+{
+        test:    /\.html$/,
+        exclude: /node_modules/,
+        loader:  'file-loader?name=[name].[ext]',
+      }
+```
+
+U236M9FH9 : I think only those that're imported by your `index.js`.
+U236M9FH9 : You could use the copy webpack plugin: <https://github.com/kevlened/copy-webpack-plugin>
+U39DE7RQ9 : OK, thanks!
+U6AU4N1HR : Hey, I'm doing Json.Decode.map5 over a JSON and creating record User. I want to add another field to that record, which is a list. The problem is, this list is not a part of JSON. I want to intiliaze record User with a empty list. Is it possible to somehow use empty list with Json.Decode.map6?
+U48AEBJQ3 : <@U6AU4N1HR> The record constructor is just a regular function. You could instead go `\a b c d e -&gt; MyRecord a b c [] d e` You could also use `Json.Decode.succeed []` with the `map6`
+U14Q8S4EM : You can do `succeed list`
+U14Q8S4EM : `Json.Decode.succeed whateverListYouWanted`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

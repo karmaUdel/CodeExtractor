@@ -1,0 +1,90 @@
+U3SJEDR96 : for reference - <https://github.com/elm-lang/elm-compiler/issues/1521>
+U3SJEDR96 : (note that a fix was commited for 0.19)
+U6D1E91QV : i'm well away from 1521 :smiley:
+U3SJEDR96 : Sure, but every call that can create a stack-frame can make this problem rear its ugly head, unfortunately.
+U3SJEDR96 : so, what you can do is open up the compiled code in an editor and look for `ctor: '::',`. If you find a place where it looks like it's going "deep", that's one to investigate. Splitting it up into multiple smaller lists and concatenating those using `++` is the suggested workaround for now...
+U3SJEDR96 : if you're able to load that page with the chrome dev-tools on, it should pause before exploding, and this might also give you some information on where to look
+U6D1E91QV : <@U3SJEDR96> i'll give it a shot, thanks
+U3SJEDR96 : ping me if you run into anything, I'd love to help out :slightly_smiling_face:
+U5QJW0DDE : <@U6D1E91QV> updated us later if you figure out what the problem is, i'd like to know
+U2LAL86AY : that sounds awesome!.:smile: I'm curious about memory consumption :simple_smile:
+U2LAL86AY : it is possible at list in principle to have a dict with 2 keys and one value? Right now i store the second key, inside the value like so:
+`Dict.fromList [ ( 1 , Tag { secondKey = 2 , otherData = .. } ) ] `
+and i wondered how something like this can work.
+`Dict.fromList [ (1, 2,  Tag { otherData = .. } ) ]` 
+this prevents me form doing value unwrapping like 
+```
+case value of 
+    Tag { secondKey } -&gt; do stuff with second key.
+```
+
+U4872964V : <@U2LAL86AY>, not sure what you want exactly, but you can use `(1,2)` as the key
+U2LAL86AY : hmm , i can use it, but i was hoping to get something like `Dict.get2  2` -&gt; and get the value.I don't know the first part of the tuple. I need something like: `Dict.get (_, 2)`
+
+U4872964V : Not sure what you’re after, sorry, do you want to get the value _either_ by key 1 or 2?
+U3SJEDR96 : it would pretty much have to work as 2 separate dicts under the hood, if you want to be able to select on either key
+U2LAL86AY : yes, `key1` and `key2` are both indexes for a single value: it's like having`Dict1 key1 sameValue`
+`Dict2 key2 sameValue`
+but instead of duplicating the value. you use a special dict that can index by both keys. -&gt; i mean for what i need i can use that unwrapping - and calculate the ke2 based on key1 but that would be some more work.
+Yes <@U3SJEDR96> maybe. but this idea of indexing the same value on multiple keys is used a lot in elastic search and stuff. So i don't think is not implemented somewhere. Just wondering how this can work in elm.
+
+U4872964V : just use two dicts
+U4872964V : or if the keys are the same kind/type, just add the value under both keys in the dictionary
+U2LAL86AY : you mean i should use `Dict.fromList [ (1, 2) =&gt; {val..} ]` -&gt; i guess this is still an improvement over what i have.
+U4872964V : I mean you should just put the value in multiple times, it will not do any copying
+U3SJEDR96 : otoh, updates become a bit more annoying
+U4872964V : well, depends on your use case, for sure
+U2LAL86AY : `it will not do any copying` &gt; i don't fully underestand how this is true. Duplication is bad.
+U4872964V : Elm does not copy values, it just stores references, since values are immutable
+U2LAL86AY : hmm this is a mind bending trick :smile:
+U4872964V : if you are going to update the values, that’s another use case, which you will need to think about I suppose
+U2LAL86AY : yes i will update, and a lot. i need some time to think how this can actually work. :thinking_face:
+U2LAL86AY : thanks for now :simple_smile:
+U4872964V : so you’d want to update the value for all keys at once
+U0D4VR7BP : So, there was a bit of flamewar on Twitter today, from which came the following thought:
+*If adding a syntax was not a problem, is there any other issue with auto-generating "trivial" JSON decoders for types?*
+
+(ie. if I want to decode `{"foo": 1}` into `{foo: String}`, I obviously need to say how that conversion happens. This is not "trivial". Trivial would be `{"foo": 1}` into `{foo: Int}`)
+
+This already happens with ports to some degree - a decoder gets created: <https://github.com/elm-lang/elm-compiler/blob/master/src/Generate/JavaScript/Expression.hs#L205>
+
+So, again: if adding a new syntax was not a problem (and Evan wanted to add this), is there any other, conceptual or otherwise, hurdle to having this?
+```
+type alias User =
+    { name : String
+    , comments : List String
+    , products : List Int
+    }
+
+derived userDecoder : Decoder User
+
+-- similar syntax to port myPort : ...
+```
+
+U4872964V : <@U0D4VR7BP> I see it going in the other direction, actually, remove the automatic decoding of ports
+deriving decoders is definitely possible, the issue is to have the _best_ solution, not just _a_ solution
+
+U3SJEDR96 : Potentially, this might keep people from using the proper types for things, instead choosing to rely only on primitives, records and lists because they map so nicely with json. Also, having a `Maybe` becomes tricky - should it be equivalent of `oneOf [ map Just decoder,  null Nothing ]` or `oneOf [ map Just dec, succeed Nothing ]`? Currently, it is the latter in decoders, and equivalent to the former in ports, I think
+U0D4VR7BP : yeah, I suspect that instead of creating `Decoder MyFancyTypeWithADTsAndStuff` one would have the `derived` line and then a function `ApiResponseWithOnlyPrimitives -&gt; MyFancyTypeWithADTsAndStuff`.
+U0D4VR7BP : which doesn't sound _that_ bad, but it's on the user to do that and not use `ApiResponseWithOnlyPrimitives` in his Model etc.
+U0D4VR7BP : I got lost in the `Maybe` part of your post (behaviour of `null`), will chew on that a bit
+U4872964V : So, the main hurdle is that you’d very soon run into situations where you’d want to tweak the decoders a bit
+U3SJEDR96 : <@U0D4VR7BP> difference being that `type alias Foo = Maybe Int` with input "`foo`" could either end up an `Err "wrong type"` or an `Ok Nothing`. Perhaps it's not strictly related to this discussion, but it serves as a reminder that even the current ports decoders work subtly different from how you'd (naively) write a manual decoder
+U4872964V : I’m more leaning towards somethine _like_ <https://github.com/norpan/elm-dynamic-types/blob/master/Dynamic/Json/Decoder.elm> where you could traverse the type definition and decode accordingly, using an Elm function to do it
+U3SQ42JJW : Is ist right that Dict’s are always sorted alpabetical? So I have no chance to preserve the order of a list when transforming it to a dict and then back to a list… or?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

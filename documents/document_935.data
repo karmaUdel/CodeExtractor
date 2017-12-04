@@ -1,0 +1,126 @@
+U5KU1HNKY : Hrm… actually:
+```
+UNKNOWN::0: read: #lang not enabled in the current context
+```
+
+U5KU1HNKY : … that must be from C? I can't find it in the racket source
+U07SD9T7W : <@U5KU1HNKY>  `#lang not enabled in the current context` usually means you want `with-module-reading-parameterization`
+U5KU1HNKY : looking… I used `(read-accept-reader #t)` and feel like I'm going down a rabbit hole
+U5KU1HNKY : same rabbit hole:
+```
+dynamic-require: name is not provided
+name: 'read
+module: #&lt;resolved-module-path:(submod "/Users/ryan/Work/git/zenspider/schemers/br/basic/main.rkt" reader)&gt;
+```
+
+the only dynamic-require I use anywhere is for the colorer, which shouldn't be invoked at this point
+
+U5KU1HNKY : also, `syntax/modred` vs `syntax/module-reader`? :confused:
+U5KU1HNKY : ok. Stole some code from <https://github.com/AlexKnauth/postfix-dot-notation/blob/master/postfix-dot-notation/lang/reader.rkt> and have it reading in correctly. Don't understand why `read` is the wrong approach but `read-syntax` works just fine
+U5KU1HNKY : can somebody help me with this last bit? I clearly don't understand something in the glue of racket's `#lang` handling:
+<https://gist.github.com/6c4e50cdea9925f706ac1ff0019e3105>
+
+outputs:
+
+```
+code:
+(module basic-mod basic/expander
+  (b-program
+   (b-line ...lots of stuff...)))
+define:
+run:
+dynamic-require: unknown module
+  module name: #&lt;resolved-module-path:'basic-mod&gt;
+  context...:
+   /Users/ryan/Work/git/zenspider/schemers/br/basic/basic: [running body]
+```
+
+U3NJS8H7C : The module is declared in `ns`, but `ns` isn't the current namespace when `dynamic-require` looks for a module.
+U5KU1HNKY : but if  I declare the module in current-namespace then it blows up because `module` and `#%app` aren't defined
+U3NJS8H7C : I recommend using `dynamic-wind` with `ns`:```
+(parameterize ([current-namespace ns])
+    (dynamic-require ''basic-mod #f))
+```
+
+U5KU1HNKY : and not using `make-resolved-module-path` ?
+U5KU1HNKY : that was it…
+U5KU1HNKY : how could I have figured that out??
+U0702F2CE : <@U5KU1HNKY> what led you to use `make-resolved-module-path` originally? was that described in Beautiful Racket?
+U3NJS8H7C : Using `woot` in place of `''basic-mod` (uncommenting out the two earlier lines that set it up) is a fine idea. Usually the goal is to use a path instead of a symbol, though.
+U3NJS8H7C : <@U0702F2CE> I think I earlier recommended using `current-module-declare-name`, which needs a resolved module path
+U5KU1HNKY : wow! `Process Racket REPL abort trap: 6` go me!
+U5KU1HNKY : should my reader be doing a gensym for the module name? If I add multiple basic files on the cmdline the second one blows up because it's the same name
+U5KU1HNKY : <@U3NJS8H7C> thank you… that was 2 hours in the making and I wouldn't have come up with that diagnosis or that 2 line block of code
+U5KU1HNKY : is there a way to tell that I'm running in the repl vs not?
+U5KU1HNKY : right now I'm testing `(current-command-line-arguments)` being empty, but that isn't right
+U07SJGB4H : The REPL wraps forms in `#%top-interaction`, so you could customize that form to set a parameter that you inspect
+U5KU1HNKY : <@U07SJGB4H> … idgi… how would it know that it is in the repl? by being used? that implies I won't know until it's eval'd something and displayed it?
+U07SJGB4H : Racket wraps all REPL expressions in `#%top-interaction` for you. So you define your lang's `#%top-interaction` to be a macro that sets a parameter like `(current-eval-is-repl?)` to true, then you can dynamically do something different in the repl.
+U07SJGB4H : The `#lang racket` language doesn't do this so it would only work in a custom language where you redefined `#%top-interaction`
+U5KU1HNKY : ok. `make-resolved-module-path` with `gensym` seems to be a happy combo
+U5KU1HNKY : here's my latest version: <https://gist.github.com/zenspider/6c4e50cdea9925f706ac1ff0019e3105>
+U5KU1HNKY : I'm now trying to take it one step further and get it so I can shebang the basic files and run them directly
+U0702F2CE : <@U07SJGB4H> can I suggest that you do development on your fork, rather than in `racket/rackunit`?
+U0702F2CE : I ask mostly because commits to `racket/rackunit` send a bunch of people mail
+U07SJGB4H : <@U0702F2CE> is it possible to change the mail settings? working on the fork is slightly irritating
+U0702F2CE : Sadly there's no option to only send mail for `master`
+U07SJGB4H : is it github mail or travis mail?
+U0702F2CE : it's github mail
+U5KU1HNKY : <@U07SJGB4H> I think if you worked in a branch it wouldn't send email
+U0702F2CE : <@U5KU1HNKY> that's not correct, sadly -- <@U07SJGB4H> is working on a branch
+U07SJGB4H : I am working in branches - checking <https://help.github.com/articles/about-notification-emails/> for more details
+U5KU1HNKY : at least… that's how we work on some of our projects and we don't get inundated by my crazy commit storms
+U0702F2CE : <@U07SJGB4H> it's a hook, that sends mail to a mailing list
+U0702F2CE : it's not notification email
+U07SJGB4H : ohhh, so it's not coming directly from github?
+U07SJGB4H : wait what list
+U0702F2CE : github has an "email" service, and that's set up to email `<mailto:committers@racket-lang.org|committers@racket-lang.org>` which is basically all the people who got email before we moved the canonical repo to github
+U5KU1HNKY : ah. gotcha
+U07SJGB4H : this thing? <https://help.github.com/articles/managing-notifications-for-pushes-to-a-repository/#enabling-email-service-notifications-for-pushes-to-your-repository>
+U0702F2CE : perhaps we should just get rid of it, but for the moment it's easier to just keep it
+U0702F2CE : <@U07SJGB4H> yes
+U5KU1HNKY : final version… <https://gist.github.com/zenspider/6c4e50cdea9925f706ac1ff0019e3105> … is something like `run-with-lang` of general use?
+U07SJGB4H : <@U0702F2CE> I'll work on the fork, sorry about the noise
+U0702F2CE : <@U07SJGB4H> thanks
+U07SJGB4H : shame it can't distinguish master from non-master though
+U0702F2CE : This is in reality not a great system since it's really reliant on the not-true idea that there's a general "committers" set for all of Racket
+U07SJGB4H : was it created pre-package-split?
+U0702F2CE : no it was created to emulate the old behavior when we split the old repository
+U0702F2CE : because the old repo of course had a single set of committers
+U07SJGB4H : gotcha
+U07SJGB4H : <@U0702F2CE> the incomplete PRs I've got open already would be difficult to move, is it alright if I just do new dev on the fork?
+U0702F2CE : yes that's certainly fine
+U5KU1HNKY : is it possible to profile / report where startup time is being spent? cost of requires and #langs I guess?
+U3NJS8H7C : <@U5KU1HNKY> You could try `racket -l mzlib/traceld -t &lt;your-module&gt;`
+U5KU1HNKY : <@U3NJS8H7C> are those milliseconds?
+U3NJS8H7C : Yes, CPU milliseconds since startup
+U5KU1HNKY : huh… it hits my lexer and loads rackunit, even tho the require is in a submodule that isn't being activated
+U5KU1HNKY : ```  loading /Users/ryan/Work/git/zenspider/schemers/br/basic/lexer.rkt at 1063
+   loading /MyApplications/dev/lisp/Racket/share/pkgs/rackunit-lib/rackunit/compiled/main_rkt.zo at 1243
+```
+
+U07SCV14J : it looks like it isn't loading `lexer.rkt` from a `.zo`, so it would need to load rackunit to compile `lexer.rkt`
+U07SCV14J : try precompiling the lexer?
+U5KU1HNKY : ah
+U5KU1HNKY : compiling the lexer and expander count for .6-.7s… but it's still a lot more than it feels like it should be
+U5KU1HNKY : nice to see just how much is loading… I'll write a post-processor for that tracer output to report the expensive bits nicely
+U5KU1HNKY : hey. I made a thing to make profiling load times easier to figure out: <https://gist.github.com/d31e7d54e8350370b141393f4afc24d6>
+U5KU1HNKY : I'll port to racket later
+U60J15S1Y : is there anyway to catch a `(values x y ...)` as a whole when passing it to a function?
+U5KU1HNKY : <@U60J15S1Y> ? can you explain?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,127 +1,66 @@
+U3BTVEFQU : it wasn't me!! :wink:
+U2JA29EKF : Sorry, won't be able to look tonight.
+U3SJEDR96 : ```sendDelayedRequest : (WebData String -&gt; msg) -&gt; Cmd msg
+sendDelayedRequest tagger =
+    Process.sleep (200 * Time.millisecond)
+        |&gt; Task.andThen (\_ -&gt; Http.toTask request)
+        |&gt; RemoteData.fromTask
+        |&gt; Task.perform tagger
+````
+
+U48AEBJQ3 : ream88: <https://www.youtube.com/watch?v=NbosplYmAT0>
+U23SA861Y : umm, request isn't defined....
+U3BTVEFQU : <@U3SJEDR96> ok this does work. However I still don't get it.. do you know any good introduction into cmds vs tasks?
+U0F7JPK36 : jonf: something weird happened with aws. looks okay now
+U3SJEDR96 : In <@U3BTVEFQU>'s code, it is :wink:
+U3BTVEFQU : Btw <@U3SJEDR96> thx!!! :slightly_smiling_face:
+U3SJEDR96 : Though this probably makes more sense:
+U3SJEDR96 : ```sendDelayedRequest : Time.Time -&gt; Http.Request a -&gt; (WebData a -&gt; msg) -&gt; Cmd msg
+sendDelayedRequest delay request tagger =
+    Process.sleep delay
+        |&gt; Task.andThen (\_ -&gt; Http.toTask request)
+        |&gt; RemoteData.fromTask
+        |&gt; Task.perform tagger
 ```
-and if you have something like `String -&gt; String -&gt; String -&gt; String` where the strings are related, maybe it's time to put them into a type aliased record anyway
-is there an easy way to convert a .svg into some virtual svg dom?
-great tutorial though!
-sry?
-<https://mbylstra.github.io/html-to-elm/> might support that
-you can also embed the file with an object tag
-well, I need the nodes for events and stuff.
-ah, looks good! <@U3SJEDR96>
-<@U3HQVHERX> <@U2GPAEU1L> let's take it out of the thread :slightly_smiling_face: I realize this is just a case of differing opinions, and you're free to use type aliases all you want; however in the context of a tutorial aimed at beginners, I'd be careful in expressing that opinion without labelling it as such. As for documentation and it going stale, so can a type alias, say `name : FirstName -&gt; LastName -&gt; String` and I refactor the implementation to be `name lastName firstName = ...`. Since they're type aliases, I'm just making your life more difficult, compared to if it had been `String -&gt; String -&gt; String` and you had to look at the argument names to figure out what they refer to.
-My opinion: type aliases for primitives are unnecessary _at best_
-There's also the matter of `String` being available everywhere whereas if you alias it you need to import it wherever it's being used, right?
-No, there's no need to have that alias in scope to call a function which uses it :slightly_smiling_face:
-no, you can pass a regular string to something that takes and alias
-I mean in the type annotation
-That's kind of the point - it doesn't give extra safety, requires extra knowledge, and overall means more things to keep in mind, rather than less
-ah, right.
-`takeString : MeaningfulString -&gt; String` if `MeaningfulString` is aliases in some other module you have to import it... seems like if one is going to the extra trouble of aliasing primitives these might be in a module of there own and used when applicable though?
-to be clear, though, I *really* appreciate the time and effort you're putting into these tutorials, <@U2GPAEU1L>, and I think it's absolutely fantastic to have this type of material
-I just want them to be the best they can be :slightly_smiling_face:
-ditto
-you lose all the distinctiveness when you invoke the function: `takeString "aString" "aString"`
-I think showing that strings and other primitives can be aliased is important to explaining exactly _what_ a type alias is
-i'm wondering why `type alias FavNum = Int` is allowed by the compiler? seems like there should be some kind of purpose judging from how nice and small Elm syntax is
-yeah, it's easier to say `type alias Age = Int` than to start talking about records at the same time
-If the compiler didn't allow aliasing any type, you'd have to special case aliases to only work on certain types and I think that's more complicated and confusing
-agreed. It's important to know it's possible, and to realize it's done in the core libraries, too (`type alias Time = Float` and `type alias Json.Decode.Value = Json.Encode.Value` come to mind)
-oh, and `Task` for whatever reason
-this actually confused me when i was starting out.
-`Task`?
-`Task.Task` is a type alias for `Platform.Task`, iirc
-at present it helps with docs a bit
-because you can document the alias, otherwise there is no reference in the docs to what type that is
-I think the real problem <@U3SJEDR96> was surfacing is the overuse of primitives. At first glance it _looks_ like type aliases fix that ("I'm using a `Time`, not a `Float` here") but they just give us shiny new names for the same old primitives.
-The docs can't really have argument names, though; unless people want to give up the ability to do any pointfree programming at all :stuck_out_tongue:
-Though really, docs should have examples, and examples should be verified by `elm-verify-examples`
-we just hit this question in general, someone was wondering where `Color` came from
-it wan't a type alias it just used the core Color and so there was no indication how to construct it
-even if you had an example it would be like `Color.color 255 0 0 |&gt; otherfunc`
-Isn't the main issue there that the docs don't do cross-package links?
-yes, this is probably the root of the issue
-<@U3HQVHERX> Thanks :slightly_smiling_face: Always nice to hear that
-Thanks <@U3SJEDR96>, I had to go for lunch, that's why I disappeared. This cheered me up though, I appreciate it :slightly_smiling_face:
-I definitely still wanna include that you can do that, as mentioned further in the thread, it's done in core libraries, what if I just removed the one sentence saying "it's quite common" on this frame: <http://codetidbit.com/#view/snipbit/596fa4497890d775c05191f9/frame/7>
-<@U3SJEDR96> ^
-That would definitely help :slightly_smiling_face:
-As always, thanks for the feedback :slightly_smiling_face:
-Also, atm, I cache the last snipbit you opened, so you'll have to open another snipbit and then go back to this snipbit to get the updated snipbit.
-hello, i'm a complete beginner so this may be stupid but i can't figure out how to use JSON dict decoder to create my type aliased record fetched as JSON via REST API
-here's the code: <http://lpaste.net/8489866380898729984>
-i can't figure out how to write decodeUser
-this is a common issue, you aren't alone. Moving into a strongly typed world can be fairly abrupt
-what does the actual json look like
-<@U6AU4N1HR> welcome to Elm :slightly_smiling_face:
-Your type alias is a _record_, not a dict
-exactly as the alias
-<@U0LPMPL2U> oh ok
-records have preset keys that are known at compile time
-when type aliasing records, Elm automatically creates a constructor function for you
-in your case: `User : Int -&gt; String -&gt; String -&gt; User`
-`JD.map3 User (JD.field "id" <http://JD.int|JD.int>) (JD.field "name" JD.string) (JD.field "gender" JD.string)`
-with `import Json.Decode as JD`
-Ok
-I don't know why I tought record == dict
-Thank you guys
-  - Understanding decoding/encoding (I break it down into 5 small tutorials): <http://codetidbit.com/#view/story/58f7ac012bdce7111285c2ea>
-#shamelessplug
-:stuck_out_tongue:
-haha
-well I make them _exactly_ for people asking :slightly_smiling_face:
-To try to avoid the number of times we answer the *same* question on Slack
-<@U6AU4N1HR> also worth checking out: <https://guide.elm-lang.org/interop/json.html> what helped me was playing around int he repl decoding things
-<@U2GPAEU1L> i'll check it out
-and docs, of course: <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#map3>
-resource overload. happy coding :wink:
-it makes me feel like I'm accomplishing something
-Thanks everyone for prompt help
-:smile: Happily, enjoy
-yeah, i get endorphin hit every time i feel like i'm contributing to the discussion
-hahaha
-your stopping me from getting my fix man, geez
-lol
-hahahaha, I'm sorry!
-It is well done.  Well written.
-3. Combine the values decoded in step 2 into a single decoded User using `JD.map3`
-4. Write a `List User` decoder by building on the `User` decoder. hint: `JD.list`
-:slightly_smiling_face:
-<@U3HQVHERX> yeah i'm gonna need that :slightly_smiling_face:
-Thanks <@U5WS7CJLV>, appreciate the compliment :smile:
-This morning I was Result.map2-ing for the first time and I suddenly saw how consistent the Elm API was
-maybe the experience wasn't entirely rational
-but I'd been marching through decoding code
-following the pattern, but not really feeling it was intuitive
-but then I started mapping Results, and Decode felt like it made sense
-I had a similar breakthrough when learning to work with `Random`
-JSON decoding made complete sense afterwards
-can't decide if its a good or a bad thing that you get confronted with decoding so soon after you start Elming
-because you feel like "This JSON stuff is easy"
-and then decoding isn't trivial
-but I know there's a ton-o-value in mapping multiple Results or Maybes
-and I know that's not entirely intuitive when you start
-so I would be more patient about that
-I guess I just need to be more patient. Period.
-based on the experience, I wrote an article showing how to build up the same structures in the context of 4 different structures: `Maybe`, `List`, `Random.Generator`, and `Json.Decoder`: <https://robots.thoughtbot.com/elms-universal-pattern>
-Once you have that breakthrough, working on just about anything in Elm is so much easier. Combining Tasks, building Fuzzers, even working with custom types
-but you can't really teach the concept of `map` or `map2` in the abstract or in a top-down manner
-Most Haskell material tries that and it just ends up confusing people (myself especially)
-It's better learn to use `map2` with `Maybe`, learn to use `map2` with `Result`, and so on
-eventually you connect the dots and see the bigger pattern
-and the world makes so much sense!
-`map` is pretty intuitive for things like `List` and such, less so for the more abstract data containers. What really gets you looking at your monitor sideways is the signature of things like `andMap`
-I have a dict and thought I could just map over it and the result is a List of html. But as Dict.map returns a Dict, it seems like iterating over Dicts in order to generate html is not possible… is this right? Do I have to convert data from my Dict to a List first in order to display it?
-so if you map over a dict you will get another dict
-you need to put it in some other html container, all of which accept lists
-so yes, using toList would be probably what you want
-Oh… it has a .toList function ? ups didnt see that… that makes it easy. Thanks Jonathan :smile:
-and thanks for making things clearer :slightly_smiling_face:
-my pleasure :smile:
-also, if it didn't have a toList function you could use fold to implement it
-`toList dict = Dict.foldr (\k v l -&gt; (k,v)::l) [] dict`
-jonf: uh… I have to study this. I still lack of some functional concepts. Thanks so much…  I try to understand this foldr-thing :slightly_smiling_face:
-I think you should try, fold is the sort of the complement to map.
-<@U0LPMPL2U> I finally finished your universal pattern article - very nice!
-thanks!
-`map f in = Dict.foldr (\k v d -&gt; Dict.insert k (f v) d) Dict.empty in`
-<@U3SQ42JJW> if you want to prevent the traversing and convert directly - with a single iteration -&gt; maybe this package helps. It's kind of hard for my brain - but i think with time i'll get used to. <http://package.elm-lang.org/packages/avh4/elm-transducers/latest>
-I thought the compiler had special optimization for pipe because of exactly this
+
+U3BTVEFQU : <@U2JA29EKF> no problemo, <@U3SJEDR96> fixed it for me.. However I'm still on the task to understand it properly :wink:
+U3BTVEFQU : ilias: <https://github.com/ream88/delayed-requests>
+U23SA861Y : the cloud never goes down /s
+U3BTVEFQU : <@U3SJEDR96> thx again, you made my day :blush: I love this community
+U3BTVEFQU : here a :beer: or a :coffee: for you :wink:
+U3SJEDR96 : <https://gist.github.com/zwilias/a8acaf4c9ecf76d7c26faf46ac2f1e3f>
+U5W50TZ6C : I have a question about records:Lets say I have a function that takes a record, like this:
+```
+getId : { file | id : String } -&gt; String
+getId file =
+    file.id
+```
+I could pass in something like this: `{ id = "abcd", name = "hi.txt"}` because it's got an `id`. All good so far.
+
+My question is: could I create an alias for the "file" in the function type signature? What would the syntax for that be?
+
+U0J8D9M2P : Yes you can
+U0J8D9M2P : It's called extensible record
+U0J8D9M2P : You can create a type alias for that
+U0J8D9M2P : type alias File file = { file | id : String }
+U0LPMPL2U : you can alias anything that would go in a function signature
+U0LPMPL2U : even functions e.g. `type alias Function a b  = (a -&gt; b)`
+U5W50TZ6C : Awesome, thank you <@U0J8D9M2P>, that's the word I was looking for
+U5W50TZ6C : Wow, good to know <@U0LPMPL2U> !
+U2DSBB76Y : Is it possible to click on a button which expands out an input, and give that input focus?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,162 +1,92 @@
+U2SR9DL7Q : chasote: i've had similar concerns. I've basically decided to hedge my bets on elm. At the moment, I work primarily as an independent consultant, building desktop apps. I'll eventually branch into web development, and I plan on going Elm first. 
+I think FP is no longer some weird sub-niche in the web development world. I also realize that elm was the best way for me to learn the hodge podge of waffle that is javascript through its interaction with elm... where I can digest it all in sane bite sized chunks.
+
+U635238TG : i like that approach. you are saying learn js as needed in complementing elm? I also wonder if anyone is bootstrapping their own small companies/services while using elm. I don't need much to get by so if there aren't jobs out there for me, I wonder if I could create my own position. I'm basically just trying to rationalize why I'm going to stubbornly stick with Elm. Every experience I've had with it so far has felt right except for the employment opportunities.
+U2SR9DL7Q : for employ by someone else... i'd like to think their hiring process looks for someone who has experience building good, stable, performant sites, using good dev practices, over someone who can write _fancy_ javascript. learning new languages is easy, but developing good code discipline and principle is much more valuable. Elm is good for that.
+U635238TG : make my portfolio so good they can't ignore me. Got it! Hahaha. (That actually is my plan/approach though)
+U2SR9DL7Q : for all its "flaws", python's syntax matters interpreter means I never write sloppy looking code, even when I'm making throw-away scripts. I just never learned how. With Elm, I can never add complexity to one part of my code, and leave it unhandled by the rest. That's *really* important I think.
+U635238TG : Yes, and that is my "back up" I think. Take the good habits and approach developed from Elm and transition it to a more hireable language only when and if I have to. It should give me a leg up over other junior web devs hopefully.
+U635238TG : back to the tutorial! Thank you for the chat
+U2SR9DL7Q : no problem! i return to my crappy website i'm building.
+U638BAUJZ : Executing elm-test throws runtime exception: Cannot read property 'href' of undefined
+U638BAUJZ : <https://stackoverflow.com/questions/44909872/executing-elm-test-throws-runtime-exception-cannot-read-property-href-of-unde>
+U2W6RTGQH : ```main: Html msg main =
+    text "elm"
 ```
-guards... that's nostalgic.
-I have a question about "filtering" keyboard events <https://ellie-app.com/3KRNszj47Lca1/0>
-though I suppose it relates to all kinds of subscriptions
-essentially, I'm interested in only two keyboard events, but I'd rather not trigger the update function for any other keypress
-That's not possible, at the moment, <@U5W86UED6> - it's a bit of an all-or-nothing situation
-<@U3SJEDR96> I realize the performance penalty isn't too bad, but it's more about filtering out information in the debugger
-do you have any more context about why it's an all-or-nothing situation? the design decision behind it?
-<@U5W86UED6> - it's ok to have that conversation in the channel rather than in a thread :slightly_smiling_face:
-as for the `why` - basically you'd need the ability to do something like `(a -&gt; Sub b) -&gt; Sub a -&gt; Sub b` so you could return `Sub.none` to filter them out, but that would have some non-obvious effects, such as the ability to suddenly "add" subscriptions from within a subscription
-would that be considered a side effect?
-No, it would just be pretty hard to grasp what it would _actually_ do. A subscription is basically just saying "when this happens, execute this function and give the result to `update`". If a subscription could bail out, so to speak, that would make things much more complicated, both in terms of implementation as well as cognitive load for developers
-Is this possible in elm somehow: <https://stackoverflow.com/questions/29715655/html-5-input-type-date-disable-keyboard-input>    ???
-<@U5WD40ZA9> yes; you can do this using `onWithOptions` from `Html.Events`, though you will need a `NoOp` message
-`onWithOptions "keydown" { stopPropagation = True, preventDefault = True } (Json.Decode.succeed NoOp)`
-Gotta go now, hope you figure things out :slightly_smiling_face:
-<@U3SJEDR96> thanks!
-I found some additional information about this on the mailing list, for those interested <https://groups.google.com/forum/#!topic/elm-discuss/u-6aCwaJezo>
-If I convert a list to a set in elm, will order be maintained? If not, will order be *not* maintained in the same way if passed the same list?
-Sets don't maintain list order. IIRC, they are implemented as search trees, so they should always produce sorted lists.
-umm you shouldn't count on a set ever maintaining order
-it may, but thats an implementation detail
-No, it's documented
-<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Set#toList>
-that says nothing about the set, only that the implementation of toList guarantees sorting.
-what does it mean for a set to be sorted if not that?
-So if I have list [0,1,2] and that becomes set (2,0,1)... if I called set.fromList on [0,1,2] again, would it have a different order?
-Because it feels like that breaks statelessness 
-the function `toList` guarantees the the output will be sorted
-<@U2SR9DL7Q> Elm sets are sorted, all functions that iterate through them do it in sorted order
-they do seem to provide that guarantee in their api
-but the underying tree implementing the set may look different, have different branching, but that's nothing you can see
-Ahhh 
-Curious. 
-I think it is safe to think of a `Set` is equivalent to a sorted, unique list and should that change it would be documented in the change notes.
-The same goes for Dicts, for the keys.
-well I would say the api guarantees sorted order access, I wouldn't make any assumptions about how it's implemented (not that you can do anything with those assumptions anyway)
-Sure, but for a first-pass conceptual understanding, I think it is fine.
-Sets and dicts are sorted at the the level that I interact with them. That... makes sense, in elm. 
-The docs just didn't make it clear, and it made me wonder. 
-well, you have to look at the documentation for the individual function that you use
-FromList doesn't mention sorted or not. Unlike toList 
-a set by definition is not ordered
-it may use it as an implementation detail
-<@U2SR9DL7Q>, sure, but how do you get the values from the set?
-but a set is a collection of distinct objects
-in fact some sets (with hash table backing) are going to be extremely disorderd
-<@U4872964V> you mean from the list? I have a list of values that a becoming a set. But from prior experience, sets aren't necessarily ordered. 
-<@U2SR9DL7Q> but what does it mean for you for a set to be ordered or unordered, that's the question. i think this is just a semantic question. Elm sets are ordered in every way that you can use them.
-Right now, `Set.foldl` will give you the set elements in order. This is *unlikely* to change, but it might.
-and yes, `Set.fromList [1,2,3] == Set.fromList [3,2,1]` and so on
-Perhaps more importantly `Set.fromList [1, 2, 3] == Set.fromList [3, 1] |&gt; Set.insert 2`. For this to hold, either the data structures need to be identical or `Set` would need a special implementation of `==`, which I don't see Elm doing any time soon.
-That was my concern. I don't care what the sets actually are, only how they're returned using `fromList`. The documentation doesn't mention ordering, but it seems like they are, which is fine.
-fromList doesn't and can never have an ordering
-because the set itself is not ordered
-<@U48AEBJQ3> `Set` does have a special implementation of `==`: <https://github.com/elm-lang/core/blob/5.1.1/src/Native/Utils.js#L74>
-foldl foldr and toList can
-a set can be implemented in such as way so that when you traverse it, it is in a given order, but the concept of a set is not ordered
-sets don't inherently possess order. but a set returned from `Set.fromList [Some List]` is ordered, no?
-I'm trying to write a test in Ellie to check
-you can't test that
-as <@U23SA861Y> says, that's not a testable concept for Sets, you can only test the serialization functions
-you can look at the javascript and see that it's implemented as a search tree
-a red-black tree to be precise
-Alright, I think I get, but one last question. Say I wanted to output the contents of a set, either as Html or a string or in the repl... would I have to convert it to a list first?
-yes, most functions only accept lists of things, not sets
-techinically you could call one of the folds directly
-the repl calls toString on it to show it I think
-in either case the traversal order is guaranteed to be sorted
-This was the missing piece.
-Elm is a typed language, so you have to provide data that are of the right type to the functions you use.
-much can be understood just by looking at the types of the functions
-I couldn't understand why you were saying I couldn't see whether the set was sorted, not considering that the implementation to view the contents of the set presents sorted elements
-well, to view something it has to be serialized in some way
-It's my python background I suppose. The way sets are implemented there, you can view them without ordering. I know why that wouldn't make sense for elm though. I just had to be sure.
-so there is no concept of hidden in python
-python sets are implemented using a hash table
-however, hash tables are not suitable for pure functional languages, because they are not good at being persistent so they are not used in Elm
-well, you could have a search tree on the hash and that would have similar behaviour with unordered traversal
-yes, hash trees are sometimes useful
-but either way, it all comes down to the api
-python guarantees unordered traversal while elm guarantees sorted, the underlying implementation doesn't matter
-unordered traversal sounds like an interesting "guarantee" :slightly_smiling_face:
-I'm glad we had this talk. If nothing else, this slack has made me better at saying what I _actually mean_. Question parameters should be explicit, rather than implicit, or something like that...
-yes, <http://mywiki.wooledge.org/XyProblem>
-some situations require guaranteed randomness, scheduling comes to mind
-yeah, but it's not guaranteed to be unordered, just to be random :slightly_smiling_face: nitpicking
-anyway, not for this channel
-<@U4872964V> I'm glad you're here!  You may not remember, but yesterday I asked you about formatting a money float to a string.
-And you suggested using an int instead of a float
-yes
-so I thought I'd create a Pennies type, so I did, but I don't think it was necessary
-mmm yes floats for money, bad
-because I had named it "Pennies", I was thinking in terms of little copper discs
-and you can't have a negative amount of little copper disks
-so I tried to model that
-<https://github.com/jordanwilcken/commerce-dotcom/blob/master/commerce_dotcom/elm/Pennies.elm>
-most important stuff is right up top
-probly I want to think in terms of cents and not pennies when dealing with money
-and money amounts can be negative - happens all the time
-but I did want to get your input (or anybody's) on what I done to model not-being-negative
-yes, well, that looks ok, you don't need the Zero I suppose
-no, I was thinking that too
-and you should probably give some error, with `Result` if you try to make negative pennies
-yeah, I was thinking that, but then I got stuck when I tried to use Pennies in my model
-because my model wants pennies and not Results
-<https://github.com/jordanwilcken/commerce-dotcom/blob/master/commerce_dotcom/elm/Financial.elm>
-look at the FinancialData type
-my model won't ever do something as silly as trying to make negative pennies
-well in that case it's probably ok to have 0 then
-yeah, that's where I ended up
-trying to make it clear that if you do something silly like pass a negative int you end up with a MinimumZero that is Zero
-I think I started modeling too quickly.  I recall somebody on this Slack talking about "the urge" to model things.
-and I think that's what I did before questioning my assumption that pennies couldn't be negative
-nothing wrong with modelling early, you can just refactor :slightly_smiling_face:
-yes, that is one of the joys of Elm
-Most of the time I model something complicated and then after a while almost every complexity goes away
-but you do lose time.  Although it can lead you down interesting paths as this did.
-when you start writing functions you realize that your model could be improved and then functions become easier, and everything is better
-What <@U4872964V> for sure. I think it's a common misconception that because you're working in a "statically typed" language, that you can't change your types (they're "static", right?)..... but in fact, static types allow you to *change* your types more freely than in dynamic languages, since it will catch most of the places where changes are needed.
-something that really steals time is generalizing too much though, like making a big pennies library when all you want to do is adding some ints :slightly_smiling_face:
-`type Money = Money Int Int` is probably all you need to get started
-yeah, it was "the urge"
-hell even `(Int,Int)`
-once I start modeling it's hard to stop
-`type Money = Money Int` I use
-The "what if's" just jump right into my mind
-program what you need
-just cents or whatever the lowest unit of money is
-not what you will need
-look at your domain and describe how it is, change it later if you need to
-<@U23SA861Y> (Int, Int) would have been a good one
-real simple that
-why two ints?
-lets you stay in dollars and cents, which I think is more natural
-gives you a lot of problems when adding etc, too complex :slightly_smiling_face:
-tha's true
-but then you can write a slick function for that! #theUrge
-yeah, if you just use a unit for the quatization thats good too
-I've built a shopping cart for instance, it's very easy just to use ints for Money, no problem with strange rounding for discounts etc
-yeah, you don't have to worry about negative where monies are concerned.  I believe that's what led me far afield.
-well, as you say, they can often be negative. discounts are, for instance :slightly_smiling_face:
-yep
-anyway, it's great practice to write those data types so keep it up!
-you fellows have day jobs?  I am just curious.  My secret identity is that of a work-a-day C# dev.  Native applications.  All of my Elming is purely for fun.
-Yeah, I've just got slack open all day
-yes, i work mostly with business systems but do some frontend work too
-Right there with ya'll. But pushing it as hard as possible.
-we are in the process of making some frontends for our system and I'm pushing Elm
-I hope you win.  I hope Elm wins.
-oh it will
-If I ever do escape native applications I want Elm to be there waiting for me
-yeah, well, Elm for native applications is not such a bad idea either
-here here!
-Elm :allthethings:
-Is there some way of getting the message and status code behind `NetworkError`?
-"means the user turned off their wifi, went in a cave, etc." :slightly_smiling_face:
-status codes you can get from `BadStatus` error
-Hehe, jupp…
-Okay, so i would be able to get, to say, a 401 from `BadStatus`?
-yes, the `Response` contains a `status` field with `code`and `message`:  <http://package.elm-lang.org/packages/elm-lang/http/latest/Http#Response>
-Perfect! Thanks a lot!
+what does msg mean here?
+
+U23SA861Y : It is the type of the object to be dispatched back to the update function. In this case it is unspecified because text does not use it.
+U2W6RTGQH : `List String` means list with values in string format, do you mean each type can have different values like html can have msg as values?
+U23SA861Y : I mean that `List a` represents a `List` with a parameterized type `a`. It is the value the list contains. That a could be any type `List Int` `List String` `List (Int-&gt;String)`
+U23SA861Y : In the case of html it needs to be one single type, but it could be any type
+U23SA861Y : typically it is a user defined union type and by convention that type is typically called `Msg` note the difference in capitalization
+U2W6RTGQH : got it thanks, but why doesn't `Html Msg` work ?
+U23SA861Y : `Html Msg` would say that this dispatches messages of concrete type `Msg` which it does not
+U2W6RTGQH : but Html msg also does same right ? I'm sorry i'm very new to elm and type system, getting confused.
+U3YDBDP4Z : `msg` is like a placeholder for an unspecified value. While `Msg` is a specific type
+U23SA861Y : I'm not sure where it states it in the docs (or if it does so) but type parameters are uncapitalized and concrete types are capitalized
+U3YDBDP4Z : It's the difference between "I don't know what I'll get but I'll take it" and "I'm expecting this specific thing and will be cranky if I don't get it"
+U23SA861Y : <@U2W6RTGQH>  have you used java or c++ in the past?
+U2W6RTGQH : no, only JS
+U2W6RTGQH : `concrete types are capitalized` sure?
+U3YDBDP4Z : Yup
+U2W6RTGQH : thanks.
+U3YDBDP4Z : Unit testing a `case`, how can I ignore all but the branch I care about testing?
+U23SA861Y : you can put catch all branches in like `_-&gt;`
+U23SA861Y : avoid them in the mainline code but its fine for testing
+U3YDBDP4Z : I still need to return something from that catch all. Not a big deal though.
+U23SA861Y : right, return someting which would fail the test because you are presuming it should never get there
+U3YDBDP4Z : Does a decode `Result` error return any value?
+U3YDBDP4Z : Or is it just `Err -&gt;` in a case branch?
+U3YDBDP4Z : Wondering if it's possible to see what the error was
+U17MNKY3H : It'll have a string message AFAIR.
+U17MNKY3H : An error `Result` can't really be created without a value.
+U3YDBDP4Z : ```getResultValue result =
+    case result of
+        Ok value -&gt;
+            value
+
+        Err err -&gt;
+            err
+```
+Says the type annotation should be `Result a a -&gt; a`
+
+U3YDBDP4Z : Would have thought it could say `Result String String -&gt; String` or something
+U17MNKY3H : Elm does that. It finds the most general type it can for a function.
+U17MNKY3H : It will accept a less general one though.
+U3YDBDP4Z : Ah, my annotation worked just as well :slightly_smiling_face:
+U23SA861Y : your annotation can be more specific
+U17MNKY3H : Better wording. :slightly_smiling_face:
+U3YDBDP4Z : Hmm… Invalid JSON : Unexpected token t in JSON at position 53.```
+json =
+                        """
+                        {
+                          target: {
+                            elements: {
+                              email: {
+                                value: "<mailto:jane@mail.com|jane@mail.com>"
+                                }
+                              }
+                            }
+                          }
+                        """
+```
+
+U17MNKY3H : JSON needs to have string keys.
+U17MNKY3H : `{ "target": ... }` vs `{ target: ... }`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

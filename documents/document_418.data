@@ -1,2 +1,168 @@
-Expecting 2, but got 1.```
-<@U0JBSEGHY> `IncomingCall (Maybe String)`
+U23SA861Y : by parsing the result
+U6531GSTW : ahh how do i parse :smile:..
+U48AEBJQ3 : There is also <http://package.elm-lang.org/packages/elm-community/elm-time/1.0.7/Time-Date#date> and that package also gives you a `compare` which can be used to construct `isBetween`
+U23SA861Y : yeah that date constructor would probably be helpful
+U23SA861Y : yeah, I'd pull in that community package.
+U6531GSTW : start = Date.fromString "10-07-2017"end = Date.fromString "16-07-2017"
+
+U6531GSTW : umm this is false?
+U6531GSTW : i just need to turn Result String Date into a date..
+U23SA861Y : the data constructor in the community package avoids dealing with results and such
+U6531GSTW : so what should i do now?
+U5XHTBFS6 : Hi y'all, I'm having an apparently crazy problem with `elm-test` and any help would be appreciated.
+My tests were running fine until I installed `truqu/elm-base64` with `elm-package install truqu/elm-base64`, now `elm-test` fails with 
+```
+Compilation failed for /home/etandel/nomad/nomad-frontend/elm-stuff/generated-code/elm-community/elm-test/src/Maineed9d77ce544e1ad67de53dae9be090c.elm
+```
+
+Actually, this only started happening once I synced `tests/elm-package.json` with my main `elm-package.json`. If I remove the `truqu/elm-base64` line from `tests/elm-package.json`, the tests run fine again.
+
+BTW, if I `cd tests` and then run:
+
+```
+elm-make /home/etandel/nomad/nomad-frontend/elm-stuff/generated-code/elm-community/elm-test/src/Maineed9d77ce544e1ad67de53dae9be090c.elm
+```
+
+I get this error:
+
+```
+I cannot find module 'Test.Runner.Node'.
+
+Module 'Test.Generated.Maineed9d77ce544e1ad67de53dae9be090c' is trying to import it.
+
+Potential problems could be:
+  * Misspelled the module name
+  * Need to add a source directory or new dependency to elm-package.json
+```
+
+U5XHTBFS6 : Does anyone have any idea what might be going on?
+U23SA861Y : <@U6531GSTW>  <https://ellie-app.com/3HKJwRqPDcja1/0>
+U5XHTBFS6 : Welp, I just found this similar error on github: <https://github.com/elm-community/elm-test/issues/178>Deleting all of elm-stuff and reinstalling it again worked for me as well. Very strange, and very annoying =s
+
+U6531GSTW : somehow the code is creating a huge mismatch ni my code :))
+U23SA861Y : you can change the alias on the community package
+U23SA861Y : it's probably colliding with the native Date import
+U6531GSTW : yes it is :slightly_smiling_face:
+U6531GSTW : i renamed "import Time.Date as Something" and now  aTermin : Something.Date
+U6531GSTW : but it should be just native Date.Date
+U23SA861Y : no the type is still from the native package
+U23SA861Y : it's the functions Date.data and Date.compare which are in that package
+U6531GSTW : okey? and now i should?
+U23SA861Y : don't change it the `aTermin : Something.Date`.  Change the compare and date functions to be Something.date, Something.compare
+U6531GSTW : no no the aTermin: Date.Date
+U6531GSTW : but the error says
+U6531GSTW : <https://ellie-app.com/3HK9tMNGTLHa1/2>
+U6531GSTW : List{ aBeschreibung : String
+, aDeadl : Date
+, aMinuten : Int
+, aMonth : Month
+, aTyp : String
+, aDauer : Int
+, aName : String
+, aPrio : String
+, aStunden : Int
+, aTag : Day
+, aTermin : Something.Date
+}
+
+U48AEBJQ3 : You are still using `Date.fromString` instead of the `date` function from the package.
+U6531GSTW : sorry
+U6531GSTW : wrong link
+U6531GSTW : <https://ellie-app.com/3HK9tMNGTLHa1/3>
+U23SA861Y : <https://ellie-app.com/3HL3grG4KZGa1/0>
+U23SA861Y : pay attention to the types your values are returning
+U23SA861Y : the api documentation is your friend
+U663M2MB7 : is there any super simple way to fetch some xml from a web service? i don't need to pass messages and stuff, as this http GET will be sent from within a map function
+U48AEBJQ3 : You can't query things inside of a map function. You have to pass the request out of your update function to the runtime and then the runtime executes it and gives you the result.
+U663M2MB7 : why not? the mapping function is mapping specifically based on the results from the http GET (or rather should)
+U48AEBJQ3 : Elm has managed side effects. You can do the get and if it succeeds you can map on the resulting data.
+U663M2MB7 : Right, that is going to make this more complicated than expected.
+U663M2MB7 : Thank you.
+U23SA861Y : not more complicated, just different. You likely need to turn your code inside out to make it work out.
+U5DJNFLUD : I've been trying to understand how the code in `rtfeldman/elm-spa-example` handles having one `Main` file and multiple other model files, and how stuff gets routed between them, so I put together a working example -- <https://gist.github.com/mrb/b5f87cf3d8918c87ff211d2ed3427d88> -- it's "simpler" than the `elm-spa-example` stuff because it has fewer moving parts and doesn't do routing and such. Does this look sensible to people? Did I miss anything or mess anything up?
+U153UK3FA : <@U5DJNFLUD> yep, that's the pattern
+U5DJNFLUD : <@U153UK3FA> Cool! Took me a bit to figure out how to Map the sub-models Msg types
+U5DJNFLUD : Is there a resource that spells out how to do this? The spa example blog post is mostly higher level
+U153UK3FA : It's a pattern that was popular for a while, but people over used it resulting in lots of boilerplate and confusion
+U153UK3FA : it makes a lot of sense at the level of a ‘page', but a lot less sense at the level of a ‘widget/component'
+U5DJNFLUD : Depending on the complexity/size of the widget/component, I agree
+U5DJNFLUD : Certain things are definitely simpler if you have a page
+U153UK3FA : If you search for ‘elm components' you'll find many blog posts about the pattern, but you've already got everything you need to use it.
+U5DJNFLUD : Ah ok
+U5DJNFLUD : Cool
+U153UK3FA : `Html.map`, `Cmd.map` work like any other `map` function
+U5DJNFLUD : Always helpful to find the right thing to google :slightly_smiling_face:
+U153UK3FA : new users had a tendency to ‘cargo cult' that pattern to try to build React like ‘components' which lead to a lot of confusion
+U601ELFEG : So, I'm about to deploy to a web server - I've been running with `elm-reactor` for all of development - and I've got a main.html file that works with that
+U601ELFEG : I assume I need (a) a new index.html, and (b) to call `elm-make` putting the `.js` file somewhere (`build/main.js`??) --
+U601ELFEG : I couldn't find any docs on how to set this up or best practices.
+U601ELFEG : any good pointers?
+U64M3DF1B : <@U601ELFEG> this actually is pretty solid - <https://medium.com/@diamondgfx/writing-a-full-site-in-phoenix-and-elm-a100804c9499>
+U5QJW0DDE : is there a way to have elm-reactor automatically refresh the page when you save the source file
+U5QJW0DDE : similar to how figwheel works for cljs
+U5QJW0DDE : this would allow you to keep coding, saving, and seeing changes immediately without switching to web page and hitting refresh
+U3SJEDR96 : elm-reactor itself can't do that, but `elm-live` does exactly that :slightly_smiling_face:
+U5QJW0DDE : sweet i shall give it a proper tidy effort
+U5QJW0DDE : i'm curious about the Debug module, if you have "log" sprinkled through your code, that would mean manually removing all those logs for a production build? or is there a more elegant workflow?
+U600K7WE4 : <@U5QJW0DDE> You can also check out create-elm-app (<https://www.npmjs.com/package/create-elm-app>)
+U5QJW0DDE : looks nice
+U600K7WE4 : It is similar to create-react-app if you are familiar with it. We are very satisfied with using it
+U3SJEDR96 : <@U5QJW0DDE> currently; yes. I believe in 0.19 Elm will be a little smarter about that, tho, but consider that "unconfirmed"
+U663M2MB7 : <@U23SA861Y> likely not, having a Haskell background helps, but after 5 hours of Elm I had no idea it treated IO special or if it was me making the http calls wrongly or what :slightly_smiling_face:
+U5QJW0DDE : how do you import a module in the repl?
+U5QJW0DDE : i.e. the Text module
+U2JA29EKF : `import ModuleName` should work. not sure what Text module you are referring to. but, for example, `import Dict` will import the `Dict` module
+U5QJW0DDE : I'm referring to using Text.fromString
+U5QJW0DDE : import Text does not work from a repl
+U2JA29EKF : there is no `Text` module in core, is `Text` on of your own modules?
+U5QJW0DDE : no, it is mentioned as an Elm module here: <http://elm-lang.org/docs/syntax>
+U5QJW0DDE : there is mention of Text.fromString function
+U2JA29EKF : I can't find any mention of `Text` or `fromString` on that page when I ctrl + f ...
+U5QJW0DDE : sorry, i meant this page: <http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#++>
+U3SJEDR96 : Elm only has a `String` type, no `Text`. Possibly a remnant from ... a long time ago :x
+U5QJW0DDE : ah, a doc failure
+U5QJW0DDE : ok
+U3SJEDR96 : <http://package.elm-lang.org/packages/elm-lang/core/3.0.0/Text> so yeah, 0.16 leftovers, it seems like
+U5QJW0DDE : is there such a thing as fromString anymore?
+U5QJW0DDE : i guess not
+U3SJEDR96 : I don't think there's a `fromString` in core anymore, no, but there might be things like `BigInt.fromString` in separate packages
+U3SJEDR96 : oh, theres `Date.fromString` still
+U3SJEDR96 : <http://klaftertief.github.io/elm-search/?q=fromString>
+U604S603Y : I think there's one for Float and Int, too
+U3SJEDR96 : there are `String.toFloat` and `String.toInt`, indeed
+U5QJW0DDE : I was interested in the bit of taking any data structure, using toString on it, and then using fromString on it.
+U5QJW0DDE : but since that exercise is moot now, no bother
+U5QJW0DDE : the old Text module seems to have provided some interesting tools similar to Clojure's reader
+U5QJW0DDE : i don't understand this type annotation: main : Program Never Model Msg
+U5QJW0DDE : What type is Program here?
+U0K92QFST : <@U5QJW0DDE> check out the `program` function in the `Html` module:```
+program
+    :  { init : (model, Cmd msg), update : msg -&gt; model -&gt; (model, Cmd msg), subscriptions : model -&gt; Sub msg, view : model -&gt; Html msg }
+    -&gt; Program Never model msg
+```
+
+U0K92QFST : as far as I know, the functions exposed by the `Html` module are the only ones which construct the type `Program`
+U0K92QFST : So you need to use these functions in order to produce a valid value for your `main` function
+U0K92QFST : I *think* `main` can also be of type `Html msg` if you just want static Html though.
+U0K92QFST : Does that make sense?
+U5QJW0DDE : ok, but as far as parsing the main type annotation itself, what does Program actually refer to here, what kind of type, i.e. is it a union or.. ?
+U0K92QFST : It's an opaque type from the `Html` library, so its implementation details are hidden from view.
+U0K92QFST : Take a look at this: <http://package.elm-lang.org/help/design-guidelines#keep-tags-and-record-constructors-secret>
+U5QJW0DDE : ok
+U5QJW0DDE : a little confusing. I assume "List" is similar. For example, List number. What does that mean? Well, it means a list of numbers, of course. But what is the actual List type, is it a record, a union, etc ? I assume that is also just like a language primitive, in a sense
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

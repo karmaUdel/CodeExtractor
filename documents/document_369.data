@@ -1,30 +1,103 @@
+U2D7NUGS1 : It's very good. Just takes a change of a mindset.
+U153UK3FA : <@U604S603Y> are you using elm-decoder-pipeline ? That trades nicer API against good error messages
+U604S603Y : yes, I am using elm-decoder-pipeline
+U3LUC6SNS : Hello all!  I've transferred the entire folder containing my app from my dev machine (with inoperative keyboard) to my wife's computer.  On the latter I have installed elm, node, webpack, etc.  However, when I run `yarn start`, I get this error message:```
+$ yarn start
+yarn start v0.27.5
+$ nf start
+[WARN] No ENV file found
+5:52:52 AM api.1    |  module.js:487
+5:52:52 AM api.1    |      throw err;
+5:52:52 AM api.1    |      ^
+5:52:52 AM api.1    |  Error: Cannot find module '/Users/carlson/Documents/dev/koko_client2/api.js'
+5:52:52 AM api.1    |      at Function.Module._resolveFilename (module.js:485:15)
+5:52:52 AM api.1    |      at Function.Module._load (module.js:437:25)
+5:52:52 AM api.1    |      at Function.Module.runMain (module.js:605:10)
+5:52:52 AM api.1    |      at startup (bootstrap_node.js:158:16)
+5:52:52 AM api.1    |      at bootstrap_node.js:575:3
+5:52:52 AM api.1    |  error Command failed with exit code 1.
+[DONE] Killing all processes with signal  null
+internal/util.js:183
+  throw new errors.Error('ERR_UNKNOWN_SIGNAL', signal);
+  ^
+
+Error [ERR_UNKNOWN_SIGNAL]: Unknown signal: null
+    at convertToValidSignal (internal/util.js:183:9)
+    at ChildProcess.kill (internal/child_process.js:373:5)
+    at EventEmitter.&lt;anonymous&gt; (/Users/carlson/Documents/dev/koko_client2/node_modules/foreman/lib/proc.js:54:11)
+    at emitOne (events.js:120:20)
+    at EventEmitter.emit (events.js:210:7)
+    at ChildProcess.&lt;anonymous&gt; (/Users/carlson/Documents/dev/koko_client2/node_modules/foreman/lib/proc.js:50:13)
+    at emitTwo (events.js:125:13)
+    at ChildProcess.emit (events.js:213:7)
+    at Process.ChildProcess._handle.onexit (internal/child_process.js:197:12)
+error Command failed with exit code 1.
 ```
-leave off the `--warn` part
-I want to show other sorts of warnings...
-oic now :sweat_smile: I don't think so
-Hi everyone! Has anyone ever run into debugger not synchronizing it's changes with the actual view? I mean, I do things at my page and state indeed changes, but when I travel through it (in a separate debugger history window) it doesn't change view accordingly - it's like view is reflecting the last change made to the state. Is there a chance that it is a webpack problem? Or, maybe, something about programWithFlags that I don't know?
-Hmm, are you using JS?
-If you're doing anything outside of elm (ports, commands), those things won't get brought along
-As for now, I'm only using flags.
-Is there a way to debug debugger? :thinking_face:
-<@U5P1BDUM8> all I can think of is to ignore them or  put in the type annotations
-<@U31FGNWCT> what type of things are you doing and what is not changing? There are a couple of scenario's I can think of where this would be expected, like an `input` without a `value` or a `checkbox` without a `checked`, but to help you better, more info would be useful, and actual code on <http://ellie-app.com|ellie-app.com> would be perfect :wink:
-<@U3SJEDR96> Unfortunately it's a relatively big chunk of production code, so I can't share a part of it.
-The only thing I can think of, then, is that it's part of your view that relies on state that isn't part of your model - uncontrolled inputs first and foremost
-It happens on a simple login form, login &amp;&amp; password inputs with a submit button. Nothing extraordinary.
-can you verify that on those fields, there is a `value` attribute in  Elm, and not _only_ an `onInput`?
-Aha!
-That's it!
-Thank you very much!
-The debugger renders your view with the given state, but of course that only does something if the view represents _only_ that state :slightly_smiling_face:
-I didn't understand you well when you had mentioned it earlier, sorry
-Yeah, that's alright, it's hard to explain because intuitively, what you see is a reflection of your state :slightly_smiling_face:
-I am slightly nervous about how that would play out in practice though, any advice for big records?
-I'd go for a `Dict String Data`, I think
-though you'll probably have some keys where some data doesn't make sense for
-:thinking_face:
-The nesting seems like it would introduce more complexity though
-If the values vary, and you know all the possible things it could be, you want to use a union type most likely.
-rather than lots of maybe values
-possibly, a mix of a record with some strongly typed keys, and a `Dict String Data` for the "freeform" stuff
-Thanks y'all! I'll trial a couple of small scale things and see how they play out
+I've missed something, but have no idea what it is.
+
+U3SJEDR96 : to be fair, <@U3LUC6SNS>, I didn't see an api.js when I had a look at your code last week.. I did see a `server.js` though, but that seems a mock at most
+U3SJEDR96 : can you check if there _is_ an api.js on your (former) dev machine? Plugging in an external keyboard might help..
+U3LUC6SNS : <@U3SJEDR96>, I'll investigate -- thanks!
+U3LUC6SNS : <@U3SJEDR96>, just looked at the old app folder.  No `api.js` file there.  Interestingly enough, when I run `yarn start` there, I get a similar error message.: `Cannot find model ...koko_client/api.js` etc.  But it is much shorter.  It ends with `Killing all processs with signal null ... Exited with code 1`  But then it goes on to say `Project is running at http://...3000`
+U3LUC6SNS : Hard to do much on the old machine since I can't type a space with the  incompatible keyboard.
+U3LUC6SNS : server.js is an express web server.  I looked in webpack.config.js and found no `api.js`
+U3LUC6SNS : Ah here it is: in `package.json`:```
+"scripts": {
+    "api": "node api.js",
+    "build": "webpack",
+    "client": "webpack-dev-server --port 3000",
+    "start": "nf start"
+  },
+```
+
+U3SJEDR96 : right. So your Procfile probably has a `yarn client` in there somewhere... It's a little odd that foreman decides to stop on your current machine, but continued on your older machine. I suppose you can remove the `yarn api` part of your Procfile for now..
+U3LUC6SNS : <@U3SJEDR96> Commented out `api yarn api` in `Procfile`.  The error is now```
+172-10-18-240:koko_client2 carlson$ yarn start
+yarn start v0.27.5
+$ nf start
+[WARN] No ENV file found
+6:27:11 AM client.1 |  sh: webpack-dev-server: command not found
+6:27:11 AM client.1 |  error Command failed with exit code 127.
+```
+Could there be a problem with `PATH`?  It is now
+```
+172-10-18-240:koko_client2 carlson$ echo $PATH
+/Users/carlson/Library/Haskell/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/carlson/.rvm/bin:/Users/carlson/dev/node_modules/mathjax-node/bin
+```
+
+U3SJEDR96 : it seems to expect webpack to be installed globally
+U3LUC6SNS : OK, how would I do that?
+U0CLDU8UB : `yarn global add webpack`
+U3SJEDR96 : yarn global add webpack would probably fix that, though I do suggest trying to make sure it uses the local path
+U3LUC6SNS : I'll give these suggestions a try.  Thanks <@U3SJEDR96> and <@U0CLDU8UB> Yikes
+U3LUC6SNS : Yikes what a pain this is!!! I did `yarn global add webpack`, then `yarn start`  Error message is```
+172-10-18-240:koko_client2 carlson$ yarn start
+yarn start v0.27.5
+$ nf start
+[WARN] No ENV file found
+6:33:28 AM client.1 |  sh: webpack-dev-server: command not found
+6:33:28 AM client.1 |  error Command failed with exit code 127.
+[DONE] Killing all processes with signal  null
+internal/util.js:183
+  throw new errors.Error('ERR_UNKNOWN_SIGNAL', signal);
+```
+
+U3LUC6SNS : `$ which webpack` returns nothing
+U0CLDU8UB : ahh, `webpack-dev-server` is being used directly in the scripts, too
+U3LUC6SNS : Yes
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

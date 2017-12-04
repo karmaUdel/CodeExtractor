@@ -1,11 +1,104 @@
-True : Bool```
-I want it to be false since I have letters
-I think you want match instead of contains
-and you will have to put start of line and end of line patterns on there
-nvm contains is the correct function
-but you want to so a full string match
-for posix that would be a `^` at the beginning and a `$` at the end
-not sure what the JS flavour is
-looks like it's the same
-`Regex.contains (Regex.regex "^(\\[0-9]|-)*$")`
-Yeah what he said :+1:
+U2SR9DL7Q : say you've defined a type `FunType = type FunType Int Int`. How would you extract just the `Ints` later? Or would you just do `type alias FunType = { firstInt : Int, secondInt: Int }` ?
+U1UGYHGCA : Pattern matching
+U1UGYHGCA : ```extractor: FunType -&gt; (Int, Int)
+extractor value =
+  case value of
+    FunType i1 i2 -&gt; (i1, i2)
+```
+
+U1UGYHGCA : Or maybe even
+U1UGYHGCA : ```extractor FunType -&gt; (Int, Int)
+extractor (FunType i1 i2) =
+  (i1, i2)
+```
+
+U1UGYHGCA : Since your type can only have one value
+U2SR9DL7Q : <@U1UGYHGCA> brilliant. Thanks. I'm thinking the type alias with the named fields might be better for this example then. Avoids a whole new function on my end.
+U1UGYHGCA : That was just an example, you would do the pattern matching directly when using the type, you wouldn't need such function in real code
+U1UGYHGCA : But yeah, depends on your need, the type alias might be more readable if you assign names to both int
+U1UGYHGCA : You can do the same pattern matching directly inside the function args
+U1UGYHGCA : ```extractor FunType -&gt; (Int, Int)
+extractor { firstInt, secondInt } =
+  (firstInt, secondInt)
+```
+
+U2SR9DL7Q : I'll try both, and see which looks better
+U39DE7RQ9 : I need help. Im creating a SPA and using a butchered version of rtfeldmans SPA example. Now my pages does not load unless I click enter in the url. So the URL is updated when I click a link (a href...) but there is nothing listening for OnLocationChange. Anybody?
+U39DE7RQ9 : In <@U0CL0AS3V> code he does not use the OnLocationChange message like in the elm tutorial. The update function is triggered though but not the SetRoute function that should be called for the page to be changed. I cannot find the code that I am missing.
+U1UGYHGCA : <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L478>
+U1UGYHGCA : That's the line which will send a `SetRoute` msg every time the location change
+U1UGYHGCA : It uses <https://github.com/elm-lang/navigation>
+U39DE7RQ9 : <@U1UGYHGCA> OK, that makes sense but I must be missing something else. I have that code but SetRoute is not run
+U39DE7RQ9 : Should the init function run each time the location updates?
+U39DE7RQ9 : In my case it does not, can that be a hint?
+U1UGYHGCA : Nope, the init function is only ran once ever
+U39DE7RQ9 : OK
+U39DE7RQ9 : Found it!! I was missing the SetRoute case in my UpdatePage function.
+U1UGYHGCA : Compilation should have failed
+U39DE7RQ9 : Seems like I usualy find my errors my self only after I have asked for help. Thanks anyway <@U1UGYHGCA>
+U1UGYHGCA : Np
+U39DE7RQ9 : I had this case at the bottom:  ( _, _ )
+U4872964V : yes, he seems to have a catch-all there
+U39DE7RQ9 : Yepp
+U4872964V : should really be a catch all per page I think
+U4872964V : like the NotFound case, but for each page
+U39DE7RQ9 : <@U4872964V> make a pull request ?
+U1UGYHGCA : Yeah, having catch-all is never good for compilation
+U4872964V : not sure how you would handle it here actually
+U4872964V : catch-all for the message with _ for page I think
+U4872964V : i'll make an issue
+U4872964V : <https://github.com/rtfeldman/elm-spa-example/issues/27>
+U39DE7RQ9 : :+1:
+U69D8R59S : Is there a way to get a property off a record if it's in a `Maybe`?
+My array looks like `[ { score: 1 }, {score: 2} ]`
+
+I thought I could do something like `Maybe.withDefault 20 (get 1 array).score`, but it looks like I'm misunderstanding `Maybe`s.
+
+U1UGYHGCA : ```get 1 array
+|&gt; Maybe.map .score
+|&gt; Maybe.withDefault 20
+```
+
+U3SJEDR96 : `get 1 array |&gt; Maybe.map .score |&gt; Maybe.withDefault 20`
+U3SJEDR96 : :smile:
+U69D8R59S : Wow. You all are fast and awesome. Thank you!
+U2D07QZN3 : Http.getString returns HttpRequest String  How do I take that apart to get the string?
+U4872964V : you use `Http.send` to create a command that you return from your update function
+U62UFEG4D : Hello happy Elm people, hope you are all doing amazing today :slightly_smiling_face: !I am trying to apply a function to a list of tuples.
+I intuition I need to unpack (_uncurry?_) the tuples, but so far I have miserably failed.
+Here is an example to give an idea:
+
+```
+points =
+    (List.map2
+        (,)
+        (arrayX |&gt; Array.toList)
+        (arrayY |&gt; Array.toList)
+    )
+        |&gt; List.map Geometry.Point
+```
+any help appreciated ! Thanks,
+
+U4872964V : <@U2D07QZN3> <https://guide.elm-lang.org/architecture/effects/http.html>
+U4872964V : <@U62UFEG4D> well, you uncurry the function to make it work on tuples, so```
+List.map (uncurry Geometry.point)  yourListOfTuples
+```
+if I understand your request
+
+U4872964V : but from your description it sounds like you have to Arrays that you want to apply the function to
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

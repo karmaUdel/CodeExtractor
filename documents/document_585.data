@@ -1,35 +1,64 @@
-```
-there are legitimate cases for `Debug.crash` where elm's type system isn't strong enough to convince the compiler that something holds (for example a list is not empty), but it is nonetheless guaranteed
-wups, I'm taking a shortcut myself :smile: (`toString s.code`)
-<@U2JFD9ALE> that thing you linked to; I don't see how they're taking a shortcut or how it is related to debug.*?
-How do I convert numbers to strings if `toString` becomes part of `Debug`
-In case of an error, they return the old model and no new commands
-there will be a `String.fromInt` and `String.fromFloat`
-Hello! Good day to you all!
-<@U3SJEDR96> I would rather have something like this: `Console.log "text"` rather than `Debug.log`
-Console.log should produce a `Msg` like all the other side-effects
-I mean `Cmd msg`
-I'm not sure I see the use-case, in general, for logging to the console _except_ for debugging purposes?
-That way I can built-in to my SPA if I want to provide the option to `log` to the `console`
-but if you need that, you can sure do that - have a simple `port emit : Json.Value -&gt; Cmd msg` and `app.ports.emit.subscribe(console.log)`
-I'm preparing a talk: _*"Data protection by design and by default" *_, which is GDPR (General Data Protection Regulation) related <https://www.meetup.com/Elm-Copenhagen/events/241530394/> where I will show case that from 2018-05-25, languages like :elm:, :haskell:, PureScript and Idris will really shine (<http://blog.stermon.com/articles/2017/07/14/haskell-why-many-people-so-stupid-about-gdpr>) but it will require that the language actually provides strict delimiters between pure and impure code :wink:
-so my example gets pretty much useless due (`toString`, `Debug.`, ...) and so. Therefore it would be nice if _*all*_ side-effects would be handled in a similar manner
-data protection cannot be handled in the front end, surely?
-It can
-Come to my talk :slightly_smiling_face:
-but it’s javascript in the end anyway
-i’m not sure i understand
-on the backend - for sure the language can help
-Once the slides are made, I'll send you a private message and you can decide :wink:
-<@U2JFD9ALE> I'm interested in the slides too :smiley:
-<@U2JFD9ALE> sure thing
-I am trying to do a cross site posting and am having some trouble with Http.send &amp; Http.request. Http.request returns `Request ()` and Http.send says it is expecting `Request String`.  Where have I gone wrong?
-<http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#request> seems to return `Request a` which should be fine
-you just have to pass the right `expect`
-Better to show the code instead
-    Request String`
-because you handle its result as a `String`. If you do that, you also need to make sure the request actually expects a `String`
-OK, I think I get it. Thanks!
-<@U4872964V> - thanks again. took a couple of minutes before all was clear to me. All bright and shiney now!
-&gt; Note: I'm using `getString`
-I got all twisted up because of cross site posting
+U14Q8S4EM : Ive never done this exactly, but I bet you could make a custom html event handle that returns `(KeyCode, String)`
+U14Q8S4EM : Where the keycode is an `Int`
+U14Q8S4EM : So you can get the value and the key code of what happened most recently in one go.
+U0JBSEGHY : Yea there is this <http://package.elm-lang.org/packages/elm-lang/keyboard/1.0.1/Keyboard>
+U0JBSEGHY : But I still don't know where to go from here :confused:
+U14Q8S4EM : Thats a little different I think.
+U14Q8S4EM : So that listens to all mouse events in the whole window.
+U14Q8S4EM : Thats not what you want right?
+U0JBSEGHY : True
+U14Q8S4EM : Hold on a second
+U0JBSEGHY : ```onChange : (String -&gt; msg) -&gt; Attribute msgonChange tagger =
+    on "keydown" (JD.map tagger targetValue)``` this worked in that it compiles
+
+U0JBSEGHY : Custom Decoder instead of Custom Event Handlers.
+U0JBSEGHY : I'll keep chipping away at it :slightly_smiling_face:
+U14Q8S4EM : Ah okay
+U14Q8S4EM : Great.
+U14Q8S4EM : Well I just wrote up this bit of Elm, following on my idea
+U14Q8S4EM : <https://gist.github.com/Chadtech/f296740ee724e0d69d285aaf9b082b49>
+U0JBSEGHY : Don't know much about the decoders. So I will have to do a bit more reading to know what the map is doing
+U0JBSEGHY : Cool thanks. I will refer to it later if I get stuck and see if it helps me along further. Thanks so much for helping
+U5GJ5FEAU : i've seen a lot of examples of SPA with Elm, but how do non-SPA's use Elm? How can we have one js for Elm runtime and generate js for each page separately? instead of one huge js for the whole application
+U153UK3FA : <@U5GJ5FEAU> this is something you have to do manually. A build for each page if you want the JS to be completely seperate.
+U0JBSEGHY : Slowly coming together. Your gist did help <@U14Q8S4EM> I just had to change it to "keyup"
+U153UK3FA : but JS tends to gzip and minify better the larger the bundles so even with a non-SPA having a single bundle might be fine
+U5GJ5FEAU : <@U153UK3FA> that makes sense. though how can we manually compile the runtime and the elm application separately
+U6HCJ8JHM : Hello. Quick question: What is the recommended way to Json.Encode a list of records?
+U153UK3FA : <@U5GJ5FEAU> nope, you can't
+U5GJ5FEAU : oh! got it.
+U153UK3FA : <@U6HCJ8JHM> <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Encode#encode> has an example of encoding an object
+U6HCJ8JHM : I have my single object encoder made, but figured I'd have to map over it somehow and pass it to `Json.Encode.list` or something
+U0JBSEGHY : Does anyone know how to handle paste and cute in a form?
+U0JBSEGHY : So far I have this ```onChange : (( Int, String ) -&gt; Msg) -&gt; Attribute MsgonChange handler =
+    let
+        toTuple =
+            JD.map2 (,) keyCode targetValue
+    in
+        on "keyup" (JD.map handler toTuple)```
+
+U6HCJ8JHM : since list takes `Value` and my single encoder returns `User`, but my `UserEncoder` returns a `Value`
+U0JBSEGHY : Which handles the entering and deleting of items. Not sure how to handle a cut and paste
+U153UK3FA : <@U6HCJ8JHM> you put those `Value`s in a `List` and pass it to <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Encode#list>
+U153UK3FA : If you've got a `List User` you can `List.map` your encoding function to get a `List Value`
+U6HCJ8JHM : ah ok. i just had to put `List` in front of map and hit save in vscode haha
+U6HCJ8JHM : thanks for the help <@U153UK3FA>
+U0JBSEGHY : Is there a `paste` and `cut` event?
+U6B7NBTLZ : hello
+U6B7NBTLZ : How to update an element of a list?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

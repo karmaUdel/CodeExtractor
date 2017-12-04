@@ -1,9 +1,69 @@
+U40QW928G : ok I have that
+U40QW928G : ```fetchUser : Cmd msgfetchUser =
+    Http.send FetchUsers userEndpoint```
+
+U0LPMPL2U : right. Instead of hardcoding `FetchUsers`, pass it in as an argument
+U0LPMPL2U : that way `fetchUser` function has no dependency on the `Msg` type
+U40QW928G : oh ok
+U0LPMPL2U : ```fetchUser : (a -&gt; msg) -&gt; Cmd msg
+fetchUser tagger =
+    Http.send tagger userEndpoint
 ```
-Do not underestimate `awk`!
-awk is cool
-And its much more readable than `sed` version :wink:
-Yeah, but if you want to build this into an already existing Python program, a few lines of code will do.
-Oh wait OP mentioned two text files on his file system... :stuck_out_tongue_winking_eye:
-<@U13L8J76J> I figured it out ... I was doing everything right, but there was a missing _ in main ... can't believe I missed that and can't believe it didn't give me an error on that
-"Missing _"?
-I'm just building up a set up scripts to do everything in AWS as practice, as well as to help create a more automated envirnment for my partner (they do dev, I do ops)
+
+U40QW928G : ok but now
+U5ABF3BH7 : In my company, we are transitioning from Rails to Elm for the FrontEnd. So far, things have been built thinking only about the front end, building  models that make sense for the front end, and without thinking too much about the back end. Now I have the task of refactoring so that we have a better separation between data and views.  I am having a hard time because it is all tightly connected in several layers. For example, one view touches different database models, and the same database model is represented in  different views. I am a bit confused as what is the best way to encapsulate that in the view. Let's say I have an Address model, an Organization model and a person model (I have many more but it is to simplify). Both the organization and person have a contact information which in turn has phone numbers (which are all models). And all those fields are in one view. A person and an organization have an address.How would you design your view model to reflect that complexity, making it easy to encode and decode.  I know I am to separate your data from the view, but I am hesitant on what is the right way to go about it. Any advice? Sorry for the long paragraph.
+U40QW928G : It's yelling at me for this function type
+U40QW928G : ```userEndpoint : Http.Request (List User)
+userEndpoint =
+    Http.get (baseUrl ++ "/users") decodeUsers
+```
+
+U40QW928G : ```Function `send` is expecting the 2nd argument to be:
+
+    Http.Request a
+
+But it is:
+
+    Http.Request (List User)
+```
+
+U0LPMPL2U : Can you change the signature to `fetchUser : ((List User) -&gt; msg) -&gt; Cmd msg` ?
+U23SA861Y : Think it needs to be a `(Result Error (List User)) -&gt; Cmd msg`
+U40QW928G : ```The 1st argument to function `send` is causing a mismatch.
+
+20|     Http.send tag userEndpoint
+                  ^^^
+Function `send` is expecting the 1st argument to be:
+
+    Result Error a -&gt; msg
+
+But it is:
+
+    List User -&gt; msg
+```
+
+U0LPMPL2U : ah yes
+U23SA861Y : sry `(Result Error (List User) -&gt; msg) -&gt; Cmd msg`
+U23SA861Y : look at the type signature for send and replace `a` with `List User`
+U40QW928G : yeap that worked
+U40QW928G : now idk what to do with the update
+U40QW928G : how do I match fetchUser in my base
+U40QW928G : case*
+U31A7HG1E : I noticed this commit from a few days ago in elm-lang/elm-compiler:  <https://github.com/elm-lang/elm-compiler/commit/1361e2b6469be2af57a2694fae6c81bdba36c845>
+U23SA861Y : `UsersFetched (List User)` would be one of your main message types
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

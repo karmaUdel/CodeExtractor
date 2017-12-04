@@ -1,62 +1,88 @@
+U6C09T8HX : ...with the same name?
+U0JFGGZS6 : <@U3F8KG1DE>  you may find this helpful for getting to the next sibling and its scrollHeight:  <http://package.elm-lang.org/packages/debois/elm-dom/1.2.3/DOM>
+U0JFGGZS6 : without resorting to ports
+U48AEBJQ3 : <@U6C09T8HX> It is an alias for a type defined in another module. In this case, a module which is not exported from the package.
+U6C09T8HX : hmmm
+U6C09T8HX : Forgive my ignorance gilbert, but are you saying that the http package contains a module somewhere within it which defines the Request type but since it is not exported by that module we see this: "type alias Request a = Request a"?  So all I need to take away from that like is that something can be tagged as a request?
+U48AEBJQ3 : It seems that there are two issues in your question. First is that there is no special way to reexport types and functions from a module and sometimes you end up having something in a module you don't want to export. Using this type alias is effectively exporting just this type from the other module.
+Also, it is very common to *not* export the constructors of a data type. By leaving them hidden, the maintainer can change implementation details without changing the exposed API. It also helps to prevent people from creating bad states by forcing them to use controlled functions to get an instance of a type.
+
+U3LUC6SNS : Hello, I have two functions that I would like to run in sequence in the `update` function:
+First is 
 ```
-Yeah, or do the filtering at the view level, which is what I would start with.
-Or `data` and a `filter` which is a union type of the kind of filter, then the filter is applied dynamically. (Only works if its a small data set)
-Ask why you need to keep the filtered data vs just the filters and apply them when rendering
-`type Filter = All | Unread | Replied | None`
-caching the filtered data feels like an optimization that leads to this potentially unnecessary complexity
-yeah this, apply the filter at render time
-so don’t have a filter msg?
-We have a situation like this in our system, and we just store which filter they want (since we have a set number)
-I would have a filter msg `Filter FilterType`
-instead of doing it in the update, do in a view type function?
-Then, in your model, store the `currentFilterType : FilterType`
-Save what filter they are looking for, not the filtered data.
-Then, when rendering the view, filter the data
-nice
-I like it!
-`filter : FilterType -&gt; Data -&gt; Data`
-The general approach is to calculate everything you can until you need to optimise. Then insert a cache.
-just implemented that soluition <@U0FP80EKB>, really nice and elegant!
-It's basically also how elm-sortable-table works, fyi.
-if time comes to optimize, a light salting of `lazy` and possible `keyed` should do the trick
-yup
-hey everyone.  i have a quick question.  does Elm have any particular solutions for problems related to windowing, a la Reacts `fixed-data-table` or `react-virtualized`?
-what are those?
-Just something like `List.filter` ?
-From a quick look at `react-virtualized`'s GitHub page, it seems kinda like Elm's `Html.Lazy` ?
-<@U3GHR2G91> what do they do?
-is it something like  <http://package.elm-lang.org/packages/FabienHenon/elm-infinite-list-view/latest> ?
-let's say you have a long list
-with sorting or something like that
-ahh, hold on, brb
-I bet the answer is `List.filter` :slightly_smiling_face:
-don’t jump to conclusions, folks
-<@U3GHR2G91>, what are you trying to do?
-let's say you have a very long list, it doesn't make sense to pay the cost of rendering every item
-these solutions give you an aperture (i.e. calculate the portion of you rlist that is visible in browser)
-it can vastly improve perf
-<@U3GHR2G91> have you run in to this as a real issue in Elm yet?
-nope
-but i have in React, using immutable data structures
-i could put together a POC pretty easily
-That would be best :slightly_smiling_face:
-There are many possible ways to solve a problem like this, hence why you got three different answers.
-However, the best way to know how to solve your problem is to have an example of _your_ problem :slightly_smiling_face:
-has anyone worked on a stats package in elm?  even basic descriptive stats?
-I found <http://package.elm-lang.org/packages/myrho/elm-statistics/latest>  but it looks like just a bare beginning
-<@U0JFGGZS6> I'm using that for R7 but would appreciate more :slightly_smiling_face:
-I played around with implementing quantiles last night off the wikipedia page
-(amazing how little stats you need to know if you have some formulas/algorithms!)
-but ended up with a lot of questions in my mind about api design. which is maybe where I should ask these questions -&gt; <#C2MFMKHDX|api-design>
-<https://runelm.io/c/66v>
-You probably don't need a phantom type there, tbh. It doesn't really add anything at this point :slightly_smiling_face:
-OK, this was one of my basic questions. With stats functions you often need a sorted list/array. And often you need it at several different points. So rather than sort multiple times, it makes sense to require that the calling context pass it in sorted.
-The phantom type there was a way of enforcing that the passed in list is sorted
-I'm not sure I understand how that type enforces that the list is sorted? :slightly_smiling_face:
-you would have to call `Quantiles.sort myData`  to pass your data in to `quantile`
-at present it doesn't but if this was in a module and the FVector constructor was not exported then it would have to be obtained by that modules sort call
-right exactly
-Ah, so it's a way to tag data to say "this has already been through our sort function" ?
-right
-nice!
-that's clever, I wouldn't have thought of that :thumbsup:
+login2 : Model -&gt; (Model, Cmd Msg)
+login2 model =
+  ( login model,  Request.User.loginUserCmd model Request.Api.loginUrl)
+```
+and second is
+```
+search : SearchDomain -&gt; String -&gt; Page -&gt; Model -&gt; ( Model, Cmd Msg )
+search searchDomain query page model = ...
+```
+How would I go about doing this?
+
+U6C09T8HX : oThank you very much for taking the time to answer my question Gilbert!  It's very much appreciated.  How can I repay you?
+U6C09T8HX : ...and what motiates you to hang out here and answer questions?
+U153UK3FA : <@U3LUC6SNS> ```let
+  (model1, cmds1) = login2 model
+  (model2, cmds2) = search searchdomain something somepage model1
+in 
+  (model2, Cmd.batch [cmds1, cmds2])
+```
+
+U153UK3FA : <http://package.elm-lang.org/packages/Fresheyeball/elm-return/latest> is a package that can remove some of the boilerplate
+U3LUC6SNS : Thankyou <@U153UK3FA>!!
+U153UK3FA : <@U3LUC6SNS> I wasn't sure if you wanted to sequence the Cmds (which you can't do)
+U3LUC6SNS : <@U153UK3FA>, that works fine - actually, it works beautifully!
+U153UK3FA : just to be clear, there is no guarantee that your login will complete before your search request.
+U153UK3FA : if they depend that ordering (implicitly passing state through the model) then they'll likely fail under different network conditions
+U48AEBJQ3 : <@U6C09T8HX> Just try to be a decent person who makes the world a bit better. I don't have a rationalization for why I do this.
+U6CEJALSF : hey folks! new to elm and taking the knowthen course on elm beginners concepts.  I'm a JavaScript developer by day, which is a pretty natural progression into elm, I think.(link to _free_ course: <http://courses.knowthen.com/>)
+
+U6CEJALSF : I hope to get to know Elm a lot better over the coming months, partly for self-enrichment, partly in order to convince my team that Elm is a big step in the right direction for web UIs.
+U0JBSEGHY : I've got this message. ```type Msg    = Answer String
+    | MakeCall String
+    | IncomingCall Maybe String```
+
+U0JBSEGHY : My update is giving me this error ```Pattern Main.IncomingCall has too few arguments.
+220|         IncomingCall caller -&gt;
+             ^^^^^^^^^^^^^^^^^^^
+Expecting 2, but got 1.```
+
+U153UK3FA : <@U0JBSEGHY> `IncomingCall (Maybe String)`
+U0JBSEGHY : I'm calling it from a subscription. ```subscriptions model =    Sub.batch
+        [ incomingCall IncomingCall ....```
+
+U0JBSEGHY : Oh
+U0JBSEGHY : ```The argument to function `incomingCall` is causing a mismatch.
+276|           incomingCall IncomingCall
+                            ^^^^^^^^^^^^
+Function `incomingCall` is expecting the argument to be:
+
+    String -&gt; msg
+
+But it is:
+
+    Maybe String -&gt; Msg
+```
+
+U0JBSEGHY : I just needed to add Maybe String to my port it seems
+U0JBSEGHY : slowly getting the hang of this Types thing :slightly_smiling_face:
+U3F8KG1DE : I thought so too but this way feels like a workaround. I mean perhaps there is another way to acheive the same goal i.e. to animate some div element?
+U3F8KG1DE : <@U0JFGGZS6> I thought so too but this way feels like a workaround. I mean perhaps there is another way to acheive the same goal i.e. to animate some div element?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

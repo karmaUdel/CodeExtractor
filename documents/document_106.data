@@ -1,41 +1,79 @@
+U0LJU20SJ : <@U0E0XL064> no, from what I understand it is about the macro expansion of the specs:```
+src/service/routing/spec.clj:40:17: suspicious-expression: and called with 1 args.  (and x) always returns x.  Perhaps there are misplaced parentheses?
+
+src/service/routing/spec.clj:44:22: suspicious-expression: and called with 1 args.  (and x) always returns x.  Perhaps there are misplaced parentheses?
+
+src/service/routing/spec.clj:38:20: constant-test: Test expression is always logical true or always logical false: 2 in form (if or__5058__auto__ or__5058__auto__ (clojure.core/or 0))
+
+src/service/routing/spec.clj:38:20: constant-test: Test expression is always logical true or always logical false: nil in form (if nil (clojure.core/inc nil) 2)
+
+src/service/routing/spec.clj:38:20: constant-test: Test expression is always logical true or always logical false: nil in form (if or__5058__auto__ or__5058__auto__ (clojure.core/or 
 ```
-?
-isn't that pretty much what the actual implementation does?
-<@U5ZAJ15P0> that binds `x` in the else branch
-`if-let` doesn't
-that's what the extra local binding is for
-<@U060FKQPN> oh, I see. that makes sense; thanks!
-I am getting a StackOverflow error when trying to use log4j with Leiningen, could someone please take a look at the stacktrace? <https://gist.github.com/hmaurer/40c1bc6d08550222f65e06a6366f0eb9>
-fixed it by removing a few dependencies… still strange though, I would like to understand why simply adding dependencies to project.clj could cause a stackoverflow error when launching the repl
-Hi everyone, I've been doing some experiments on visualizing clojure.spec fails and ended up wrapping them in a library
-<https://github.com/jpmonettas/inspectable>
-maybe it's useful to someone else
-Given that I have figwheel set up to use a ring handler via `:ring-handler`, and that handler is also set to auto reload via `ring.middlware.reload/reload`, is there some way I can make it reload *everything*? Basically restart the whole deal. I'm working with a library called `sente` which is for websocket communications, and it doesn't look like the code that initializes everything related to that is being re-run, so it's kind of painful to iterate.
-what I do is put all the code that has a lifecycle into <https://github.com/stuartsierra/component> so I have a way to restart the entire thing
-<@U0739PUFQ> Hmm, alright. I'll see if I can whip something up that works. Thanks :slightly_smiling_face:
-don't know if you are currently using something like components or mount
-but I've done that with sente
-you create something like a web-server component, and in the start/stop of that component you start/stop http-kit server, sente channels etc
-Okay, I see. Is it possible to get that to play well with figwheel using `:ring-handler`?
-I mean, if you move all the stuff that deals with state into components, and then create a system(a bunch of components) you end up with a restart fn you can use wherever you want
-I never fired it from that reload middleware but can't see any issues with that
-I see. I guess I just don't quite grok how all these things work together. But I'm sure I can come up with something from what you've told me. Thanks!
-does anyone have a pro-tip/link to an example of using core.async with ring? or some other http server? like how does one wait for input on a channel and flush said result to a response?
-aleph actually has an async request handler infrastructure - and it uses manifold that is designed to integrate easily with core.async
-if you use eg. jetty your async code will run but there will still be a blocking thread per request until you respond
-the real question I guess is why you are using async, then you can use that answer to guide how you integrate that with a ring server
-for the go-loop as you show it, you end up with a single block of code that can only deal with one request at a time - there's valid reasons to do this sometimes but it's a pretty severe bottleneck
-awesome - I will look into aleph. I was thinking of using core.async as a general abstraction on input/output
-something like that
-when I say "one request at a time in the block" I mean globally, only one of your requests can be in that block - so if you have five concurrent clients, it takes 5x as long to complete
-which usually isn't the kind of behavior you want in a web server at all
-yeah :confused:
-trying to figure out how to use the results of `(&gt;! out)` in that example
-with manifold, you can set up a function that gets called with an input channel and an output channel, and it is instantiated as many times as you get requests, which is a more reasonable pattern of behavior
-Is there a way to quickly run tests when a file changes? Manually running `lein test` takes about 10s to boot for me, and using <https://github.com/weavejester/lein-auto> take the same time
-I assume the delay is coming from the jvm boot time, but I don't know how to avoid it
-<@U5ZAJ15P0> fyi lein test just uses clojure.test, and you can require that and run `(clojure.test/run-all-tests)` in your repl (after requiring your test namespaces of course)
-<@U5ZAJ15P0> I'd recommend running tests from a persistent repl, and using something like clojure.tools.namespace to ensure code is reloaded and up to date
-you could hook up the run-all-tests to run as part of your system refresh if you have such defined
-<@U051SS2EU> ah, good point. Thanks!
-thanks! hadn't thought of that
+
+U0E0XL064 : Well, I guess eastwood is not clojure.spec compliant yet. You may add an issue to <https://github.com/jonase/eastwood/issues> ?
+U0E0XL064 : similar issues seem to exist already: <https://github.com/jonase/eastwood/issues/207>
+U0LJU20SJ : jumm I was hoping to be wrong. The question is rather is eastwood at fault or clojure.spec? because those expanded expressions do look suspicious
+U1B0DFD25 : Is `clojure.core/hash` always non-negative?
+U060FKQPN : no
+U060FKQPN : it uses the full int range
+U1B0DFD25 : Thanks
+U3J7HSKNC : this might be a dumb question - it likely is - but what is the best way to define a spec in `clojure.spec` for an argument that is a function of arity 1?
+U3J7HSKNC : is that a thing?
+U3J7HSKNC : Something that could be used to spec a function like `take!` from `core.async`:
+```
+(defprotocol ReadPort
+  (take! [port fn1-handler] "derefable val if taken, nil if take was enqueued"))
+```
+
+U3J7HSKNC : for `fn1-handler`
+U068SUJNT : How could I combine two images?
+U1B0DFD25 : What's the pattern in Integrant/Component REPL development to pick up an edited configuration file on reset? Do you make it a component in the system? I'm building my system object according to the config so I can't do that.
+U06FTAZV3 : <@U1B0DFD25> I tend to read the config file each time and merge the result into my system map. Using Aero to read the EDN file I then do something like this: `(merge-with merge system config)`.
+U06FTAZV3 : With a component like this:
+```
+(defrecord Datomic [uri]
+  component/Lifecycle
+  ;; ...
+  )
+```
+
+And a config file like this:
+
+```
+{:datomic {:uri "datomic:<mem://my-app>"}}
+```
+
+U06FTAZV3 : And a system map like this:
+```
+(component/system-map :datomic (map-&gt;Datomic {}))
+```
+
+U06FTAZV3 : Integrant does things slightly differently I believe?
+U06FTAZV3 : Looks like Integrant will reload your config from this: <https://github.com/weavejester/integrant#configurations>
+U1B0DFD25 : <@U06FTAZV3> Integrant config is the equivalent to Component's system, so it won't just re-read my external config file.
+U06FTAZV3 : Yeah, from a quick look at the Integrant README, there is no explicit system map in Integrant.
+U1B0DFD25 : That's what I like about it, the system map is data.
+U06FTAZV3 : Component's system map is data too. :slightly_smiling_face:
+U06FTAZV3 : If you've got a `config` somewhere as per the README, and reloading is done via clojure.tools.namespace, I'd expect changes to the file to show up.
+```
+(def config
+  (ig/read-string (slurp "config.edn")))
+```
+
+U06FTAZV3 : Can't say I've used Integrant before though. Sorry.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,0 +1,182 @@
+U0702F2CE : similarly this looks like a rktio failure: <http://drdr.racket-lang.org/40902/racket/collects/file/private/glob.rkt>
+U0702F2CE : If it would be helpful to track these elsewhere, I can do that
+U0702F2CE : and <http://drdr.racket-lang.org/40902/pkgs/racket-test/tests/file/cache.rkt>
+U3NJS8H7C : Thanks – I've been looking at those, but I haven't yet fixed them
+U3NJS8H7C : <@U3VGR2S7Q> I think the test failure with "unix-socket.rkt" is a bug in "unix-socket.rkt". When the custodian-shutdown callback is triggered for a listener, the listerner struct still has a value for `fd` – so the `prop:evt` callback can recreate the semaphore for `fd` even though that's not a valid file descriptor anymore. Adding a poll of `reg-box` before creating the semaphore makes the test to pass on my machine, but if I'm diagnosing the problem correctly, maybe there's a better repair.
+U3VGR2S7Q : <@U3NJS8H7C>, yes, that makes sense. But now I can't understand why it ever worked in the past. Any idea what changed?
+U3NJS8H7C : The way the fd-semaphore table interacts with the scheduler is probably slightly different than before
+U3VGR2S7Q : I think maybe that code is trying too hard to compose a pretty solution out of nice pieces like custodian-boxes-acting-as-evts. It might be cleaner with another custodian shutdown procedure specialized to listeners. I'll try that.
+U3VGR2S7Q : <@U3NJS8H7C>, just pushed a fix
+U5KU1HNKY : my get-info function for my #lang is buggy… is there a lighter weight way to test it w/o reloading drracket left and right?
+U5KU1HNKY : ```exception raised by exception handler: result arity mismatch;
+ expected number of values not received
+  expected: 1
+  received: 7
+  values...:
+   "\n"
+   'white-space
+   #f
+   12
+   13
+   0
+   #f; original exception raised: colorer.rkt:11:5: srcloc-token: unbound identifier in module
+  in: srcloc-token
+```
+
+U5KU1HNKY : ok… I have that fixed… tho I have to say I have no idea how / why the lexer coloring function works the way it does. Also seems buggy. If I type `prin` it in red. It should go black when I add the final `t` for `print` but then I have a word that is 80% red and 20% black. DrRacket doesn't seem to re-lex &amp; color the whole word as it changes?
+U3NJS8H7C : <@U5KU1HNKY> DrRacket's colorer depends on the lexer giving it information to back up just enough to recolor. I'm guessing that something about the lexer prevented the colorer from going pack to the "p" to re-lex from there. Exactly what went wrong is difficult to guess, although I recall implementing error tokens wrong once or twice, maybe because it's easy to have the wrong backup or not have the error range covered by a single token.
+U3NJS8H7C : <@U0702F2CE> On Travis tests: It looks like we spend about 15 minutes on `make`, about 8 minutes on `racket-test-core`, about 20 minutes on `raco pkg` tests, and a little while for the rest.What if we drop the `raco pkg` tests? Has that set of test ever exposed a problem via Travis that wasn't discovered otherwise (either through DrDr or other tests)?
+
+U0702F2CE : <@U3NJS8H7C> I think we probably have at some point, but maybe not enough to be worth it (or worth trying to make the `raco pkg` tests faster)
+U0702F2CE : let me look at the history for the pkg code
+U0702F2CE : <@U3NJS8H7C> Travis exposed some problems in the `raco pkg` tests themselves, and it's possible that <https://github.com/racket/racket/commit/a5f6bf34dc75e33dd8a09d6ee7c9ea509395feb2> was motivated by Travis tests (but hard to tell now)
+U0702F2CE : that seems to be it that I can find
+U0702F2CE : Not sure that's enough of a positive record to be worth running 80 min of tests on every commit
+U3NJS8H7C : <@U0702F2CE> I don't recall the immediate motivation there, either. Turning off the `raco pkg` test for Travis seems right to me.
+U5KU1HNKY : <@U3NJS8H7C> this is what I'm working from: <http://beautifulracket.com/basic-2/the-syntax-colorer.html> — seems straightforward to me. I would have thought it would always be going back some to do coloring… I do find it rather odd that it is creating a `basic-lexer` on each call. What if the language needed stateful info to tell?
+U3NJS8H7C : I'll look a little more, but to answer your last question, the coloring API supports an extended mode to let you thread through state (i.e., store-passing), so the colorer can keep track of which state to send back if it needs to resume from a particular point
+U3SEVDPJT : hi <@U3VGR2S7Q>, may I ask how you were able to configure the build you used to test <https://github.com/racket/racket/pull/1704> changes? I tried doing a local merge with the master branch but the build keeps failing with Racket aborting in middle of `raco setup` so I'm currently unable to replicate the errors you got.
+I do totally believe you :slightly_smiling_face: and I understand that my code caused SQL_BUSY status codes to be converted into raised exceptions, breaking automatic retry. I'm just concerned that I'm effectively blind to seeing that at my end.
+
+U3NJS8H7C : zenspider: I'm not clear what code you're running. Do you mean that you're using "basic-2-tutorial.zip" unmodified?
+U5KU1HNKY : sorry, no. I have implemented all of basic up to the point of implementing the completed colorer, so `#lang basic` w/ my own main and basic/colorer. Lemme see if I'm fully pushed
+U5KU1HNKY : OK. I am: <https://github.com/zenspider/schemers/tree/master/br/basic>
+U3VGR2S7Q : <@U3SEVDPJT> I started with the current master branch and used `hub am` (`hub` is a github-enhanced version of the `git` command) to add your changes. The effect should be the same as starting with your PR branch and rebasing with the current master branch. (And probably the same as just doing a merge, except without the merge commit.) How is the build failing? Out of memory, or something else?
+U3NJS8H7C : Ok, I guess I'm actually unclear on how to get into the state you showed. But I also notice that keywords are given the style `'no-color`, which seems to mean "don't change the color" – that is, if "prin" was formerly red to show an error then it won't be changed to a different color if it becomes part of "print"
+U5KU1HNKY : that's exactly the scenario. I can make a video to show it… but put `print” up there, it'll turn a proper color, backspace once and wait until "prin” goes red, and then type "t”. Only the "t” is black at that point.
+U5KU1HNKY : sorry to bother you with this. mbutterick isn't on anything online and doesn't respond much to my MANY reports against his content
+U5KU1HNKY : well… damn. I can't reproduce the red color right now either… I'm gonna have to back up to figure out why/how
+U5KU1HNKY : OK. Yes, I can reproduce. I had an extra commit from halfway through the next section which adds variables to the lexer. If I roll that out, then the 80% red 20% black thing sticks. If I change the no-color line to symbol, then it does redraw properly. Is there a "normal-but-not-no-color” value? I don't see where drracket's color semantics are documented
+U5KU1HNKY : OK. I used `ag` and dug up `syntax-color` module and decided a fair default was `other` and it seems to have fixed it… I'll send that as feedback to BR
+U3SEVDPJT : So far when I'm building a fresh `amd64` binary on my Windows machine using `nmake win32-in-place` it fails with either error `nmake : fatal error U1077: 'racket/racket.EXE' : return code '0xc0000005'` or `nmake : fatal error U1077: 'racket/racket.EXE' : return code '0xc0000374'` Googling those error codes tell me that it appears to be a memory corruption issue. 
+I tried doing build based off just the `master` branch without my changes merged and also a fresh build after doing a checkout of the v6.9 tag. I still get failing builds so I think this is something specific to my machine. I don't know yet what's wrong, I was able to build from the v6.9 codebase without issues at least a month ago.
+
+I'll give this another try when I have access to a different Windows machine. Are you satisfied with the most recent PR commit push?
+
+U3VGR2S7Q : <@U3SEVDPJT> yes, I'll push them, thanks!
+U07SJGB4H : <@U3QF0EM0E> did you have more comments on <https://github.com/racket/rackunit/pull/41> or shall I merge?
+U3QF0EM0E : go merge!
+U07SJGB4H : huzzah!
+U0702F2CE : <@U3NJS8H7C> since the rktio changes, this test and a few like it have been failing on and off: <http://drdr.racket-lang.org/41014/pkgs/racket-benchmarks/tests/racket/benchmarks/shootout/typed/echo-non-optimizing.rkt>
+U0702F2CE : I realize that's not the most helpful diagnostic information
+U0702F2CE : It's also not clear if this is a concurrency bug in the tests that just started happening because of your changes, or if it's a real bug in Racket
+U3NJS8H7C : <@U0702F2CE> Is port number 8888 reserved in DrDr for that test?
+U0702F2CE : It's the only occurrence of 8888 in `racket/racket`
+U3NJS8H7C : I guess non-registration would be a `listen` error anyway
+U0702F2CE : is there a reservation mechanism in DrDr that I've forgotten about?
+U3NJS8H7C : There's some list of ports somewhere. Maybe it's not actually registered other than being in the list.
+U3NJS8H7C : Looking at that test, though, isn't there a race between the client starting and the server listening?
+U0702F2CE : it does look like a race
+U0702F2CE : looks like the race was there from the beginning, in <https://github.com/racket/racket/blob/d615bccb08274398f347b78a1dd746fe40eb3671/collects/tests/mzscheme/benchmarks/shootout/echo.ss>
+U0702F2CE : I'll add some synchronization
+U5KU1HNKY : <@U0702F2CE> what's the racket'y way of doing that? I don't find an equivalent to C/unix `select`, which is what I'd normally reach for…
+U0702F2CE : <@U5KU1HNKY> `sync` is the equivalent of `select`
+U0702F2CE : but in this case I think I can just start the client later
+U0702F2CE : no, that's wrong too
+U5KU1HNKY : heh. sure.
+U5KU1HNKY : hrm. sync is on _any_ data you send through the channel?
+U5KU1HNKY : that's nice
+U0702F2CE : `sync` is very nice
+U0702F2CE : and more composable than select
+U5KU1HNKY : but `break` is an exception, not some sort of event you send through?
+U5KU1HNKY : hrm… I can't tell how the break stuff gets fired
+U5KU1HNKY : is it more idiomatic to send off a `break-thread` to all your child threads or to send through some sort of `stop` datum/event to all of them?
+U0702F2CE : <@U5KU1HNKY> why would you need to do that?
+U5KU1HNKY : thinking of the worker model… fire off a pool of threads to do work, throw them things to work on via `sync`, then when you're done shut them down by telling them to stop somehow
+U5KU1HNKY : might be backwards thinking in racket land
+U0702F2CE : mostly you do `thread`-per-connection
+U07SJGB4H : worker thread pools are more useful when stopping and starting threads is expensive and the resource overhead per-thread is significant
+U07SJGB4H : for green thread systems like racket's that's typically not the case
+U0702F2CE : right, I use pools of Racket places in some situations
+U0702F2CE : since those are expensive
+U07SJGB4H : a package providing a nice place-pool abstraction might be useful
+U07SJGB4H : <@U0702F2CE> out of curiosity, do you know of any multicore webservers written in racket with places?
+U0702F2CE : I think I've seen examples, but not that I recall offhand
+U3ZV4UG3T : <@U07SJGB4H> I've played around with that idea in the past. I think it would be a bit more straightforward if a tcp listener could be sent over a place channel.
+U07SJGB4H : <@U3ZV4UG3T> how'd it work out? my first impression is that it seems like individual places should be responsible for binding to OS ports, but I haven't really done more than idly daydream about the problem
+U3ZV4UG3T : <@U07SJGB4H> I never took the idea very far :slightly_smiling_face:
+You definitely could have different places bind to different ports, but then you'd need a proxy layer in front of that, right? You can also leave a single place in charge of accepting connections and handing them off to workers (which is what I was toying around with), but that seems like a bit lightweight of a task for a place.
+
+U07SJGB4H : proxy layer would definitely be needed, yes
+U07SJGB4H : specifically I was thinking of how to make a Racket web service with the SEDA architecture <https://en.wikipedia.org/wiki/Staged_event-driven_architecture>
+U07SJGB4H : <@U3QF0EM0E> :party: :party: :party: <https://github.com/racket/rackunit/pull/48>
+U0702F2CE : <@U3QF0EM0E> <http://drdr.racket-lang.org/41016/racket/share/pkgs/redex-test/redex/tests/run-tests.rkt> looks like it's caused by your changes
+U07SJGB4H : <@U3QF0EM0E> responded to #48, assuming your approval means it's good to merge
+U07SJGB4H : death to the monads :tada:
+U3QF0EM0E : yep! I just had those little questions
+U07SJGB4H : thanks for all the reviews :)
+U3QF0EM0E : of course, I'm just a concerned user of Rackunit. Thanks for all the improvements
+U07SJGB4H : would it be inappropriate for rackunit to depend on `syntax/parse`?
+U07SCV14J : I doubt it would be a problem, given that `syntax/parse` is in `base`
+U07SJGB4H : I'm less worried about package dependencies and more worried about test execution speed slowing down if loading `syntax/parse` is expensive
+U07SCV14J : I guess that's a valid concern, yeah
+U07SJGB4H : but I have no idea how expensive loading `syntax/parse` is
+U0702F2CE : It should be fine
+U5KU1HNKY : Is there a way to "run” an input file as if it had a `#lang xxx` line at the front… basically say eval this port/file/whatever with xxx lang?
+U5KU1HNKY : I want to write a more "traditional” style of tool, then have that slurp into racket as if it were a `.rkt` file with a proper `#lang`
+U0L0F9F2Q : <@U5KU1HNKY> if its a module language (and doesn't have a special reader), you can read the file in, construct a module with the language xxx and the read in stuff as the body, and eval that. might be an easier way though
+U3NJS8H7C : <@U5KU1HNKY> If the module language does have a reader, you can call it directory, but another option is to use `input-port-append` to add the `#lang` line. In any case, to handle relative paths,  you'll want to set `current-load-relative-directory` while reading; to get the module declaration associated with the original path, set `current-module-declare-name` during `eval`.
+U086VDRBK : Is the order of the marks of continuation-mark-set-&gt;list specified?  <http://docs.racket-lang.org/reference/contmarks.html>
+U0702F2CE : <@U086VDRBK> the innermost mark is first, I think
+U086VDRBK : Makes sense.
+U0702F2CE : discussion about 2d syntax on Hacker News: <https://news.ycombinator.com/item?id=14657857> (cc <@U3NGSC6AF>)
+U3NGSC6AF : whee!
+U0702F2CE : it's actually pretty positive
+U086VDRBK : There has been some Racket talk on HN lately.   <https://hn.algolia.com/?query=racket&amp;sort=byDate&amp;prefix&amp;page=0&amp;dateRange=pastWeek&amp;type=all>
+U5KU1HNKY : are there macro forms of IO that don't take thunks? (iow, use `expr ...`) just feels klunky
+U5KU1HNKY : also, I'm trying to do <@U3NJS8H7C>'s suggestion of using `input-port-append` to prepend a `#lang` line … Will location info be for the concatenation or for each port being used? IE, will error info be off-by-one?
+U5KU1HNKY : Hrm… actually:
+```
+UNKNOWN::0: read: #lang not enabled in the current context
+```
+
+U5KU1HNKY : … that must be from C? I can't find it in the racket source
+U07SD9T7W : <@U5KU1HNKY>  `#lang not enabled in the current context` usually means you want `with-module-reading-parameterization`
+U5KU1HNKY : looking… I used `(read-accept-reader #t)` and feel like I'm going down a rabbit hole
+U5KU1HNKY : same rabbit hole:
+```
+dynamic-require: name is not provided
+name: 'read
+module: #&lt;resolved-module-path:(submod "/Users/ryan/Work/git/zenspider/schemers/br/basic/main.rkt" reader)&gt;
+```
+
+the only dynamic-require I use anywhere is for the colorer, which shouldn't be invoked at this point
+
+U5KU1HNKY : also, `syntax/modred` vs `syntax/module-reader`? :confused:
+U5KU1HNKY : ok. Stole some code from <https://github.com/AlexKnauth/postfix-dot-notation/blob/master/postfix-dot-notation/lang/reader.rkt> and have it reading in correctly. Don't understand why `read` is the wrong approach but `read-syntax` works just fine
+U5KU1HNKY : can somebody help me with this last bit? I clearly don't understand something in the glue of racket's `#lang` handling:
+<https://gist.github.com/6c4e50cdea9925f706ac1ff0019e3105>
+
+outputs:
+
+```
+code:
+(module basic-mod basic/expander
+  (b-program
+   (b-line ...lots of stuff...)))
+define:
+run:
+dynamic-require: unknown module
+  module name: #&lt;resolved-module-path:'basic-mod&gt;
+  context...:
+   /Users/ryan/Work/git/zenspider/schemers/br/basic/basic: [running body]
+```
+
+U3NJS8H7C : The module is declared in `ns`, but `ns` isn't the current namespace when `dynamic-require` looks for a module.
+U5KU1HNKY : but if  I declare the module in current-namespace then it blows up because `module` and `#%app` aren't defined
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,0 +1,94 @@
+U6DG2DGAK : Does anyone know whether this elm-compiler bug is known?
+U0EUHKVGB : <@U6DG2DGAK> looks like a recursion bug of some sort. hard to say without seeing more code
+U6DG2DGAK : well the code is online: <https://github.com/matheus23/elm-ide/blob/490e747002cd1446169420bc0c09c5f51c084d28/src/Edit/Type.elm#L107>Its not _that_ much, but its not that little either...
+
+U6DG2DGAK : I have already had experience with recursion bugs in elm, but after looking as hard as I could, I couldn't find any lets that seemed odd
+U6DG2DGAK : I looked through the elm-compiler open issues, and didn't find anything that looked related. I'll try to create a smaller test case
+U6DG2DGAK : ah and I'm sorry. Its got nothing to do with currying. Its actually called "eta abstraction/reduction" I just saw
+U23SA861Y : god is point free syntax ever hard to read
+U2GTQM83A : Hi people. I've got a tough problem for which I cannot find a solution that doesn't involve type classes.
+I fetch objects from the server that, depending on the request, will have a full object in a field or just the object ID. To support that in my types, I have something like this:
+```
+type alias Book author = 
+   { name: String
+   , author: author
+   }
+```
+This way I can define what I expect to be inside book. The same happens with my decoders.
+But in my http request I say which fields should be populated using strings. Something like `/books?embed=author`. I don't have any type safe way to relate my type to what I send in the `embed` field of the url.
+
+What I need is a function that given the type `Book String` would return `[]` and given the type `Book Author` would return `["author"]`.
+
+*Is this possible in Elm?*
+
+U1CE9DL9H : not in this fashion, you'd need to bring stuff down from the type level to the value level, so `Book AuthorOrString` where `type AuthorOrString = A Author | S String`
+U23SA861Y : that and a oneOf decoder
+U2GTQM83A : I don't have an instance of the type when doing Http requests, but I do have the decoder. I was thinking of doing something on the lines of```
+authorToEmbed : SomeType Author -&gt; String
+authorToEmbed d = ["author"]
+
+bookToEmbedString : SomeType a -&gt; SomeType Book a
+```
+
+But I can't really figure out how that would work
+
+U2GTQM83A : <@U23SA861Y> I'm not really trying to decode it. I'm trying to encode it.
+U2GTQM83A : Is there anything like `oneOf` for encoding?
+U0PC31XD0 : <@U6DG2DGAK> did you try defining the function that isn’t working in non-point-free style? might help diagnose the issue
+U23SA861Y : umm well in a sense yes. If you are using a union type an encoder would be simple enough to construct
+U23SA861Y : if you have control over then endpoint you probably shouldn have different types of data going to the same place but if you have to then..
+U2GTQM83A : Hmm. but I'm not using a union type. That's the thing. I know exactly the type I want. Sometimes I want a Book Author. Sometimes I want a Book String.
+U23SA861Y : in elm it should be a union type
+U23SA861Y : the actual record you encode doesn't have to be, but in elm you need something to tell you what data you have and the type you should use for that is a union
+U2GTQM83A : Not in this case. I have a big codebase with different Elm programs. They all share the same types, but each will use the type with different content in it.
+U2GTQM83A : Some might need to access the author of the book, so I ask the server to do a join in the database and send that. Another program will only need the book's own properties. So the author field doesn't need to be populated.
+U2GTQM83A : Here is an example decoder from my production codebase:```
+userStructure : Decoder position -&gt; Decoder contact -&gt; Decoder team -&gt; Decoder (UserStructure position contact team)
+userStructure positionDecoder contactDecoder teamDecoder =
+    decode UserStructure
+        |&gt; required "_id" string
+        |&gt; required "email" string
+        |&gt; required "active" bool
+        |&gt; required "permission" (adtDecoder userPermission)
+        |&gt; optional "position" (nullable positionDecoder) Nothing
+        |&gt; optional "contact" (nullable contactDecoder) Nothing
+        |&gt; optional "team" (nullable teamDecoder) Nothing
+
+```
+
+U2GTQM83A : In this case, position team and contact may be strings or something else.
+U2GTQM83A : I know that I can map from a JS string to my type. Now I need to map from my type to a specific Elm value.
+U2GTQM83A : I can go from one decoder to a string. like this.```
+projectToEmbed : Decoder Project -&gt; String
+encodeProject a =
+    "created_by"
+```
+
+U2GTQM83A : But I don't know how to do it if my decoder type is parameterised. Like `Decoder (Project a)`
+U0CL0AS3V : &gt; What I need is a function that given the type `Book String` would return `[]` and given the type `Book Author` would return `["author"]`.&gt; [...]
+&gt;  I know exactly the type I want. Sometimes I want a Book Author. Sometimes I want a Book String.
+
+since you know exactly the type you want, why not write two functions?
+
+one takes `Book String` and the other takes `Book Author`
+
+U2GTQM83A : Because I have at least 5 types which take three type parameters each.
+U2GTQM83A : That would be a lot of functions
+U2GTQM83A : Aaand. Because it would end up not being type safe.
+U23SA861Y : I don't think it's possible to create a parameterized decoder....
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

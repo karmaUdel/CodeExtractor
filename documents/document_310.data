@@ -1,26 +1,50 @@
-                ( model, Cmd.none )```
-Oh, alright. So even that `Ports.changeWindowTitle : String -&gt; Cmd msg` function doesn't have a side effect; and doesn't actually change the window title. Rather, it returns a `Cmd` that describe to the runtime that it needs to call a function in JS
-so you probably want `ChangeWindowTitle page -&gt; ( model, Parts.changeWindowTitle (getPageInfo page |&gt; .baseTitle) )` or something like that
-the important part is that you must return that Cmd from your `update` to have it do anything
-, please?
-so each deal is valid for each hotel? or..?
-making a few assumptions here, but possibly something like this: <https://ellie-app.com/3FLMJtntJm8a1/0>
-<@U3SJEDR96> I love those fancy resorts with free toilet paper ;D
-Don't we all?
-with the elm debugger (seems to be builtin?) running in Chrome -&gt; is there a way to look into the Message contents?
-if elm debugger is running you can just click on it and it will open a window with all the Messages and states
-the thing in the bottom right corner of the page
-also, for quick-n-dirty msg logging, `case Debug.log "msg" msg of` in your `update` :wink:
-yeah but the Messages part of it is so small so I can't see the data, even when hovering over it
-ah okay, it does not show the whole message content anyway (looked into the elm debug window with Chrome's devtools)
-well, it's still awesome
-ilias: Thank you very much for that!
-Hey, I have scanned the FAQ, but couldn't find an answer, could anyone help me with a wee problem?
-woah, `case Debug.log "msg" msg of` is great!
-Tell us, Allan
-I want to specify that the return type of a function could be one of a few things, is it possible? i.e. functio : Alias1 -&gt; model -&gt; Maybe OneOfAFewThings
-you could do that by making `OneOfAFewThings` a type: `type OneOfAFewThings = AString String | OrMaybeAnInt Int | SomethingElseEntirely FooBar`
-Awesome, thanks, will give that a whirl
-You have to be explicit about the types, wrap them with a "tagger" and unwrap them where you use them, though
-There are some good search terms for me :smile:
-<https://guide.elm-lang.org/types/union_types.html> might help :slightly_smiling_face:
+U5V0HVAKB : Decode.Decoder is a type alias ?
+U5V0HVAKB : if someone can explain to me how to reproduce it with a simple example
+U153UK3FA : Decode.Decoder is a type from the Json.Decode module
+U5V0HVAKB : ye i see it
+U5V0HVAKB : but even if i read the source code i dont understand the syntax here
+U153UK3FA : `Decode.Decoder String` is a type of json decoder that will produce a `String` when run using <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#decodeString>
+U5V0HVAKB : could explain me how to reproduce it in code like just like this 
+``` 
+decodeGifUrl: Decod String
+decodeGifUrl = 
+"hello" 
+```
+
+U153UK3FA : `<http://Decode.at|Decode.at> ["data", "image_url"] Decode.string ` mean ‘create a decoder that when run with some JSON will look for the field `data` and inside that the field `image_url` and get the `String` value
+U5V0HVAKB : i really get what about the return value
+U5V0HVAKB : thats about the syntax in type
+U5V0HVAKB : ```decodeGifUrl: Decod String```
+U5V0HVAKB : can you show me if I would like to do this how i have to init it
+U5V0HVAKB : ``` type alias Decod = String ``` ?
+U153UK3FA : <https://guide.elm-lang.org/interop/json.html> provides a good introduction to how to write Json decoders
+U153UK3FA : The return value of `decodeGifUrl` isn't a String value that you can use, it's a description of how to obtain that String given some JSON
+U153UK3FA : In the example this function comes from (<https://guide.elm-lang.org/architecture/effects/http.html>) the Decoder returned from `decodeGifUrl` is passed to the HTTP request to be used to decode JSON in the Http response and obtain the url of the gif
+U153UK3FA : eg. the response is this JSON <https://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&amp;tag=pizza>
+U5V0HVAKB : i mean i really understand what the decoder do
+U5V0HVAKB : and what return value should be
+U5V0HVAKB : but i am pretty new with elm
+U5V0HVAKB : and i just want to recreate this ``` 
+showME: Test String
+showMe= 
+"hello" ```
+
+its all about the syntax what "Test" is here
+
+U5V0HVAKB : what it mean
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

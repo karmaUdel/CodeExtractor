@@ -1,33 +1,64 @@
+U4F64AKQV : <@U2FJ2D6M7> the original problem was that `renderWords` returns a List of Html. This creates a problem in your `view` though, because we can't nest multiple levels of children when creating Html.
+U4F64AKQV : If you call the function as you did, it will attempt to put the list of rendered words as a child of the top level `div`. You do not want that though.
+U4F64AKQV : You want to add everything _inside_ the returned list to the child list of the top-level div
+U4F64AKQV : Ah, actually there's another problem before that one.
+U4F64AKQV : You really want something like this…```
+renderWords sentence =
+    let
+        words =
+            String.split " " sentence
+    in
+        List.map renderWord words
+
+
+view model =
+    div []
+        (input [ placeholder "Text to proof", onInput NewContent, myStyle ] [])
+        :: renderWords model.content
 ```
-oh
-is basically how it works under the hood
-nice
-So, you want to show your calendare if it exists, otherwise show nothing?
-exactly
-so you can combine a Maybe.map and a Maybe.withDefault
-`Maybe.map Calendar.view model.calendar |&gt; Maybe.withDefault (text "")`
-Ok i see what i was missing
-official documentation is not that clear about this concept
-At least for a newcomer
-it kind of assumes you'll just pick up the patterns as you go along
-maybe
-yes, it could use a pipe example
-I guess it just assumes you'll use a `case` ?
-It's convenient to know that `map |&gt; withDefault` is equivalent though
-nothing wrong with using a `case` statement though
-yep case is fine but in the end I will have a lot of components, it seems to verbose for something I'll do a lot
-if you do it a lot you can make your own general function
-probably let's play with maybe.map for now
-you'll notice that alot of things have map on them
-List
-Dict
-Task
-`Maybe.Extra` has a function `unwrap : b -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b`
-So you could say `Maybe.Extra.unwrap (text "") Calendar.view model.calendar`
-I'm friendly with map ruby is my defaut langage
-<@U0LPMPL2U> functions with three or more parameters are harder to understand though
-fair
-but it's a matter of taste i suppose
-i like pipelining
-I'd say `case` vs `map |&gt; withDefault` vs `unwrap` are probably context dependent for readability
-x2 only replaces infix operations with prefix operators of x1
+
+U5V0HVAKB : how thats pretty genius to destructuring with ::
+U5V0HVAKB : :slightly_smiling_face:
+U5V0HVAKB : gj
+U5V0HVAKB : i will explain a bit more tell me if i am wrong <@U4F64AKQV>.
+U5V0HVAKB : div [] [] the last one is a list
+U5V0HVAKB : by writing ```
+ (input [ placeholder "Text to proof", onInput NewContent, myStyle ] [])
+        :: renderWords model.content
+```
+its the same if you write so 1 :: [2, 3, 4]
+
+U5V0HVAKB : so that's why it should work
+U4F64AKQV : It also becomes easier to see when you write type annotations.
+U5V0HVAKB : but its should not be ``` 
+div [] [
+(input [ placeholder "Text to proof", onInput NewContent, myStyle ] [])
+        :: renderWords model.content
+]
+```
+
+U4F64AKQV : Alternatively, you could have passed the entire output of `renderWords` to `div []`
+U4JT89FGB : Has anyone had luck getting `Go to definition` reliably working with Elm in VS Code?
+U5V0HVAKB : u didnt miss the second [] from the high level div ?
+U5V0HVAKB : oh no i am wrong because the an array of list
+U4F64AKQV : <@U5V0HVAKB> What is the type of `div`? What is the type of `(input... ) :: renderWords model.content`?
+U5V0HVAKB : ye i am wrong
+U5V0HVAKB : div : List (Attribute msg) -&gt; List (Html msg) -&gt; Html msg
+U5V0HVAKB : that's look really sexy ^^ i like this
+U5V0HVAKB : <@U4JT89FGB> i dont think u have a function path finding in vs code like in phpstorm
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

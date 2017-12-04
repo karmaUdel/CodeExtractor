@@ -1,1 +1,95 @@
+U0CLDU8UB : Z means it's UTC. Can ISO8601 ever be local datetime?
+U0LPMPL2U : ```&gt; ZDT.fromISO8601 (TZ.us_pacific ()) "2017-07-05T20:14:02.530471Z" |&gt; Result.map (ZDT.toISO8601)
+Ok "2017-07-05T13:14:02.530-07:00" : Result.Result String String
 ```
+
+U0LPMPL2U : from the REPL (ZDT is ZoneDateTime and TZ is TimeZones)
+U3HQVHERX : (oh dear, production returns Z at the end, but not local dev environment, lol....)
+U3HQVHERX : Is there a way to subscribe to the users local browser time?
+U0LPMPL2U : `Time.now` or `Time.every` ?
+U3HQVHERX : Time.now returns unix epoch time though
+U0LPMPL2U : oh you want the user's machine time zone?
+U3HQVHERX : yeah
+U3HQVHERX : in js I can do
+U3HQVHERX : ```Date()
+"Wed Jul 05 2017 14:03:15 GMT-0700 (PDT)"
+```
+
+U3HQVHERX : Maybe I could write a port that returns that last PDT bit and map to the timezones
+U3HQVHERX : sounds a bit hacky though
+U3HQVHERX : `new Date().getTimezoneOffset();`
+U3HQVHERX : gives me `420`
+U0LPMPL2U : so 7 hours?
+U0LPMPL2U : I'm assuming that 420 minutes
+U3HQVHERX : that makes sense given the previous output from the browser (GMT-0700)
+U0LPMPL2U : Strangely there doesn't seem to be any way of constructing a timezone from the offset :confused:
+U3HQVHERX : i guess I do have another api endpoint that gives me my profiles current timezone
+U3HQVHERX : but it sure would be nicer to get it from the browser
+U0LPMPL2U : Typically you would want Timezone to be configurable right? Instead of always getting it from the system?
+U3HQVHERX : i guess?
+U3HQVHERX : seems like the burden of setting the correct timezone should be on the system, not the user
+U3HQVHERX : (to the contrary of what you just said)
+U3HQVHERX : so if you go to a different timezone everything "just works"
+U0LPMPL2U : As long as it can be overridden
+U3HQVHERX : instead of going and clicking a drop down
+U3HQVHERX : yeah
+U3HQVHERX : like, if we were going to meet up at 5pm, i would want the software we are using to be smart enough to show timezones in a helpful manner
+U0LPMPL2U : I used to have French set as the default language on my computer it it would get super annoyed when sites would auto-redirect me to their French site, even when I specifically requested the English version
+U0LPMPL2U : I could see something similar happening with timezones
+U3HQVHERX : i worked on some bilingual software and my browser would always try to auto translate the text
+U3HQVHERX : which got confusing with debugging
+U3HQVHERX : hmm, it's rendering the wrong language....
+U3HQVHERX : oh wiat
+U3HQVHERX : dang it google!
+U3HQVHERX : lol
+U3HQVHERX : `List.map #random messages`
+U3HQVHERX : `fromName : String -&gt; Maybe TimeZone`
+U3HQVHERX : so that's what i need to use now
+U0LPMPL2U : Say I'm traveling and I want to set up a meeting on my return. I'd want to set the meeting for 10AM in my home time zone, not whatever time zone I'm in right now
+U3HQVHERX : so this use case is with messages
+U3HQVHERX : i wonder if I want to know what time you sent me the message in your timezone
+U3HQVHERX : or maybe just show them in my timezone and then warn if the user is in a different timezone
+U0LPMPL2U : I think I'd want to see what time the message was sent in _my_ timezone?
+U3HQVHERX : so do you see a "5:24" time stamp on this slack message?
+U0LPMPL2U : Yes
+U3HQVHERX : i see "2:24"
+U3HQVHERX : on your message
+U3HQVHERX : does it mater to me that it's a bit later where you are?
+U0LPMPL2U : Maybe?
+U3HQVHERX : i guess if it does i click your face
+U0LPMPL2U : This is probably a case where you want to do some user research for your specific use case.
+U3HQVHERX : right
+U0LPMPL2U : In Slack's case, I'm guessing they came to the conclusion that you mostly care about the time a message was sent in relation to your current time
+U0LPMPL2U : but you might occasionally want to know the time of day of the other person
+U37BS6J6N : woot just figured it out~
+U48AEBJQ3 : <@U37BS6J6N> You are matching on the wrong part of the result, it should be:```
+NewGif (Err error) -&gt;
+    case error of
+```
+
+U37BS6J6N : thanks though <@U48AEBJQ3>
+U3HQVHERX : <@U37BS6J6N> just a note - checkout `elm-format` to auto format your code for readability. also, line 30 it's perhaps a better practice to replace `Model topic "waiting.gif" ""` to a `initModel` function  that returns a `{topic = ""  , gifUrl = "waiting.gif"  , error = ""}`
+U153UK3FA : <@U0LPMPL2U> you can't actually convert an offset to a timezone, many timezones can share the same offset. For a valid time you need an actual timezone, the offset is mostly useless.
+U64FLQRC4 : Hey, this is an embarrassingly stupid question, but I just installed Elm on my Mc and I can't find what folder it ended up in...
+U64FLQRC4 : Mac*
+U37BS6J6N : <@U28CBJM9R> have you tried opening a terminal and typing`whereis elm`?
+
+U64FLQRC4 : Nothing happens when I try that
+U64FLQRC4 : Just get a new terminal line
+U153UK3FA : I don't think I've ever used a machine where `whereis` worked as expected
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,31 +1,89 @@
+U1SSQQ02U : And we want to dynamically change message.user for whatever user it is!
+U1T62AX2A : Hi, I have a question about botkit. Is it possible to spawn multiple bots in the same server? Something like this:```
+var slackController = Botkit.slackbot({
+    debug: false
+});
+var fbController = Botkit.facebookbot({
+    access_token: process.env.PAGE_TOKEN,
+    verify_token: process.env.VERIFY_TOKEN,
+});
+..... how ever many more channels you want
+
+var sbot = slackController.spawn({});
+var fbBot = fbController.spawn({});
 ```
-I _believe_ that should still grant you access -- at least I wrote that it should back in November! It's possible I mis-spoke and you're the first to notice though :wink:
-I made a Google Bot for Slack. Check it out @ <https://github.com/MatejMecka/GoogleAssistantSlack>
-I'd like to know how I can improve it, add new features and more.
-Also Forks and Stars are appreciated :slightly_smiling_face:
-last i read bots cannot delete messages that they didn't post
-matejmecka cool :slightly_smiling_face:
-<https://twitter.com/One16th/status/864526254841745408>
-right but the bot can take the identity of an admin (using his token) and then be able to delete every message.
-has anyone run into users.list returning a 500?
-got the error being returned or how are you calling it <@U5FPB0C9G> ?
-usually you get a 200 back regardless of an error being thrown iirc
-<https://github.com/slackapi/hubot-slack/blob/master/src/bot.coffee#L56-L58>
-my org is too big
-<https://github.com/slackapi/node-slack-sdk/issues/343>
-but I'm not really sure what the format of `SLACK_CLIENT_OPTIONS` is
-has anyone used this env variable?
-Trying to use `thread_ts` in a chat.PostMessage. Setting it to the parent ts (which is an interactive message) but it only add the message to the specified channel (<@USLACKBOT>) without adding it in a thread as a reply to the parent message. Any ideas what I am doing wrong here?
-And of course, using the Tester works… Is there special scope to use threads from a Slack App?
-Are threads supported in the Events API?
-Have you tried using a message that doesn't involve using <@USLACKBOT>?
-Yes, there are events about threaded messages available in the events API -- message subtypes `message_replied` being the one you most likely want.
-Yes, the thread_ts is set to the parent ts. When using the same ts in the Tester, it works
-Not sure I understand your last reply. I can't use chat.postMessage in event API?
-What scopes does the token you're using have? It's possible it just doesn't have the scopes needed to write messages with what you're working with.
-I'm using chat.postMessage, and it's working fine. When adding the thread_ts attribute, it just does not change anything, still working like before, still normal message, not threaded replies
-and you're including `thread_ts` as a URL parameter in this case? What's the `channel` field set to and `as_user` value set to? Are you using a bot token or a user token?
-I'm using my Slack App token. as_user is set to false and channel is set to @user (user being whatever user the Slack App is talking too)
-btw, thank you for helping me out here :slightly_smiling_face:.
-It _might_ be a quirk with using a @username in that field -- it's a little bit on the edge of typical behavior.   Normal usage typically will use a specific IM/direct message ID there, a channel ID, a private channel ID, or an MPIM ID.
-Just to be sure, since it sounds like you're using a user token, what are the scopes you asked for when you made it?
+
+U1T67F478 : <@U0K43G63U>: cool concept. what, if any, were the biggest snags you hit using botkit for facebook messenger? in regards to tracking sentiment and mood, are you using watson for that? are there any other good api's you'd recommend looking at in regards to pulling out mood from free text?
+U0K43G63U : I actually didn't use botkit (sorry <@U04SM6T2H> :grin:)
+U0K43G63U : <@U1T67F478>: I am using a few different APIs and some of my own logic to determine mood/emotion
+U0K43G63U : There are a ton of sentiment analysis APIs that can be leveraged
+U0K43G63U : DM me if you want more details!
+U0K43G63U : I would highly reccomend botkit though. It was mostly due to timing and my own situation that I didn't choose botkit for this project. I've used it in the past and love it!
+U1EG97KUY : I think I'm confused about how botkit storage works, shouldn't it insert the teams automatically?
+U0KECURAT : <@U1SSQQ02U>: that's not possible 
+U1T9WRFUH : Quick question on persistent data storage methods: How can you use a third party database service like Cloudant, when making a controller? Do you have to define those functions (get, put delete, etc.) for that service? If so, how would you then "connect" Cloudant and Botkit? The example file here: <https://github.com/howdyai/botkit/blob/master/lib/storage/simple_storage.js> didn't provide much guidance for actually implementing a third party database```
+var controller = Botkit.facebookbot({
+  storage: my_storage_provider // How to add Cloudant, MongoDB, etc here?
+})
+```
+Thanks!
+
+U0YQS1FAR : <@U1T9WRFUH>: You'll have to create your own storage provider. There is an example linked in the README. It needs to implement all the methods that that the other storage providers use (and make sure the tests pass)
+U126KEXN2 : <@U0K43G63U>: I dig it. Was thinking of writing myself a little CBT bot at some point.
+U0HUTFBHS : cbt?
+U0HUTFBHS : Continuously Botted Transmission?
+U126KEXN2 : You got it!!
+U126KEXN2 : Or maybe it's cognitive behavioral therapy, I always get those two confused.
+U0K43G63U : Heh
+U0K43G63U : <@U126KEXN2>: thanks! Would love to hear your thoughts. DM me!
+U126KEXN2 : Lemme play with it a bit. Do you have plans to bring it to Slack? I try to keep Facebook Messenger closed because FB makes my time go :hourglass_flowing_sand:
+U0K43G63U : Yeah. Still exploring the best route for Slack, might make it more workplace focused but tbd
+U0K43G63U : Versus just a direct port over
+U126KEXN2 : Makes sense, although I could totally see myself installing it on my primary Slack team just as-is
+U0KECURAT : <@U1T9WRFUH>: maybe this one can help you a bit <https://github.com/FoundersAS/botkit-storage-elasticsearch>
+U1KH878SJ : I've an issue with displaying links when I'm using the `chat.postMessage`. It works fine when I use the webhook url but not using the api.
+U1KH878SJ : the messages come like this: `Question ID: &lt;https://www.abc.com/question/10803|10803&gt;.`
+U1KH878SJ : whereas, I want them to appear like a label which has an associated link but not displayed.
+U1KH878SJ : any clues, anyone?
+U0KECURAT : <@U1KH878SJ>: using botkit?
+U1KH878SJ : no sir, I am using HTTParty directly to call the `chat.postMessage` in rails framework
+U0KECURAT : <@U1KH878SJ>: in botkit you'll have to wrap your message in at least `{text: ‘my message'}` for it to work, maybe it's the same for you sorta? Worth a shot I guess :slightly_smiling_face:
+U1KH878SJ : ```options = {
+            body: {
+                token: token,
+                channel: channel,
+                username: message['username'],
+                icon_url: message['icon_url'],
+                text: message['text'],
+                attachments: message['attachments'].to_json,
+                parse: "full"
+            }
+        }
+        response = <http://self.post|self.post>("/chat.postMessage", options)
+```
+
+U1KH878SJ : That's being done already, see the above snippet
+U1KH878SJ : <@U0KECURAT>
+U0KECURAT : huh, yeah that should work I suppose, according to this it should be okay <https://api.slack.com/docs/messages/builder?msg=%7B%22text%22%3A%22I%20am%20a%20test%20message%20%3Chttp%3A%2F%2Fslack.com%7Cslack%3E%22%7D>
+U1KH878SJ : <@U0KECURAT> In the response from slack, I get something like this: `Question ID: \\u0026lt;https://www.abc.com/question/7802|7802\\u0026gt;`
+U1KH878SJ : some issue with encoding may be?
+U0KECURAT : let me try a call :slightly_smiling_face:
+U1KH878SJ : cool
+U0KECURAT : <@U1KH878SJ>: i think your `<http://self.post|self.post>` is encoding `&lt;` and `&gt;`
+U1KH878SJ : Yeah, I think so too. Figuring that out at the moment.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

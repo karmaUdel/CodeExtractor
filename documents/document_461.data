@@ -1,25 +1,144 @@
-What does the ! operator do?   I've been reading through the elm-datepicker code and came across some lines that look like this: ```prepareDates (prevMonth currentMonth) model ! []```
-<@U6ECA0Q4D> it's short hand for `(model, Cmd.none)` ... it makes a tuple
-<http://package.elm-lang.org/packages/elm-lang/core/latest/Platform-Cmd#>!
-So what is valid in the array?  Just commands?
-`List (Cmd msg)`
-Ah, that's where it is in the docs!  I couldn't find it.  Thanks!
-yeah.. searching for infix operators is weird i googled `elm "! []"` to find that
-Thanks for the help <@U3HQVHERX>.  I'm trying to wrap my head around the elm architecture and functional programming and it's kicking my butt
-<@U6ECA0Q4D> no problem! it's worth the effort. my advice: use the `elm-repl` as a sandbox to learn features of the language and use <https://ellie-app.com/new> for small case studies
-<@U3HQVHERX> what does your Webpack config file look like?
-Config looks good. You could try removing debug: true from the options line to see if that changes anything. 
-tried that : /
-when i run the webpack dev server it does not output a bundle js file though, so that's weird
-I'm a little stuck and not sure if I should reach for a library or roll my own solution.
-I'm sending the last character of an `onInput` Event out libphonenumber-google for formatting. I want to get it back and then use that to update the input field.
-I also want to track a backspace to send another message out to the AsYouType formmater to pop off the last number
-<@U0JBSEGHY>, so are you using a port to send it out to that libphonenumber-google service?
-Regarding the backspace, you can add your own custom event listener that listens for that key code.
-Yea I have it on the client side. So I am just working with it as some external JS client side
-I just realised I probably also have to track deletes and cut and pastes as well :confused: haha.
-Yeah thats all no problem if you just make an even listener that takes an `Int -&gt; Msg`
-Do you need any help making that kind of thing? And regarding the google service, why dont you use a port to send back whatever it is you wanted in Elm?
-I think I might have to sit down and map it all out. I also want to accept letters and treat it as a search bar as well.
-I have a port sending it back and showing the result elsewhere but I would like to also format the input field.
-This is a little more fancy than I initially thought it would be haha
+U4872964V : what happens if a new thing streams in while it's pending?
+U641LDZFU : it won't, it's a very controlled stream :slightly_smiling_face:
+U641LDZFU : i.e. clicks
+U641LDZFU : and things are unclickable when the state is pending
+U641LDZFU : (its not really a stream at all is it?)
+U4872964V : :slightly_smiling_face:
+U3LUC6SNS : I'd like to do something like this:```
+|. oneOf [ symbol "\n", symbol "\\" ]
+```
+but where in place of `symbol "\\"` there is `foo "\\"` which accepts `"\\"` but does not consume it.  That is, `"\\"` remains in the input stream to be parsed.
+
+U3SJEDR96 : I wonder if you could use `delayedCommit (fail "") (symbol "\\")` :thinking_face:
+U3LUC6SNS : <@U3SJEDR96>, I will try that
+U3SJEDR96 : I'm not sure, really, but who knows.. There probably is a better way to express that than some sort of `peek`
+U3LUC6SNS : <@U3SJEDR96>, re `peek` etc., I couldn't get that to work -- will come back to it after I fix some other things.  
+Is there a way to display the unparsed part of input?  For example, in 
+```
+&gt; run word "ab cd"
+Ok "ab" : Result.Result Parser.Error String
+```
+I'd like to see the "remainder", which is `cd` or ` cd`.  I think most of my problems are one-character mistakes resulting from my lack of understanding of this.
+
+U5DU3L996 : Hello people, I have a doubt about elm 0.18 hot reloading. I work mainly with clojurescript and figwheel, where when I change the ui behavior, figwheel reload only the new behavior without restarting the application state. I checked out elm-like with the Counter (buttons) example, and everytime I save the Main.elm with UI changes, the application state is restarted. It is pretty annoying :disappointed:  Is there another hot reloading environment for elm without webpack or something like that? Thanks!
+U4F64AKQV : <@U5DU3L996> That's the difference between live reloading and hot reloading.
+U5DU3L996 : Ok, so, live reloading is reloading the browser, but just automated, and hot reloading is the nicer thing where the app behavior changes without changing the state? :upside_down_face:
+U2M4VPZ9D : <@U5DU3L996> did you take a look at <https://www.npmjs.com/package/create-elm-app>? It has support for hot reloading.
+U5DU3L996 : Thanks <@U2M4VPZ9D>. create-elm-app use webpack and for some reason I don't like it too much :disappointed_relieved: but, if there are not other way ... :thinking_face:
+U3LUC6SNS : <@U5DU3L996> The problem you mention is also one that users face when they accidentally or deliberately reload the browser.  I've addressed one tiny part of this problem by saving the user's time-limited login token to local storage and then reading that back in if the user is not logged in.  
+This saves me from having to log in again each time I update the app, which is still in development.  One could do the same with the entire model, but for now I am waiting for a solution by someone who really knows what they are doing.  I know that Evan CZ was working on something along these lines.
+
+U5DU3L996 : Thanks <@U3LUC6SNS>. I use hot reloading with clojurescript during development. The other issue you mention I think is related to the SPA's nature of the app. I think your solution is pretty valid along with push state and other tricks.
+U5DU3L996 : Using local storage for the elm debugger log with auto-reloading during the app loading could mimic hot reloading.
+U2GPAEU1L : Caching in localStorage + live-reloading pretty much gets you to hot-reloading
+U2GPAEU1L : (I do that)
+U5DU3L996 : Thanks for the confirmation <@U2GPAEU1L> . I'm going to try those ideas. Saludos!
+U4872964V : caching state or messages? or both?
+U4872964V : i see a case for both
+U2GPAEU1L : I was talking about state
+U4872964V : type of state changed =&gt; use messagestype of messages changed =&gt; use state
+
+U4872964V : bug in update function =&gt; use messages
+U601ELFEG : Looking for some help on a `port` pattern: I have a piece of JS that does something, and calls back via a `Sub`
+U601ELFEG : Now, I want to invoke that JS (via `Cmd`) from three or four places in my code base... and then those different places need get their answer via the `Sub`
+U601ELFEG : so, it is like I somehow want to pass the `a -&gt; Msg` function to the JS via the `Cmd`, and have it call back the `Sub` in a way the the right `Msg` gets returned to `update`
+U601ELFEG : all I can think of is to pass a `String` to out `port` and have it back with the sub.
+U601ELFEG : which is ick
+U601ELFEG : concretely, imagine my JS reads `localstorage`
+U601ELFEG : so I want     `port readLocalStorage : String -&gt; Cmd msg`
+U601ELFEG : and  `port localStorageResult : (String -&gt; Msg) -&gt; Sub msg`
+U3SQ42JJW : Time for another Json.Decode Question anyone?
+U23SA861Y : might want to ask why so many modules are trying to read and write to local storage
+U601ELFEG : well - imagine for the moment that they are very compartmentalized: one module is storing view preferences, another is storing usage history, etc.
+U601ELFEG : they are not related
+U23SA861Y : sure they are, they are related in that you need to store them
+U601ELFEG : but I don't want to have to make `readLocalViewPrefs` and `localViewPrefsResult` --- for each
+U601ELFEG : assuming that I don't want to read them all at once - then
+U601ELFEG : I'm trying to not have lots of ports - and therefore lots of JS
+U601ELFEG : What I wish I could do is
+U23SA861Y : put the saveing and loading in one place with a ADT to select what you want to save or load from the model
+U601ELFEG : `port readlLocalStorage : (String, String -&gt; Msg) -&gt; Cmd msg`
+U601ELFEG : and `port localStorageResult : ((String, String -&gt; Msg) -&gt; Msg) -&gt; Sub msg`
+U601ELFEG : where that 2nd element of the tuple is passed through JS
+U601ELFEG : but I suspect I can't do that
+U601ELFEG : but within that ADT
+U601ELFEG : to JS aren't I'm going to have to pass a string and get a string
+U601ELFEG : because I've got only one `Sub`, right?
+U601ELFEG : (only one `port`)
+U601ELFEG : `readUserPrefs : Cmd Msg`   and `readUserPrefs = readLocalStorage "userPrefs"`
+U601ELFEG : but then
+U23SA861Y : hmm this is the sort of thing that should be a task
+U23SA861Y : you should be able to blindly pass an ADT through JS without too much trouble
+U23SA861Y : I believe anyway
+U23SA861Y : hmm
+U601ELFEG : But - is Task the right way to go with this?
+U601ELFEG : or if I can pass an ADT, I could do that rather than the `String`
+U23SA861Y : as in, there should be a task library that allows for saving
+U601ELFEG : but I imagine I can't have that `a` in the `port` defs ....?
+U601ELFEG : maybe it has to be `StorageType`
+U23SA861Y : :confused:
+U23SA861Y : could just be verbose about it with one port/sub per stored category
+U2LAL86AY : Json.Encode.Value
+U601ELFEG : I want "Dear JS, do your thing with the nice String argument, and when the result is done, send it back through a subscription tagged with this ADT thing"
+U601ELFEG : one port/sub per is clear - but super sad since the JS it totally boilerplate
+U23SA861Y : yeah, then again ports kinda should be painful
+U2LAL86AY : i think what you want is to decode this ADT. YOu want many things done trough only 2 ports - one to js - one from js.
+U601ELFEG : which is why I want so few of them
+U2LAL86AY : yes you want only 2
+U2LAL86AY : you can have 2 ports - but you need a separate message for each of thouse actions
+U601ELFEG : hmmm.... okay, so send the 'marker' though as `Json.Value` - and then get it back...
+U2LAL86AY : <https://ellie-app.com/3zkrBCHtz39a1/0>
+U2LAL86AY : here a ADT is decoded back form js
+U601ELFEG : that's good - then the ports of generic - "Dear JS, do this thing, and when you pass the result back via subscription, hand me back this Json blob"
+U601ELFEG : good - I like this
+U23SA861Y : I presume this is being written to file?
+U601ELFEG : I have two such "generic" JS facilties: One is read/write local files - the other is read/write `localStorage`
+U601ELFEG : I will have a third..... read/write MIDI device    :wink: :notes:
+U3LUC6SNS : What is the meaning of `|-` in <https://github.com/elm-tools/parser/blob/2.0.1/src/Parser/LanguageKit.elm#L252>
+U3LUC6SNS : <@U601ELFEG> could you share code on your `localStorage` facility?
+U4872964V : <@U3LUC6SNS> seems to be an internal function
+U2LAL86AY : actually before i made a mistake - when js comes back inside subscriptions - there can only be 2 messages not more. - one is for when the decoder fails - and another for when it succeeds.
+But this Succeed message will not carry just a simple value. 
+It will carry an ADT - and inside, you can place whatever info you need from js.
+
+U65GZU4MR : Hi folks, AFAIK there is a shortcut function to get property:```
+.prop
+-- the same as:
+\a -&gt; a.prop
+```
+
+Is there a shortcut to write property? Something like this:
+```
+\a b -&gt; { b | prop = a }
+```
+
+U4872964V : <@U65GZU4MR> no there is no such shortcut
+U5XC2FJ1Y : <@U3LUC6SNS> looks like it's defined a few lines further down
+U3LUC6SNS : <@U5XC2FJ1Y> thanks, should have been more observant!
+U3LUC6SNS : Is there an Elm function for determining whether a character is either in a given string or a given list of characters?
+U4872964V : <@U3LUC6SNS> there is `String.contains` and there is also the `Regex` module for more advanced stuff
+U3LUC6SNS : <@U4872964V> I tried ```
+String.contains (toString '.') ".abc"
+False : Bool
+```
+Unfortunately I need to check whether a character is in a string (or, alternatively, an array of characters)
+
+U4872964V : use `String.fromChar` instead of `toString`
+U4872964V : `toString '.'` will give you the string `"'.'"`
+U4872964V : …many quotes there… :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

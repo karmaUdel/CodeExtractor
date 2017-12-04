@@ -1,17 +1,78 @@
-    clientId=&lt;my client id&gt; clientSecret=&lt;my client secret&gt; port=3000 node slackbutton_bot_interactivemsg.js```
-u would run it as  `clientd=&lt;yourAppId&gt; clientSecret=&lt;yourAppSecret&gt; port=&lt;3000 or another port u want&gt; node slackbutton_bot_interactivemsg.js`
-My console printed this
-I changed the port to 8080 because my xampp is configured in that way. And the login page isn't in my local host, or im omitting something
-Ok. my mistake, i had running xampp and for this reason the "login" page wasnt accessible. Now im running the integration. I'll test it, thanks for the help
-hello, i am facing some problems regarding bot in slack. that after some time bot stops listening, what ever users write in DM or channel
-logs shows nothing
-<@U1JQ8B5BM>: I've had that problem too and for now just restart the bot every couple of days.
-<@U1JQ8B5BM>: Could also be that it is stuck in a conversation, make sure every branch ends with convo.next().
-no it is not listening
-thanks for reply
-Hey guys, is there any way to open active slack app on web and mobile via code? In our slack bot we are showing a payment link to user and once the payment flow completes we want to open the slack app.
-Hi All. Does anyone know if it's possible for a slack app to have access to user profile images? I am trying to create a custom slash command, that when invoked will fetch the user's profile image and do something with it. It seems I'm able to do this by calling Slack's web api, but that requires an OAuth bearer token. I can generate a token for myself during testing, but was wondering if I can get a token when I launch the app that is not tied to any particular user; I'm not building a stand-alone slack client, but introducing new incoming webhooks and slash commands into a team's slack account. Adding a Slack Button (<https://api.slack.com/docs/slack-button>) seems to provide an OAuth flow when the app is added to an team's slack account, which also seems to return a OAuth Bearer token. Is this is only way to access the slack web api from a non-user account, e.g., a custom slack app. The other alternative seems to be to create a custom SlackBot, which also gets it's own bearer token which can be used to access the webapi -- however, it's unclear if that bot will have access to user profiles/profile images.
-Pretty sure the OAuth flow gives your app a token whether you want a bot user or not. Have you tried using the token that comes back in the `access_token` field when you hit the `oauth.access` endpoint?
-(In any case, we should probably take this to <#C0K8617D5>.)
-Hey guys I'm using botkit how do you make the bot put the @user who asked the bot a question in the response? message.user contains some sort of uuid not the username directly
-Sorry will move to botkit channel!!
+U050MP39D : the edn file is using underscores for the namespace, which is incorrect
+U050MP39D : I'd have to see your loader code to know whether you compensate for that
+U050MP39D : but, while that's a problem, it's not a problem that should yield the error you got. the error you got very specifically says the file does not exist in the cp
+U050MP39D : (it could be finding the edn file because it's accessible by some other cp entry like .)
+U1B0DFD25 : I think the names in `could not locate` error message should not start with a quote, so check for single quote in the edn file such as:```
+{:description "Markdown parser"
+ :init 'cryogen-markdown.core/init}
+```
+
+U050MP39D : ^ that's it
+U050MP39D : I missed the quote
+U050MP39D : you don't need to quote inside an edn file
+U050MP39D : ```(edn/read-string "{:foo bar}")
+=&gt; {:foo bar}
+(class (first (vals *1)))
+=&gt; clojure.lang.Symbol
+```
+
+U050MP39D : and in fact it's not part of edn I don't think (' etc are part of the clojure reader)
+U050MP39D : yeah ```
+(edn/read-string "{:foo 'bar}")
+=&gt; {:foo 'bar}
+```
+
+U1B0DFD25 : It's surprising in my opinion actually. Maybe it's a bug in the lib, not wrapping with `(name symbol)` where it should.
+U1B0DFD25 : Nope, I'm wrong
+U050MP39D : it's surprising but I dunno about bug... the language reader and the data format reader can't be exactly the same
+U1C03090C : That's probably it. I'll check when I get back to my computer. 
+U1C03090C : Yep removing the quote fixed it. Thanks for your help!
+U1C03090C : So I have some code in my -main function `(extend-classpath (filter #(.contains (.getName %) ".jar") (file-seq plugin-dir)))`. If I run this directly in the repl, it changes my classpath as I want it to. If I run the -main function in the repl, it doesn't work. What causes this difference (boot repl if it matters)?
+U0BKWMG5B : Oh, thanks! But I'm afraid I already have an invite. Thank you anyway.
+U05308A8D : <@U1C03090C> regarding `extend-class` in repl vs -main, I'm wondering if it could be related to boot using pods to isolate classpath (<https://github.com/boot-clj/boot/wiki/Boot-for-Leiningen-Users#repl-dependencies>). Just getting started with boot myself. Would appreciate an authoritative answer too.
+U0DH86UA1 : There seems to be an issue with 1.9.0-alpha17 in let blocks with auto-gensymed variables in macros. Is that a known issue?
+U0DJC1V3R : <@U0DH86UA1> could you elaborate?
+U0DH86UA1 : <@U0DJC1V3R> I'm trying to find the example that exploded yesterday :slightly_smiling_face:
+U0DH86UA1 : <@U0DJC1V3R> looking again with fresh eyes, I found the bug. I had this:
+U0DH86UA1 : that fails with something completely unreadable:
+U0DH86UA1 : trying it in 1.8 I am getting this instead:
+U0DJC1V3R : that error message seems crystal clear to me /s
+U0DH86UA1 : so if I do the right thing and use `msg#` instead of `msg` it works
+U0DH86UA1 : So yeah. Not a bug, just a mistake on my part, coupled with an awful error message :confused:
+U051HUZLD : what is the general approach to "expanding iteration"?```
+(path-to-paths
+  [:a]
+  {:a #{:b :c}
+   :b #{:d :e}})
+  
+;=&gt; [[:a :c]
+;    [:a :b :d]
+;    [:a :b :e]]```
+Is this a `loop/recur` client? Or are there any alternatives?
+If this is a `loop/recur` – is there any intuition for how to know how many things I need to keep track of in `loop` bindings? I seem to spend much more time on these than it should take me.
+
+U0DH86UA1 : <@U0DJC1V3R> i just added this: <https://github.com/bhb/expound/blob/master/README.md>
+U0DH86UA1 : and got this:
+U0DH86UA1 : that's pretty neat...
+U0DJC1V3R : that's indeed pretty cool!
+U051HUZLD : <@U0DH86UA1> <https://clojurians.slack.com/archives/C1B1BB2Q3/p1501600794016449>
+U0DH86UA1 : Thanks <@U051HUZLD>
+U08HJGLPQ : is there any recommended way of fixing ``` java.lang.ClassNotFoundException: clojure.tools.logging.impl.LoggerFactory```? This is happening on a fresh project created with `lean new luminus &lt;app name&gt;` (running `[org.clojure/clojure "1.8.0"][org.clojure/tools.logging "0.4.0"]` )
+U1C03090C : <@U067DHTFF> you can consider asking in the <#C077KDE3A|luminus> channel. I'll see what I can find
+U08HJGLPQ : ok, will do!
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

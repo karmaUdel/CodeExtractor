@@ -1,1 +1,121 @@
-Out[99]: 'Mar'```
+U0EUHKVGB : But it was like 30 lines of code or something
+U3L8MM10T : Maybe.Extra.unwrap (<http://package.elm-lang.org/packages/elm-community/maybe-extra/4.0.0/Maybe-Extra#unwrap>) takes a default value.  Is there a way to lazily calc the default value? Most times it may not be needed altogether, and the default value may be expensive to derive.
+U0EUHKVGB : <@U3L8MM10T> You will have to write your own function which takes `() -&gt; b` as an arg
+U0EUHKVGB : <@U3L8MM10T> `() -&gt; b` is known as a thunk
+U3L8MM10T : I see.
+U0EUHKVGB : this is a function which will produce an value, but is unevaluated until you call it
+U3L8MM10T : cool
+U0EUHKVGB : so for example, 
+```
+unwrap : (() -&gt; b) -&gt; (a -&gt; b) -&gt; Maybe a -&gt; b
+unwrap thunk fn maybe =
+  case maybe of 
+    Just thing -&gt; fn thing
+    Nothing -&gt; thunk ()
+```
+
+U0EUHKVGB : which you can now use like this:
+```
+unwrap (\() -&gt; someExpensiveDefault 5 6) fn maybeThing
+```
+
+U0EUHKVGB : Now `someExpensiveDefault 5 6` will only be evaluated when there is a `Nothing` called.
+U0EUHKVGB : Note, this may not solve your performance issues. You might better off doing:```
+ourDefault = someExpensiveDefault 5 6
+
+unwrap ourDefault fn MaybeThing
+```
+
+U0EUHKVGB : this way the expensive calculation is run only once, and on startup.
+U0EUHKVGB : If it is a static default, then this is probably your best bet for performance.
+U3L8MM10T : Thanks. This should be added to FAQ.
+U3SJEDR96 : It's not exactly frequently asked, tho :smile:
+U0J1M0F32 : IFAQ (`InFrequently Asked Questions`)
+U2SR9DL7Q : "thunk" is a great name for what this is and what it does.
+U2D0V2SAC : Hey everyone.Lets say i add a BIG MODULE (Say a List.Extra module) in my elm app.
+If, within my elm app i only import one or two functions of this module, will the build step cut the useless weight? Or will i carry over ALL the List.Extra module at runtime?
+
+This would be a deciding factor for us between importing helper libraries, versus only copying or implementing our own 2-3 functions that we use.
+
+Thanks!
+
+U3SJEDR96 : though I suppose having an article about explicit laziness in Elm somewhere would be itneresting
+U0EUHKVGB : <@U2D0V2SAC> Is the question “how can I make my bundles smaller?”
+U0U6ML22H : tree-shaking-like
+U2D0V2SAC : Its "does elm include and bundle ONLY the imported parts of the modules i use (tree shaking like), or the entire things",
+U0EUHKVGB : We call tree-shaking dead code elimination
+U0EUHKVGB : Only things you import get included in the output
+U0LPMPL2U : <@U3SJEDR96> <@U3L8MM10T> The README for this library is pretty comprehensive <http://package.elm-lang.org/packages/elm-lang/lazy/latest>
+U2D0V2SAC : So if i have a module A exposing (fn1, .... fn1000)
+and i only import A exposing (fn1, fn2),
+
+All the fn3 to fn1000 won't be bundled in the output
+
+U0EUHKVGB : Sorry, _modules_ that you import
+U3SJEDR96 : (and any modules that this imports)
+U3SJEDR96 : though do note that DCE will be a thing in Elm sooner or later, and then it shouldn't really matter anymore :slightly_smiling_face:
+U2SR9DL7Q : <@U3SJEDR96> DCE?
+U3SJEDR96 : dead code elimination / tree shaking
+U0EUHKVGB : Dead code elimination
+U2D0V2SAC : So, will module A fn3 to fn1000, which are all unused functions of the module, be included in the output?
+U3SJEDR96 : currently, yes
+U60SXAF96 : I'd be happy to contribute towards DCE/tree-shaking.
+U60SXAF96 : Because that's a seriously non-trivial advantage.
+U0EUHKVGB : <@U2D0V2SAC> Yes, but you can run it through google closure compiler
+U0EUHKVGB : which will strip some of those away.
+U3SJEDR96 : <@U60SXAF96> I think they're already implemented, afaik, but hasn't made it into a release yet
+U2D0V2SAC : Ok thanks.
+U60SXAF96 : Babel / Babili has DCE, too: <https://babeljs.io/docs/plugins/minify-dead-code-elimination/>
+U60SXAF96 : We're currently feeding Elm's output into Babili. Haven't measured if it's actually valuable.
+U0EUHKVGB : 0.19 has numerous planned changes in this sort of space.
+U3L8MM10T : <@U0LPMPL2U> Thanks. Better to use this `Lazy`stuff (wraps thunking) because it conveys intent to reader.
+U2SR9DL7Q : so am i correct in understanding that this DCE lets you keep only the functions you import (and consequently, only the functions that those imported ones import) and doesnt carry over the non-essential parts of the module?
+U0EUHKVGB : Not in Elm.
+U0EUHKVGB : Google Closure Compiler may do that for you.
+U2SR9DL7Q : gotcha.
+U0EUHKVGB : Elms DCE currently is only limited to not including modules that are not imported anywhere.
+U0EUHKVGB : (so it’s not really DCE)
+U2SR9DL7Q : i believe standard python also just grabs the entire imported module's contents, so the idea of a selective approach seems interesting.
+U0F01KLV6 : UglifyJs is also great at stripping away unused functions in elm, and it doesn't require a Java runtime :slightly_smiling_face:
+U0F01KLV6 : Also important to note. Elm is only compatible with "simple optimisations" mode in google closure.
+U3ZNWN526 : Very nice! :smile: (I can totally win with this one, hehe)
+U1CKM8DGT : <http://clojutre.org/2017/small-fp/>
+U60SXAF96 : Why is this?
+U60SXAF96 : Until Uglify-harmony comes out, though, it barfs on modern JS.  We're running on the "90% rule" -- we support 90% of users in the wild, which means IE 11 and the last 3 versions of the big browsers -- and Uglify can't handle the output from Babel.U1CE9DL9H
+
+U1CE9DL9H : <@U60SXAF96> ^
+U60SXAF96 : Gotcha. So it's this: <https://developers.google.com/closure/compiler/docs/api-tutorial3#propnames>
+U60SXAF96 : To which Google says, "Don't do that." :confused:
+U23SA861Y : getting an odd install error trying to install elm globally via npm on a linux system ```
+&gt; elm@0.18.0 install /usr/lib/node_modules/elm
+&gt; node install.js
+
+Error extracting linux-x64.tar.gz - Error: EACCES: permission denied, mkdir '/usr/lib64/node_modules/elm/Elm-Platform'
+npm WARN /usr/lib64/node_modules/elm is not a child of /usr/lib
+```
+
+U23SA861Y : attempting to install via sudo so this is odd
+U0J1M0F32 : Sounds like an issue with npm permissions
+U23SA861Y : right, but sudo
+U0CLDU8UB : did you try `npm i -g elm` without sudo?
+U23SA861Y : thats a global install, it should never work
+U0CLDU8UB : on some systems that works out of the box, just installs it for your user
+U23SA861Y : then npm is broken and doing things it shouldn't be
+U0CLDU8UB : as in `~/.node_modules` or something
+U23SA861Y : no -g tries to install globally
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

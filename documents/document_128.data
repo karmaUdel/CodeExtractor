@@ -1,4 +1,99 @@
+U6BQSDQRE : This is upon running `lein ring server`
+U6BQSDQRE : I also just noticed that `lein deps :tree` seems to output a good deal of warnings regarding my dependencies. I'm honestly not sure what the best way to fix that would be, so I'll post that as well: <https://gist.github.com/87f04f1805c2cc20e1dee2a9defe0462>
+U6BQSDQRE : Hmm. This seems to have something to do with datomic. I added exclusions like this: `[com.datomic/clj-client "0.8.606" :exclusions [org.eclipse.jetty/jetty-http]]` and eventually got it to run. Now the `lein ring` server starts but attempting to connect to it just results in a connection reset
+U5ZAJ15P0 : Why does `(if-let [x y] ...)` expands to```
+(let*
+ [temp__4655__auto__ y]
+ (if temp__4655__auto__ (clojure.core/let [x temp__4655__auto__] ...) nil))
 ```
-all you really need to do is have some ring middleware that populates a session key containing a user-id in the ring request. then your controllers can take that user-id and build whatever authz (role-based, fine-grained permissions based on models, etc) that you want
-there are a bunch of helpers for doing things like working with encrypted+signed session cookies
-<@U3QUAHZJ6> not with update afaict, reduce works though (reduce #(update %1 %2 inc) [:a :b])
+and not to
+```
+(let [x y]
+  (if x ...))
+```
+?
+
+U06F82LES : so that `x` doesn't have to be re-evaluated multiple times
+U06F82LES : Different question: Is this an ok way to access both the first arg and all args? `(fn [&amp; [head :as all]])`
+U5ZAJ15P0 : how would x be re-evaluated multiple times in that scenario?
+U5ZAJ15P0 : <@U06F82LES> ^
+U06F82LES : ```user=&gt; (macroexpand-1 '(if-let [x (do (prn :foo) true)] [x x] (prn :no)))(clojure.core/let [temp__6751__auto__ (do (prn :foo) true)] (if temp__6751__auto__ (clojure.core/let [x temp__6751__auto__] [x x]) (prn :no)))```
+
+U06F82LES : i.e. in cases where `x` is used in the body of the if-let
+U5ZAJ15P0 : <@U06F82LES> it still wouldn't get evaluated multiple times with```
+(let [x (do (prn :foo) true)] (if x [x x]))
+```
+
+U5ZAJ15P0 : ?
+U06F82LES : isn't that pretty much what the actual implementation does?
+U060FKQPN : <@U5ZAJ15P0> that binds `x` in the else branch
+U060FKQPN : `if-let` doesn't
+U060FKQPN : that's what the extra local binding is for
+U5ZAJ15P0 : <@U060FKQPN> oh, I see. that makes sense; thanks!
+U5ZAJ15P0 : I am getting a StackOverflow error when trying to use log4j with Leiningen, could someone please take a look at the stacktrace? <https://gist.github.com/hmaurer/40c1bc6d08550222f65e06a6366f0eb9>
+U5ZAJ15P0 : fixed it by removing a few dependencies… still strange though, I would like to understand why simply adding dependencies to project.clj could cause a stackoverflow error when launching the repl
+U0739PUFQ : Hi everyone, I've been doing some experiments on visualizing clojure.spec fails and ended up wrapping them in a library
+U0739PUFQ : <https://github.com/jpmonettas/inspectable>
+U0739PUFQ : maybe it's useful to someone else
+U6BQSDQRE : Given that I have figwheel set up to use a ring handler via `:ring-handler`, and that handler is also set to auto reload via `ring.middlware.reload/reload`, is there some way I can make it reload *everything*? Basically restart the whole deal. I'm working with a library called `sente` which is for websocket communications, and it doesn't look like the code that initializes everything related to that is being re-run, so it's kind of painful to iterate.
+U0739PUFQ : what I do is put all the code that has a lifecycle into <https://github.com/stuartsierra/component> so I have a way to restart the entire thing
+U6BQSDQRE : <@U0739PUFQ> Hmm, alright. I'll see if I can whip something up that works. Thanks :slightly_smiling_face:
+U0739PUFQ : don't know if you are currently using something like components or mount
+U0739PUFQ : but I've done that with sente
+U0739PUFQ : you create something like a web-server component, and in the start/stop of that component you start/stop http-kit server, sente channels etc
+U6BQSDQRE : Nah, not using anything like that. I'm pretty new to all of this, so still trying to figure out best practices and what people are doing etc.
+Okay, I see. Is it possible to get that to play well with figwheel using `:ring-handler`?
+
+U0739PUFQ : I mean, if you move all the stuff that deals with state into components, and then create a system(a bunch of components) you end up with a restart fn you can use wherever you want
+U0739PUFQ : I never fired it from that reload middleware but can't see any issues with that
+U6BQSDQRE : I see. I guess I just don't quite grok how all these things work together. But I'm sure I can come up with something from what you've told me. Thanks!
+U3J7HSKNC : does anyone have a pro-tip/link to an example of using core.async with ring? or some other http server? like how does one wait for input on a channel and flush said result to a response?
+U051SS2EU : aleph actually has an async request handler infrastructure - and it uses manifold that is designed to integrate easily with core.async
+U051SS2EU : if you use eg. jetty your async code will run but there will still be a blocking thread per request until you respond
+U051SS2EU : the real question I guess is why you are using async, then you can use that answer to guide how you integrate that with a ring server
+U051SS2EU : for the go-loop as you show it, you end up with a single block of code that can only deal with one request at a time - there's valid reasons to do this sometimes but it's a pretty severe bottleneck
+U3J7HSKNC : awesome - I will look into aleph. I was thinking of using core.async as a general abstraction on input/output
+U3J7HSKNC : something like that
+U051SS2EU : when I say "one request at a time in the block" I mean globally, only one of your requests can be in that block - so if you have five concurrent clients, it takes 5x as long to complete
+U051SS2EU : which usually isn't the kind of behavior you want in a web server at all
+U3J7HSKNC : yeah :confused:
+U3J7HSKNC : trying to figure out how to use the results of `(&gt;! out)` in that example
+U051SS2EU : with manifold, you can set up a function that gets called with an input channel and an output channel, and it is instantiated as many times as you get requests, which is a more reasonable pattern of behavior
+U5ZAJ15P0 : Is there a way to quickly run tests when a file changes? Manually running `lein test` takes about 10s to boot for me, and using <https://github.com/weavejester/lein-auto> take the same time
+U5ZAJ15P0 : I assume the delay is coming from the jvm boot time, but I don't know how to avoid it
+U051SS2EU : <@U5ZAJ15P0> fyi lein test just uses clojure.test, and you can require that and run `(clojure.test/run-all-tests)` in your repl (after requiring your test namespaces of course)
+U050MP39D : <@U5ZAJ15P0> I'd recommend running tests from a persistent repl, and using something like clojure.tools.namespace to ensure code is reloaded and up to date
+U051SS2EU : you could hook up the run-all-tests to run as part of your system refresh if you have such defined
+U5ZAJ15P0 : <@U051SS2EU> ah, good point. Thanks!
+U5ZAJ15P0 : thanks! hadn't thought of that
+U050MP39D : fwiw, I always have something like this in user.clj```
+(defn run-unit-tests []
+  (repl/refresh)
+  (test/run-all-tests #"^project-ns.*$"))
+```
+
+U5ZAJ15P0 : are there any "good practice" I should be aware of regarding testing clojure? (either tools/libs or approaches). Or should I just get started with clojure.test?
+U050MP39D : I also use Cursive to run single test files a lot
+U5ZAJ15P0 : Also, is it advisable to place pre/post conditions on every "core"  functions of an app? Including spec checks on arguments.
+U5ZAJ15P0 : <@U050MP39D> I am trying to avoid Cursive for now to get a first-hand experience on clojure, and not have too much hidden behind IDE magic
+U5ZAJ15P0 : but I'll definitely try it out at some point
+U050MP39D : that's fair, and to do what cursive does without cursive it's basically just (do (repl/refresh) (test/run-test ...))
+U050MP39D : repl in this case is clojure.tools.namespace.repl and test is clojure.test
+U5ZAJ15P0 : <@U050MP39D> yep, right now I have a function "reload" which calls clojure.tools.namespace.repl/refresh, as well as restarts my system
+U5ZAJ15P0 : I guess I can just run the tests there
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

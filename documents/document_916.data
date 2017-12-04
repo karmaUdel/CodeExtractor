@@ -1,0 +1,124 @@
+U5VGKQ2SY : yeah.. this works for me if I have zip file that extracts to csv if csv not there. But print "csv-filename already exists" if csv w/ same same already exists.
+U4WG0KTNJ : Thanks! This is what I have so far, not working as I thought it would be, instead of file_a_1, file_a_2, file_b_1, file_b_2. It gives file_a_1, file_a_2, file_b_3, file_b_4
+U5VGKQ2SY : update line 1 to:```
+import os
+import os.path
+from zipfile import ZipFile
+```
+
+U5VGKQ2SY : this `zip_ref = zipfile.ZipFile(file_name)` to `zip_ref = ZipFile(file_name)`
+U5PJK7JHE : quick question assume I have a list `["abc","ab","cda" ..]` I want to remove all elements that are substring i.e. in this case it would be `["abc","cda"]`
+U5PJK7JHE : what is the quickest way to do that?
+U4WG0KTNJ : len?
+U5PJK7JHE : huh?
+U1BP42MRS : <@U5PJK7JHE> what have you tried?
+U1BP42MRS : We like to see what you've tried before just giving answers :)
+U5PJK7JHE : ```for e in li:any([ x in e for x in e if x !=e])
+```
+
+U5VGKQ2SY : <@U4WG0KTNJ> moving our convo as comments/thread into your last code snippet
+U1BP42MRS : You want a substring, right? So I'm not sure a `!=` makes sense 
+U1BP42MRS : Try `in`
+U5PJK7JHE : I have that as well
+U5PJK7JHE : just ensures it doesn't check the same element
+U5VGKQ2SY : <@U4WG0KTNJ>  here, actually
+U1BP42MRS : Also any returns a Boolean, aren't you trying to remove from the list?
+U4WG0KTNJ : from zipfile import ZipFile doesn't work actually. I'm using Python 2.7
+U1BP42MRS : Or filter it down, rather 
+U5VGKQ2SY : So make these changes. Also, what are you trying to do w/ i counter/index in lines 12 and 19?
+U5PJK7JHE : yeah that would just be a filter and I would add it to a list
+U1BP42MRS : So is it working, or are you trying to make it faster/more efficient?
+U5PJK7JHE : make it more efficient
+U4WG0KTNJ : basically there are 3-5 files in each zipped folder: file_a, file_b, file_c, file_d
+I wanted to make it so that the filename would increment, file_a_1, file_a_2, file_b_1, file_b_2
+
+U5VGKQ2SY : so there is a conflict w/ i here.
+U5VGKQ2SY : on line 12 you initialize it to 0.on line 13, i takes values 0 to len(zip_ref.filelist)-1 (automatically incrementing it's value as f gets a new element value from zip_ref.filelist
+
+U5VGKQ2SY : so list ["cat", "dog", "bird"]i=0; f=cat
+i=1; f=dog
+i=2;f=bird
+
+U5VGKQ2SY : just to be clear, this happens automatically when you `for i, f in enumerate(pet_list):`
+U4WG0KTNJ : ah makes sense didn't notice it
+U4WG0KTNJ : getting a KeyError: “There is no item named “cat_0.csv” in the archive”
+U5VGKQ2SY : yeah. So basically what you are trying to do is change the name of the file inside the zip and then unzip, right?
+U4WG0KTNJ : yeap!
+U5VGKQ2SY : right. so what is happening is you are only updating the name of the list, now the name of the file, inside the zip, on the HD.
+U5VGKQ2SY : Check this out: <https://stackoverflow.com/questions/3982034/how-can-i-extract-files-using-custom-names-with-zipfile-module-from-python>
+U5VGKQ2SY : looks like unziping to a tmp folder might be the way to go.
+U5VGKQ2SY : &gt; right. so what is happening is you are only updating the name of the list, now the name of the file, inside the zip, on the HD.What I said here, is wrong. Zip file is one that is getting overwritten. NOT the files inside the zip.
+
+U5VGKQ2SY : so if there are existing files of `file_a`, it should create `file_a_0` and then `file_a_1`, and so on? It just keeps adding to file_a_watever-count and file_b_whatever-count, depending on the files that have already been extracted?
+U0NRYQNAZ : anytime i open a file in pycharm it says loading ... arggg. why does this happen when i have something really important to fix.
+U4WG0KTNJ : file_a_0, file_a_1or file_a, file_a_1
+or file_a, file_a_0, file_a_1
+
+are all acceptable!
+
+U5VGKQ2SY : yes... I saw that.
+U5VGKQ2SY : if f.filename in os.listdir(dir_name):                name, ext = os.path.splitext(f.filename)
+
+U5VGKQ2SY : <@U4WG0KTNJ>
+U5VGKQ2SY : line 7 counts the number of files that start the same and end the same... this assumes that file_a_1, file_a_2... is sequential. If you get file_a_1, file_a_4, file_a_7 then just play w/ this. Also, had line 11 one indentation back so it was trying to unzip/extract file from previous iteration, that were the file not found error coming from
+U4WG0KTNJ : hmm it still only opens the first 2 zipped folders and line 10 is giving me RunTimeError: Attempt to read ZIP archive that was already closed
+U5VGKQ2SY : ```import os
+import os.path
+from zipfile import ZipFile
+
+dir_name = '../data/'
+extension = ".zip"
+
+os.chdir(dir_name) 
+
+for item in os.listdir(dir_name):
+    if item.endswith(extension):
+        zip_ref = ZipFile(item)
+        for f in zip_ref.filelist:
+            if f.filename in os.listdir(dir_name):
+                name, ext = os.path.splitext(f.filename)
+                f.filename = name + '_' + str(len([elem for elem in os.listdir(dir_name) if elem.startswith(name) and elem.endswith(ext)])) + ext
+                zip_ref.extract(f)
+            else:
+                #continue
+                zip_ref.extractall(dir_name)
+            zip_ref.close()
+            os.remove(item)
+```
+
+U5VGKQ2SY : that's the whole script that I am using
+U5VGKQ2SY : <@U4WG0KTNJ>  Try with `with`:```
+        with ZipFile(item) as zip_ref:
+            for f in zip_ref.filelist:
+                if f.filename in os.listdir(dir_name):
+                    name, ext = os.path.splitext(f.filename)
+                    f.filename = name + '_' + str(len([elem for elem in os.listdir(dir_name) if elem.startswith(name) and elem.endswith(ext)])) + ext
+                    zip_ref.extract(f)
+                else:
+                    zip_ref.extractall(dir_name)
+            os.remove(item)
+```
+
+U5VGKQ2SY : that way you don't have to worry about closing
+U5NC85SCB : Hey, could I get some quick help from someone? No idea how to explain the situation
+U5NC85SCB : Essentially calling a function from another file doesn't seem to work the same when you call it from inside another function
+U5NC85SCB : Is there any reason why these two calls would act different?
+U5VGKQ2SY : line 2 vs lines 4-6?
+U5VGKQ2SY : lines 4 through 6 won't execute unless today_posts is called from somewhere.
+U5NC85SCB : Yeah, I get that :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,15 +1,275 @@
+U0CL0AS3V : and then it's also really easy to say "here are the pieces of information my function must accept in order to render those"
+U0CL0AS3V : and then figuring out where that data ought to live...there is no one-size-fits-all answer
+U23SA861Y : what is the addage, "show me your code and I will have no clue what you're doing, but show me your data and I can deduce your code"
+U23SA861Y : or seomthing like that
+U0CL0AS3V : never heard that one haha
+U2U94G0QG : show me your data... :smirk:
+U4872964V : Yes, my experience is that when I run into trouble I have modelled my data incorrectly
+U17MHJ12N : I agree. The data modelling is the most important thing. But I maintain that there is a case for components and there is a case for encapsulation and that _can_ lead to duplication unless you are careful. In that cicumstance you have to separate the data the component is responsible for from the data it is not.
+U4872964V : I guess there is if you try to fit all sub-update functions into the same form.
+U4872964V : but the point is that you don’t have to
+U23SA861Y : ```Show me your flowcharts and conceal your tables, and I shall continue to be mystified. Show me your tables, and I won't usually need your flowcharts; they'll be obvious.
+  --Fred Brooks
 ```
-minitest (in ruby) does diffing on `assert_equal` failures and provides `make_my_diffs_pretty` to ensure that big things get printed structurally. makes finding the problems a breeze in comparison
-It does it that way specifically to find inequalities deep in a nested sexp and it is really really quick to hone in on where the problem is. `check-sexp-equal?` has to embed `#:new` and `#:old` tags to show you where the differences are but the whole sexp is printed flat
-just doing a pretty-print of the output would make it much better
-<@U5KU1HNKY> check-sexp-equal is very nice and was part of the inspiration for `expect` :)
-<@U07SJGB4H> I'm not a fan of expectations (at least from the BDD perspective). I imagine that your RHS blows up really quickly on anything non-trivial
-thanks! if you have any insight on how to improve its output I'm all ears
-there's "expectation conversion" so that you can write something like `(hash 'foo (list 1 2 (vector 'a 'b (expect-pred? number?))))` and it will convert it to an expectation that structurally matches things and reports errors in contexts
-the above example I had didn't do that because `expect!` does not yet convert its expectation argument automatically
-`(expect-equal? some-complex-data-with-hashes-and-lists-and-stuff)` will do it though
-They're more like junit/hamcrest "matchers" than anything else, but I wanted a more noun-y name
-I'm currently working on a test filtering feature for chk and rackunit. The idea is to be able to call `raco test my/module -- args to forward` and the test lib interprets `args to forward` as filters for test names, files, lines to run. I'm looking for feedback/feature requests based on the WIP documentation: <https://cfinegan.github.io/chk-docs/chk.html#(part._.Filtering_.Tests_with_.Command-line_.Arguments)>
-Please let me know what you think. Rackunit docs are coming after I figure out what features are the most popular.
-<@U5GQ7TC3H> instead of relying on command line arguments, would it be cleaner for `raco test` to define some sort of "filters" concept and pass it along to test submodules? module-level filtering could work with a config submod in the test module
-There's always `getenv` plus the ability to define an env var on the command-line ¯\_(?)_/¯
+
+U4872964V : I have update functions returning three separate pieces of data in some cases
+U17MHJ12N : I understand that
+U4872964V : so in that sense, they “own” that data I suppose
+U0CL0AS3V : &gt; But I maintain that there is a case for components
+I maintain that there isn't, so we'll probably have to agree to disagree on that one :smile:
+
+U0CL0AS3V : but hey, if you're happy with how your code works, far be it for me to tell you to change!
+U17MHJ12N : I guess it depends what you mean by a component. There are things that I can't see working any other way.
+U4872964V : components is the “obvious” way to do it, so it’s not like we haven’t tried that :slightly_smiling_face:
+U0CL0AS3V : I mean it in the OO sense...I talked about it more in my Elm Europe keynote - will share that when they're done editing it!
+U17MHJ12N : I just mean module with its own model, view update subs etc
+U4872964V : yeah, that’s what i mean too, and sometimes that’s the best way to model it for sure
+U4872964V : but it’s almost a component by accident, not by necessity. it just happens that the data is so cleanly separated so that it makes sense to group it like that
+U4872964V : but it’s not a component in the sense that it’s a generic thing that can be instantiated multiple times etc. That leads to headaches like having a “button” component in your code that has some kind of state that you’re going to handle etc.
+U17MHJ12N : that's exactly the scenario when you do need a component
+U17MHJ12N : when you want to reuse it
+U17MHJ12N : or just a view fragment - of course I get it
+U4872964V : that’s when you need a reusable function :slightly_smiling_face:
+U4872964V : functions don’t have state
+U17MHJ12N : I understand the pros and cons of components. Sometimes you need them. It was never really my point.
+U4872964V : ok :slightly_smiling_face:
+U17MHJ12N : Sorry that sounded a bit grumpy :slightly_smiling_face:
+U4872964V : reading your post there, it’s exactly that problem (cascade of updates) that thinking in terms of components leads to. If you instead think in terms of functions, input and output, and narrow the types to be exactly the data that the function needs and returns exactly the data that the function should produce, then that problem goes away, in my experience
+U0CL0AS3V : &gt; module with its own model, view update subs etc
+I think calling this a "component" encourages reaching for it often, instead of it being the technique of last resort, and I think using it as a last resort is for sure the right way to go
+
+U0CL0AS3V : agree w/ <@U4872964V>
+U0CL0AS3V : the way I think of components is the way designers do
+U0CL0AS3V : if a designer says to me "let's make a nice reusable dropdown component that looks like this"
+U0CL0AS3V : I don't think "the designer is communicating to me that it's important for me to a separate model, a view, and an update for this"
+U0CL0AS3V : I think "the designer is communicating to me that I should have a dropdown that looks and works a certain way"
+U0CL0AS3V : and my next task is to figure out the right API for that
+U0CL0AS3V : so to me, the word "component" just means "a part of a UI"
+U0CL0AS3V : and it's not saying anything about the API
+U0CL0AS3V : or the internal design from a code perspective
+U17MHJ12N : yes I do appreciate that but I think we have derailed a little bit. I am really concerned about the difficulties that ensue when you do (appropriately) have a component. This does not mean I always use them or that I don't appreciate the splendour of the simple function,
+U4872964V : Well, you’d only have a component when it doesn’t lead to difficulties :slightly_smiling_face:
+U0CL0AS3V : exactly! :smile:
+U0FP80EKB : Perhaps switching the discussion from “here is something we need to worry about” to “here is a specific pain point I’m running into, and this is the way that I can see to solve it. Does anyone else have ideas on how to solve it differently?”
+U0FP80EKB : It is easy to run into the “I don’t know a different way, therefore there isn’t, so we have to work on my proposed solution”
+U0FP80EKB : (but I’m staying out of this conversion) :slightly_smiling_face:
+U0CL0AS3V : fair point <@U0FP80EKB>
+U0FP80EKB : Everyone is right when discussing solutions first. Everyone is wrong when discussions solutions first.
+U4872964V : Sure, so looking at the post, we have a `pageOne` component that also needs to access and update the `user` data
+U17MHJ12N : quite, so what started all this was me saying, perhaps we could make it clear that pageOne should not update user, by passing it in separately. Furthermore perhaps we could borrow react terminology and call that Props.
+U17MHJ12N : as a useful convention
+U4872964V : but it _can’t_ update user, because it does not return a user
+U17MHJ12N : just as it is in react
+U0FP80EKB : &gt; perhaps we could make it clear that pageOne should not update user, by passing it in separately. What is the pain that this added complexity is targeting?
+
+U17MHJ12N : if user is made part of its Model then it can if it returns a Cmd that will cause that to happen
+U4872964V : but why would we
+U17MHJ12N : so user should *not* be part of its Model is the conclusion
+U3GD698R5 : hope to see more of this talk!
+U17MHJ12N : a reason we would want to is to preserve encapsulation. We might want all of pageOne's state to be confined to its model. To keep things neat, not realising we have made a subtle architectural mistake
+U17MHJ12N : People like patterns and they see this update function signature and they think that's what they have to use. This is how this can happen.
+U4872964V : So, we just do what it says under “Do not allow two copies of volatile data”. I don’t agree with “The downside is that it doesn’t scale very well. What happens when I discover another piece of state that is really owned by an ancestor component? I have to add that to the signature as well. All the way down.”
+Yes, you add it. All the way down. How does this not scale?
+
+U17MHJ12N : I did say that I didn't agree with my own conclusions anymore!
+U4872964V : :slightly_smiling_face:
+U4872964V : And taking this further in this direction, why do we have to have a `Model` exactly in the update function?
+U17MHJ12N : But I think rather than add User to the signature I would rather add a single Type (aka Props) to contain *all* stuff I don't own and then just make that a convention
+U4872964V : this is taking it away from components
+U4872964V : Why call it Props if it is a User
+U17MHJ12N : to future proof it when the next thing comes along
+U4872964V : that’s just making it more opaque
+U0F2LCU58 : what now?
+U0F2LCU58 : I got a notification
+U4872964V : future proof? Just add another parameter if you need one. That’s all.
+U23SA861Y : write what you need, not what you will need
+U4872964V : and if you discover that you actually need to update the user, just have the function return a User and update the model with it
+U0FP80EKB : &gt; Never plan extensibility, refactor and extract to it
+U17MHJ12N : I think it depends how many things you anticipate needing to pass around. I *know* I will need quite a few so I am planning for it. That's all
+U0F2LCU58 : It's just another way of looking at `&lt;&lt;`
+U4872964V : I think this comes down to that refactoring in javascript is hard, but refactoring in Elm is easy
+U23SA861Y : yeah, there is a big difference in refactoring when you have a compiler vs when you don't.
+U17MHJ12N : I'm not worried about the refactor, I'd just rather not have the same signature with five things being passed in. Of course, not always necessary but not a big deal either way.
+U4872964V : so if you have many parameters you can make a record, call it props if you like, I prefer to deconstruct it right away in the definition
+U4872964V : but don’t be afraid to change even the `Model` parameter in the input and output, if that suits your data better
+U17MHJ12N : ok - well thanks all - time to go home for me now!
+U4872964V : thanks! great conversation
+U4Z4NEUQG : How can I use an elm rendered DOM node as target node for some js library?
+U4872964V : easiest is to put a class or id on it
+U0CL0AS3V : night <@U17MHJ12N>, thanks for the discussion!
+U4872964V : and then use a MutationObserver
+U4Z4NEUQG : HO yeah good idea
+U4872964V : make sure it doesn’t get rerendered by Elm if you store stuff on it though
+U4Z4NEUQG : how can I prevent that?
+U4872964V : by not changing your view structurally too much
+U4872964V : if you add elements, use Html.Keyed
+U31A7HG1E : Is there a guaranteed way to prevent re-rendering?  something akin to returning 'false' from shouldComponentUpdate in a react component?
+U4Z4NEUQG : Nah I just render a div for an embed an not touching it after that.
+U0FP80EKB : <@U31A7HG1E> look at `Html.Keyed` and `Html.Lazy`
+U31A7HG1E : will do, thanks
+U4Z4NEUQG : Yeah I guess lazy is also what I need:P
+U4872964V : No, Html.Lazy is just an optimization not to call the view function
+U4872964V : it doesn’t change the rendering
+U4Z4NEUQG : it only prevents virtual DOM diffing?
+U4872964V : Well yes, but it’s just an optimization, without Html.Lazy there would be no difference anyway
+U4872964V : Html.Keyed on the other hand lets you tag nodes with key to reuse them even if some nodes are inserted etc
+U4872964V : Doesn’t help if you change the structure too much though
+U4872964V : But it depends on what you do with the node, if you have a MutationObserver you can just set it up again when it’s being rendered again
+U4Z4NEUQG : So basically to have the equivalent of shouldComponentUpdate, we just need our view to return the same thing?
+U4872964V : well, no, shouldComponentUpdate is about the virtual DOM, so it corresponds to Html.Lazy but that won’t affect the real DOM
+U4Z4NEUQG : So, same argument to view function + lazy is equivalent then?
+U4872964V : in terms of real DOM rendering yes
+U4Z4NEUQG : ok
+U4Z4NEUQG : Why would you need a mutation observer? To be notified when elm has rendered the node where I want to put my embed?
+U4Z4NEUQG : So the mutation observer goes on the elm container?
+U4872964V : yes, you could also do that by sending a message through a port, but it’s easier with a mutation observer
+U4872964V : yes, on the elm container node, watching for subtree childList changes
+U4Z4NEUQG : OK makes sense
+U4Z4NEUQG : Thanks
+U4872964V : also, if you need to send information back to elm from your library you can use custom events on the node instead of ports
+U4872964V : look at this: <https://ellie-app.com/qyNKkTsrNRa1/2>
+U4872964V : pretty neat technique for interop
+U4Z4NEUQG : yeah, that's neat. thanks
+U5QJW0DDE : <@U3GD698R5> I will draft up an example tomorrow. 
+U2GPAEU1L : Hey everyone, I just spent a fair bit of time creating a tutorial on a very common mistake in Elm, *hooking up sub-pages*. I show some code for how you would go about hooking up sub-pages and then explain a potential problem, one that I discovered in my own Elm app. If that sounds interesting to you, go check it out! I hope this prevents others from making the same mistake I made.
+<http://codetidbit.com/#view/bigbit/5967ed087890d775c05191f1/introduction/>
+
+Cheers :smile:
+
+U5W5F6QGP : I've never seen codetidbit before, what an awesome way of displaying a tutorialNice work! 
+
+U2SR9DL7Q : <@U2GPAEU1L> I'll be bookmarking this one as well :slightly_smiling_face:
+U4Z4NEUQG : <@U2GPAEU1L>  I did something a bit different. I return pages scope message + global messages
+U4Z4NEUQG : for example, `update: PageMsg -&gt; PageModel -&gt; ((PageModel, Cmd PageMsg), GlobalMsg)`
+U4Z4NEUQG : And I have logic to turn global msg into a Cmd in my global update
+U4Z4NEUQG : As of view, they return only scoped messages
+U4CDPP9HR : <@U4Z4NEUQG> The problem with that approach, if I understand you correctly, is that a view can’t return a message that affects any other part of the page.
+U4Z4NEUQG : each page has only 1 view
+U4Z4NEUQG : which is split in reusable view functions
+U23SA861Y : but they likely share data don't they?
+U4Z4NEUQG : in my code, only 1 page can live at a time
+U4Z4NEUQG : look at  <https://github.com/rtfeldman/elm-spa-example/>
+U4Z4NEUQG : my structure is similar
+U23SA861Y : I see, so the model is completely swapped out
+U4Z4NEUQG : basically yeah
+U5QJW0DDE : here is a simplified app example: <https://gist.github.com/astoeckley/040230ae10409210c7109edd3cb8f009>
+U23SA861Y : at this point its just a bunch of seperate pages
+U4Z4NEUQG : yeah, that's why they are called page:P
+U23SA861Y : sure
+U2GPAEU1L : <@U5W5F6QGP> <@U2SR9DL7Q> Thanks :slightly_smiling_face:
+<@U4Z4NEUQG> Absolutely, that’s why in my tutorial *I said that this is just one possible solution for the problem. Feldman does it completely differently in his SPA, and perhaps I’ll talk about that in another tutorial.*
+ 
+That being said, as <@U23SA861Y> just pointed out, it just becomes a bunch of pages. Like if you always drop the last model, how do you save data across the pages? Like if someone switches to another tab of your website and then back, is the model reset because the top-level model only has 1 model at a time? Perhaps I am misunderstanding it, but that would be a problem for me. Also as <@U4CDPP9HR> pointed out, you still don’t avoid the problem of dup messages. What happens if multiple pages need a `NoOp` etc etc… I find the approach Feldman took in the SPA quite interesting, but at first glance it seems not to satisfy the way I like to build applications.
+
+-&gt; I also haven’t tried doing it that way yet, so perhaps I’ll be pleasantly surprised…who knows. Learning every day
+
+U4Z4NEUQG : If I need some "big reusable view that might send global messages" I just pass the message as argument, like `someView: msg -&gt; Html msg`
+U4Z4NEUQG : I found out that is was easier to have perhaps 1 duplicated message.
+U4Z4NEUQG : My app is pretty big now, and I have no duplicate.
+U4Z4NEUQG : I have a few part of my app that are reusable and are more than one function, I took an approach similar to elm-ui. But those parts cannot send global messages. If they need to send something "outside" I pass the message as argument.
+U5QJW0DDE : <@U0FP80EKB> <@U3SJEDR96> would enjoy your thoughts on this as well: <https://gist.github.com/astoeckley/040230ae10409210c7109edd3cb8f009>
+U5QJW0DDE : but i'm off to bed now (approaching 2 am for me)
+U0CL0AS3V : my first thought: I strongly disagree with 4)
+U0CL0AS3V : I can't speak for CLJS but I would give basically the opposite advice: "it's perfectly normal for a view function to need more state data, resulting in a need for it to be passed additional data"
+U0CL0AS3V : I have a thought experiment. Here is a claim:
+Any advice of the form "View functions should..." is either:
+
+1) true, but also true of all functions
+2) false
+
+U0CL0AS3V : can anyone think of any counterexamples? (I tried and couldn't think of any.)
+U2GPAEU1L : <@U0CL0AS3V> Fun….hmmm….
+View functions should care about how the code physically resembles the output (?)
+
+That might be cheating…not sure…
+
+U0CL0AS3V : haha
+U0CL0AS3V : I wouldn't even say I'm on board with that one :smile:
+U23SA861Y : view functions should, describe how to render your data
+U2GPAEU1L : <@U0CL0AS3V> I can think of examples where the code would be easier to work with if it was more shaped like the output, I think if I actually spent the time to create the examples you _might_ agree with me (although you don’t seem to like to :stuck_out_tongue: ). 
+But it’s completely beside the point, I see what you are saying, we should treat view functions like everything else, they are not magical, and I agree. I don’t _think anyone here would disagree with that_.
+
+U2GPAEU1L : View functions should create views
+U2GPAEU1L : hehehehe….
+U0CL0AS3V : I think if you drop (4) as a constraint, then the problem goes away
+U0CL0AS3V : and there is nothing tricky about this particular set of business requirements - each function requires a certain amount of data to return the `Html` necessary to make the page look right, and in all cases it gets that data passed in from its caller.
+U0CL0AS3V : No need to add additional restrictions on top of that!
+U601ELFEG : It seems that I can build a higher level module that has a `Cmd` and `Sub` interface, even though it itself is built all in Elm... but since the thing it is built on uses `port` and hence is `Cmd` and `Sub` based, my higher level one must be too.... Is this a common pattern one sees? Or is `Task` suppose to be the right way to do this? Or is there some other abstraction or technique for building upon things which must, ultimately be based on code the async's through JS?
+U601ELFEG : Meh... hang it - there seems to be no way to have two different higher level modules make use of a `port` module with the `port` module knowing all the clients. The problem is there is no way to transparently route the `Sub`s
+U601ELFEG : oh - what's an `effect module`?
+U601ELFEG : is that something current? deprecated?
+U0Z9TPK7S : <@U601ELFEG> an effect module is something that elm kernel stuff, which normal users should use but not write.
+U0Z9TPK7S : <@U601ELFEG> in general, you can declare the port, and just the port, inside a dedicated `port module`, then require and use the port module as any other module.
+U0Z9TPK7S : Modules that import the port module don't need to be themselves port modules
+U153UK3FA : <@U601ELFEG> `port`s are an application level concern, they aren’t something that you share
+U601ELFEG : okay - soooooo I'm having a mental block here:  I've got some low level facility like:  `port requestFoo : String -&gt; Cmd msg`    and  `port receivedFoo : (Json.Encode.Value -&gt; msg) -&gt; Sub msg`
+U601ELFEG : this i can code
+U601ELFEG : but now I want to call this from two places.... like `requestFoo "alpha"` and have the `Sub` somehow result in a `Msg` value of `ReceivedAlpha String`
+U601ELFEG : and similiary  `requestFoo "beta"` and have the `Sub` result in a `Msg` value of `ReceivedBeta String` for that one
+U601ELFEG : It seems like since I get one only one `Sub` for the `port`, I need something that knows about all the users of `requestFoo` to distribute the only `Msg` the `Sub` can give me back
+U601ELFEG : Does that make any sense? There seems no good way to compose uses of a `port module`
+U153UK3FA : yep, it’s not request/response. It’s publish/subscribe
+U601ELFEG : sure - so how can I have one low level pub/sub server multiple clients
+U153UK3FA : all subscribers will get all values sent
+U153UK3FA : but there is only one subscriber
+U601ELFEG : right - so something needs to demultiplex the subscriptions
+U153UK3FA : `update` is your only subscriber
+U153UK3FA : it’s called with all the `Msg`s that result from a subscription
+U601ELFEG : Right - so then `update` must somewhere know about all the global uses of that `Sub` and know how to dispatch them... which doesn't seem very modular
+U153UK3FA : `update` ties all the modules together
+U601ELFEG : Essentially I'm trying to build something similar in feel to WebSocket - but that was using `effect module` (hence my question)  - and that kind of machinery doesn't seem avilable
+U153UK3FA : yep, it’s not
+U601ELFEG : Yes `update` does, but `Cmd.map` and `Sub.map` and and ADT heirarchy of `Msg` types let you compose modules
+U601ELFEG : but it doesn't seem possible to compose with `port`
+U153UK3FA : You can’t write something similar to the WebSocket package without writing an ‘effect manager’ which you generally shouldn’t do.
+U601ELFEG : okay - I'm willing, but there doesn't seem to be any doc on writing an `effect manager` - and <@U0Z9TPK7S> suggested it was "kernel level stuff"
+U601ELFEG : well, I've got to send some messages to some HW - and get responses - and I really don't want to have write an in `port` for each and every message!
+U601ELFEG : So - what is the pattern to be?
+U0Z9TPK7S : <@U601ELFEG> the lack of documentation is intentional because 1) details of how to write an effect manager will change and 2) they are unsafe, so users are discouraged from writing those.
+U601ELFEG : I could write   `port requestFoo : (Int, String) -&gt; Cmd msg` and `port fooResponses : (Int, String) -&gt; Sub msg` --- and use `Int` to tie requests and responses
+U0Z9TPK7S : Yes
+U0Z9TPK7S : That is probably the approach. Have a single generic port that can convey different messages
+U601ELFEG : but there isn't a good way to write a manager that allocates the Ints, and maps them back to `Msg` - at least as far as I can see.
+U0Z9TPK7S : You don't want to write a manager
+U0Z9TPK7S : And I am not sure exactly what you are trying to do
+U0Z9TPK7S : You might need a dedicated Msg
+U601ELFEG : Here: I've got JS to send MIDI messages.   There are many of them - but the JS is really all the same: Take some bytes, send, wait for the corresponding bytes response
+U0Z9TPK7S : If the port you are using is `port fooResponses : (Int, String) -&gt; Sub msg`
+U601ELFEG : I want to send some MIDI message from one module - and when the response comes, it wants a `Msg` of `MyThingArrived ...`
+U0Z9TPK7S : then the easiest thing is to have a `type Msg = MidiResponse (Int, String) | ...`
+U601ELFEG : Sure - but who knows which `Int` value is from which module?
+U601ELFEG : and who decodes that?
+U153UK3FA : `update` does
+U153UK3FA : because only `update` can
+U0Z9TPK7S : ```update msg model =
+  case msg of
+    MyThingArrived (theInteger, theString) -&gt;
+       doYourStuffWith theInteger theString
+    ...
+```
+
+U153UK3FA : <@U601ELFEG> what ever function produces the `Cmd` that sends to the `port` will be called by `update` it can require `update` to pass it an `Int`. `update` can store that `Int` somewhere in the `Model` for reference later
+U601ELFEG : okay here is a sketch
+U601ELFEG : there seems no good way for A and B to call into Midi to get a `Cmd` - and update any model Midi might try to keep... so that it can decode that `Int` back to Msg
+U601ELFEG : this is complicated because A and B have different Msg types - that only get combined back up at top
+U601ELFEG : like there is no good way for this mapping of `Int` to `Top.Msg` to get `AStuff` and `BStuff` wrapped around the `Cmd` from when A or B called into Midi
+U601ELFEG : I suppose I could pass up some `MidiCmd` type, from A and B's `update` (rather than `Cmd`), which could be `MidiCmd.map`'d "on the way up" , and then - finally in Top, have that converted to and actual `Cmd`
+U153UK3FA : you probably want an additional attribute in the values being sent and received to allow `update` to identify whether it’s for `AStuff` or `BStuff`
+U153UK3FA : `MidiStuff` probably isn’t specific enough for your usecase
+U601ELFEG : right - which would mean that `Midi` would sort of need to have an ADT that enumerated all the users... which is what I was trying to avoid
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

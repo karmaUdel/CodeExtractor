@@ -1,43 +1,89 @@
+U0EUHKVGB : jonf: Can you clarify what you mean by this? Comes across a little hostile
+U23SA861Y : as in I pretend to know what what I'm talking about
+U0EUHKVGB : <@U37HUSJ4R> Try asking in <#C192T0Q1E|beginners> :slightly_smiling_face:
+U3SJEDR96 : <@U23SA861Y> I don't mean anything by it, just pointing out how those names tend to be used in common Elm libraries :slightly_smiling_face:
+U3SJEDR96 : good call that there are two valid ways to define a `map` for a `Function a b`, tho - in which case one usually guesses which one would be the most commonly used (like `Result.map` maps the `Ok`, not the `Err`), and defining an alternative for the other one (like `Result.mapError`)
+U23SA861Y : heh, I wasn't taking offense just derriding my own inabilities
+U2LAL86AY : Thanks all for your effort and explanations. I think i'm struggling to underestand this: `function shaped box` -  functions are supposed to be actions - they do stuff - i know that functions are values - but is not like i deeply agree with that :smile: - i mean it must be true - but i think this 2 views don't marry nice in my head. How an action can have a shape?!. 
+I'm having assumptions that keep me form understanding this stuff more deeply.  I can use this `map`, `andThen == flatMap == bind == concatMap`, `function composition` all day- but still i feel like you guys have another level of insight into this. We are looking at the same stuff - but i don't see all there is :smile: Anyways, i guess it comes with time and a lot of practice.
+
+U23SA861Y : does slack have the *me* or \me thing
+U3SJEDR96 : <@U23SA861Y> alright, gotcha :sweat_smile: - though there's no need for that, either! It's been 153 since I wrote "hello world" in Elm, which was my first ever encounter with FP and all that comes with it - I'm arguably still new to this, too :slightly_smiling_face:
+U5W50TZ6C : Hi! Ready for a strange question? `elm-make` runs out of memory when compiling this file: <https://gist.github.com/SidneyNemzer/d7be995a3f12f9bb69a7c3883cdc6191>
+U2LAL86AY : ```Failed To Save Project11:38:14 PM
+Ellie couldn't save your project. Here's what the server said:
+
+An internal server error occurred
 ```
-it's like umm yeah that is an a
-It is a problem with comparable objects, it's just the compiler error is entirely not helpful
-so <@U0GR6DHEK> it does seem to be an issue with user defined types not being comparable
-Thanks. I think I can switch to a list easily enough and create a `member ` function 
-There already is a `List.member` function, isn't there?
-Yes there is
-interestingly List.member accepts any type. Does that imply that every type is equateable?
-No, when you call List.member, the type of the value you are searching for has to map the element type of the list.
-Those `a`s must be the same type for any particular call.
-They can vary between calls to `List.member`.
-yes, but that implies that (==) is a valid operation on any type. `a-&gt;a-&gt;Bool`
-"that all types belong to the type class equatable", so to speak
-Yeah, I suppose `==` is defined on all types
-Just unexpected
-Yeah. That didn't occur to me either. Especially since `comparable` is a restricted set of types.
-comparable also includes ordering
-but yeah, unexpected
-I suppose it has to do with the type class unioning issues
-<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Basics#equality>
-yeah, I knew it exploded for function types
-Interesting... fun way to make Elm blow up
-Oh I'm too late to the party.
-I was going to demonstrate the "breaks on functions" issue <https://ellie-app.com/3QNjCJx73HYa1/0>
-but I had to rebuild the error from memory :stuck_out_tongue:
-First time I ran into that error it was a little scary. Easy to fix, but I had to think for awhile about where exactly it was coming from and why it only showed up _sometimes_.
-Also behaves "unexpectedly" on "types that don't behave like regular Elm types", like `Json.Encode.Value`
-which isn't really that big of a deal; until you run into it :wink:
-Late yesterday I was asking about `Json.Decoder.oneOf` and why I was having trouble parsing a list of floats.  After further study, I realize I didn't understand the code, and now I have something that works just as I wanted: <https://ellie-app.com/3QPJnGTtfGha1/0>
-Now this image below is a bad one, but i will make it better soon.
-Thank you :smile:
-i've build a repo here: <https://github.com/AionDev/xray-time-traveling-debugger>
-<@U0F7JPK36> ^ I remember you were looking into improving the debugging experience in Elm. You folks might want to talk, before someone jumps in and spends a buttload of time
-<@U2LAL86AY>, hey, if you've written something up then please put it in a gist.
-Long form posts like that are not well suited to Slack.
-It makes it very hard to give feedback to you.
-yep i created that repo
-will make a gist soon
-That repo is fine, I didn't click on it yet cause I was still reading your post :wink:
-ah and i forgot to mention - when calling the same function multiple times in the same update step - clicking on it in the second pannel - will show every instance of it's calling in order. So nothing is hidden
-Anyone using IntelliJ? Am I assuming correctly that it does not support showing type errors (eg missing cases), only syntax errors?
-]
-<@U2LAL86AY> will read it tomorrow! interesting
+
+U2LAL86AY : just loaded your code into ellie and got this.
+U5W50TZ6C : I just tried to save it as an ellie project too, same issue
+U0LPMPL2U : I've seen something like this happen once when the types wrong in a recursive function. Somehow the compiler seemed to go into an infinite loop trying to figure the types out.
+U0EUHKVGB : I suspect this line: <https://gist.github.com/SidneyNemzer/d7be995a3f12f9bb69a7c3883cdc6191#file-textarea-elm-L41>
+U0EUHKVGB : actually, i see it
+U0EUHKVGB : Your update has mis-matching cases.
+U0K92QFST : <@U2LAL86AY> this is stuff that I've learned over 3 years of functional programming, reading various books, watching talks and absorbing the chatter of everyone around me! I never just looked at the code and just "got" it. As with anything else, it's gradual and takes time!
+U0EUHKVGB : there’s actually a few weird things in here :thinking_face:
+U0K92QFST : If you're interested in learning more about this stuff I would recommend the Big Purple Haskell Book :stuck_out_tongue: <http://haskellbook.com/>
+U5W50TZ6C : Unfortunately I didn't write it, nor am I an elm expert, so I've had quite the time debugging it :anguished:
+U0EUHKVGB : Okay
+U5W50TZ6C : <@U0EUHKVGB> Could you explain what you mean by "mis-matching cases" in the update? Any idea why that breaks the compiler?
+U0EUHKVGB : Yeah, one sec, I’m just making sure
+U3SJEDR96 : it's a typo - `if config.hiddenFields then`  -&gt; `if options.hiddenFields then`
+U3SJEDR96 : first line of `view`
+U14Q8S4EM : Plus one on <@U0K92QFST> ‘s book suggestion.
+U14Q8S4EM : I read a bit of it after the NYC Haskell meet upgroup recommended it
+U0EUHKVGB : <@U14Q8S4EM>  =&gt; <#C0CJ671HU|random>
+U3SJEDR96 : oh, wait, that breaks it completely
+U0EUHKVGB : <@U5W50TZ6C>, <https://gist.github.com/SidneyNemzer/d7be995a3f12f9bb69a7c3883cdc6191#file-textarea-elm-L53>
+U0EUHKVGB : this is missing `! []` to match the other line
+U0EUHKVGB : <https://gist.github.com/SidneyNemzer/d7be995a3f12f9bb69a7c3883cdc6191#file-textarea-elm-L71> is refering to a name that does not exist
+U0EUHKVGB : <@U5W50TZ6C> My suggestion would be to take it line-by-line and make it as explicit as possible, replacing parts with `Debug.crash ""` until it compiles.
+U5W50TZ6C : Yeah, that's probably the next step
+U5W50TZ6C : thank you for your help :slightly_smiling_face:
+U0EUHKVGB : I suspect it’s a combination of using pattern matching on this line: <https://gist.github.com/SidneyNemzer/d7be995a3f12f9bb69a7c3883cdc6191#file-textarea-elm-L70>
+U0EUHKVGB : with the incorrect name used on this line: <https://gist.github.com/SidneyNemzer/d7be995a3f12f9bb69a7c3883cdc6191#file-textarea-elm-L71>
+U3SJEDR96 : Also, `Config Msg &lt;-&gt; Config`
+U5W50TZ6C : <@U3SJEDR96> Changing `Config Msg` to `Config` makes the compiler complain about missing `msg`. But it doesn't crash! Adding `Msg` back makes it crash.
+U3SJEDR96 : <https://ellie-app.com/3xgmV5BBJtma1/0> which reveals a few more errors
+U3SJEDR96 : <@U5W50TZ6C> I mean that your `view` is missing the type parameter for config altogether
+U3SJEDR96 : (the `indexedMap` in the view was missing `config` as a parameter to `viewFold`, so had to add that to the definition of `view`. the `onInput` in the `then` clause was also wrong, `&lt;|` instead of `&lt;&lt;`
+U5W50TZ6C : Those changes fixed it, <@U3SJEDR96>! Anyone know why the original breaks the compiler though?
+U3SJEDR96 : Probably type unification failing because of the missing type parameter, but hard to say tbh
+U2HLL9C6Q : I was just looking at <https://github.com/elm-lang/persistent-cache> is there any port that wraps access to localStorage for me?
+U2Q3QE54G : Hello everyone. My unindenting mechanism for a code editor in elm using `textarea`s does a strange thing. The unindenting works great, but with certain selection ranges the selection changes to a simple cursor at the selection end instead of keeping the selection range. I’ve created an SSCCE in Ellie to demonstrate. Curious why this is happening and how to fix?<https://ellie-app.com/3x2qQdLqpHga1/1>
+
+U2Q3QE54G : You can see that the selection range is from 5 to 12 and then changed to 5 to 10 (because 2 `tab`s were unindented). But the 5 to 10 selection range appears as 10 to 10 (just a cursor at position 10)
+U1YUR8HRN : <@U2HLL9C6Q> plain ol' ports are gonna be your best bet: it's the safest way to get unimplemented JS features into your app. There's a nice section in the elm guides on ports, and here's an example that deals with localStorage in particular: <https://github.com/evancz/elm-todomvc/blob/master/index.html#L15-L20>
+U1YUR8HRN : elm gude: <https://guide.elm-lang.org/interop/javascript.html>
+U5LFUHH19 : I need to Json.Decode a dict where the values can be strings, numbers, and other dicts.  Is that possible?
+U23SA861Y : example?
+U23SA861Y : ahh yes, you want to use the one of decoder
+U23SA861Y : `Json.Decode.oneOf`
+U23SA861Y : and a union type to differentiate what is stored in the dict
+U5LFUHH19 : ```{ "_id": { "$oid": "592db11daecb553dde65eda5" }, "biological__chlorophyll": 1, "biological__prey_organism_if_applicable": "none" }```
+U5LFUHH19 : OK!  Thanks, I will look at that.
+U1CE9DL9H : that json looks more like a record
+U23SA861Y : depends if you have for knowledge of the keys
+U5LFUHH19 : Right, so the return is a list of dict/records that have loads of data about the objects (biological samples) that were found.  I'm struggling to understand how to deal with this, because some of the values are strings and some are numbers.  The fields vary and new ones could be introduced at any time.  If I define some sort of Record, would I have to account for every field/datatype?
+U23SA861Y : what are you ultimately doing with this data?
+U5LFUHH19 : Users will search for sample using a form.  I want to display the results in a table and also use the returned data to narrow the search parameters.  E.g., if "chlorophyll" ranges from 0-100 for all samples in the db but then only from 0.5-2.3 for the subset returned, I will want to show that to the users as a pair of min/max inputs.  Likewise, the "Longhurst province" might just be a subset of 2-3 string values, in which case I'd construct a multi-select.
+U5LFUHH19 : Looking at Json.Decode.oneOf, it looks like I'd have to coerce everything to a string?
+U23SA861Y : no
+U23SA861Y : do you need to recurse, as in some of your keys contain dicts or are you fine with strings and ints
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

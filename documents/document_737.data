@@ -1,70 +1,80 @@
+U4872964V : If you are to have the Elm architecture, your reducer would also return something like the Elm Cmd
+U4872964V : which could be “show the toast” for instance
+U6AH7SUH5 : that would at least make it pure, but at the same time introduce even more boilerplate event classes
+U4872964V : well, it’s hard to take “half” the architecture I suppose :slightly_smiling_face:
+U4872964V : how do you handle fetching data for instance
+U4872964V : let’s say i want to click something and then it should fetch me some data
+U0CLDU8UB : I suppose you're looking for something more like the Redux side-effect libraries, and not really the Elm way?
+U0CLDU8UB : (This is not a criticism, mind you, it might work out better in an OO language like Kotlin)
+U4872964V : well, at least one of the Redux side-effect libraries does it the Elm way :slightly_smiling_face:
+U4872964V : in any case, you should probably handle this in the same place where you handle for instance data fetching
+U6AH7SUH5 : I'm not sure yet tbh. Currently I have an ADT of event types, that could be things happening in the UI or from outside (network) etc. I have various streams of events that I merge together to form a single stream, which then gets fed into the update function. Before merging everything into the final stream, I could flatMap the event that triggers a network action to the function that loads the data, which itself returns a stream of `LoadingStarted, LoadingFinished, FailedLoading` events
 ```
-Yup
-in this case, I want to write `helper`
-In particular…
-I want to write `helper` that just passes the `va_list` to another (C) function.
-Because I'm hooking up two libraries.
-Through Racket….
-Of course, this still isn't enough to duplicate va_copy, as that's  macro. To do that, we would need to make scheme_va_copy, or something like that.
-Which does nothing but call the macro.
-Of course, if we do that, it would make sense to do that for va_arg as well.
-We couldn't do `va_start` and `va_end` though, because that would require supporting vaargs, and `...`, which, as you rightly pointed out, is terrifying.
-At least, what it looks like anyway. Perhaps I'm wrong.
-Thanks for the example.
-Any time. :slightly_smiling_face:
-<@U3NJS8H7C> worksp/librktio/… vs librktio/… these two directories seem pretty similar. Is one of them deprecated?
-There should be a "rktio" directory with the rktio implementation and a "worksp/librktio" directory with MSVC projects
-I'm not seeing multiple "librktio" directories
-err…ya, I mean worksp/rktio. That makes sense that one is for windows. Thanks.
-<@U3NJS8H7C> oh wait, no
-I do see a worksp/librktio.
-racket/racket/src/worksp/librktio
-Just to be sure: there should only be one "rktio" and one "librktio" directory; the "librktio" directory should be in "worksp", and the "rktio" directory should not be in "worksp"
-Although that one does look like a visual studio project.
-Ah, okay.
-That is correct.
-So, since windows has `src/worksp/libffi`, does that mean it doesn't use `src/foreign`?
-OH….
-src/worksp/libffi probably is in pace of src/foreign/libffi.
-The `foreign.c` part of `src/foreign` is included directly in `libracket`, while `src/worksp/libffi` is the project for `src/foreign/libffi`
-Okay
-Also, I realized, adding a primitive for va_list is silly, since per the spec, its just an (undefined) struct type.
-So it would make a lot more sense to just add a function to the core that calls `sizeof` (which I suspect already exists), and then define _va-list in racket.
-<@U08JL5H89> Is even `sizeof(va_list)` useful, since the calling convention can depend on more than the size? For example, `long` and `double` are often passed differently – though I'll grant that `va_list` is unlikely to be represented as a `double`. I still think it's best to use `(system-library-subpath #f)` and hardwire a representation in `ffi/unsafe` for various known results.
-Ah, fair.
-<@U3NJS8H7C> Actually, no. Since `va_list` is NOT a primitive in C (per the spec), it'll be handled just like any other struct will.
-(Like, the size and field order of the struct is undefined, but the fact that it is a struct is.)
-"The type declared is va_list which is an object type suitable for holding information needed by the macros va_start, va_arg, va_end, and va_copy”
-"object type" =&gt; "struct"?
-Even so, I thought the way a struct is passed could depend on its content beyond just its size, but I forget these details
-That is how I interpret it. Although I admit I didn't make the spec so I'm not 100% sure.
-Ok. FWIW, I don't think "object" means "struct" in the C standard
-Also ya, it certainly is true that structs are passed differently based on what is in them.
-Hmm…okay.
-I'll see if I can find an answer to that. Thanks. :slightly_smiling_face:
-<@U3NJS8H7C> "object: region of data storage in the execution environment, the contents of which can represent values”
-So I guess it _could_ be a primitive.
-Just not a macro.
-According to <https://www.openhub.net/p/racket> the last commit to Racket happened about a year ago - what happened a year ago that it doesn't include anything since then?
-<@U3VT0L7C5>   <https://github.com/racket/racket/commits/master>
-Oh! You are asking why OpenHub does update. No idea.
-yes, that's what I was wondering about
-Do other projects show updates?
-yes
-maybe it doesn't redirect from plt/racket to racket/racket: <https://www.openhub.net/p/racket/enlistments>
-yep - that's it - can you change it?
-I tried but got this: "You can view, but not change this data. Only managers may change this data. "
-who are the managers?
-<https://www.openhub.net/accounts/elibarzilay>
-Is he on Slack, can't find him?
-send him a mail
-<http://www.barzilay.org/contact.html>
-will do, thanks
-done
-Hi I'd like to improve my Racket programming and abstraction/algorithm design in general. Can anyone suggest a good place to post Racket scripts and discuss how to improve it, other than Code Review on StackExchange? Thanks
-<@U6F1KCK6Y> Here would be ok. Use <http://pasterack.org|pasterack.org> then post url here.
-<@U3VT0L7C5> Alternatively, he probably is on the <#C088CK7J6|irc> channel.
-thanks <@U08JL5H89>
-I just had to rebuild a machine and things seem a bit wonky with my packages… is `raco setup --clean` sufficient to sanitize and sanity check everything?
-<@U086VDRBK> thanks
-<@U086VDRBK> pasted my code into paste <http://rack.org|rack.org>. The url is:  <http://pasterack.org/pastes/72152>. Thanks. Your feedback would be great.
+events = Stream.merge(
+        view.sendEmailEvents,
+        view.composeEmailEvents,
+        view.refreshInboxEvents.flatMap(emailUseCase.loadEmails())
+)  
+```
+
+That way I'll have all logic that changes the app state in the update Function and none in the stream. A significant disadvantage of this approach is that not all possible event types will ever reach the update function (since the refreshInbox event is already mapped to something else in the stream), which means I lose the exhaustion checking for ADTs in the update function
+
+U4872964V : yes, well, it’s not easy to design these things I suppose. I would go for the Elm Architecture all the way, but that’s me :slightly_smiling_face:
+U0CLDU8UB : <@U6AH7SUH5> Did you take a look at <https://github.com/glung/elm-architecture-android> ?
+U0CLDU8UB : It doesn't look very polished, but maybe it has some ideas
+U4872964V : implementing the architecture naively should not be much code, the tricky parts are making it fast :slightly_smiling_face:
+U4872964V : something like react-native does
+U4872964V : <https://github.com/zserge/anvil> perhaps
+U3E6ZPM1A : I’m running into an issue using integer division:`378282246310005 // 10 == -1847312168`
+I’m pretty sure it has something to do with using very large numbers with the JS bitwise or (`|`), which is what Elm uses under the hood. Does anyone have an idea of an alternative approach I could take? My goal is essentially to sum up all the digits of a number
+
+U4872964V : yes, it truncates to 32 bits
+U4872964V : if you expect less than 53 bits of int you can use Float instead
+U4872964V : It’s a known issue: <https://github.com/elm-lang/core/issues/721>
+U3E6ZPM1A : ah great I’ll try that approach
+U4872964V : <http://package.elm-lang.org/packages/gilbertkennen/bigint/1.0.1/BigInt> is also available
+U6AH7SUH5 : <@U0CLDU8UB> interesting approach, but I'm afraid that library will be far too slow to be usable
+U0EUHKVGB : Just a PSA for anyone who is new, <#C0K384K4Y|news-and-links> is a great place to hang out if you like to see what's happening in the world of Elm :slightly_smiling_face: Everyone is welcome to share their projects there!
+U0KNG2NHH : evening, folks, let’s see who’s up
+U0KNG2NHH : given ```
+type Bla = A Int | B Int
+valA1 = A 1
+valA2 = A 2
+```
+is there a way for me to check whether `valA1` has been constructed with the constructor of `valA2`?
+
+U1CE9DL9H : not generically
+U1CE9DL9H : but  `Maybe.map2` or `Result.map2` do something like it
+U1CE9DL9H : actually, if you're feeling hacky, you could do something with `toString`, but...
+U0KNG2NHH : <@U1CE9DL9H> no `toString` please :}
+U1G51S63S : is anyone have an experience with elm-form? I can't skip validation at all. found this issue <https://github.com/etaque/elm-form/issues/88> but not sure how to use it :disappointed:
+U1G51S63S : so when I am using it just like `succeed Contact` I got ```[TYPE MISMATCH]The definition of `contactValidation` does not match its type annotation.
+The type annotation for `contactValidation` says it is a:
+
+    Validation () (Contact)
+
+But the definition (shown above) is a:
+
+    Validation () (String -&gt; String -&gt; String -&gt; String -&gt; String -&gt; Contact)
+
+Hint: It looks like a function needs 5 more arguments.```
+
+U0EUHKVGB : <@U0KNG2NHH> There is not magical way to do that in Elm.
+U0EUHKVGB : You can do `toString x |&gt; String.split " " |&gt; List.head == toString y |&gt; String.split " " |&gt; List.head`
+U0EUHKVGB : Or define your own functions on a as-needed basis.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

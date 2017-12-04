@@ -1,0 +1,112 @@
+U4872964V : <@U23SA861Y> Re floats, indeed they are inherently imprecise. Integers should probably be some kind of bignum (unlimited) in Elm though. Having limited integers invites trouble. If you really want speed, Elm could provide special types for that.
+U3SJEDR96 : <@U23SA861Y> that was indeed my opening statement :smile:
+U2LAL86AY : regarding floating point representation, i watched a talk a few days ago - Douglas Crockford explaining another implementation for numbers -&gt;  <https://youtu.be/bo36MrBfTk4?t=2580> - he claims will solve a lot of our problems, i'm not experienced enough to say one of the other - but i think if something like he proposes can be implemented in elm - maybe would be useful to do it. One more awesome reason to choose elm :smile:
+U4872964V : It would be great if Elm numbers were not tied to javascript strangeness, for sure
+U4872964V : <@U2LAL86AY> is it the DEC64 he’s talking about?
+U4F64AKQV : <@U4872964V> Yeah, I’m not sure how many problems it would actually solve for Elm though.
+U2LAL86AY : <@U4872964V> yep, DEC64 - <@U4F64AKQV>  me neither. but `this idea that we could implement something completely different` - not needing to copy old stuff that's buggy - seems very applealing :simple_smile:  As Douglas Crockford says - our memory and computational power has increased a lot - and optimizing for it might be like optimizing for datastructure - when dom rendering it accounts of 90% of performance. Optimizing for ease of reasoning and no bugs is more important then memory .
+U170TNSTZ : Wouldn’t it be a good thing to have a way to get the actual HTML element of a virtual DOM node, like you can in React? Or does this somehow violate Elm principles?
+U1G51S63S : Do you know if there is easy way to "rate-limit" events? Something like with setTimeout in vanilla js. For example I am watching for `Window.resizes` and really don't want to redraw on each pixel changed, maybe just after 300ms when resizing is finished
+U153UK3FA : <@U170TNSTZ> there is the issue of how you would get access to that value
+U1G51S63S : Like this snippet in jquery: ```$(window).resize(function() {    clearTimeout(window.resizedFinished);
+    window.resizedFinished = setTimeout(function(){
+        console.log('Resized finished.');
+    }, 250);
+});
+```
+
+U1G51S63S : So even will be fired if user finished resize (didn't touch it for a 250ms)
+U153UK3FA : set a flag in the model and check that flag
+U4872964V : <@U170TNSTZ> what do you mean by the actual HTML element?
+U1G51S63S : but redraw will be because of model changed then :smile:
+U1G51S63S : I thought maybe it's possible to do w/o storing flag/time in model. Maybe via `Task` and `Process.sleep`?
+U4872964V : <@U170TNSTZ> you mean having some kind of concrete Html type in Elm, instead of the current opaque one?
+U170TNSTZ : <@U4872964V> Yes, so instead of invoking eg `Dom.focus` on an id, you'd invoke it on an actual DOM node.
+U4872964V : <@U170TNSTZ>, ok, so not Html, but DOM access?
+U4872964V : Accessing DOM elements in Elm would indeed be against the Elm principles.
+U0H3A9XLN : Is unsafeness of global id following Elm principles?
+U4872964V : unsafeness?
+U1G51S63S : just noticed that feature I am asked for named `debounced events`. there is a lot of of packages for elm already, but all of them rely on some state. so looks like it can't be w/o state :smile:
+U0H3A9XLN : Yep
+U0H3A9XLN : Global string identifier, type size = infinity
+U4872964V : <@U1G51S63S> indeed, to debounce events in Elm you’d need to have it in the state
+U0H3A9XLN : Same as using strings instead of union types
+U153UK3FA : But any reference to a DOM node would also be unsafe since it may not exist want you want to access it
+U170TNSTZ : Agree with <@U0H3A9XLN> - even in plain ol' js-React, stringly typed refs are avoided :-)
+U4872964V : <@U0H3A9XLN> well it may be that id:s are duplicated or missing, but how is it unsafe?
+U153UK3FA : The problem is how your code would get access to the ref
+U4872964V : The DOM is not really suited to Elm, we just make a best effort to wrap it up in our type-safe, pure world
+U0H3A9XLN : <@U4872964V> how is it unsafe to use strings instead of union types?
+U0H3A9XLN : By answering this question you'll get answer for your one
+U153UK3FA : the refs would need to be passed in `update` so you could produce `Cmd`s that acted on them, but you’d also get all the refs for the whole view so you’d need a way to find the one that you want.
+U153UK3FA : perhaps the refs could be in a `Dict String Ref` and you could lookup the refs via a string…..
+U6EAT2Z37 : <@U0H3A9XLN> There's nothing inherently unsafe about strings. Maybe I misunderstood the point you were trying to make.
+U170TNSTZ : <@U6EAT2Z37> I guess I’d interpret “strings being unsafe” as them having a higher chance of not being correct. Eg, the compiler cannot help me with spelling errors. Also, several DOM elements can share an ID.
+React’s `ref` feature guarantees that the reference is either pointing to a single DOM element or null:
+
+&gt; React will call the ref callback with the DOM element when the component mounts, and call it with null when it unmounts.
+
+U170TNSTZ : (from <https://facebook.github.io/react/docs/refs-and-the-dom.html>)
+U0Z9TPK7S : <@U170TNSTZ> what are you trying to achieve exactly? I have found myself in a similar situation when writing our on-click-outside code
+U4872964V : It would be interesting to see if there could be a good api for onMount/onRemove-like functionality in Elm, for sure
+U0Z9TPK7S : TBH, that seems like a terrible idea
+U0Z9TPK7S : We'd go back to the worst parts of React
+U4872964V : <@U0Z9TPK7S> well, for things like `Dom.focus` etc
+U0Z9TPK7S : It would be a step back
+U4872964V : Wether it’s a step back or not would depend on what the api is and what you’d use it for, I think
+U4872964V : Not having to invent unique id:s but instead get them back from the runtime
+U153UK3FA : `Dom.focus` is kind of a kludge,  what you really want to be able to do is set focus in `view`
+U4872964V : <@U153UK3FA>, yes, perhaps
+U4872964V : then you’d have to keep track of focus in your model too
+U42FYKFRN : hey - what are people doing for Localstorage ? There don’t seem to be any packages for it - so is everyone just doing it with ports?
+U4872964V : <@U42FYKFRN> yes, ports. there are some packages too, but not on elm packages (because they would use native code)
+U42FYKFRN : I tried this one: <https://github.com/JohnBugner/elm-storage> but it’s broken for me at least
+U42FYKFRN : I just fixed it locally - might send a pull request
+U26VBS4NA : :+1:
+U5ZC6V535 : This was an answer to a previous question of mine; but now I have a slightly different problem..
+Say that I want to use `BoidsGenerated` in my main update function — I can’t really do that because `BoidsGenerated` is not of type `Msg`. Is there a way to overcome this? Maybe with Cmd.map (i am not sure). — Thanks
+
+U0JFGGZS6 : <@U42FYKFRN>  the [elm-spa-example](<https://github.com/rtfeldman/elm-spa-example>) includes a basic usage of localstorage through ports
+U4872964V : <@U5ZC6V535> what do you mean by “use `BoidsGenerated` in my main update function”?
+U5ZC6V535 : <@U4872964V> Here’s what I am trying to do: 
+```
+        UpdateWorld size -&gt;
+            let
+                randomPosition = (0,0)
+            in
+            ( { model | world = ( size.width, size.height ) }
+            , Seed.generateBoids BoidsGenerated 1500 randomPosition maxRandomSpeed
+            )
+```
+
+U4872964V : <@U5ZC6V535> oh, I see, you have to use something like `(GeneratorMsg &lt;&lt; BoidsGenerated)`
+U5ZC6V535 : <@U4872964V> Hmm, so we are combining `GeneratorMsg` and `BoidsGenerated` messages together. That makes sense :slightly_smiling_face: Thanks
+U3SJEDR96 : (seeing answers *click* like that makes me so happy)
+U4G7CC18U : Good evening,I have an array of coordinates `(Int, Int)`. Let's assume the array has at least 3 coordinates, so it defines a polygon.
+I have a function that knows the `midpoint` between two coordinates.
+
+I am now looking a function that given this array [c1, c2, c3, c4] will give me an array [midpoint(c1,c2), midpoint(c2, c3), midpoint(c3,c4), midpoint(c4,c1)]
+
+That last part is the one that is bending my mind.. any pointers would be greatly appreciated :)
+
+U4G7CC18U : I have been looking into List and List.Extra, but I don't see anything too obvious
+U4872964V : if you had the array `[c1, c2, c3, c4, c1]` could you solve it easily then?
+U4G7CC18U : That came across my mind. It would then reduce the problem to something a little simpler. Now I would need to find the highorder function that applies a function to every 2 items of an array
+U4G7CC18U : highorder midpoint [c1, c2, c3, c1]  &lt;-- looking for the correct `highorder`
+U4G7CC18U : because I can create an `appendHeadAsLastItem` to get my list into that state
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

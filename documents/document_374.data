@@ -1,11 +1,96 @@
+U1NME8MS8 : <@U0CLDU8UB> This is why I love elm, it has all those reasonable / practical people!
+U3SJEDR96 : `Maybe.andThen identity` is particularly nice, actually haven't had to use that before :stuck_out_tongue:
+U0CLDU8UB : Me neither, to be honest :smile:
+U3SJEDR96 : Then again, `Maybe (Maybe v)` doesn't happen _that_ often. Should have a `type alias Maaaaaybe a = Maybe (Maybe a)`
+U23SA861Y : yeah, identity comes in handy from time to time
+U1NME8MS8 : Do I understand correctly that this is what people call flatMap in other languages?
+U0CLDU8UB : Right, or `&gt;&gt;=` (bind).
+U0RPQMZ9S : <@U3SJEDR96> <@U0CLDU8UB>, if you ever do need it, and are already using elm-community/maybe-extra, `Maybe.andThen identity == Maybe.Extra.join`
+U0RPQMZ9S : I think "join" captures whats going on a bit better
+U0CLDU8UB : All right, good to know
+U5ABF3BH7 : Hello, does anyone know what ```&lt;\&gt;``` represent? For example in  ```route =    oneOf
+        [ Url.map Home (s "")
+        , Url.map Login (s "login")
+        , Url.map Logout (s "logout")
+        , Url.map Settings (s "settings")
+        , Url.map Profile (s "profile" &lt;/&gt; User.usernameParser)
+        , Url.map Register (s "register")
+        , Url.map Article (s "article" &lt;/&gt; Article.slugParser)
+        , Url.map NewArticle (s "editor")
+        , Url.map EditArticle (s "editor" &lt;/&gt; Article.slugParser)
+        ]```
+
+U3SJEDR96 : `&lt;/&gt;` is an infix operator defined in the urlparser package, that says "the parser that precedes me, followed by a `/`, followed by the parser that follows")
+U5ABF3BH7 : <@U3SJEDR96> Thanks!
+U3SJEDR96 : because you'll often want to match on something that's separated by slashes, like `/blog/user/article/id` which could be `s "blog" &lt;/&gt; string &lt;/&gt; s "article" &lt;/&gt; int`
+U5ABF3BH7 : Hello, I am trying to re-organize all my files to follow Richard Fedman SPA appapp<https://github.com/rtfeldman/elm-spa-example> to separate view from data that needs to be encoded (or decoded via json).  I would appreciate some advice on how I should organize the following model. In the backend, the Person Model has a physician (through physician id, a care taker via caretaker_id, etc... which are RolodexEntries.  Is the best practice to create. Data.Person.Physician, Data.Person.CareTaker....etc... or Data.Person.RolodexEntry?
+U0LPMPL2U : It's OK to put multiple types in a file
+U0LPMPL2U : once you have a lot of functions that work on one type, it can make sense to extract that type and the related functions to a new file
+U5ABF3BH7 : <@U0LPMPL2U>, would you use one file Data.Person.RolodexEntry instead of several like Data.Person.Physician,  Data.Person.CareTaker, etc... ? And if later there are too many differences, you would create new files? Is that how you would do it?
+U0CLDU8UB : I usually start with a single Types.elm file :slightly_smiling_face:
+U5KCFP7GT : What's the best way to work with elm-css during development? As somebody who's coming from react / css-modules / webpack hot reloading it's not quite obvious what the best approach is. Ideally I would like to avoid to manually compile the css and reload the app..
+U0LPMPL2U : I tend to start with multiple types in the same file. As time goes on, the functions in the file tend to clump around each of the types. At some point, I'll extract the type and related functions.
+U5ABF3BH7 : <@U0LPMPL2U> thanks
+U0CLDU8UB : <@U5KCFP7GT> Then you'll probably feel right at home with one of the webpack-based starters
+U5KCFP7GT : <https://github.com/tcoopman/elm-css-webpack-loader>?
+U0LPMPL2U : Not sure if the video is out yet but it's worth watching Evan's keynote from ElmConf Europe. It's all about how to structure apps and when to break up files :slightly_smiling_face:
+U4F64AKQV : :point_up: Was about to link to that
+U0FP80EKB : <https://www.youtube.com/watch?v=2ihTgEYiKpI>
+U0CLDU8UB : hfjallemark: Yep, that looks like something I'd try. Maybe base it on this <https://github.com/elm-community/elm-webpack-starter>
+U0FP80EKB : Evan's talk ^^^
+U5KCFP7GT : Awesome. Will try it out, thanks!
+U5ABF3BH7 : <@U0FP80EKB> and <@U0LPMPL2U> Thanks!
+U2SR9DL7Q : hello all. quick question. i've been considering adding multiple "pages" to  small web application hosted on github. Currently using the *elm-mdl* library for formatting. Should I just used their built in tabs to mimic page to page movement, or use *elm-navigation* to capture and handle proper routing?
+U5J0H2NS2 : You could use both at the same time
+U5J0H2NS2 : Then the user has the ability to use back and forward of the browser
+U5J0H2NS2 : Selecting a tab via clicking could raise a change in the url which will be handled via routing
+U2SR9DL7Q : cool. thats the goal almost. i'm using to practice responsive design. so on mobile, the user should be able to move around using drawer buttons. but when its on a large screen, the drawer should be replaced by tabs or something similar.
+U2SR9DL7Q : i'm designing for the small screen first through then moving my way outwards.
+U17PWHU4D : been struggling since yesterday on importing an array from json with mixed types.  Its always consistent.  `[ int, int, string, int ]`.
+U17PWHU4D : Im' using pipeline decoder.  and works for everything else, however, I have to specify a type alias. and have no idea how to describe this.
+U17PWHU4D : any advice would be much appreciated.
+U5J0H2NS2 : Did you try oneOf ?
+U17PWHU4D : was trying to learn oneOf, but i think the issues is more that i need to map.  i got this far, with the help of someone yesterday.
+U17PWHU4D : ```segmentsDecoder list =
+    Decode.map5 &lt;need type alias here&gt;
+        (Decode.index 0 <http://Decode.int|Decode.int>)
+        (Decode.index 1 <http://Decode.int|Decode.int>)
+        (Decode.index 2 Decode.string)
+        (Decode.index 3 <http://Decode.int|Decode.int>)
+        (Decode.index 4 <http://Decode.int|Decode.int>)
+
+
+segmentDecoder : Decoder SegmentResponse
+segmentDecoder =
+    decode SegmentResponse
+        |&gt; required "segments" (Decode.list segmentsDecoder)
 ```
-yeah, I'm used to the go playground flow
-essentially, the user should click start game, and the game board should appear.
-in that case you should have some sort of state variable `type State = Pregame | Playing | Results`
-Button onclick will eventually do the necessary updates
-or something and have the view conditional on that
-rather than just an explicit `showBoard: Bool`
-game is a `Maybe Game` type so the button triggers to update function that sets up the required state
-right so you would use a case instead then
-and do a pattern match
-I considered case... but I've never used it with a list element... since the only thing changing is one item in the main div's list of Html
+
+U17PWHU4D : it feels like oneOf is more for if i wanted to convert if all index are not the same type.  When really, i just want to pull that `index 2` out and make it a key/dict or something.
+U2D7NUGS1 : :champagne: Just published my first Elm package! <http://package.elm-lang.org/packages/lzrski/elm-polymer/latest>
+U2D7NUGS1 : Thanks for your tremendous help!
+U0CLDU8UB : <@U17PWHU4D> Does your JSON look something like this:```
+{ "segments": [ 4, 2, "yes", 4, 2 ] }
+```
+
+U17PWHU4D : yes, exactly <@U0CLDU8UB> !
+U0CLDU8UB : Okay so what is the problem you are facing?
+U17PWHU4D : so this is my first attempt with json decoders.  and i'm able to correctly decode all other data.
+U17PWHU4D : but as far as i know i need to specify an alias, so the decoder, can use it to create the Elm object.
+U17PWHU4D : in my ex. above.  after Decode.map5.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

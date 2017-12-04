@@ -1,19 +1,55 @@
+U4Z4NEUQG : I'm diving in elm code after 2 week break, it's so easy to get back into, I don't need to re-create a full mental image of the app, I can just continue where I left.
+U4Z4NEUQG : I read there way no "official support", but do you know what is the elm browser support?
+U4Z4NEUQG : And if some browser is not supported, can we easily polyfill it? I saw somewhere that Object.assign was necessary.
+U3SJEDR96 : Compiler compiles to ~ES3, mostly. RequestAnimationFrame is also used, but has a builtin fallback.
+U3SJEDR96 : I don't think Object.assign is used at all, or at least not in core+vdom
+U4Z4NEUQG : Apparently it is used only in dev tools (searching the mailing list now). So I guess it's safe.
+U4Z4NEUQG : But I guess it would help to throw "wide browser support" somewhere on the elm home page. I am working with a lot of enterprises still under IE 9.
+U41NK9BM4 : The bleeding edge, apparently
+U3SJEDR96 : oh, indeed, elm-hot-loader (which I also encountered on my GH search) seems to be about the only thing, but that's only tangential anyway
+U4Z4NEUQG : Yeah
+U1G51S63S : Hi folks! What do you think is the best way to make a tree-like structure? I have this types ```type alias AreasTree =    { id : String
+    , name : String
+    , path : String
+    , children : AreasTreeChildren
+    }
+
+
+type AreasTreeChildren
+    = AreasTreeChildren (List AreasTree)
 ```
-yeah .elm-overlay { z-index: 999; } did the trick
-I haven't had that issue before but I would just include some inline CSS that makes its z-index higher perhaps?
-ahh I see you just did that
-<@U1G51S63S>: maybe you have a redirect-rule that returns the index for a route not found, which leads to linking it twice?
-(meaning, i now read your issue, and this is all i have to offer :slightly_smiling_face: )
-<@U1AN4JRFV> thought about this already. removed routing (navigation/url-parser) at all - didn't helped :disappointed:
-i'd click through all the responses in the dev-console after a fresh reload and check if any of them returned the index.
-other than index.html, of course
-nope, it's not. google maps really loaded twice btw. first time w/o api key and second one with it
-so, did you get it? is it mapping?
-no, I still have no idea why it's loading twice
-I am just added debug log to `googleMap` function (which returns Html.node) and it's called once
-so, it’s loading as a response to that DOM element being created, you could compare the stack trace for the two loads
-maybe something funny is going on with the DOM node being created twice, or the attribute added later or something
-I decided to go with Elm for a major project, contrary to RedInk's advice to start small
-I don't regret it
-absolutely amazing!
-2017-08-02T14:25:55.693454
+
+and get just a plain list via API where `path` is a key like `a.b.c`
+
+U1G51S63S : at the end I want tree like AreasTree(a) -&gt; children (AreasTree(b)) -&gt; children(AreasTree(c))
+U1G51S63S : I think fold will fit my needs, but I am not sure what is the best way to put `c` for example into nested structure
+U1G51S63S : what I get from API is a list of ```type alias Area =    { id : String
+    , name : String
+    , path : String
+    }```
+
+U0LPMPL2U : You may find this useful: <https://evancz.gitbooks.io/functional-programming-in-elm/recursion/binary-trees.html>
+U0LPMPL2U : particularly the section on insertion
+U34MW57SN : hi. So I have a bit of experience doing elm - have a few simple things in production but havent written elm in a few months. I would like to follow a series to nail the basics again and get onto much more advanced tutorials. Any recommendations (free is best)
+U2W8J47KQ : if you haven't done it already, I found <https://www.elm-tutorial.org/en/> to be very helpful
+U1G51S63S : <@U0LPMPL2U> thanks, reading it already :thumbsup:
+U1T0RKXDX : Hey everybody, I wanted to ask if some of you are from Slack, and if we could find a way to have a great slack plan to have access to history ?
+U101G7VEX : I'm interested in building an interactive map with Elm (like this <https://dl.dropboxusercontent.com/s/ir26ue9lftzoqzr/2017-06-26%20at%2019.14.png>) and I'm not really sure what the best approach would be. Has anyone done anything similar and can share some tips?
+U0EUHKVGB : <@U0CK8CJ5D>’s your person for maps in Elm :slightly_smiling_face:
+U0EUHKVGB : <@U1T0RKXDX> We already have slack history
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

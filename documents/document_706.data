@@ -1,64 +1,75 @@
+U4KFY2V6V : Hi :slightly_smiling_face: I've trouble searching for syntactic sugar. Hope you can healp me out.
+U4KFY2V6V : So I have a function with 2 arguments calling another function with the same arguments and using the result. I would like to compose `funInternal` with `(++) pre`
+U3SJEDR96 : yeah, there's no operator for that. You can get rid of `b`, but not both. You _could_ hack around it and do `fun = curry &gt;&gt; (uncurry funInternal) &gt;&gt; (++) "pre"` I think
+U3SJEDR96 : oh wait, what am I saying?
+U0LPMPL2U : Since `funInternal` is constant, could you define:```
+fun =
+  funInternal () ()
+    |&gt; (++) "pre"
 ```
-Psycopg2 has a `NamedTupleCursor`, which provides the same syntax.
-In that case, at least the schema is documented elsewhere. But I don't like it.
-You prefer that?
-Maybe
-I can work like that. You have a job for me? :stuck_out_tongue_winking_eye:
-In the general case, yes. It's not exactly a great hardship. In a database context, it might be nice to have a type that directly reflects the DB schema - which is what we have ORM for
-btw, the `NamedTupleCursor` gets its attribute names from the fields behind the *SELECT*. I.e. `select name, salary from Employees` would result in *.name* and *.salary* attributes on the tuples in the resultset.
-I just really dislike things that attempt to cut down on a bit of typing by ruining the interface. Several parsers do it, like BeautifulSoup. lxml.objectify is even worse
-I wouldn't call it ruining. It makes the code more readable to me. I prefer dot notation over index lookup with a string.
-The dot notation and the index lookup carry different information. `x.y` implies that `y` _must_ exist. `x["y"]` implies that a value for "y" might exist, if someone added it earlier.
-Except xml node is not a container, but an object :confused:
-Ah, we have a different view on that too. When I see `x["y"]` in code, I assume the programmer knows that an *y* value is present, or should be present (punishable by KeyError). When I see `x.get(y)`, then I know the programmer is trying to communicate to me that *y* perhaps does not exist in *x*.
-it's an object that contains an arbitrary number of other objects
-<@U5ZPMJA06>  But the point is that you see it's a dict, and that the contents vary
-Obviously you can make assumptions if you know what's been added, but the syntax tells you the nature of the structure you're working with
-<@U5LNXQHN3> Yeah there you have a point, `x["y"]` certainly conveys that *x* is a dict.
-...or at least a mapping type on which you can do indexed lookups.
-Now wouldn't it be fun to override `__getitem__()` to call a memberfunction instead of looking up a value, and have `__call__()` lookup an indexed item?
-You could write `a["save"]` to call functions and `a("age")` to lookup values.
-:joy:
-I'm trying to use Pycharm CE with Flask but I can't seem to configure a interpreter to run `virtualenv/Scripts/flask` or `python -m flask run`. Is there anyway to run Flask applications inside Pycharm without having to buy the pro version?
-<@U63VCB8AH> I believe you just need to set the interpreter to the virtualenv Python, then in the run panel you use flask as the script
-That's not an exclusive pro feature as far as i know
-How would I reference flask as the script?
-<@U1BP42MRS>
-<@U1NSCAY6R> not possible
-Send a pic of what you see
-I'm also stuck on Windows...
-What does that have to do with the pycharm config?
-Send a pic of your pycharm window
-The config
-Default, which points to my main.py
-Ignore the script parameters, it was just me playing around
-Script should point to flask from the virtualenv, if you're in one
-Flask is the script/executable
-in `env\Scripts`?
-`which flask` would show the path on posix
-yes that's right
-but I can't use that in Pycharm since it is an EXE file
-Then be sure to set the working directory in that same window to the project root (where main is)
-On mobile, I'll check back when I get to my office
-Windows BS
-one reason I suggest using a virtual machine
-eg, docker or vagrant
-anything other than java or C# on windows is more trouble than its worth, in my experience
-agree <@U0LSCQQNR>
-I have Flask running just fine in PyCharm on Windows. Not at the machine now, though.
-Community Edition <@U5LNXQHN3> ?
-No, but I don't expect it matters
-Pro set's everything up automatically, used it at my last job
-I never use automatic setup. I would have done it manually
-I just filled in the fields as in Joe's screenshot
-do you remember what use set the Script file to?
-No. I might just have a file which contains `app.run()`.
-Apparently that's not recommended any more, probably because it doesn't play nicely with other aspects of Flask that I'm not a fan of
-kylotan: not a fan of many things
-:slightly_smiling_face:
-Only with flask
-it is true, I'm pretty unhappy with most software I work with
-haha
-i'm sticking with `app.run()`` for now
-'r--', 'bs' and 'g^' indicate color and shape. example: 'g^' stands for green triangles.
-Best way to approach calling function using a dictionary to store the func object as a value. I'm doing this in a class so it doesn't quite work properly the traditional way of literally just using the function object name as the value.
+
+U0LPMPL2U : oh wait, you just want composition but with two args
+U4KFY2V6V : <@U0LPMPL2U> Jop, it was only a simplified example
+U4KFY2V6V : Exactly: function composition with more than one argument :slightly_smiling_face:
+U4KFY2V6V : Could change the API to a large tuple of arguments but that would be a workaround
+U3SJEDR96 : I suppose you could make an operator for that, but it doesn't come up in reality often enough to warrant that, imho
+U3SJEDR96 : ```(&gt;&gt;&gt;) : (a -&gt; b -&gt; c) -&gt; (c -&gt; d) -&gt; a -&gt; b -&gt; d
+(&gt;&gt;&gt;) f g a b =
+    f a b |&gt; g
+```
+
+U4KFY2V6V : Awesome!
+U4KFY2V6V : But there has to be 1 operator definition per artity, right?
+U4KFY2V6V : *arity
+U0K92QFST : Yep, basically
+U4KFY2V6V : Because of your help, I found this. <https://github.com/Fresheyeball/elm-function-extra/blob/3.0.0/Function.elm#L28-L34> :slightly_smiling_face:
+U3SJEDR96 : Not the most "Elm-ish" library ever, that, but it's a good place for some arcane functional magic :wink:
+U64A0BYHH : jonf: Boom! Thanks <@U23SA861Y> + <@U0FP80EKB> for diving in deep and <@U0EUHKVGB> for the info + issue link. Seeing you expand my recursive solution to an iterative one was also helpful for me, personally, as I couldn’t figure that out on my own.
+U0JFGGZS6 : <http://package.elm-lang.org/packages/sporto/elm-autocomplete/latest>
+<http://package.elm-lang.org/packages/ericgj/elm-autoinput/latest>  (my own, very basic)
+
+U2GPAEU1L : Remote meetup happening in an 1h20m:
+<https://www.bigmarker.com/remote-meetup/Elm-Remote-Meetup-9?show_live_page=true>
+
+U40QW928G : I'm having trouble avoiding circular dependency in elm
+U40QW928G : For instance I have a Messages.elm and a User.elm
+U40QW928G : and when I make my messages it requires the User model and some of the commands in my User.elm require Messages
+U40QW928G : how do I break this out
+U23SA861Y : if they are so tightly integrated the question becomes should they
+U0LPMPL2U : would it make sense to pass in the message for your commands?
+U0LPMPL2U : that's how the core library deals with commands, they let you pass in your own messages
+U23SA861Y : Yeah a context or function parameter to configure the call
+U31A7HG1E : I just ran into this very same problem and ended up doing exactly as <@U0LPMPL2U> suggested
+U40QW928G : I'm not sure I'm seeing your solution
+U0LPMPL2U : ```myUserCommand : (a -&gt; msg) -&gt; Cmd msg
+myUserCommand tagger =
+  ...
+```
+
+U5ABF3BH7 : Would any more advanced Elm people be interested in giving 1 or 2 hours of tutoring to give some guidance on how to refactor a project?  I live 1 hour South of San Francisco.
+U0LPMPL2U : `myUserCommand` no longer has any dependency on a particular `Msg` type, you pass it in instead
+U0LPMPL2U : this is the approach used by the core library, e.g `Random.generate`
+U0LPMPL2U : ```generate : (a -&gt; msg) -&gt; Generator a -&gt; Platform.Cmd.Cmd msg
+```
+
+U23SA861Y : it's actually used in almost every core lib function
+U0LPMPL2U : right because the core library _can't_ depend on your custom `Msg` type
+U0LPMPL2U : <@U5ABF3BH7> have you been to the SF Elm meetup? I hear it's really good :slightly_smiling_face:
+U5ABF3BH7 : I have, it was good, I should have asked then.
+U5ABF3BH7 : I went to the last 2
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

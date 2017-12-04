@@ -1,8 +1,135 @@
+U3SJEDR96 : I think you actually want `List.map (\record -&gt; record.name) records` or - shorter yet - `List.map .name records`
+U3SJEDR96 : It's a little hard to make out what you're actually after. Perhaps you could give an example of the input and what you'd like the output to be?
+U153UK3FA : `List.filter (\record -&gt; String.contains "pizza" record.name) records` will give you a list that only contains records with names that contain the word "pizza"
+U2D07QZN3 : that's it, thanks!
+U37HUSJ4R : If I have a 
+```type Status
+    = Open Time
+    | Closed
+
+type alias Time =
+    { open : Int
+    , closed : Int
+    , message : Maybe String
+    }
+
+data : List Status
 ```
-Why are there two `result`s at the end of `merge`?
-`Dict.merge (\key val dict -&gt; Dict.insert key [ val ]) (\key val otherVal dict -&gt; Dict.insert key [ val otherVal dict ]) (\key val dict -&gt; Dict.insert key [ val ]) leftDict rightDict Dict.empty`
-the first one is your "initial" result, much like you have with foldl and foldr
-the second is your return value
-Oh!
-Makes sense now.
-elm reactor doesn't work with native modules??
+and I want to update a `Status` record on `data` I have a function that gets me the record I want to update, but how do I then update a union type? obv `{ record | closed = 1 } ` is incorrect
+
+U37HUSJ4R : where `record` is a `Status`
+U0ULRASLC : <@U37HUSJ4R> Hm your question is a bit confusing. Is it correct that you want to change your definition of the Time-record to where `closed : Int` becomes `closed : Status`, and after doing so you wonder how to update that field in the record?
+U0ULRASLC : ah nvm. I see what you mean now I think. I miss read the code a bit
+U0ULRASLC : What is the difference if a Status is Closed and when a Status is Open but has a Time-record with closed  = 1 ? If they mean the same you could remove one of them
+U0ULRASLC : if you have a function that takes a Status and only updates the field closed if the Status is open you could write it like this```
+updateClosedFieldIfOpen : Status -&gt; Int -&gt; Status
+updateClosedFieldIfOpen status newClosed =
+  case status of
+    Open time -&gt;
+      Open { time | closed = newClosed }
+    Closed -&gt;
+      Closed
+```
+But then again I'm not sure I understand what you want to do :stuck_out_tongue:
+
+U31FGNWCT : Hi everyone! When you send JSON array of objects to elm does it convert it to something? I've got a runtime error like this (cut, it's a lot longer):```
+Expecting a String but instead got: [{"id":2,"name":"Administrator","code":"admin","description":"Administrator","permissions":["
+```
+Trying to decode it with this:
+```
+type alias Row =
+    { code : String
+    , description : String
+    , id : Int
+    , name : String
+    , permissions : List String
+    }
+
+thatDecoder = Decode.map5 Row
+                (Decode.field "code" Decode.string)
+                (Decode.field "description" Decode.string)
+                (Decode.field "id" <http://Decode.int|Decode.int>)
+                (Decode.field "name" Decode.string)
+                (Decode.field "permissions" &lt;| Decode.list Decode.string)
+thatListDecoder = Decode.list thatDecoder
+
+main : Program String Model Msg
+...
+init = (\flags -&gt; (Result.withDefault [] (Decode.decodeString thatListDecoder flags), Cmd.none))
+...
+```
+
+U153UK3FA : <@U31FGNWCT> You don't actually need to decode that, Elm will do it for you
+U153UK3FA : <https://guide.elm-lang.org/interop/javascript.html>
+U31FGNWCT : So I just pass it as flags without decoding?
+U153UK3FA : yep
+U31FGNWCT : Well, that's pretty convenient!
+U31FGNWCT : Thank you, Ill try that.=)
+U31FGNWCT : Haha! Awesome! Thank you very much <@U153UK3FA>!
+U601ELFEG : Hmmm... In order to use Bootstrap tooltips, you have to do some JS initialization on the DOM elements after they are created. Does Elm have a JS hook after the DOM has been created or updated?
+U0CLDU8UB : No, Elm doesn't have lifecycle hooks
+U601ELFEG : :sad_panda: : - then I'm not sure one can make use of the nice declarative tooltips in Bootstrap
+U0CLDU8UB : I suppose you don't want to use elm-bootstrap?
+U601ELFEG : well.. I didn't think I needed all that... does that have _native magic_ to get around the tooltip issue?
+U0CLDU8UB : I have no idea, I've never used Bootstrap :slightly_smiling_face:
+U1P6FFJ64 : <@U601ELFEG> I think the packages published on <http://package.elm-lang.org|package.elm-lang.org> are not allowed to have native code. Just pure Elm
+U6CGHRFN2 : Hi, I'm having an issue with the Date.fromString 
+It returns the day before, like this:
+/Date.fromString "2017-07-20"
+/Ok &lt;Wed Jul 19 2017 21:00:00 GMT-0300 (BRT)&gt;
+
+But if I use slashs as a separator, it comes out right:
+/Date.fromString "2017/07/20"
+/Ok &lt;Thu Jul 20 2017 00:00:00 GMT-0300 (BRT)&gt;
+
+U236M9FH9 : <@U6CGHRFN2> <https://stackoverflow.com/a/22959559><https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse#ECMAScript_5_ISO-8601_format_support>
+
+U6CGHRFN2 : <@U236M9FH9> that answers my question. Thank you! :smile: 
+U6B7NBTLZ : Hi
+U6B7NBTLZ : Random.map2 (\pos chance -&gt; { position = pos, chance = chance }) spawnPosition spawnChance
+U6B7NBTLZ : what is \ ?
+U6B7NBTLZ : :-?
+U6B7NBTLZ : \pos
+U1P6FFJ64 : <@U6B7NBTLZ> that's an anonymous function
+U1P6FFJ64 : <@U6B7NBTLZ> basicaly it's creating something like:```
+functionName pos chance =
+  { position = pos
+  , chance = chance
+  }
+```
+
+U1P6FFJ64 : <@U6B7NBTLZ> it's on the syntax page, just above the infix operators: <http://elm-lang.org/docs/syntax#infix-operators>
+U6B7NBTLZ : this is all the code
+U6B7NBTLZ : it a code for a snake game
+U6B7NBTLZ : and i still can t undestand what is with that \pos
+U6B7NBTLZ : i started learning elm now 3 days :slightly_smiling_face:
+U1P6FFJ64 : With `\` you create anonymous functions. Basically what is between the `\` and the `=` are the variable names.
+U1P6FFJ64 : For example:
+`(\a b = a + b) 2 4` will return `6`. What is between the parenthesis is the function and the next two numbers are the arguments being passed to the function.
+
+U4F64AKQV : <@U6B7NBTLZ> For example, it would be equivalent to write this on lines 418-420.```
+let
+    toPixelStr x =
+        round x |&gt; toString
+    …
+in
+    …
+```
+
+U4F64AKQV : Just to be clear, the ellipsis are not part of the code. Just using them to show that there is more there that doesn't matter.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,0 +1,67 @@
+U5NMSURAQ : ... come to think of it, if you don't do any processing at all, you can just skip this method
+U5NMSURAQ : if you don't implement it yourself, an original one will be used from `list`
+U5JG72GA2 : well I'm just practicing with `super`. Let's say I want to log or print before `__len()__` is executed
+U5JG72GA2 : ok why do I have to use `return`?
+U3G7RJP61 : You're saying return the result of my parent classes `len` method.
+U5JG72GA2 : ok so I did this as well but no return was necessary:```
+class MyDict(dict):
+    def __setitem__(self, key, value):
+        print("adding key: {} and value: {}".format(key, value))
+        super(MyDict, self).__setitem__(key, value)
+
+    def __getattr__(self, key):
+        if key not in self:
+            return 'key not recognized'
+        else:
+            return self[key]
+
+```
+
+U5NMSURAQ : `setitem` doesn't return anything useful
+U5NMSURAQ : and there is a return statement in your `getattr` :))
+U5JG72GA2 : ah I see
+U0L051JUB : What is the best way to convert a list to a dict? The only thing is I want to specify my keys from outside the list. So the list is basically the values of the dict and I will provide the keys separately.
+U5NMSURAQ : ```&gt;&gt;&gt; values = ['one', 'two', 'three']
+&gt;&gt;&gt; keys = [1, 2, 3]
+&gt;&gt;&gt; d = dict(zip(keys, values))
+&gt;&gt;&gt; d
+{1: 'one', 2: 'two', 3: 'three'}
+```
+
+U0L051JUB : Perfect exactly what I was looking for.
+U5WD1KS5P : Hey guys, I'm new to deploying django applications and I've been fighting an issue for two days now, could anyone help me with this? <https://stackoverflow.com/questions/44666555/django-wsgi-no-module-named-site> I just posted a question in stack overflow and I'm completely stuck at the moment
+U1BP42MRS : <@U5WD1KS5P> I think you have a type-o in your question:
+```
+activate_this = os.path.join( PROJECT_DIR, 'env/shinra/bin', 'activate_this.py'$
+```
+
+The `$` is invalid and would cause a syntax error
+
+U5WD1KS5P : oh yeah let me edit that, thanks!
+U1BP42MRS : Otherwise, some questions:
+1. Where are you running the `python3 -i ...wsgi.py` command from? The app may not be in your PYTHONPATH
+2. Why are you not using  uwsgi or gunicorn to serve the app, vs trying to run it directly?
+
+U5WD1KS5P : ive tried running it from both /var/www/shinra/ and var/www/shinra/shinra
+U5WD1KS5P : I ran it with uwsgi and gunicorn both and was able to get them both to serve the app (without the static files) but I was never able to configure either apache or nginx correctly for my EC2 instance
+U5WD1KS5P : And the tutorials to configure either of those are old
+U1BP42MRS : If you're at all familiar with ansible, here is how I have my recent Django app served from gunicorn 
+U1BP42MRS : <https://github.com/mrasband/ansible/blob/master/ottter.yml>
+U5WD1KS5P : Oh no idea, but the line exec_start seems to be what I ran when I tried with gunicorn and that worked perfectly so being able to run that as a bash or something would be great
+U5WD1KS5P : My question there would be, is it ok to run the gunicorn command to start serving the app, store that command to run on server start and just use nginx to feed my static files?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,383 +1,378 @@
+U1U831FNE : <@U1JQ8B5BM>: I've had that problem too and for now just restart the bot every couple of days.
+U1DM2B4SY : <@U1JQ8B5BM>: Could also be that it is stuck in a conversation, make sure every branch ends with convo.next().
+U1JQ8B5BM : no it is not listening
+U1JQ8B5BM : thanks for reply
+U1NSE6M3N : Hey guys, is there any way to open active slack app on web and mobile via code? In our slack bot we are showing a payment link to user and once the payment flow completes we want to open the slack app.
+U1T9UELH5 : Hi All. Does anyone know if it's possible for a slack app to have access to user profile images? I am trying to create a custom slash command, that when invoked will fetch the user's profile image and do something with it. It seems I'm able to do this by calling Slack's web api, but that requires an OAuth bearer token. I can generate a token for myself during testing, but was wondering if I can get a token when I launch the app that is not tied to any particular user; I'm not building a stand-alone slack client, but introducing new incoming webhooks and slash commands into a team's slack account. Adding a Slack Button (<https://api.slack.com/docs/slack-button>) seems to provide an OAuth flow when the app is added to an team's slack account, which also seems to return a OAuth Bearer token. Is this is only way to access the slack web api from a non-user account, e.g., a custom slack app. The other alternative seems to be to create a custom SlackBot, which also gets it's own bearer token which can be used to access the webapi -- however, it's unclear if that bot will have access to user profiles/profile images.
+U1BPBKXK5 : Pretty sure the OAuth flow gives your app a token whether you want a bot user or not. Have you tried using the token that comes back in the `access_token` field when you hit the `oauth.access` endpoint?
+U1BPBKXK5 : (In any case, we should probably take this to <#C0K8617D5>.)
+U1T1QD672 : Hey guys I'm using botkit how do you make the bot put the @user who asked the bot a question in the response? message.user contains some sort of uuid not the username directly
+U1T1QD672 : Sorry will move to botkit channel!!
+U0TGHKPEU : ```&lt;@user_name&gt;```
+U1T1QD672 : Wow should have rtfm 
+U1T1QD672 : Thank u <@U0TGHKPEU> 
+U1TGELUKE : How do you pretty format the text when you use bot.reply?
+U1TGELUKE : If you check on the slackbot message, it's got bold, italic and links and I'd like to know how to do that. Is there some sort of documentation I can read? Thanks.
+U1TNJKNCR : how I can update a message from a bot with response_url?
+U1TNJKNCR : payload recover in php
+U1TNJKNCR : i need your help
+U1BPBKXK5 : The response_url just posts new messages in the same channel I think
+U1BPBKXK5 : Responses from interaction posts will replace the content of the original message
+U1BPBKXK5 : Otherwise, you have to use chat.update
+U1TNJKNCR : well,i should use  slack appi or botkit
+U1BPBKXK5 : Botkit lets you do this, it has an API helper. `bot.api.chat.update`.
+U1TNJKNCR : its a function, true?
+U1TNJKNCR : where I find that function?
+U1BPBKXK5 : <https://api.slack.com/methods/chat.update>
+U1BPBKXK5 : There's the API doc
+U1TNJKNCR : Thank you
+U1BPBKXK5 : np. Good luck!
+U1AQ8MY3U : hey guys, I'm tinkering with the interactive buttons trying to add them to my bot - I feel like I must be missing a step, I've registered an app, added my bot user, added a callback url, sending a message as per the docsbut all that seems to appear is the “text” of the message (not the attached buttons)
+
+U1AQ8MY3U : is there some subtle step I'm missing - I feel like i've read over the docs a hundred times :smile:
+U1HK4CCRM : <@U1AQ8MY3U> have you tested your json in the message builder?
+U1AQ8MY3U : yup! it works there
+U1AQ8MY3U : <https://api.slack.com/docs/messages/builder?msg=%7B%22attachments%22%3A%5B%7B%22actions%22%3A%5B%7B%22name%22%3A%22Button%201%22%2C%22style%22%3A%22default%22%2C%22text%22%3A%22Text%201%22%2C%22type%22%3A%22button%22%2C%22value%22%3A%22value1%22%7D%2C%7B%22name%22%3A%22Button%202%22%2C%22style%22%3A%22primary%22%2C%22text%22%3A%22Text%202%22%2C%22type%22%3A%22button%22%2C%22value%22%3A%22value2%22%7D%2C%7B%22confirm%22%3A%7B%22dismiss_text%22%3A%22dismiss%22%2C%22ok_text%22%3A%22ok%22%2C%22text%22%3A%22Text%22%2C%22title%22%3A%22Title%22%7D%2C%22name%22%3A%22Button%203%22%2C%22style%22%3A%22danger%22%2C%22text%22%3A%22Text%203%22%2C%22type%22%3A%22button%22%2C%22value%22%3A%22value3%22%7D%5D%2C%22attachment_type%22%3A%22default%22%2C%22callback_id%22%3A%22703699%22%2C%22color%22%3A%22danger%22%2C%22fallback%22%3A%22this%20is%20the%20text%22%2C%22text%22%3A%22this%20is%20the%20text%22%7D%5D%7D>
+U1AQ8MY3U : ugh heh
+U1HK4CCRM : are you using botkit?
+U1AQ8MY3U : no, my own bot
+U1HK4CCRM : gotcha. Are you encoding your attachments?
+U1AQ8MY3U : let me double check
+U1AQ8MY3U : (i'm not receiving any api error responses though)
+U1AQ8MY3U : brb
+U1HK4CCRM : It wouldn't return an error. It would just ignore that property
+U1AQ8MY3U : ah ok
+U1HK4CCRM : &gt; The optional attachments argument should contain a JSON-encoded array of attachments.
+U1HK4CCRM : <https://api.slack.com/methods/chat.postMessage>
+U1AQ8MY3U : quick extra question while I grab some more details..
+U1AQ8MY3U : if I send `{"channel":"C1E6M4WUW","text":"hello”}` to `chat.postMessage` as a GET it works
+U1AQ8MY3U : as a POST it fails with `channel_not_found`
+U1HK4CCRM : POST doesn't take JSON right now
+U1AQ8MY3U : oh ok
+U1AQ8MY3U : bugger :smile:
+U1AQ8MY3U : ok cool, perhaps this is related then - I think the attachments are being sent as json - let me change this up so they are encoded GET params
+U1AQ8MY3U : sounds like that'll be the fix!
+U1AQ8MY3U : what should the query param be?
+U1AQ8MY3U : I didn't see it in the docs
+U1AQ8MY3U : ie `<http://api.foo/path?&lt;what_goes_here&gt;=encodedJson>`
+U1AQ8MY3U : :facepalm: nvm - I know what I was doing wrong
+U1AQ8MY3U : I was too caught up in thinking in terms of json since thats how everything is represented in the docs
+U1AQ8MY3U : all good now! - thanks for the push in the right direction <@U1HK4CCRM>
+U1AQ8MY3U : next problem :stuck_out_tongue: - I don't seem to be getting a response from button taps :confused:
+U1KH878SJ : <@U1AQ8MY3U>: it does take JSON but you have to specify the correct `Content-Type` headers
+U1KH878SJ : for POST`ing` to `chat.postMessage`
+U1AQ8MY3U : yup, I was specifying `Content-Type: application/json`
+U1AQ8MY3U : but it wasn't working for some reason :confused:
+U1AQ8MY3U : I managed to get the buttons to show using encoded params
+U1AQ8MY3U : but when I tap them my https url isn't getting hit
+U1AQ8MY3U : I can see the initial test from slack is working when I setup the url in the config
+U1AQ8MY3U : but the button taps themselves aren't :disappointed:
+U1AQ8MY3U : I can't use the regular bot auth (bot token) if I want to use interactive buttons?
+U1AQ8MY3U : I have to use oauth ?
+U1AQ8MY3U : hmm no, seems regular bot user is ok
+U1AQ8MY3U : I wish there was a way to debug this stuff… I'm kinda stuck :confused:
+U0HT1NBLH : were the messages with buttons sent from your app? See #1 here: <https://api.slack.com/docs/message-buttons>
+U1AQ8MY3U : yeah
+U1AQ8MY3U : so I can make my bot (which is wrapped in an app) display buttons
+U1AQ8MY3U : but tapping them does nothing
+U1AQ8MY3U : I can only assume I've not configured something properly
+U1AQ8MY3U : which is why I asked about the auth method :confused:
+U1AQ8MY3U : currently I'm using the bot user token - I suspected that I might need to change it to use oauth instead - but I can't find any docs that specify that
+U0HT1NBLH : Yep, I think it has to be coming from a Slack App that a user has authed over OAuth
+U1AQ8MY3U : is there a way to do that without user interaction ?
+U1AQ8MY3U : I know what oauth is from a user standpoint - but I've never really needed to interact with it from a development standpoint
+U0HT1NBLH : Nope, you need user interaction to confirm the auth. The docs have a pretty good overview of how the process works for Slack: <https://api.slack.com/docs/oauth>
+U0HT1NBLH : the easiest way to get in to the flow is using the Add to Slack or Sign in with Slack buttons, which will hit your apps provided oauth url
+U1AQ8MY3U : fair enough - I'll try again :smile:
+U1AQ8MY3U : thanks!
+U0HT1NBLH : np - here's my first pass at it (uses Foundation, but the idea is the same) :slightly_smiling_face:<https://github.com/pvzig/SlackKit/blob/master/SlackKit/Sources/OAuthServer.swift>
+U1AQ8MY3U : cool, cheers :smile:
+U1LLB1709 : I'm running into a frequent problem with response times. (I'm still a rookie at this in general.) I'm using Google Apps Script as my platform (essentially server side javascript) so response times aren't fantastic. Nearly every command/button that is sent triggers `Timeout was reached` even when it takes just barely too long to reply. The Slack API talks about sending an HTTP 200 "OK" status code to prevent a user facing error. Can anyone point me in the right direction on how to accomplish this with a stripped down version of js? I can't include any external libraries unless they're hosted w/in GAS.
+U1UL0T6RY : Hi,How can I add 2nd level authorization before user posts message to any channel using webhook url?
+
+Manish
+
+U1UL0T6RY : from what I looks like, once I have a webhook URL , i can just curl post to any channel
+U1UL0T6RY : :flushed:
+U0LKH699P : can slack APi send notes or a snippet ?
+U0LKH699P : i remember some talk about that a while back
+U0LKH699P : maybe just editing an existing note or sthing?
+U1P3Q8JKV : _i think_ the only way to limit the webhook's destination channel is to bundle it into an app. The app doesn't need to be published.
+U1P3Q8JKV : <@U0LKH699P> if you use web api to upload a file to a channel, that can create a snippet.
+U1UL0T6RY : Thanks <@U1P3Q8JKV>
+U0LKH699P : <@U1P3Q8JKV>: thanks, will try that
+U1QB7RXQQ : HIi
+U1QB7RXQQ : is there a possible way to get file that uploaded in slack from user to post it to my api through bot?
+U1USFAQ6S : When I send a message with the web chat.postMessage API and include attachments (with action buttons), things work great. But, when I send the same type of message (with same formatting) in response to a slash command to the response_url, the attachment is ignored.  Anyone know if attachments are not supported in response to a slack command or button click?
+U0HUTFBHS : weird dharmesh, the docs say that should work.
+U1USFAQ6S : No worries.  Not a huge deal -- it's likely going to end up being something silly that I'm doing wrong.
+U0HUTFBHS : I haven't tried the message buttons yet, gotta get on that.  :slightly_smiling_face:
+U1HK4CCRM : <@U1USFAQ6S> are you posting form-data or JSON to the response_url?
+U1USFAQ6S : <@U1HK4CCRM>: I'm posting JSON data to the response_url.  But, oddly, the attachments "element" in the JSON needs to be a string (even though it's JSON).  At least, that's what I think, and it's the only way I got attachments to work at all -- even with the regular chat.postMessage.
+U1HK4CCRM : <@U1USFAQ6S>: I'm not so sure that attachments needs to be a string if you're posting with `application/json`
+U0HUTFBHS : When you say element, do you mean key, or value?
+U1V00QLG0 : /app_report 
+U1V00QLG0 : Hi bot developers
+U1V00QLG0 : sorry for my ignorance, but I am totally new into this bot world :slightly_smiling_face:
+U1V00QLG0 : are making slack bots profitable?
+U0YHRDB3Q : <@U1V00QLG0>: if I'm not mistaken, Slack doesn't have a monetization system for bots yet
+U0YHRDB3Q : BUT
+U1BPBKXK5 : Not sure anyone has a proven business model yet
+U1BPBKXK5 : But lots of ideas, some of which _seem_ tenable
+U0YHRDB3Q : you can offer paid tiers of your service, but I'm no business expert
+U1V00QLG0 : <@U0YHRDB3Q>, yes, I would like to create bot and charge per user by making external service in addition to bot (seems like lots of bot developers are doing like this)
+U1V00QLG0 : <@U1BPBKXK5>: seems like there are bots charging money for usage, I made some other apps for other platforms, now interested in trying slack
+U0HBN0L9M : <@U1V00QLG0>: what is interesting with Slack is that you build for businesses
+U0HBN0L9M : so you can defend charging because you create measurable value
+U0HBN0L9M : versus BtC bots... much harder
+U0YHRDB3Q : tbh the reason the place I'm working at is letting me screw around with <#C0AV5N8NA> so much is because they find value in having everything in one place
+U0YHRDB3Q : Hubstaff reports, Trello cards, etc
+U0YHRDB3Q : it just saves time
+U1V00QLG0 : I just started reading integration docs and it feels crappy (sorry slack team)why is the slash commands and bot users are different thing?
+
+can I create bot which has slash commands integrated, so that user who is integrating it to their team do not need to fill forms, webhooks and so on?
+
+U1V00QLG0 : so far I am having difficult times to understand their writing style
+U0YHRDB3Q : <@U1V00QLG0>: let <#C0AV5N8NA> into your life <https://github.com/howdyai/botkit>
+U0YHRDB3Q : it has both Bot User capabilities and Slash commands built in
+U1V00QLG0 : thanks <@U0YHRDB3Q> :+1:
+U0HUTFBHS : I like that slash command are separate.
+U0HUTFBHS : It's a lot simpler to develop and easier to scale than a bot user.
+U0LKH699P : any suggestions for a html/css front end framework or libraries for a bot?
+I have a slack bot but want to build a limited way for users to chat to it via the web. but building out a nice bubbles chat UI that feels good is a lot of work.
+
+U0LKH699P : anyone know github projects that are built for this?
+U0LKH699P : something like an open-source version of olark but just the client part. to add to another website so ideally not bogged down with angular or react etc.
+U0LLUCLP3 : To clarify I used a crude design example to exaggerate the concept.Slack Group Admin. will be able to put up time for different countries or time zone regions as the Slack Group needs.
+Slack is Global as we all know so this diverse combination of different nationalities is an excellent place for "Slack Customizable International Time Display."
+
+U0HBN0L9M : <@U1V00QLG0>: slash commands or webhooks are simple apps. Bots are complex, powerful apps
+U0HBN0L9M : basically you're asking "why the powerful app can't integrate the simple app". It can :slightly_smiling_face:
+U1NF8G401 : anyone have a better method for building a link to a message in the archives than something like this: `var link = 'https://'+payload.team.domain+'.<http://slack.com/archives/'+payload.channel.name+'/p'+parseInt((parseFloat(payload.message_ts)*1000000));|slack.com/archives/'+payload.channel.name+'/p'+parseInt((parseFloat(payload.message_ts)*1000000));>`
+U1V80FSKB : Hi all! Seeing some interesting Slack API behavior and was wondering if this was normal: it seems that when a bot is added to a team, an IM session is automatically created between the bot and every user. I thought that an IM session had to be created manually either by a user interacting with my bot or by my bot via `im.open`.
+U1DM2B4SY : using botkit or something else?
+U1DM2B4SY : or bots taken from the app directory?
+U1V80FSKB : Using my own home grown client.
+U1V80FSKB : Moving this :question: over to <#C0K8617D5>. :slightly_smiling_face:
+U1TNJKNCR : in botkit
+U1TNJKNCR : what function, i can use chat update
+U113YKYHF : Is there a slack meetup in Santa Monica or the Westside of LA?
+U1MP10YR0 : <@U1TNJKNCR>: You can use bot.api.chat.update to update previous sent messages.
+U0LKH699P : <@U113YKYHF>: if there isn't you could start one, I did that in SF and overnight we had ~100 people interested. and that was *before* the current hypopalooza.
+U113YKYHF : <@U0LKH699P>: Good point! Thanks for the perspective.
+U0C2RGP4P : Just wanted to let you all know that Talla, which is based in Boston, just opened an office in San Fran with 1 FTE.  More soon.  We would love to connect in person with any of you who are local to either location
+U1TNJKNCR : I can update a postMessage of a bot?
+U1TNJKNCR : use botkit
+U1TNJKNCR : i try update a postMessage with slack-api-master in php
+U1VLZ6FK9 : Hi, I'm sure this is a really common question, but what's the best method for a botkit bot to start a conversation without an incoming message?
+U1VLZ6FK9 : I was going to use bot.say() and then add a controller.hears to listen for a few options before starting the conversation but that seemed a strange approach...
+U04SM6T2H : <@U1VLZ6FK9>: join us in <#C0AV5N8NA> to discuss
+U1VLZ6FK9 : ah sorry
+U04SM6T2H : no worries
+U1TMT1R1C : Hi!, i've a question about responses to a "interactive button message", after read and read and your help, i could get my bot working. But now, im trying to send a response back to the action buttons that the user clicked. But im getting this message: 
+(
+   [ok] =&gt; 
+   [error] =&gt; message_not_found
+)
+
+And i cant send any response 'cause that is the Slack response.
+
+Im using php and the "chatUpdate" method in slack api. Can you help me please?
+
+U1TMT1R1C : Or there's another way to send a message to change the past message from "Request URL" configured before in my app?
+U0HUNC8PR : i am not sure if i understand you ..but just to understand more are you sending ` replace_original` as True or False
+U1TMT1R1C : Amm, sorry if my question isnt clear, well, i was trying to update the message with 'call('chat.update')' from slack api, but, slack sent me an error (message_not_found), of course I used the api tester in the page to send the new message, but... in the response of the test, the page sent me the same error. All the fields were filled correctly but the same error. Or where i've to use 'replace_original'
+U1TMT1R1C : The original message was sent from a bot, im trying to update it from php using the 'payload' to get the token and other information like TS, etc. It's that possible or i've to send my new message from my JS file using bot.replyInteractive?
+U1VTY2EJE : hello i am junior developer
+U1VTY2EJE : wanted to integrate stack for my site via add to slack button
+U1VTY2EJE : i need to test in on my local machine ?
+U1VTY2EJE : anybody would help me
+U0KECURAT : <@U1VTY2EJE>: you can use ngrok, localtunnel if you need ssl or you can add an entry in your host file to set a custom domain for your test app as redirect uris
+U1VTY2EJE : i m using this
+U1VTY2EJE : now i wana test my custom command of app
+U1VTY2EJE : and one more thing i also want to know about one this is user_id is enoughf to identified that user already installed app?
+U1VLZ6FK9 : Can bots @mention users?
+U0563E81H : <@U1VLZ6FK9> - you can send &lt;@U12341234&gt; to mention a user by his ID
+U1VLZ6FK9 : ah great, thanks
+U1VLZ6FK9 : inclusive of &lt;&gt;?
+U0KECURAT : <@U1VLZ6FK9>: yes
+U1VLZ6FK9 : great, thanks
+U1NSE6M3N : Hey Guys, We are facing issue in implementing Slash Commands. Below is the format of our command:
+Format: /send @receiver gift
+
+In slash commands, we are getting receiver's username instead of receiver's slack id. But in other normal messages, whenever someone mentions a @username we always get user's slack id instead of username. Is it possible to get receiver's slack id in case of slash commands or Is there any way to get user's slack id from username?
+
+U0TGHKPEU : <@U1NSE6M3N>: if you are not storing list of users from the team to your local storage , you can try using <https://api.slack.com/methods/users.info> , how ever this may delay the response of your slash command , although you can use the response_url of the slash command if that would happen
+U1TMT1R1C : Hi!, A little question. Im using an app from slack (i created it), to use interactive messages i created a bot inside that app and using Howdy's botkit i can send messages. My bot is able to post messages with buttons, but i cant give a "interactive response" or a chat update.I've my URL configured in the app and imt trying to send a response with php, but... well, i get this error: [ok] =&gt; 
+ [error] =&gt; message_not_found.
+
+Now, i changed the way to response that messages and i decided to use Botkit and "replyInteractive" method to send a new message, but... My buttons still not working. Someone can give a hand with that please? :pensive:
+
+Im trying to use this method, but i cant receive the callback or the data that this method requires
+<https://github.com/howdyai/botkit/blob/master/readme-slack.md#receive-an-interactive-message-callback>
+
+U1TMT1R1C : If it's necessary, i can send you the code (file where im working) :slightly_smiling_face:
+U14TYLC94 : Cool read about Chatbots from the team at Orange: <http://osvproduct.com/howcanihelp/>
+U0LKH699P : i went to that event last night <@U14TYLC94>
+U0LKH699P : Cool read, "if i say so myself" lol :slightly_smiling_face:
+U14TYLC94 : :slightly_smiling_face:
+U0LKH699P : its a big deal the CEO of orange presented there
+U14TYLC94 : yeah it was cool. We are going to upload the vide ofo rthe folks that could not make it. I'll post the link
+U0LKH699P : there's a <#C0HK02UNN> also fyi
+U1WGDEYNA : Hey! :slightly_smiling_face:
+U1WGDEYNA : How do I change a bot's 'appearance'
+U1WGDEYNA : So lets say I want to change its first_name / last_name and make the icon :robot_face:
+U0C2RGP4P : Is there a way to mention a username and not have them get notified by slack?  If not, I'd love to see Slack implement some kind of tag such that a bot could insert a sentence into a public channel like "Yes, &lt;special tag&gt; John Smith&lt;/special tag&gt; is working on that."  John Smith doesn't need to be notified that he was just mentioned, as the mention was informational, not directed to him.
+U0LKH699P : <@U0C2RGP4P>: why cant you just put the name in *bold* ?
+U0C2RGP4P : I think that still triggers a notification 
+U1AQ8MY3U : by default you only get a notification for @yourname (@ needs to be present)
+U1AQ8MY3U : oh nope
+U1AQ8MY3U : im a big fat liar :stuck_out_tongue:
+U1AQ8MY3U : @yourname and yourname do trigger notifications
+U1AQ8MY3U : :zipper_mouth_face:
+U0LR6R73K : I thought bots didn't trigger notifications unless `@` is used. They definitely don't trigger notifications for highlighted words.
+U0LR6R73K : Tested and no notification from bot where username is mentioned without @ tag.
+U1MQMDL8L : Anyone ever seen setInterval not respect your millisecond setting properly? I have it set to 5 minutes and sometimes it posts at 1 minute, sometimes 5 minutes, sometimes 3. Very weird.
+U1RQECA1H : Where are you using it? NodeJS?
+U1MQMDL8L : Yeah. I think I figured out the issue though. One of my clearInterval seems to have silently failed, so it was double pushing.
+U0C2RGP4P : <@U0LR6R73K>: I get a different result.  What do you mean by "notification"?  I get the same thing if my name is mentioned with or without @
+U0C2RGP4P : <@U0LR6R73K>: and it would still be nice to have a tag that would allow me to use @name without notifying them.  Sometimes I just want to reference a person for someone else
+U0LR6R73K : It might be to do with team wide settings, actually. See <http://your_team.slack.com/admin/settings#require_at_for_mention|your_team.slack.com/admin/settings#require_at_for_mention>
+U0LR6R73K : <@U0C2RGP4P>: 
+U0LR6R73K : Sorry, that may be why I have different results
+U0HERRQR1 : <@U1MQMDL8L>: setinterval is based on your clock cycle
+U0HERRQR1 : so it's not persistent
+U0C2RGP4P : <@U0LR6R73K>: ah cool.  Thx
+U1MQMDL8L : I found the issue. It was because a clearInterval didn't clear properly. But thanks <@U0HERRQR1>
+U1TMT1R1C : Hi!, Good night.I built my bot and now is ready to start the work. Now i have a big question. How can i install it in a server?
+
+U1TMT1R1C : How can i leave it working all the day, i was reading that it disconects after few time
+U16USBQBH : Does anyone have a good solution for custom user subdomains? Using MEAN stack.
+U1X28AW6S : Anyone know why I am getting an "Received slash command, but could not load team" error when launching a slack command app using vscode json debugger? Works fine manually starting it through node cli
+U1SSQQ02U : <@U1TMT1R1C> try heroku
+U0KECURAT : <@U16USBQBH>: dynamic subdomains is not the most pleasant thing to do in express, although doable I'd prefer to leave that up to a reverse proxy like nginx if you're using that :slightly_smiling_face:
+U1TMT1R1C : <@U1SSQQ02U> I'll read about it, but you can provide me some pages with concrete information, please?
+U1SSQQ02U : <https://blog.heroku.com/how-to-deploy-your-slack-bots-to-heroku>
+U1SSQQ02U : <@U1TMT1R1C>:
+U1TMT1R1C : Thanks :)
+U1TMT1R1C : Ok, my team puts the bot in the server and they starts to work with it using node ----.js in the console. But the Bot disconnects the RTM Api, how can we get the bot working all the time
+U1TMT1R1C : ?
+U1MQMDL8L : If you're on the free Heroku plan, the server sleeps 8 hours a day. If you want to stay active, you need a paid plan with Heroku.
+U0D1YNBEE : <@U1TMT1R1C>: you should also try Beep Boop :wink: <https://beepboophq.com/>
+U1UB04YR4 : <@U0D1YNBEE> I havent seen this yet, it might change my life :ok_hand:
+U0D1YNBEE : I hope so :slightly_smiling_face:
+U1TMT1R1C : <@U0D1YNBEE>: But if my bot isn't a custom bot?, its integrated with an app in my team. I use it to send interactive messages. I follow the Howdy Botkit to build it. (To start the bot i use clientID, secretID and a port)
+U0D1YNBEE : On Beep Boop we handle the whole oauth flow for you, would be tricky to port an existing app over. Beep Boop works best if your bot is a Slack App (like you're using) rather than just a custom integration token
+U07CW6N3A : Hello everyone!
+Today the Slack platform team released the Events API, a way for your Slack apps to subscribe to specific team events and have them pushed to your server. :lightning:
+
+:mag_right:  Focus just on the event types you need and don't worry about maintaining open websocket connections for every team or user you work with.  :four_leaf_clover:
+
+&gt; Our announcement covers some of the typical use cases: <https://medium.com/slack-developer-blog/subscribe-to-the-events-api-d7120470983f#.u9n3rc58x>
+
+&gt; The documentation walks you through configuration and processing events: <https://api.slack.com/events-api>
+
+&gt; Browse the available event types: <https://api.slack.com/events/api>
+
+We're excited to see what you build with the Events API! When used in conjunction with the Web API, it's possible to build (&amp; scale) bot users entirely over HTTP.
+
+U0LKH699P : i like that demo. slack is turning into a platform for realtime apps...
+U0LKH699P : be interesting to see how buttons and forms develop
+U0LKH699P : i thought the "updating a message after its been sent" is a cool feature but worried it was a hack that might get closed off. if you're using it for slackbot demos then it feels safer to use :slightly_smiling_face:
+U0JPS3SHX : my question is, if we can use the events to avoid the RTM API, is there a way to make the bot “available” without doing the connection ?
+U1TMT1R1C : <@U0D1YNBEE>: Ok i think that i followed all the steps, now i heve to upload my project to the github repository, Where i have to put all the files and what files i've to put in the repo?. I use Mysql in node
+U1AQ8MY3U : if you subscribe to the ‘message' event aren't you just gonna get bombarded with ‘pushes' ?
+U1AQ8MY3U : I assume this is an alternative to a ‘bot' in which a constant web socket connection is over kill
+U1AQ8MY3U : I don't think this provides anything over and above the RTM api - it seems to just be 2 ways to achieve the same end?
+U0JPS3SHX : +1 <@U1AQ8MY3U> maybe I am missing something but looks like that, I was expecting more events around bot mentions for example, or direct messages to the bot, etc
+U1AQ8MY3U : I don't think having 2 ways to achieve the same thing is a bad thing though. sometimes a websocket _is_ over kill - like in the example interaction they are showing
+U1AQ8MY3U : but yep, I'd also be happy to see them expanding the events each of those apis get
+U1AQ8MY3U : my _preference_ would be that they introduce some consistency into the existing api first though :stuck_out_tongue:
+U0CNYC404 : Awesome, was looking forward to this coming out :slightly_smiling_face:
+U0JPS3SHX : the slash command, button payload and now the event payload are all similar but quite different
+U0D1YNBEE : :wave: today we released a new node library called <#C1XFTGV55> for creating Slack Apps that's designed specifically for using the Events API <https://blog.beepboophq.com/slapp-a-new-library-for-slack-apps-13a6e91b6bf#.qtc5a35c6>
+U0JPS3SHX : slash command:user_id: ‘12312'
+button pressend:
+user.id: ‘121212”
+event payload:
+user: ‘1231231'
+
+U1AQ8MY3U : lol
+U1AQ8MY3U : :upside_down_face:
+U1AQ8MY3U : sounds like their teams need an internal style guide or something ?
+U1UB04YR4 : <@U0JPS3SHX> reminds me of CSS rules :stuck_out_tongue:
+U1UB04YR4 : exampleStyle: nonesomeOtherThing: 0
+yetAnotherThing: no-thing
+
+U0JPS3SHX : lol exactly
+U0JPS3SHX : maybe they are different teams, but the funny thing is when i saw in the button pressed payload `user: { id: ‘1212' }` I though that was a good move and that would be the way moving forward … but now a new style is in town
+U07CW6N3A : We're definitely cognizant of the inconsistencies between API types in the platform. Some of them are trickier than others when honoring historical choices. In the Events API, for example, we're bound by the existing structure of events sent in the RTM API, though we have the luxury of "wrapping" those existing event types with additional, more modern metadata, we also erred on the side of being non-duplicative.
+U07CW6N3A : The way of addressing user IDs in message buttons is definitely a more modern approach that we can't easily backport to slash commands and event payloads in a non-breaking and non-duplicative way, though we'd definitely prefer consistency across features.
+U04TLHGSC : <@U07CW6N3A> thanks for the update
+U0JPS3SHX : no problem <@U07CW6N3A> thanks for the details :slightly_smiling_face:
+U1S2K009M : <@U1TMT1R1C>: I have a bot similar to yours. I have the following setup: Bot code in open source (<https://github.com/prongs/lens-slack-bot>). The bot reads token and some more details from a config file. Now, I have installed that in one of the server machines. With two helper files: 
+
 ```
-hi everyone. is this community for AI in general? Or for some specific field?
-hi can someone help me sending a message ,with messagae-buttons using python/
-Guys how to implement "Sign in with Slack" and "Add to slack" with bot kit. Looks like Botkit only takes one set of scopes.
-hi !! :slightly_smiling_face:
-Hey folks! Just in case if someone missed this. Our team <http://Standuply.com|Standuply.com> has partnered with an awesome event for AI/chatbots enthusiasts - Chatbot Summit that will be held in BERLIN on the 26th of June. Now can offer you 30% discount. Visit their website at <http://bit.ly/chatbotsummit> and use the promo code STANDUPLYBOTS in order to get it. Enjoy :wink:
-The idea of cheap and easy MVP: <http://bit.ly/2sXUJws>
-I need some help
-ask away!
-hi guys this is kingshuk
-i need help in one issue
-i am getting duplicate responses from messenger bot
-<@U0V93GE5R> are you here ? :slightly_smiling_face:
-<@U5SS5GK36> you didn't ask anything.....
-<@U5SS5GK36> we are always here :smile:
-I posted an issue on the github of botkit :slightly_smiling_face:
-I know that I can use bot.api.chat.update(...) but I need timestamp, so how to get the message info from the bot reply ?"
-<@U04S3JCH2> <@U1DM2B4SY> <@U0V93GE5R> :slightly_smiling_face:
-(botkit)
-<@U5SS5GK36> caught up with work right now but you should scan the <#C0AV5N8NA|botkit> channel and post your question in there :thumbsup:
-Hey all! Looking for some help and can't find anything online. I want to use api/files.upload to upload a file to our team channel and having issues with the multipart/form-data request. If anyone has any experience with this please send me a message or let me know.
-I do not know that a botkit channel existed
-thanks ! :slightly_smiling_face:
-Hey guys! I'm the Founder and CEO of StdLib, I've been here for a bit and tracked some convos. We launched a really easy way to build Slack bots a couple months ago.
-I just wanted to share our most recent stuff, you can build a basic Twilio Bot + Call Forwarder in 7 minutes with no infrastructure setup required :slightly_smiling_face:
-<https://medium.com/@keithwhor/build-a-serverless-twilio-sms-call-forwarding-bot-in-7-minutes-using-node-js-stdlib-411697c3cc1b>
-I want to write bot which will be parsing channel and write some reaction on some words. How to write this part?
-Hey, we build a light-weight project management tool for remote team like us. A Slack bot that tracks your team's time and progress, creating reports for all to see. product is here: <https://limibot.io/> video demo is here: <https://www.youtube.com/watch?v=a4bsL4NywIc> Wish to help you.
-If i can be of any help at all, please don't hesitate to reach out
-<https://github.com/slackapi/python-slack-events-api/tree/master/example>
-<@U49NW26L9> please dont crosspost <#C0JQ4TX7Z|announcements> so liberally, or keep big walls of text to a thread.
-Thanks 
-Is it possible to disable interactive message buttons for certain users?
-Hi, I've imported the botkit-starter-ciscospark to glitch. I've added the access_token and the public_address in the env file. I got the public_address from ngrok which is running on local machine. There are no errors on glitch. I see `POST /ciscospark/receive 502 Bad Gateway` on ngrok window. What am I missing? The bot is not replying to "hello".
-did you add the secret to the .env file?
-its a random string you make up
-fwiw we also have <#C2DR1AJD7|cisco_spark> here
-Hi guys, has anyone built a bot on the Microsoft Bot Framework, ideally connected to Skype for Business or Facebook @ Workplace?
-<@U0V93GE5R> Yes. On glitch, I'm using the access_token which I used in a non-botkit bot which I ran on my local machine following a cisco learning labs lab. That bot is now offline. Should I use the access_token of a newly created bot?
-yes, and you ALSO need to create a secret token
-i think you can reuse that old token
-mgtheboss: you might want to  regenerate the token or create a new app in the cisco developer portal if you are unsure if the old one still works
-I also see 3 errors, `'matches' is not defined` in `skills/help.js`.
-thats unrelated to the token issue
-  type: 'bot' }`. The emails and displayName fields contain correct values. Is token really the issue?
-I tested with a new access_token. It didn't work. I removed and readded the bot in cisco spark. The two actions generated two more `502 Bad Gateway` errors in ngrok.
-I tested with a new bot's access_token. It didn't work. I got `502 Bad Gateway` error when I added the new bot in cisco spark.
-hey
-how to use delayed response with botkit?
-need for slash command
-And you entered the access token AND added the secret token that you made up?
-<https://lighthousebot.com>
-<@U5U969G1G> congrats and everything, but if you could please keep announcements like this in <#C0JQ4TX7Z|announcements>
-we'd appreciate it!
-benbrown: sure will do next time thanks :slightly_smiling_face:
-Yes. In addition to during addition and removal of the bot, I am also getting the bad gateway message when doing @botname hello or @botname help.
-Do I need to put the strings in double quotes in the env file?
-Hi mgtheboss:  i hope you have solved your issue :slightly_smiling_face: , but, in view of the technical nature of the issue, I would say it's worth to take a look on <https://machinabot.com> , let me know what you think...
-The error encountered was: dial tcp [::1]:8080: connectex: No connection could be made because the target machine actively refused it.
-Using `ngrok http 3000` instead of `ngrok http 80` seems to have taken care of the tunneling issue but, the bot is still not replying. I'm not getting the bad gateway messages anymore.
-It seems I have solved the last piece of the puzzle. I was not providing the secret while creating the webhooks. I've got the welcome message, "I am a bot, here to do your bidding." I would like to know why it was not working with port 80. The `node-sparkbot-samples` from learning labs ran perfectly with port 80.
-Hello, I have installed and am using the botkit-starter-slack, everything is up and running but onboarding does not seem to work at least not my own thread, it only responds Welcome, &lt;user&gt;. Tried with creating an Onboarding1 in the botkitstudio and set it in the components/onboarding.js but it does not trigger by that call.
-It does not seem to be called in the console in studio. Any idea someone?
-I can imagine, some ppl are sleeping right now :slightly_smiling_face: I fly away and hope there will be a reply sooner or later *flies*
-I found out you will need to fix that yourself in the botkit-starter-slack/skills/sample_events, nevermind. Now I really fly away for a time being. But I would like to really thank Ben and his company for this great bot, it works splendid
-I cannot use websockets anymore, does anyone know why?
-The permission scope of `im:read` is included.
-Hey everyone! Our slack bot's on ProductHunt front page today and trending :slightly_smiling_face: Please do stop by and I look forward to answering questions! <https://www.producthunt.com/posts/senseihub>
-wow, that's a YUUUUGE gif
-Hey  all :slightly_smiling_face: !! here is nice tutorial of "How to start testing and debugging your bot locally in one minute" <https://medium.com/inside-machinabot/from-dev-to-live-part-1-how-to-start-testing-and-debugging-your-bot-locally-in-one-minute-74e4e334a449>
-Hey everybody! Do you have some ressources about learning how to use Botkit's NodeJS SDK? I mean except the official documentation?
-that is the best resource at the moment, but feel free to ask any advanced questions on the github or over in <#C0AV5N8NA|botkit>
-Its seems that nobody is responding in <#C0AV5N8NA|botkit> lol
-Hi, how can I prevent my Bot from showing up under "DIRECT MESSAGES"? I just want the team to use the bot's slash command and not show the bot as a bot user
-<http://chatbot.fail/>
-Hey all we're getting together for Hack Days and we'll be live streaming as well. :slightly_smiling_face: Join up! <https://www.facebook.com/events/113934942548240>
-hi all, I'm a beginner looking to learn more
-are bots able to access chat data - either in messenger or on slack?
-I also have the same question, can we access the chat data?
-(i mean, beyond the user's chat with the bot fyi)
-It depends on the permissions of the bot and where the conversations take place. 
-Hello
-How to overcome this bug in my bot program?
-Hi, how can I prevent my Bot from showing up under "DIRECT MESSAGES" after installation? I just want the team to use the bot's slash command and not show the bot as a bot user
-I am a beginner and I followed the differents docs files but I can't connect cisco-spark starter pack with my bot. Does anyone have some time to teach me ?
-<@U5WK01H71> hey there! I can help you out. join the <#C2DR1AJD7|cisco_spark> channel and DM me :slightly_smiling_face:
-Hi, does anybody know which graphics library is used by statsbot. <@U0GRGF85N> ?
-Any bot creator/developer from Canada here? I'm looking to make a bot for the airline and fintech industry. Hit me up, let's chat
-why my slack messages encoding? e.g. Let's Validate became Let%27s Validate
-Awesome work <@U5VFAL5DY> and <http://UXDesign.cc|UXDesign.cc> team. I agree that chatbots currently lack proper human escalation protocols. 
-Hello everyone, when I tried to make the connection via slack_client.rtm_connect()  it always returned “False”. Does anybody know how to deal with this?
-<@U5URZ4FL0> - mine is now doing the same thing after rebuilding my docker app...
-guess if anybody has any solutions pass it along! slack status is saying everything is good... think that is a big fat lie.
-added an integration to this channel: <https://dev4slack.slack.com/services/B5YE29PP0|Carla>
-hello
-removed an integration from this channel: <https://dev4slack.slack.com/services/B5YE29PP0|Carla>
-thanks.
-Hi I am looking for anyone who was able to get carousels working?
-itsmejainh: you can't update other people's messages with a bot. see <https://api.slack.com/methods/chat.update>
-<@U5YF8SWR5> Hi, that is possible can you try to add other permissions `channels:write` , `chat:write:bot`.
-I added those permissions and then I am able to edit my own messages
-<@U3RAA8WSJ> rewind
-Great... let me process your channel.
-See below two of the best items I found. For the complete list, <https://web.paperbot.ai/?utm_source=slack&amp;utm_medium=messaging&amp;utm_campaign=rewind | click here>.
-<@U3S6WLUM7> you should not install your bot in <#C04SM6TAK|general>  and also your bot <@U3RAA8WSJ>  is DMing all the members of this community for sign ups. Which is strictly not allowed. 
-<@U0V93GE5R> , <@U04SM6T2H> please take appropriate action. 
-But I want is - capability to edit all messages posted by anyone with some formatting
-<@U0Y7H2F3M> thanks for that report
-Hey Ya'll, does anyone use redux in there chatbots?
-Curious. There's a 500 API limit even for hosting it on own server?
-hi. i'm having some trouble wrapping my head around botkit and the slack api. i'm having a bit of a "drinking from a firehose" feeling. there seem to be a bunch of different methods of authentication, of communicating with the slack api, etc. does anybody have any advice? i'm trying to figure out what's the absolute bare minimum i need to get a bot up and able to read and write from a channel but am not having much success.
-hi guys. i'm trying to write a chatbot that's asking for email, phone number, age, etc. do you have any idea how could i build the conversational flow so that if someone replies with an invalid email address, the chatbot would ask them to type a valid email address. after they retyped the email and it was validated, the chatbot should go to the next question?
-drguildo: did you start with the Slack starter kit?
-you can start super easily here: <https://glitch.com/~botkit-slack>
-anam1: check out the conversation docs: <https://github.com/howdyai/botkit/blob/master/docs/readme.md#conversation-threads>. at a high level - sounds like you should have one `thread` that ask the core questions - email, phone, age, etc. then you should have another thread for the case of an incorrect email (use regex to check) that you can jump to and ask for the correct email, and jump back once you have it
-<@U4HG47ZGD> thanks
-I also made a video walkthrough for that you might enjoy: <https://www.youtube.com/watch?v=us2zdf0vRz0>
-Random question - has anyone had a lot of problems with Facebooks account system if you've only set one up to access their Developer Platform?
-I'm getting so much grief about "suspicious activity"
-thanks but how is a project with 20+ files super simple?
-i managed to take a machete to some example code and it turns out you only really need about 4 lines of code to get a slack bot connected and processing events
-but all the code and documentation i've looked at overcomplicate things
-there's a lot going on but really the /skills folder is all you need to look at to start out. slack just has a bunch of different ways to process events.
-having fun writing this macOS app <https://higher.team/blog/2017/june/native-macos-slack-client-not-electron> any alpha testers out there?
-do anyone know here how to integrate Telegram with Slack : I have a group in telegram and I want send &amp; receive msgs from Slack Channel
-do anyone know how I can join a real user to any channel through nodejs?
-I am new to  slackbot
-salimhurjuk: i dont think botkit has telegram support yet, but you could start with a Slack bot in Botkit and send/receive requests via the Telegram api, or even write Botkit middleware for telegram :slightly_smiling_face:
-you can also use botkit studio for this, it's a very simple flow and you will need to write only very little code
-azizimranz: you want to invite a real user to a channel in slack, is that what you mean? use the channels.invite method <https://api.slack.com/methods/channels.invite>
-Thanks for the reply Vikyan.
-hi everybody! :slightly_smiling_face:
-hey there :slightly_smiling_face:
-Is there a standard way to direct message a large list of users in a team? When I try to loop through them and startConversation, I get a `Callback was already called.` error.
-how to separate slack app from production and development? need to test app before deployment
-bakhtiyor: I think most of us actually have 2 different apps for that purpose
-Yep, me too. Sometimes more even, for seperate devs and staging too
-yeah, i created "fake" apps, but wanted your experiences
-thanks
-how to resolve it?
-same thing here, separate apps for each dev and staging.  Pretty easy to manage once all set up.  Only issue we ran into was sharing slash cmds in the same team.
-We have a separate Slack team up and running that we use to test apps in a dev environment.
-I created a basic FAQ bot for my company. when I tried to include in our slack group. it is working only if add it to channel. Can i make it not include in channel so users can post directly to slackbot
-<@U2ST09C5V> the slack bot i did was an outgoing webhook and it only saw messages that started with the bot's keyword… is that what you're looking for? (I didn't actually test across channels that i recall)
-<@U4Y8PNP6V> for sharing slash cmds, i put some "namespaces", e.g. `/analyze`, `/analyze:dev`, `/analyze:staging`
-Is there any open source Bot framework available that support  web chat like a Drift?
-You mean like web-based real-time message framework?
-neel: posted a reply over in <#C0AV5N8NA|botkit>
-Hey! I'm wondering if its a good idea to be able to pass in a tickInterval as config?
-Does anyone have documentation on how to make message buttons (not message menus) for a bot that isn't an app
-trfylh: why not just make it an app
-Doing it for an internal company thing, don't have a choice unfortunately :disappointed:
-My understanding is only an app can respond to interactive messages
-Also, in case it helps for an internal thing: apps can be private — don't have to list them in the directory.
-^ what <@U0D7F12ER> said! just make it a private app
-We use private apps as our primary method of distribution. Everything runs via a bot, but because we're enabling our customers to talk to _their_ customers, we need the bot to be branded according to the company (vs. a bot named after us).
-Thank you!
-Unable to verify url while creating slack app
-Hi all
-Can we create a bot to talk to another bot in Facebook Workplace ? Is there any sample code I can refer?
-ezree: will respond over in <#C11Q41CR3|fb-messenger>
-Hi there.  Is there a detailed step by step code tutorial on setting up OAUTH for Slack apps for a non-developer?
-<@U4E6DDG6L> you can use our prebuilt boilerplate app that uses oauth. we have docs for setting it all up.
-I will DM you some links
-Please sir.
-What's the best way to scale a bot that connects to multiple teams across several servers?
-e.g. Let's say I'm connecting to 1000 Slack teams using websockets. I need to spread that load to a max of 100/server (hypothetical)
-How can I ensure that each of the 10 servers is connecting to the right teams without duplication?
-you'd probably want to set up some kind of microservice that can track all 1000 servers and distribute them 100 at a time as they're requested
-something with express would be easy ish
-the main problem you might have is determining when a server has gone down (for restarts or whatever) -- possibly could have each server re-validate their connection to the microservice every 5m or so
-<@U62H7MAG2> That seems like a case serverless ! (<http://serverless.com>) I'm currently working around with it, and it's what I'd use, coupled with either dynamoDB or Google Cloud Datastore depending on the needs and mood of the day
-anyone know what are the other values of “attachment_type”? I've only seen “default” on slack documentation pages (<https://api.slack.com/docs/interactive-message-field-guide>, <https://api.slack.com/docs/message-buttons>)
-Has anyone done authenticated app unfurls? There is an option to send a user_auth_required to get the user to authenticate. But looks like it still required a token for the request. Since the user hasn't authenticated yet, which token do you use? I'm guessing I have to keep track of the token of the first user who authenticated the app and use that here?
-<https://www.facebook.com/groups/sfhackdays/permalink/1455139384600993/>
-^Just gonna post it here instead of spamming too many channels looking for answers.
-Mahendra S Chouhan
-<@U62EJPRUH> No bots in general please 
-Hello! I've run starterbot in PyCharm and everything was ok. But when I've written in command line"python starterbot.py", I got an import error " No module named slackclient". Why??
-<https://github.com/slackapi/python-slackclient/issues/183>
-<@U3NFQN97H>: There is no other value for now, It's a placeholder for future features
-<@U500C4E05>: to make it more complicated, also check out: <https://github.com/BeepBoopHQ/slapp>
-I personally don't like botkit's approach. You end up writing different bots for different platforms anyways. Go for somehting Slack specific and always uptodate with the API features. Will make your life easier from my experience.
-<@U6330SLE9>: yes that's true. You are expected to respond within 3 seconds.
-When your response requires some time to be processed (e.g. when generating a statistic) then reply immediately with a message that states that you are currently processing the request and update or respond to this messages when you have your result.
-When you are having trouble to respond within 3 seconds even when your use case is simple then you should look into why your performance is so bad. You should aim for 100ms response time for standard responses in production mode. When testing locally using tunnels you might run into this limit from time to time though. Just ignore it.
-Thanks <@U54C2FV2L> that's exactly my concern, so far the `bot.api` in botkit seems to be handling that very nicely, so basically there is a 1-to-1 mapping with slack's API. However, I'll definitely look into slapp and see if a platform specific toolkit will be more flexible, because in the end I just want to create a Slack specific bot.
-happy that I could be of help :slightly_smiling_face:
-Thanks <@U54C2FV2L> :slightly_smiling_face:
-Hello, I am not able to make an account on botkit website for quite a while, are you guys still up?
-<@U66575GER> <#C0AV5N8NA|botkit>
-this isn't only a botkit chat
-pavelescu.razvan: What error are you seeing specifically? We also have <#C4MJKM145|botkit_studio>
-hi guys. I'm running a slash command that calls an aws lambda function.  The command works just fine and responds with the correct info. THen slack immediately shows the error: “Darn – that slash command didn't work (error message: `502_service_error`).” …. Any ideas whats going wrong?
-tennis: try adding `bot.replyAcknowledge();`
-also this is probably better suited for <#C0AV5N8NA|botkit> and/or <#C0K8617D5|slack-api> :slightly_smiling_face:
-Thanks. Will do.
-This message was deleted.
-is this a slack bot or what service are you connecting to?
-It's a Slack Bot connecting using rtm.connect
-I'm getting a websocket error. However, if it doesn't connect it should just print my else statement, but it continues as if it connected.
-<@U69AVHSRL> what is RTM for reference?
-Hi everybody! I just make my robot with botkit, I have in my slack team already and I saw the event "onboarding" was trigger when I installed it. Now the problem is that I cannot trigger any other script, I've tried with the "hello" script and one that I made yesterday but nothing happend. Is there anything I did wrong? should I activate the events in the my API slack? Thanks for your attentions. Regards!
-well I answer myself, I have found that I miss some parameters like the bot needs to receive events and some other configurations, every other thing was OK. Here I found the answer for my question (video from howdy by the way): <https://www.youtube.com/watch?v=us2zdf0vRz0>
-Hi Guys,
-i am kinda new to the bot building and AI, how ever trying my best to learn stuff as quickly as possible.
-I need some help
-i am tasked to build an enterprise chatbot that will communicate with a Qlik Sense and fetch requested data from it
-i have gone through multiple tutorials and am more confused than ever..
-these are the parts that i was able to figure out
-- Natural Language Processing &amp; Understanding using <http://API.AI|API.AI>
-- Building a Bot Using Microsoft Bot Framework with Node Js
-- Integrating <http://API.Ai|API.Ai> with my botframework
-how ever the tricky part is Qlik Sense uses a Websocket protocol for communicating with Qlik Engine.
-Now i am super confused as to how do i map the intents and entities to the Websocket api's
-Any help is much appreciated, thank you
-I'd recommend checking out a more specific channel to try to maximize the expertise of folks who see it: <#C63KSHE2C|bot-framework> is the channel for MS Bot Framework folks which could be a good spot to start
-<@U4T67EY1X> yep! there is a conversation over their now if people want to reply!
-whoops one sec
-the correct channel is actually: <#C0UUYSF1P|botbuilder>
-<@U4T67EY1X>  Sure thank you
-will do
-Hello guys where can I find good tutorials on building chat bots  with nodeJS
-Hey <@U6734RZ9V>; <https://medium.com/slack-developer-blog/build-a-serverless-slack-bot-in-9-minutes-with-node-js-and-stdlib-b993cfa15358>
-That's for Slack, specifically.
-Thanks <@U4MSZ8FKN> 
-thanks!
-Hey all, 100% new to bots. I want to relay messages between a slack channel and hangout/groupme. Can you point me in the right direction?
-With something like postman, you'll have a field for a URL (your incoming webhook URL) and the ability to easily just say "I'm posting JSON" and copy and paste it into a box hit send and check out the result.
-Can you add scripts as treads in other scripts? Like can you import scripts to use as treads? I'm finding that I'm repeating myself a lot.
-So I'm looking for a way that I can reuse that script if it's possible.
-Hello everyone!
-if you are using botkit studio if you wrap the script as a skill then you can `trigger` the script anytime using `controller.studio.runTrigger`
-start with the slack bot starter kit! <https://github.com/howdyai/botkit-starter-slack>. easiest thing is to just get it setup with Glitch. then you'll have to look into the hangout/groupme apis those aren't supported by botkit yet so you could integrate with them directly or build some botkit middleware :slightly_smiling_face:
-real time messahing
-This is cool. Any experience/thoughts deploying the botkit for slack framework to stdlib?
-Thanks
-I just create one slack botchat using botkit. I congured everything but now i am stuck i could not run the application
-can any one help me how can I test my application
-Hi
-What alternatives to Botkit Studio do you use to manage messages etc. Just a normal admin backend with flask or node ? Sorry for a noob question, just trying to get my head around the best way to keeping a bot up to date, e.g. My bot projects sends reminders, motivation etc. So I need to be able to manage those easily
-What's up fellow bot makers
-I've a quick newbie question, regarding node.js bots
-After conducting a api method how do i pass the output, of let's say the channel value to a variable?
-Hey I have question to the Slack API for python, I am making a “chat.postMessage” call with the api_call() method, and I try to make a post of String, when I look in slack, the string is getting formatted, how can I avoid that? Thanks
-Just curious what is undesirable about using studio for this?
-<https://api.slack.com/methods/chat.postMessage/test>
-I don't know the pricing yet and would like to plan longer term if this makes sense, I think botkit studio is great but I have no transparency over future costs 
-we are close to announcing pricing, let me send you a dm!
-Is it possible to get WhatsApp Grp msgs on Slack ?
-hi
-hi
-how can I manage a slack-bot with dynamic response using Ruby language
-I am new to slack-bot and ruby
-2. ruby installed
-i want a response from my bot if i ask anything to the bot
-Try send `help` to <@U3NTT2Z3K>
-You may find what you're looking for
-Welcome bot doesn't have much in the way of ruby specific info, sadly 
-<@U6BFN2S3X>
-just a friendly reminder: please dont run bots in <#C04SM6TAK|general>
-<@U3NTT2Z3K> tell me how to output variables from a api method?
-What type of bots are you guys working on?
-Welcome is a little more general than that. Try messaging it help for a list of topics 
-I'm jkin
-Fixed my problem anyways
-anyone point me in the direction of making bots have user abilities like so -&gt; <@U3NTT2Z3K>
-that bot is made with botkit studio! using very little botkit code
-<https://studio.botkit.ai/login>
-but actual using api methods?
-or rtm client
-It's built using events api. Using studio will give you access to deploying a starter kit on glitch or heroku, or you can host it yourself. Welcome bot is powered by glitch!
-Can someone help us get Botkit hooked up to Spark through Heroic deployment?
-Hi Ya'll, I gave a talk at BrooklynJS last night about chatbots. Peep my slides - <https://docs.google.com/presentation/d/1AGFl4n_bpdYJLvjceJzYUMSJ1dxMYqbqkH1WG69ALN0/edit?usp=sharing>
-<https://github.com/thoughtis/gistbot>
-<@U0V93GE5R> I might try and create a PR for this re: <https://github.com/howdyai/botkit/issues/767>
-<@U4T0WR6EM> great! if you need to work out any ideas, feel free to use <#C57S6LLS0|botkit-contributors>
-:+1:
-Hi
-I created a bot and hosting on glitch. but i get this error "Your bot has not yet made an API request."
-I checked env file and im sure everything is correct
-any idea?
-anyone know how to close the browser window and come back to slack?
-i'm doing an app that opens the browser (on mobile, its an OK embedded browser) to do a speech recognition task.
-I want to close the browser and come back to the chat window…
-window.close() and history.back() both do not work
-ie if you send a link in a chat then the browser would launch
-<https://developers.facebook.com/docs/messenger-platform/webview/close>
-equivalent to ^
-I guess slack doesn't really have ‘integrated' webview experience.
-is there any other way to capture audio input than opening the browser?
-Anyone building a tipbot here :slightly_smiling_face:
-I am nearly done with it also!
-Node.js and ruby
-Lol talk about an 'active' slack
-<@U6BK0H0U8> is that .env local or hosted on glitch?
-i know for heroku you update the environmental variables via the CLI not a file in the repo
-thanks to <@U04SM6T2H> my problems solved
-Anyone knows how to keep a pair TITTLE : VALUE in the same line using 'attachments '
-Can I log express server requests using winston without setting up express for this specific bot?
-Seems to me <https://github.com/bithavoc/express-winston> I kinda have to
-at least according to that
-Hey guys, anyone have an example of how to attach an interactive button using sc_api_call
-nvm figured it out
-Is there a way to have good metrics/monitoring/logging without setting up express for my botkit application?
-hey Guys. I want to explore Bots for FB messenger, anyone knows of a descent boiler plate bot Dev for Fb Messenger  ? thank you so much in advance!
-boilerplate for FB messenger ;node.js/js if possible- thanks
-<https://github.com/howdyai/botkit-starter-facebook> :wink:
-^ that one is really good.
-you can discuss it in <#C11Q41CR3|fb-messenger>
-Awesome!! thank you so much guys!!
-Hi guys, I am trying to figure out how to make a simple mathbot using this: <https://github.com/slack-ruby/slack-ruby-bot/blob/master/TUTORIAL.md#env>
-But im having trouble, I would love some help
-Is the only connection to the bot when coding just the .env folder with only this in it: SLACK_API_TOKEN=xoxb-tokenstuffwhichiwontshowontheinternet
-Has anyone else stopped receiving event notifications from slack? Both bots, running on different servers as different apps, suddenly stopped receiving events
-slack is having trouble rn <https://status.slack.com/>
-^
-ugh, right can't delete that
-Thanks! Bookmarked for future ref.
-Do you have more and more status code 500 when you do api call to slack?
-statuscode 500 returns a html webpage instead of a json object from cloudfront (or cloudflare, i don't remember)
-we have members of the slack team over in <#C0K8617D5|slack-api> btw
-anyone good at ruby, i need some help with a bot?
-detecting user input mostly
-Hi All, we're looking into moving over to slackclient from Slacker for our Python apps.
-Wondering if it has support for Python 3 yet... there seems to be some confusion about this.
-Also, do we need to use a token or can we just rely on incoming webhook urls?
-Thanks!
-<@U6DTPT746> I can help. We can move this to the <#C0HUW58BC|language-ruby> channel
-ok im there
-<https://medium.com/@maelezzabdi/designing-a-chatbot-for-slack-lessons-learned-25edfe2c3a59>
-anyone know how to use ngrok and accept the challenge when requesting the url
-make sure your web app/server/whatever is running when you start ngrok, and point Slack at the URL that ngrok prints out as the `https` URL
-you should get the challenge just like Slack was connecting directly.
-how am i able to get the bot object outside of a controller.hears type of event?  i saw one thread on github where someone says to `controller.spawn()` and assign that to a variable, but that doesn't appear to work.  really i am trying to get the app token, which is usually at `bot.config.bot.app_token`, but `controller.spawn().config` is empty
-If all you need is the `app_token` I would recommend fetching it out of storage. `controller.storage.teams.get(team_id)`.  That would get around the spawn issue.
-thanks, having a look
-Anyone else haveing same issue?. Tried deleting node modules and re-installed the libraries, no use
-have you tried deleting your `package-lock` file and re-installing?
-checked your `nodejs` version on your server?
-<https://wit.ai/blog/2017/07/27/sunsetting-stories>
-I'm trying to get access logs for my bot <https://github.com/onaio/karma/blob/14-implement-logging/lib/Facebook.js#L64>
-However, expressWinston only logs for routes defined after the logger has been instantiated.
-Is there a way I can log requests for routes that were instantiated by botkit without copying the botkit routes and replicating logic that botkit provides?
-which is better RTM or Event API ?
-Depends on what you're planning to do
-Event API is much easier and RTM a bit more powerful.
-Am I asking the wrong question or is my code trash? I wonder why nobody here answers me.
-there's not many people on in this time zone <@U4U6P9L1M> - some people are but perhaps those that can answer you aren't?
-Oh that's encouraging
-<@U5D3HQ6R0> :slightly_smiling_face: thanks
-OK I found the solution from the FB botkit code. Instantiate the logger before the call to `createWebhookEndpoints`
-any tutorial for RTM and python ?
-Thanks in advance
-<@U6330SLE9> <https://www.fullstackpython.com/blog/build-first-slack-bot-python.html> is a little out of date but still looks like a decent tutorial.
-Does it have to be RTM? Can you use the Events API? If so: <https://github.com/slackapi/python-slack-events-api/tree/master/example>
-Hi guys, I am developing a bot using RTM API, is it possible to connect and subscribe to certain channel only?
-Normally you receive only message from channel where the bot are. So you just have to get your bot into channels you wanted to subscribe.
-Thanks!
-Guys, I'm trying to make an interactive menu with a button so user can choose an option from menu, then push the button and get the result. But I can't get how to do it, menu field clears right after I choose anything in it :disappointed: Can anyone help me? Maybe any live examples? I'm using Python.
-I tried to attach metadata, but dont see it in the FB request
-node-slack-interactive-messages anybody tried this
-<https://github.com/slackapi/node-slack-interactive-messages>
-i am trying to add messages with buttons through hubot
-<@U6DAU7PS6> tried <https://github.com/slackapi/node-slack-interactive-messages>
-Yep, but I've tried it with Python language. It's pretty simple if you're not trying to do anything sophisticated.
-I'm trying to deploy a hubot instance to cloud foundry but it's getting stuck after it writes `DEBUG Loading adapter slack` to log
-any thoughts on what it could be
-?
-Hey, has anyone here ran botkit with pm2 as the process manager and how did that go for them? It seems to start multiple processes (some sort of LB) and that makes continuing with a  conversation impossible.
-or hard
-hmmm I believe I have solved it by setting instances to 1 but I wish there was a way to make the pm2 process manager work something like a sticky load balancer.
-Thanks
-Elm is an eager language, not laziness unless explicitly introduced
-That choice was made back when we still did FRP, but some of the reasoning still applies - <https://groups.google.com/d/msg/elm-discuss/9XxV9L0zoA0/cx3UMZ05Gc0J>
-my version are elm 0.18.0, node 8.1.1, npm 5.0.3.  Yes, I can see the "update: DoSignUp" in the console as well.  But I was expecting the "Got the cmd" and data being passed around using the ports feature.  That is not happening when I press the sign up button in the Main.elm page.  Thanks again for the assist <@U0JFFPRHP>.
-I'll try a simple ports example and play around with that.
-is there a quick way of getting the month number instead of the Month type, from a `Date.Date`
-Introducing laziness in Elm would only lead to strange bugs where you'd have to introduce strictness functions at non-obvious places. Not so good for newcomers
-hardfire: the Date.Extra package will let you if you don't mind adding a dependency - <http://package.elm-lang.org/packages/justinmimbs/elm-date-extra/latest/Date-Extra>
-thanks <@U18S4094L> , i might do that if have another Date-ish requirement again. Right now I just did my own Month-&gt;Int function
-<@U48AEBJQ3> i dont see logged content in the command line. Debug.log is supposed to print in the browser console, but there is none for the npm runner
-When running Elm-test, it should just appear in the console
+lens@server-machine:/usr/local/lens/bot$ cat lensbot.js
+var LensSlackBot = require("lens-slack-bot");
+var bot = new LensSlackBot();
+bot.start();
+lens@server-machine:/usr/local/lens/bot$ cat startbot.sh
+while true; do
+rm -rf /tmp/npm-*
+npm install git+<https://github.com/prongs/lens-node-client.git>
+npm install git+<https://github.com/prongs/lens-slack-bot.git>
+ps -ef | grep node | grep lensbot | grep -v grep | awk '{print $2}' | xargs -L1 kill -9
+node lensbot.js;
+sleep 60;
+done &amp;
+lens@server-machine:/usr/local/lens/bot$```
+
+This makes sure the bot is always up. The 60 second interval can be reduced as per the requirement. Turns out, this bot stays up for days and the 60 second downtime occurs once a week or so. I have the following in the app's code that might be resulting in such a behaviour: 
+
+```controller.on('tick', () =&gt; {
+      const now = new Date();
+      if (now.getTime() - this.lastActiveTime.getTime() &gt; 1000 * 60) { // 1 minute idle timeout
+        this.bot.say({type: "ping", id: now.getTime()}, this.updateLastActiveTime);
+      }
+    });```
+
+With these two mechanisms, I'm able to keep my bot up practically indefinitely.
+
+U1NSE6M3N : Hey guys, is it possible to change color of optional text with attachment and make it bold
+"attachments": [
+       {
+           "fallback": "Required plain-text summary of the attachment.",
+           "color": "#36a64f ",
+            "text": "Optional text that appears within the attachment"
+        
+        }
+    ]
+
+U0HT1NBLH : you can bold it using markdown (see docs here under the header “Message Formatting": <https://api.slack.com/docs/message-formatting#message_formatting>) but I don't think it's possible to change the color
+U0KECURAT : he was missing the `”mrkdwn”: true` part :slightly_smiling_face:
+U1JQ8B5BM : hello i want to integrate interactive messages buttons but when i click on button salkbot says "Oh no, something went wrong. Please try that again."
+U1JQ8B5BM : does any one have a solution to this
+U1JQ8B5BM : what i have to do to get postback from interactive buttons
+U1116QM2Q : <@U1JQ8B5BM>: are u using botkit? 
+if you're using botkit and use the internal function that it has to set up the interactive endpoints then you need to go to your slack app profile, go to interactive messages tab and post the endpoint as `<https://your-hosting-service-here/slack/receive>` as the botkit routes the interactive messages postbacks to that endpoint
+
+U1JQ8B5BM : yes
+U1JQ8B5BM : can you tell me the procedure what i have to do.do i have to create slack app first. then i can use interactive messages buttons
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

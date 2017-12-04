@@ -1,11 +1,58 @@
+U5X2ZRFDF : Well, maybe try Snap. You can still create web templates using Heist.
+U5X2ZRFDF : Also Haskell is just getting parameterized modules in the upcoming GHC 8.2, so that will be interesting.
+U5X2ZRFDF : Hadn't even heard of Spock yet, could be good. I do share that feeling that no Haskell web framework ever seems right.
+U5X2ZRFDF : I saw someone give a talk on using ghcjs with React, and that was pretty impressive.
+U5X2ZRFDF : But that's front-end
+U5X2ZRFDF : I guess then on the back end you can just use an API and have the front end call it.
+U23SA861Y : well frameworks are inherently against good programming practices
+U23SA861Y : but, but why do they need them if they already have typeclasses????
+U5X2ZRFDF : I'm not sure that I can explain that. I'm still learning about it. But it has more to do with the packaging system.
+U5X2ZRFDF : <http://plv.mpi-sws.org/backpack/>
+U2SR9DL7Q : quick question. In the case of a series of piped updates where ```
+update msg model = 
+    action1 -&gt; 
+        (modelchange1, cmd) 
+        |&gt; modelchange2 
+```  
+Will both the model updates occur before the cmd is executed?
+
+U5X2ZRFDF : I'm sort of an Elm beginner, but yes, I believe so.
+U153UK3FA : the Cmds won't be executed until after `update` returns
+U5X2ZRFDF : The commands are executed in the interim space between events
+U2SR9DL7Q : <@U153UK3FA> even if update2 just changes the model and passes along the original command?
+U2SR9DL7Q : ```updateBlockedMsg : BlockedMessage -&gt; ( Model, Cmd Msg ) -&gt; ( Model, Cmd Msg )
+updateBlockedMsg bm ( model, cmd ) =
+    case bm of
+        Reset -&gt;
+            ( { model | blocked = 0 }, cmd )
+
+        Increment -&gt;
+            ( { model | blocked = model.blocked + 1 }, cmd )
 ```
-I have been using `elm-make Main.elm --output elm.js` and then simply opening _index.html_. How would I use `elm-reactor`?
-Right, gotcha, makes sense :slightly_smiling_face: I wonder if it's worth having in an -extra package somewhere, even if it's just `Maybe.map List.singleton |&gt; withDefault []`
-<@U5FU80S06> `elm-reactor Main.elm`
-simply start `elm-reactor` (it should come with the runtime) and go to localhost:8000
-^
-If it shows you your file tree, just click on `Main.elm`. It will run your app with a live debugger.
-<@U3SJEDR96> it already exists <http://package.elm-lang.org/packages/elm-community/maybe-extra/4.0.0/Maybe-Extra#toList>
-:smile: Ah. Figures :slightly_smiling_face:
-<@U5FU80S06> IIRC you can also use `elm-make --debug`
-:point_up: i didn't know about that!
+Here's one of my actual ones.
+
+U153UK3FA : `modelchange2` needs to be of the type `(Model, Cmd Msg) -&gt; (Model, Cmd Msg)`
+U153UK3FA : <@U2SR9DL7Q> The model is updated and the cmds are executed after `update` returns.
+U2SR9DL7Q : <@U153UK3FA> awesome. I was _almost_ sure that's how it works, but I figured I'd ask to be sure.
+U2SR9DL7Q : I've been piping thre commands through successfully already, but now I have a command that depends on a value changed in one of the pipes.
+U153UK3FA : Yep, all Elm functions are ‘stateless and side-effect free'
+U2SR9DL7Q : It's been a fun day refactoring.
+U2SR9DL7Q : _"elm-make.exe: type applications should start with a type atom"_ anyone ever seen this error before? For those using atom's linter
+U3SJEDR96 : <@U2SR9DL7Q> hrm, double check your type annotations and definitions, and read through the issue logged on elm-compiler - i've seen that before but can't quite recall the cause
+U2SR9DL7Q : <@U3SJEDR96> i ended up just going back to my last commit (small and frequent commits save souls) but it's the second time I've seen. 
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

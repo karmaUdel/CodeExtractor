@@ -1,34 +1,75 @@
+U3SJEDR96 : Elm is an eager language, not laziness unless explicitly introduced
+U3SJEDR96 : That choice was made back when we still did FRP, but some of the reasoning still applies - <https://groups.google.com/d/msg/elm-discuss/9XxV9L0zoA0/cx3UMZ05Gc0J>
+U5CGE1K16 : my version are elm 0.18.0, node 8.1.1, npm 5.0.3.  Yes, I can see the "update: DoSignUp" in the console as well.  But I was expecting the "Got the cmd" and data being passed around using the ports feature.  That is not happening when I press the sign up button in the Main.elm page.  Thanks again for the assist <@U0JFFPRHP>.
+U5CGE1K16 : I'll try a simple ports example and play around with that.
+U5GJ5FEAU : is there a quick way of getting the month number instead of the Month type, from a `Date.Date`
+U4872964V : Introducing laziness in Elm would only lead to strange bugs where you'd have to introduce strictness functions at non-obvious places. Not so good for newcomers
+U18S4094L : hardfire: the Date.Extra package will let you if you don't mind adding a dependency - <http://package.elm-lang.org/packages/justinmimbs/elm-date-extra/latest/Date-Extra>
+U5GJ5FEAU : thanks <@U18S4094L> , i might do that if have another Date-ish requirement again. Right now I just did my own Month-&gt;Int function
+U2SSNHFEJ : <@U48AEBJQ3> i dont see logged content in the command line. Debug.log is supposed to print in the browser console, but there is none for the npm runner
+U3SJEDR96 : When running Elm-test, it should just appear in the console
+U3SJEDR96 : for example; I just added a `|&gt; Debug "foo"` right before an expect, and see this:```
+Running 20 tests. To reproduce these results, run: elm-test --fuzz 100 --seed 287150092
+
+foo: Ok (Branch ([Branch ([Val "foo",Val "bar"]),Val "foo"]))
+
+TEST RUN PASSED
 ```
-You can't have a record with a changing number of fields. You must know all the fields at compile time. With a dict, you can plop whatever you want in there.
-ok, thank you. how to go from [Dict.fromList[], ..., Dict.fromList[]] to [record, ..., record]
-Do you know all the fields at compile time?
-If you don't, then you can't.
-We might want to explore why you have a `Dict` to begin with.
-I do not know data and dims at compile time
-Where is this data coming from?
-From server
-Who's server?
-third party server
-Do they have an API or spec?
-If you are getting data from there, then they probably have some consistent data structure that they are sending you back.
-If not, then you have to use a Dict
-to array of three records - I do not know names, number of objects at compile time?
-Like I said, you _can't_
-That's not how records work. The fields are fixed at compile time.
-Otherwise, you can't provide any kind of type safety, because any dynamically added field to an object changes the type of that object.
-Hence why `Dict` is what you have to use - a Dict can store keys and values, without needing to care about the fields other than the key must be a certain type, and the value for each key must be a certain type
-Is it possible to have the `elm-stuff` directory somewhere else than the root of the project?
-Nope, it's always where your elm-package.json is
-Why?
-For example, if the project root happens to be read-only...
-What situation is that?
-When deploying?
-I've moved `node_modules` elsewhere using the `NODE_PATH` env variable
-You should compile your Elm files _before_ deploying
-docker-based development environment
-Our webpack runs in an environment where all source files and their directories are read-only
-Simple fix: put `elm-package.json` into your writable directory
-then run webpack from there.
-`source-directories : "../../some_read_only_dir"`
-Ah, that would do the trick. Running `elm-package` will be somewhat harder, but with this setup running `npm` is also hard :slightly_smiling_face:
-Thanks :thumbsup:
+
+U2SSNHFEJ : Ah. I was using Debug.log
+U0CLDU8UB : Yes, `Debug.log` is what ilias meant
+U3SJEDR96 : indeed, my bad. `Debug.log "foo"` in this case
+U5HM74BD0 : Is there a way I can persist my model to localstorage ?
+U36C7SUAX : Is there some easy way of using relative address with websockets, like `WebSocket.listen "<ws://localhost:8080/api>" Msg` -&gt; `WebSocket.listen "<ws://api>" Msg`? Or do I have to create a task to retrieve `window.location.host` on start and use it to construct the url?
+U36C7SUAX : <@U5HM74BD0> <https://github.com/elm-lang/persistent-cache>
+U0JFFPRHP : oh, I see-- ah, the "Got the cmd" output is from <https://youtu.be/X6e8KpPWHg0?t=10m20s> in entry.js which I think I delete later on.
+U0SES5Y3T : <@U5HM74BD0> I don't think there is package out there currently but you can certainly do it with JS interop
+U5HM74BD0 : It looks like elm-lang/persistent-cache isn't released yet. Is it better to avoid it, then, and use JS interop, as you're suggesting, <@U0SES5Y3T> ?
+U0SES5Y3T : <@U5HM74BD0> I would think so
+U0SES5Y3T : It's pretty straight forward process, just moving data between Elm the and DOM
+U5HM74BD0 : Does localStorage work if the app is served up via file:// instead of http:// ?
+U2CR5RDL5 : <@U36C7SUAX> What I do for making Http requests work locally as well as on a live server is to start the elm application with flags, passing through the correct host and keeping hold of it in the model, no need for tasks.
+U0SES5Y3T : <@U5HM74BD0> yes, since you are in the browser, you have access to localStorage
+U0SES5Y3T : <@U2CR5RDL5> I think you still need to call a Task because it's an async operation
+U0SES5Y3T : if you are calling your async operations in Elm than you will need a Task to run them, I believe, unless you are using JS interop to run your async operations
+U2CR5RDL5 : It's not to run any async ops, <@U36C7SUAX> just needs a way to start listening on a specific host. If you embed the elm application with flags, passing through the host, that can be stored on the model and then used in subscriptions to listen for websocket messages on the host without hardcoding the hostname in the elm source.
+U0SES5Y3T : makes sense
+U2CR5RDL5 : ```Elm.Main.embed(node, {hostname: window.location.host});``` after keeping hold of the hostname flag in the model (within init) this can then be used in subscriptions ```subscriptions model =
+    WebSocket.listen model.hostname Msg``` No need to create a task to get the hostname, just initialise the app with flags instead.
+
+U2CR5RDL5 : Also, if <@U36C7SUAX> is using the `Navigation.program` instead of `Html.program` then the programs init function already gets a `Navigation.Location` object which the hostname could be plucked out from.
+U5VJL4AJZ : hiya. two unrelated newbie questions here
+U5VJL4AJZ : 1. looking at <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Maybe> and it shows int he example for `andThen` an operator `|&gt;` . what is that operator supposed to do?
+U5VJL4AJZ : 2. is type annotation not available in the REPL? also, is there a way to create multiline functions on the REPL?
+U5VJL4AJZ : when i try to do type annotation, in the repl, i get the following error:```
+&gt; getFirstMonth : List Int -&gt; Maybe Int
+-- SYNTAX PROBLEM -------------------------------------------- repl-temp-000.elm
+
+A single colon is for type annotations. Maybe you want :: instead? Or maybe you
+are defining a type annotation, but there is whitespace before it?
+
+8|   getFirstMonth : List Int -&gt; Maybe Int
+                   ^
+Maybe &lt;http://elm-lang.org/docs/syntax&gt; can help you figure it out.
+```
+
+U5VJL4AJZ : i just figured out #2 , you need to terminate each line of a multiline with a `\`
+U5VJL4AJZ : i do remember reading that in the turtorial, but i forgot
+U5VJL4AJZ : so, just #1... type annotation ?
+U5VJL4AJZ : and `|&gt;`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

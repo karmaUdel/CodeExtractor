@@ -1,32 +1,59 @@
+U1A6BTMPA : There must be something different between my environment locally and the remote one but I can't figure out what it would be
+U0K0TFQLW : I'm not familiar with nginx-clojure, does it setup a classpath for you (and possibly include a different version of clojure)? In the past, I've witnessed systems like that (Storm and Hadoop come to mind) that cause weird dependency issues
+U0K0TFQLW : oh, yeah it does
+U0K0TFQLW : can you try to add a :provided profile to your project.clj and put your clojure dependency on that
+U1A6BTMPA : I'll try that now
+U0K0TFQLW : the example for nginx-clojure seems to indicate that v1.5.1+ is okay (and uses 1.7.0 specifically)
+U1A6BTMPA : <@U0K0TFQLW> I got the same issue after adding my clojure dependency to :provided :confused:
+U090G4C05 : is the <#C0FM7N1SM|quil> channel dead?
+U04V70XH6 : <@U090G4C05> I'd say that it's just _quiet_…
+U28TJ0DDZ : how can I get the list of protocols which a type implements ?
+U1ALMRBLL : <@U28TJ0DDZ> `ancestors` will include protocols implemented, along with superclasses
 ```
-i'm currently diagnosing some garbage collection issues and am wondering if maybe i should be using the oracle jvm instead of openjdk
-i cant find any evidence that it matters but i cant say for sure
-it won't make a difference
-does anyone have any opinions on thi?
-you suspect a leak in your code?
-no, im looking into very long stop the world pauses ~20 secs
-i guess im wondering if the implementation of garbage collectors makes a difference
-ok i just wanted to hear someone say it wont make a difference because that's my instinct too
-while we're on the topic, just so i'm clear, the implementation of g1 garbage collector in openjdk is different than the implementation in oracle jvm right?
-it is not different <@U098UL4QP>
-G1 is G1
-ok thank you for clarifying that
-have you looked at heap profilers?
-the choice of GCs makes a difference with pause times, and your allocations are going to be workload dependent...
-i've found usually that there's an offending spot in my code, but it can be tricky to track sometime
-A quick temporary fix for long pause times is to a) make your max heap size _smaller_ and b) remove any JVM command line flags that somebody pasted into your deployment  (probably directly from stack overflow)
-I was almost going to mention that making the heap smaller thing, but then I realized it sounded really weird and I didn't have a cite... thanks for confirming that though
-also, I recently learned the term "jvm smoke break" for this kind of problem, which I find amusing
-lol
-the advice is totally counterintuitive.  mem leak =&gt; long GC =&gt; increase heap size =&gt; larger leak =&gt; longer pause time
-Hi! Is Clojure 1.9 stable enough to start a project on it now which will be pushed to production in a couple of months?
-<@U050ECB92> which heap profilers do you recommend?
-<@U5ZAJ15P0> looks pretty stable to me: <https://github.com/clojure/clojure/graphs/contributors?from=2017-01-01&amp;to=2017-07-01&amp;type=c>
-Is it ok to have side-effects in clojure specs? e.g. a database call. The application I am thinking of is checking that an email hasn't already been used on a "signup" API payload
-seems gross
-<@U5ZAJ15P0> only if idempotent
-and implies effectively global scoping of the database connection, which is also gross
-It's ok to validate things outside of spec too 
-<@U5ZAJ15P0> Clojure 1.9 is stable enough for production use as far as I'm concerned — my company has Clojure 1.9 Alpha 17 in heavy production usage right now.
-does anyone have recommendations on a good job scheduling library for Clojure? checked out Quartzite earlier, but had some difficulty getting it to play nicely with my loading of env vars from mount
-I've found following question on SO: <https://stackoverflow.com/questions/12044181/into-or-vec-converting-sequence-back-to-vector-in-clojure> but I don't think  the different behavior for small arrays mentioned in answer is true
+(defprotocol Foo
+  (bar [this]))
+=&gt; Foo
+(deftype Baz [a b c]
+  Foo
+  (bar [this] nil))
+=&gt; user.Baz
+(ancestors (class (-&gt;Baz 3 4 5)))
+=&gt; #{user.Foo clojure.lang.IType java.lang.Object}
+```
+
+U28TJ0DDZ : <@U1ALMRBLL> nice, is there any way to get the methods for each interface or protocol ?
+U0GRKUGLQ : is there a version of `run!` to use with transducers? I mean, some fn `run2!` that you use like `(transduce xf run2! init coll)`
+U1ALMRBLL : ```(into [] (.getDeclaredMethods SomeClassHere))``` <@U28TJ0DDZ>
+U1ALMRBLL : you can `.getName` on those for just the name, you can also call them since you have reflected and have the `Method` objects
+U28TJ0DDZ : thanks
+U051SA920 : <@U0GRKUGLQ>  `(run! #(prn %) (eduction identity [0 1 2]))`
+U051SS2EU : if you look at the source of `run!`, I think `(transduce xf #(f %2) nil coll)` is the most parsimonious thing ```user=&gt; (source run!)(defn run!
+  "Runs the supplied procedure (via reduce), for purposes of side
+  effects, on successive items in the collection. Returns nil"
+  {:added "1.7"}
+  [proc coll]
+  (reduce #(proc %2) nil coll)
+  nil)
+```
+
+U0GRKUGLQ : yeah... I thought so too <@U051SS2EU> . and that's what I'm doing <@U051SA920> . I just wanted to know if there was some other fn to use directly, but thanks
+U067BPAB1 : I've been doing a bit of reading about functors recently and it just occurred to me that transducers might be exactly that. Only touched the tip of the iceberg so are they really the same thing or is there a counterexample of a transducer that cannot be classified as a functor?
+U051SS2EU : `(map f)` can't be mapped over, so it isn't a functor
+U051SS2EU : in fact I can't think of any transducer that you can map over...
+U050ECB92 : transducers exist outside of collections
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

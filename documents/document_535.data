@@ -1,7 +1,120 @@
-                Math.floor(Math.random()*0x0FFFFFFF));```
-Is your Elm code in src/Main.elm?
-I haven’t touched MIDI yet, but would be very interested if you find any existing work
-yes, it starts there, and the rest of the elm code is all under _src_.
-Not to worry, it's not a biggie. I can always do a Debug.log...
-what's the error message?
-I will post this in the general channel as well.
+U1A0BJG7J : I have a type with a tag that takes 2 parameters `type MyType = MyType arg1 arg2`. This tag is then given to a function, that takes care of calling it with the proper arguments `myFunction  MyType`. However, when I need to nest the type inside another type `MyWidget (MyType arg1 arg2)`, I cannot use `&gt;&gt;` like I would usually do when nesting types `myFunction (MyType &gt;&gt; MyWidget)`, as MyType takes 2 arguments, and function composition `&gt;&gt;` only deals with one parameter. What's the usual way to design this in an elegant way? I've tried with an anonymous function, but it's ugly. So far the best I could think of is to make the type take a tuple instead of 2 parameters `type MyType = MyType (arg1, arg2)`. Is there a more elegant way?
+
+U4872964V : <@U1A0BJG7J> well, I'm not sure exactly what the issue is, but if you have a tuple and want to pass it to a function taking two arguments, you can `uncurry` the function (or constructor, in this case)
+U3SJEDR96 : You can do `MyType arg1 &gt;&gt; MyWidget` is partial application up-front is an option - which is usually is, since a function can't return more than 1 thing unless it's in a tuple, in which case `uncurry MyType &gt;&gt; MyWidget` would work
+U3SJEDR96 : as a very last resort; defining `&gt;&gt;&gt;` is also an option, though I'd advise against it, personally. It makes it much harder to grasp what is going on, imo
+U1A0BJG7J : no, partial application up-front is not an option. The option `uncurry MyType &gt;&gt; MyWidget` sounds valid and interesting, although I'm not sure what would be more elegant/correct. I guess I don't have a precise criteria on what is the essential meaning of the tuples, what they express when people see them. is `type MyType = MyType (arg1, arg2)` something frequently seen in Elm code?
+U1A0BJG7J : btw, here's the context of my question: <https://github.com/arnauorriols/multitaskOS/blob/master/src/EditableElement.elm#L35>
+U1A0BJG7J : and this is the client code where I need to use `&gt;&gt;` <https://github.com/arnauorriols/multitaskOS/blob/master/src/Job.elm#L397>
+U153UK3FA : `\arg1 arg2 -&gt; MyWidget (MyType arg1 arg2)` is really simple
+U153UK3FA : <@U1A0BJG7J> don't over think it, an anonymous function will be easier for you to read next week
+U1A0BJG7J : <@U153UK3FA> you are probably right
+U604S603Y : I'm struggling with `Json.Decode` again:I receive JSON with a field containing a string and I want to decode said string into a Discriminated Union - I'd be totally fine with pattern matching "by hand" on the string to get the correct union case to work with it type safe afterwards - but I have no idea how to get that into the Json.Decode.Pipeline...
+The DU:
+```type CheckModus
+    = Schnellcheck
+    | Expertencheck```
+In the JSON I then have 
+```{ "modus": "Expertencheck"}```
+
+U604S603Y : I _think_ I worked it out - will report back later
+U3SJEDR96 : You'd do something like `|&gt; required "module" (string |&gt; andThen decodeCheckModusFromString)`
+U0CLDU8UB : That, and you need to have branches like 
+`"Expertencheck" -&gt; Json.Decode.succeed Expertencheck` 
+and e.g. 
+`other -&gt; Json.Decode.fail ("No modus called '" ++ other ++ "' exists")`
+
+U604S603Y : your solution looks a lot cleaner and easier to understand than mine. thanks <@U3SJEDR96> <@U0CLDU8UB>
+U5E3DU81K : Is it possible to display an asciidoc text file as html, on the fly?
+U3SJEDR96 : I don't think anyone has written a parser in Elm for it, though it seems like that would be _largely_ possible. There are some things that would be considerably harder, tho, like passthrough blocks. Also, ping <@U3LUC6SNS> who is involved in asciidoctor iirc
+U4872964V : there is support for markdown, it looks similar: <http://package.elm-lang.org/packages/evancz/elm-markdown/latest>
+U4872964V : Or, <http://package.elm-lang.org/packages/pablohirafuji/elm-markdown/latest> maybe it can be modified to accept your format
+U2J1FUQTZ : There is a package that helps to write a JSON encoder aka transform an Elm structure in JSON code?
+U3SJEDR96 : `Json.Encode` which is part of the core package
+U6D3ERLA1 : Why no tab completion in repl? If I `import Json.Decode exposing (..)` sort of hoping typing de+tab will tab through imported decoders...?
+U3SJEDR96 : The repl is fairly basic; indeed. I don't think there's a specific reason for it, other than "it hasn't been implemented yet"
+U3LUC6SNS : <@U5E3DU81K>  I am working on an app that displays asciidoc.  My solution (imperfect) is to use ports.  I send the asciidoc file through a port to JS-land where it is rendered in a div by `Asciidoctor.js`.  Then comes the awkward, hacky part.  I position that div so that it l looks like it is part of the regular Elm app.  The code is at  <https://github.com/jxxcarlson/koko_elm_client>.  This is an Elm client that talks to a Phoenix server. The code for it is at <https://github.com/jxxcarlson/koko>.  
+
+Feel free to discuss this with me.  The app is still alpha, but I will deploy it on Heroku for testing as soon as a get the time to do so.
+
+U3LUC6SNS : <@U5E3DU81K>, <@U3SJEDR96>, I am investigating the possibility of writing a parser in Elm for asciidoc, but that is a way off. It is a big job and I need more study and some experiments.  One problem is that Asciidoc, like Latex has no formal grammar that I am aware of, and both languages are non-context free. (Yikes!)
+U3LUC6SNS : I believe there is an Elm parser for markdown, so it should be possible
+U3SJEDR96 : There is, indeed; and I concur, it should be totally feasible; with the possible exception of the passthrough blocks
+U3SJEDR96 : that's just a wrapper around marked.js tho
+U3SJEDR96 : so let's not use that as a reference for a pure Elm solution :wink:
+U3LUC6SNS : Ah … ok.  Yes, passthroughs are a pain.
+U5E3DU81K : I was wondering about that markdown one - I wonder how asciidoc it might turn out to be without doing anything
+U5E3DU81K : I was looking at asciidoctor.js (having been using asciidoctor standalone, the ruby one, to manually shoehorn asciidoc into what I want). But being a beginner at this programming thing I wasn't quite sure where to start. So I've adopted a strategy of manually converting the asciidoc docs to html snippets manually ahead of time, as to be honest the content won't be changing that often. But, it'd be nice to see it work on the fly, one day.
+U5E3DU81K : I like asciidoc in preference to markdown because: asciidoc maps pretty tightly to docbook, and if converted to docbook and then through FOP, can give you a pdf option, if desired. Also, markdown has a ridiculous variation of implementation, there's pretty much only one asciidoc. I'd write a book in asciidoc but not attempt it in markdown. Markdown is fine for enabling styling of a web input field, but not much more.
+U635238TG : i'm doing a tutorial and the compiler doesn't like the arrow at line 67.
+U635238TG : but my code is matched with the tutorial example
+U635238TG : any help?
+U0J1M0F32 : I think your indentation is off on line 65
+U0J1M0F32 : and 72
+U0J1M0F32 : it should be consistent with lines 62 and 69 respectively.
+U635238TG : funny you say that, i was just at <#C4NU4FXDE|elm-format> and ilias set me straight that it is actually an intended part of elm-format
+U635238TG : <https://github.com/avh4/elm-format/issues/350>
+U635238TG : so i don't think that is causing this error.
+U635238TG : Arrows are reserved for cases and anonymous functions. Maybe you want &gt; or &gt;=instead?
+
+67|          NewEntries (Err error) -&gt;
+                                    ^
+Maybe &lt;http://elm-lang.org/docs/syntax&gt; can help you figure it out.
+
+U0J1M0F32 : Can you drop a minimum version of this into ellie?
+U635238TG : i can sure try! something i should learn anyways.
+U635238TG : <https://ellie-app.com/3QLRCGyQxRYa1/0>
+U635238TG : that is through my update portion. let me know if i should add more in there. the whole program is about 200 loc right now
+U2GPAEU1L : <@U635238TG> Just 1 extra space :slightly_smiling_face:
+U2GPAEU1L : Backspace before* `NewEntries`
+U0J1M0F32 : ^^^
+U0J1M0F32 : Just found it :stuck_out_tongue:
+U3HQVHERX : in the future: hit "format" at the top every once in a while
+U2GPAEU1L : Credit to <@U0J1M0F32> for calling it before he even saw the ellie* :slightly_smiling_face:
+U635238TG : d'oh! Thank you. That's what I get for playing around with vim's yank and paste function at the same time to get nice and lazy
+U0J1M0F32 : I've had a few indentation errors in my day :wink:
+U2GPAEU1L : I dislike the way it's handled tbh, I think it could be done better.
+U2GPAEU1L : Haven't thought about a solution though, so I'll shut up :slightly_smiling_face:
+U635238TG : i think there is a way for vim to show the little lines showing indentations like i've seen on other text editor's in videos. that will probably help me
+U3HQVHERX : <https://github.com/Yggdroot/indentLine>
+U635238TG : thank you. this is how i end up taking an hour "break" from learning Elm. lol
+U3LUC6SNS : Is there a bug crawling around in <http://eeue56.github.io/json-to-elm/> ?? I've pasted the following in with the pipeline option selected.  But I get nonsense with type alias definitions interspersed with function definitions.
+```
+type alias Credentials = {
+  signature: String,
+  policy: String,
+  key: String,
+  acl: String
+}
+
+type alias CredentialsWrapper = {
+  credentials: Credentials,
+  url: String
+}
+```
+
+U0EUHKVGB : There are many
+U0EUHKVGB : But, what you've done is paste in two type aliases at once
+U0EUHKVGB : Right now it only supports one type alias at once
+U3LUC6SNS : Ah .. thanks!!!
+U3FJSB596 : Hello everyone! I want to get last week's date (seven days ago). I need it for a URL. I'm able to get today's date using `Date.now` but I do not know how to substract seven days. Any help?
+U23SA861Y : how are you defining days...
+U3FJSB596 : Today is July 25th and I want to get July 18th
+U23SA861Y : well I ask be cause time can be funny
+U23SA861Y : one way to do it is to convert to unix time and subtract 7 days worth of seconds
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,2 +1,149 @@
-=&gt; 1483894941```
-or multiple the full value slack gives by 1000
+U0J3X1BFG : nope
+U0KRESR89 : Is there a reason to prefer @bot commands or slash commands? Asking for a friend.
+U0JPS3SHX : <@U0KRESR89>: the problem with @bot commands is that you need to invite the bot to the channel and you can technically "listen" to the conversation, so the team/org has to be comfortable with you doing that .. with a / command the integration is less intrusive and is available right away
+U0JPS3SHX : IMO
+U0LABQF6X : it depends on what problem you are trying to solve.  / commands are great for one-off actions, while bots are more for prolonged engagement. Since bots can be ambient listeners, they can at some point proactively engage with you / notify you
+U0LABQF6X : syntax is also different when interacting.  / commands are really like command-line interfaces: [executable] [flag1|value1] [flagN|valueN]
+U0LABQF6X : interacting with bots is having to parse sentences / natural language.  of course, you could always look for literal sentences like “what is my name”, but it also leaves it up for interpretation.  kind of getting in the smart assistant, language processing, AI business.
+U0H0S3E69 : <@U0CSBGTKM>: In reference to <https://dev4slack.slack.com/archives/general/p1454565482000595>, how were you able to rename a disabled bot user? I don't see that option
+U0H0S3E69 : It might be because I am not the team admin...
+U0HBN0L9M : <@U0KRESR89>: very fundamental question.
+U0HBN0L9M : I wrote this```
+There are basically three main types of Slack apps, which roughly fall into three buckets
+
+- Incoming webhooks are for notifications (outside -&gt; inside),
+- commands are for simple actions (inside -&gt; outside),
+- and bots for two-sided interactions and conversational interfaces.
+
+Of course one could use bots for notifications, or as a “super-command”, but they thrive in complex situations where they can either extract better context or provide richer informations through conversations.
+```
+
+U0HBN0L9M : <https://medium.com/@MVaragnat/how-to-build-a-slack-app-5b83d71e083a#.l6dgzclv7>
+U0HBN0L9M : If the interaction is limited, then go for a command app, it's simpler, available in all channels, does not require scary permissions
+U0H88ASGK : <@U0JPS3SHX>: Just upvoted!
+U0H88ASGK : <@U0JPS3SHX>: Trying it in my teams slack
+U0KECURAT : wasn't there recently posted a bot that would post to a channel if it found a hashtag in a PR or issue on Github or did I miss something? :open_mouth:
+U0KRESR89 : <https://dev4slack.slack.com/archives/general/p1454651702000694>
+U0KRESR89 : Yah, I think lack of interactivity is the key differentiator.  Kind of obvious in retrospect :simple_smile:
+U0CSBGTKM : <@U0H0S3E69>: I just clicked on the name. Give me a few and I'll make a quick Jing video.
+U0CSBGTKM : it became editable once I clicked
+U0LCT5LAY : Hi there, I've just joined and right away I have a question. I have played around with various integrations _command_ and _bot user_ and all things are working great so far. An answer I could not find is, how to maintain or even create a good setup, servers etc for a bot app. I mean what are you experiences in a large scale setup with many bot users around?
+U0HNAA1GU : I'd seperate the bot and your app into seperate services.
+U0HNAA1GU : I have my bot purely doing conversation. It then sends any requests to a seperate service
+U0HNAA1GU : It's not yet tested in a large scale environment however
+U0LCT5LAY : <@U0HNAA1GU>: ok, if you have 100 clients, with 100 bots, then they need to run all the time.
+U0HNAA1GU : Yes. I am basically sending all incoming messages towards a seperate service that I can scale up if need be
+U0HNAA1GU : I'm curious to know other approaches though
+U0LCT5LAY : do you use a bot or slash command?
+U0LCT5LAY : I am asking cause a slash command is _kind of simple_ cause it is like building an API. I only receives a request. But bots are connected all the time to slack and have to listen.
+U0HNAA1GU : A bot
+U0CS6NSF5 : <@U0LCT5LAY>: best practices would basically depend on what you need
+U0CS6NSF5 : as you mention, it's not as easy as just adding more processes, since you'll have to maintain all the connections up and running
+U0CS6NSF5 : simplest option is to use consistent hashing to split connections across different processes, but depending on your requirements that would be just enough or you'll need some extra work :simple_smile:
+U0J27NX0X : <@U0LCT5LAY>: I'd caution against slash command because they can be hard to discover. But this is also understanding your audience. If we're talking general audience that's not experienced with scripts, start with @ mentions, then teach /'s through conversation
+U0J27NX0X : If you use howdy, try it's “build a meeting” conversational experience. Does a great job of teaching proper syntax
+U0CS6NSF5 : <@U0J27NX0X>: `/commands` which reply in public are not too bad with discoverability
+U0CS6NSF5 : see giphy as an example, I believe was (is?) the most used integration, and it's a slash command
+U0J27NX0X : oh totally. I guess I see giphy a bit different because it doesn't feel so narrow? Which is weird since it just does gifs. In some ways, it feels bot like since there really isn't much of a syntax.
+U0J27NX0X : I'm thinking more of commands like `/remind` which have a mildly complicated syntax, are not used that often, and require a bit more knowledge of a platform's capabilities
+U0CS6NSF5 : yep, that's no luck with discoverability
+U0CS6NSF5 : but the same happens with bots that are primarily used via DMs
+U0CS6NSF5 : in that sense, the help with discoverability comes from using the bots in public
+U0J27NX0X : or being checked in on?
+U0J27NX0X : anyways, yes, you're totally right. Very public /'s could totally work.  Hopefully slack and Peach will educate the world. People figured out #'s somehow, right?
+U0CS6NSF5 : bots can help with self-discoverability by interjecting in conversations when something relevant happens, but many users are very wary about bots monitoring everything that is being said
+U0CS6NSF5 : and just interjecting
+U0CS6NSF5 : it can feel nosy *and* noisy
+U0J27NX0X : &gt; it can feel nosy and noisy
+U0J27NX0X : LOVE that phrase
+U0CS6NSF5 : :simple_smile:
+U0CS6NSF5 : I'm sure we'll start seeing more rude bots as time passes, same it happened with spammy apps in facebook
+U0CS6NSF5 : as a rule of thumb, we try to be the least intrusive possible
+U0G6ZCWES : cool, Chatlio made it into the Slack App Spotlight, great app idea  <#C0JV0QA4E>
+U0D7C5RAL : I tend to (for small-scale, at least) like keeping things restricted to "Slash command beaming out, Incoming Webhook beaming back in", but that's definitely more limited in deployment scale &amp; number-of-integrations-required.
+U0H9CA2MS : Would anyone be interested in a Meetup in NYC
+U0AQ8GPGR : <@U0H9CA2MS>: Did you see <http://www.meetup.com/New-York-Slack-Meetup/events/227552998/> ?
+U0H9CA2MS : I did not! But I have now...
+U0LCT5LAY : <@U0CS6NSF5>, <@U0J27NX0X> I have got a response from Ben Brown at howdy and he says to add a message queue layer on top. Doing my research about it right now. Slash commands are for sure more simple, cause easy load balancing will work like a charm.
+U0CS6NSF5 : <@U0LCT5LAY>: that only helps with delivering messages, though
+U0CS6NSF5 : you still need to manage all the RTM connections :simple_smile:
+U0LCT5LAY : <@U0CS6NSF5>: yes, but as I understand it, the queue handles the connection and distributes them. I wonder how all the existing bots are doing it right now.
+U0CS6NSF5 : <@U0LCT5LAY>: a queue might work to start a bot, but will have issues managing those connections, starting connections when a process goes down, etc :simple_smile:
+U0CS6NSF5 : we have hundreds of WS connections with Slack running 24/7 :simple_smile:
+U0LCT5LAY : <@U0CS6NSF5>: ok, so what would be a starting point for a basic setup which I can scale up?
+U0CS6NSF5 : as I said, it depends on what you are building :simple_smile:
+U0CS6NSF5 : we had a talk about this in <#C04SPC24T> today
+U0CS6NSF5 : and there were a few approaches mentioned there :simple_smile:
+U0LCT5LAY : <@U0CS6NSF5>: ok thanks, I will read that
+U07HXFWUD : speaking of meetups, we are doing another one in SF next week
+U07HXFWUD : <http://www.meetup.com/SlackDevs/>
+U07HXFWUD : we have ~15 mins at the end for people to do elevator pitches
+U07HXFWUD : if you're in SF and have something to announce, looking for collaborators, beta testers… please come along and let us know!
+U07HXFWUD : space is limited but a few slots are left
+U07HXFWUD : also join us in <#C0LDY2E2X>
+U07HXFWUD : during the meetup event we'll be posting live about who's working on what, and Ben has said we can throw in new integrations and generally test stuff out and make a mess. so, knock yerselves out :simple_smile:
+U0HUZ214H : Hey <@U0LEQM36U>! Glad you joined!
+U0LEQM36U : <@U0HUZ214H>: thanks for the invite
+U0LG7AF3M : hi everyone :simple_smile: just discovered this channel via <http://howdy.ai|howdy.ai> - kinda getting into bot development for our agency team. looking forward to communicate with all y'all :simple_smile:
+U0LGCMV16 : Hi All, great to see Dev channel for slack bots. Not sure if I can ask a question here , but my bot eventually stops after giving "Write failed: Broken pipe" this message and again I had to restart it. Any solution is appreciated.
+U0CSBGTKM : <@U0LGCMV16> depending on the framework or language you're using, there might be a channel that is tailored to the question you're asking. If you don't hear anything in here, you might try perusing the channel list for something more specific.
+U0LGCMV16 : Thank you <@U0CSBGTKM> . I am using botkit.
+U0CSBGTKM : Ok yea join <#C0AV5N8NA> for questions. Lots of enthusiastic folks in there.
+U0LGCMV16 : Thank you very much <@U0CSBGTKM> , I just joined. Appreciate your quick help.
+U0CSBGTKM : Np. Enjoy your botting!
+U04SM6T2H : This is a pretty cool feature for bot makers:
+U04SM6T2H : <https://ifttt.com/maker>
+U04SM6T2H : as simple as sending a webhook to trigger IFTTT rules
+U04SM6T2H : can also receive webhooks
+U04SM6T2H : so your bot can get connected to TONS of services and devices
+U0HBN0L9M : :clap:
+U0HUZ214H : I can't believe how aligned the thoughts in this community are! Thanks <@U04SM6T2H> for opening the door to this excitement. When these announcements came out last week, I thought, of course bots should tie into the rest of the automation. I blink and you people have already prototyped it. It's almost teaching/forcing me to think quicker, just being around these chats. Like in chess where I know I need to be at least 2 more steps ahead of where I thought I was. It's quite humbling, but feels like an honor at the same time. Being around these Kung Fu Masters.
+U0HBN0L9M : :heavy_plus_sign: :one:
+U0K7M8JHM : Hmmm… why do bot accounts and channels share a namespace?
+U0CS6NSF5 : <@U0K7M8JHM>: bot accounts, user accounts, public channels and private channels all share the same namespace
+U0CS6NSF5 : that's why you can do <https://my.slack.com/messages/general>
+U0CS6NSF5 : and go to the general channel or the general user
+U0K7M8JHM : for simplicity so everything can be referenced the same way, I guess?
+U0K7M8JHM : right
+U0K7M8JHM : k, thanks
+U0CS6NSF5 : np
+U0GQ2JCCA : anyone have a certain place they get their icons for bots for?
+U0GQ2JCCA : or recommendations
+U0LKW5SKT : :wave:
+U06U57P6E : I use creative commons licensed icons <http://www.flaticon.com/>
+U0GPKTHQ9 : Is anybody from rightgif on this slack?
+U0LL6RZPS : hello
+U0LL6RZPS : Is it possible to have a bot do show "is typing" as it's processing something?
+U0CS6NSF5 : <@U0LL6RZPS>: haven't tried it, but I'm guessing sending the `typing` event should work
+U0LL6RZPS : <@U0CS6NSF5>: thanks :simple_smile:
+U0HLC2479 : <@U0LL6RZPS>: ```var startTyping = function(bot, channel){        bot.rtm.send(JSON.stringify({
+            channel: channel,
+            type: 'typing'
+        }), function(err) {});
+    };```
+
+U0LL6RZPS : thanks <@U0HLC2479>!
+U0F9T9KPH : Hey everyone, we just launched our version of a Standup Bot. Meet Standup Bot: Automated standups for slack channels. Hope you try it out and thanks for all the knowledge! <http://standupbot.com>
+U0LMQ4XEH : Ohai everyone!
+U0HNY2V47 : <@U0F9T9KPH>: that looks great! How does it compare to <http://Howdy.ai|Howdy.ai>?
+U0F9T9KPH : <@U0HNY2V47>: We went down a different route than <http://Howdy.ai|Howdy.ai>.
+U0F9T9KPH : Asynchronous is great but we found in our testing that we had a lot more incomplete standups with that model.
+U0F9T9KPH : It was almost like people needed the social pressure of the group to have them complete a standup.
+U0F9T9KPH : That being said we think the learning curve is a lot smaller too. You don't have to teach our bot anything. It just does one thing really well. Collect and organize standup information from your team.
+U0HNY2V47 : cool, thanks :simple_smile:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

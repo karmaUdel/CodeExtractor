@@ -1,2 +1,70 @@
+U37HUSJ4R : just want to know how to pass my flag json into the decoder
+U0EUHKVGB : so, you have a function which is like this: `init : Json.Value -&gt; (Model, Cmd Msg)`
+U0EUHKVGB : then that wants to look something like this:
+U0EUHKVGB : ```init value =
+  case Json.Decode.decodeValue myDecoder value of
+    Err e -&gt; some error model
+    Ok actualModel -&gt; (model, Cmd.none)
 ```
-this will turn any FieldValue into either a `val` or a list of errors
+
+U0EUHKVGB : where `myDecoder` is the decoder that you have.
+U0EUHKVGB : See here for more examples: <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode>
+U37HUSJ4R : I will take a look, thanks sir :slightly_smiling_face:
+U0FP80EKB : <@U17R1GD96> awesome! Thanks. Glad it worked.
+U2LAL86AY : what is the use/meaning of this function? <http://package.elm-lang.org/packages/Fresheyeball/elm-function-extra/3.0.0/Function-Pro#mapAfter> - i can't wrap my head around it :smile:
+U37HUSJ4R : <@U0EUHKVGB> in the example above this words great if I `actualModel` is the model I wish to update, what happens when my model is something like:
+U37HUSJ4R : ```type alias Model =
+    { application : Application
+    }
+```
+
+U37HUSJ4R : where Application is another type alias
+U37HUSJ4R : how do I pass `model` into the init function so i can do something like `{model | application = data}`
+U0EUHKVGB : <@U37HUSJ4R> you have to define a static `defaultModel` or something
+U0EUHKVGB : <@U2LAL86AY> That library isn’t really very Elm-y
+U37HUSJ4R : <@U0EUHKVGB> ok, do I pass this then as 2nd param of init?
+U0EUHKVGB : <@U2LAL86AY> but it’s basically mapping the function contained inside the `Arrow`.
+U0EUHKVGB : <@U37HUSJ4R> You don’t - it’s a _static_ default
+U0EUHKVGB : e.g```
+defaultModel = { application = defaultApplication }
+
+init flags = 
+  { defaultModel | application = ... }
+```
+
+U37HUSJ4R : <@U0EUHKVGB> I see :slightly_smiling_face:
+U2LAL86AY : mapping functions instead of values? I'm familiar with mapping values - ex the maybe value.  this is what you mean by not Elm-y? pff - I still don't understand what mapping a function actually means :smile:
+
+U0EUHKVGB : <@U2LAL86AY> <https://github.com/Fresheyeball/elm-function-extra/blob/3.0.0/Function.elm#L68>
+U0EUHKVGB : it’s basically just saying “call this first function, then pass the output to this second function
+U0EUHKVGB : In normal Elm, it looks like this:
+```
+mapAfter : a -&gt; (a -&gt; b) -&gt; (b -&gt; c) -&gt; c
+mapAfter value firstFn secondFn =
+  secondFn (firstFn value)
+```
+
+U0EUHKVGB : that’s all.
+U2LAL86AY : didn't thought of it as `mapping` - function composition is mapping. hmm.
+U2GPAEU1L : Hey everyone, was looking for some documentation on `Html.Keyed` but couldn't find anything that answered my questions.
+So as far as I understand, if I have _different_ keys, then the VDOM will avoid doing patches (such as changing text) and realize that these nodes cannot be re-used with each other.
+
+My question is, if I have the _same_ key, does it mean "these elements are the same" or does it mean that "these elements can be reused with eachother when doing diffs, but it doesn't mean they are the same"
+
+U2GPAEU1L : I feel like it's: "these elements can be reused with eachother when doing diffs, but it doesn't mean they are the same"
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

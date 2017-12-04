@@ -1,0 +1,63 @@
+U0NRYQNAZ : :thumbsup:
+U0NRYQNAZ : same here
+U0NRYQNAZ : i've adopted it.
+U0NRYQNAZ : way better to ship than not have shit.
+U1BP42MRS : Of course my old director when he left said "you guys don't hold yourself to a high enough software craftmanship standard"
+U1BP42MRS : So... ¯\_(?)_/¯
+U0NRYQNAZ : there is a balance you need to keep.
+U0NRYQNAZ : you def. don't want the crappiest code ever being written... but you can also spend waaay to much time on some some stuff.
+U1BP42MRS : He was really just being an ass, not to be too rude
+U1BP42MRS : I think I just decided a new policy, no calling a package/module: utils, common, or shared
+U5CGPBF0U : <@U5UKKT0EP>```backend
+|_ broadway
+   |_ all_the_python_scripts.py
+|_all_the_not_python_files.ext```
+
+U5CGPBF0U : Something like that
+U5CGPBF0U : So literally everything .py is in the broadway folder
+U5CGPBF0U : Then I use `python -m broadway` to run it
+U5CGPBF0U : So you mean that it's lookin in `backend` for `create_app` rather than in `broadway`?
+U5UKKT0EP : <@U6A6D1TT4> what are you trying to do? there are Python libs that do lots of financial stuff that you could just use. Unless you want to 'learn Python by doing' type of thing
+U5UKKT0EP : <@U5CGPBF0U> I see.  Do you have a py script anywhere where you imports "backend" first?
+U5UKKT0EP : <@U5CGPBF0U> To asnwer your question: Yes.  It's hard to guess without the full code but pay close attention to __init__.py and your initial app import.  The folder structure needs to be what Flask expects or at least direct it to it if you're going the unconventional way.
+U5UKKT0EP : <@U5CGPBF0U> Once you need to deploy this to a server, you ll need a wsgi script that would declare all the pathes as well. Otherwise you'll be banging your head trying to figure out why an "moduleName importError" is popping everywhere.
+U5CGPBF0U : Only `__main__.py` is truncated there
+U5CGPBF0U : Thanks for the heads up about WSGI! I hadn't gotten there yet but I hadn't made a WSGI script yet
+U5UKKT0EP : <@U5CGPBF0U> where is your `app = Flask(__name__)`
+U5CGPBF0U : <@U5UKKT0EP> in `__init__.py` is the snippet :slightly_smiling_face:
+U5UKKT0EP : <@U5CGPBF0U>  change to `from broadway import config`
+U1BP42MRS : I've never used a wsgi script, the gunicorn arg or config file should be enough - but you can do whatever makes sense to you
+U4JJH96TS : What is the strategy to decide limit for number of processes when working with `multiprocessing`?
+U1BP42MRS : I'd favor `concurrent.futures` (or the `futures` backport if you are on python2).
+U1BP42MRS : Basically you can define a pool with the max workers
+U1BP42MRS : ```import concurrent.futures
+
+with concurrent.futures.ProcessPoolExecutor(max_workers=2) as pool:
+    pool.submit(print, 'Hello World')
+```
+
+U1BP42MRS : (untested and from memory <@U4JJH96TS> :point_up::skin-tone-4:)
+U4JJH96TS : Sure, let me explore `futures`. So, I'll be doing I/O with these forked processes. Reading from the web, suggestions are to keep workers equal to number of cores. Is that reasonable?
+U1BP42MRS : Yep, that's usually what I see/hear around. Note that if you are doing I/O - probably best to use `ThreadPoolExecutor` since your bottlekneck isn't CPU and processes in python are expensive
+U1BP42MRS : Especially resource sharing
+U4JJH96TS : Thanks. Let me read more on the subject
+U5JF1KD18 : Hello guys
+U5JF1KD18 : I got a problem, I want to connect my self to an external site using python requests.
+U5JF1KD18 : What I aim to have at the end is a way by which I can connect myself to the site using python requests and when I open my browser, I should see myself already logged in
+U5JF1KD18 : But the problem is when I connect myself using python requests and I open thee browser I'm not logged in
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

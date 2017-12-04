@@ -1,10 +1,91 @@
+U0J9LVB6G : <@U3JURM9B6> I think this should work.```
+(ns foo.bar
+  (:require
+   [clojure.core.match :refer [match] #?@(:cljs [:include-macros true])]))
 ```
-not proposing for this to be part of Clojure, just asking what you think of it as a practice
-<@U0LJU20SJ> can you file an issue or PR on that repo?
-I guess so. I just thought it would be faster if any of them was here :smile:
-I'm here, just focused on other things ATM :)
-ah ok, well … done
-the fix is quite simple so no op :wink:
-<@U0LJU20SJ> thanks!
-<@U06SGCEHJ> I just created another pr for some other small markdown problems that I found. Hope it helps
-thanks! I'll let <@U07BWACEA> review those changes, he's the primary on the GSoC stuff
+
+U0J9LVB6G : <https://github.com/clojure/clojurescript/wiki/Differences-from-Clojure#namespaces>
+U0J9LVB6G : You may get away with not including the include-macros thingy, and just :requiring normally, but it depends on how the namespace you're requiring is written.
+U0J9LVB6G : <http://blog.fikesfarm.com/posts/2016-03-01-clojurescript-macro-sugar.html#implicit_sugar>
+U1WMPA45U : hrm, there really is no way to override hashCode for a defrecord, huh?
+U1WMPA45U : I've got an issue with that, I have a defrecord that contains a derived map from potemkin, but which one of the "keys" of the derived map is null
+U1WMPA45U : which causes hashCode to throw a NullPointerException
+U064X3EF3 : a null in a map shouldn't cause an NPE
+U064X3EF3 : so I'd say that's a bug in potemkin, but would need to see more to know for sure
+U11BV7MTK : <@U1WMPA45U> what defrecord stuff are you using? i'll look at it
+U11BV7MTK : ```(hashCode [this]
+    (reduce
+      (fn [acc [k v]]
+        (unchecked-add acc (bit-xor (.hashCode k) (.hashCode v))))
+      0
+      (seq this)))
+```
+
+U11BV7MTK : that looks like it
+U11BV7MTK : compared to <https://github.com/clojure/clojure/blob/master/src/jvm/clojure/lang/APersistentMap.java#L104>
+U1WMPA45U : it does seem like it is a bug in potemkin, I wrote up <https://github.com/ztellman/potemkin/issues/52>
+U1WMPA45U : my use case would have been better served using identityHashCode, too, so I just wrapped the object in another holder object
+U4ZJ5UHQD : I'm really struggling how best to test with Clojure, specifically when I start having to mock interactions with a database etc. Looks like mock frameworks aren't super popular in clojure and I'm assuming there's a good reason that I'm missing
+U4ZJ5UHQD : Any tips?
+U4ZJ5UHQD : looks like maybe `with-redefs*` might be what I'm looking for
+U1WMPA45U : I, for one, prefer testing against a "real" database if possible; we test our app against a in-memory datomic DB, and against a H2 database (we use datomic and a SQL database)
+U064X3EF3 : <@U4ZJ5UHQD> beware <http://blog.cognitect.com/blog/2016/9/15/works-on-my-machine-understanding-var-bindings-and-roots>
+U11BV7MTK : <@U1WMPA45U> what do you mean on that pull request?
+U11BV7MTK : you're making sure we don't hash false? but isn't that fine?
+U1WMPA45U : making sure you *are* hashing false?
+U11BV7MTK : good point
+U11BV7MTK : is there a reason to use `(if some? v)` vs `(if (instance? Object k)`?
+U1WMPA45U : `some?` might perform better than `instance?`, I guess
+U11BV7MTK : i wouldn't have thought to use some? like that on a single value. that's clever
+U11BV7MTK : no idea
+U11BV7MTK : `instance? (fn instance? [^Class c x] (. c (isInstance x))))`
+U11BV7MTK : yeah looks like it
+U11BV7MTK : good thought
+U11BV7MTK : didn't know some? was just a nil check
+U11BV7MTK : thanks :+1:
+U1WMPA45U : good find, too, I didn't bother digging through potemkin
+U11BV7MTK : i've read the source a little while ago so kinda knew where to root around.
+U3JURM9B6 : <@U08E3BBST>:```
+
+(def ocall #?(:cljs oops.core/ocall
+              :clj (not-implemented "ocall")))
+
+(def oget #?(:cljs oops.core/oget
+             :clj (not-implemented "oget")))
+
+(def oset! #?(:cljs oops.core/oset!
+              :clj (not-implemented "oset!")))
+
+(def gcall #?(:cljs oops.core/gcall
+              :clj (not-implemented "gcall")))
+
+```
+doesn't work since ocall oset oget are macros
+
+I'm trying to push the #_ (:cljs :clj) into lower level libraries. Is this possible?
+
+U2VRAHXEX : is there a way to list the functions that are currently 'under instrumentation' (clojure.spec)?
+U2VRAHXEX : of a running program that is
+U08E3BBST : <@U3JURM9B6> wrap macros with macros… because turtles
+U08E3BBST : in a macro you can detect if you are in cljs or clj via &amp;env: <https://github.com/binaryage/env-config/blob/1d9a2409dad78324ed7ab2984d2b40b081173936/src/lib/env_config/impl/macros.clj#L3-L4>
+U3JURM9B6 : <@U08E3BBST>: is there no way to write these as *functions* if we pass all args as strings ?
+U08E3BBST : <@U3JURM9B6> macros are expanded at compile time, functions are called at runtime, once you are in runtime, you cannot "go back" and do compile-time stuff (except for using eval, which is a different story)
+U3JURM9B6 : no, I meant implemenatikn of oget
+U3JURM9B6 : why does it have to be a macro instead of a function ?
+U08E3BBST : the question is, why do you need those to be functions?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

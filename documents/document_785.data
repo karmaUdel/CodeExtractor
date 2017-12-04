@@ -1,0 +1,84 @@
+U37HUSJ4R : how would I update the `paused` field on line 40
+U17R26VR8 : what do you want to update it to? it's just like how you did it on line 33
+U37HUSJ4R : is it? it’s a nested field though?
+U37HUSJ4R : and the value of `toggle`
+U17R26VR8 : right, so you want to set status to `OnCall { number = 0, controls = {paused = toggle} }`
+U6EAT2Z37 : <@U17R26VR8> good answer.
+U37HUSJ4R : no, as I don’t want to update number
+U37HUSJ4R : only the paused field
+U17R26VR8 : ok, however nwo you have another concern, if your model.status was Available or Wrap then you'd want to do the above
+U17R26VR8 : otherwise, you want to just update the paused field
+U17R26VR8 : ```case model.status of
+  Available -&gt; ( brandNewModel, Cmd.none )
+  Wrap -&gt; ( brandNewModel, Cmd.none )
+  OnCall call -&gt; do_stuff_here
+```
+
+U37HUSJ4R : true, whats the correct elm way to solve this then?
+U37HUSJ4R : surely this is common place?
+U17R26VR8 : updated my code :point_up: , typically in elm, i try not to reach too far into a model to update things but you can by destructuring and then returning a new version with the updated fields
+U37HUSJ4R : interesting, thanks
+U37HUSJ4R : how would you model this data then to keep it simple?
+U6EAT2Z37 : I don't think it's that complicated is it?
+U37HUSJ4R : well from a logic pov it’s confusing
+U37HUSJ4R : as if you are toggle pause lets say
+U6EAT2Z37 : how he has it is almost right
+U37HUSJ4R : you wouldn’t be Available you’d always be on a call
+U37HUSJ4R : so feels strange to have the case statement
+U6EAT2Z37 : it's not a statement
+U6EAT2Z37 : (this is important)
+U37HUSJ4R : so maybe I am modelling this wrong
+U6EAT2Z37 : it's an expression.
+U6EAT2Z37 : I'm not trying to correct you, I'm trying to explain it's important to think about it differently
+U17R26VR8 : do you have any other controls? or just paused as in the operator has put you on hold is that what it means?
+U37HUSJ4R : There are many
+U37HUSJ4R : paused is paused recording really
+U37HUSJ4R : there will be hold
+U37HUSJ4R : possible more
+U37HUSJ4R : <@U6EAT2Z37> I understand :slightly_smiling_face:
+U6EAT2Z37 : Okay, well it's a case because you need to take every possible value into account.
+U37HUSJ4R : yeh I get that
+U37HUSJ4R : but its not correct for my domain
+U37HUSJ4R : so I must be modelling it wrong
+U6EAT2Z37 : I don't see why not
+U37HUSJ4R : because you can’t TogglePaused if someone is not on a call
+U17R26VR8 : so i'd make CallState a union type `type CallState = Call | Paused | Hold` etc
+U37HUSJ4R : doesn’t make sense
+U6EAT2Z37 : oh I see... CallState contains a Bool. Yeah that's not probably what you want.
+U17R26VR8 : then i'd change your TogglePaused to be `TogglePaused Bool Call` so you have the call to change so you don't need to worry about if you're not on a call, because you can only toggle a state if you are in a call
+U17R26VR8 : is CallState going to be:```
+paused: Bool,
+hold: Bool,
+otherFlag: Bool
+```
+
+U17R26VR8 : where only one of them can ever be true at a time?
+U37HUSJ4R : to make it more complex no :stuck_out_tongue:
+U37HUSJ4R : multiple can be true
+U17R26VR8 : ah ok, fair enough
+U37HUSJ4R : for the union type did you mean to have `Call` in there?
+U17R26VR8 : i think what you have makes sense then, it's just that because you've got 3 levels of nested records, it's going to be a pain to reach into it without helper functions
+U17R26VR8 : the `Call` in the union type is a tag, it doesn't have anyhting to do with the record Call
+U17R26VR8 : i thought it was a CallState can be in any of one state so the default state is you're talking to someone so i called it `Call`
+U17R26VR8 : anyway, to get back to your original question, you can write a function like:```
+updatePaused: Bool -&gt; Call -&gt; Call
+updatePaused newValue ({controls} as call) =
+  { call | controls = { paused = newValue } }
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

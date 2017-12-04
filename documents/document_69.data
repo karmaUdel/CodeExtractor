@@ -1,20 +1,110 @@
+U050ECB92 : dunno
+U061V0GG2 : Boot uses shimdandy
+U06SGCEHJ : <@U050R7ECY> meaning you can't control the classpath?
+U050R7ECY : I'm working on <https://github.com/arohner/spectrum>. Spectrum uses tools.analyzer. Tools.analyzer uses eval, which breaks defrecords and protocols when files are reloaded. I'm looking for a way to isolate the code reloading
+U06SGCEHJ : Ah, a library, so you can't keep clojure.jar off of the cp
+U050R7ECY : right
+U06SGCEHJ : yeah, shimdandy won't work for you there
+U060FKQPN : <@U050R7ECY> could you try maybe isolating the classloader that t.a uses?
+U050R7ECY : AIUI, it's compiler.java that's creating new classes via eval, so it's the compiler's classloader that matters?
+U0K064KQV : You were simply missing a dependency on nrepl. Cider jack in injects a few repl only dependencies. Not all editors do this. 
+U0W0JDY4C : how is one supposed to use `loop/recur` to reduce a nested collection?
 ```
-but it's not documented that that will always work (or become reserved for some special system/core usage) so I wouldn't use it
-<https://dev.clojure.org/jira/browse/CLJ-1527>
-the point is, just because the reader only constructs certain kinds of symbols and keywords, that doesn't restrict the Symbol and Keyword data types to only construct those types of symbols and keywords
-<https://dev.clojure.org/jira/browse/CLJ-17>
-<https://dev.clojure.org/jira/browse/CLJ-2009>
-etc etc etc
-And at one point, very specifically, the Clojure/core team made `:1` (numeric keywords) illegal in the reader on the grounds that they weren't sanctioned by the docs -- and they broke a bunch of code out there in the wild so they reverted the reader change.
-I was affected by that change (one of the OSS libraries I maintain) but I would have been perfectly happy to change `:1` to `(keyword "1")` -- which they said they would _not_ break... but they still reverted the change :slightly_smiling_face:
-So we have prior art for the reader being publicly known to accept things that are not considered "correct" and not getting fixed -- and a statement that `keyword` (and, similarly, `symbol`) being able to produce "junk" output from arbitrary input :neutral_face:
-the issue isn't that the reader and the reader docs are not in 100% agreement about what is a readable keyword (that is another issue) the issue is that a valid readable keyword is not the same as a valid keyword
-for example, the keywords json libraries create for map keys never pass through the reader
-so they can be any crazy thing
-Exactly my point, yes.
-which negates the purpose of turning them in to keywords in the first place, because the only reason people turn them in to keywords is since most maps in clojure use keyword keys, they more comfortable with them
-Speed of lookup over plain strings. In theory.
-maybe
-`(identical? :abc (keyword (str "a" "bc")))` =&gt; true
-So map lookup will be faster if it can check for `identical?` before falling back to "equal".
-but do you want to be interning json coming in over the wire?
+given {:children {1 {:children {3 {:children {}} 2 {:children {}}
+
+(defn recurse-children [acc root]
+  (reduce (fn [a node] 
+    (if (empty? (:children n)) 
+      (do-accumulation acc node)
+      (map #(recurse-children a %) (:children n)))))
+```
+^ this is what I _want_ to do, but I know that will result in an overflow
+
+U060FKQPN : I think if we provided a custom classloader that extends DynamicClassLoader we could be able to isolate the evaluation that happens through tools.analyzer and the clojure runtime
+U0W0JDY4C : except if I try to rewrite that in `loop/recur`, i will end up with some sort of `(map #(recur acc %) (:children n))` at some point, which I know isn't valid either
+U060FKQPN : don't have time right now but if you're stuck on it I can give it a try this weekend
+U050R7ECY : <@U060FKQPN> I'm happy to work on it now, but I'm not following yet. which behavior in the CL needs to change?
+U051SS2EU : <@U0W0JDY4C> it can be done breadth first if you add an extra accumulator for nested children, so you process items if leaves, or append to the accumulator if branches, then recur on the vector of branches
+U060FKQPN : DCL has a map that goes classname -&gt; class, and that's how the Compiler resolves classes, if analyze+eval did evaluation using a different classloader using a different class cache, it might not impact the regular evaluation context (so no redefining of defrecords)
+U060FKQPN : I've literally given it just 20 seconds of thought tho, it might not work
+U051SS2EU : <@U0W0JDY4C> that said, the result often looks weird enough that it's worth just using non-optimized recursion until you know you have inputs too big for that
+U060FKQPN : in particular there might be some more issues to solve around namespaces
+U0W0JDY4C : as always, a big help <@U051SS2EU> .. dont think I'll hit that limit for quite some time
+U050R7ECY : The most recent thing I tried doing was 1) grabbing the current classpath. 2) creating a new URLClassLoader using the current classpath URLs, but setting the parent classloader to `(.getParent (.getClassLoader clojure.lang.RT))`. 3) Using classlojure to `eval-in` in that supposedly isolated classloader.
+U051SS2EU : <@U050SC7SV> they will not be MapEntry instances when processed in postwalk, postwalk returns vectors
+U051SS2EU : and vector? returns true for instances of MapEntry
+U051SS2EU : now, there are definitely cases where I changed my algorithm so I could use prewalk instead just because prewalk gives you MapEntry instead of vector
+U553KK0QH : <@U3L6TFEJF> Thanks for the pointer to Specter. Looks useful beyond my use case. :slightly_smiling_face:
+U050R7ECY : hrm, using `(.getParent (clojure.lang.RT/baseLoader))` seems to work
+U060FKQPN : <@U050R7ECY> what's the issue specifically btw? something we have to fix in t.a.jvm?
+U5QCSK76C : How do you load a local jar in a clojure project? Is there a lein way?
+U060FKQPN : ideally t.a.jvm/analyze-ns shouldn't behave differently than normal clojure namespace reloading
+U050R7ECY : <@U060FKQPN> still trying to figure it out :slightly_smiling_face: not sure if it's user error or bug
+U050R7ECY : I'm also trying to get analysis for e.g. clojure.core, so normal reloading is not good enough
+U060FKQPN : I've cried many many tears trying to make that the case and I thought that's how it behaved now
+U060FKQPN : oh
+U060FKQPN : hm
+U060FKQPN : yeah that might cause some issues
+U060FKQPN : altho with clojure.core you should be able to avoid eval
+U060FKQPN : as everything is already evaluated
+U050R7ECY : oh, so write an `analyze-ns` that doesn't call analyze+eval?
+U060FKQPN : either that or wait for me to add a :no-eval option to analyze-ns :)
+U060FKQPN : but yeah you can try that for the time being
+U060FKQPN : hm, deftypes might get corrupted as t.a.jvm does an internal eval to set up reflection contexts :( so not as easy as just not using eval
+U060FKQPN : I have to go now but I'll think about it. I'm sure there's a way to make this less painful
+U0J9LVB6G : There's the `map-vals` function from <https://github.com/weavejester/medley>
+U051SS2EU : <@U5QCSK76C> the easy way is to install that jar in your local cache (which is `lein install` for lein projects) then you can just add it to your deps
+U051SS2EU : though when you deploy you'll probably need to make sure the deployed jar can find the artifact
+U051SS2EU : which might mean deploying the jar to clojars (for open source you want to share) or might mean building an uberjar on your local machine or hosting a secure private maven repo of your own
+U052XLL3A : In Datomic, I can test my queries on an inline datastructure, like `(d/q '[:find ?e :in ...], [[123 :att :val] [[456 :att :val]])`Does something similar exist for SQL tables, so that I do not have to spawn a real database for integration tests?
+
+U5YHNV0EA : How would I add this dependency without using cider? Where would be the best place?
+U0NCTKEV8 : there are file back and memory backed sql databases, but none of them are entirely compatible with the popular client/server sql dbs
+U0NCTKEV8 : generally, the way I deal with wanting to run things entirely in memory is I create a protocol that represents a set of queries, and then have some kind of in memory store that satisfies that protocol, a long with something that satisfies the protocol for storing in a database,  and swap one for the other in tests or whatever
+U0509NKGK : <@U052XLL3A> did you try the code sample you shared? it should work :slightly_smiling_face:
+U3L6TFEJF : <@U052XLL3A> <http://www.h2database.com/html/main.html> is an in-memory Java SQL DB
+U06C63VL4 : wouldn't merge-with suffice for this? possibly a bit obscure looking:
+U06C63VL4 : `(mege-with (fn[_ v] (some-processing v)) m m)`
+U0HM5MJ5V : <@U052XLL3A> there tend to be enough vendor specific differences between SQL databases that <@U0NCTKEV8>'s solution is the only one i've had success with
+U0HM5MJ5V : worked on a codebase that tried to do sqlite tests with postgres prod and bugs persistently crept in
+U04V4HWQ4 : You go to production with the isolation level you have, not the isolation level you want to have.
+U0524B4UW : <@U052XLL3A> docker compose offers a decent way of running integration tests against a throwaway copy of your actual db
+U0ALQHJRF : <https://twitter.com/degree9io/status/885280570204315648>
+U3A8CQMGU : Hi, does task defined using mount (<https://github.com/tolitius/mount>) 's `defstate` and started using `mount/start` running in a new thread or in the main thread? Can I `defstate` a function that blocks the thread ? Thanks.
+U5YHX0TQV : You can even map the directory of your db to a tmpfs speeding it up massively.
+U052XLL3A : <@U0NCTKEV8>  and others: Thanks for the great hints regarding integration-testing and databases! I think docker sounds like an interesting approach.
+U3L6TFEJF : what do you have to do to make reader tags work?
+U3L6TFEJF : I have a `data_readers.clj` in my source dir which looks like `{kh/test kleinheit.pg.impl/maybe-map}`
+U3L6TFEJF : but when I try it out in the REPL I just get```dev=&gt; #kh/test {:a 1 :b 2}
+
+        java.lang.IllegalStateException: Attempting to call unbound fn: #'kleinheit.pg.impl/maybe-map
+clojure.lang.LispReader$ReaderException: java.lang.IllegalStateException: Attempting to call unbound fn: #'kleinheit.pg.impl/maybe-map
+```
+
+U0564EGNY : so, I need a function that takes a nested data structure (only concerned with maps right now) like {:a {:b {:c 1} :d 2}} and returns all the paths to leaves: [[:a ::b :c] [:a :d]]… 
+not sure where to start
+
+U3L6TFEJF : <@U0564EGNY> <https://github.com/nathanmarz/specter>
+U3L6TFEJF : if you ask your question in <#C0FVDQLQ5|specter> I'm sure someone will help you out
+U3L6TFEJF : I'd love to take a look but that will have to be later, I'm at work at the moment
+U050KSS8M : I've been using Clojure for a long time now and one question randomly popped into my head:
+U050KSS8M : is there ANY case where map destructuring of *keys only* can throw an exception?
+U050KSS8M : I know that vector destructuring can throw all sorts of fun stuff :slightly_smiling_face:
+U050MP39D : if you pass it something that's not a map
+U050KSS8M : hm … :slightly_smiling_face: really?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

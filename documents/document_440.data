@@ -1,1 +1,93 @@
-or drop the Html bit if you are ```import Html exposing (..)``` (all)
+U26LR8F4H : that is getting called even after i removed the task from the update
+U23SA861Y : yeah it would get called on load
+U23SA861Y : elm is eager
+U23SA861Y : so it will be called when the let is evaluated and thats when the program loads
+U26LR8F4H : oh, interesting
+U23SA861Y : scrollToTop is  a value not  a function
+U23SA861Y : it gets constructed on program start
+U26LR8F4H : well, that is super helpful to know, thank you.
+U3SJEDR96 : This sounds remarkably close to what I did with elm-demystifyin-decoders :grin: excited to see what you come up with!
+U623QK78C : What is the best way map a `Maybe String` to the an attribute value of an input?
+U623QK78C : Currently I have: ```([ class "mdc-textfield__input"                     , id "message-input"
+                     , rows 2
+                     , cols 40
+                     , placeholder "Your message here..."
+                     ]
+                        ++ case message of
+                            Just t -&gt;
+                                [ value t ]
+
+                            Nothing -&gt;
+                                []
+                    )```
+
+U623QK78C : But I was wondering if there was a better way.
+U57KYFW67 : <@U623QK78C> Are you trying to "get the string out of" a `Maybe String`?
+U57KYFW67 : Ahhh I see. You are trying to embed your maybe into a list.... hmm
+U57KYFW67 : <@U623QK78C> This is the function you're looking for: <http://package.elm-lang.org/packages/elm-community/maybe-extra/4.0.0/Maybe-Extra#toList>
+U57KYFW67 : It's in maybe-extra, though, so depending on how you feel about extra dependencies, what you have is completely sufficient.
+U57KYFW67 : It might be worthwhile to float it into a `let` statement earlier in the code. That's what I like to do, at least, when I have an ugly `case` statement sitting in the middle of an expression.
+U623QK78C : Thanks, Maybe-extra.toList looks nice.
+U158457NK : is it possible to download a file using elm.http, a link wont do as I need to add an authorization header, but the resource, which is an xlsx file keeps being treated as data as opposed to downloading
+U5P4FLYLE : Hi all, with what would you replace Cmd.none in order to realize side effect that calls Linux command or invoke script and takes what is generated in stdout as String?
+U3LUC6SNS : `re: elm-tools/parser`  I now have several parsers, e.g. `macro1` for input like `\\foo{bar} `, `macro2` for `\\foo{bar}{baz} `, `environment` for `\\begin{ENV} BODY \\end{ENV}`.  I would like to combine them in a parser `latex` which looks at its input and tries each of the above parsers until it either succeeds or runs out of parses to try and then fails. 
+I know there is some way to do this but couldn;t find it by reading the source and searching it for `combine`.
+
+U3SJEDR96 : <@U5P4FLYLE> I'd generally do that with two `port`s, with the actual side-effect happening on the JS side
+U3SJEDR96 : <@U3LUC6SNS> `oneOf`
+U3LUC6SNS : <@U3SJEDR96> Thanks!
+U3SJEDR96 : <@U158457NK> I don't know if there's a great way to do that even in plain old JS with ajax. I think you _could_, potentially, download it as data and have it as a href for a link or something vaguely along those lines, but I'm not sure, to be honest
+U3LUC6SNS : <@U3SJEDR96>, I am trying this:```
+type Latex
+    = Macro1
+    | Macro2
+    | Environment
+
+
+latex : Parser Latex
+latex =
+    oneOf
+        [ Macro1
+        , Macro2
+        , Environment
+        ]
+```
+but then get lots of error messages like
+```
+-- DUPLICATE DEFINITION -------------------------------------- ./src/XParser.elm
+
+Naming multiple top-level values `Macro2` makes things ambiguous. When you say
+`Macro2` which one do you want?
+
+51|&gt;type alias Macro2 =
+52|&gt;    { name : String
+53|&gt;    , arg1 : String
+54|&gt;    , arg2 : String
+55|&gt;    }
+```
+
+U1ZFF0E5P : when you define a type alias, it also gives you a constructor for free. so with your type alias you can call `Macro2 "string1" "string2" "string3"` to build a record
+U1ZFF0E5P : when you define a union type, the "options" are also constructors to build the actual type
+U1ZFF0E5P : so you can't have a union type and a type constructor with the same name in the module
+U1ZFF0E5P : you can move one or the other to another module and call it with the whole name
+U1ZFF0E5P : <@U3LUC6SNS> ^
+U3SJEDR96 : <@U3LUC6SNS> you'll need something like `oneOf [ parser1, parser2, parser3 ]`, so in your case `oneOf [ macro1, macro2, environment ]` etc
+U3LUC6SNS : Thanks <@U3SJEDR96>, thanks <@U1ZFF0E5P> !
+U3SJEDR96 : assuming that `macro1 : Parser Latex` etc
+U3LUC6SNS : Got it!
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

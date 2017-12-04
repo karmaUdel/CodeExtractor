@@ -1,13 +1,108 @@
+U3YDBDP4Z : Right.
+U3HQVHERX : ```linkAttrs : String -&gt; List (Attribute Msg)
+linkAttrs path =
+    [ href &lt;| path, R.onLinkClick &lt;| UpdateLocation path ]
 ```
-interesting
-So what about the case where I have more of a parent child relationship?
-Basically the main is aggregating events from websockets
-and `superView : SuperModel -&gt; Html SuperMsg`
-and then a bunch of different little views exist on the page displaying different information from that new aggregated state
-ohh
-so just the view could be composed of that larger message type?
-yep!
-I don't want the Main module to have to prepare to receive all the kinds of messages that it normally would just pass down into the smaller views
-so the `update` could still keep its signature?
-`update` is one I'm still having difficulties with, I'll confess. :confused:
-this is how I've got my `view` setup:
+
+U3YDBDP4Z : I'm not clicking any links. This is on page load
+U3YDBDP4Z : I get the "correct" views if I change the url, as if it doesn't even care about the `userRequired` function
+U3YDBDP4Z : But none of the debug logs are being logged :confused:
+U3YDBDP4Z : So I don't know what's going on!? :smile:
+U3HQVHERX : oh, none of them are being logged??
+U3YDBDP4Z : No
+U3HQVHERX : Try putting one in your init
+U3HQVHERX : just for a sanity check
+U3HQVHERX : ```init : Location -&gt; ( Model, Cmd Msg )
+init location =
+    let
+        currentRoute =
+            Routing.parseLocation location
+        _ = Debug.log "loc" location
+    in
+        ( Models.initialModel currentRoute, Cmd.none )
+```
+
+U3YDBDP4Z : init logs
+U2SR9DL7Q : <@U0JL9RPC4> just a quick update. did some reading. should be possible to keep the css locally. i'll need bower, some build steps and some finnicking, but it *should* work. thanks again!
+U3HQVHERX : i gtg, but follow it down the rabbit hole, look in the `parseLocation` function.... then keep digging :wink:
+U3YDBDP4Z : Alright, take care!
+U3HQVHERX : good luck
+U3YDBDP4Z : Problem solved
+U3LUC6SNS : What do you recommend in the way of application icons.  Material? Something else?  I'd love to see an example of styling a button or something with an icon.
+U3LUC6SNS : Oops: TheSeamau5/elm-material-icons doesn't work with 0.18
+U5GJ5FEAU : i'm thinking how do we handle a textbox that holds a field of type float. Whenever a user inputs a dot, it doesn't pass as a valid float (in the update) and then the re-render causes the textbox to remove the dot.  Same goes for clearing/emptying out such a field .
+U3LUC6SNS : Are you setting `value` ?
+U5GJ5FEAU : <@U3LUC6SNS> yes
+U4F64AKQV : <@U5GJ5FEAU> Maybe you should have two different checks for whether the input is valid. One for when the user is still typing and another for when they attempt to submit the value.
+U5GJ5FEAU : yeah! i was thinking of that as well. Earlier method seemed like the easy way out :smile:
+U5GJ5FEAU : Another thought was to do the check onBlur but unfortunately we don't have the value on blur. Maybe i'll try to write a custom onBlur event handler
+U5GJ5FEAU : custom onBlur seems like a good way to do it. Just not sure if it punishes me sometime in the future :smile:
+U5UP0B6QM : is there a syntax for combining exposing all `module My.Module exposing (..)` with exposing union types `module My.Module exposing (MyType(..))`?
+U4872964V : <@U5UP0B6QM> combining how?
+U5UP0B6QM : just wanted to expose everything in my module, but it seems to be having trouble with me union types when i try to access them in other files
+U5UP0B6QM : woops i figured it out.. my mistake. thanks for the quick feedback though!
+U3YDBDP4Z : How do I create commands? I'm not finding any docs about it
+U3YDBDP4Z : And how do I use `if else` with Maybes?
+U5UP0B6QM : <https://www.elm-tutorial.org/en/03-subs-cmds/02-commands.html>
+U3YDBDP4Z : Yes but it's not really helpful, because it only shows how Random gives you a command, not how to issue one of your own
+U5UP0B6QM : from my understanding commands can only be called in the update
+U3YDBDP4Z : Yup
+U3SJEDR96 : <@U3YDBDP4Z> a Cmd is a structure that the runtime can interpret and allows the runtime to execute something, after which it would call your update with the resulting msg. What is your use-case for creating commands?
+U3SJEDR96 : as for `if..else` with `Maybe`; could you explain what you're trying to achieve? I'm sure we can help you figure out how to best handle it :slightly_smiling_face:
+U3YDBDP4Z : Basically, in pseudo-elm code
+U3YDBDP4Z : `cmd = if model.user then Cmd.none else ChangeLocation "sign-in"`
+U3YDBDP4Z : model.user is a `Maybe User`
+U3SJEDR96 : Right, so, `ChangeLocation "foo"` is a branch of your `update`, right?
+U3YDBDP4Z : Yup
+U3SJEDR96 : Does it change anything in your model, or does it just return your model and adds a cmd to actually go to a different page?
+U3YDBDP4Z : If the command is ChangeLocation, then model.route would also need to be updated
+U3YDBDP4Z : So the url and route match
+U3SJEDR96 : Right. So what you'd basically do is take the content of that branch of your update, turn it into a function, and call that
+U3SJEDR96 : I mean, you already _have_ the code you want to execute, now you just need to call it. But rather than you telling the runtime to execute your `update` with a certain message, you can just call it directly
+U3YDBDP4Z : Sure. But then this branch of `update` would just return `(model, Cmd.none)` if that's the case?
+U3YDBDP4Z : If I call `update` with another message directly?
+U3SJEDR96 : I wouldn't call `update` directly, making `update` a recursive function can get confusing while there's no real need for that. Taking the code you actually need (the content of tht branch) and putting it into a function, then calling that function from both places is going to be much easier
+U3YDBDP4Z : Then you lost me. :slightly_smiling_face: Cause I thought we were talking about recursive update calls
+U3SJEDR96 : I see how I could've given you that idea, but I was rather talking about calling the common code directly, rather than update itself. Could you perhaps post your update somewhere? I could give you some pointers :slightly_smiling_face:
+U3YDBDP4Z : ```update : Msg -&gt; Model -&gt; ( Model, Cmd a )
+update msg model =
+    case msg of
+        ChangeLocation path -&gt;
+            ( model, Navigation.newUrl path )
+
+        OnLocationChange location -&gt;
+            let
+                newRoute =
+                    location
+                        |&gt; parseLocation
+
+                cmd = if model.user then Cmd.none else ChangeLocation "sign-in"
+            in
+                ( { model | route = newRoute }, cmd )
+```
+
+U3SJEDR96 : Right, so, the simplest thing to do here would be `cmd = if model.user == Nothing then Navigation.newUrl "sign-in" else Cmd.none`
+U3YDBDP4Z : Hmm true true
+U3SJEDR96 : (you'll need `(Model, Cmd Msg)` in your type annotation, tho)
+U3YDBDP4Z : Thanks for the guidance!
+U3YDBDP4Z : Does Elm use `and` or `&amp;&amp;`?
+U3YDBDP4Z : Feels like it _should_ be `and` but the compiler doesn't recognize it
+U3YDBDP4Z : Perhaps I'm missing some parentheses
+U3SJEDR96 : it's `&amp;&amp;`, <@U3YDBDP4Z> <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Basics#&amp;&amp;>
+U3YDBDP4Z : "Cannot find variable !=" :confused:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

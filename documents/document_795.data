@@ -1,0 +1,83 @@
+U635238TG : i just completed the pragmatic studio tutorial and i think we just did something similar with cleaning up the main code into some submodules.
+U2SR9DL7Q : Cmd.map I use. Subs are still a bit mysterious to me.
+U635238TG : but it had me changing everything from Msg to msg and fixing problems that come up with that change
+U2SR9DL7Q : Yeah... I've done this big refactor, and all that's left is sorting out the view and the updates.
+U0JFGGZS6 : yeah. it's like if you have multiple subscriptions that need routing to sub-modules, same basic idea
+U635238TG : it was cool seeing the compiler helping us along the whole time
+U2SR9DL7Q : I'm not unconvinced the compiler is a tiny node of evan's brain living detached from the main host, yet connected through mysterious forces.
+U2SR9DL7Q : <@U0JFGGZS6> Html.map totally worked, and makes sense.
+U2SR9DL7Q : Now for my true fear... the update.
+U2SR9DL7Q : update says I need to account for DominoesMsg...
+U2SR9DL7Q : <@U0JFGGZS6> err, last question, but I think it's going to work similarly. I'm in updates now where I have```
+ChangeLocation pathname -&gt;
+            ( model, Navigation.newUrl pathname )
+
+        DominoesMsg msg -&gt;
+            let
+                ( domiModel, domiCmd ) = Dominoes.update msg model.dominoes
+            in
+                ( { model | dominoes = domiModel }, )
+```
+Again we have a case where I'm returning the Dominoes versions of model and Msg as opposed to the main versions. If I'm following right, I need a mapping function to take me from `( Dominoes.Model, Dominoes.Cmd )` to `( Model, Cmd )`. Not certain about the command part but am I on the right track?
+
+U1NKH2HDX : Hi folks. Is there a jsfiddle equivalent for Elm ?
+U1NKH2HDX : I’d like to show stuff to somebody but I don’t want him to install reactor etc
+U0CL0AS3V : <http://ellie-app.com>
+U0CL0AS3V : <@U1NKH2HDX> :point_up:
+U0CL0AS3V : it's awesome!
+U1NKH2HDX : yeah !
+U1NKH2HDX : I had forgotten the name !! thx a lot !
+U0JFGGZS6 : Yep. Or just a `let` to grab that pair and merge them in. This is where `Cmd.map` comes into play.
+U1NKH2HDX : does it work with Html.program ?
+U1NKH2HDX : I have a single .elm file that works in reactor
+U1NKH2HDX : but not in ellie-app
+U1NKH2HDX : `Cannot read property ‘fullscreen’ of undefined`
+U1NKH2HDX : aaah
+U1NKH2HDX : module name my bad sorry
+U0CL0AS3V : there's also an <#C408UCWMN|ellie> channel
+U5WS7CJLV : interesting what the docs say about Html.map: "This should not come in handy too often. Definitely read this before deciding if this is what you want."
+U5WS7CJLV : but you cannot argue very hard against something that solves your problem
+U5WS7CJLV : if something works, it works
+U2SR9DL7Q : Where or how would I define the function that goes `(a -&gt; Cmd a)` for `Cmd.Map`?
+U2SR9DL7Q : I know the second argument is my _domiCmd_ (I hate that name but I'll change it after). But how would one define the first?
+U2SR9DL7Q : <@U5WS7CJLV>  as far as i understand, this is a fairly common setup for elm projects so yeah, it confused me as well.
+U5WS7CJLV : If I've understood, seems you'd need some function that returns Cmds, but the only one I know of is Http.send
+U0JFGGZS6 : Cmd.map is `(a -&gt; msg) -&gt; Cmd a -&gt; Cmd msg`
+U5WS7CJLV : right, so you need a Cmd, yes?  I don't think I've encountered anything that will return a Cmd.  Other than Http.send.
+U0JFGGZS6 : so you have the `Cmd a`, that's your sub-Cmd from `Dominoes`. So you just need the `a -&gt; msg`, right?
+U2SR9DL7Q : I think i got it
+U5WS7CJLV : if ericgj is on track then you probly just need one of your Msg constructors
+U2SR9DL7Q : ```DominoesMsg msg -&gt;
+            let
+                ( domiModel, domiCmd ) =
+                    Dominoes.update msg model.dominoes
+            in
+            ( { model | dominoes = domiModel }, Cmd.map DominoesMsg domiCmd )
+```
+Maybe I didn't. This compiles but it shouldn't.
+
+U0JFGGZS6 : why do you say it shouldn't?
+U2SR9DL7Q : map _does_ need a message constructor... but we're _in_ DominoesMsg
+U0JFGGZS6 : right. when it goes through the next update cycle, it ends up right here in this branch again
+U5WS7CJLV : *nods even though he doesn't understand.  Scrolls back up to review the code*
+U0JFGGZS6 : but that's ok because the whole point of this branch is just to delegate messages back down to `Dominoes.update`.
+U2SR9DL7Q : Heh. This... okay. step 1: message comes into DominoesMsg. It is a Dominoes.Msg. Step two.. evaluated in let block. step 3, model is updated. step 4... Cmd.map ... does a thing... and the result is a regular command.
+U2SR9DL7Q : I may need to look at the source docs
+U0JFGGZS6 : A command whose 'callback' is to update the Dominoes state again
+U5WS7CJLV : all roads lead back to the update function
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

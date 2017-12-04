@@ -1,67 +1,57 @@
+U5PMCBK6V : hi <@U23SA861Y>. cmds are consumed by the elm runtime?
+U23SA861Y : indeed they are
+U23SA861Y : Which it in turn uses to generate a stream of messages for your update function
+U5PMCBK6V : ah thanks. Stream of messages terminology is relatable to me, coming from js world
+U5PMCBK6V : and the elm compiler checks that each possible message maps to an update function
+U23SA861Y : mm, there is only a single update function, but it checks that the update function handles all possible messages
+U5PMCBK6V : ah thanks
+U5X2ZRFDF : Is it considered bad style to create a type with a single constructor wrapping a record? The down side is that you have to pattern match the constructor to get at the record in order to use dot notation. The up side is the strong nominal typing guarantee.
+U5X2ZRFDF : E.g. `type Foo = Foo { x : Int, y : Int }`
+U5X2ZRFDF : I guess Evan also pointed out that wrapping the record can be used to hide the representation from library users. I probably have no need for that in my case. 
+U2UGVS24E : <@U5X2ZRFDF> I would not consider it bad style at all. In our application we tried to do that as much as possible where it made sense, for the reason you described.  Elm has great pattern matching, so it's very easy to access said fields in a function definition, etc.
+E.g
+
 ```
-this says the Dict has string keys and that the values are node locations
-yep.  this looks like it makes sense to me!
-going to try this out and see if i get there.  thanks again.
-Note that reading from a `Dict` returns a `Maybe` because there's no guarantee that the key would be present (other languages usually return `null` in this case)
-makes sense.  I'll keep an eye out for that.
-is there such a thing as getting an element in a List via an index in Elm? can't seem to see it in the docs
-like if I want the second element, etc.
-list is probably not the best for random access
-but take is what you want
-err sry
-hmm, may have to look at remodelling my logic perhaps
-You can get that behaviour by dropping N-1 elements and then using head
-but if you List is a linked list so it isn't random access
-a `Dict` would allow for random access as well as `Array`
-although there was some talk of `Array` being broken in some way
-hmmm, I'll have a look into them and see if it'll work for what I need
-what is the application this is for
-there might be a better way to do what you want
-basically I just have a list of "Items", a user starts at item 1, does a bunch of stuff via the UI that modifies item 1, then clicks next. Item 2 appears, same thing happens, item 3... etc. At the very last item there'll be a "complete/finish" event at which stage I'll go through all the items and calculate things based off their state
-in typing that all out though, I realise I can probably just calculate that state at each point and then just pop the item off the list and forget about it
-instead of going back at the end and doing it
-a Dict keyed with and Int would work just fine there
-there was also a talk about this I remember seeing
-having a datastructure that is like {previous : List Page, Current : Path, next : List Page} also works
-yeah I think in my case I may actually be alright just doing the state calc at the point of hitting next, then just popping it off the list, as the user can never go "back" to a previous step
-<https://www.youtube.com/watch?v=IcgmSRJHu_8>
-watch this one
-I think I was just incorrectly imaging doing all that calculation at the end of it all having to iterate over the list again
-sweet, I'll cue it up to watch
-well the previous is there so you can do the calculation
-you don't actually need to give users a back button
-yeah true, I'll have a watch of the video and see if I makes sense doing it that way
-I'm sort of just experimenting here a little bit
-Elm's type system is pretty powerful, making your compiler do your bug checking for you is an amazing experience
-I definitely can't foresee ever wanting to go back to vanilla js
-even the small few components I've now built in Elm have been mind-blowing
-So long as it doesn't get bogged down by some of haskell's baggage, it has a bright future
-I've got no experience with Haskell, so not really sure what that entails
-Haskell is very academic with the code written in graduate student style
-It has a lot of people adding new and interesting features but less of a community actually using it to get stuff done
-seems fitting for an academic language haha.
-fair enough, but it's kind of soured FP for a long time because all those feature can make the language quite obtuse
-particularly when you let everyone make their own operators and encourage it in your stdlib
-yup, which I guess like you said, as long as Elm doesn't fall down that same rabbit hole I'm sure it will continue to do quite well
-and gain more traction
-one thing I do very much like about it is how you can enforce one style of writing it too, no more arguments with your fellow devs as to styleguides
-well you certainly can from a formatting perspective, you can still get some stylistic variations though
-yeah I guess in terms of variable/function naming etc. but it's definitely a major step up from the shitfest that is javascript
-<https://github.com/zwilias/elm-demystify-decoders/blob/master/src/Exercise07.elm>
-Seems it's not asking for a decoder at all, just a string?
-It wants you to make a `Decoder` which doesn't do anything but produce the indicated string.
-well it wants a decoder which always succeeds in returning a string
-cough wink nudge
-so it's not going to decode anything?
-It ignores the JSON.
-no, but it needs the same shape as a decoder
-lol ok
-The next exercise will have you use it for something more useful.
-I'm still not convinced of the format of this sort of exersize when there is no place to really go but to ask people if you get stuck.
-I tried exercism for a while and kept running into the same thing
-am i supposed to be using the decodeString on it?
-nvm got it
-supposed to use succeed
-redroyal: how often do you use the `elm-repl`? i found myself slowly understanding things after doing small things and guessing at the output.
-It's not a case of that, it's more lack of not knowing the tools they want me to use
-the hell, my code is compiling with elm-make but it's failing when compiling with elm-test
+myFunc (Foo {x, y}) =
+    x + y
+```
+
+U2UGVS24E : If I recall correctly, you don't need the parentheses if you only have one argument
+U2UGVS24E : And if you need to reference the entire value again, you can use the `as` keyword:
+```
+myFunc (Foo {x, y} as fooValue) =
+   ...
+```
+
+U5X2ZRFDF : Good point, thanks. I have been accessing the record via:```
+myFunc (Foo foo) =
+    foo.x + foo.y
+```
+...so that's another option. What's tricky is if you have a list of foos and you want to map an accessor over them. 
+
+U153UK3FA : <@U5X2ZRFDF> The common pattern for that is to define a `map` function for your type that applies functions to the unwrapped record value
+U5X2ZRFDF : That makes total sense, considering it's a separate type, and Elm likes to keep its map functions clearly distinct.
+U5X2VC483 : <@U0JFEBK6F> <@U2M4VPZ9D> thanks for the heads-up about fluxxu's elm-hot-loader and create-elm-app
+U2M4VPZ9D : No problem <@U5X2VC483> I was at a Meetup and some ClojureScript people were talking about how cool ClojureScript is at hot code reloading. Elm is not at that level, but with the hot loader, it is close enough.
+U5WD40ZA9 : I'm trying to create a input autocomplete dropdown like this one: <http://gregziegan.com/elm-autocomplete/> 
+I've managed to do so, but I would like to add the feature that when the dropdown suggestions is shown and the user presses outside of the dropdown, the dropdown closes. Any suggestions :slightly_smiling_face:?
+
+U0CLDU8UB : The classical JS solution is to make a click handler that closes it for the entire page behind the dropdown.
+U4872964V : <@U0CLDU8UB> but not for clicks in the input field, right? I wonder how to best do that in Elm
+U0JFEBK6F : oscarevert: The way I've done it: Keep track of the rect for your input/dropdown (i.e in your model), you could use something like <http://package.elm-lang.org/packages/debois/elm-dom/1.2.3/DOM#boundingClientRect>) and then set up a subscription to <http://package.elm-lang.org/packages/elm-lang/mouse/1.0.1/Mouse#clicks> to check for clicks outside your input/dropdown
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

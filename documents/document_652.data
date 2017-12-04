@@ -1,1 +1,174 @@
-print(CLASS().something_to_do(1,2).toFloat)```
+U1G51S63S : and in such case branch 1 returning `Tree` and branch 2 `List Tree`
+U3ZNWN526 : (and Also line 132?)
+U5LFUHH19 : OK, I'm going to really think about those lines.  I'm not at all sure I have the logic correct.
+U3ZNWN526 : :smile: (Mostly I just noticed that when I click the frog, the wrong frog moves! Hehe)
+U5LFUHH19 : Yes, you are correct!  Thanks bigly
+U3ZNWN526 : :laughing: Any time!
+U3ZNWN526 : Oh, interesting - almost had it solved, but I just noticed that when I get the last right-frog to Space 1, (with space 0 open) I can't move it over for some reason.  Must be some small logic error there too...
+U3ZNWN526 : (possibly `slots` isn't what you're expecting it to be, since it's usually the frog and the two spaces in front of it, but that frog only has 1 space in front of it?)
+U5LFUHH19 : Yes, I was just seeing this, too.  It helped me to 1) find the solution and 2) step through with only 3 frogs.  I need to iron out that bug.
+U0LPMPL2U : <@U1G51S63S> yeah, my comment there was to say return a `Tree`, not a `List Tree` in branch 2
+U0LPMPL2U : Branch 2 would actually look like:```
+Tree { tree | children = (List.map (insertItem item) tree.children) }
+```
+
+U1G51S63S : <@U0LPMPL2U> ah, got it. thanks! just didn't fully understood comment :slightly_smiling_face:
+U1G51S63S : will try it now
+U1G51S63S : and parentOf/ancestorOf checks if item is parent/ancestor of tree or reversed?
+U0LPMPL2U : It checks if the item should be a direct child of the tree
+U1G51S63S : <@U0LPMPL2U> and `ancestorOf` is not for direct ancestor right? just any ancestor?
+U0LPMPL2U : Correct. Non-direct ancestor (direct is checked by the parentOf function)
+U1G51S63S : hmm, should it be in reversed order than?
+U1G51S63S : ah, no
+U1G51S63S : sorry :slightly_smiling_face:
+U1G51S63S : oh god, looks like it working :smile:
+U1G51S63S : <https://ellie-app.com/3zYfQbMWvMKa1/0>
+U1G51S63S : I am not sure if `unwrapChildren` is the best I can do for self-referenced type alias
+U1G51S63S : <https://ellie-app.com/3zYfQbMWvMKa1/1> - I think this is more expressive
+U1G51S63S : really thank you a lot :slightly_smiling_face:
+U5ABF3BH7 : Hi again. I am still working at creating a select2 (single select -<https://select2.github.io/examples.html>). I got the search box working, thanks to <@U2UGVS24E>  and <@U0JFGGZS6>. Now, I need to implement that clicking on a li will actually select the item just like for select2,  and close the searching div. Has anyone implemented something similar or has examples, especially simple examples to start with?
+U57KYFW67 : Is there a way to install elm packages in a system-wide fashion?
+U5LFUHH19 : Much better, but probably not perfect: <https://github.com/kyclark/elm/blob/master/frogs/Main.elm>
+U4F64AKQV : <@U57KYFW67> As in like NPM global? Isn’t that practice looked down upon these days?
+U5V0HVAKB : <@U57KYFW67> it's better to never install npm packages globally maybe you have a really specific usecase?
+U0LPMPL2U : <@U5ABF3BH7> you'll want to add some `onClick` handlers to the `li`s, create a few more Msg types for selecting a value and opening the dropdown. Your model will need to track some extra state such as open/closed and what the selected value is
+U0LPMPL2U : Here's a simple example: <https://ellie-app.com/3B3JQDgRCqga1/0>
+U5ABF3BH7 : <@U0LPMPL2U> Thanks a lot, it is very helpful!
+U0LPMPL2U : Glad to help :slightly_smiling_face:
+U0LPMPL2U : good luck with your project
+U5ABF3BH7 : <@U0LPMPL2U> Thanks!
+U57KYFW67 : <@U5V0HVAKB> <@U4F64AKQV> It feels like a waste to have to redownload and recompile every time. Especially if everything is semantically versioned. That's a big difference between what npm does and what a typed language should be able to do.
+U57KYFW67 : But if it's not possible, oh well. It was just a curiosity
+U4LKS2ZTR : The reason behind chrome showing the JSON instead of the page has to do with the fact that I was differentiating between the 2 on the backend. So chrome sees the same URL and caches it wrongly. I specifically added `.json` to the URL and now it doesn’t happen anymore.
+U3SJEDR96 : <@U4LKS2ZTR> ooh, right! another thing that might work is adding content-type headers on the backend, and possible `vary`, too, though I _think_ content-type should be enough to have chrome see the difference
+U3SJEDR96 : <@U57KYFW67> that's actually quite possibly part of 0.19 - install everything, versioned, in your home-folder, and pull it from there when you install something in a project.
+U3SJEDR96 : though you won't do a `--global` or something, it would just be default behaviour
+U5V0HVAKB : <@U57KYFW67> you can use yarn it's a lot of faster than npm
+U0L93MVJN : Does anyone use folkertdev/outmessage ?
+U0L93MVJN : Someone was telling me about it at elmconf Europe and I was about to give it a go
+U1CE9DL9H : Haven't needed it for most actual apps, but I guess you have chatty components?
+U0L93MVJN : Mostly not, but there is the odd one
+U0L93MVJN : Currently I am intercepting messages in `Msg` from the level above, but its ugly and hacky
+U0L93MVJN : Hey, you are the author of that library :slightly_smiling_face:  How about that
+U1CE9DL9H : Yea, well I think you should start out by returning more from update, maybe a sum type, but without using the package at first
+U0L93MVJN : I've actually done that before and got annoyed with it because of the wiring issues you mention in the README
+U1CE9DL9H : well, that is just sort of how elm works. The more time passes, the less I'm satisfied with the outmessage package. It doesn't actually make the code that much shorter; it's not that much better to justify pulling a package in for the projects I've worked on
+U1CE9DL9H : if you have some example of nasty code we can look at it together
+U0L93MVJN : Hmm - well, if that's coming from the package author then fair enough :slightly_smiling_face:
+U0L93MVJN : Ok, I'll write it without the library and see how it looks
+U1CE9DL9H : well given elm's architecture there just isn't that much you can do. If you see the `OutMsg` as the api of your component, then write `OutMsg -&gt; Cmd Msg` and pipe that into your update function that is very clear and simple. Wrapping in helper functions doesn't give you much extra
+U3KSN5MAL : hmm, need a bit of help finding an answer
+U3KSN5MAL : what's the best way to open a save as, or open dialog from elm
+U3KSN5MAL : so i can throw the file url to some js fileapi stuff?
+U3SJEDR96 : for opening: using an &lt;input type="file"&gt;, probably. Save as, I'm not too sure. &lt;a download="filename" href="path_to_file"&gt; might work but depends on what you actually need to happen, I suppose
+U3KSN5MAL : Can i make that input type in elm?
+U3KSN5MAL : I couldn't find it in the reference
+U3SJEDR96 : `input [ type_ "file" ] []` will probably do. It's just a generic file-upload element, but you can handle it with elm+ports :slightly_smiling_face:
+U3KSN5MAL : I really need to be able to call it from an update
+U3KSN5MAL : hmm
+U3KSN5MAL : ok i'll try that
+U3SJEDR96 : I think I have an example somewhere
+U3SJEDR96 : <https://ellie-app.com/3qpgdbQFFfqa1/1>
+U3KSN5MAL : thanks!
+U3SJEDR96 : ah. Yeah, I'm fairly sure there's no cross-browser way to trigger such a thing if you're already outside a user-event
+U3KSN5MAL : don't need cross browser, only chromium. (photoshop plugin)
+U3KSN5MAL : maybe adobe has implemented something
+U3KSN5MAL : i'll have a look
+U3KSN5MAL : thanks for the help!
+U3SJEDR96 : yeah, I'd guess they would have, definitely worth checking that out
+U3KSN5MAL : hard to say with this stuff
+U3KSN5MAL : they don't even give me access to make hotkeys -_-
+U3KSN5MAL : AH found it!
+U3KSN5MAL : wasn't where i was looking
+U3SJEDR96 : is it just me or is their plugin SDK documentation absolutely horrible?
+U3KSN5MAL : makes me want to die tbh
+U3KSN5MAL : the examples plugin is so amazingly bad
+U3KSN5MAL : the amount of nested tables is some horrible abortion
+U3KSN5MAL : as far as i know i'm the only person to use elm for this stuff so far too
+U3KSN5MAL : look at this crap -_-
+U3KSN5MAL : how this is supposed to be clear example code i'll never know
+U41NK9BM4 : Crystal clear…
+U3KSN5MAL : there was only one relevant line of code...
+U3KSN5MAL : ` var result = window.cep.fs.showOpenDialogEx(...); `
+U3KSN5MAL : the rest was just silly verbose html
+U382GQ6KH : Hello. I want to use <http://package.elm-lang.org/packages/abadi199/datetimepicker/latest>. In the documentation it is said to use css class `"my-datetimepicker"` but i can't find it anywhere. Any suggestion?
+U3KSN5MAL : it doesn't work if you use that?
+U382GQ6KH : <@U3KSN5MAL> yeah, the shape broke
+U3SJEDR96 : <@U382GQ6KH> you probably don't really need that, but you will need to add the actual css somewhere, either using `elm-css` and `DateTimePicker.Css.css` or by adding <https://raw.githubusercontent.com/abadi199/datetimepicker/3.0.3/styles/styles.css> somewhere
+U3KSN5MAL : yeah i was about to say, looks like a css thing
+U3KSN5MAL : have a look at the demos on the github page
+U3KSN5MAL : <https://github.com/abadi199/datetimepicker/blob/3.0.3/demo/Demo.elm>
+U41NK9BM4 : Yep, sounds like a custom CSS class you can use to tweak/augment styling
+U3KSN5MAL : they are usually better than looking at the reference if you are stuck
+U3KSN5MAL : in this demo he doesn't even seem to be referencing a class in the view
+U3KSN5MAL : so try without it
+U41NK9BM4 : Most probably because it is blindly applied to the generated date picker
+U3SJEDR96 : yup; the custom class referenced in the docs is probably just to show that you can add further styling yourself; or for an older version
+U382GQ6KH : <@U3SJEDR96> <@U3KSN5MAL> <@U41NK9BM4> yeah i know it's css problem but i can't find the class in documentation. too bad i'm a newbie so i only know injecting the css to css file but not `elm-css`. thanks for the answer :slightly_smiling_face:
+U3SJEDR96 : Yeah, it's a little weird to have that unrelated class in the examples there
+U3KSN5MAL : No worries, we are all noobies at some point
+U0LPMPL2U : The name `"my-datetimepicker"` implies user-defined class to me, but I agree it should probably be mentioned explicitly.
+U0LPMPL2U : doc PR maybe? :slightly_smiling_face:
+U3SJEDR96 : junior for life :sign_of_the_horns:
+U3KSN5MAL : i constantly think i'm a shit coder as i only ever work by myself so i have nothing to judge myself by xD
+U382GQ6KH : <@U3SJEDR96> <@U3KSN5MAL> :smile:<@U0LPMPL2U> i thought the author is a bit busy now. so many unresolved issues on this project
+
+U41NK9BM4 : I would use `&lt;input type="date"… &gt;` for now :slightly_smiling_face:
+U382GQ6KH : <@U41NK9BM4> :facepalm: why i forgot about this? any suggestion for time type?
+U41NK9BM4 : There’s `datetime` and `datetime-local` it is helps :slightly_smiling_face:
+U41NK9BM4 : But really, my suggestion was that if this was really blocking you there are temporary shortcuts.
+U382GQ6KH : <@U41NK9BM4> nice suggestion. i'm thinking too hard that i forgot these simple solutions. thank very much :smile:
+U41NK9BM4 : Support is not so good, that’s why is a temporary patch: <https://caniuse.com/#search=datetime>    :slightly_smiling_face:
+U5DJNFLUD : New post!
+U5DJNFLUD : <https://blog.reifyworks.com/fuzz-testing-makes-you-a-better-programmer-e065b04e7d32>
+U0RPQMZ9S : <@U5DJNFLUD> <#C0K384K4Y|news-and-links> is also good for such things
+U5DJNFLUD : <@U0RPQMZ9S> Oh cool thanks
+U382GQ6KH : <@U41NK9BM4> 82.67% looks good for me :grimacing:
+U41NK9BM4 : Hehehe.
+U37HUSJ4R : I’ve watched a talk by <@U0CL0AS3V> where he mentions that some super long form in the No Red Ink application is much easier in elm than react ever was. I was wondering how the validation for this form is handled? The reason for my question is I am thinking of using Elm for a fairly complex form in my application, I need to do such things as ‘if input x is 5 then throw a error on field y’ 
+I’ve noticed in <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Page/Login.elm#L183> Richard is using his validation lib but this only seems to include simple validation rules. Is there an community agreed way on how to handle long/complex forms? Should I find a package? Or will vanilla Elm be enough?
+
+U0CL0AS3V : &gt; I was wondering how the validation for this form is handled?
+we use <http://package.elm-lang.org/packages/rtfeldman/elm-validate/latest>
+
+U37HUSJ4R : <@U0CL0AS3V> Thanks for the response :slightly_smiling_face: I assume you then write your own custom validators?
+U0CL0AS3V : yeah when necessary
+U37HUSJ4R : <@U0CL0AS3V> Am I correct in saying `ifInvalid` is the method used to build up custom validators?
+U37HUSJ4R : could you share an example of a custom validation (if possible, would be a great help :))
+U0EUHKVGB : <@U37HUSJ4R> Look at the examples.
+U0EUHKVGB : It shows how to make a custom validator for a model
+U0EUHKVGB : ```validateModel : Model -&gt; List (Field, String)
+validateModel model =
+    Validate.all
+        [ .name  &gt;&gt; ifBlank (Name, "Please enter a name.")
+        , .email &gt;&gt; ifBlank (Email, "Please enter an email address.")
+        , .age   &gt;&gt; ifNotInt (Age, "Age must be a whole number.")
+        ]
+       model
+```
+
+U6083PEG3 : Hello everyone! :slightly_smiling_face:
+U0EUHKVGB : `.name` is a function that will take the model, and get the `name` field from it
+U0EUHKVGB : `&gt;&gt;` is the syntax for combining two functions into one
+U0EUHKVGB : <@U37HUSJ4R> If you are just starting with Elm, I would recommend maybe just writing your own code for now.
+U37HUSJ4R : thanks <@U0EUHKVGB>
+U37HUSJ4R : so what would the type signature look like for a custom validator? for example `ifFoo`
+U37HUSJ4R : `ifFoo : Model -&gt; Validator error String`?
+U0EUHKVGB : No, `Validator error String`
+U0EUHKVGB : It is confusing because in that library, `Validator` is a type alias for a function
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,18 +1,92 @@
+U39DE7RQ9 : OK, thanks!
+U6AU4N1HR : Hey, I'm doing Json.Decode.map5 over a JSON and creating record User. I want to add another field to that record, which is a list. The problem is, this list is not a part of JSON. I want to intiliaze record User with a empty list. Is it possible to somehow use empty list with Json.Decode.map6?
+U48AEBJQ3 : <@U6AU4N1HR> The record constructor is just a regular function. You could instead go `\a b c d e -&gt; MyRecord a b c [] d e` You could also use `Json.Decode.succeed []` with the `map6`
+U14Q8S4EM : You can do `succeed list`
+U14Q8S4EM : `Json.Decode.succeed whateverListYouWanted`
+U14Q8S4EM : Yeah what <@U48AEBJQ3> said
+U6AU4N1HR : Thanks!
+U6AU4N1HR : Didn't see the succeed function
+U48AEBJQ3 : <@U6AU4N1HR> 
 ```
-Hello everyone! :slightly_smiling_face:
-`.name` is a function that will take the model, and get the `name` field from it
-`&gt;&gt;` is the syntax for combining two functions into one
-<@U37HUSJ4R> If you are just starting with Elm, I would recommend maybe just writing your own code for now.
-thanks <@U0EUHKVGB>
-so what would the type signature look like for a custom validator? for example `ifFoo`
-`ifFoo : Model -&gt; Validator error String`?
-No, `Validator error String`
-It is confusing because in that library, `Validator` is a type alias for a function
-`type alias Validator error  = subject -&gt; List error`
-notice how `subject -&gt; List error` matches our `validateModel` example
-where the `subject` is `Model`, and the `error` is `(Field, String)`
-Does that make sense to you?
-it does
-So, our `validateModel` _is_ a custom validator
-it just doesn’t take an error message, which the other validators do
-so if I wanted to create my own `if..` where I could pass my model and then do a custom assertion, what would that look like?
+decodeUser : Decode.Decoder User
+decodeUser =
+    Decode.map5
+        (\id userName firstName gender booksCount -&gt;
+            User id userName firstName gender booksCount [])
+        (Decode.field "id" <http://Decode.int|Decode.int>)
+        (Decode.field "username" Decode.string)
+        (Decode.field "first_name" Decode.string)
+        (<http://Decode.at|Decode.at> [ "profile", "gender" ] Decode.string)
+        (Decode.field "books_count" <http://Decode.int|Decode.int>)
+```
+
+or, if you moved that field to the top of the record:
+
+```
+decodeUser : Decode.Decoder User
+decodeUser =
+    Decode.map5 (User [])
+        (Decode.field "id" <http://Decode.int|Decode.int>)
+        (Decode.field "username" Decode.string)
+        (Decode.field "first_name" Decode.string)
+        (<http://Decode.at|Decode.at> [ "profile", "gender" ] Decode.string)
+        (Decode.field "books_count" <http://Decode.int|Decode.int>)
+```
+
+U6AU4N1HR : <@U48AEBJQ3> ok i get it, thanks
+U4RR7KX45 : ```type alias Year =
+    Float
+
+
+type alias Seconds =
+    number
+
+
+type alias Details =
+    ( Year, Seconds )
+```
+what's wrong with this code?
+
+U4RR7KX45 : gives me the following error```
+Type alias `Seconds` must declare its use of type variable number
+
+21|&gt;type alias Seconds =
+22|&gt;    number
+
+You probably need to change the declaration like this:
+
+type alias Seconds number = ...
+
+```
+
+U6CBXFWHG : trying to setup my atom ide for elm, and I get a linter error
+module Main exposing (..)
+
+is all I have in the file, and the linter says "The system cannot find the path specified."
+
+any ideas?
+
+U6CBXFWHG : Im trying to follow the elm tutorial on <http://knowthen.com|knowthen.com>
+U635238TG : is your file named Main.elm?
+U635238TG : I had something like that happen to me when I didn't have a Main.elm for it to pull in. I'm a total newb though
+U153UK3FA : <@U4RR7KX45> that's not going to work, you need to specify what type of `number` will be in that type
+U6CBXFWHG : test.elm
+U6CBXFWHG : just renamed it and still have the same issue
+U153UK3FA : <@U4RR7KX45> `number` isn't a type so you can't alias it, it's a compiler magic typeclass 
+U6CBXFWHG : I'm using windows 7 and it was already a pain to get the path for the elm-format to work, I am open to downloading a different ide, I was using vscode and gave up to try atom...
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

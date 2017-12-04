@@ -1,7 +1,464 @@
-```
-I couldn't find a good tutorial that explains this so I sort of followed the cats git example
-but couldn't get far
-<@U4RR7KX45> What is in the list?
-at the moment I'm just hard coding it on the api
-and it's just an array of strings
-`Decode.list : Decoder a -&gt; Decoder (List a)` So you need to hand it a decoder for each item in the list and it will apply it across the whole list.
+U0HERRQR1 : botkit uses promises and ES6
+U0HERRQR1 : which is supported by node 4, 5, 6
+U0HERRQR1 : sorry sourcebot uses promises and es6
+U0HERRQR1 : on the other hand botkit uses ES5 and callbacks
+U0HERRQR1 : the aim of sourcebot is to solve one problem: write code once and use it on multiple platforms
+U1ZFG84E4 : I get that. You're saying the major difference is promises instead of callbacks?
+U0HERRQR1 : yes, the chance of your process to be exited on error is 0 if you use sourcebot
+U0HERRQR1 : also we have a command line interface
+U0HERRQR1 : ```npm i sourcebot-cli -g```
+U0HERRQR1 : and then u can make this:
+U0HERRQR1 : ```sourcebot create hello-world```
+U0HERRQR1 : it will create a folder with a starter pack
+U1ZFG84E4 : I'm guessing there's no chance of those changes being merged upstream, or some kind of ES6 shim in front of botkit?
+U0HERRQR1 : i am actually a contributor of botkit itself, i've been merging botkit's pull requests for the past year
+U0HERRQR1 : it is pretty hard at the moment to refactor all of the code to ES6 and enable promises
+U1ZFG84E4 : Ahhhh
+U0HERRQR1 : therefore, a new an a cleaner approach to bot framework itself, seemed a better idea for me
+U0HERRQR1 : currently, it is just an experiment
+U0HERRQR1 : we want the word to be out
+U0HUTFBHS : Neat!
+U0HUTFBHS : Nice work <@U0HERRQR1>!
+U0HERRQR1 : ty
+U06Q2D6TW : <@U04SM6T2H>
+U06Q2D6TW : <@U04SM6T2H> congrats on your howdy work and success
+U2PTKV02C : just started playing around with botkit tonight
+U2PTKV02C : anyone know if there's a way to freeze conversations in custom storage?
+U2PTKV02C : when i restart my bot mid-conversation, the end user seems to lose their place and has to start over again
+U0HUTFBHS : oh interesting
+U0HUTFBHS : There should be a way to save that state.
+U2PTKV02C : i agree
+U2PTKV02C : any known workarounds?
+U0RRCPDK9 : Hey fellas :wave:Things are going strong with Yala (you can check her out right here - just @-mention yala), but I'm struggling a bit with conceptualizing DMs. How do you manage DMs in a workplace environment? Do you DM everybody who's interacted with the bot? Limit DMs to the bare minimum and communicate via email? What's the best approach?
+
+U0RRCPDK9 : Oh, plugged in a test account to <@U1TSMM4EN>.
+U04SM6T2H : You mean with updates?
+U04SM6T2H : Or like, news?
+U04SM6T2H : You definitely _do not_ want to DM everyone
+U04SM6T2H : Probably best to only DM the user who installed it
+U04SM6T2H : Or users who regularly use it
+U04SM6T2H : (with news and updates)
+U04SM6T2H : I know whenever a bot DMs people on my team
+U04SM6T2H : everyone groans
+U04SM6T2H : and looks at how to uninstall it
+U0HBN0L9M : by default most app makers DM only the "champion" who installed the bot
+U0HBN0L9M : I like the idea of adding the heaviest users <@U04SM6T2H>  thanks
+U0GT29N3A : We flag users who interacted with us (either mentioned us or talked to us in DM) and use that.
+U2AQYMAQP : suggestions on why my bot won't respond to ppl after the initial time they have talked to it? Its on fb messenger. Never had this problem before locally. Now running in cloud
+U2QT7L1B7 : what cloud provider?
+U2QT7L1B7 : also is it a free account or paid?
+U2AQYMAQP : its on a digitalocean droplet. I wrote the code so its not a GUI bot builder. Built it using botkit and it seems to not like responding after the first conversation.
+U2AQYMAQP : so if you engage with the bot, it responds continuing the conversation. but you can't come back to do another conversation
+U2QT7L1B7 : do you have the storage setup on the bot?
+U2AQYMAQP : yeah using rethink but only called to store info at the very end of the conversatoin
+U2QT7L1B7 : turn on debug when you run it
+U2QT7L1B7 : when you're setting up the controller and wait it in the terminal window
+U2QT7L1B7 : watch it even
+U2AQYMAQP : when I run it locally I dont get any errors and can delete my conversation and start it over as I please. But as soon as its on DO it messes up
+U10GJTHV2 : Hey everyone! Is anyone else getting a "socket hang up" originating from the tickCallback?  Or just general connection issues right now?  It just started happening an hour ago, and nothing's changed on our end... anyone know if Slack is doing something to the API right now?
+U1AQ8MY3U : I'm seeing a lot of websocket errors in the last week or so
+U1AQ8MY3U : my bot has dropped a fair few times
+U10GJTHV2 : Thanks Ian.  It looks like we're stable... for now...
+U1AQ8MY3U : I'm finding heroku hard to get logs out of :confused:
+U0HUTFBHS : I thought there was a cli command for that?
+U0HUTFBHS : granted it's been years since I herokued.
+U1AQ8MY3U : yeah I can see a ton of heroku related logs
+U1AQ8MY3U : I have a bunch of `print` statements for logging but for whatever reason they don't all appear in the logs, or seem to have any kind of order :joy:
+U1AQ8MY3U : its written in Swift, which is fairly new on the server
+U1AQ8MY3U : I'm gonna add a custom logging object which should be much better though
+U2QF05QM6 : what's the event that is triggered by onboarding for a bot?
+U2QF05QM6 : like, when a new user joins the team
+U2QF05QM6 : on the flip side, how do you onboard when you're adding a bot to a team? you certainly don't want to dm everyone from the bot informing how to use it...
+U0HUTFBHS : oh lord no please
+U0HUTFBHS : I get enough spam from slackbot already
+U0HUTFBHS : one dm per slack
+U0HUTFBHS : I think a human making an announcement like “Hey, I just installed mybot which does X.  dm mybot ‘help' to find out more."
+U0HUTFBHS : you do have a help feature, right?  :slightly_smiling_face:
+U2QF05QM6 : yep yep
+U2QF05QM6 : so basically, when a bot comes onto an existing team, perhaps just have it wait until a human dm's it with help
+U2QF05QM6 : but would you think it's a good idea to have an existing bot dm a new user, with onboarding messages? similar to how slackbot or skillflow have preloaded with dm's?
+U2QF05QM6 : and if so, what's the event from slack's event list that i should listen for?
+U1TAT1DMY : probably not
+U1TAT1DMY : best way to introduce a bot
+U1TAT1DMY : is listen for channel_joined event
+U1TAT1DMY : and have the installer invite the bot to a channel where it introduces itself
+U0HUTFBHS : Ah, that's nice.
+U2CCKNCLR : I try to connect my slack app to slack. But I am getting a "Error connecting bot to Slack: fatal_error". I use BOTKIT.
+U0HBN0L9M : <@U1AQ8MY3U> many disconnects here as well in the last few days
+U0HBN0L9M : error 408
+U2CCKNCLR : What is going on?
+U2QDKM3LP : I get the same error occasionally
+U0HBN0L9M : <@U2CCKNCLR> you should ask in <#C0AV5N8NA|botkit> I think
+U2QDKM3LP : but ok when i rerun the code
+U2CCKNCLR : Thank you matBut I am unable to manage my slack apps also, it sais "something went wrong" but the status page of slack shows no major error.
+
+U0GT29N3A : FYI you're not alone, I think there were some API issue :slightly_smiling_face:
+U2CCKNCLR : Thanks for the info <@U0GT29N3A> They should have put that on the status page, then.
+U2R992RQC : Hi all, would love it if any freelancers here could take a look at my product <http://www.pipelinedaily.com|www.pipelinedaily.com> - Pipeline sends you handpicked freelance projects every week, tailored to your needs. You can get 10% off now with the code 'TENDISCOUNT'. Thanks guys :slightly_smiling_face:
+U2R9V2YTE : Hi, anyone able to answer couple of questions about the API rate limit ?
+U0LR6R73K : <https://dev4slack.slack.com/archives/general/p1476875619001207>
+Does HUNDREDDISCOUNT also work? :grin: 
+
+U21U8SZ2P : hi all — we at HBR have launched our bot to the public, and we got this nice writeup from Digiday. Pretty psyched about it! <http://digiday.com/publishers/harvard-business-review-launched-slackbot-delivers-workplace-advice/>
+U04SM6T2H : <@U21U8SZ2P> cool!
+U1AQ8MY3U : fwiw re: those websockets dropping, im not using botkit
+U1AQ8MY3U : so I don't believe its the client side
+U1AQ8MY3U : <@U0HBN0L9M> cc:
+U1TAT1DMY : When in doubt, port over all possible functionality to the events API
+U0HUTFBHS : Yeah, I need to look into that.
+U2QT7L1B7 : why does botkit wrap url in a response in &lt;&gt; and encode it?
+U1TAT1DMY : <@U2QT7L1B7> what do you mean?
+U2LGQFAHJ : even an external link would be helpful
+U0HBN0L9M : when someone shares a picture
+U0HBN0L9M : you get a file_shared event
+U0HBN0L9M : with the url
+U0HBN0L9M : you can download them using your bot token
+U2LGQFAHJ : donethanks
+
+U23KZ4R8V : <@U2LGQFAHJ> iirc the event only contains the file_id though, a separate call to the web api is needed to get the url or download urls
+U23KZ4R8V : the event payload look like: {"token":"123","team_id":"123","api_app_id":"123","event":{"type":"file_shared","file_id":"123","user_id":"123","file":{"id":"123"},"event_ts":"event_ts"},"type":"event_callback","authed_users":["123"]}
+U23KZ4R8V : the separate call: <https://api.slack.com/methods/files.info>
+U2LGQFAHJ : <@U23KZ4R8V> thanks
+U0SPQ5PDY : Hi yall! I wrote a post about what I learnt as a PM at a slack bot startup. Wondering which is the channel to post it?
+U0HUTFBHS : Wow that's a good question.  Wherever it is, I'd like to see it.
+U0Y1UC0A3 : maybe <#C0JQ4TX7Z|announcements>? i don't know much about article posting rules
+U0V93GE5R : i think its good for general :smile: if it isnt super spammy its probably useful to everyone
+U0HUTFBHS : I agree with peter.
+U0HUTFBHS : I'm not in announcements because in most slacks, people overuse the alert flags.
+U0HBN0L9M : general is good
+U0SPQ5PDY : Cool! Here you go :slightly_smiling_face: I'd love to get feedback - the ideas in it, the writing, anything! Please feel free to be as critical as you want, and if you like it, please “Recommend”! 
+<https://medium.com/@samudranb/building-a-product-that-is-a-bot-5531c992344f>
+
+U1AQ8MY3U : websocket died again today
+U1AQ8MY3U : :disappointed:
+U0HUTFBHS : Well, what that really means is that we need to implement better recovery scenarios on our end.  Daemonization, for instance.
+U1AQ8MY3U : yeah I need to dig into my bot a little bit to see if I can improve the resilience
+U1AQ8MY3U : it does have a retry mechanism but when this specific error pops up it just continues to fail until it hits the max retry
+U1AQ8MY3U : so I'll need to dig a little deeper !
+U0K4TM8N8 : <@U0K4829UY> Not cool, don't DM people <https://dev4slack.slack.com/archives/general/p1475952559000940>
+U0K4829UY : Saved this <https://dev4slack.slack.com/archives/general/p1475952559000940|message> in: :label: *Not cool <https://my.pogo.ai/dev4slack/l/not-cool?user=mp|(1)>* ? _2 views_ ? _2h ago_
+U0K4829UY : Saved this <https://dev4slack.slack.com/archives/general/p1475952559000940|message> in: :label: *don't DM people <https://my.pogo.ai/dev4slack/l/don-t-dm-people?user=mp|(1)>* ? _2 views_ ? _2h ago_
+U0K4TM8N8 : Seriously stop DM'ing me :scream:
+U07VCKRUK : I've disabled Pogo and I'll be in touch with the developer ... egad.
+U0DJZMV7G : Hi everyone
+U0DJZMV7G : Pogo developer here
+U0K4829UY : :thinking_face: Oops, I didn't get that. What should I do for _developer here_?
+U0DJZMV7G : we're definitely not DM-ing everyone
+U0DJZMV7G : only those who have interacted with the bot at some point in the past
+U0HUTFBHS : I had not, and I got a dm.  You might want to check your logic.
+U0DJZMV7G : Double checking now
+U0DJZMV7G : sorry for the trouble
+U0HUTFBHS : Hey, it's bots.  No worries.  :slightly_smiling_face:
+U0DJZMV7G : we've DM-ed about 6% of users from this Slack
+U0DJZMV7G : our intention is to DM only people that have interacted with Pogo
+U0DJZMV7G : in most cases a small % of the team
+U0DJZMV7G : I can double check our logic, we might be a bit overzealous
+U0DJZMV7G : when we mark users as having interacted with Pogo
+U0HUTFBHS : That makes sense.  Also, there's a convention here where you can create an <#C1PETBX18|app-pogo> channel if you want to try some new functionality.
+U0DJZMV7G : We've mistakenly identified onewheelskyward and netweb as having interacted with Pogo in the past. I found a bug in how we track usage state, and we'll address it before sending any more messages.
+U0DJZMV7G : and some more users on this Slack, not just you two
+U0DJZMV7G : We've sent messages to ~6% of users on this Slack
+U0DJZMV7G : which is more than users who have used Pogo due to this bug
+U0DJZMV7G : but fortunately less than everyone
+U2AQYMAQP : just caught up with this group. Super excited about the promises vs callbacks. Working with callbacks in botkit is the only thing I dont love about it
+U0HUTFBHS : <@U0DJZMV7G>++ for the analysis
+U1116QM2Q : websocket did die again on me today but fortunately i got it fixed the other day with the help of <@U0HUTFBHS>
+U1116QM2Q : just catching that event and retrying the connection seems to work
+U1116QM2Q : wonder if i should switch to the events api though would it fix the issue?
+U1EP0GH2T : hello, does anyone know if it possible to get the list of channels a user (or bot) belongs to ? (edited)<http://users.info|users.info> does not return that info
+
+U1116QM2Q : if you're using botkit you can check all the channels that the bot knows and there will be a property to say if he's a member or not
+U1116QM2Q : ` <http://bot.api.channels.info|bot.api.channels.info>`
+U1116QM2Q : in the response there's a variable -&gt; `is_member = response.channel.is_member;`
+U1116QM2Q : <@U1EP0GH2T>
+U15AQ2T6X : is there a good room to ask about the link unfurling functionality?
+U1DM2B4SY : <#C0K8617D5|slack-api> might be a good start
+U15AQ2T6X : more interested in details about how slack fetching the data rather than api details
+U15AQ2T6X : =/
+U15AQ2T6X : i.e. spotify gets an iframe with a functional ui, was curious if thats a something they are doing manually or if its related to the link expanding robot
+U1EP0GH2T : <@U1116QM2Q> : thanks, since i did not find any dedicated api, i'm using channels.list that list of team's channels with its member... and i check if the target user is part of members
+U1116QM2Q : yeah it works too :slightly_smiling_face: it's a bit of a stretch but maybe you could make a PR to botkit (if you're using it that is) with that function i'm sure someone else has needed something like `function isMemberOfChannel(userID, channelID)``
+U0V93GE5R : We've started posting our Talkabot videos: <https://blog.howdy.ai/talkabot-conversation-with-ted-livingston-ceo-kik-38955988669e#.y40r3zh2n>
+U04SM6T2H : That conversation was super interesting!
+U04SM6T2H : Ted was super nice too
+U1116QM2Q : oooh nice i've been waiting for them eagerly!
+U1116QM2Q : wanna binge watch most of them :smile:
+U1116QM2Q : cool stuff <@U0V93GE5R> <@U04SM6T2H>
+U04SM6T2H : it will be a while before they are all out
+U04SM6T2H : because they are so good
+U04SM6T2H : we want to take time to present them in the best way
+U04SM6T2H : but
+U04SM6T2H : THEY'RE COMING NOW
+U04SM6T2H : peter is kicking ass
+U1116QM2Q : good :stuck_out_tongue: i can wait no problem as long as they do get released :smile:
+U0D1YNBEE : :wave: Hi friends! We have a post up on the Slack Platform blog talking about our approach to building our new Beep Boop Slack App.  <https://medium.com/slack-developer-blog/lessons-learned-from-beep-boops-new-slack-bot-bd250e8d9887#.2vykcpp8d>
+U0D1YNBEE : Also, <@U2RNTQRN3> is installed in this team as well if you want to try it out. There's not much to do if you don't have any Beep Boop projects though :slightly_smiling_face:  — would love any feedback including what you think of the term “appbot” :wink:
+U0Y1UC0A3 : sad i couldn't make it to talkabot. thanks for sharing the video! <@U0V93GE5R>
+U235HG07K : Nice article <@U0D1YNBEE> !
+U0HUTFBHS : You can take that to a #app-yourbot channel instead of dropping it in general.
+U2RRADN8M : <@U0HUTFBHS>  sorry about that, I deleted it. Thank you so much!
+U2T7TC4FL : I seem to be having issues with slash commands not registering, Is there a channel for posting questions in relation to this, or is here fine?
+U2T8Y34KA : Hi, I have integrated Slack API into my application. I am working with PHP and found Simple SDK (<https://github.com/threadmeup/slack-sdk>) for interacting with <http://Slack.com|Slack.com> via the API. I have send message to channels and its working. Now I want to send Direct message to user. any one can help on this? 
+I want to send message to slack user when an order placed on my application.
+
+U235HG07K : <@U1W70V7S6> have you looked at <@U0K0DQ6G0> ?
+U235HG07K : just type '/apps statsbot'
+U235HG07K : enjoy
+U1ZMN2FD1 : last i checked that gem doesn't handle the sign-in-with-slack button right
+U2BRSHB54 : Guys, I'm are working on a bot for a multiple teams using a botkit! What are the best approach to scale and control the websocket connections you think ?
+U0EJEUZRD : Thanks, <@U1ZMN2FD1>.  You're talking about this same gem? <https://github.com/kmrshntr/omniauth-slack>
+From what I read, it seems like it's built to enable a custom workflow to sign in via Slack, but maybe there's a specific "sign in with Slack button" that you're talking about?
+
+U2AQYMAQP : anyone have some presentations/videos of doing an intro to chatbots? Interested in how ppl explain and walk those new to chatbots through presentation
+U2AQYMAQP : thinking something like a meetup talk or conference deck
+U0EJEUZRD : <@U2AQYMAQP> hopefully this is helpful: <https://www.youtube.com/watch?v=0hacY24MAjA>
+U2TM6BYUX : does anybody have a super quick "Add to Slack" app that just prints out the details? I'm writing a bot for one team/developing on it, and don't want to fuss around with writing a full proper system right now. just want my bot token. :slightly_smiling_face:
+U0D1YNBEE : <@U2TM6BYUX>: been a long time :) you should check out  <@U2RNTQRN3> 
+U2TM6BYUX : ohai <@U0D1YNBEE> :slightly_smiling_face:
+U2TM6BYUX : oh hell that's fantastic.
+U2U7UJ10C : Hey, the article I wrote and mentioned last night at sf meetup is on <https://medium.com/@girlie_mac/creating-a-slack-command-bot-from-scratch-with-node-js-distribute-it-25cf81f51040#.9vqaj6ry6> :cat2: It's the step-by-step to write a slash command with node.js :smiley:
+U04SM6T2H : We posted Andy Mauro's talk from Talkabot this morning:
+U04SM6T2H : <https://blog.howdy.ai/talkabot-lessons-from-voice-recognition-andy-mauro-automat-154d3191aa87#.h1zc6efhw>
+U04SM6T2H : That was one of the most popular and information dense talks of the event.
+U04SM6T2H : Andy has a ton of experience building intelligent agent software
+U04SM6T2H : and is now applying that to building bot tools
+U04SM6T2H : I highly recommend watching the video!
+U235HG07K : Thanks for the post <@U04SM6T2H> . Very insightful
+U04SM6T2H : credit to Andy for saying the smart stuff and <@U0V93GE5R> for writing it up :slightly_smiling_face:
+U235HG07K : Its well written. Best 3 mins of today's morning!
+U0V93GE5R : <@U235HG07K> :smile:
+U2KM45WFN : Write up for last night's Slack meetup: thanks for pulling it together! <https://medium.com/@ctraganos/bot-does-it-work-ec29644ab3ca>
+U235HG07K : Thanks for the mention <@U2KM45WFN> !
+U2R9V2YTE : Hi, is there any way to test message buttons integration? Im lost in documentation, it says you cannot use buttons with custom integration, but I dont see any way to install slack app in development to or team?
+U21U8SZ2P : anyone have advice on how to make team members aware of your Slack bot when it's a DM-based bot? Our current workflow is asking the installing user to `invite` the bot to a public channel, at which point the bot introduces itself. But only 40-45% of installers are doing that invite step, so I worry that we're losing a lot of potential users.
+U0HUTFBHS : <@U21U8SZ2P> Tell them about it?
+U0554MQJB : <@U21U8SZ2P> this is a big problem - I think Slack should open up a right sidebar menu to 3rd party apps &amp; bots so there is a clear place to discover and interact with them.
+U2VCS99HT : Um, guys :) sorry if I'm at the wrong place, but I am reading the *botkit* docs in github :) I am looking how to make the bot to speak to a channel what I wrote as a direct message
+U2VCS99HT : Any help on that?
+U2VCP98AY : I hope this is the right place to ask :slightly_smiling_face: I've also looked through the botkit documentation and I was wondering if it is possible to send a message through botkit at specified times? I could only find one question on SO which is still unanswered.
+U120R8V4Y : Hi guys. I created a PHP library that helps you with developing Slack bots (using the new Event API). Its API is similar to botkit :slightly_smiling_face:<https://github.com/mpociot/slackbot>
+
+U2R9V2YTE : Hi, is there any way to test message buttons integration? Im lost in documentation, it says you cannot use buttons with custom integration, but I dont see any way to install slack app in development to or team?
+U0HT1NBLH : botkit people, you might want to ask in <#C0AV5N8NA|botkit>
+U0HT1NBLH : <@U2R9V2YTE> you need to use a ‘Slack App', you can create one here: <https://api.slack.com/apps>
+U2R9V2YTE : <@U0HT1NBLH> Yes, but I cannot find how to install non-published slack app to my team
+U0HT1NBLH : you need to auth them to your team like you would a published app
+U0HT1NBLH : the easiest way would probably be using the Add to Slack button once you have oauth configured
+U0GT29N3A : <@U2R9V2YTE> Both published app and non published apps are installed with the same "Add to Slack" button.
+U2R9V2YTE : ok thx I will have a go at that
+U2U7UJ10C : <@U2R9V2YTE> Shameless plug here, but I wrote it up about Add to Slack button on Medium. I explained the “custom integration” and the installable app. The link is pasted somewhere above! :point_up:
+U07CW6N3A : Somewhat on topic: I've been cataloguing the best tutorial content out on the web for slack developers -- whether about developing slack apps, custom integrations, with botkit, bupkis,, or in Turbo Pascal -- I've built up an interesting collection and would love to find more goodies to help connect developers with. 
+If there's an article you've written or read that really helped you in a way Slack's documentation never has, feel free to send me a link by DM if you're so inclined.
+
+U0HBN0L9M : would boilerplate app count?
+U07CW6N3A : I love that kind of stuff -- for our community page which I'd love to improve further some day -- and am happy to collect those URLs, but at the moment I'm most thirsty for articles/tutorials/guides -- if the readme for the project is exceptional, it'd also be super welcome.
+U0HBN0L9M : <@U07CW6N3A> <https://medium.com/@MVaragnat/how-to-build-a-slack-app-5b83d71e083a#.ujto7y1g9>
+U0HBN0L9M : code here <https://github.com/mvaragnat/pleasemeet-slack>
+U0HBN0L9M : and a (not related to the above article) boilerplate app here <https://github.com/mvaragnat/botkit-express-demo>
+U0HBN0L9M : I'd be reading a turbo pascal tutorial :stuck_out_tongue:
+U07CW6N3A : thanks <@U0HBN0L9M>!
+U0HUTFBHS : omg turbo pascal
+U0HUTFBHS : Arguably my first language.  :slightly_smiling_face:
+U07CW6N3A : Do you configure your text editor of today to use yellow-on-blue by default? :grinning:
+U0HUTFBHS : hahaha no.
+U0HUTFBHS : But there is a soft spot in my :hearts: for that scheme.
+U2VA89FPD : added an integration to this channel: <https://dev4slack.slack.com/services/B2VRD53GA|outgoing-webhook>
+U2VA89FPD : @twiliobot No, don't leave!
+U2VA89FPD : @twiliobot No, don't leave!
+U2VA89FPD : removed an integration from this channel: <https://dev4slack.slack.com/services/B2VRD53GA|outgoing-webhook>
+U2U7UJ10C : yeah omg turbo pascal!!! I tried a little bit and gave up a long long time ago.
+U0HUTFBHS : Ditto.  Turbo C 2.0 was more my style.
+U0HUTFBHS : Does anyone have a good how-to on creating a slack login page for a team?
+U0T1G849W : <@U0HUTFBHS>  Sounds like you're looking for something like this:  <http://rauchg.com/slackin/>
+U2U8QKZRD : &gt; irc
+U2U8QKZRD : &gt; hard to use
+U2U8QKZRD : lol
+U0HUTFBHS : Well, I'll try to tease apart that source and see how it differs from the others I've seen.  The crux of it is that it's using an undocumented API endpoint.
+U0HUTFBHS : Thanks for that <@U0T1G849W>!
+U235HG07K : Reposting here (sorry!) Hi folks, for those among of you who have slash commands in production, how do you the callback URLs set up? Is anyone useing <http://localtunnel.me|localtunnel.me> or ngrok in production?
+U0HUTFBHS : nah I just push to lambda.
+U0HUTFBHS : Or run in an EC2 instance, with a public IP.
+U1G1G4HED : <@U235HG07K> i use ngrok and working well for me
+U2AQYMAQP : same. although I have found localtunnel is faster to receive messages on fb. But ngrok is a better product by far!
+U235HG07K : thanks <@U1G1G4HED> and <@U2AQYMAQP>
+U235HG07K : ngrok seems much more stable for us
+U0HBN0L9M : localtunnel is very convenient in dev
+U0HBN0L9M : but I wouldn't use in production in they paid me
+U21U8SZ2P : do we have any data yet on what a good users-per-team ratio might be for a Slack bot?
+U0HBN0L9M : <@U21U8SZ2P> interesting question. I'd assume it varies with type of service
+U0HBN0L9M : Would you be open to share your stats?
+U21U8SZ2P : true true
+U21U8SZ2P : we're at like, 1.4 users per team right now
+U21U8SZ2P : defining users as people who interact with the bot via DM
+U2X0W0HRQ : Hey, are there plans to enable Github PR Review notifications in Slack?
+U0HUTFBHS : Is there a webhook for those?
+U0HUTFBHS : I've noticed those are missing as well.
+U0HBN0L9M : <@U21U8SZ2P> my gut feeling + handful of not-representative data points, I would say it's a bit low and you could increase with better onboarding, use of buttons etc
+U21U8SZ2P : <@U0HBN0L9M> yeah definitely feels low, and at any rate it's lower than we'd like it to be. just difficult to figure out what the ceiling is. all of this is so new that coming up with reasonable metrics are one of the more difficult parts of bot-creation, IMO.
+U0HUTFBHS : You probably want to look at as a percentage of team size for more readily comparable numbers.
+U2U8QKZRD : anyone have an issue where slack will randomly re-add im's to the bar on the left that you have explicitly closed?
+U2VQV3WNP : Hi everyone, was wondering if you can do something like convo.sayWithTyping to simulate typing between multiple consecutive convo.say?
+U2U8QKZRD : I'm not using botkit, but it should be possible. Mine does it with `client.typing(channel: data.channel)`
+U2VQV3WNP : <@U2U8QKZRD>  What are you using to develop your bot ?
+U2U8QKZRD : ruby-slack-client
+U0V93GE5R : Want to discuss creating a Skype for Business bot? Just created: <#C2XPXKAM9|microsoft_skype>
+U07CW6N3A : <@U2XH6R8QJ> did you use the same app where you registered that URL to post the message itself via chat.postMessage or an incoming webhook URL you received as part of the OAuth approval process? (It's possible to send these messages by other means and then they won't be connected to your app).
+U2YBSFV0C : I had a problem with opening URLs through the browser via Slack API similar to Google Docs.Has anyone any idea? 
+<https://stackoverflow.com/questions/40404788/open-url-in-browser-from-message-button-using-slack-api>
+
+U07CW6N3A : <@U2YBSFV0C> it's unfortunately not possible to accomplish it -- the Google Docs integration is an odd duck with some unique capabilities
+U2YBSFV0C : <@U07CW6N3A> thanks for the info. I searched a lot &amp; could not find anything. :slightly_smiling_face:
+U07CW6N3A : Some times the absence of information is the only sign you need :wink:
+U26JU7J4F : Hi all - anyone aware of a way to insert a nicely formatted edited indicator for messages updated via `chat.update`?
+U26JU7J4F : Like the way Slack does it natively:
+U26JU7J4F : Smaller font size, muted text
+U0GT29N3A : <@U26JU7J4F> That should show up automatically.
+U26JU7J4F : Yeah that's what I thought
+U26JU7J4F : Definitely does not include the indicator for a bot message posted with `chat.postMessage` and edited with `chat.update` :slightly_frowning_face:
+U272P5K71 : they should :thinking_face:
+U272P5K71 : what params are you passing on chat.postMessage?
+U1AQ8MY3U : don't you need `as_user` or some such juju ? :smile:
+U26JU7J4F : <@U272P5K71> maybe it has something to do with the original `chat.postMessage` post. My params are pretty vanilla. `text`, `attachments` only. Flipped `as_user` on/off to no avail
+U1ZMN2FD1 : if the slack user who authorized my app with the `bot` scope is deleted from the slack team, does the bot token become invalid?
+U2R9V2YTE : Hi, question: Is there any way to open popup, can be slack and/or browser, via something in Message? Link or button would do. Usecase is when bot sends piece of data, you can click on link the attachment that shows popup with same data (basically popup with webapp). I tried "javascript:window.open()" but its not being parsed as a link. Any way to do this?
+U0HUTFBHS : Oh I sure hope not.
+U0HUTFBHS : :slightly_smiling_face:
+U2R9V2YTE : Sorry I dont know if that comment was related to my question, but I don't see any issue with enabling opening popup on user's click. As long as its done via user action, there shouldnt be any problem with it
+U2YL3L82K : is the slacktodo project dead?
+U2YL3L82K : Looking for a read only channel type thing they had. but it doesn't work
+U2VQ1GHMG : <@U2R9V2YTE> Sending a link to a website doesn't work?
+U272P5K71 : <@U1ZMN2FD1> I'll double check but I believe so.
+U2R9V2YTE : <@U2VQ1GHMG> yes clicking on normal link works, but it opens full-featured max-sized window. What I am after is opening small popup with something loaded in it (no address bar, no toolbar etc). Same thing that you cna achieve with window.open()
+U21U8SZ2P : is there a way of receiving a notification when a user goes away? my use case is that I'm trying to debug why my bot just drops a connection for no apparent reason, and the logs aren't helpful
+U0HUTFBHS : the presence change generates an event, yes
+U0HUTFBHS : for instance `{"type"=&gt;"presence_change", "presence"=&gt;"away", “user”=&gt;"U0739Q0SF"}`
+U0HUTFBHS : So you could have a bot watching your bot.  Unless that bot disconnects, of course.  :slightly_smiling_face:
+U21U8SZ2P : thanks. meta-bots!
+U0HBN0L9M : that's good. Just host the bot n2 on another server :slightly_smiling_face:
+U0HUTFBHS : In my case, when the rtm disconnects, my bot goes disconnected as opposed to away.
+U0HUTFBHS : I really need to spend some time with the events api.
+U1G1G4HED : Wonder if Botkit will adopt events API.. I think the main blocker is bot presence.
+U04SM6T2H : It will!
+U04SM6T2H : we've got a PR with support
+U04SM6T2H : will merge soon
+U2YU2K3QD : hi there. I'm hoping someone can  help me with suggesting the best way to lookup an existing message. I'm using the events-api and have a subscription to `reactions.add`. So basically when someone adds a reaction to a message, I want to capture that message and do something with it. The problem is I can't figure out the correct API call to get to the `text` of that original message. For example here is what slacks returns as part of the payload from the event: `... "item"=&gt;{"type"=&gt;"message", "channel"=&gt;"CXXXXX", "ts"=&gt;"1228370827.000011"}, ...`
+U2YU2K3QD : I assumed the payload will include a message ID of some sort that I could then just post back to slack and get the text of the message that said person added a :thumbsup: to
+U2ZK5NCEA : Hey all, 
+I built a bot that extracts text from any image posted and allows it to be completely searchable in the future, here: <http://pixibot.co|pixibot.co> 
+
+I'm looking for beta testers to help me improve on this!
+
+U2ZK5NCEA : Also for general feedback, hehe
+U0HBN0L9M : looks like solid engineering. what would be the use case you envision, for a pro account?
+U2ZK5NCEA : I envisioned the bot being used at larger companies. So the pro account doesn't limit you to the 100 processed images per month
+U2ZK5NCEA : what do you think, <@U0HBN0L9M> ?
+U0HBN0L9M : I've understood the volume thing
+U0HBN0L9M : My question was, what for?
+U2EDT25NJ : Hey everyone!  I had a quick question,  does anyone know of a good connector that is not a SaaS model to Skype?  I know some stubborn people who don't wanna switch and I find myself missing their messages
+U21U8SZ2P : file under “oh dang, i didn't even think of that until now”: daylight savings time changes!
+U04SM6T2H : <@U21U8SZ2P>: haha I thought my hbr news came at a different time today :)
+U21U8SZ2P : owing to the aforementioned daylight savings angst: our bot only sets the user's time zone on first install. Is it a reasonable solution to write a new thing that gets all our user's timezones once per week or something from Slack, and updates them in the database if there's been a change?
+U04SM6T2H : yes
+U04SM6T2H : We are now rnning ours _nightly_
+U04SM6T2H : to keep the timezone info up to date for all users
+U04SM6T2H : because people move!
+U04SM6T2H : or set their timezone _after_ installing apps
+U235HG07K : <@U21U8SZ2P> <@U04SM6T2H> , given the nature of our bot, we update the timezone of the user whenever we converse and also daily (in case we havent chatted with them) . Note that we send a lot of contextual reminders so this makes more sense for us.
+U0CNYC404 : Also remember not to get caught in the trap if setting scheduled updates for the future where the timezone difference to where you are to where they are may differ compared to that current day e.g UK/US (if comparing between two users, aka 'the calendar problem')
+U21U8SZ2P : i think we're okay from a day-to-day perspective, it's just the hour-to-hour thing that has gone awry
+U21U8SZ2P : another question though: what about users who don't have their time zone set?
+U3031L44S : How can I get a Slack bot to leave a channel?
+U242G0ZAP : `/kick @bot`
+U2ATR2KV1 : Hello.. Can we create a channel(either channels.create or groups.create) using bot user
+U0HBN0L9M : no, you need to use user token, for which you would have asked channel:write permission
+U316K6HFG : hello guys
+U316K6HFG : Trust everyone's well
+U316K6HFG : need a quick help on botkit
+U316K6HFG : so I make a private conversation with user using the `startPrivateConversation` API
+U316K6HFG : my issue is now with getting mutiple input from the user
+I already passed the optional `capture_options` parameter to `convo.ask`
+
+but I was able to also get the first input.
+
+any help on this please or maybe if someone has implement something of sort before
+
+Thanks
+
+U316K6HFG : btw... the skillflow bot is awesome
+U1TAT1DMY : <@U316K6HFG> thanks :+1:, let me know if you have any issues with <@U2M72RHDX> or suggestions for improvements :smile:
+U2V28UESG : Is it possable that 'bot' is use 'command' by rtm?
+U1DDKQPGB : We'd like to extend our messaging inside bCRM to allow bot builders to create/send polls and surveys. Starting with polls to keep it simple. I'd rather not build if we can integrate a solution inside our platform. Any recommendations/ideas?
+U316K6HFG : The massive smile on my face mehn
+U316K6HFG : I finally figured out how the `convo.extractResponses()` works
+U316K6HFG : now I've answered the question I posted here myself yesterday
+U316K6HFG : My bot finally works
+U316K6HFG : This is some good stuff mates
+U0HBN0L9M : <@U1DDKQPGB> ping <@U0GPKTHQ9>
+U305SE7S5 : Hey, I wanted to immediately respond using 'response_url' , how will i do it?
+U2DSW08UU : has anyone tried hooking botkit with <http://recast.ai|recast.ai>?
+U1DDKQPGB : Thanks <@U0HBN0L9M> I've looked and looks good. Perhaps it might be a decent foundation as I need a little more. Hi <@U0GPKTHQ9> please tell me more via DM
+U0K4TM8N8 : <@U04SM6T2H>, You need to “ask” people to join a room, ask people to test your bot, don't invite people to channels they do not wish to participate in
+U04SM6T2H : <@U0K4TM8N8>: what are you referring to?
+U04SM6T2H : I didn't invite anyone to anything 
+U0K4TM8N8 : Inviting _everyone_ into <#C31ABMDQD|_alertsy-daily> ? <https://cloudup.com/cKGA8ACAnSX>
+U0K4TM8N8 : <https://cldup.com/ttn7lakTPB.png>
+U04SM6T2H : Sigh
+U04SM6T2H : I was trying to help the developer solve an issue
+U04SM6T2H : Did not know it was going to spam 300 people 
+U04SM6T2H : Alas
+U0K4TM8N8 : Hehehehe :heart: :robot_face:
+U1DDKQPGB : It's only called spam when it comes from an unknown or untrusted sender - you're good :wink:
+U0V93GE5R : this talk has lots of useful information on how to get your slack bot accepted into the store on the first go: <https://blog.howdy.ai/talkabot-talks-state-of-the-slack-platform-amir-shevat-slack-1eee5b056e07#.c8jd04171>
+U21U8SZ2P : I botched the permission scope the first time, hah
+U21U8SZ2P : but I will also say that Slack HQ was very helpful and quick in getting back to me on any revisions
+U0V93GE5R : Amir in the video cited that as a top reason.
+U21U8SZ2P : anyone have suggestions on software or other methods by which I might sketch out a bot's conversation flow possibilities? at like, the high-in-the-air view, if that makes sense
+U1G1G4HED : <@U21U8SZ2P> <https://walkiebot.co>
+U2GRWJT7A : Nice tool, thanks <@U1G1G4HED>
+U1G1G4HED : there are a few devs here who built it.. thanks to them :slightly_smiling_face:
+U21U8SZ2P : oooooh! thank you <@U1G1G4HED> and builders
+U31SD2536 : Hey, I am trying to update a message with an buttons. I am not receiving the event for that button click. Can someone help?
+U06E352LU : <@U2DSW08UU>: recast is pretty good :) making good progress everyday... Did you encounter any issue ?
+U0HBN0L9M : <@U06E352LU> I guess the question was whether you need to hit the API yourself, or if there was a middleware. question seconded :slightly_smiling_face:
+U0HBN0L9M : do we have recast ppl here?
+U0HBN0L9M : I just sent Jasmine an email to ask if they'll do a Botkit middleware
+U06E352LU : Don't think there is a middleware yet, maybe they have in the pipe 
+U32L2MQ87 : Hi guys! 
+Does anyone know of a way to record a macro like script of user generated messages?
+I'm building a bot, and I want a way to play out different scenarios of user input for the bot to respond to, so I could test the server functionality.
+
+Thanks :heart:
+
+U0HUTFBHS : Sounds like a job for integration testing.
+U32L2MQ87 : <@U0HUTFBHS> do Slackbots have a test suite?
+U0HUTFBHS : Some of them do, it depends on which bot framework you're using.
+U32L2MQ87 : <@U0HUTFBHS> I'm using Botkit
+U0RRCPDK9 : <@U0F7LRC5A> or anyone - any idea how many people use the native app vs the web app for Slack?
+U2YBSFV0C : Any ideas on whether it is possible to add a new item to the ```+``` menu for the creating new types of files?
+U1DM2B4SY : Not possible, special to google docs. Not open to the API
+U2YBSFV0C : thanks for the info <@U1DM2B4SY>
+U055FHACC : *Question about retention:* Our bot's 3-month retention is steady at 60-65% for at least the last 6 month. We thought this was a really good number, and it certainly blows our old iOS app out of the water. But someone came in the office today and shook our confidence, now we're not sure anymore.
+Can I ask everyone: is this high/low? Would you share yours?
+
+U2DSW08UU : <@U06E352LU> - I have not but I did notice that the workflow is very different from using a service like <http://api.ai|api.ai>. @mattheiu I was hitting the API myself directly from the chat-bot. I do want to integrate some sort of middle ware though in the future. Just to see how well it would all work together.
+U0HBN0L9M : <@U055FHACC> that looks very good
+U0HBN0L9M : Also, I remember you shared a graph a users-per-team in an article
+U0HBN0L9M : do you recall where it was?
+U31HJH7LG : <@U2DSW08UU> and <@U0HBN0L9M>, we have no integration with Botkit for now but it's a good idea :wink: We'll working on it! If you have any questions, feel free to ping <@U2UVDV3R6> or me :+1:
+U055FHACC : What would be the average retention for bots? Any benchmark published? Maybe someone from one of the analytics products here?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

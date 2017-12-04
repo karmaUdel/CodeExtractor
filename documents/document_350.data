@@ -1,82 +1,100 @@
+U5AR0LDQA : Change the name
+U601ELFEG : is this a known bug in Elm?
+U0EUHKVGB : Because it correctly figures out what update you are using, but generates the wrong code.
+U0EUHKVGB : Ye.s
+U0EUHKVGB : But please don't do that anyway: it makes your code very hard to read
+U5AR0LDQA : :point_up:
+U601ELFEG : No, sure, I wouldn't do that by default - and didn't notice
+U601ELFEG : and will change it - just I was factoring out that operation (it is used in several other Msg values that I didn't list - ) and didn't realize the name conflict - I was stuck thinking it was somehow my polymorphic use of `clearHoveredSlot`
+U601ELFEG : yay - no more hangs - thanks all!
+U17PWHU4D : hossman333: thanks <@U5AR0LDQA> , is there a way to set this inside a let instead?  I realize this is still the js mindset, but:
 ```
-<@U0RPQMZ9S> click on that ellie a few lines up :slightly_smiling_face:
-I just felt the urge to model the domain so strongly
-:slightly_smiling_face: i know that feel
-(I was writing one myself, albeit more slowly)
-It's pretty straightforward to represent generic JSON in Elm, type-safely, and allows you to quite easily make a pretty UI for it, too.
-this could easily be a pulled out into a library
-So what I'd do, <@U61JQ4F4J>, is make a nice datastructure for your directory tree, `type FSTree = Directory String (List FSTree) | File String JSVal` and have a nice little decoder for it
-<@U3SJEDR96>, never thought of that, good point. I wouldn't want to use something like this because it loses all domain meaning. JSON decoders might be tedius but I think this is a plus in the sense that it makes you think about the necessities in API design :slightly_smiling_face:
-Arbitrary JSON *is* the domain. The idea would be to use that _within_ a semantic structure.
-<@U3SJEDR96> while we're here, I'm curious why you included JSOther in there?
-seems unnecessary
-`app.ports.foo.send({"magic": function () {}})`
-for JSON, it's redundant, yes
-for JS values, less so :slightly_smiling_face:
-example: <https://gist.github.com/owen-d/b727b9a1a5d4990ed947c6fa7056a92a>
-I always forget you can tuck arbitrary JS away in a `Value`
-which is probably a good thing haha
-oh and don't try to use that decoder ^ on a JS Event. :sweat_smile:
-<@U3SJEDR96> yes it is the domain in the OP case, I was trying to refer to my own code where JSON isn't the domain. You're totally right in this case
-Oh, alright, gotcha. Shouldn't use that unless what you're trying to represent _is_ arbitrary JSON, indeed! Good point :slightly_smiling_face:
-:smile: does it launch the rockets on JS events?
-ok I feel like I should try the type safe version first and keep the port as a fallback
-events have domnodes tucked away in them, and you start to endlessly recurse quite fast :slightly_smiling_face:
-(domnodes tend to be cyclic: child has a parent has children etc)
-OMG I didn't consider that - my life is so much better thinking in Elm
-<@U64FYS317> as kind of a first thing, I wouldn't think about it in terms of `casting`. You're ultimately creating values of the higher level `Msg` type, and one way to do so happens to be via the data constructor `LayoutMsg`, which is a function `SubMsg -&gt; Msg`
-life's nicer without cycles :smile:
-I kind of wonder why this isn't part of Json.Decode
-at least the union definition
-It represents a very specific Domain, though - it's not terribly useful outside of that domain
-but to more directly answer your question, if you have a chunk of `Html SubMsg`, and you want to get an `Html Msg`, `Html.map` is the way to go
-I pondered including it in json-extra but decided against it
-but if you have solid arguments for including it, feel absolutely free to open an issue and we'll talk about it :slightly_smiling_face:
-<@U0RPQMZ9S> Thanks for linking html.map
-yeah my mindset is closer to Rust's serde's `Value` on this
-which is practically the above union type
-i wonder what the cross pollination between elm &amp; rust are.
-clarification: in terms of userbase.
-should also point out that doing the whole SubMsg, SubUpdate, SubView pattern is often overkill....... a lot of the time, the cleanest way to separate concerns is just with a few helper functions with narrowed down types
-oh, thanks. Could you elaborate? Really looking for a clean way to extend my codebase
-the recent elm europe talks by Evan and Richard go in to this in a good amount of detail, let me rustle up some links right quick
-oh hell yeah, thanks a bunch
-here's Richard's: <https://www.youtube.com/watch?v=DoA4Txr4GUs>
-looks like evan's isn't online yet, I only managed to catch it when the stream was still up
-Hey everyone! Where would be the correct spot to discuss tackling tickets in core?
-they're probably still editing Evan's talk
-<@U681TBBUP> define "tackling"
-As far as I know issues on core libraries are Evan's realm right now
-... and his only
-:slightly_smiling_face:
-So we wouldn't be taking in any prs there?
-Depends. Can you expand a bit what you're thinking of?
-<https://www.youtube.com/watch?v=DSjbTC-hvqQ> remember me of Evan's "Code is the easy part" video
-...reminds...
-The issues within <https://github.com/elm-lang/core/issues/721> look like they would be good candidates for a first contribution
-Right. The idea is certainly appreciated, but I'm afraid that it's not _really_ how work on Elm happens - it tends to be batched so a _single_ coherent solution to things can be found and implemented - where the implementation usually takes only a fraction of the time spent thinking, researching and coordinating things
-The approach is strange at first but I think it really pays off well - other languages like JS grow/mutate where Elm shrinks in complexity
-If you're thinking about contributing to Elm in a more structured way, I highly recommend having a look at <https://github.com/elm-lang/projects/blob/master/README.md>
-<@U3SJEDR96> thanks for that link! I was looking in the wrong places for the usual contribution guide. And <@U4WH8STNX> yes I completely agree with that approach
-It's all part of the "doing things right vs doing things right now" philosophy; and the long term goals of Elm. I sincerely hope this doesn't scare you off - we tend to be a very welcoming bunch. But jumping in and writing code is - contrary to how it happens in many other projects - not quite how things in Elm are done :slightly_smiling_face:
-I'm happy you came here to ask actually - just making a PR, having it sit there for a few months and getting frustrated over the seemingly slow progress can be _extremely_ frustrating!
-Right, I'm really excited to see what Elm 1.0 will eventually look like, although the bus-factor of 1 is kind of a risk :rainbow:
-<@U681TBBUP> I'm glad you asked, too, as I wasn't aware of the process until <@U3SJEDR96> explained it
-Part of my motivation for peeking into the core repo was that I want to start using elm, but I need to also have some somewhat advanced graphics. Given the current ecosystem of javascript plotting/charting libraries D3 seemed like the right choice, but since Elm uses it's own virtual-dom implementation as of 0.17, I can no longer use hooks like described in this blog post (<http://sgillis.github.io/posts/2016-03-25-highcharts-integration-in-elm.html>). It looks like there is a data visualization project though (<https://github.com/elm-lang/projects#data-visualization>). Has there been any progress down this avenue?
-yes
-<@U64FYS317> would there be any interest in making this process more documented for people coming in through a route similar to mine?
-<@U681TBBUP> I haven't poked around the contribution docs at all, so I'm afraid I'd have a rather poor opinion on that. I'm flattered you asked, though
-<https://github.com/gampleman/elm-visualization>  is pretty much a port of D3, or at least the parts Elm needs (not the jquery-esque stuff)
-also for very common business plots there's <https://github.com/terezka/elm-plot>
-<@U0JFGGZS6> oh awesome :slightly_smiling_face: my googling unfortunately yielded <https://github.com/seliopou/elm-d3> which appears to be dead
-doesn't have everything yet by any means, but the author has been adding stuff steadily
-recently added force-directed graphs for instance
-<@U681TBBUP> Actually the projects link is supposed to be that better documentation of the contribution process, maybe you can file an issue there and make some suggestions?
-I mean this one: <https://github.com/elm-lang/projects/blob/master/README.md>
-he also gave a talk on it at the recent elm europe conf
-<@U4WH8STNX> yes that documentation of the process is great and my suggestions were not related to its contents but rather how a newcomer would go about finding it. The first thing I looked for was a `CONTRIBUTING.md` in the core repo as this is the way other langs (<https://github.com/rust-lang/rust/blob/master/CONTRIBUTING.md> , <https://github.com/golang/go/blob/master/CONTRIBUTING.md>) seem to do it. Granted that elm is structured differently but it might be easy to just redirect people to the projects repo
-that would be a good suggestion, I'd like that
-<@U681TBBUP> welcome to Elm, let's conquer the future
-:elm: I have certainly never been nearly as excited about writing a front end :grin:
-Hey there, I have a small question
-Is it possible to add an extensible record to another record?
+let 
+  if model.isActive &amp;&amp; somethingElse then
+    activeVal = "1"
+  else 
+  activeVal = "0.5"
+```
+
+struggling to see how you would dynamically set a value inside let.
+
+U5AR0LDQA : Yeah so you would do something like this.
+```
+let
+   isActive = if model.isActive &amp;&amp; somethingElse then
+    "1"
+   else 
+    "0.5"
+in
+```
+
+U5AR0LDQA : `isActive` becomes the variable
+U5AR0LDQA : So then you can use it in `in` <@U17PWHU4D>
+U17PWHU4D : ooh!  nice.  thanks <@U5AR0LDQA> trying that out now!
+U5AR0LDQA : You're welcome! :smiley: <@U17PWHU4D> 
+U62P4HLCA : I'm banging my head trying to decode a nested json {"error":[],"result":{"DASH":{"aclass":"currency","altname":"DASH","decimals":10,"display_decimals":5}
+U4F64AKQV : <@U62P4HLCA> You probably want to use something like `<http://Json.Decode.at|Json.Decode.at>` (<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#at>)
+U4F64AKQV : <https://noredink.github.io/json-to-elm/> might also be helpful
+U62P4HLCA : ah thanks... I'll take a look
+U62P4HLCA : perfect thanks
+U5GJ5FEAU : after number of encounters, i think i have figured out json encoding and decoding now :smile:
+U5D4VHEN7 : I can't for the life of me get `Debug.log` to work. It doesn't do absolutely anything. I'm calling it like so (to just make sure it is being called):```
+main =
+    let _ =
+        Debug.log "Hello"
+    in
+    program
+        { init = init
+        , update = update
+        , subscriptions = always Sub.none
+        , view = view
+        }
+```
+I am using Webpack with `elm-hot-loader` and `elm-webpack-loader` and the options:
+```
+{
+  verbose: true,
+  debug: true,
+  warn: true,
+}
+```
+Is there some voodoo I need to do to get this to work? Everything else in my application runs absolutely fine.
+
+U5D4VHEN7 : also:```
+    "elm-hot-loader": "^0.5.4",
+    "elm-webpack-loader": "^4.3.0",
+```
+
+U5D4VHEN7 : Oh goodness, not a Webpack issue at all. Solution was the first response here: <https://www.reddit.com/r/elm/comments/4pzrwd/using_debuglog/>
+
+U5D4VHEN7 : Instead of:```
+Debug.log "Whatever, this is just like console.log right?"
+```
+Do:
+```
+Debug.log "Some Label:" "Of course not! This is Elm!"
+```
+Basically, needs two arguments, label and value
+
+U5D4VHEN7 : Confused as to why that doesn't throw a compiler error...
+U48AEBJQ3 : Elm has partial application and first-class functions. `Debug.log "Foo"` produces a function of type (a -&gt; a) which you assign to `_` so it gets promptly ignored.
+U5D4VHEN7 : Ah, that definitely makes sense. Thanks for the insight <@U48AEBJQ3> :slightly_smiling_face:
+U48AEBJQ3 : It could be something that produces a warning, though. You might add an issue on <https://github.com/elm-lang/error-message-catalog>
+U5D4VHEN7 : Sweet :slightly_smiling_face: Will do. Given that I spent about an hour smashing my head against that, seems like it could be valuable warnings for beginners
+U3LT1UTPF : <@U5XHTBFS6> I'm writing an app with leaflet as the main character. I tried using ports, but after watching richard feldman's talk, I opted for writing a custom element. Not sure if that's convinient for all cases, though.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

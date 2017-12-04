@@ -1,38 +1,94 @@
-<@U0HKDKHD4> I see your install doc says ```npm install --save botkit-middleware-witai``` I assume that should be `-<http://api.ai|api.ai>`
-<@U13DWUG8Y>: looks like is quite close to what I need but what i am having a hard time is to recognise time expressions from a sentence,
-<@U0563E81H> - best news ever, thanks!
-<@U0563E81H> - actually a followup question - is that available for REST api?
-ah yes, I'll make a change, used the template from the <http://wit.ai|wit.ai> middleware for consistency
-quick question : anyone have already stress test a node.js application that listen to slack for message ? what is your tricks ?
-<@U0JPS3SHX>: There's also <https://github.com/wanasit/chrono>, based on the excellent chronic Ruby lib
-I've just started using <http://date.js.org/> and it feels pretty good so far
-date.js looks great
-do you know how timezones are handled? <@U0HPNTZ8Q>
-No, not really, I'm not there yet. But I think the general idea is that you have to pass in offsets relative to the local timezone
-<@U0HPNTZ8Q>: great - I'll add that later but thanks for the tip on Date.js, it saved me an evening of implementing Wit
-works like a charm
-<@U0HPNTZ8Q>: if a non-time-related text is entered, the output is now. How do you detect if that's the case ?
-I'm sorry, I have no idea. In my usecase I know the user is going to enter a date now. And I'm going to show the resulting date/time back to the user to have him verify it's correct.
-But that doesn't sound cool and I can't think of an easy way handle that off the top of my head :confused:
-hey <@U1DDKQPGB> just saw your tweet re human ‘bots', would love to talk when you have time :slightly_smiling_face:
-Thanks <@U0CNYC404> :slightly_smiling_face: should I explain here or email? [waiting for the slack cops to knock on my door]
-DM me :slightly_smiling_face:
-Dear All, We would like to implement xoxco which allows us to use our wikipedia with slack.  <https://blog.howdy.ai/our-slack-wiki-e4f6d23a3495#.sftexn5ba>
-could you somebody help us to install this?
-Hey <@U04SM6T2H> - love the Slack Wiki thing - would be an awesome integration with TiddlyWiki - is the code on Github?
-Hey there, did anyone had any disconnected RTM around 4am UTC?
-julian_e: yep
-it happens from time to time
-<@U0JAVM98A>: ok thanks, just wanted to check since Slack status doesn't report any incident :slightly_smiling_face:
-julian_e: not an incident, it just happens, you reconnect and voila
-It happened for &gt; 90% of our teams and the Web API was slow for several hours too
-exact
-I wouldn't care if it was just some RTM disconnected here or there (this indeed happens all the time). But tonight was a bigger issue for us :slightly_smiling_face:
-yes, it was bigger than usual
-<@U1292LZFC>: <@U1D0EBWVC> the code is like 15 lines of php
-well maybe like 150 lines
-its just a wrapper on grep and reading and writing markdown files
-<@U04SM6T2H>: you gonna make me dig out my PHP?! :wink: Cool - thanks, I'll give it a go
-haha
-i would say just build your own
-i mean, really this was a hack day project
+U5JUDH2UE : I've settled on consecutive entries in a let with the same name.
+U0CV48L87 : Cool. But it could be as simple as:
+```
+(defn default-if [x pred default]
+  (if (pred x) default x))
+```
+
+It even reads fairly well in a threading macro:
+
+```
+(-&gt; (+ 2 1)
+    (default-if even? "even")
+    (default-if neg? "negative"))
+```
+
+U0CV48L87 : ¯\_(?)_/¯
+U5JUDH2UE : That'd be pretty good. I tend to like to rely on core as must as possible without small helper function like that. Maybe that's just a bad philosophy on my part though.
+U0CV48L87 : <@U5JUDH2UE> I'd say I _usually_ do the same, but I think this can be understood at a glance, which means to me that it's not going to affect readability negatively by requiring the reader to be familiar with what you've introduced.
+U5JUDH2UE : That's true, and it's arguably more readable than the alternative anyways. Thanks!
+U0CV48L87 : Ah, small issue with what I posted above though…if the first `default-if` returns a `"even"` then it calls `neg?` on that and fails.
+U0CV48L87 : So you'll need a macro if you actually want to stack them like that.
+Anyway, have a good one. :slightly_smiling_face:
+
+U5JUDH2UE : Thanks, you too. :slightly_smiling_face:
+U0CV48L87 : Oh, and if you want to do something truly godawful, here's a way to do it with core:
+```
+(condp #(%1 %2) (+ 2 2)
+  even? "even"
+  neg? "negative"
+  identity :&gt;&gt; identity)
+```
+
+:upside_down_face:
+
+U0W0JDY4C : holy canoli… my java/clojure interop knowledge has some gaping holes. how does one invoke a java api that uses anon inner classes? for example, selenium:```
+new ExpectedCondition&lt;Boolean&gt;() {
+            public Boolean apply(WebDriver d) {
+                return d.getTitle().toLowerCase().startsWith("cheese!");
+            }
+        }
+```
+1)  do you need to provide a return type for a class? provide some sort of complier hint? `ExpectedCondition&lt;Type&gt;`
+2) I know from the clojure guide (and java spec) you can reference anon inner classes as Class$InnerClass, but that' doesn't really apply here. how does one construct an anon inner class and provide method implementations?
+perhaps I just don't know enough of the right verbs/nouns in java-land to properly ask dr. google, but I wasn't able to find much
+
+U0W0JDY4C : In that above example the expectedcondition derives `apply` from `goog.common.base.Function`… i guess i'm not sure if that means i need to extend an existing base class (proxy) or not (reify)?
+U1WL8TSPM : perfect, thanks <@U0CV48L87>!
+U051SS2EU : <@U0W0JDY4C> &lt;Foo&gt; is a fiction, only the java compiler needs it, it doesn't exist in a true sense in the byte code.
+U051SS2EU : to make an anonymous class, use reify or proxy
+U051SS2EU : *instance of an anonymous class
+U051SS2EU : docs say it's an interface, which means you can use reify, you only need proxy to extend concrete classes
+U051SS2EU : <https://google.github.io/guava/releases/20.0/api/docs/com/google/common/base/Function.html>
+U1WL8TSPM : <@U0CV48L87> - one more, do you know to handle rounding the numbers in transit-cljs? I don't seem to be able to supply a custom handler for "Number"
+U0CV48L87 : <@U1WL8TSPM> I'm not certain but I believe `Number` is a superclass of a variety of types. I think you'll have to identify what the underlying class is and add a `WriteHandler` for that.
+U1WL8TSPM : <@U0CV48L87> just answering my own question - all numbers are just Numbers in js. have to specify {js/Number (NumberHandler.)}} to override and must use (tag [_ v] "i"), if you specify empty tag, it'll go to an infinite loop
+U0CV48L87 : <@U1WL8TSPM> Oh, I didn't notice you'd said "cljs". But I'm glad to hear you got it worked out!
+U66G3SGP5 : is there some way to use Spring with Clojure
+U1C03090C : <@U66G3SGP5> A quick google search found <https://github.com/henrik42/spring-break> and <https://stevendick.github.io/blog/2013/08/13/write-a-spring-mvc-controller-in-clojure/>. An easy wrapper doesn't seem to exist, but I'm not an expert.
+U1C03090C : I'm making a program that allows plugins to be added to it. I'm thinking of creating a launcher that runs the program with the plugins included in the classpath, does this seem reasonable? It seems like the absolute best way to do this would be to write a custom class loader, but I'm not sure I have the experience to write one well (as suggested by <@U0NCTKEV8>)
+U6FNM3ATD : hello everyone. I am looking around for a way to implement this: <https://medium.com/react-native-training/deep-linking-your-react-native-app-d87c39a1ad5e> in clojure with re-natal… has anyone tried this?
+U051HUZLD : <@U6FNM3ATD> try <#C0E1SN0NM|cljsrn>
+U6FNM3ATD : 10x
+U1ACUMJKX : Does anyone know of a wavefront or collada file loader for clojure? I basically want to load a geometry definition file as a clojure data structure. I might have to make my own library for that, but it doesn't hurt to ask.
+U061V0GG2 : <@U1ACUMJKX> I've used assimp with C++, but readme mentions there being Java bindings also: <https://github.com/assimp/assimp>
+U066DCEM7 : No experience with assimp Java bindings. However, assimp seems to have the best support for loading different 3D models. If you want Open Source library that is.  At least that used to be the case about year ago.
+U050ECB92 : anyone have a good method to use `tools.deps` to include the current working directory besides running it once then appending:```
+echo -n ":${PWD}/src" &gt;&gt; .cpcache/default/default.cp
+```
+
+U0B4ZBBKM : Can I write this more concisely? `(let [x (group-by some-pred some-coll)    matches (x true)  non-matches (x false)] ...)`
+U11BV7MTK : first thought is to use map destructuring where you name the key and the var name it should destructure to
+U060FKQPN : `(let [{matches true non-matches false} (group-by ..)] ..)`
+U0B4ZBBKM : Ah, I had the map destructuring backwards. Thanks!
+U3HKE2SLW : I rarely see this destructuring syntax in the projects I work on. We always use `{:keys [key-a, key-b]}` (which I personally find much more readable)
+U060FKQPN : it is more readable but it's not equivalent in power
+U0B4ZBBKM : That wouldn't work with boolean keys `true` and `false` I think.
+U3HKE2SLW : yeah, it likely wouldn't. I'm just mentioning this for the generic case. Imo this line above is already too hard to grasp when skimming through code.
+U050MP39D : yeah it wouldn't, :keys syntax only works with keyword keys. {binding key} lets you use any type of key
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

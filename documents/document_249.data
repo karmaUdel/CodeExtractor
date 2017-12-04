@@ -1,23 +1,78 @@
+U153UK3FA : It's been suggested to make ports return Tasks but this exposes your Elm app to the error prone nature of JS
+U153UK3FA : ie. if you send on a port and never get a reply (because JS errored), what should the Elm app do?
+U5GJ5FEAU : <@U153UK3FA> that sounds like a good way to differentiate between `Task`s and `Port`s.
+U0CLDU8UB : <@U5ABF3BH7> Can you try `onChange` instead of `onInput`?
+U5L2XPH54 : Can some help me to understand 
 ```
-I want to hide the implementation details in the documentation. I only want to mention type Catalogue, not the whole type
-I get the whole type. But that should be hidden in the Documentation…
-Don't know if its cleared what i want…. :confused:
-I was looking at Richard Feldman's SPA example. In some file he uses a =&gt; operator. Unless I missed something, I haven't encountered this yet, although I followed a bunch of tutos and read Richard's Book. By example in <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Page/Login.elm> there is:
-=&gt; NoOp
-Yeah <@U5Z3Y472L> , did you have a question about that? Making your own operators is almost always a bad idea.
-I think Richards use is maybe one of the exceptions where its handy. Maybe not tho.
-Personally I do something just like Richards `=&gt;` but I do `:=` instead. I dont really understand how an arrow conveys what `(,)` does.
-ok, I thought it was something I did not know yet about elm, but it's a user defined operator
-thanks <@U14Q8S4EM>
-Sure thing!
-hello guys I need help writing a decoder
-is there any way to break that process up into small steps
-JSON decoder
-yes!
-in fact, that's the easiest way to build a decoder
-start with the smallest parts of your decoder
-my JSON file is thousands of lines long there's really no way to understand it completely the first time
-then combine them into more complex parts
-Also, there are automated tools like <https://eeue56.github.io/json-to-elm/> that might be helpful
-In JSON they are written `List [Int, Int]` but in Elm they could be `List (Int, Int)`
-your website returned me a very simmple answer
+login : { r | email : String, password : String } -&gt; Http.Request User
+```
+
+<https://github.com/rtfeldman/elm-spa-example/blob/master/src/Request/User.elm#L23>
+
+What is ` { r | ` ?
+
+U0CLDU8UB : "a record that has at least `email : String` and `password : String`, I don't care about anything else that may be in the record"
+U5L2XPH54 : thanks
+U5TQ5FZA5 : Hi! I'm wondering how to model a dictionary in Elm which has arbitrary keys whose values are either a string  or another dictionary (which in turn has arbitrary keys and values of String | Dictionary). Is this possible in Elm?
+U5TQ5FZA5 : So far the only examples I've seen refer to Dictionaries which aren't nested and whose keys are known.
+U0CLDU8UB : What do you mean by "arbitrary keys"?
+U4872964V : for arbitrary keys you could use <http://package.elm-lang.org/packages/eeue56/elm-all-dict/latest> and for values of either string or another dictionary you'd use a union type like so```
+type EitherStringOrDict
+  = AString String
+  | ADict YourDictType
+```
+
+U5WGZ2GTZ : I am an Elm beginner, but I think this might be possible using the union types?
+U5TQ5FZA5 : Arbitrary keys: {foo = ‘1', bar = ‘2'} or {fuzz = ‘3', bazz = ‘2'}. It doesn't matter what the keys are called, nor how many of them are present.
+U1P6FFJ64 : <@U5TQ5FZA5> have you seen this package? <http://package.elm-lang.org/packages/eeue56/elm-all-dict> It has an EveryDict that allows the Dict keys to be of any type
+U0EUHKVGB : Eh, I don't think that's what they want
+U0EUHKVGB : <@U5TQ5FZA5>, i think you just want a plain dictionary
+U0CLDU8UB : So the key can be of type `String`
+U0EUHKVGB : Here's how your example would look: `Dict.fromList [ ("foo", 1), ("bar", 2) ]`
+U5TQ5FZA5 : <@U0EUHKVGB> but don't I have to declare the keys and types then in my model?
+U0EUHKVGB : Yes. You cannot have varying keys in a record in Elm, because it makes the types impossible to figure out.
+U0EUHKVGB : You can have multiple different records
+U0EUHKVGB : But that's different from varying keys.
+U5TQ5FZA5 : <@U0CLDU8UB> yeah - the keys are String and the values are String | Dict
+U0CLDU8UB : I think you might be confusing how Dicts and records work. Records have certain named fields, with specific types per field. Dicts are collections of for key and value pairs, where the keys need to be of one single type (strings are fine), and the values need to be of a single type, but that includes the union type <@U4872964V> showed earlier.
+U4872964V : ok, so then```
+type alias YourDictType = Dict String EitherStringOrDict
+```
+
+U0CLDU8UB : yep, that
+U5TQ5FZA5 : <@U0CLDU8UB> yep - I think you're right there!
+U5TQ5FZA5 : Thanks, <@U4872964V>  - I'll try that :slightly_smiling_face:
+U3YA74FQD : What's the best strategy when elm is reusing an input node (and erroneously displaying the old value)?* Should I try to force a new empty value to the input?
+* Should I look into `Html.Keyed`? I feel that this would be incompatible with packages like `rundis/elm-bootstrap`
+
+U4RR7KX45 : Hello elmers :smile: How can I decode a json list? I have the following function:
+```
+fetchRandomQuotes : Http.Request (List String)
+fetchRandomQuote =
+    Http.get randomQuoteUrl decodeQuoteUrl
+
+decodeQuoteUrl : Decoder (List String)
+decodeQuoteUrl list =
+    <http://Decode.at|Decode.at> [ "" ] list
+```
+
+U4RR7KX45 : I couldn't find a good tutorial that explains this so I sort of followed the cats git example
+U4RR7KX45 : but couldn't get far
+U48AEBJQ3 : <@U4RR7KX45> What is in the list?
+U4RR7KX45 : at the moment I'm just hard coding it on the api
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

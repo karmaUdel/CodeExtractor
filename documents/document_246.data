@@ -1,23 +1,61 @@
-```
-Just as an alternative. I don't think it is really better.
-Depends on what it is you're trying to do.
-In my experience, from being here in <#C192T0Q1E|beginners> for a long time, a lot of people run into issues when they aren't leveraging the type system fully.
-Or their datastructures could be remapped.
-<@U5AEH3L05> By 'this' do you mean wanting to use functions which aren't already part of some standard package? I don't think that should necessarily discourage you. Elm's ethos is to be cautious about deciding which features to add in an effort to encourage exploration and experimentation to see if we can find good solutions without extra complexity.
-a pairwise map is a perfectly reasonable method of traversing a list, however it is preferrable to implement it via the base fold method as opposed to recursion
-Ahh, thanks for showing me how to do it with foldr! I was thinking about that.
-<@U23SA861Y> why's that?
-<@U48AEBJQ3> Good to know. I guess it felt like I saw every other kind of map but this :slightly_smiling_face:
-By specifying exactly what you want things can be optimized under the hood. While there are things like `tail call optimization` that exist in functional languages that help this it is really easy to get recursion wrong
-or to write in a way which will pop the stack
-for example, your implementation isn't stack-safe, <@U5AEH3L05>
-Makes sense -- I'm still not as comfortable with folds as i'd like to be!
-fold is sort of the ultimate traversal primative
-you can use it to implement map for example. Getting a feel for fold helps alot.
-it hadn't crossed my mind to use fold with a tuple before, but <@U48AEBJQ3> had a nice implementation with it
-Might be a good addition to List.Extra. Consider submitting a PR.
-can get even better I think
-I'll try and chip away at it for fun. should I prefer foldl vs foldr for any reason?
-it depends on what you want/need
-foldl starts processing right away which foldr needs to traverse to the bottom before it processes back up
-you might even be able to do it with map
+U4PT7NG4V : That's a pretty vague question :slightly_smiling_face: Could you be more specific?
+U5ABF3BH7 : Let me try to be clearer
+U5US3G22C : If I'm working on a module, how can I try it out without integrating it into my existing code? Unit tests?
+U5US3G22C : When I make a new feature, I usually have to rewrite it a few times to make it nice and elegant (including making it work first). Having to make a Main for each one is kinda tedious. Is there a better workflow?
+U4PT7NG4V : I personally prefer to see it as a part of the whole. i.e. "Chase compiler errors until the feature is done". But unit tests sounds reasonable to me
+U5US3G22C : Maybe I don't have enough experience with the different features and how everything works. I see a bunch of errors and fall back on the workflow i just described.
+U4PT7NG4V : It's an interesting question for sure :slightly_smiling_face:
+U48AEBJQ3 : <@U5US3G22C> Code organization in Elm is likely going to be different from what you are accustomed to. I would advise not worrying so much about organization until after at least one round of refactoring. Don't go making a bunch of modules before you know that you need them.
+U5US3G22C : It's not usually the organization that's the issue more along the lines of, "I've got this piece of json i need to get from the server, but I need to handle it in this way and how do I setup the decoding pipeline and etc to make it all work correctly (what records will I need, what unions types, etc.). I think this might just stem from a lack of understanding and experience with functional languages and elm
+U48AEBJQ3 : <@U5US3G22C> Probably. I think that starting from "I've got this piece of json" is often the wrong approach. I usually start by thinking of the data structures that I want and then figuring out how to build one given the API requests I have available to me.
+U5US3G22C : Maybe I could be more specific.``` { 
+        "type": "A" or "B" or "Error"
+        "data": some_json  // Only if type == A or B
+        "error": "error message"  // Only if type == Error 
+}```
+
+U5US3G22C : I wanted to decode that from a request I got. So I first had to figure out how to setup the get request, then what decoders I need (ok lets just use `value` and handle it down the line). Now how do I check the "type" field and decode based on what it is
+U5US3G22C : I've got it figured out now, but it took me a while and doing so in the original project (as I just used my workflow i described) would have led to a bunch of errors that would have kinda put me off
+U5ABF3BH7 : Here is what I'm seeing. I have a Country field created using [this line of code, nested in a condition].
+U5ABF3BH7 : ```, div [ class "col-xs-7" ]                                  [ select [ class "select form-control", onInput (config.toMsg Location.ChgCountry), value config.model.country ]
+                                      Addresses.countryOptions
+                                  ]```
+
+U5ABF3BH7 : When a country other than United States is selected, the UI displays a different set of fields above the country field. This works as expected. However, what I'm finding, is that when I select a different country than US, "United States" continue to display instead of the country selected. I have to once again select a country for the field to update.
+
+If the line creating the country field is in the main view, it works as expected, if it is in the subview, displayed on condition of the m model, then I have that issue.
+
+U48AEBJQ3 : <@U5US3G22C> Understanding composible data structures is *the* biggest stumbling block for new Elm users despite many difficulties. It's a big problem for a lot of FP languages.
+U5ABF3BH7 : <https://screencast.com/t/GnvOvy2SMx1>
+U48AEBJQ3 : <@U5ABF3BH7> It *seems* to be a problem with the virtual dom losing track of what goes where. Have you tried setting `selected` on the selected option?
+U48AEBJQ3 : You might also try <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html-Keyed#node>
+U5ABF3BH7 : I tried that selected model.country, but get the error that selected is expecting a Bool
+U5ABF3BH7 : ```The argument to function `selected` is causing a mismatch.
+88|                                                                                                                       selected model.country
+                                                                                                                                   ^^^^^^^^^^^^^
+Function `selected` is expecting the argument to be:
+
+    Bool
+
+But it is:
+
+    String```
+
+U5ABF3BH7 : Since I don't know in advance what the bool is I am a bit confused as what I should put for selected
+U48AEBJQ3 : You have to put `selected True` in the currently selected `option` tag. But I think you should try `Keyed.node` first.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

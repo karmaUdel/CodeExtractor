@@ -1,0 +1,99 @@
+U5WS7CJLV : you have a loop
+U5WS7CJLV : while(true)
+U5WS7CJLV : yield return ++someInt
+U5WS7CJLV : the "yield" keyword gives you magic
+U3SJEDR96 : Ok, so implicit state :slightly_smiling_face:
+U5WS7CJLV : sure
+U3JQ0PT6E : Use triple backticks for code snippet. Single backtick for inline code
+U3JQ0PT6E : Like `this` :slightly_smiling_face:
+U3SJEDR96 : yeah, can't do that in Elm. Hence why for example generating random numbers requires passing a `Seed` in and receiving a value + a new seed back. (unless you're using `generate` which gives you a `Cmd` so that it can sneakily keep track of the seed-management in an effect manager)
+U5WS7CJLV : `got it` :slightly_smiling_face:
+U5WS7CJLV : ```while(true) { yield return ++someInt; }```
+U3SJEDR96 : the way people _usually_ deal with this in Elm is by keeping track of the previous `id` in the model, and updating that when an `id` is needed
+U5WS7CJLV : right.  Sequence of ints is not hard to do, but if you know about something like the magic `yield` you can do it more magically.  I will just track the id somehow.  Thanks!
+U5WS7CJLV : :magic_wand:
+U3SJEDR96 : Indeed, the keyword being *magic*, which is something Elm steers clear of :smile:
+U5WS7CJLV : well, haters gonna hate (magic) :smile: :magic_wand:
+U5WS7CJLV : the ! operator kind of looks like a magic wand :slightly_smiling_face:
+U5WS7CJLV : and it works a bit like one too :slightly_smiling_face:
+U5WS7CJLV : until you read about it on the FAQ
+U5WS7CJLV : and then, depending on who you are, you might hate it :slightly_smiling_face:
+U3SJEDR96 : eh, it's really just a function call `(!) model effects = (model, Cmd.batch effects)`... But yeah, it's confusing/weird/being removed :smile:
+U5WS7CJLV : a function call - yuck!  I generally hate variables, functions etc that are named in one letter/character
+U5WS7CJLV : I guess it worked well for Prince
+U5WS7CJLV : I don't like it at all in code
+U5WS7CJLV : but back to Elming!
+U3SJEDR96 : (I still read it as "*BANG* effects")
+U37HUSJ4R : can anyone help with this? <https://ellie-app.com/3NtgvsLjhdza1/0>
+U17R26VR8 : can’t seem to find evan’s ‘life of a file’ elm europe 2017 talk, anyone got a link
+U37HUSJ4R : I am trying to decode a json string with dynamic keys into a union type
+U3SJEDR96 : Which part are you getting stuck on, <@U37HUSJ4R> ?
+U37HUSJ4R : the `uncurry` into a union type part
+U37HUSJ4R : everything else works correctly
+U3SJEDR96 : that part doesn't really make sense, indeed. But uhm, what should happen with the mentioned date?
+U153UK3FA : <@U37HUSJ4R> `Status` is a type, you want a function there
+U3SJEDR96 : I mean, you already have a decoder for `Status`
+U153UK3FA : <@U37HUSJ4R> you probably want to use `Open` there
+U37HUSJ4R : I then pass it the `standardWorkingHoursDecoder` which should either be `Closed` or if `Open`
+U37HUSJ4R : <@U153UK3FA> hmm not sure
+U37HUSJ4R : because it might not be `Open`
+U37HUSJ4R : I want the `standardWorkingHoursDecoder` to work that out
+U3SJEDR96 : I just changed the types of your model and the decoder so that it returns a `List (String, Status)`, and removed that `Decode.map (List.map...)` - <https://ellie-app.com/3NtqVGd2Tkpa1/0>
+U3SJEDR96 : (and fixed your json)
+U3SJEDR96 : But it's hard to tell what you actually _want_ to happen
+U37HUSJ4R : <@U3SJEDR96> yes actually look at it, maybe I have modeled it incorrectly
+U3SJEDR96 : cause the `standardWorkingHoursDecoder` already returns a `Status` - `Open` if it can, `Closed` if it doesn't have the times
+U37HUSJ4R : ok let me go back and take a look
+U37HUSJ4R : :slightly_smiling_face:
+U37HUSJ4R : thanks sir
+U4872964V : So, if you change your view so that the node is rerendered, then, if you use ports, you need to send a new message to initialize the js component, but if you use a MutationObserver, that will trigger automatically
+U37HUSJ4R : I am trying to update  a `WebData` record (<http://package.elm-lang.org/packages/krisajenkins/remotedata/4.3.0/RemoteData#WebData>)
+U37HUSJ4R : can someone explain why `RemoteData.map (List.map (\l -&gt; l)) model.data` wouldn't work
+U37HUSJ4R : where `data` is a `WebData Foo`
+U37HUSJ4R : I want to update a record but first just trying to get something to compile
+U4872964V : because Foo is not a list?
+U4872964V : what’s the error message
+U37HUSJ4R : ```Function `map` is expecting the 2nd argument to be:
+
+    RemoteData Http.Error (List a)
+
+But it is:
+
+    WebData Foo
+```
+
+U4872964V : Yes, so Foo is not a List
+U37HUSJ4R : ok so `Foo` looks like
+U37HUSJ4R : ```type alias Foo =
+    { bar : List String
+    }
+```
+
+U4872964V : Yes, and that is not a `List`, but you’re trying to use `List.map` on it.
+U37HUSJ4R : but if I try and do `model.foo.bar` I get
+U37HUSJ4R : ```The type of `model.data` is:
+
+    WebData Foo
+
+Which does not contain a field named `bar`.
+```
+
+U3SJEDR96 : `RemoteData.map (\foo -&gt; { foo | bar = List.map (\l -&gt; l) foo.bar })`
+U3SJEDR96 : or split that lambda of into a proper `Foo.mapBar : (List String -&gt; List String) -&gt; Foo -&gt; Foo`  function
+U4872964V : To sort these things out, try to make a function to update a Bar, then make a function using that to update a Foo, then make a function using that to update the whole shebang
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

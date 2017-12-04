@@ -1,7 +1,51 @@
+U0K0TFQLW : it sounds like a combination of org-mode and pythons doctests
+U0NCTKEV8 : yes
+U0NCTKEV8 : there is a lein plugin for it if I recall
+U0K0TFQLW : as I understand it, the python community has largely shied away from doctests (although I don't particularly know the reason; it might be an implementation issue)
+U0K0TFQLW : <@U087U9YG3> it should be straightfoward to go the route you proposed using an augmented codeblock transformer with markdown-clj to grab the code blocks. See <https://github.com/yogthos/markdown-clj#customizing-the-parser>
+U0K0TFQLW : (just thinking about it from the perspective of reusing existing stuff to avoid writing markdown grammar or some regexes)
+U06FTAZV3 : <@U087U9YG3> Elixir has something like executable documentation that (I think) centers around iex.
+U06FTAZV3 : Here you go: <https://elixir-lang.org/getting-started/mix-otp/docs-tests-and-with.html#doctests>
+U04V32P6U : Playing around with spec-ing `clojure.core/sort` and I came across something interesting:
 ```
-<@U5ZAJ15P0> there's also `sayid`: <https://github.com/bpiel/sayid>
-keywords have no relationship with vars <@U09LZR36F>
-<@U09LZR36F> is it something you need for spec?
-<@U050R7ECY> Cursive has a bytecode debugger, and you can definitely see the locals (as well as other normally invisible locals created by e.g. destructuring). It also does its best to help control locals clearing.
-You're right AFAIK that CIDER's debugger is source transformation.
-I figured it would be useful for that, yes
+(frequencies [Double/NaN Double/NaN])
+=&gt; {NaN 1, NaN 1}
+```
+
+U04V32P6U : ah, this is why
+U04V32P6U : ```(= Double/NaN Double/NaN)
+=&gt; false
+```
+
+U050MP39D : lol.... I guess that makes some math I don't understand work
+U04V70XH6 : <@U087U9YG3> If you're willing to live with Midje, there's a plugin to run the readme code as a set of tests -- clj-time uses it.
+U087U9YG3 : <@U04V70XH6> I've got clj-time checked out and I'm actually having a hard time figuring out how to see/run the readme tests
+U087U9YG3 : docs say to run lein test-readme but I'm getting no such task
+U087U9YG3 : and the test/readme.clj file that got generated looks really short
+U04V70XH6 : `lein with-profile dev,default,midje test readme` -- only code annotated with `clojure` (not `clj`) is turned into Midje facts
+U04V70XH6 : I get a `test/readme.clj` that's nearly 400 lines long -- mostly whitespace but it does have all the ````clojure` code fragments as tests
+U04V70XH6 : (hard to backtick a bunch of backticks)
+U04V70XH6 : ^ <@U087U9YG3>
+U087U9YG3 : heh, yeah, I ran into the same problem
+U087U9YG3 : cool =)
+U087U9YG3 : <@U04V70XH6> hm I don't suppose you ever found a way to make that command exit with failure if a test fails?
+U087U9YG3 : also, wow, that found a lot of README errors XD
+U04V70XH6 : `lein test` ought to get a non-zero exit status if tests fail? (Dunno, we switched to Boot ages ago at work)
+U04V70XH6 : Ah, but *Midje* doesn't. Yeah that kinda sucks. 
+U04V70XH6 : I've always avoided Midje for... reasons... but I hadn't noticed it doesn't set an exit status in this case. 
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,12 +1,106 @@
+U2UGVS24E : indeed, that's how it should be done
+U5Z0YQN3S : Does anyone have a good pattern for propagating sub-view errors (like HTTP 404) to a parent view to have it display a nice not-found page? I was trying to follow this example(<https://github.com/rtfeldman/elm-spa-example>) but it is not clear how the `NotFound` page is set.
+U0LPMPL2U : It looks like it's being set here: <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L252>
+U0LPMPL2U : in response to a `Maybe Route` being `Nothing`
+U5Z0YQN3S : When does the `SetRoute` get set as the model then? <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L336>
+U5Z0YQN3S : I'm new to `elm`, but familiar with the functional concepts. The difficulty has been the patterns of `elm`. These are state machines, but the transitions between states are hard to hunt down. Wish they were more declarative.
+U5FU80S06 : If I want to call `update` programatically, should I do so, or is there a recommended technique?
+U23SA861Y : umm, it is just a function. If it's the same function you are passing to program, then that seems a little odd.
+U2XRG0UKA : Call it programmatically. Nothing odd about doing that.
+U0LPMPL2U : If you are calling `update` programatically for code re-use, you probably want to extract a function instead
+U0LPMPL2U : ```udpate msg model =
+  case msg of
+    Msg1 -&gt; doThing
+    Msg2 -&gt; doThing
 ```
-then you could define some functions for that type like `toggle: Selectable -&gt; Selectable` that toggles between the two states or perhaps a `toString: Selectable -&gt; String`
-`toCheckBoxView: (a-&gt; msg) -&gt; Selectable -&gt; Html msg` for displaying it
-<@U0JFEBK6F> are there setters and getters for the Tab control? I want to be able to find out the new activeTab, and to update the relevant pane - it seems (to a beginner like me!) that State, Item and Pane are opaque types, and I don't know how to "get at them" - thanks!
-<@U153UK3FA> excellent, thank you!
-Great article! :blush:
-<@U5J08KX0D> there are intentionally no getters and setters for tab state. Is your use case that you dynamically want to change the content of a tab once the user selects a particular tab ? 
-Yes, exactly - to know which tab has been selected, and then to change the contents
-and sorry for not posting in the elm-bootstrap channel - I've just found it! :slightly_smiling_face:
-I think a better way than getters/setters in that case would be a "callback"7message  ónTabSelcted? with the id of the tab passed.
-Forgive my beginner-ness! Is there a way of doing what I want to do, or will it require a change to the module? Do you mean that there is already a message `onTabSelected id` ?
-Hey, Im trying to set a field in a record, then use the new field value in the model to update another field. Im using a let block to first create a model, then using this to create another one. Is there a better way? It gets very messy now if I want to have it chain further. ``
+
+_not_
+
+```
+update msg model =
+  case msg of
+    Msg1 -&gt; { model | name = "foo" }
+    Msg2 -&gt; update Msg1 model
+```
+
+U4JT89FGB : <@U5Z0YQN3S> `SetRoute` is the command passed here: <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L476> if you take a look at the source of `Navigation.programWithFlags` it will give more ideas of what is going on
+U5WD40ZA9 : I have the following regular expression:
+ "^[\s\da-zA-ZåäöÅÄÖ&amp;()+*é,.‘-]*"
+
+But for some reason I get the following error :
+
+(line 1, column 5): unexpected "s" expecting space, "&amp;" or escape code
+
+Anyone see something that I don't…?
+
+U5FU80S06 : Can `update` be called programatically from inside `update` ?
+U0EUHKVGB : Yes, but it's generally not a great idea
+U0EUHKVGB : You are better off pulling out the "common" part into a helper function and call that instead :slightly_smiling_face:
+U57KYFW67 : `update` is just a function like anything else. But note that it doesn't actually change your state.
+U57KYFW67 : so the name is a bit misleading in that regard, since it doesn't perform any actual update, but rather generates the new value of your model for the Elm runtime to work with
+U5FU80S06 : That's fine.
+U0LPMPL2U : <https://elmlang.slack.com/archives/C192T0Q1E/p1498503501610433>
+U0LPMPL2U : <@U5FFVDC4W> here's an example of DRYing up an `update` without programatically calling `update` again
+U5VTA57UN : What's the idomatic way to access cookies in elm?  (Django sets a CSRF token cookie, I need to access it to include it in a POST)
+U0LPMPL2U : Cookies aren't normally used in API requests (in general, not Elm-specific)
+U0LPMPL2U : Also, see this: <http://tech.noredink.com/post/147676730053/maybe-the-cookies-api-should-not-exist>
+U0FP80EKB : Does Django set it as a cookie, not as a piece of the form field? In Rails, it is generally put into the form as a hidden field.
+U0FP80EKB : In an API, though, the CSRF field (usually generated when building a new form) isn't used.
+U0FP80EKB : Cookies, though, travel along with the http request, which comes in handy when integrating with an existing system (at least for us), because it carries session information.
+U0FP80EKB : But, there's probably a question about whether you should have the CSRF token
+U5VTA57UN : Django sets it as both, and it is more typical to find it in the form field.  However, because my app is an SPA that handles login, and CSRF tokens are rotated on login, I need a mechanism to pick up the CSRF token without the usual embedding mechanism.
+U0FP80EKB : Personally, we disabled CSRF checking are relying on other mechanisms
+U0FP80EKB : Although we don't use Elm for the login screen
+U0FP80EKB : relying just on a standard form
+U0FP80EKB : So we do have the token then
+U5VTA57UN : That may be a better solution in my case as well.  Thanks.
+U0LPMPL2U : One option would be to pass the model
+U0J1M0F32 : I would pass the whole model into `htmlNote`, or the one other object you need.
+U0LPMPL2U : So the signature would now be `htmlNote : Model -&gt; Note -&gt; Html Msg`
+U0LPMPL2U : In your `map`, you'd do something like `List.map (htmlNote model) model.notes`
+U0LPMPL2U : Passing a just the first argument to `htmlNote` here is a trick called "partial application". I'm glad to explain more if you haven't encountered that yet :slightly_smiling_face:
+U5Z3Y472L : Hi!
+U5KEJPXHP : <@U0LPMPL2U> I attempted something like this before and couldn't get it to work. I'm going to attempt again and see what happens. Thanks!
+U3SQ42JJW : Hi everyone. I have a question, maybe someone can help. I am writing a module that I would like to publish one day. 
+I am struggling with the elm package documentation.
+I have a type Catalogue which looks like this:
+
+U3SQ42JJW : ```type Catalogue    = Catalogue
+        { previous : List Question
+        , current : Question
+        , remaining : List Question
+        }
+```
+
+U3SQ42JJW : I want to hide the implementation details in the documentation. I only want to mention type Catalogue, not the whole type
+U3SQ42JJW : Problem is, when I mention ```
+@docs Catalogue
+```
+I get the whole type. But that should be hidden in the Documentation…
+
+U3SQ42JJW : Don't know if its cleared what i want…. :confused:
+U5Z3Y472L : I was looking at Richard Feldman's SPA example. In some file he uses a =&gt; operator. Unless I missed something, I haven't encountered this yet, although I followed a bunch of tutos and read Richard's Book. By example in <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Page/Login.elm> there is:
+U5Z3Y472L : SetEmail email -&gt;            { model | email = email }
+                =&gt; Cmd.none
+=&gt; NoOp
+
+U14Q8S4EM : Yeah <@U5Z3Y472L> , did you have a question about that? Making your own operators is almost always a bad idea.
+U14Q8S4EM : I think Richards use is maybe one of the exceptions where its handy. Maybe not tho.
+U14Q8S4EM : Personally I do something just like Richards `=&gt;` but I do `:=` instead. I dont really understand how an arrow conveys what `(,)` does.
+U5Z3Y472L : ok, I thought it was something I did not know yet about elm, but it's a user defined operator
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

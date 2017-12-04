@@ -1,29 +1,145 @@
+U23SA861Y : or I believe so
+U64MK7215 : how do i trigger 2 events with onclick?
+U23SA861Y : hmm, which two events
+U0M9CNX1A : <@U64MK7215> typically I will try to model this sort of situation with a single message that describes what the user did (FooButtonClicked) and handle the multiple things you want to happen in the update function. Don't forget you can extract/share functions between branches of your update case. 
+U0JBSEGHY : How are people managing live reload with Elm projects. It looks like elm-live is unmaintained? Is everyone using webpack?
+U0JBSEGHY : I would prefer not to use webpack if I can help it lol.
+U0CLDU8UB : elm-live works fine
+U0EUHKVGB : elm-live actually has some issues right now if you are also using elm-test to watch files
+U2SR9DL7Q : Hey all. I have a strange conundrum. I'm trying to do some clever redirection in an SPA with the `Navigation` and `Routing` modules.
+U2SR9DL7Q : I followed the method outlined in the Elm tutorial with great success, but found a follow up describing a 'push-state' model which I wanted to try so users could navigate to the various 'pages' from a navigation bar in the drawer. 
+Unfortunately after giving it a try I found that while the link to the 'home' page works, the second page I'm testing with doesn't appear to work. 
+
+Specifically, where I should be seeing ..../secondpage, I instead have to use /#secondpage from the original form. The button either fails to trigger the change silently or if I type what should be the proper URL into the browser, it triggers the 404 error. 
+
+<https://github.com/sporto/elm-navigation-pushstate/blob/master/src/Main.elm> is the guide I have been following.
+
+U2SR9DL7Q : Below are my _Routing.elm_ and relevant _Views.elm_ respectively. I am reasonably sure that my updates and messages match the example code.```
+viewTestLink : List (Html Msg)
+viewTestLink =
+    [ a
+        [ href paths.home
+        , onLinkClick (ChangeLocation paths.home)
+        ]
+        [ text "Home" ]
+    , a
+        [ href paths.resume
+        , onLinkClick (ChangeLocation paths.resume)
+        ]
+        [ text "Resume" ]
+    ]
 ```
-the same principle
-It works
-:slightly_smiling_face:
-also `lambda: func()` works. Should have just done that....
-<@U5NMSURAQ> since it seems you've used tkinter, what's the best way to go about passing data to another Frame. I'm trying to grab a selection and place it inside a label to show a user what they selected, but in the same way as before it places the default value into the label instead of grabbing the updated one.
-If `lambda: func()` works just `func` should also work...
-But it doesn't that's the thing lol
-Lambda is just a function reference, without a name. so setting `lambda: func()` is the same as `func`
-Sounds like some other error, but if it works that's good :smile: ¯\_(?)_/¯
-It's because it, for whatever reason attempts to access a key in a dict that doesn't exist and it steps into the function i attach to `command` if I just do `lambda: func()` it doesn't actually go into the function til it's finally clicked
-<@U1BP42MRS> `func` and `lambda: func(foo, bar)` are different :wink:
-Which is why I recommended using a partial as an alternative
-Anyway, in tkinter you see a ton of `lambda: thing()` so it't not out of the norm :smile:
-<@U4BMZ90T0> can you show a bit of code? maybe it's something obvious
-nooo waaay
-you, mister, should have a cup of coffee :coffee:
-I actually got it
-I just pass the controller in, grab the dictionary of frames and get the variable from the corresponding frame
-But this is quite annoying :slightly_smiling_face:
-That was my experience with most desktop ui programming, it's a little funky what you have to do
-especially since Tk is sooo barebones
-I just need 4 screens
-that's it
-there's a good side though: you better understand what happens under the wraps in other GUI frameworks
-god is this bad
-Should have just made a frontend, honestly
-just attempting to format this is so bad.
-You can pass around `bar` or `foo` to any function that needs a callable (with no args in this case)
+```
+paths : { home : String, resume : String }
+paths =
+    { home = "/"
+    , resume = "/resume"
+    }
+
+
+onLinkClick : msg -&gt; Attribute msg
+onLinkClick message =
+    let
+        options =
+            { stopPropagation = False
+            , preventDefault = True
+            }
+    in
+    onWithOptions "click" options (Decode.succeed message)
+
+
+matchers : Parser (Route -&gt; a) a
+matchers =
+    oneOf
+        [ map HomeRoute top
+        , map ResumeRoute (s "resume")
+        ]
+
+
+parseLocation : Location -&gt; Route
+parseLocation location =
+    case parseHash matchers location of
+        Just route -&gt;
+            route
+
+        Nothing -&gt;
+            NotFoundRoute
+```
+
+U2SR9DL7Q : a link to the github: <https://github.com/tkshill/tkshill.github.io/blob/master/Main.elm> and a link to the site itself: <https://tkshill.github.io/> where if you click the drawer the problem can be seen.
+U0JFGGZS6 : and you tried `parsePath` instead of `parseHash` ?
+U2SR9DL7Q : ... I'm going to feel quite silly if that's the problem :neutral_face:
+U2SR9DL7Q : So that helped! But now there seems to be the issue that it returns the 404 message on the initial page load.
+U0JFGGZS6 : before or after it hits your Elm app?
+U2SR9DL7Q : after. this is testing in elm reactor.
+U2SR9DL7Q : so I redirects to my 404 div
+U0JFGGZS6 : I've always used hash urls so not as familiar with the 'push state' style
+U2SR9DL7Q : it's strange. the home button works. when the app starts, Navigation calls the `OnLocationChange` with the current address which should be _localhost:8000_
+U0JFGGZS6 : hopefully someone else can weigh in.  This issue may be relevant. <https://github.com/evancz/url-parser/issues/35>
+U2SR9DL7Q : okay, so I think I know why it's confused. The base directory UrlParser provides is localhost:8000 but the active address using elm reactor is localhost:8000/Main.elm
+U2SR9DL7Q : so it thinks Main.elm is an invalid URL. I'd have to test outside of localhost to be certain.
+U3SJEDR96 : You need server-side configuration to map every route to your elm-app
+U2SR9DL7Q : <@U0JFGGZS6> this issue looks like exactly what is going on.
+U2SR9DL7Q : <@U3SJEDR96> I _think_ I understand what you're saying, but I'm not sure what that means in terms of next steps. If I understand the problem now, this problem shouldn't occur on the live site. But I'm not sure what I would need to do to perform server side mapping in my test environment.
+U5J0H2NS2 : <@U2SR9DL7Q> Sorry if I misunderstand your issue, but why don't you use hashed urls if you want client-side routing?
+U2SR9DL7Q : I initially used hashed urls before linking up the navigation buttons. A small issue was just that the generated urls have the '#' symbol added in. It just happens that the sample code I found describing how to reroute from the href attribute in my buttons also described how to use push state to remove the '#' symbol. <@U5J0H2NS2> 
+U2SR9DL7Q : Now it seems to be working, but the initial page when the app starts is being redirected to the pagenotfound response. 
+U2SR9DL7Q : Specifically, the div I've set to appear for an invalid page request within the app appears, Not the browser one. So from there, I can use the nav drawer to go to the other pages as intended. 
+U5J0H2NS2 : I see it on your webpage. The link ".../resume" works in the menu. But since this is not a hashed url, if I copy-paste it into the browser, I get 404
+U2SR9DL7Q : Yup. But when it was hashed, the menu link didn't work. 
+U5J0H2NS2 : Or if I click F5 to refresh
+U2SR9DL7Q : And to access the resume page, I had to type '#resume' into the browser 
+U5J0H2NS2 : I have found this article to be useful: <https://medium.com/elm-shorts/choosing-the-right-elm-spa-architecture-d6e8275f6899>
+U2SR9DL7Q : At this point, I'm not bothered about the pound symbol. My priority is consistent navigation and page functionality... :( 
+U2SR9DL7Q : This article... is very good. 
+U2SR9DL7Q : Time to roll up my sleeves are figure things out.
+U2SR9DL7Q : <@U5J0H2NS2> <@U3SJEDR96> <@U0JFGGZS6> thanks for the assistance!
+U5J0H2NS2 : What if you change &lt;a href="/resume"&gt;Resume&lt;/a&gt; to &lt;a href="/#resume"&gt;Resume&lt;/a&gt;
+U2SR9DL7Q : Giving that a try right now
+U5J0H2NS2 : Or you could use an elm-mdl List in the menu and assign proper msg-s to them. Then you could change the url with the Navigation package inside your update. This generates a new Msg. Then in the next update, you parse your new url .
+U5J0H2NS2 : This would be more mdl-ish I guess
+U2SR9DL7Q : well, I swapped out a mdl nav for a regular nav just to see if it was an mdl issue (it wasnt)
+U2SR9DL7Q : ```[ Layout.link
+       [ Layout.href paths.home
+       , Options.attribute &lt;|
+           onLinkClick &lt;|
+               ChangeLocation paths.home
+       ]
+       [ text "Home" ]
+   , Layout.link
+       [ Layout.href paths.resume
+       , Options.attribute &lt;|
+           onLinkClick &lt;|
+               ChangeLocation paths.resume
+       ]
+       [ text "Resume" ]
+   ]
+```
+
+U2SR9DL7Q : This was the original idea. It's essentially the same as what it's doing now. 
+But you're suggesting adding a separate msg for each URL?
+
+U5J0H2NS2 : Yes. Or one common msg with the url as parameter
+U2SR9DL7Q : so then... my `changeLocation` function would presumable use case statements to construct it's own urls, and pass those the `Navigation.newUrl` command...
+U2SR9DL7Q : I'll try some of your suggestions. I need to re-read that medium article, and look into just what url is returned when the page first loads.
+U66RFDZ8F : Hello everyone, I just started learning Elm, and I have been looking at parent child communication
+U66RFDZ8F : this is kinda troubling
+U66RFDZ8F : What I find is not appealing
+U66RFDZ8F : I have looked at <https://medium.com/@alex.lew/the-translator-pattern-a-model-for-child-to-parent-communication-in-elm-f4bfaa1d3f98> and <https://github.com/evancz/elm-sortable-table> for inspiration and I still think there's a gap
+U66RFDZ8F : From what I saw, I came up with this <https://gist.github.com/thedumbtechguy/b930cfe1f066e24bc266d6b9d1eac059>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

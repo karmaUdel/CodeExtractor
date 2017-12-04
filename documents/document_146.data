@@ -1,3 +1,71 @@
-```Can't find Python executable "python", you can set the PYTHON env variable.```
-oh
-there exist a stackoverflow question <http://stackoverflow.com/questions/21365714/nodejs-error-installing-with-npm>
+U5JUDH2UE : What is a fast way to do this without the repeated nested pointer?```
+(-&gt; state
+    (assoc-in [:a :b :b/field0] "")
+    (assoc-in [:a :b :b/field1] "")
+    (assoc-in [:a :b :b/field2] ""))
+```
+
+U0CM1QURZ : ```;; maybe?
+(assoc-in [:a :b] {:b/field1 "" :b/field1 "" :b/field2 ""})
+```
+
+U050MP39D : fast as in performance?
+U5JUDH2UE : Fast as in, using standard library. I don't want to add any external libs or anything.
+U5JUDH2UE : Performance isn't a concern.
+U5JUDH2UE : Sorry, I shouldn't be using that work. :stuck_out_tongue:
+U050MP39D : (merge state {:b/field1 "" :b/field1 "" :b/field2 ""})
+U050MP39D : err
+U050MP39D : sorry, (update-in state [:a b] merge {:b/field1 "" :b/field1 "" :b/field2 ""})
+U050MP39D : forgot a few words
+U11BV7MTK : ```(let [nav [:a :b]]
+  (-&gt; {:a {:b {}}}
+      (assoc-in (conj nav :b/field0) "")
+      (assoc-in (conj nav :b/field1) "")))
+{:a {:b {:b/field0 "", :b/field1 ""}}}
+```
+
+U11BV7MTK : the navigator is just a vector, so create it with the shared navigation parts
+U11BV7MTK : if i'm understanding correctly
+U5JUDH2UE : <@U11BV7MTK> That's what I thought I was going to need to do.<@U050MP39D> I'm not sure why I didn't think of update-in... That should work nicely.
+
+U5JUDH2UE : Not the question is update-in with assoc or merge. Is there any performance difference?
+U050MP39D : I suspect they'd be identical
+U5JUDH2UE : I figured they would be. Anyways, thanks all!
+U050MP39D : merge is implemented in terms of `conj` so yes I'd say identical <https://github.com/clojure/clojure/blob/clojure-1.9.0-alpha14/src/clj/clojure/core.clj#L3022>
+U5ZAJ15P0 : When I use lein, where will the clojure stdlib be located on my file system?
+U5ZAJ15P0 : .clj files that is
+U11BV7MTK : ```(let [nav [:a :b]]
+  (reduce (fn [m [k v]] (assoc-in m (conj nav k) v))
+          {:a {:b {}}}
+          [[:b/field0 ""]
+           [:b/field1 ""]
+           [:b/field2 ""]]))
+{:a {:b {:b/field0 "", :b/field1 "", :b/field2 ""}}}
+```
+
+U06CM8C3V : <@U5ZAJ15P0> You mean the jar files?
+U5ZAJ15P0 : ah right, so the std lib will be within jar files. Nevermind then
+U050MP39D : jar files are just zip files and you can unzip them and the .clj files will be inside, if that matters to you
+U0NCTKEV8 : <@U5ZAJ15P0> lein runs 2 jvms, lein's jvm and your project's jvm, the clojure runtime that lein uses is  part of the lein jar and lives in ~/.lein, the clojure runtime for your project is Just Another Jar(tm)
+U06CM8C3V : lots of interesting jar files in `~/.m2/repository` too
+U066TMAKS : what's a good way to xor two sets?
+U050MP39D : (set/union (set/difference s1 s2) (set/difference s2 s1))
+U051SS2EU : a silly way to do it ```=&gt; (into #{} (comp cat (take 2)) (clojure.data/diff #{1 2 3} #{2 3 4}))#{1 4}```
+
+U0CDMAKD0 : is it possible to use clojure.java.shell to invoke a shell command like `tr &lt; infile.txt -d '\000' &gt; outfile.txt` ?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

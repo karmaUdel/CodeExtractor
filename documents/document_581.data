@@ -1,8 +1,94 @@
+U0JBSEGHY : I also want to track a backspace to send another message out to the AsYouType formmater to pop off the last number
+U14Q8S4EM : <@U0JBSEGHY>, so are you using a port to send it out to that libphonenumber-google service?
+U14Q8S4EM : Regarding the backspace, you can add your own custom event listener that listens for that key code.
+U0JBSEGHY : Yea I have it on the client side. So I am just working with it as some external JS client side
+U0JBSEGHY : I just realised I probably also have to track deletes and cut and pastes as well :confused: haha.
+U14Q8S4EM : Yeah thats all no problem if you just make an even listener that takes an `Int -&gt; Msg`
+U14Q8S4EM : Do you need any help making that kind of thing? And regarding the google service, why dont you use a port to send back whatever it is you wanted in Elm?
+U0JBSEGHY : I think I might have to sit down and map it all out. I also want to accept letters and treat it as a search bar as well.
+U0JBSEGHY : I have a port sending it back and showing the result elsewhere but I would like to also format the input field.
+U0JBSEGHY : This is a little more fancy than I initially thought it would be haha
+U14Q8S4EM : I think Ive been in your circumstance. I had an app that I wanted to listen for the enter key. There are a few ways to do it, but I ended up with..```
+input
+    [ onChange HandleField
+    , onEnter HandleEnter
+    , value model.inputField
+    ]
+    []
+
+onEnter : Msg -&gt; Attribute Msg
 ```
-Maybe not...
-But certainly you could do something like multiply it by `1.0`
-toFloat could certainly be `number -&gt; Float` but I’d be interested in seing your particular use case
-Which may illustrate why the function doesn't exist - because in most cases it wouldn't be useful (that I can think of anyway)
-My mistake!  I guess you *can't* multiply by 1.0 :slightly_smiling_face:
-But I guess the thing is if you have a `number` you can just use it as a `Float` rather than converting it to a `Float`
-(i.e. it basically is a Float already - for practical purposes)
+
+U14Q8S4EM : It fired that message if the key that was pressed was the enter, and then separately, there was another event listener that listened for the changes generally
+U14Q8S4EM : When you say "format the input field", you might like change or update?
+U0JBSEGHY : I think I should hold 3 different states in the model. The current state of input, the state of the formatted number (human) and then the state of the number for international calling format.
+U0JBSEGHY : I'm going to have a crack at what you have just outlined there. I just reread the code and it makes sense now haha
+U0JBSEGHY : <@U14Q8S4EM> how does your HandleField work? Does it accept a string?
+U0JBSEGHY : ```The 1st and 2nd entries in this list are different types of values.
+327|                         [ onInput FormatNumber
+328|&gt;                        , onChange HandleField
+329|                         , value model.numberToCall
+330|                         , placeholder "Enter a Phone Number"
+331|                         , class "login-form"
+332|                         ]
+
+The 1st entry has this type:
+
+    Attribute (Msg)
+
+But the 2nd is:
+
+    Attribute (String -&gt; Msg)```
+
+U0JBSEGHY : If I remove the first input field it throws errors all the way down the view. So I'm a little stuck on the types.
+U14Q8S4EM : Yeah, accepting a string is what I had in mind.
+U14Q8S4EM : So.. `type Msg = HandleField String | ...`
+U3HQVHERX : ```Project is running at <http://localhost:8080/>
+webpack output is served from /
+Success! Compiled 1 module.
+Successfully generated /var/folders/_c/8wr2xwdd5fgd09brqxxycj080000gp/T/117631-5543-1pmxcl4.bb90w1att9.js
+Hash: 585e3744c67183452465
+Version: webpack 3.4.1
+Time: 974ms
+    Asset    Size  Chunks                    Chunk Names
+bundle.js  628 kB       0  [emitted]  [big]  main
+  [35] multi (webpack)-dev-server/client?<http://localhost:8080> ./public/js/app.js 40 bytes {0} [built]
+  [36] (webpack)-dev-server/client?<http://localhost:8080> 5.83 kB {0} [built]
+  [37] ./node_modules/url/url.js 23.3 kB {0} [built]
+  [40] ./node_modules/querystring-es3/index.js 127 bytes {0} [built]
+  [43] ./node_modules/strip-ansi/index.js 161 bytes {0} [built]
+  [45] ./node_modules/loglevel/lib/loglevel.js 6.74 kB {0} [built]
+  [46] (webpack)-dev-server/client/socket.js 856 bytes {0} [built]
+  [78] (webpack)-dev-server/client/overlay.js 3.6 kB {0} [built]
+  [80] ./node_modules/html-entities/index.js 231 bytes {0} [built]
+  [83] (webpack)/hot nonrecursive ^\.\/log$ 170 bytes {0} [built]
+  [84] (webpack)/hot/log.js 1.04 kB {0} [optional] [built]
+  [85] (webpack)/hot/emitter.js 77 bytes {0} [built]
+  [86] ./node_modules/events/events.js 8.33 kB {0} [built]
+  [87] ./public/js/app.js 76 bytes {0} [built]
+  [88] ./src/Main.elm 303 kB {0} [built]
+    + 74 hidden modules
+webpack: Compiled successfully.
+```
+
+U3HQVHERX : it says "emitted bundle.js" but i do not see it anywhere
+U14Q8S4EM : Although I would name it something other than `HandleField`, maybe something more specific to what you are doing
+U0JBSEGHY : Yea I am just trying to get it to compile for me first
+U0JBSEGHY : The thing is having `HandleField String` throws errors on all my `onClick` handlers
+U0JBSEGHY : That is once I remove the `onInput`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

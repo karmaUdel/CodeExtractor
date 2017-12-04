@@ -1,0 +1,206 @@
+U4WH8STNX : please quit trolling the slackbot, he only wants to help :slightly_smiling_face:
+U6D1E91QV : eh, i'll stay clear of that
+U0LPMPL2U : If do end up using the "extractor" approach, I'd probably wrap it in a type and provide an explicit `extract` function so you don't leak the internals
+U6D1E91QV : don't i have wrappers already?
+U6D1E91QV : `FieldValue` and `Extractor` ?
+U6D1E91QV : or should Extractor not be an alias, but a newtype?
+U0LPMPL2U : right, make Extractor it's own type, not an alias
+U0LPMPL2U : right now, `main` is: `text &lt;| toString &lt;| extractModel myForm`
+U0LPMPL2U : it's treating `extractModel` like a function
+U0LPMPL2U : which it is
+U6D1E91QV : ```type Extractor2 model val
+    = Extractor2 (model -&gt; Maybe val)```
+
+U0LPMPL2U : yup
+U3SJEDR96 : exactly. And wrap everything in `Extractor2 &lt;|` and use `(Extractor2 theFunction)` in declarations
+U3SJEDR96 : though I don't really think of that as a necessity
+U6D1E91QV : can't i decompose on definition?...apparently, i can't
+U3SJEDR96 : you can, `map f (Extractor2 extractor) = Extractor2 &lt;| \model -&gt; extractor model |&gt; f`
+U0LPMPL2U : You can only decompose in the definition if there is only one constructor
+U6D1E91QV : oh i forgot to rewrap
+U0LPMPL2U : `map` functions always follow the sequence unrwap, do thing, re-wrap :slightly_smiling_face:
+U5X2ZRFDF : I'm having trouble with designing some types. I'm creating a simplified model of what's going on in another application, for visualization purposes. The existing app uses a SQL database, thus a relational layout, and also computes some information on the fly. My model gets rid of some of the complexity.
+Ideally I want the user to be able to initialize my app with a list of assessment event data. Then it will compute deterministically a bunch of related data. Both the assessment event data and the related data will be used in the visualization. When someone changes the view, it won't have to recompute that related data. Only if they choose to add/delete/modify an assessment event will it recompute the cache of related data.
+
+The relationships between this data are fairly complex. I had hoped to create data structures that directly contained each other, but it may be easier to create IDs on the assessment events, put them into a Dict for indexing, and have the other elements reference them by ID. Does that seem reasonable?
+
+Also, I'm concerned that I may need many variants on the same data type as I add more data to it. The original data specified by the user for an assessment event contains a limited set of fields. Then I'm going to compute more fields and want to cache the results. That includes the ID. It seems like too much coupling to have one function compute all those extra fields - so I guess I need a function that looks at one record type and returns a slightly larger record type. Perhaps this is where I need to take advantage of anonymous record types, where I can parameterize over the input type and only specify the fields I care about, and then specify that the output contains additional fields?
+
+U5X2ZRFDF : E.g., I'm afraid I'll end up with a proliferation of types like: AssessmentEvent, AssessmentEventWithId, AssessmentEventWithIdAndEffectiveDates, etc....
+U2GPAEU1L : Hey everyone, is this a bug: <https://ellie-app.com/3QntKMSr7KRa1/1>
+When we start, the `a` has no `href`, but if you switch to an `a` with an `href` and then back, the `a` with no `href` now has an href…
+
+U1UGYHGCA : Looks like it :slightly_smiling_face:
+U2GPAEU1L : It pretty much _has_ to be a bug…
+Same model, different view
+
+U2GPAEU1L : Filing an issue
+U0F7JPK36 : oh weird, `href` is like a strange case where not having the attribute at all is different from having the attribute without a value
+U2GPAEU1L : Yes, I had this problem on my app, cause it starts creating links back to the base of the website even though no `href`
+U2GPAEU1L : Do you think I should put this in elm-lang/html or elm-lang/virtual-dom
+U2GPAEU1L : (The issue)
+U5X2ZRFDF : Oh, people answered my question on elm-discuss, thanks....
+U2GPAEU1L : I’m gonna go with vdom…
+U0F7JPK36 : virtual-dom, this is a problem with patching i think
+U3SJEDR96 : <https://github.com/elm-lang/virtual-dom/blob/master/src/Native/VirtualDom.js#L496> &lt;- hm, do attributes actually return `undefined` when they're not set? I think they return the empty string :thinking_face:
+U2GPAEU1L : Issue here: <https://github.com/elm-lang/virtual-dom/issues/109>
+U2GPAEU1L : <@U3SJEDR96> I’m not sure, taking a look now
+U3SJEDR96 : `var a = document.createElement('a'); a.title === ""`
+U3SJEDR96 : `getAttribute` returns explicit `null`, though
+U3SJEDR96 : I think the plain accessors are required to return the serialized version of the attribute, which - when absent - means empty string. I don't know where it says so in the spec, though, let me look that up
+U3SJEDR96 : Okay, so; it's a little more complicated. But the gist is that attributes that are part of a DOM interface can only return `null` if they're defined as a `DOMString?`, which basically means "never", or at least I can't spot any optionals in the spec (<https://www.w3.org/TR/DOM-Level-2-HTML/idl-definitions.html>)
+U3SJEDR96 : (and the spec on `DOMString` and `null`: <https://heycam.github.io/webidl/#idl-DOMString> )
+U3L8MM10T : Due to code logic, if I am casing on a branch that the code should never reach, is it better to use a benign value (such as `0`) , or a failing value (such as `Infinity = 1000^1000`) , or perhaps force a system crash?  (The comment in all 3 cases would be `-- should never get here`.)  And how exactly would I force a crash?
+U3SJEDR96 : as for a workaround, I suggest `Html.Keyed` with different keys; though I am quite curious when you _really_ need an attribute to be absent?
+U6D1E91QV : <@U3L8MM10T> `Debug.crash` ?
+U2GPAEU1L : <@U3SJEDR96> Ya just to switch diff-logic
+U3SJEDR96 : I try to return a benign value when possible, or `Debug.crash "give some info why you should never reach this"` + a whole lot of fuzz tests to validate it is absolutely completely impossible to get there
+U0F7JPK36 : <@U3SJEDR96> the diff isn't performed against the existing dom, it's performed against the previous vdom tree
+U3SJEDR96 : Oh! good point :sweat_smile:
+U0F7JPK36 : yeah that was the first thing i went to look at and then i was like wait a second...
+U0F7JPK36 : yeah this is a tough one
+U2GPAEU1L : Ya the `undefined` is just checking against the javascript object (here: <https://github.com/elm-lang/virtual-dom/blob/master/src/Native/VirtualDom.js#L496>)
+U3L8MM10T : <@U3SJEDR96>  But sometimes the code is super explicit. Like if I just tested that a list is non-empty, and then `case` on the `Maybe`result of `head`, then the branch of `Nothing` should never be hit. But yet, you would still have gobs of tests?!
+U3SJEDR96 : No, though I'd probably not check if a list is empty before matching on the `head` ..
+U3L8MM10T : <@U3SJEDR96> That example was for illustration purposes only.
+U3SJEDR96 : There are cases where you have invariants that the type-system can't check, though, in which case a `Debug.crash` is still a bit of an eye-sore :slightly_smiling_face:
+U2GPAEU1L : <@U3L8MM10T> 
+Ideally when you “check” something you do it through the type system. Like you do `List.head` and then in that _case_ where it is `Just x` you know the list is not empty and you have the first thing in the list to “prove it”. It isn’t always easy to do this, but that’s what you do as much as possible in Elm, getting the type system to be “on your side”. That’s why they make videos like “making impossible states impossible”, the idea is to avoid this very problem of having your types say one thing but the logic in your code say something else. It’s hard. The more elm I write, the better I get at avoiding these situations. Sidenote, you may want to read about _dependent types_
+
+U0F7JPK36 : here's what's happening: `href` is being set as a `property` and not an `attribute`, so it's being set to the empty string rather than removed as an attribute
+U0F7JPK36 : <@U2GPAEU1L> i'm gonna close your issue and reopen it on elm-lang/html
+U2GPAEU1L : <@U0F7JPK36> Sure…happy you found it. Can you link me your issue when done.
+U0F7JPK36 : yep!
+U2GPAEU1L : Thanks :slightly_smiling_face:
+U3L8MM10T : <@U2GPAEU1L> Can you point me to some reading on _dependent types_ ? Thanks
+U2GPAEU1L : I like to always start with wikipedia and see where it takes me :slightly_smiling_face:
+<https://www.wikiwand.com/en/Dependent_type>
+
+U2GPAEU1L : Also, Agda, another programming language that uses dependent types, commonly comes up:
+<https://www.wikiwand.com/en/Agda_(programming_language)>
+
+U0F7JPK36 : <@U2GPAEU1L> <https://github.com/elm-lang/html/issues/142>
+U2GPAEU1L : <@U0F7JPK36> Thanks
+U4872964V : Seems like a lot of attributes are being set as properties
+U1EES739B : As I write more complex things in elm I am a bit unhappy with how I am dealing with Maybe/Result. I seem to end up choosing whether to use withDefault a lot (and feeling like I am throwing away some potentially useful information) or ending up with code that feels really unclear/unwieldy (making the meaning of the code less clear). Anyone else been through this and got any recommendations of things/code to read that might help? Sorry this is vague, no concrete example to show at the moment.
+U0LPMPL2U : Try to keep Maybe/Result at the edges of your system
+U0LPMPL2U : Try to design your types so as to avoid Maybe/Result in your model
+U3SJEDR96 : Personally I like dealing with things like remotedata only at the last moment possibly, usually in my view. For manipulations and whatnot, I rely heavily on function composition and `map`
+U0LPMPL2U : :thumbsup:  to using "normal" functions and `map`
+U1EES739B : Thanks for the replies, I do use normal functions and map etc. but I keep ending up with e.g. a List of Maybe and needing to do extra manipulations/functions. It all works, I just know what I am doing feels ugly! Just want to try to find some good code that legitimately has a lot of Maybes and see how it is dealt with
+U0JFGGZS6 : can you share one example where it feels ugly?
+U0JFGGZS6 : ugly sometimes just means unfamiliar :slightly_smiling_face:
+U23SA861Y : If you find yourself tripping over maybe it probably means that you are abstracting along the wrong lines
+U57KYFW67 : <@U0JFGGZS6> I find that when I'm programming in a functional language, I'll start off first doing it the "ugly" way, then when I have it working, I go back and try to clean it up.
+U57KYFW67 : Once you have the code put together, you can pick out where you need to draw boundaries for the maybe code.
+U23SA861Y : like try not to put maybes in function signatures
+U0JFGGZS6 : all this is true, but to help <@U1EES739B> with their question, it would help to see their code.
+U57KYFW67 : oh, I replied to the wrong person. My mistake :slightly_smiling_face:
+U1CE9DL9H : to be fair, dealing with result/maybe in a "nice" way requires that you can spot some patterns, and then use map/mapN/andMap. This requires experience
+U0JFGGZS6 : np
+U1CE9DL9H : also, we can help here, if you have some particularly nasty bit of code
+U2D07QZN3 : It works in both now - I got your change.
+U2D07QZN3 : I knew turning it into elm was not the way to go, but I knew how to do it, and I was in a hurry!
+U5LFUHH19 : A while back some kind soul on this channel helped me with a sum type to parse some JSON that might have strings/int/floats/etc.  I've got a case where I'm getting back a Dict of that union, but I was hoping it would parse the data as floats instead of Values.  Can someone set me straight on why I'm getting a `Dict String Value` instead of a `Dict String (List Float)` (and also I'm not quite sure what a `Value` is). <https://ellie-app.com/3QrTxmsMGxLa1/2>
+U5WS7CJLV : how odd
+U5WS7CJLV : I never seen a question go this long without a response.  You seem to be struggling with decoding.  Which is a common struggle.
+U5WS7CJLV : not entirely sure what you are after, but if you wanted to get your chlorophyl numbers into a `List Int`, you could `Decode.decodeString (Decode.field "biological__chlorophyll" (Decode.list Decode.float)) s`
+U5WS7CJLV : not entirely there, but this compiles: <https://ellie-app.com/3QscDw2frYRa1/1>
+U5WS7CJLV : that in the neighborhood if what you need <@U5LFUHH19> ?
+U5LFUHH19 : <@U5WS7CJLV> Thanks!  My problem is that I don't know beforehand if I'm going to have a list of floats/ints/strings, so I'm not able to choose the correct decoder.  I'm going to continue to think on this.
+U5LFUHH19 : I'd love to understand better how `Json.Decode.oneOf` works.  Does it try each branch in order, moving on when it fails until it finds something that works?
+U5LFUHH19 : Probably everyone has gone home for the day, which is what I need to do now.  More tomorrow!
+U153UK3FA : <@U5LFUHH19> yep, that’s what `Json.Decode.oneOf` does
+U153UK3FA : <@U5LFUHH19> you’re getting a `Value` because it’s a list.
+U153UK3FA : <@U5LFUHH19> <https://ellie-app.com/3QrTxmsMGxLa1/2>
+U23SA861Y : anyone know of a way to list the import tree of an elm project, or to list the modules that are being recompiled?
+U23SA861Y : So when you change a line in that mat file I'm getting 15 modules recompiled. That seems to be quite a bit
+U23SA861Y : I'm trying to track down which modules
+U23SA861Y : as for what's haskell like and what's not, almost that entire X folder is out of place in an elm project
+U3SJEDR96 : I think elm-analyse can get the tree.. alternatively, `ls -alTr` in the right subfolder or `elm-stuff` just after a compile is useful :)
+U17MHJ12N : Elm-analyse has a --serve option that serves a site giving all sorts of interesting info
+U2L33RRR8 : hey! is there a way in elm to only render whats visible in viewport?
+U4872964V : <@U2L33RRR8> what problem are you trying to solve? infinite scroll?
+U2L33RRR8 : I have some performance problem with a list type of view
+U4872964V : yes, so there are a few packages that may work for you, for instance <http://package.elm-lang.org/packages/FabienHenon/elm-infinite-list-view/latest>
+U2L33RRR8 : ok thanks, I will try it out
+U3SJEDR96 : More importantly, what's causing your performance issue? Re-rendering? Is it an option to use `Html.Keyed` and/or `Html.Lazy`?
+U2L33RRR8 : the problem is not re-rendering (anymore), since I am using both `Html.Keyed` and `Html.Lazy`.  Now the issue is interaction became somehow slow, including scrolling.
+U3SJEDR96 : is it "including scrolling" or "especially scrolling"?
+U3SJEDR96 : if it's the former, you may want to investigate setting `pointer-events: none;` _during_ scrolling, so there is less re-rendering and recalculating of styles going on due to hover states and whatnot
+U3SJEDR96 : <https://www.thecssninja.com/css/pointer-events-60fps> for some more info on that particular trick
+U2L33RRR8 : other type of actions are also slow, I am investigating why other normal actions (for example showing a modal takes long).
+U2L33RRR8 : thanks <@U3SJEDR96>, I’ll consider that
+U4872964V : I made a little list reordering animation demo, what do you all think? <https://ellie-app.com/3QmmNMSn45na1/3>
+U2L33RRR8 : nice norpan! I have been meaning to do something like this.
+U4872964V : the nice thing is that the Elm code is virtually unaffected
+U4872964V : so it should work for any kind of container, I think
+U1G8WC4UR : This seemed simple at first, but it beats me. I have this list:
+```
+[ (1,True)
+, (2,True)
+, (3,False)
+, (4,False)
+, (5,False)
+, (6,True)
+, (7,True)
+, (8,False)
+, (9,False)
+, (10,True)
+, (11,True)
+, (12,True)
+]
+```
+
+and i'd like to render it as
+
+```
+&lt;div&gt;1&lt;/div&gt;
+&lt;div&gt;2&lt;/div&gt;
+&lt;div&gt;
+    &lt;div&gt;3&lt;/div&gt;
+    &lt;div&gt;4&lt;/div&gt;
+    &lt;div&gt;5&lt;/div&gt;
+&lt;/div&gt;
+&lt;div&gt;6&lt;/div&gt;
+&lt;div&gt;7&lt;/div&gt;
+&lt;div&gt;
+    &lt;div&gt;8&lt;/div&gt;
+    &lt;div&gt;9&lt;/div&gt;
+&lt;/div&gt;
+&lt;div&gt;10&lt;/div&gt;
+&lt;div&gt;11&lt;/div&gt;
+&lt;div&gt;12&lt;/div&gt;
+```
+
+that is, all "False" items should be in order enclosed by a containing div, while all "True" items should be stand alone divs.
+
+Any smart ideas?
+
+U3SJEDR96 : `yourList |&gt; List.Extra.groupWhileTransitively (\(_, a) (_, b) -&gt; a == b) |&gt; List.concatMap showGroup` where in `showGroup` you check the first entry to see if it's `True` or `False` and either return a List of div's, or a list of div's wrapped in a div, wrapped in a list.
+U0EUHKVGB : PSA:
+Installs for elm-format might be failing for now on your machines. This is an issue to do with Github. They're working on the fix. I'll write again when they've fixed it.
+
+U3SJEDR96 : <@U1G8WC4UR> <https://ellie-app.com/3QGY4Yv3DPYa1/0>
+U3SJEDR96 : a little more legible: <https://ellie-app.com/3QGY4Yv3DPYa1/1>
+U1G8WC4UR : Thanks a bunch, I see it works allthough I think I'll need to look at it for a few minutes before I understand it :slightly_smiling_face: (Big kudos to <@U0F7JPK36> for Ellie)
+U3SJEDR96 : groupWhileTransitively with that predicate results in sometihng like `[ [ (1, True), (2, True) ],  [ (3, False) (4, False), (5, False) ], ...]` etc. In other words, it groups "similar" elements together, based on a predicate that compares two elements. Using that list-of-lists, it's fairly trivial to then either make it a list of divs, or nested divs :slightly_smiling_face:
+U1G8WC4UR : Ok that's neat and quite readible (with a little explanation)!
+U1G8WC4UR : Thanks alot!
+U2SR9DL7Q : <@U3SJEDR96> Sometimes it pays to lurk. That example you gave just taught me how to use `&gt;&gt;` and I now know that I can use type signatures in let blocks
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

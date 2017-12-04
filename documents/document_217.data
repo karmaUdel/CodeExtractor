@@ -1,23 +1,74 @@
-```
-or even `(uncurry  testMove)` so you can keep your current implementation of it :wink:
-thank you <@U0CLDU8UB> but how will it fill `when` and `expected` const with the tuple value ?
-in ohanhi's setup, `testMove` takes a tuple and deconstructs it. with `uncurry`, that's handled by elm
-well, handled by `uncurry` :stuck_out_tongue:
-cool
-hihi, `uncurry` is also another door toward functional programming
-So that syntax I wrote will do the same as your `Tuple.first` and `Tuple.second`, but already in the function definition.
-I'll give it a try
-ex: `datesInBetween "20 June" "25 June" -&gt; [ 20 June, 21 June, 22 June, 23 June, 24 June, 25 June ] `
-there was a function doing this in one of the packages - i used it before - but can't find it now.
-basically `List.range` but for dates?
-yes
-Have you looked at Date.Extra?
-<http://klaftertief.github.io/elm-search/?q=Date+-%3E+Date+-%3E+List+Date> :disappointed:
-same when searching for `List Date`
-there is, however, `dayList : Int -&gt; Date -&gt; List Date`
-Also <http://package.elm-lang.org/packages/justinmimbs/elm-date-extra/2.0.3/Date-Extra#range>
-(also, five packages have a function name `orange`. Only 3 `apple`s, though.)
-Hahahaha.
-Waiting for someone to tell me one is obviously a colour and the other isn't, which means I'd be comparing apples to oranges.
-My first question would be, is this a good use case of extensible records, or is there a simpler way to achieve the same?
-Well, aren't you updating the entire Customer at once, since you are getting it from the server? I'd have it as a separate data field just because of that
+U3KHRQLTX : With Events API, I'm subscribed to im_open, message.channels, and <http://message.im|message.im>. I know when my bot gets invited to a channel and removed. Is there a way to check to see if the bot is currently in a channel, or is it best for me to track if my bots in a channel based on invite/removal messages? Or B ) use <http://channels.info|channels.info> and see if my bot user_id is in channel – members
+U07CW6N3A : It's hard to have an official recommendation on this... myself -- if I were writing something like this and I wanted _know_ whether I was a member of channel XYZ or not right now, I'd use `<http://channels.info|channels.info>` ad hoc to confirm that. Events API can tell you a lot and give you moment-to-moment updates, but I like the prime knowledge available in a request-and-response approach.
+U3KHRQLTX : <@U07CW6N3A> Agree, I was leaning towards that. Appreciate it!
+U3MG3Q1FD : <https://github.com/howdyai/botkit/blob/master/slack_bot.js>I have used the above example of Botkit (It's the simplest one). It's nice and I would like to present it to  my teacher but I need to get more info about  it's architecture and how it works . So, I can develop it further too. Where &amp; how can I get info about the architecture of Botkit (especially that example)?
+
+U0YB2C09Y : <@U3MG3Q1FD> DM incoming
+U3MG3Q1FD : <@U0YB2C09Y>  asked for more details so I clarify my question further: I mainly would like to know architectural description of the system illustrating the flow of data between the two
+systems (Slack and the Botkit module)
+
+U3MG3Q1FD : i hope there is anyone who can elobarte  this to me? :slightly_smiling_face:
+U0YB2C09Y : <@U3MG3Q1FD> as I said in our DM, `Corebot.js` has the basics of the entire botkit framework, and `Slackbot.js` augments it to work specifically with Slack. Start there and if you have any questions we would love to help you understand better. 
+Some extra freebies. Botkit uses an Events System to register listeners to specific events that come from the platform you've connected to. These events arrive at a webhook endpoint in all cases except when using Slack RTM API, and are handled according to what platform the message is coming form, and the type of message. Botkit handles conversation management (keeping context between messages, queing messages, creating complex interactions) for you which is a big part of the framework. 
+The docs do a pretty good job of explaining how this works and what botkit is doing. The specifics can be gleaned from reading the code.
+
+U3KHRQLTX : Is there some logic to channel_ids, team_ids, user_ids (real person and bot). eg. From what I'm seeing, can I assume channel_ids that are channels will always start with C, where users/bots will start with U, and teams will start with T?
+U0L8LLD99 : hi <@U3KHRQLTX>, there is my config
+U0L8LLD99 : ```'prefix': {'B': 'bots', 'U': 'users', 'T': 'team', 'C': 'channels', 'G': 'groups', 'D': 'ims', 'S': 'subteams'},```
+U3KHRQLTX : <@U0L8LLD99> Thank you, I assume this is consistent, and I can rely it will be this way (at least, unless otherwise announced in the future) – correct? I haven't read this officially, so I want to be sure. :slightly_smiling_face:
+U0L8LLD99 : correct <@U3KHRQLTX>, Slack also using this for check the model
+U3KHRQLTX : <@U0L8LLD99> aha, thank you – that's exactly what I was looking for. Appreciate it!
+U0L8LLD99 : just note the for prefix G: it can group or mpims
+U0L8LLD99 : ```getModelObById: function(id) {    if (!id) return null;
+    var ob_type = id[0];
+    if (ob_type === "C") {
+        return channels.getChannelById(id)
+    } else if (ob_type === "G") {
+        return mpims.getMpimById(id) || groups.getGroupById(id)
+    } else if (ob_type === "S") {
+        return user_groups.getUserGroupsById(id)
+    } else if (ob_type === "E") {
+        return emoji.getEmojiById(id)
+    } else if (ob_type === "B") {
+        return bots.getBotById(id)
+    } else if (ob_type === "U" || ob_type == "W") {
+        return members.getMemberById(id)
+    } else {
+        return ims.getImById(id)
+    }
+},```
+
+U3KHRQLTX : <@U0L8LLD99> thanks!
+U3MC5LL4Q : hi..i was wondering how i can host a bot on microsoft azure. I used the python SDK to build the bot
+U3MDM39U0 : Hi guys, Java and AngularJS guru's?? I need you..! Core Java Developer role in Paris. If youre interested or know someone that might be, please Dont hesitate, message me!
+Thanks Guys,
+
+U3N7DRHDJ : Hi, there ! Happy new year :tada:
+U3N7DRHDJ : Did someone else also noticed that image_url in a message seems to be cached ? when you update the url with a new image and post a new message with the same url referred by image_url, the previous image is displayed as it was cached by slack and not the expected new one
+U3MDM39U0 : and to you too! if your'e interested in opportunities, # the people foundry ... so I can find you! or DirectMessage Me
+U3N7DRHDJ : Slack support gave quickly  the answer for the cache : "That's right, we do cache the contents of image_url and unfortunately there is no way to disable the caching right now. There might be a possible workaround, however. You could use a unique timestamp (or another query string) every time the URL is called, for example:
+* <https://example.com/image/?time=123456789>
+* <https://example.com/image/?time=987654321>
+This should be enough to make Slack fetch the new image each time. Please let me know if you have more questions.
+"
+Works fine. Thank you Wojtek Borowic.
+
+U3KHRQLTX : Is there a way to attach an image in a Slack conversation that shows up like I'd send an image in a text message – without the option to download, or without the link to the original URL? Or, is it designed this way as a founding principle of transparency or sorts for Slack?
+U0GT29N3A : <@U3KHRQLTX> Do you mean something like that?<https://api.slack.com/docs/messages/builder?msg=%7B%22attachments%22%3A%5B%7B%22fallback%22%3A%22Required%20plain-text%20summary%20of%20the%20attachment.%22%2C%22image_url%22%3A%22http%3A%2F%2Fplacehold.it%2F350x150%22%7D%5D%7D|https://api.slack.com/docs/messages/builder?msg=%7B"attachments"%3A%5B%7B"fallback"%3A"Required%20plain-text%20summary%20of%20the%20attachment."%2C"image_url"%3A"http%3A%2F%2Fplacehold.it%2F350x150"%7D%5D%7D>
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

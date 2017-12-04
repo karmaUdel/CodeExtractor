@@ -1,2 +1,83 @@
+U5V0HVAKB : ```decodeGifUrl: Decod String```
+U5V0HVAKB : can you show me if I would like to do this how i have to init it
+U5V0HVAKB : ``` type alias Decod = String ``` ?
+U153UK3FA : <https://guide.elm-lang.org/interop/json.html> provides a good introduction to how to write Json decoders
+U153UK3FA : The return value of `decodeGifUrl` isn't a String value that you can use, it's a description of how to obtain that String given some JSON
+U153UK3FA : In the example this function comes from (<https://guide.elm-lang.org/architecture/effects/http.html>) the Decoder returned from `decodeGifUrl` is passed to the HTTP request to be used to decode JSON in the Http response and obtain the url of the gif
+U153UK3FA : eg. the response is this JSON <https://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&amp;tag=pizza>
+U5V0HVAKB : i mean i really understand what the decoder do
+U5V0HVAKB : and what return value should be
+U5V0HVAKB : but i am pretty new with elm
+U5V0HVAKB : and i just want to recreate this ``` 
+showME: Test String
+showMe= 
+"hello" ```
+
+its all about the syntax what "Test" is here
+
+U5V0HVAKB : what it mean
+U153UK3FA : ah, you're asking about type parameters
+U5V0HVAKB : yes
+U5V0HVAKB : :slightly_smiling_face:
+U153UK3FA : eg. `List Int` is a list of ints
+U153UK3FA : a good example is <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Maybe#Maybe>
+U153UK3FA : ```type Maybe a
+    = Just a
+    | Nothing
 ```
-Hi everyone, I have a n00b question, what is the recommended way to use css? It's the only thing that not clear for me after reading the wonderful intro  guide. I read about elm-css and elm-style but I don't sure what the difference is. thanks!
+
+U153UK3FA : the `a` in that type definition is a parameter, it can be any type
+U153UK3FA : You can have a `Maybe Int` or a `Maybe String` etc.
+U2FJ2D6M7 : Hello! I'm trying to output some HTML but having trouble breaking up my view. Essentially I would like an input/sentence like "This is a sentence" to be rendered like "&lt;span&gt;This&lt;/span&gt;&lt;span&gt;is&lt;/span&gt;&lt;span&gt;a&lt;/span&gt;&lt;span&gt;sentence&lt;/span&gt;" but having trouble extracting out a method and keeping the types correct. I think is probably a simple thing I'm missing, but if anyone has a spare cycle, would not mind some :eye:s.
+```
+renderWord word =
+    span [ myStyle ] [ text word ]
+
+renderWords sentence =
+    let
+        words = String.split " " sentence
+    in
+        List.concat (List.map renderWord words)
+
+
+view model =
+    div []
+        [ input [ placeholder "Text to proof", onInput NewContent, myStyle ] []
+        , (renderWords model.content)
+        ]
+```
+
+As more experienced devs might be able to tell, I'm getting an type mismatch:
+
+```
+The argument to function `concat` is causing a mismatch. - Function `concat` is expecting the argument to be:
+
+    List (List a)
+
+But it is:
+
+    List (Html msg)
+```
+
+U2FJ2D6M7 : I see why it's wrong, but I'm not sure what my option is.
+U5V0HVAKB : List.concat (List.map renderWord words)
+U5V0HVAKB : u are returning a list
+U5V0HVAKB : oh no!
+U5V0HVAKB : List.concat (List.map renderWord words)
+U5V0HVAKB : your renderWord
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

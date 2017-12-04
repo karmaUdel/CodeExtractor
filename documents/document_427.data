@@ -1,72 +1,109 @@
+U5QJW0DDE : <@U4JT89FGB> i'm sorry you don't understand the issue, but I think some of the others have
+U5QJW0DDE : it's not complicated.
+U5QJW0DDE : it's just about separating model state from view heirachies
+U0LPMPL2U : If I understand correctly, you'd like to be able to pull some sort of "global" value directly from within deeply nested child functions?
+U5QJW0DDE : that would be one solution, yes
+U5QJW0DDE : or, to "subscribe" to a particular part of the model for a child
+U5QJW0DDE : i will post to the mailing list
+U663M2MB7 : Is there any equivalent to  `$` from Haskell in Elm?
+U0CL0AS3V : <@U663M2MB7> `&lt;|`
+U663M2MB7 : Thank you! :slightly_smiling_face:
+U64FYS317 : Can anyone help me troubleshoot this? I'm getting a `cannot find variable: Mdl` in the following code, although it's defined just a few lines before.```
+module Lib.Layout.View exposing (..)
+
+import Types exposing (Model)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Material.Layout as Layout
+import Material
+
+
+type alias Mdl =
+    Material.Model
+
+view : (Model -&gt; Html msg) -&gt; Model -&gt; Html msg
+view viewFn model =
+    -- Cannot find variable `Mdl`
+    Layout.render Mdl
+        model.mdl
+        [ Layout.fixedHeader
+        ]
+        { header = [ h1 [ style [ ( "padding", "2rem" ) ] ] [ text "counter" ] ]
+        , drawer = []
+        , tabs = ( [], [] )
+        , main = [ viewFn model ]
+        }
+
 ```
-ahh yes, I see you've encountered my day job
-lol you wrote that?
-no
-just sounds very familiar
-OK, the struggle is real
-at least its in JSON
-all the data formats I need to parse are poorly specified and ad-hoc
-does everyone here use a linter for elm? I am having problems for the second time just setting up linter-elm-make with atom, and its stopping me from getting into elm...
-<@U23SA861Y> I think most of the internet and much software are poorly specified and ad hoc, but I'm a pessimist (read: realist)
-I was a realist, then I tried reading the C++ spec. Now I'm a nihilist.
-Hahahahahahahahahahhahahahaha
-<@U55890VFT> : what kind of problems are you having? is elm-make in the path or specified in the settings of linter-elm-make?
-I will be quoting this
-yea I have the correct path, basically my file has an error that it doesnt find
-im following a tutorial and the linter finds this problem in the video
-do you have the elm-format package installed?
-yea
-thats got the path to elm-format.exe
-maybe elm and windows dont mix?
-can you post the file you talk about as is?
-    Html.text result
-in the browser it properly tells me that result needs to be a string
-yep, works here
-do you have an elm-package.json in that same folder?
-awe I thought I could do an image inside a thread
-but guess not
-here's a workaround: use vs code, it has good quite good support for elm too
-i need to go to sleep :wink:
-okay, I was in vscode originally but some stuff wasn't working so I went to atom
-I will give it another go
-thanks for the help!
-that's unfortunate, but i am sure, it's just a small thing. good luck!
-Is there any way to log the model is a json object format that looks good in dev tools? It all seems to become such a mess…
-<@U5WD40ZA9> Have you tried built in debugger? It shows your model prettified.
-What do you mean? Debug.log ?
-No, when you compile your elm app with --debug flag there is a special debug tool on your page
-Thanks :slightly_smiling_face: Not a huge fan of it however. But it seems to be great for the problem at hand!
-I want to subscribe to `touchmove` events.
-<@U23QS8ETZ> there's <http://package.elm-lang.org/packages/mpizenberg/elm-touch-events/3.0.1>
-I haven't used it (yet) but I'd be interested to hear how you go
-as it happens, I'm currently doing a mobile app, and wasn't quite satisfied with the existing libs. <http://package.elm-lang.org/packages/zwilias/elm-touch-events/1.0.1/Touch> is what I'm using for now
-though I'll admit that it currently doesn't expose the details of move events
-if you can let me know what you need from those, we can figure out a good way to expose it?
-mpizenberg's package is very complete, though. I just found it a little unwieldy for my use-case, I suppose
-Whereas the mouse package does have this for mouse events.
-<@U3SJEDR96> I'd love to see higher-level gestures like in <https://zingchart.github.io/zingtouch/> :slightly_smiling_face: multi-finger tap, rotate, pinch etc.
-<@U23QS8ETZ> yeah, the mouse library has a subscription because it can register an event listener on the window. Sadly, the only way to do that is using special code which isn't available to regular packages. Having an event-listener on a "wrapper"-div around your view gives mostly the same result, but certainly less elegantly
-<@U1ZCL9GAX> that's the end-goal; if I can find enough time to implement it all :slightly_smiling_face:
-Aight cool, thanks <@U3SJEDR96> :v:
-<@U4872964V>, thanks for the suggestion re asciidoctor and markdown.   I'll look into it.
-I wonder if it would be possible to add a search feature to Ellie - search on title, author, and user-supplied tags.  Ellie is a fantastic resource and this would IMHO make it even more so.
-Not to be crass, but what is the easiest way to decode this json based on this type ailas:
-<https://ellie-app.com/3R9wXjy2zyca1/0>
-I'm looking for
-`Json.Decode.decode Alias """ {foo: "x", bar: "y"} """`
-<@U6D3ERLA1> not sure what you are looking for exactly, but this should cover your needs I think: <https://guide.elm-lang.org/interop/json.html>
-I guess my question is - can I decode a json string using a type alias
-you have to write a decoder - json is not the same as Elm types
-but you can have a look at <http://eeue56.github.io/json-to-elm/>
-It seems like a lot of boilerplate - if the type alias describes the expected types, not sure why we write it twice..
-as a type alias and as a decoder
-because json is not Elm types
-right - that's the work we're expecting the decoder to do
-for simple examples, it may be the same, but sooner or later you want something to be slightly different
-if json was elm types we could use it directly :wink:
-well, that's javascript
-I understand that it has to be converted to elm types, what I don't understand is why it can't use a type definition to do this...
-ex:
-You can't use the type definition because elm doesn't have runtime type reflection
-or compile-time, for that matter
-the quickest way is to map those field decoders over your type constructor
+
+U64FYS317 : I'm confused at the possibility of such a thing
+U300LJUAK : I think your confusing the meaning of this part.
+```type alias Mdl =
+    Material.Model```
+
+This only defines `Mdl` as an alias of the type `Material.Model`, so you can use it in function definition. It does not copy `Material.Model`'s constructor into `Mdl`.
+
+U300LJUAK : ```type alias Foo =    { rawr : String }
+
+
+type alias Bar =
+    Foo
+
+
+someFunc : Bar -&gt; String
+someFunc { rawr } =
+    rawr```
+
+In this case I could do `Foo "someString"` and get a value of type `Foo`, but I can't do `Bar "someString"`. I can, on the other hand, pass a value of type `Foo` into `someFunc`, because `Bar` is and alias of `Foo`.
+
+U64FYS317 : <@U300LJUAK> Thanks. I'm trying to reconcile this with some examples I've seen
+U300LJUAK : No problem, I doubt I can really help you any further than that with elm-mdl unfortunately. You can try <#C12KMAYJX|elm-mdl>, too. Perhaps someone on there will have a better answer than me. I'm just not very familiar with it.
+U300LJUAK : <@U64FYS317> From what I understand from the docs though, the first argument of Layout.render (the `Mdl` you're trying to pass) should be a message that's local to your app and receives a value of type Material.Msg. See this example:
+```import Material.Layout as Layout
+import Material
+
+type alias Model =
+  { ...
+  , mdl : Material.Model -- Boilerplate
+  }
+
+type Msg =
+  ...
+  | Mdl Material.Msg -- Boilerplate
+
+...
+
+App.program
+  { init = ( model, Layout.sub0 Mdl )
+  , view = view
+  , subscriptions = Layout.subs Mdl model
+  , update = update
+  }```
+
+U64FYS317 : <@U300LJUAK> Lol I've struggled a lot with this one. Was actually just coming to that conclusion myself (albeit 100x slower than you )
+U64FYS317 : I was trying to figure out how they used Mdl as a seeming constructor in the `Layout.render` function
+U64FYS317 : I assume creating the ```
+type Msg =
+...
+| Mdl (Material.Msg MyMsg)
+```
+actually does let us use the `Mdl` name as a constructor
+
+U64FYS317 : as its then defined as a component of a union type?
+U64FYS317 : and thus fits neatly into the layout.render fn
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

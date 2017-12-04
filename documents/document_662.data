@@ -1,21 +1,107 @@
-Out[29]: 5```
-How do you define months in this context?
-<@U5LNXQHN3> sorry?
-A month is not a fixed unit of time (at least not in the cultures I know of)
-I need to know how many months have passed between two dates
-If you want the intuitive answer then I think you will just have to check the difference in years and months individually
-for example I started it today - June 2017, and the end - June 2016. The difference - 12 months
-I think the best way is to pass the Python...
-Does this work? `((endDay.year - startDay.year) * 12) + (endDay.month - startDay.month)`
-works
-Thank you. You are a genius.
-You can't use timedelta for this because a span of 30 days is over a month if the span starts on Feb 1st and under a month if the span starts on Jan 1st
-no problem
-exactly...
-<@U2BS4M1RV> if you self host, there is no limit
-I would recommend that. With docker its really not all that hard to host it
-thats what I do. All similar systems will have some type of limit. There is also bugsnag, and rollbar, but they all have limits
-self hosting is the only way to have no limits. Oh, I guess google cloud has one called stack-driver that is just a flat monthly fee + minimal data charges
-use `dateutil`
-or `maya` or `arrow`, etc
-That's cheating :wink:
+U0F01KLV6 : (at least initially)
+U0JL9RPC4 : excepted for obvious reasons (for instance, if you need random accesses, go with `Array`)
+U0JL9RPC4 : who said "premature optimization is the root of all evil."?
+U0JFGGZS6 : you can always throw it behind an opaque type to limit places you'd have to change if you change the implementation later
+U5YDC1YUW : Yo, so I've got an HTML structure like this:
+```
+&lt;div class="Quiz"&gt;
+    &lt;div class="Quiz__header"&gt;
+        &lt;!-- Header stuff --&gt;
+    &lt;/div&gt;
+    &lt;div class="Quiz__section"&gt;
+        &lt;!-- Question + answers --&gt;
+    &lt;/div&gt;
+    &lt;div class="Quiz__section"&gt;
+        &lt;!-- Question + answers --&gt;
+    &lt;/div&gt;
+    &lt;div class="Quiz__section"&gt;
+        &lt;!-- Question + answers --&gt;
+    &lt;/div&gt;
+    &lt;div class="Quiz__footer"&gt;
+        &lt;!-- Footer stuff --&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+```
+
+U5YDC1YUW : what's the best way to dynamically generated those `Quiz__section`'s base off a list on the model?
+U5YDC1YUW : currently I have something looking like this:
+U5YDC1YUW : ```view : Model -&gt; Html Msg
+view model =
+    div [ class "Quiz" ]
+        ((div [ class "Quiz__header" ] [ h3 [] [ text model.heading ] ])
+            :: renderSections model
+        )
+```
+
+U0EUHKVGB : `List.map viewSection model.secions`
+U5YDC1YUW : but that's missing the footer section still
+U0EUHKVGB : You’ll probably want to do something like this:```
+let
+  header = ...
+  sections =  List.map viewSection model.sections
+  footer = ...
+in
+  header :: sections ++ [ footer ]
+```
+
+U5YDC1YUW : yeah just ends up looking a bit gnarly... wondering if I shouldn't just wrap the sections in another div then the function returning a list can just be the function call to `renderSections`
+U0EUHKVGB : sure, that’s a valid option
+U5YDC1YUW : ```view : Model -&gt; Html Msg
+view model =
+    div [ class "Quiz" ]
+        [ div [ class "Quiz__header" ] [ h3 [] [ text model.heading ] ]
+        , div [] (renderSections model)
+        , div [ class "Quiz__footer" ] []
+        ]
+```
+
+U5YDC1YUW : Look's a bit nicer I think?
+U0EUHKVGB : Looks great
+U0EUHKVGB : That’s how I would’ve done it :slightly_smiling_face:
+U5YDC1YUW : sweet! just trying to figure out best practices here, fairly new to Elm
+U5YDC1YUW : Any good examples out there of POST'ing a JSON payload to an endpoint using HTTP basic auth?
+U5YDC1YUW : Anyone know what the heck is going on here?
+```
+The 2nd argument to function `send` is causing a mismatch.
+
+19|     Http.send ServerResult
+20|&gt;        (Http.request
+21|&gt;            { method = "POST"
+22|&gt;            , headers = []
+23|&gt;            , url = "<http://example.com>"
+24|&gt;            , body = Http.emptyBody
+25|&gt;            , expect = Http.expectString
+26|&gt;            , timeout = Nothing
+27|&gt;            , withCredentials = False
+28|&gt;            }
+
+Function `send` is expecting the 2nd argument to be:
+
+    Request Msg
+
+But it is:
+
+    Request String
+```
+
+U17R26VR8 : here is send: <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#send>
+it’s expecting a `Request a` which is the same as your `Result Error a`
+
+U17R26VR8 : your `ServerResult : Result Error Msg` …. actually i’m confused
+U5YDC1YUW : you and me both
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

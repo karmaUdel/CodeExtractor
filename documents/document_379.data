@@ -1,1 +1,84 @@
+U3YDBDP4Z : Ah, right
+U3YDBDP4Z : Thanks <@U3SJEDR96>
+U3YDBDP4Z : Not getting it to work.```
+onFormSubmit : (String -&gt; msg) -&gt; Html.Attribute msg
+onFormSubmit tagger =
+    let
+        options =
+            { stopPropagation = False
+            , preventDefault = True
+            }
+    in
+        Events.onWithOptions "submit" options (Json.map tagger targetData)
 ```
+
+Used like `onFormSubmit SignIn` on the form.
+
+Causes a page reload.
+
+U3YDBDP4Z : Switching the line `onFormSubmit SignIn` to the built in `onSubmit SignIn` works
+U3YDBDP4Z : But the implementations look identitical…
+U3SJEDR96 : what is targetData?
+U3YDBDP4Z : Json decoder
+U3YDBDP4Z : The same as the built in targetValue decoder
+U3SJEDR96 : you'll probably want to stop propagation, too, actually
+U3YDBDP4Z : `onSubmit` doesn't
+U2M39B7TM : One question. How I can decode a union type with decode.pipeline?```
+"""
+{
+ Click: Int
+ action : Action
+}
+"""
+
+type Action =
+  Increment
+  | Decrement
+
+decoder : Decoder Types.Model
+decoder =
+    decode Types.Model
+        |&gt; required "click" int
+        |&gt; ???
+
+```
+
+U3YDBDP4Z : Okay, I'm getting an error that's not shown anywhere
+U3YDBDP4Z : Expecting an object with a field named `value` at _.target but instead got: {"0":{},"1":{},"elm_handlers":{}}
+U3YDBDP4Z : when Elm is creating the event handler
+U3SJEDR96 : ```actionDecoder : Decoder Action
+actionDecoder =
+  string |&gt; andThen (\action -&gt;
+    case action of
+      "Increment" -&gt; succeed Increment
+      "Decrement" -&gt; succeed Decrement
+      _ -&gt; fail &lt;| "Failed to decode '" ++ action ++ "'"
+  )
+```
+
+U3YDBDP4Z : It looks like it fails creating the message constructor
+U3SJEDR96 : So what do you expect `event.target.value` to be for an `onSubmit` event? As in, what is the "value" of a `form` element?
+U3YDBDP4Z : I wasn't expecting target.value to be anything, just trying to put things together.But you are on the right track, that is that it will silently fail and refresh the page if the property on `target` doesn't exist
+
+U3YDBDP4Z : I just used the targetValue decoder as a template
+U3SJEDR96 : close. Your decoder is ran, and returns a `Result String val`. If that is an Err, the event will not be handled by Elm
+U3SJEDR96 : i.e. `on "submit" (fail "nah")` would have a similar effect :slightly_smiling_face:
+U3YDBDP4Z : That's what I mean with a silent fail. The result was an `Err` and anything that isn't `Ok` will just do nothing.
+U3YDBDP4Z : In this case, it caused a page refresh. I suspect I might have seen an error in console if the page hadn't refreshed…?
+U3SJEDR96 : Nope, they're not logged; they silently fail
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

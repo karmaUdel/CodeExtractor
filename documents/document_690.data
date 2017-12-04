@@ -1,6 +1,107 @@
+U3U2EA14G : wait a minute. let me try :smile:
+U3U2EA14G : wow, it work
+U3U2EA14G : so it conflict with material desgin js file.
+U3SJEDR96 : :tada:
+U3SJEDR96 : well, the material design JS seems to add/change/remove/replace DOM elements, which tends to really confuse Elm and can give very unexpected results
+U3U2EA14G : Thank you so much <@U3SJEDR96> . I think i need to change material design js file.
+U3U2EA14G : btw, if i build a website with elm and golang. So I will use golang for build html and url, elm only used for single page. Is it ok ?
+U3U2EA14G : But I don't know how to pass parameter or session via elm.
+U0CLDU8UB : I have a functional thinking problem. I have a trail, which is really just a `List (List Point)` and a list of explosions. I also have a function that can take an explosion and a trail and cut the trail with the explosion. My problem is, how do I cut the trail with several explosions?
+Here's my current implementation, which only takes the first explosion from the list and all the others are discarded:
 ```
-I would presume you'd want to use the range `(1, n)`, the round brackets mean non-inclusive, so if `n` is 5 you'd want to test the in the range `2,3,4`, versus what you have `[1,n]` which means inclusive, so the range `1,2,3,4,5`.
-As for simplifying it, it's already reasonably straight forward. Alternate approaches could be changing your `list = ` statement to `filter(lambda d: not n % d, range(2, n))`.
-You'd also want to check that the input is a positive number, you can use `abs(n)` to ensure it's absolute
-And as an aside, don't shadow builtins. `list` is a builtin, and you're shadowing over that name with your `list = ` assignment.
-prime number factorization?
+breakIfNecessary : List Explosion -&gt; Trail -&gt; Trail
+breakIfNecessary explosions trail =
+    explosions
+        |&gt; List.head
+        |&gt; Maybe.map (breakTrail trail)
+        |&gt; Maybe.withDefault trail
+```
+
+U0CLDU8UB : I tried formulating this into a fold, but I got confused. Hmm.. maybe a recursion would serve me better.
+U0CLDU8UB : Yes, recursion it is (and flipping the arguments on breakTrail)```
+breakIfNecessary : List Explosion -&gt; Trail -&gt; Trail
+breakIfNecessary explosions trail =
+    case explosions of
+        [] -&gt;
+            trail
+
+        exp :: rest -&gt;
+            trail
+                |&gt; breakTrail exp
+                |&gt; breakIfNecessary rest
+```
+
+U0CLDU8UB : Thank you! :rubberduck:
+U0CLDU8UB : <@U3U2EA14G> Sure, it's perfectly okay to use Go on the backend.
+U3U2EA14G : But I don't know how to pass from page to page. Example I use go render two pages html is index.html can cart.html. In index.html how I call elm file ? (Elm.Main.embed(mountNode) and if I choose product from index.html  and how can it pass it in cart.html ?
+U0CLDU8UB : So usually people make Elm applications either as- a self-contained interactive part of a mostly static web page, or
+- a full "web app", also called Single Page Application (SPA), where all the navigation etc. actually happens within the index.html
+
+U0CLDU8UB : You could for example make your shopping cart in the cart.html page with Elm, and have the rest of the page be a traditional HTML page.
+U3U2EA14G : so can we use ELM build a list component. example index_component.elm, cart_component.elm ... ? And from it. we will integrate it in html file ?
+U0CLDU8UB : Yeah, that should work.
+U3U2EA14G : I learned from you. Thank you so much :+1:
+U1Z3HBMUL : can you split your Elm app into chunks/modules so parts of teh app can be loaded lazily on user request?
+U1Z3HBMUL : last time I checked Elm produced one giant JS file
+U0CLDU8UB : That's something that might come with 0.19
+U1Z3HBMUL : <@U0CLDU8UB> that'd be awesome. thanks
+U0CLDU8UB : <https://github.com/elm-lang/projects/blob/master/roadmap.md#how-do-i-make-a-single-page-app>
+U3LUC6SNS : any suggestions or references or examples on learning how to use elm-tools/parser
+U2VUFCK5G : I just open sourced an Elm app. Its an Ethereum crypto-currency wallet. <https://github.com/dosco/42wallet>
+U2VUFCK5G : I’m a pretty mediocre elm coder but the app has some good patterns and is a good read if people want to figure out stuff. It’s got multiple pages, ports, decoders and more :slightly_smiling_face:
+U0J8D9M2P : <@U2VUFCK5G> you can post it to <#C0K384K4Y|news-and-links> as well
+U2VUFCK5G : Thanks did that, posted it here since this channel had a much larger following.
+U3YDBDP4Z : Webpack, brunch, something else. What do people prefer?
+U3SJEDR96 : <@U2VUFCK5G> any particular reason you copy pasted a bigint implementation rather than using sometihng like `gilbertkennen/bigint`? (admittedly it's possible that wasn't around when you were working on this)U5S3XFEV8
+
+U3R7CKQRX : <@U0CLDU8UB> <@U3SJEDR96> <@U2W22AHNU> I have to circle back about my previous issue with scroll events that aren't fired till scrolling actually stops. Previously we came to the conclusion that the OS is stopping js execution till the scrolling stops. But I just found out that when I attach a scroll handler with plain jquery that fires as I scroll.
+U3R7CKQRX : Still not sure if it is Elm's fault or something else but I couldn't really find much about this issue. I am working on a MacBook with MacOS
+U0CLDU8UB : What is the exact code you used with jQuery?
+U3R7CKQRX : Basically what I am doing is 1) Attach the scroll event with elm and send the result through a port to JS, those events are only fired after the scroll
+U3R7CKQRX : 2) the jquery version is something like this `jQuery('.table-container').on('scroll', () =&gt; console.log('log me'))`
+U3SJEDR96 : did you try the pure JS version of that?
+U3R7CKQRX : no i didn't
+U3R7CKQRX : let me try
+U3R7CKQRX : ok the pure js version works just like jQuery
+U3R7CKQRX : I have also tried something a bit more heavy in computing, like recursion and manipulating the DOM in the callback but those also really worked fine.
+U3R7CKQRX : My elm code looks like this``` ...       OnScroll event -&gt;
+            let
+                _ =
+                    Debug.log "scroll" "now"
+            in
+            ( model, Cmd.none )
+```
+
+U0CLDU8UB : so how does the elm event listener get attached?
+U3R7CKQRX : and ```onScroll : (Encode.Value -&gt; msg) -&gt; Html.Attribute msg
+onScroll tagger =
+    on "scroll" (Decode.map tagger Decode.value)
+...
+-- in the view
+        , div [ class "table-container", onScroll OnScroll ]
+
+```
+
+U0CLDU8UB : Oh, I may have an idea what's happening. Elm runtime uses requestAnimationFrame to batch some things to happen at once. Maybe the browser postpones the animation frame until the scrolling stops.
+U3R7CKQRX : i could test that theory by adding requestAnimationFrame to the page and see when it fires
+U0CLDU8UB : Ilias, what do you think of this theory?
+U3R7CKQRX : So I checked it by subscribing and logging at animationFrame
+U3R7CKQRX : the logging doesn't stop when I scroll
+U3R7CKQRX : however the scroll events only appeared after scrolling stopped
+U3SJEDR96 : I'm thinking that the the event-callback are queued by the native scheduler, and the browser is delaying that evaluation until scrolling stops
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

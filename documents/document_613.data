@@ -1,24 +1,70 @@
-    Http.expectStringResponse &lt;&lt; always &lt;| Ok ()```
-~still getting `BadPayload`~ I think I just didn't have my latest code
-what is the error exactly?
-<@U1AN4JRFV> that worked, thanks!
-awesome!
-How would you parse date in json?
-<@U4Z4NEUQG> <http://package.elm-lang.org/packages/elm-community/json-extra/2.3.0/Json-Decode-Extra#date>
-great, I was about to write it, but I thought it was better to ask before
-thanks
-The protection against brutal API changes made me, once again, happy to use a library.
-With node I was so scared to have the "update hell long weekend". (that I had too many times)
-I've got a question: In the Http library the first definition is: "type alias Request a = Request a".  I thought type alias was used to give a name to an existing type so does this mean that "Request" is already defined?  If so where?...and why define it again?
-This is a way of re-exporting a type
-Thank you sporto!
-I'm getting "Uncaught RangeError: Maximum call stack size exceeded" in chrome, but it is fine in IE
-<https://smckissock.github.io/trump-conflicts/>   Code is here: <https://github.com/smckissock/trump-conflicts>
-:slightly_smiling_face:
-I have no idea about haskell, I have tried learning it, but just can't wrap my head around it.
-I would really appreciate, if you could just give me some pointers.
-I am trying another approach, and it is helping speed up compilation time. I am just flinging it in the blind. let me push new branch.
-basically I am converting sub messages into commands, this is speeding things up.
-I have also figured out some stuff about compiler, apart from the fact that "on any modification entire dependent tree is recompiled "
-there is one more thing, where dependencies are also recompiled, and that is the case with update function. so just splitting up update function doesn't help. The messages have to be decoupled and `Cmd.map`ed so as to avoid recompilation.
-removing that entire file had no impact on compile time. :disappointed:
+U0H3A9XLN : In this case they are sequential, but in case user have posts and friends then I want all requests for posts and friends be parallel
+U0H3A9XLN : However I’ve already implemented things as tuples and it works more or less nice :slightly_smiling_face:
+U217F5W11 : not sure Elm blocks you from doing that. We have `Task.andThen` to work with those data-sequential requests and `Cmd.batch` to dispatch multiple tasks at once
+U0H3A9XLN : Cmd do not have `andThen` so I can’t transform data inside task chains. I have to go through update with them. In this case I either have to store ids somewhere or have two different types for `User`.
+U217F5W11 : you don’t need to store those ids though, you can pass them along in a new task
+U0H3A9XLN : This is basically continuation of
+&gt; What I mean is that I’d be able to fetch all the data at once in the `Task` chain and then I don’t need to store ids somewhere.
+
+U0H3A9XLN : So with current `Task` API it seems to be impossible for me
+U0H3A9XLN : But I do it through update and it seems fine
+U0H3A9XLN : So no big worries
+U217F5W11 : so something like…
+```
+getUser : UserId -&gt; Task String User
+```
+
+becomes
+
+```
+getUser : UserId -&gt; Task String (User, Cmd msg)
+```
+
+U217F5W11 : and then…
+```
+getUser
+  |&gt; andThen (\user -&gt; (user, getPosts user.postIds) )
+```
+
+U5GJ5FEAU : i do something like `Task.map2 (\posts friends -&gt; updateModel posts friends) Data.getPosts Data.getFriends` not sure if they are parallel or not. never thought of that
+U5GJ5FEAU : <@U217F5W11> ^
+U3SJEDR96 : they're not
+U217F5W11 : but you may be hitting an intrinsic semantic question (leading to needing to deal with it in update) - is there ever a time when you want to get the user but not the posts? if they are always together, is there a reason not to just handle it in the update function?
+or, maybe that’s the question: what is it that leads you to not want to deal with it in the update function?
+
+U0H3A9XLN : Yeah, they are not :slightly_smiling_face:
+U5GJ5FEAU : dang! good to know :smile:
+U5GJ5FEAU : i always thought the Tasks were just sent off one after the other without waiting for the results
+U0H3A9XLN : Is there a way to pattern match on list field inside record which is inside union type tag? Something like:
+```
+Just { list = x :: xs } -&gt;
+```
+
+U0U6ML22H : I don't think you can pattern match on Records, no
+U4872964V : depending on your other matches, you can match on something like `case Maybe.map .list x of x :: xs -&gt; ` though
+U4872964V : I sometimes do things like this to reduce duplication in `case`:```
+case (someFun x, someOtherFun x) of
+```
+
+U0U6ML22H : it's a nice, handy trick, indeed
+U4872964V : but it would be great with more expressive case patterns, although i see the implementation problems with detecting  missing cases etc.
+U2LAL86AY : <https://gist.github.com/druzn3k/d1ce5eda51a5398e0e93> - here is a cheat sheet about destructuring.
+U0LFFASSV : am I the only one who has issue with installing elm 0.18.0 from npm on Linux (CI)?
+U5U2SN24D : Is there a specific error message you're getting?
+U0LFFASSV : yeah it's `incorrect header check`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

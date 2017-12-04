@@ -1,16 +1,96 @@
+U5D4VHEN7 : And from this I get:```
+I ran into something unexpected when parsing your code!
+
+206|   Decode.string `andThen` decodeDayGrade
+                     ^
+I am looking for one of the following things:
+
+    end of input
+    whitespace
+
+Detected errors in 1 module.
 ```
-So this this should work ? `Html.img [ on "load" (Json.succeed message), src "image.jpg" ] []`
-<@U48AEBJQ3> <@U0K92QFST>  <@U0FP80EKB>  Thanks a lot!
-<@U3DQT3ZGC> if the load event listener works as I suspect, then yes, it should work.
-Ok, I'll try it, thanks!
-It's interesting, I want to load 25 images and know when they're all loaded. And in JS I did this by the use of Promises. Any idea on how to do this in Elm without counting the times I get the `load` event?
-I guess if the code above works, thats probably the way to keep track..
-But feels a bit hacky
-<@U3DQT3ZGC> if each image has some sort of unique identifier, you could add it as a tag to the message that represents an image being loaded
-then in your model you can track which images have been loaded
-note though that `load` doesn't always trigger, afaik
-<@U0K92QFST> Ah that's nice as well
-<@U3SJEDR96> Ah ok, is that the same in JS or specific to Elm?
-Ok it does work indeed, now I wonder how reliable it is
-Hi there, I was trying to define a function where you can pass in the field of the record that you want to update
-Firstly, is that possible?
+
+U0CLDU8UB : Oh right, the backtick syntax of course
+U0CLDU8UB : That was removed in 0.18
+U5D4VHEN7 : ahhhhhh, got it. Let me try it without. Is there an alternative, or must I just place the args in order?
+U0CLDU8UB : So now it's```
+dayStatusDecoder : Decoder DayStatus
+dayStatusDecoder =
+  Decode.string
+    |&gt; andThen decodeDayStatus
+```
+
+U5D4VHEN7 : !!! Works! Thanks so much <@U0CLDU8UB>  :slightly_smiling_face:
+U0CLDU8UB : Awesome! Glad I could help!
+U5D4VHEN7 : Actually, was still doing something wrong, but fixed it. :slightly_smiling_face: Here is the final solution (with poor naming prior to refactoring):```
+dayBreakdownDecoder : Decoder DayBreakdown
+dayBreakdownDecoder =
+  decode DayBreakdown
+  |&gt; required "grade" dayGradeDecoder
+  |&gt; required "status" dayStatusDecoder
+
+
+dayStatusDecoder : Decoder DayStatus
+dayStatusDecoder =
+  Decode.string
+  |&gt; Decode.andThen doDecodeDayStatus
+
+
+doDecodeDayStatus : String -&gt; Decoder DayStatus
+doDecodeDayStatus dayStatus = Decode.succeed (decodeDayStatus dayStatus)
+
+
+decodeDayStatus : String -&gt; DayStatus
+decodeDayStatus dayStatus =
+  case dayStatus of
+    "past" -&gt; Past
+    "present" -&gt; Present
+    "future" -&gt; Future
+    _ -&gt; NoStatus
+
+```
+
+U6303RTK7 : strange issue
+U6303RTK7 : I'm seeing this error: ```duration : Span -&gt; Int
+duration span = span.duration
+```
+```
+`span` does not have a field named `duration`
+```
+
+U6303RTK7 : ```type Span
+  = Span { id : Int, duration : Int }
+
+```
+
+U5D4VHEN7 : I could be wrong, but I think you need to use a type alias instead?```
+type alias Span =
+  { id: Int, duration : Int }
+```
+
+U5D4VHEN7 : I very well could be wrong
+U6303RTK7 : that seems to have resolved the issue, thanks :slightly_smiling_face:
+U5D4VHEN7 : :slightly_smiling_face:
+U153UK3FA : <@U6303RTK7> in your above code you defined  a new type called `Span` with a constructor also called `Span` that takes a record as a parameter.
+U153UK3FA : You would construct a value of that type by writing `Span {id = 5, duration= 5}`
+U635238TG : i'm doing the 1st exercise in the tutorial, adding a reset button. why did I have to say `Reset -&gt; 0` instead of `Reset -&gt; model = 0`
+U153UK3FA : <@U635238TG> the return value of the `update` function becomes the new value of the model
+U153UK3FA : it's actually impossible to use the `=` operator to change the value of the `model`, In Elm all variables are single assignment
+U5D4VHEN7 : The `update` function's sole purpose is to return a new model. Key word is return. You don't actually do any assignment to the model in the `update` function, or really anywhere else, the Elm architecture handles that. All you have to do is make sure the final return value of `update` is a valid value for the new model.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

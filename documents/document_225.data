@@ -1,32 +1,73 @@
-       button [ style [("color", "green")] ] [ text "Send" ] ```
-ok i get it
-aha looks azesome
-elm is not only a joy when you learn it, it's also a joy to see others learn it :slightly_smiling_face:
-aha ^^
-i didnt realise but its the same typing function as angular 2
-with typescript
-(The example is a simplified version of the example in <https://github.com/SimplyNaOH/elm-searchable-menu/blob/master/examples/src/Example.elm>) where I added the select element)
-What I am trying to do is something like select2 in Elm <https://select2.github.io/examples.html>
-My only option might be to talk to Javascript.
-We are transitioning from Rails to Elm. I am unsure how to reproduce what we got with  select2 through JQuery Does anyone have advice on how to go about it?
-From Rails to Elm? The whole app or just the front end?
-just the front end
-Gotcha. I think for what you want you're gonna need some custom code, probably a port at some point.
-I'm looking over what you have, and, without diving into it entirely (so I could be wrong), it looks like you have a lot of what you want and it may be more of a styling issue at this point.
-<@U0J1M0F32> I don't seem to be able to put the 2 together though
-I am pretty new with Elm, as you can probably tell. Do you know if  there a way to use a JQuery library through the ports?
-You can use JQuery libraries through ports, but I'd advice against it if possible. It gets messy quick.
-<@U0J1M0F32> ok. Thanks
-hello. I'm new to elm, and was wondering about the "time traveling" debugging. This feature is possible because in the elm runtime there is a single message bus through which all events are serialized?
-more because there is a single well defined state
-in general it's due to lack of side effects in code. meaning I can simply log cmds and state and replay it backwards and forwards
-hi <@U23SA861Y>. cmds are consumed by the elm runtime?
-indeed they are
-Which it in turn uses to generate a stream of messages for your update function
-ah thanks. Stream of messages terminology is relatable to me, coming from js world
-and the elm compiler checks that each possible message maps to an update function
-mm, there is only a single update function, but it checks that the update function handles all possible messages
-ah thanks
-Is it considered bad style to create a type with a single constructor wrapping a record? The down side is that you have to pattern match the constructor to get at the record in order to use dot notation. The up side is the strong nominal typing guarantee.
-E.g. `type Foo = Foo { x : Int, y : Int }`
-I guess Evan also pointed out that wrapping the record can be used to hide the representation from library users. I probably have no need for that in my case. 
+U3X0VLSQL : That would kill the node.js process.  I want the bot to still be running, but I just want the current session to end with a user.
+U0V93GE5R : well it depends a little on what platform you are running your bot, where is the bot going to live?
+U0V93GE5R : for example, on slack rtm, you always want to leave the session open so your bot is available.
+U0G6S4L48 : kz i don't believe there are mechanisms provided to like, close the chat window when your bot is done. closing the conversation on their end is entirely up to the user on all the platforms i can think of.
+U0G6S4L48 : what i can recommend is make it clear the conversation, as far as your bot is considered, is completed. in howdy, we use :wave: or ttyl.
+U3X0VLSQL : Ahhh thanks.  The bot will live on a webpage using <https://github.com/Microsoft/BotFramework-WebChat>.
+U0G6S4L48 : ah ok! there might be a way to close it there, i haven't played with that much.
+U36797FQ9 : Hey gang - I created a custom bot integration to look at past Slack messages. I want it to ignore its own posts and tried to do so using `channel.history` method to get to `messages` and look at its `user`s. The catch is it keeps saying the bot is the same user as my user account. How can I get around this mixup so I can see which messages are from users other than the bot?
+U36797FQ9 : I'm using the Web API via <@U06U57P6E> ruby client FWIW, but I think this is a general enough topic to ask here.
+U272P5K71 : <@U36797FQ9> there should be a `bot_message` subtype
+U272P5K71 : example message object (python):```{u'username': u'Slack API Tester', u'attachments': [{u'text': u'Hello', u'fallback': u'NO FALLBACK DEFINED', u'id': 1}], u'text': u'new update', u'ts': u'1466096670.000002', u'subtype': u'bot_message', u'type': u'message', u'bot_id': u'B1HH9CEF5'}, {u'text': u'hi', u'type': u'message', u'user': u'U0JS5338T', u'ts': u'1456869432.000031'}, {u'text': u'hello', u'type': u'message', u'user': u'U0JK0HF3Q', u'ts': u'1456867389.000024'}, 
+```
+
+U36797FQ9 : <@U272P5K71> ok, good to know. I thought relying on user alone would do the trick. I did (in Ruby): `already_posted = msgs.any? {|msg| msg.user = authed.user }` and I was surprised it didn't work.
+U272P5K71 : here's a better example, JSON payload:user msg:
+```        {
+            "text": “foo", 
+            "ts": "1473980860.000004", 
+            "type": "message", 
+            "user": "U27FFLNF4"
+        }, 
+```
+bot msg:
+```
+        {
+            "bot_id": "B29ARBZSS", 
+            "is_starred": true, 
+            "subtype": "bot_message", 
+            "text": "Welcome to &lt;#C2C8JJADD&gt;, &lt;@U0JFHT99N&gt;! We're so glad you're here! :heart:", 
+            "ts": "1473980788.000003", 
+            "type": "message", 
+            "username": "EventsAPITest"
+        }, 
+```
+
+U36797FQ9 : I'm still confused that something I manually wrote as `"user"=&gt;"mb"` shows as `"user"=&gt;"cleanupbot"`.
+U272P5K71 : and that's the result of:```
+slack = SlackClient(slack_token) 
+CHANNEL = "C2C8JJADD"
+response = slack.api_call('channels.history', channel=CHANNEL) 
+pp_json(response)
+```
+
+U272P5K71 : here's the python json pretty print function I'm using, if any lurkers want it```def pp_json(json_thing, sort=True, indents=4):
+    if type(json_thing) is str:
+        print(json.dumps(json.loads(json_thing), sort_keys=sort, indent=indents))
+    else:
+        print(json.dumps(json_thing, sort_keys=sort, indent=indents))
+    return None
+```
+
+U36797FQ9 : <@U272P5K71> moving to a thread to try to not make too much noise in <#C04SM6TAK|general> if that's cool.
+U36797FQ9 : <@U272P5K71> not sure what you mean by "send code"
+U36797FQ9 : but I appreciate the help
+U36797FQ9 : <@U272P5K71> here's what I'm writing so far. It's ... early :slightly_smiling_face: <https://gist.github.com/mjbrender/46a2fbd86e5d9257d76d3fe81ab2fb8a>
+U272P5K71 : what method was that cleanupbot message sent via?
+U36797FQ9 : I haven't sent any messages with cleanupbot to this channel
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,24 +1,65 @@
-Task.sequence [ Process.sleep (2 * Time.second) ]```
-<@U4RR7KX45> it should, and it does. It would return a `Task x (List ())`
-The compiler complains that mapCurrent wants a `Zipper.Zipper Player` but got `Players`. `Players` _is_ `Zipper.Zipper Player` though.
-<@U2SR9DL7Q> `Players` is a type alias for `Zipper Player`?
-<@U153UK3FA> yup
-I'm not sure what `(\x -&gt; player)` does, tho?
-(or is supposed to do)
-mapCurrent applies a function to the 'current' element in the zipper. So `(\x -&gt; player)` just updates the current player to a new player.
-ah, alright, gotcha. hm. In that case, ¯\_(?)_/¯
-<@U2SR9DL7Q> so you've got `type alias Players = Zipper.Zipper Player` somewhere?
-<@U153UK3FA> yup
-What happens if you change the type declarations of `updatePlayers` to take a `Zipper Players`?
-fixed it! Everything compiles. And that's terrifying.
-I'd triple check you had a `type alias` rather than a `type`, and that the type alias was accessible at that point, and not overriden elsewhere, etc
-<@U3SJEDR96> <@U153UK3FA> an override was the problem. I'd accidentally defined Players twice.
-And... it all seems to work. After a pretty big refactor.
-Elm: 1000 runtime errors: 0
-<@U64FYS317> you need to pass `Debug=true` to the elm-loader options.
-<@U1AN4JRFV> tyvm
-Is there anyway to define a type as an integer between 0-10? Ie. throw compiler error if I try to set a value of 12
-Guess I could do something like `type BetweenOneAndTen = 0 | 1 | 2 | 3...`
-<@U45C5R6QP>, not in any really practical way, however you can hide your type in a module and have functions that check the values when setting it.
-depends on what operations you want on your integer too
-but then that's going to be a pain down the road… No, this is a rabbit hole I'm not going to jump down into. Thanks for the feedback though :slightly_smiling_face:
+U2SR9DL7Q : this is awesome
+U2SR9DL7Q : <@U2U94G0QG> thanks!
+U2U94G0QG : yvw
+U5ABF3BH7 : Hi!  I am writing a Json.Encode function to create an object in the back end, in my database.  I have a Kase. ```type alias kase =  { name : String, organization : Maybe Organization.Model, ...} ```. The field organization is a Maybe.  If there is no organization entered, I don't want that field passed in my Json object.  as it will give me some validation errors. How can I do that?  I can only think of doing List.append. This is how the code looks like if an organization exists
+U5ABF3BH7 : ```Json.object   [ ("name" , Json.string model.name)
+   , ( "organization_attributes", Json.string model.organization)
+]```
+
+U5ABF3BH7 : any advice
+U5ABF3BH7 : ?
+U5ABF3BH7 : but if there is not organization, I only want
+U5ABF3BH7 : ```Json.object   [ ("name" , Json.string model.name)]```
+
+U5ABF3BH7 : (this is a simplified version)
+U3DQT3ZGC : Hi All! Is there a way to detect if an image is loaded in Elm like this? ```const tempImage = new Image(500, 500);tempImage.addEventListener('load', doSomething);
+
+tempImage.src = url;
+```
+
+U0K92QFST : <@U3DQT3ZGC> Elm allows you to define custom event handlers for any HTML tag: <http://package.elm-lang.org/packages/evancz/elm-html/4.0.0/Html-Events#on>
+U48AEBJQ3 : <@U5ABF3BH7> There are a few ways of doing it. One might be:```
+Json.object (List.filterMap identity [Just ("name", Json.String model.name), Maybe.map (\org -&gt; ("organization_attributes", Json.String org))])
+```
+
+U0K92QFST : <@U5ABF3BH7> <@U48AEBJQ3> here's what I came up with:```
+let 
+  nameField = ("name", Json.string model.name)
+in
+  case model.organization of
+    Just org -&gt;
+      nameField :: [("organization_attributes", Json.string org)]
+    Nothing -&gt;
+      [nameField]
+```
+
+U48AEBJQ3 : And there is another :simple_smile:.
+U0FP80EKB : This```
+ nameField :: [("organization_attributes", Json.string org)]```
+can just be
+```
+ [nameField, ("organization_attributes", Json.string org)]
+```
+
+U3DQT3ZGC : So this this should work ? `Html.img [ on "load" (Json.succeed message), src "image.jpg" ] []`
+U5ABF3BH7 : <@U48AEBJQ3> <@U0K92QFST>  <@U0FP80EKB>  Thanks a lot!
+U0K92QFST : <@U3DQT3ZGC> if the load event listener works as I suspect, then yes, it should work.
+U3DQT3ZGC : Ok, I'll try it, thanks!
+U3DQT3ZGC : It's interesting, I want to load 25 images and know when they're all loaded. And in JS I did this by the use of Promises. Any idea on how to do this in Elm without counting the times I get the `load` event?
+U3DQT3ZGC : I guess if the code above works, thats probably the way to keep track..
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

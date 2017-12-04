@@ -1,44 +1,75 @@
+U3SQ42JJW : Because  List length is undefined the resolving type must be something like … er undefined…
+U3SQ42JJW : Ok, I will have to solve this with List.head and if statements…
+U48AEBJQ3 : Why do you have a list with a fixed length to begin with?
+U3SQ42JJW : It could even be more. But it is the Json that I get from a backend.
+U3SQ42JJW : It once was a Tuple, then encoded to a json object… send to a backend… and then received as a json object again and should now turned again into this tuple
+U3SQ42JJW : I know… something is completely strange here… :thinking_face:
+U48AEBJQ3 : Well, my first reaction would be to try to solve this problem at the JSON decoding step.
+U3SQ42JJW : I use this decoder: `JD.maybe (JD.field "range" (JD.keyValuePairs <http://JD.int|JD.int>))`
+U48AEBJQ3 : I can try writing something up, you seemed to say that the list could be longer? Do we even care about the field names?
+U3SQ42JJW : range is a json-object```
+{"start":0, "stop":5}
 ```
-something like this
-I broke it up into really small functions to make it easier to follow
-I find making tiny decoders and working from the bottom up is the easiest way to think through building decoders
-Yeah, I'd have gone for `maybe &lt;| map3 Times (index 0 int) (index 1 int) (maybe &lt;| index 2 string)` but fair enough
-Oh nice, I didn't think of just wrapping the whole thing with a `maybe` decoder :thumbsup:
-nice!
-thanks, I will take a look
-find decoding the hardest part of elm
-I think everyone does :slightly_smiling_face:
-The trick is to start by trying to decode only the smallest piece of your data structure
-you might be interested in going through these: <https://github.com/zwilias/elm-demystify-decoders>
-Then you look into how you can combine that with other parts to decode more and more complex structures
-will take a look
-and good advice <@U0LPMPL2U>
-Also, writing small decoder functions and including their type signatures helps me think through the problem
-Okay, here's a question.  Is there some reason that using sinon.js fakeTimers wouldn't work to simulate time passing with elm code?
-I'm doing acceptance testing on my app using webdriver and trying to trigger actions that are supposed to happen every 30 seconds, and sinon.js has a fake timer mechanism that mocks all the time functions (Date.now(), trigger setTimeouts, etc.) and it's working, but Elm isn't doing anything.
-(Does the elm runtime have it's own esoteric time mechanism or something?)
-when you say "isn't doing anything", can you clarify what you mean?
-What is the current recommended library for touch interactions?
-I'm guessing this is related to Elm using requestAnimationFrame for rendering, with a fallback to `setTimeout(1000/60)`
-<@U3SJEDR96> - Yeah, I mean the things that happen on a timed subscription are not happening at all (much less at an accelerated rate)
-Ooh, so it uses requestAnimationFrame to move the runtime to the next step?  Yeah, I bet that's not mocked by sinon's fake timers...
-So if that's the case, that could explain it...
-I wonder if there's a way to force elm to use setTimeout... ?
-I think `window.requestAnimationFrame = undefined` should force the fallback; though all of that (sinon and disabling rAF) should probably happen before Elm is loaded
-Yeah, that makes sense - I'll give it a shot :slightly_smiling_face:
-Huh - that didn't seem to do it either, even though window.requestAnimationFrame was undefined before the app's init function was called.
-<@U3ZNWN526> just dropping in but are you using a subscription to run it every 30 seconds?
-Yeah, I sure am.
-It does seem to be using `setInterval` under the hood <https://github.com/elm-lang/core/blob/f064b696a2b9ca93abf4c7d1e21ce9e35fbb1d0f/src/Elm/Kernel/Time.js>
-Well that's pretty odd!  That should work with sinon's fake timers just fine...
-But perhaps elm itself is getting confused by the fake timers, since once they are activated, time only moves forward in big jumps...
-Well I gave up on it for now.  I'll just leave that test "pending" :wink:
-For uninstalling a package, do I use `elm-package uninstall`, or do I manually edit _elm-package.json_ and delete appropriate line(s)? (Ditto for _tests\elm-package.json_.) -- and then delete elm-stuff (for tests too) as well as elm.js?
-<@U3L8MM10T> All the dependencies for your project (as of elm 0.18) are stored in the project's elm-stuff directory, so removing it from elm-package.json and deleting elm-stuff will get rid of it.
-or removing from `elm-package.json` and re-running `elm-package install`
-Is elm-graphql still being maintained?  In order to talk to the github graphql it needs to pass a basic auth header (note: this is in contravention of the documentation).  I could fork it and do a pull request, would it be taken up?
-<http://package.elm-lang.org/packages/jamesmacaulay/elm-graphql/1.4.0/GraphQL-Client-Http#RequestOptions> &lt;- shouldn't you be able to use those options? Or are you talking about a different `elm-graphql`?
-Different one.  Sorry, didn't specify.  it's base-dev/elm-graphql.  I had a look at James's, I am going to talk to him about it when he resurfaces.
-Ah, no experience with that one
-It seems to have made the corr3ect design decision to start with the schema and the query, but it has not been touched for a few months.
-(not being updated doesn't mean much when it does what it's supposed to do)
+
+U48AEBJQ3 : ```JD.maybe (JD.field "range" (JD.map2 (,) (JD.field "start" <http://JD.int|JD.int>) (JD.field "stop" <http://JD.int|JD.int>))
+```
+
+U3SQ42JJW : daFuCK :flushed:
+U3SQ42JJW : sorry… but that's by far better. Perfect !!!
+U3SQ42JJW : Thanks :smile:
+U48AEBJQ3 : NP. Just always try to make sure that the data that your decoder produces is actual data you want in your app. Cleaning it up later just leads to problems.
+U5QE9LDU4 : is JD like an alias for JSON decoder?
+U48AEBJQ3 : `import Json.Decode as JD`
+U3SQ42JJW : yes
+U5QE9LDU4 : is there a way to expand the sidebar for the history explorer?
+U5QE9LDU4 : or is hovering over each call the only way to read the full message?
+U3SQ42JJW : in Slack?
+U5QE9LDU4 : no, the time travel debugger
+U5QE9LDU4 : I'm assuming you can't, just wanted to make sure i'm not missing something obvious
+U3SQ42JJW : no
+U3SQ42JJW : only in the browser inspector
+U6EV3H0N7 : <@U5QE9LDU4> I think this was discussed _somewhere_ in this slack yesterday, and the answer was "maybe in 0.19, maybe not" if i remember correctly
+U3SQ42JJW : but that's of course not persistent…
+U5QE9LDU4 : kk thanks. Ain't no biggy.
+U5X2ZRFDF : ```getInts : List (String, Int) -&gt; Maybe (Int, Int)
+getInts pairs =
+    case pairs of
+        [(_, i1), (_, i2)] -&gt; Just (i1, i2)
+        _ -&gt; Nothing
+```
+
+U23SA861Y : sry what?
+U48AEBJQ3 : Leftover from a previous conversation, it appears.
+U48AEBJQ3 : And yes, that is how one would implement it if there wasn't a way to fix it before it became a problem.
+U3LUC6SNS : I'm looking for more advice on how to deploy an Elm app.  Fire away! :slightly_smiling_face:
+U6E5PS83X : Aww, I can't do this:
+`import Project.Thing.Request.User as Request.User`
+
+Or can I and I'm missing something?
+
+U6E5PS83X : for example if i have
+```
+import Project.Thing.Data.User as User
+...
+import Project.Thing.Request.User as ???
+```
+
+U4872964V : No, but you can import it as `RequestUser` for instance
+U6E5PS83X : yeah that's probably going to be my workaround. thanks <@U4872964V>!
+U3SJEDR96 : You could also make things potentially confusing and improt both `as User` :stuck_out_tongue:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

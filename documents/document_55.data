@@ -1,20 +1,76 @@
+U050MP39D : I believe so, one of the reasons that they're faster (in situations where laziness isn't a benefit) is because they don't have the overhead of keeping track of unrealised computations
+U051SS2EU : it's a lot simpler to enumerate the things that are lazy (there's very few), and sequence is the only built in lazy thing using transducers and I forget the details but saw it explained that sequence was sub-optimal in important was compared to other lazy functions
+U051SS2EU : a transducing function just transforms a single result, so would hardly benefit from laziness, a transducing context can be lazy or not (and sequence is the only lazy built in transducing context)
+U4VDXB2TU : <@U050MP39D> <@U051SS2EU> thanks, I will go back and meditate some more on transducers and laziness…
+U066TMAKS : is there a way to access the value of the default ring memory store atom from the repl?
+U46LFMYTD : ```(* 3 (/ 1 3))
+=&gt; 1N
 ```
-not sure where to start
-<@U0564EGNY> <https://github.com/nathanmarz/specter>
-if you ask your question in <#C0FVDQLQ5|specter> I'm sure someone will help you out
-I'd love to take a look but that will have to be later, I'm at work at the moment
-I've been using Clojure for a long time now and one question randomly popped into my head:
-is there ANY case where map destructuring of *keys only* can throw an exception?
-I know that vector destructuring can throw all sorts of fun stuff :slightly_smiling_face:
-if you pass it something that's not a map
-hm … :slightly_smiling_face: really?
-nil
-blows up on my version of clojure
-`(let [{:keys [a b]} 0])` throws `Can't type hint a primitive local` lol
-woah… different in ClojureScript!
-I (think) it's probably much more likely to blow up in 1.9 with spec too
-huh, nope. interesting
-latest ClojureScript
-yes it blows up on Clojure JVM
-ok that's very interesting… good to know
-yeah, blowing up is an implementation detail by the looks
+I am confused why I would get a BigInt here
+
+U46LFMYTD : is there a design choice which made the return value a BigInt and not an Int?
+U1LCB75M2 : <@U46LFMYTD> ```user=&gt; (type (/ 1 3))clojure.lang.Ratio```
+
+U1LCB75M2 : and `Ratio`  is defined in terms of `BigInt` <https://github.com/clojure/clojure/blob/f572a60262852af68cdb561784a517143a5847cf/src/jvm/clojure/lang/Ratio.java#L23>
+U46LFMYTD : ah ok, thank you
+U2FBZ33M3 : <@U5LPUJ7AP> ```#_(this s-exp will be entirely ignored)``` ?
+U5LPUJ7AP : <@U2FBZ33M3> yes, someone told me about that macro, thanks anyway
+U2FBZ33M3 : Didn't realise where my scrollbar was at the time, too early :wink:
+U1YTUBH53 : Any book (or blog) recommendation, specifically for clojure concurrency?I've spent some time today wrangling atoms, agents, `add-watch` and promises, for managing a work queue. It has been a nice drill. I'm undecided what's the best queue management technique and might suspect clojure.async or even some Java implementation might be more performant/safe.
+
+U1YTUBH53 : Maybe someone's written a book I'm not seeing about that?
+U1YTUBH53 : :slightly_smiling_face:
+U5JEJN1CP : <@U2MPUENUC> Thanks.  That second did the trick.
+U0EL66M19 : one of these two expressions looks wrong to me:```user&gt;  (* 2.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001M 1.0)
+2.0
+user&gt;  (* 2.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001M 1.0M)
+2.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010M
+```
+
+U0EL66M19 : are bigdecimals special in being coerced to a less precise type in `*` ?
+U0NCTKEV8 : ```user=&gt; (.doubleValue (BigDecimal. "2.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"))
+2.0
+user=&gt; 
+```
+
+U0NCTKEV8 : basically, fixed precision floating point numbers are dirty and their dirtiness will contaminate any math they are used in
+U0NCTKEV8 : 1.0 in that expression is a fixed precision float (a jvm double), and that is what causes weirdness
+U0NCTKEV8 : clojure, encoded as a big honking class file, has rules about how you convert types to do math operations, and doubles as a type dominate pretty much everything, meaning if you have doubles in your expression, internally numbers that are not doubles are going to be turned in to doubles when doing math
+U0EL66M19 : so long as it's done on purpose i guess
+U5JEJN1CP : Is there a known issue between com.datomic/clj-client, figwheel, and clojure-1.9.0 ?  I cannot get them to compile together. Trying to start a repl gives a spec error:```
+Exception in thread "main" java.lang.ExceptionInInitializerError
+	at clojure.main.&lt;clinit&gt;(main.java:20)
+Caused by: clojure.lang.ExceptionInfo: Call to clojure.core/refer-clojure did not conform to spec:
+In: [2 1] val: :as fails at: [:args :exclude :op :quoted-spec :spec] predicate: #{:exclude}
+In: [2 1] val: :as fails at: [:args :only :op :quoted-spec :spec] predicate: #{:only}
+In: [2 1] val: :as fails at: [:args :rename :op :quoted-spec :spec] predicate: #{:rename}
+In: [2] val: (quote :as) fails at: [:args :exclude :op :spec] predicate: #{:exclude}
+In: [2] val: (quote :as) fails at: [:args :only :op :spec] predicate: #{:only}
+In: [2] val: (quote :as) fails at: [:args :rename :op :spec] predicate: #{:rename}
+:clojure.spec.alpha/spec  #object[clojure.spec.alpha$regex_spec_impl$reify__1200 0x43f50bfe "clojure.spec.alpha$regex_spec_impl$reify__1200@43f50bfe"]
+:clojure.spec.alpha/value  ((quote :exclude) (quote [reduce transduce into merge map take partition partition-by bounded-count]) (quote :as) (quote core))
+:clojure.spec.alpha/args  ((quote :exclude) (quote [reduce transduce into merge map take partition partition-by bounded-count]) (quote :as) (quote core))
+ {:clojure.spec.alpha/problems ({:path [:args :exclude :op :spec], :pred #{:exclude}, :val (quote :as), :via [], :in [2]} {:path [:args :exclude :op :quoted-spec :spec], :pred #{:exclude}, :val :as, :via [], :in [2 1]} {:path [:args :only :op :spec], :pred #{:only}, :val (quote :as), :via [], :in [2]} {:path [:args :only :op :quoted-spec :spec], :pred #{:only}, :val :as, :via [], :in [2 1]} {:path [:args :rename :op :spec], :pred #{:rename}, :val (quote :as), :via [], :in [2]} {:path [:args :rename :op :quoted-spec :spec], :pred #{:rename}, :val :as, :via [], :in [2 1]}), :clojure.spec.alpha/spec #object[clojure.spec.alpha$regex_spec_impl$reify__1200 0x43f50bfe "clojure.spec.alpha$regex_spec_impl$reify__1200@43f50bfe"], :clojure.spec.alpha/value ((quote :exclude) (quote [reduce transduce into merge map take partition partition-by bounded-count]) (quote :as) (quote core)), :clojure.spec.alpha/args ((quote :exclude) (quote [reduce transduce into merge map take partition partition-by bounded-count]) (quote :as) (quote core))}, compiling:(clojure/core/async.clj:9:1)
+```
+The stack trace lists a few references to figwheel_sidecar, otherwise it's all clojure.lang and clojure.core.
+
+If I switch to clojure 1.8.0 or remove com.datomic/clj-client, then everything compiles fine.  But that combination of clj-client and clojure 1.9.0 keeps throwing this error.  Any ideas what might be causing it?
+
+U051SS2EU : 1.9 enforces things that are silently accepted by older versions
+U051SS2EU : are you using the newest figwheel?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

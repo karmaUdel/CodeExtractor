@@ -1,0 +1,61 @@
+U3R7CKQRX : Because I don't want to leak event handlers I would like to use my own listener that I can control.
+U3R7CKQRX : thus I looked into the Navigation package code, opened this issue <https://github.com/elm-lang/core/issues/886>
+U3R7CKQRX : ... and here I am :slightly_smiling_face:
+U3SJEDR96 : Right. So I hadn't realized that `onWindow` isn't a subscription, but a `Task Never Never` which can only (reasonably) be used in an EM
+U3R7CKQRX : can you please give me a short intro to EMs or point me to some resource?
+U3L8MM10T : Since `Color` is in Basics, why must I import it? I don't import `List`.
+U3SJEDR96 : the implicit imports are listed here: <http://package.elm-lang.org/packages/elm-lang/core/latest/>
+U3L8MM10T : Thanks for solving the mystery!
+U16AT5E7L : how can i call Task.perform with an Action that doesn’t takes args ?
+U4872964V : <@U16AT5E7L> what’s the type of your Action?
+U16AT5E7L : ```type Action
+    = Init
+    | Load Int
+    | Press Int
+    | Next
+    | Prev
+    | Noop
+```
+
+U4872964V : I don’t understand your problem, why do you want to call Task.perform?
+U16AT5E7L : On Press is a specific key is pressed…
+U4872964V : I’m sorry, I don’t understand what the problem is
+U16AT5E7L : `Task.perform (always Prev) (Task.succeed Prev)`
+U16AT5E7L : this works but in a wrong way
+U4872964V : but why do you want to call `Task.perform`?
+U4872964V : That’s for running tasks as commands
+U16AT5E7L : ```                if (char == nextKeyCode) then
+                    ( Model.initial
+                    , Task.perform (always Next) (Task.succeed Next)
+                    )
+                else if (char == prevKeyCode) then
+                    ( Model.initial
+                    , Task.perform (always Prev) (Task.succeed Prev)
+                    )
+```
+
+U4872964V : so you want to send messages to your update function from your update function?
+U16AT5E7L : yes
+U4872964V : why do you want to do that?
+U4872964V : why don’t you just update the model directly
+U16AT5E7L : because you can click the right arrow or a button
+U4872964V : yes
+U16AT5E7L : ok I’m getting what you are trying to say :+1:
+U16AT5E7L : <@U4872964V> thanks!
+U4872964V : no problem :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

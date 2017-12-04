@@ -1,3 +1,184 @@
+U681TBBUP : However this is `O(n*log(n))`
+U2SR9DL7Q : mmmm... But then I would need to make a list of unique random integers.
+U681TBBUP : They don't have to be unique
+U1AN4JRFV : Nor integers
+U2SR9DL7Q : ... they don't do they...
+U1AN4JRFV : Na-ha, honey! I should sleep.
+U681TBBUP : Assuming the numbers are sampled from a uniform distribution, you're distribution over the permutations will also be uniform
+U681TBBUP : Fisher-yates shuffle is `O(n)` time and `O(1)` space so definitely not optimal, but easy
+U1AN4JRFV : Its mostly to help getting stuff done, my suggestion. Gnite all.
+U1AN4JRFV : Unstuck, rather. 
+U2MLC3R4G : Hello all,I need a little comments on code extract below -
 ```
-The module is declared in `ns`, but `ns` isn't the current namespace when `dynamic-require` looks for a module.
-but if  I declare the module in current-namespace then it blows up because `module` and `#%app` aren't defined
+type A = B | C | D
+
+type D = E | F | G
+```
+From the code above is type A = B | C | D | E | F | G 
+I am thinking of splitting my Msg into SubMsg types using the above logic.
+
+U236M9FH9 : `D` on the left side of `=` &amp; right side are in different namespaces
+U236M9FH9 : First one is a value with the type `A` &amp; the second is a `type`
+U236M9FH9 : You'd actually need `type A = B | C | SomeD D`
+U236M9FH9 : I find message nesting useful when I can write something like `nestedUpdate : SomeNestedPartOfModel -&gt; NestedMessage -&gt; NestedPartOfModel`
+U2MLC3R4G : Hi <@U236M9FH9>,Thank you for recommending the idea of Nested type of updates.
+I was little confused when doing the above code. 
+The compiler didn't complain when defining type A and type D.
+But when using case expression matching A, I am getting matching A on one branch and match D on another and then I get error from there.
+
+U2T2MKL58 : tried to find this on google but couldn’t…what version of javascript does elm compile to?
+U3SJEDR96 : <@U2T2MKL58> was that really such an urgent question you had to post it in 4 channels?
+U4872964V : <@U2SR9DL7Q> shuffling is an operation that is easy to get subtly wrong so that you don’t get a perfect random distribution of the elements. I think it’s easiest just to use the function provided here: <http://package.elm-lang.org/packages/elm-community/random-extra/2.0.0/Random-List#shuffle>
+(unless you are doing this to learn stuff of course, then go ahead) :slightly_smiling_face:
+
+U2SR9DL7Q : <@U4872964V> woah. didn't know this  existed. thanks! I can now compare my solution to something.
+U4872964V : yes, that should probably go into the standard package, choose and shuffle are very useful functions
+U4872964V : (and non-trivial to implement yourself)
+U2SR9DL7Q : I basically made my own rickety version of choose
+U4872964V : yes it’s a good exercise
+U2SR9DL7Q : but I had to use a lot of helper functions to keep myself from tripping up
+U2SR9DL7Q : it was fun!
+U2SR9DL7Q : But shuffle is more sensible for what I need.
+U2SR9DL7Q : I'm much more willing to replace code now than when I started programming, which pleases me.
+U4872964V : less code to worry about if somebody else has already worried about it :slightly_smiling_face:
+U2SR9DL7Q : standing on the shoulders of giants. rigorous giants with large test suites.
+U2SR9DL7Q : But I spent all day on a single problem today, working through it piece by piece (with help from you lovely folk). I haven't had a chance to do that in awhile. Missed it.
+U4872964V : yes, this community is the best! let’s hope it can stay that way when Elm gains popularity
+U2SR9DL7Q : I believe so. Python's 26 yrs old and they're pretty friendly. Elm has a lot of similar themes in terms of people falling into it, pleasant surprise at productivity and ease of use, and enjoyment of the language features and constructs
+U2SR9DL7Q : which is odd, because they're implemented so differently. But I believe there's a shared spirit of 'principled but practical'
+U4872964V : I think Evans principled stance on features vs. practicality/real time use is almost unique. I like it very much, but I also appreciate that people can dislike it. But for those people there are a lot of other languages in this realm.
+U4872964V : this may be because i’ve worked in this industry for like 25 years :slightly_smiling_face:
+U2SR9DL7Q : I think if you want to use FP, proper FP, not pseudo maybe somethingscript FP... but you also need to get things done, it's a good place to start. Also just way more approachable than Haskeel imho.
+U66RFDZ8F : The only thing I hate about elm is that I can't use it server side 
+U66RFDZ8F : But I will forever love it since it's shown me a new side of programming I didn't know existed 
+U66RFDZ8F : F# is a good compromise for me since I'm dot net based but...
+U4872964V : <@U66RFDZ8F> I don’t think the Elm Architecture necessarily is the right way to do server side programming though. But the language itself, yes.
+U4872964V : I think something like Elmchemy is interesting, for instance
+U66RFDZ8F : <@U4872964V> I'm painfully aware of this. But it doesn't hurt to dream. :D
+U4872964V : oh, it has been renamed Elchemy :slightly_smiling_face:
+U4872964V : <@U66RFDZ8F> dreaming is nice, helping is even better :slightly_smiling_face:
+U66RFDZ8F : One more thing about elm is, the architecture is pretty easy to pick up. The language as well, looks daunting coming  from a C based language, but after a while it "just makes sense". 
+My problem with elixir is having to learn about supervisors and all the others. I think it's easier to make big mistakes in terms of design there if you're a beginner. 
+
+U4872964V : for sure, backend stuff is inherently more complicated I think
+U4872964V : if you want to make it production ready
+U4872964V : the frontend app runs on the users computer so a bug there will only affect that particular user
+U4872964V : it will not crash the entire backend, which happens when you run for instance node.js
+U4872964V : so, i think the elm archicture basically “solves” the state issue with frontend code, but the solution for the backend is not that simple. supervisors is a nice way to handle things on the backend to make it robust, but as you say, they are a bit tricky to understand
+U2MLC3R4G : In one of the case that I see that nested update that you mentioned doesn't work.The case is when you use Http.send. When using (MainMessage SubMessage) it doesn't work.
+
+U3SJEDR96 : <@U2MLC3R4G> try `SubMessage &gt;&gt; MainMessage`
+U66RFDZ8F : And it's a softer entry into FP as well. 
+U66RFDZ8F : At least for me
+U4872964V : yes, it’s great that way
+U66RFDZ8F : Now I can go back and tackle elixir more comfortably. Knowing the basics of FP. 
+U66RFDZ8F : But let me just add, this paradigm is amazing! 
+U2MLC3R4G : Thanks <@U3SJEDR96> . Let me try
+U2MLC3R4G : <@U3SJEDR96> It works now.It's my first time using &gt;&gt;
+Will need to learn more about this. Thank you very much
+
+U3SJEDR96 : It's function composition. So `SubMessage` is a function which takes a `Result Http.Error Foo` and returns a `Sub.Msg`, and `MainMessage` is a function which takes `Sub.Msg` and returns a `Msg`, right? So you have a function `Result Http.Error Foo -&gt; Sub.Msg`, a function `Sub.Msg -&gt; Msg` and what you really need is a function `Result Http.Error Foo -&gt; Msg`. That's a solid use-case for function composition :slightly_smiling_face:
+U3SJEDR96 : `(&gt;&gt;) : (a -&gt; b) -&gt; (b -&gt; c) -&gt; (a -&gt; c)`
+U4872964V : it’s like `|&gt;` but without the actual function argument
+U4RR7KX45 : elmers, does anyone use any Intellij IDE for Elm?
+U4RR7KX45 : I’m trying to integrate elm-format with my webstorm somehow
+U4RR7KX45 : I set up a file watcher, but it keeps updating my file every 3 - 4 seconds
+U0U6ML22H : <@U4RR7KX45> I've switched to Atom and vim so I can't help, but you could try asking on <#C0SP19AMA|editors-and-ides> as well, so that your message will be visible longer :smiley:
+U4RR7KX45 : I tried vim too but Atom seems to be the best option so far
+U4RR7KX45 : am I right?
+U0U6ML22H : you are, of course, obviously wrong, since vim is always better than anything else ever
+U0U6ML22H : :wink:
+U0U6ML22H : I've used Atom for a while, and <@U1HPQAHAT>'s elmjutsu is a big bag of awesomeness
+U4RR7KX45 : really? could you recommend the plugins please? I’ve got elm-vim but it’s nothing compared to Atom’s support
+U0U6ML22H : I ended up going back to vim because I just like it more, and it's snappier for me
+U0U6ML22H : in my own workflow, I didn't use that many of elmjutsu's features (it's probably my loss!)
+U0U6ML22H : the one thing I do miss in everyday work is the autofix feature that adds function signature and adds/removes imports
+U0U6ML22H : other than that, elm-vim + ALE does the job fine for me
+U0U6ML22H : (I'm using neovim, rather than vim)
+U3SJEDR96 : because `toString` is magic
+U3SJEDR96 : and a debugging tool :slightly_smiling_face:
+U4RR7KX45 : thank you
+U4RR7KX45 : didn’t know about Ale :smile:
+U2JFD9ALE : Why is `toString` able to print a `type` that is not exposed from my module? Example:
+```
+module FooBar (Foo)
+
+type Foo a = Bar (List a)
+
+init : List a -&gt; Foo a
+init xs =
+  Bar xs
+```
+
+and
+
+```
+import FooBar as FB
+import Html exposing (text)
+
+main =
+  text &lt;| (FB.init [1,2,3,4,5])
+```
+pretty much break encapsulation :disappointed:
+
+U2JFD9ALE : I mean in :haskell: I just don't _*derive*_ `Show` and it's home safe
+U2JFD9ALE : (I know, I know, I don't want to start a :elm: TypeClasses thing)
+U4872964V : <@U2JFD9ALE> `toString` is being moved to the `Debug` module in 0.19
+U2JFD9ALE : That is just what I was asking for !!! Partey !!!
+U2JFD9ALE : :discoball:
+U2JFD9ALE : <@U4872964V> do you know as from `0.19` if you compile without the `--debug` flag, that all `Debug.` will be marked as an error?
+U3SJEDR96 : I think debug.log would rather become a no-op, actually
+U2JFD9ALE : I mean, I would like people to avoid taking a _*shortcut*_:
+<https://github.com/rundis/albums/blob/master/frontend/src/ArtistListing.elm#L47-L50>
+
+and probably go through all the cases:
+
+```
+    let
+        status s =
+            ( toString s.code, s.message )
+
+        error err =
+            case err of
+                BadUrl url -&gt;
+                    "Invalid url: " ++ url
+
+                Timeout -&gt;
+                    "Request timed-out"
+
+                NetworkError -&gt;
+                    "No Network Connection"
+
+                BadStatus response -&gt;
+                    let
+                        ( code, message ) =
+                            status response.status
+                    in
+                        "Statuscode: " ++ code ++ " and message: " ++ message
+
+                BadPayload _ response -&gt;
+                    let
+                        ( code, message ) =
+                            status response.status
+                    in
+                        "Statuscode: " ++ code ++ " and message: " ++ message
+    in
+```
+
+U1CE9DL9H : there are legitimate cases for `Debug.crash` where elm's type system isn't strong enough to convince the compiler that something holds (for example a list is not empty), but it is nonetheless guaranteed
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

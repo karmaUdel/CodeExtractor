@@ -1,5 +1,93 @@
+U0CLDU8UB : <https://ellie-app.com/3BBdsVGkq6da1/0>
+U5Q42DDMJ : ok but that's weird
+U5Q42DDMJ : the type shouldn't be constrained on `a` ?
+U0CLDU8UB : The more specific version `fromList : List User -&gt; List UserEntity` works too
+U5Q42DDMJ : ah I didn't see you changed ApiEntity to ApiState
+U5Q42DDMJ : of course it compiles
+U5Q42DDMJ : but that's not what I want
+U0CLDU8UB : what do you want?
+U3SJEDR96 : <@U5Q42DDMJ> `type alias ApiEntity a = ApiState (Entity a)` if `a` _is_ an `Entity something` means you have `Entity (Entity something)`, no?
+U5Q42DDMJ : ah yes brilliant <@U3SJEDR96>
+U1B8JE3Q9 : <@U5Q42DDMJ> if you expand the type aliases you have , you get the following:```
+type UserEntity = ApiEntity User
+{substitute ApiEntity}
+type UserEntity = ApiState (Entity User)
+{substitute Entity}
+type UserEntity = ApiState ( User | uuid : String }
+type UserEntity = ApiState ( username : String , uuid : String, uuid : String }
 ```
-`setitem` doesn't return anything useful
-and there is a return statement in your `getattr` :))
-ah I see
-What is the best way to convert a list to a dict? The only thing is I want to specify my keys from outside the list. So the list is basically the values of the dict and I will provide the keys separately.
+
+U5Q42DDMJ : <@U1B8JE3Q9> your solution was working but I need to redefine everything twice (for `User` and then for `UserEntity` )
+U5Q42DDMJ : <@U1B8JE3Q9>  yes :slightly_smiling_face:
+U5Q42DDMJ : but the compiler would be more helpful if it said "Looks like a record has 2 fields uuid" instead of "missing a uuid field"
+U5Q42DDMJ : thx!!
+U1B8JE3Q9 : I'm actually a bit surprised it lets you define that
+U5Q42DDMJ : anyway thanks folks for the help, very much appreciated! :slightly_smiling_face:
+U3SJEDR96 : <@U1B8JE3Q9> I think there's an open bug that you can currently have a record with duplicate fields, actually
+U3SJEDR96 : `type alias Foo = { a : String, a : Int }` &lt;- even with conflicting types, actually :sweat_smile:
+U41NK9BM4 : Oops.
+U0NCP4NC9 : did we have elm-make 64bit?   my project showing "elm-make.exe: out of memory" on win10
+U0EUHKVGB : <@U0NCP4NC9>, if it is out of memory then there is something else wrong
+U0EUHKVGB : Does this happen on a particular project?
+U4PT7NG4V : I've seen some out of memory bugs in the compiler repo. Might be worth searching there :slightly_smiling_face:
+U0NCP4NC9 : <@U0EUHKVGB> 3Q for answer ,  there is so many file in my project , and i changing some like the "foundation"  ... maybe it's to many error will coming out ..   I 'm spliting  piece by piece ..
+U0CLDU8UB : ilias, adrien and enetsee, I'm pretty sure this is a product of a core feature of the record system in Elm. This episode of Elm Town discusses the problem field in more detail: <https://elmtown.github.io/2017/04/26/history-in-elm-town-records-episode-12.html>
+U3SJEDR96 : True, but it's a bug nevertheless (and fixed in `dev` :partypuffin: )
+U2LAL86AY : found a runtime error in the svg library.```
+Svg.svg
+            [ class ""
+            ]
+            []
+```
+```
+bundle.js:12333 Uncaught TypeError: Cannot assign to read only property 'className' of object '#&lt;SVGSVGElement&gt;'
+    at applyFacts (bundle.js:12333)
+    at render (bundle.js:12262)
+    at render (bundle.js:12268)
+    at render (bundle.js:12250)
+    at bundle.js:13576
+    at Object.&lt;anonymous&gt; (bundle.js:10017)
+    at Object.def.callback (bundle.js:23128)
+    at step (bundle.js:10662)
+    at work (bundle.js:10720)
+```
+So i can't use Html.Attributes.class inside svg element - but this should work according to the type annotation.
+```
+svg : List (Attribute msg) -&gt; List (Svg msg) -&gt; Html msg
+```
+
+U1B8JE3Q9 : isn't that `Svg.Attribute` rather than `Html.Attribute`?
+U2LAL86AY : ah yes that's true.:smile:
+U2LAL86AY : but then is the job ov the compiler to catch this.```
+import Html.Attributes exposing (class)
+import Svg
+import Svg.Attributes as SA
+
+view : Model -&gt; Html Msg
+view model =
+    Svg.svg [ class "" ] []
+```
+Hmm this is the second time i found a run-time exception in the long time - errors are becoming like unicorns in elm :smile:
+
+U3SJEDR96 : yeah, so basically the difference is that `Html.Attributes.class` uses `className` under the hood, while `Svg.Attributes.class` uses `class`
+U3SJEDR96 : _but_ `Html.Attribute` (the type) and `Svg.Attribute` (the type) are both simple aliases for `VirtualDom.Property`
+U3SJEDR96 : which means you can indeed use them when they don't really make sense
+U0CLDU8UB : That's awesome and cool!
+U2LAL86AY : thanks for explanation
+U3SJEDR96 : I know it doesn't really solve your issue, but it's nice to know :wink:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

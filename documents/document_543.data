@@ -1,1 +1,64 @@
-actually, ```render : GroupBox ratio msg -&gt; ParentContext ratio -&gt; (ratio -&gt; (Int, Int)) -&gt; Int -&gt; Int -&gt; Svg msg``` would make it slightly nicer
+U0CQ254F5 : I feel like componentization might fit in this scenario, although i do try to avoid it
+U3SQ42JJW : Hi ereryone. Maybe a dump question, but is it possible to have a union type like this```
+type Answer = String | Int
+```
+… and pattern match these… so I can figure out if the answer is a string or an integer?
+
+U2BCXMGKW : <@U3SQ42JJW> you need type constructors there: `type Answer = StringAnswer String | IntAnswer Int`
+U2BCXMGKW : then you pattern match based on those:```
+case answer of
+  StringAnswer string -&gt; ...
+  IntAnswer integer -&gt; ...
+```
+
+U3SQ42JJW : <@U2BCXMGKW> … thanks. Yes in deed - seems absolutely clear now to me… was a dump question;-)
+U3SQ42JJW : :smile:
+U2BCXMGKW : <@U0CQ254F5> what do you exactly want to model?
+U0CQ254F5 : its kind of a strange concept…but essentially a `SingleQuestion` or a `GroupedQuestion`
+U0CQ254F5 : i took an initial pass at it, but it's a mess
+U0CQ254F5 : i was hoping to use the `Config data msg` pattern in the elm-sortable-table repo
+U2BCXMGKW : do you want to have a type that might have a singular question or a question with some list of other questions? maybe something like:
+```type QuestionAndRelated = Single Question | Grouped Question (List Question)```
+
+U3SQ42JJW : haha :joy: seems like everyone is building surveys… me too…
+U2BCXMGKW : I don't like the name of the type, but you get the idea
+U0CQ254F5 : and `Question` is just a type alias of a whatever record I need ?
+U2BCXMGKW : yes
+U2BCXMGKW : but you can have variations, like:
+`type Question = Single SingleQuestion | Grouped GroupedQuestion`
+
+that way you can define different records for each type, if you need it
+
+U2BCXMGKW : depends on your use case
+U0CQ254F5 : yeah, i think i like that
+U0CQ254F5 : thanks, i'll roll with that
+U3LUC6SNS : I am messing around with file uploading.  At this point I can choose an image and display it in the Elm app I am working on.  Looking at the javascript console, I see that the image is represented by a base64-encoded string.  This is also the format that the image is represented in an Elm value.  A couple of questions. (1) is this the format that should be uploaded to Amazon S3 if I want to store images there? (2) I see that images/files begin like this (for-example): ```
+"data:application/pdf;base64,JVBERi0xLjYKJe ... "
+```
+Is splitting the string at ";" the best way to retrieve the mime type? (3) In reading up on this, I've come across "Blobs".  What is their relation to base64 encoded strings?
+
+U4JT89FGB : base64 is typically used when you don't want to store the file as binary. instead, you can store it as a string in a database table
+U4JT89FGB : elm doesn't currently handle binary, so it's all ports if you want to do it that way now
+U4JT89FGB : if you want elm to handle them (keep base64) but also upload them as binary to S3, you'll need to convert
+U3LUC6SNS : How do I convert to binary?  Is that an expensive process?
+U4JT89FGB : based on the file size, but not really, no. depends on the language you're using as far as how to do it
+U4JT89FGB : ruby has `Base64.decode64`
+U4JT89FGB : you could do it in javascript as well, but then you're back to uploading using multipart/form-data
+U3LUC6SNS : At the moment I've been able to get parts of file upload to S3 in place. Here is what I have now: (1) can get credentials for uploading to S3 from my server. (2) with the aid of ports I can choose an image file from disk and create an Elm record {filename: FILENAME, content: BASE64CONTENT}, ---  so I am missing pieces.
+U4JT89FGB : are you uploading directly from the client to s3?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

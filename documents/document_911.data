@@ -1,0 +1,205 @@
+U4BMZ90T0 : I basically have a dictionary with 4 main keys, and their values lead to other keys where in turn their values are integers
+U4BMZ90T0 : However when attempting to do something like `{'key': self.val1 + self.val2}` where `val1` and `val2` are both integers, I get TypeError that they must be str, not int.
+U4BMZ90T0 : So can I not perform addition when setting values in a dictionary?
+U0LSCQQNR : dict keys are strings
+U0LSCQQNR : so I suspect its your key identification that's ht eissue
+U5LNXQHN3 : Most likely you're just wrong about what val1 and val2 are. Probably they are different types
+U5LNXQHN3 : Which is one reason why using a dict instead of something typesafe is a bad idea
+U0LSCQQNR : what if you do 
+`{'key': int(val1) + int(val2)}`?
+
+U4BMZ90T0 : yeah I'll try that real quick
+U4BMZ90T0 : Hmm I guess I'm attempting to index a string with a dict key, so something is going on in the for loop to go through the dict. let me check
+U5MV460AG : Hi there, I'm trying to solve Project Euler (Moving from WebDev to Math, like that more)... In problem 10, I have to find the sum of all primes from 2 -&gt; 2 Mil... So I wrote this method:```primes = [2]
+
+def isPrime(n):
+    if(n == 2):
+        return True
+    for x in primes:
+        if(n % x == 0):
+            return False
+    primes.append(n)
+    return True
+```
+Question is "is this method correct?"
+
+U5LNXQHN3 : no
+U5LNXQHN3 : Consider what happens if you call `isPrime(8)`
+U5LNXQHN3 : (Also, stylistically, you don't need the parentheses around the if statements - it's not Java[Script] :)
+U2BS4M1RV : <@U0LSCQQNR> Dict keys are strings? Are other data types converted to strings when used as the key then? I've used several non-string objects as keys.
+U0LSCQQNR : well, technically keys are hashes
+U0LSCQQNR : string hash, I believe
+U0LSCQQNR : but I was wrong
+U0LSCQQNR : to be used as a dictionary key, 
+&gt;To be used as a dictionary key, an object must support the hash function (e.g. through __hash__), equality comparison (e.g. through __eq__ or __cmp__), and must satisfy the correctness condition above.
+
+U0LSCQQNR : <https://wiki.python.org/moin/DictionaryKeys>
+U5NMSURAQ : <@U6DUW96PP> hi
+U5NMSURAQ : shouldn't it work even if you profile the whole application that loads a module?
+U5NMSURAQ : i.e. that module will be profiled too as a part of a bigger profiling...
+U6DUW96PP : OK thanks. and what about sub processing ? will it profile those as well ?
+U5ZPMJA06 : In other words, you can't use mutable things as dictionary keys.
+U5ZPMJA06 : Strings like "Helo" and tuples like (1,2,3) are immutable. But a list is mutable, so you can't use a list as a key.
+U5NMSURAQ : I'd guess that no
+U0LSCQQNR : bingo
+U5NMSURAQ : I mean, depending on what you mean. Time spent on waiting for a subprocess to finish is going to end up on a cProfile output
+U0LSCQQNR : or basically any data structure other than tuples
+U5NMSURAQ : But no detailed insight, because it's an entirely separate program.
+U5NMSURAQ : and fronzensets
+U6DUW96PP : yes as I thought , Thanks a lot
+U5UQKCC06 : What exactly is a hash? I hear the term all the time but I'm not clear what it means.
+U676NMRDK : hash = dictionary in some contexts
+U5NMSURAQ : no way
+U0LSCQQNR : nope
+U0LSCQQNR : <https://en.wikipedia.org/wiki/Hash_function>
+U0NRYQNAZ : there are some good pycon talks on dicts
+U3EEX4N78 : <https://www.youtube.com/watch?v=66P5FMkWoVU>
+U3EEX4N78 : That one has some good info on how dicts use hashes to store information
+U0NRYQNAZ : <@U0EPQL3LG> loves the dict.
+U6E53ESPP : ~Hi ppl, I came to barg.. ask for help _obviously_ :slightly_smiling_face:, about `wand` especially  image.crop() method, I have my nose right in the docs of this method, re-reading at least 20 times, but I can't get this, the description says `img.crop(10, 20, 50, 100)` where `Its parameters are left, top, right, bottom in order.` but what the.. that means ? top what ? it _should_ be rectangle... so I assume it can't be size of sides, obviously it should be points (x1,y1) and (x2,y2), but it won't accept zero for top, left~ _During writing my question I found it could be because wand counts from one and not zero._
+
+U1BP42MRS : Hence off by one errors! That's really frustrating
+U4BMZ90T0 : What is the best way to package a python application for easy distribution to someone who may not have python
+U1BP42MRS : pyinstaller if you are on the same OS
+U3EEX4N78 : <http://sedimental.org/the_packaging_gradient.html#bringing_your_own_python>
+U1BP42MRS : You can create a binary, effectively, that bundles in an interpreter and the dependencies
+U4BMZ90T0 : I have some settings that the user can change based on their needs, should all those settings be put as `input()` to prompt a user?
+U3EEX4N78 : You could have your application read a config 
+U3EEX4N78 : I think it would depend on how many settings there are to change
+U3EEX4N78 : Something like this <https://docs.python.org/3.6/library/configparser.html>
+U5VCDE5SS : does anybody have experience with AWS file uploads? my app has trello integration and when a file is uploaded, a link is written to the trello card. the problem is that these links expire, so is there a way to replace that link with something that will be re-provisioned once clicked?
+U1BP42MRS : <@U4BMZ90T0> If you can I'd usually generate a default on first start if it doesn't exist, then allow that to be customized
+U4BMZ90T0 : something like `self.whatever = something if something else input('blah')`
+U1BP42MRS : Depends on if your people are technical or not, but yeah you could do that if the config doesn't exist
+U4BMZ90T0 : So the `.exe` isn't interactive unless I use a gui like `tkinter` I believe
+U5PJK7JHE : does anyone know of a simple maze generation library?
+U5PJK7JHE : I can build one but I want to use prebuild so it is easier and faster
+U0LSCQQNR : <https://github.com/boppreh/maze>
+U5PJK7JHE : yeah saw that might use it thanks <@U0LSCQQNR>
+U0EPQL3LG : whoah there
+U4BMZ90T0 : Does anyone use `configparser`? Pretty sure I've asked this before, but just wondering
+U29163YQH : I usually use `yaml` for configuration
+U0NRYQNAZ : i've used it before. it's pretty nice. i also like yaml.
+U4BMZ90T0 : I'm just trying to figure out if it's best practice to grab data for each variable with the configparser module individually like when needed, or setup something like `glob.py` and set them all at once in there
+U0NRYQNAZ : configparser is ini files so if your used to microsoft world its less parity.
+U4BMZ90T0 : Because it seems that when you're compiling if the object that holds all the config stuff doesn't exist and you attempt to import them into some sort of globals file you get errors
+U4BMZ90T0 : so I'm trying to see what most do
+U4BMZ90T0 : Like should I grab the values and set them as attributes as part of classes/objects
+U4BMZ90T0 : <@U0NRYQNAZ> <@U29163YQH> are you just using `pyyaml`?
+U29163YQH : yeah.
+U4BMZ90T0 : so I can essentially just load in the yaml, store it in a settings variable and import the settings variable everywhere
+U29163YQH : exactly. You might want to perform some check on it or put some default value but yeah that's the idea
+U0NRYQNAZ : i think pyyaml is the defacto.
+U29163YQH : just be careful the import is `yaml`
+U4BMZ90T0 : got it.
+U4BMZ90T0 : should I use the `- item` or `[item]` for a list?
+U29163YQH : Personally I prefer `- item` but depend if you have a long list I guess
+U4BMZ90T0 : okay wow this is insanely more simple
+U4BMZ90T0 : is there a reason to maintain a globals file for any reason with the yaml
+U29163YQH : depends what you want to be user configurable or not
+U4BMZ90T0 : I think I'm gonna just leave the .yaml file for someone to add more items to if they want to configure it any more. I'm gonna use `tkinter` to make dropdowns to select an item from lists
+U5NMSURAQ : tkinter is alright!
+U5NMSURAQ : lots of people thing otherwise
+U5NMSURAQ : but it's got TTK for native widgets, pygubu for visual editing of your app...
+U69U49FS9 : Hello all,I want to get value of b from the dictionary mentioned below
+cursor = {a: [{b: 'Oregon', c: 223, d: 35}], e: 118686L}
+
+U0NRYQNAZ : cursor[a][0][b]?
+U4BMZ90T0 : `ValueError: dictionary update sequence element #0 has length 1; 2 is required` Getting this issue currently while passing a parent class to a create a new child class. I would like to pass both the parent as well as a list to the class.
+U1BP42MRS : can you provide a small code sample <@U4BMZ90T0> ?
+U4BMZ90T0 : Yeah
+U4BMZ90T0 : oh wait that's the wrong part
+U4BMZ90T0 : one sec
+U4BMZ90T0 : I was previously destroying root every time, but I'd like to just destroy the frame so it doesnt close out 4 times and open back up...
+U4BMZ90T0 : and the settings one is a list
+U4BMZ90T0 : well it's a dict of lists
+U4BMZ90T0 : `settings['route']` is a list though as well as `settings['base_url']`
+U4BMZ90T0 : I tried using `*args`
+U1BP42MRS : I think your super calls are a bit weird, you probably want `super(Values, self).__init__(parent, choices)` or if your're on py3: `super().__init__(*args)`
+U4BMZ90T0 : Gotcha, probably just looking at old code examples
+U1BP42MRS : Not sure of your issue there though
+U4BMZ90T0 : Yeah it's odd you could be right though
+U4BMZ90T0 : I had super earlier actually it was working find
+U4BMZ90T0 : fine now that I think about it
+U1BP42MRS : I think it's how you're passing to the super though
+U1BP42MRS : I think the signature is `Frame(master, ...options)` - so you may need to unpack your dict as options
+U1BP42MRS : `super().__init__(parent, **options)`
+U4BMZ90T0 : oh wait, I don't need to pass `self` to super... :facepalm:
+U4BMZ90T0 : hmmm, still same issue
+U4BMZ90T0 : turns out tkinter Frames object cant take in 3 arguments unless the 3rd is a dictionary
+U1BP42MRS : I was trying to find the docs on the signature more, they are certainly lacking
+U4BMZ90T0 : Yeah pretty abysmal tbh
+U4BMZ90T0 : Nearly done though
+U4BMZ90T0 : And another issue... How am I supposed to pass in anything to this class if it cant take more than one argument...
+U1BP42MRS : What do you mean? Only the parent can't take more than one - your class can though
+U63JBUJUW : are there anymore easter eggs in python than 'import this'?
+U60KNBMPX : 'import this' is the surest way to a guilt trip in Python
+U63JBUJUW : lol
+U07JGLLKF : there's `from __future__ import braces`
+U07JGLLKF : and `import antigravity`
+U60KNBMPX : `from stackoverflow import quicksort`
+U60KNBMPX : ^^^ best help advice you've ever seen in your entire life.
+U63JBUJUW : lol xkcd one nice
+U1BP42MRS : `import hello`
+U6DGQTB5Z : I have a stupid question: I'm doing a tutorial on making command line apps with argparse.  I'm most comfortable working in a Jupyter notebook, though - obviously I'll need to transfer it to a script eventually, but is there a way I could like simulate user input in a Jupyter cell instead of switching back and forth between text editor and shell?
+U07JGLLKF : <@U6DGQTB5Z> yup! by default `arg_parse()` just looks for the command line arguments from `sys.argv` but you can pass your own list of arguments to it
+U6DGQTB5Z : Aha!  Awesome, thanks!  :slightly_smiling_face:
+U0NRYQNAZ : i enjoy building cli apps with argparse but lately click has been my go to.
+U07JGLLKF : click is super nice
+U07JGLLKF : but i never use it unless i'm pulling in at least one other dependency
+U13L8J76J : You can always vendor it
+U3EEX4N78 : click is slick
+U07JGLLKF : <@U13L8J76J> true true
+U4JJH96TS : Hello, `HTTP GET` is giving `400` on one machine but works perfectly fine (`200`) on other machine for the same URL. Any ideas why?
+U4JJH96TS : machine 1```
+&gt;&gt;&gt; import requests
+&gt;&gt;&gt; requests.get(url)
+&lt;Response [400]&gt;
+```
+machine 2
+```
+&gt;&gt;&gt; import requests
+&gt;&gt;&gt; requests.get(url)
+&lt;Response [200]&gt;
+```
+
+U4JJH96TS : Both use the same version of `requests`
+U07JGLLKF : is there anything in the returning body of your 400?
+U5VNFM6HF : Hi all,I want to write a program to get the MySQL status through the command line.
+E.g The command what I am doing is 
+`msqladmin -u username -p password status`
+(there is no space between -p and password.)
+But I don't want to provide password through the command line. But give the input as password to the command line on asking password. Like 
+```
+msqladmin -u username -p status
+
+password ******
+
+```
+Is there a way to do it?
+
+U4JJH96TS : oh, thanks <@U07JGLLKF> , just checked the returned `text` from the request. my machine's IP is blacklisted, oops
+U07JGLLKF : that'd do it!
+U07JGLLKF : <@U5VNFM6HF> technically `subprocess.Popen` has a `communicate` method to do this
+U07JGLLKF : but after 10 years of python i still can never get any subprocess thing to handle input properly and i hate it
+U07JGLLKF : ooh cool i found a handy library called `sh` that isn't awful
+U07JGLLKF : <@U5VNFM6HF> you can use `sh` to easily get this result:```import sh
+result = sh.mysqladmin('-h', '127.0.0.1', '-u', 'root', '-p', 'status', _in='password')
+print(result.stdout)```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

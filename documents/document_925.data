@@ -1,0 +1,122 @@
+U0VKLQ9K7 : pythons version of a switch statement
+U5UQKCC06 : Right, I was thinking the same, that's no problem for Django, but how would you handle the nested cases?
+U5UQKCC06 : Or for example `if self.request.request_needs &gt; 10:  # Needs Takeoff or Takeoff and Estimate` is essentially checking if it's 20 or 50, would I include a key for 20 and 50 that both do the same thing?
+U0VKLQ9K7 : hold on, sorry, im trying to play with your code but 3 fires just started at work haha
+U5UQKCC06 : No worries!
+U0VKLQ9K7 : <@U5UQKCC06>
+U0VKLQ9K7 : something like this
+U5UQKCC06 : This is great, thanks <@U0VKLQ9K7> :taco:
+U5UQKCC06 : I'm going to work on implementing this and I'll let you know if I have any questions, but it looks pretty straight forward
+U0VKLQ9K7 : cool, hopefully it works out and you can just add those functions to the class you had the if statement in
+U4WG0KTNJ : need some help with transforming datetime object
+&gt;examples of the df['old'] that needs to be tranformed
+```
+0       00:19:58.582052
+1       00:25:09.107093
+2       00:06:44.541717
+4       00:03:45.035418
+5       00:07:14.327405
+6       00:04:49.413655
+10      00:07:00.095332
+11       00:30:57.42213```
+
+&gt;This is the code I'm using to convert it into seconds
+```import datetime
+
+def convert_seconds(ts):
+    for i in ts:
+        pt = datetime.datetime.strptime(i,'%H:%M:%S.%f')
+        total_seconds = pt.second + pt.minute*60 + pt.hour*3600
+    return total_seconds
+
+df['new'] = convert_seconds(df['old'])```
+
+&gt;And this is the output from df['new']
+```0       565
+1       565
+2       565
+4       565
+5       565
+6       565
+10      565
+11      565```
+
+basically I just need to find the mean of the column. Thanks!
+
+U4WG0KTNJ : also thanks <@U5VGKQ2SY> for the helpful tips :taco:
+U0VKLQ9K7 : <@U4WG0KTNJ> what is your expected output? this is a little confusing. Not fulling understanding what you are doing, returning total_seconds like that is only going to return total_seconds of the last iteration of that for loop
+U486CN4VD : <@U4WG0KTNJ>, check out `.map` and `.apply` to make your life a little easier!
+U4WG0KTNJ : Hi, I just wanted to find the mean of the column, but I had trouble in the `xx:xx:xx.xxxxxx` format so I thought I'd convert it into `int`
+U6CCKP118 : I've got a python/django issue need help with. I'm sending a curl request with json to a url (code below)
+U6CCKP118 : curl -X POST -d "username=john&amp;password=john2&amp;email=john@email.com&amp;first_name=john&amp;last_name=smith" <http://localhost:8000/api-user-create/>
+U6CCKP118 : and I'm getting an error parsing the json here's how I'm parsing it...
+U6CCKP118 : @csrf_exempt	def create_user(request):
+		response = {'status': None}
+
+		if request.method == 'POST':
+			data = json.loads(request.body)
+
+U1BP42MRS : the body there isn't JSON, it's form encoded
+U6CCKP118 : then I can get the data like &gt; username = data['username']
+U1BP42MRS : is it not bombing on the `json.loads`?
+U6CCKP118 : yes it crashes there
+U6CCKP118 : not sure how best to do this, I've been doing this for requests from an actual browser
+U1BP42MRS : If you want to send in json with curl:  `curl -X POST -d '{"manual": "json"}' -H 'Content-Type: application/json' <http://localhost/route>`
+U6CCKP118 : ah got it
+U1BP42MRS : but, doing that doesn't give you any validations with manually calling `json.loads`, so you get other issues there.
+U1BP42MRS : You can just the built in django forms, and just use forms so you get the validation logic
+U6CCKP118 : but json.loads will work this way... django is a backend for an app and the client wants to use jwt i.e. json only to communicate
+U1BP42MRS : jwt is a bearer token format, it doesn't indicate the app is json only
+U1BP42MRS : but it's okay if that's the way you want to communicate. In that case if this is a big api - you may want to try out django-rest-framework
+U1BP42MRS : It'll save you a lot of manual work like that
+U6CCKP118 : yes I'm getting user token with it but he wants additional features so I'm mimicking the input &gt; output format
+U6CCKP118 : I would try that but this is a small project and I'm keeping it simple
+U1BP42MRS : cool :slightly_smiling_face:
+U6CCKP118 : getting this error in the logs
+U6CCKP118 : ^[[A^[[BInternal Server Error: /api-user-create/Traceback (most recent call last):
+  File "/usr/local/lib/python2.7/dist-packages/django/core/handlers/base.py", line 149, in get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "/usr/local/lib/python2.7/dist-packages/django/core/handlers/base.py", line 147, in get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/usr/local/lib/python2.7/dist-packages/django/views/decorators/csrf.py", line 58, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "/home/samuel/Documents/code/binabikers/delivery/views.py", line 14, in create_user
+    data = json.loads(request.body)
+  File "/usr/lib/python2.7/json/__init__.py", line 339, in loads
+    return _default_decoder.decode(s)
+  File "/usr/lib/python2.7/json/decoder.py", line 364, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "/usr/lib/python2.7/json/decoder.py", line 380, in raw_decode
+    obj, end = self.scan_once(s, idx)
+ValueError: Expecting property name: line 1 column 2 (char 1)
+[01/Aug/2017 05:55:01] "POST /api-user-create/ HTTP/1.1" 500 85788
+
+U6CCKP118 : input: curl -X POST -d "{'user-type': 'user', 'username':'john', 'password':'john2', 'email': '<mailto:john@email.com|john@email.com>', 'first-name':'john', 'last-name':'smith'}" <http://localhost:8000/api-user-create/>
+U1BP42MRS : Please use code formatting (either triple ticks on both sides ` ``` `, or the snippet feature which is available with the little plus to the left of the code input box)!
+U1BP42MRS : But `"{'user-type': 'user', 'username':'john', 'password':'john2', 'email': '<mailto:john@email.com|john@email.com>', 'first-name':'john', 'last-name':'smith'}"` is invalid json
+U1BP42MRS : You need to swap the quotes you use
+U1BP42MRS : `'{"user-type": "user", "username": "john", ...}'`
+U6CCKP118 : awesome it worked
+U6CCKP118 : thanks <@U1BP42MRS>
+U1BP42MRS : sure thing
+U1G9D6PSQ : So, I've been using `__all__` for some time now to quickly declare to the programmer which functions of a module is to be used by other modules (more or less, when you open a file, the "entry point(s)" that other files that import this file uses can be found by reading `__all__`). It's quite helpful, but the problem is that e.g. sphinx by default won't add the docstrings of private functions. This makes sense if I'm writing API docs, but not so much if I want to cover all functions.
+How would you handle this issue?
+
+U29163YQH : `sphinx by default won't add the docstrings of private functions` there should be an option to activate it for all functions
+U1G9D6PSQ : Is that reasonable though? Maybe it's me who should rethink what the documentation should be used for.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

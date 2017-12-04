@@ -1,16 +1,145 @@
-<@U3R7CKQRX> run this: ```var loop = function() {var s = window.pageYOffset || window.scrollTop; console.log(s); requestAnimationFrame(loop);} ``` and then call ```loop();``` in your console and start scrolling
-<@U17R26VR8> what do you think we have bigger problems?
-<@U1P6FFJ64> I’m not mordraw, but I would ask about the term “enforce” which feels like there might be communication issues amongst the 3 people. Do you mean “force” or just “check” ? On my team (also 3), when we upgrade like that, we’ll all chat and do it together.
-Especially the first time we notice that in a PR. We’ll say “hey, did someone upgrade their elm-format” and then we’ll all do it.
-Oh, sorry if that's the case. English is not my native language.
-No worries. “enforce” can mean a lot of different things.
-It isn’t the wrong word, but can be misunderstood. :slightly_smiling_face:
-Is the question just how to make sure everyone is on the same version?
-Mafia "enforcers" come to mind :smile:
-This is an issue that has happen maybe twice in all the time we have being developing. Is not a big problem, just something that I think it could be automated.
-Perhaps a check in a git hook?
-some custom script that validates the elm-format version?
-That's what we will do, add a elm format check on the CI to block PRs that are not using the last elm-format
-I don’t know much about the npm stuff, though, so I’m probably not the best to answer it. I don’t think there is anything about the general environment contained in the project-specific files.
-I’d ask back whether this is worth the time to do the check and block, as opposed to just communication on the team saying “hey, I upgraded to the latest elm-format, everyone else should”
-But, depends on how cumbersome putting the CI check in there is.
+U1UGYHGCA : `Json.Decode.map` probably
+U14Q8S4EM : Here is some code I wrote up that decodes to a union type <@U5ABF3BH7>
+U14Q8S4EM : <https://github.com/Chadtech/Chadtech-Online-2-Post-Composer/blob/master/source/Types/Model.elm>
+U14Q8S4EM : Checkout the functions `ContentDecoder` and `ContentDecoderHelp`
+U3FJSB596 : Or `Json.Decode.andThen`
+U5ABF3BH7 : <@U14Q8S4EM>  <@U1UGYHGCA> Thanks a lot!
+U1UGYHGCA : ```locationDecoder: Decoder LocationType
+locationDecoder =
+  Json.Decode.field "type_" Json.Decode.string
+  |&gt; Json.Decode.map (\type_ -&gt; case type_ of
+    "Person's Residence" -&gt; PersonResidence
+    "In Transport" -&gt; InTransport
+    -- ...
+    _ -&gt; Other
+  )
+```
+
+U1UGYHGCA : Might work
+U5W86UED6 : oh! you wouldn't - I was supposing that `average` should be defined as `List Float -&gt; Float`, putting the burden on the part of the program that generates the list, rather than on the function. but your solution is exactly the way to satisfy his original question
+U3FJSB596 : With this version, you do not need to add a new value `Other` to your `LocationType`.
+U6D3ERLA1 : ```mapGrid func grid =
+    let
+        mapRows y row =
+            Array.indexedMap (mapColumns y) row
+
+        mapColumns y x val =
+            func x y val
+    in
+        Array.indexedMap mapRows grid
+
+
+updateMarker p k =
+    \x y val -&gt;
+        if p.x == x &amp;&amp; p.y == y then
+            k
+        else
+            val
+
+debug = mapGrid updateMarker { x = 1, y = 1 } "X" initBoard
+    |&gt; log "Map"
+```
+
+U6D3ERLA1 : Maybe someone can help me with this.... I'm trying to pass updateMarker to mapGrid with two paramaters (a point and a key) which will be evaluated inside of map grid - along with the current grid location (x, y)
+U14Q8S4EM : <https://gist.github.com/Chadtech/81a96e4facab7a3dc9196e2811ce6c08/edit>
+U6D3ERLA1 : Maybe I need to curry updateMarker before passing to mapgrid..
+U14Q8S4EM : <@U6D3ERLA1> , thats how I would write your code. Tho I am not sure given your use case things need to be this convoluted.
+U6D3ERLA1 : <@U14Q8S4EM> I think that gist is private
+U14Q8S4EM : <https://gist.github.com/Chadtech/81a96e4facab7a3dc9196e2811ce6c08>
+U14Q8S4EM : Doops.
+U14Q8S4EM : Thats the correct link
+U5ABF3BH7 : <@U1UGYHGCA> <@U3FJSB596> Thanks, I will give it a try!
+U1CHKCKBR : hey, i want to start learning elm; what would be the proper way to start ?
+U2U94G0QG : <@U1CHKCKBR> start with <https://guide.elm-lang.org/> and also the FAQ (see channel topic)
+U2U94G0QG : and of course ask here when questions come up
+U1CHKCKBR : :wink: ty <@U2U94G0QG>
+U2U94G0QG : I'm doing <https://www.gitbook.com/book/johncrane/ninety-nine-elm-problems/details>
+U2U94G0QG : which is fun and more about using the language than building web apps with TEA
+U1CHKCKBR : i like the way it's structured
+U6DQCTZT2 : How do I transform Time (Float) to Int?
+U6DQCTZT2 : I guess I don't? I just have to use Int for the type declaration?
+U14Q8S4EM : <@U6DQCTZT2> `round` or `floor`
+U2U94G0QG : <@U1CHKCKBR> have you seen <https://ellie-app.com/new> yet?
+U2U94G0QG : really nice way to play with Elm - 0 config
+U2U94G0QG : though personally I prefer <https://ellie-app.com/new?vim=true>  :wink:
+U6DQCTZT2 : <@U14Q8S4EM> thanks!
+U23SA861Y : <@U6DQCTZT2> what value do you want out, there are conversion functions to give you an number in a relavent unit
+U6D3ERLA1 : Hmmm well this seems to do what I want (map a coordinate and key to a grid) but it seems like too many args for the inner function not sure if there is  a better way```
+mapGrid f grid =
+    Array.indexedMap (mapRow f) grid
+
+
+mapRow f y row =
+    Array.indexedMap (mapDatum (f y)) row
+
+
+mapDatum f y x =
+    f x y
+
+
+putY p k x v y =
+    if p.x == x &amp;&amp; p.y == y then
+        k
+    else
+        v
+
+
+debug =
+    mapGrid (putY { x = 0, y = 0 } "*") initBoard
+        |&gt; log "Map"
+```
+
+U6DQCTZT2 : <@U23SA861Y> Random.initialSeed needed to be an Int and so I used the round function. Was looking for something like Time.toInt, but just me being stupid ;D
+U23SA861Y : right, if you weren't using the actual time value then thats ok.
+U23SA861Y : so you went with array of array huh?
+U6D3ERLA1 : y
+U4H406NET : I am trying to construct a Result object with an error and Result.Result tells me that Result does not expose Result (Result by itself tells me that Result is not a variable)  How do you create a Result?
+U23SA861Y : well, because this putY if you used a dict would just be `Dict.insert (x,y) value grid`
+U5ABF3BH7 : I have a designing question. In my view, I have different persons ( of Person.Model) used in my Model, for example model.caller, or as element of the list model.other People
+Each person has a list of roles of  
+```
+type alias Person = 
+  { firstName : String
+  ….
+ , roles : List PersonRole
+} 
+
+type PersonRole = 
+   Informant
+  | PrimaryPurchaser
+  | NextOfKin
+  | SurveyRecipient
+  | CoPurchaser
+```
+ 
+The different roles are presented as checkboxes in the personview person. 
+Some roles can go to only one person some have no restriction. For example, there can be only one informant , some roles like nextOfKin don't have that restriction.
+so you can have ``` person1.roles = [Informant, NextOfKin] person2.roles= [PrimaryPurchaser, NextOfKin]```  but not ```person1.roles = [Informant], person2.roles = [Informant, NextOfKin]```
+so Informant can be used only for 1 person.
+
+I have been going back and forth with different ideas on how to model that and would appreciate advice. 
+One idea is to create a dict of unique roles in my model
+uniqueRoles = { (Informant, Maybe Person.Model), (PrimaryPurchaser : Maybe Person.Model), …}
+
+On a person view  the checkbox ‘informant' needs to be disabled if the person is not the informant, but it needs to be enabled if the person has that role or no informant has been selected yet, I am thinking of adding  ```[disabled (Dict.get Informant model.uniqueRoles == Nothing || Dict.get Informant model.uniqueRoles == person)]```
+
+It seems a bit much, any other idea?
+
+U6D3ERLA1 : <@U23SA861Y> I'm translating from an existing js app so the array map (pun intended) pretty directly I'll look at the Dict implementation as well I'm just trying to get some chops so not much to lose trying a couple ways
+U23SA861Y : if they are arrays you should be able to index directly
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

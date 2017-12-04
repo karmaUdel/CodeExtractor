@@ -1,21 +1,80 @@
+U1CE9DL9H : ah i see now that is what you use
+U625M23DE : that's similar to how i'm doing it now: i have a function which takes a ratio-tagged element and a ratio-tagged parent request for rendering, and renders it. but the problem is that the actual ratio values aren't retrievable:
+U625M23DE : ```render : GroupBox ratio msg -&gt; ParentContext ratio -&gt; Int -&gt; Int -&gt; Svg msgrender box pc actualW actualH = ...
+render41 : GroupBox Ratio41 msg -&gt; ParentContext Ratio41 -&gt; Svg msg
+render41 = render 4 1```
+
+U1CE9DL9H : but, that is how it will always work, at some point the type has to be converted into a value, and you can't check that for correctness (unless dependent types)
+U1CE9DL9H : actually, ```render : GroupBox ratio msg -&gt; ParentContext ratio -&gt; (ratio -&gt; (Int, Int)) -&gt; Int -&gt; Int -&gt; Svg msg``` would make it slightly nicer
+U625M23DE : if i could write a function like this, i could abstract a lot of the boilerplate away:```extract : ratio -&gt; (Int, Int)
+extract r =
+  case r of
+    Ratio41 -&gt; (4, 1)
+    _ -&gt; Debug.crash("Got request for ratio parameters of non-ratio object " ++ (toString r))```
+
+U1CE9DL9H : are you familar with the "scrap your typeclasses" approach?
+U625M23DE : vaguely, but i don't see how it applies to this situation.
+U625M23DE : (not saying it doesn't, just haven't played with that enough to see the connection)
+U1CE9DL9H : just to be clear: yes, in comparison to haskell you'll have to write some more stuff.
+U1CE9DL9H : so this is a little nicer ```
+type alias Ratio r = (Int, Int) 
+
+
+render : Ratio ratio -&gt; GroupBox ratio msg -&gt; ParentContext ratio -&gt; Int -&gt; Int -&gt; Svg msg
+render = ... 
+
+ratio41 : Ratio Ratio41
+ratio41 = (4,1)
+
 ```
-That's not what is happening.
-Sorry, that should say if include isn't specified, and exclude doesn't trigger, then it is returned True.
-but I could be wrong. Probably best to wait for someone else to chime in
-There is no problem with that code, it tests perfectly.
-ok
-Sorry if I was unclear on that.
-My question is about the namedtuple.
-Rather than sending entry[index] I am wondering, short of a dict or a class, if there is a better way, that is closer to sending entry.query.
-<@U5VGKQ2SY>, here you go: <https://github.com/TomFaulkner/pypihole>
-Posting this b/c it got pushed up a ways. In case anyone else wants to give it a shot.
-Thanks.
-Full code to the above: <https://github.com/TomFaulkner/pypihole>
-<@U2BS4M1RV> the easy answer is that you should never change the indexes/order on a named tuple
-Thats a breaking change. If your concerned about that, you should probably use a class or dictionary and not let people use indexes
-Yeah, I think I probably have to agree there. As nice as namedtuples are, that does make it easy to break things should the data being analyzed changed.
-`Query._fields.index('client')`
-Not sure if I understood correctly
-You did, that works well.
-However, it also starts with an underscore. I can't imagine standard lib changing that, but...
-Actually, in the case of a namedtuple, it might make sense to do the underscore to avoid someone naming one of their fields 'fields' and breaking things.
+but, how many ratios do you want to support, surely there is a limited number that makes sense?
+
+U625M23DE : oh, that's interesting: extend the phantom-ness of the type to the Ratio type itself, and then you can indeed write the ratio-extracting function i mentioned.
+U625M23DE : yes, there are a finite small number of ratios i care about.
+U1CE9DL9H : there may be something better with extensible records, tinkering atm
+U1CE9DL9H : that's a dead end, so yea I think the above is the best option. it's not great but seems acceptable
+U625M23DE : after digging into this a bit in my actual code, it looks promising but i'm not out the other side yet. thanks for the help, i'll try to post back when i have it figured out.
+U60SXAF96 : <@U2LAL86AY>: `Process.sleep` was exactly what I was looking for. Thanks!
+U3YDBDP4Z : What do you name your test modules and functions?
+U6269MXK2 : Hi, did someone already experienced this issue when installing Elm trough npm ?
+U6269MXK2 : `Error extracting linux-x64.tar.gz - Error: EACCES: permission denied, mkdir '/usr/lib/node_modules/elm/Elm-Platform'`
+U3SJEDR96 : <https://docs.npmjs.com/getting-started/fixing-npm-permissions#option-2-change-npms-default-directory-to-another-directory>
+U3SJEDR96 : `/usr` isn't a very good place to (globally) install user-specific stuff :slightly_smiling_face:
+U6269MXK2 : Ah get it
+U6269MXK2 : Thanks a lot !
+U0CLDU8UB : Has npm changed the default recently? This has popped up several times in the past couple of days.
+U3SJEDR96 : Yeah, I'm not sure where this is coming from tbh
+U0CLDU8UB : Well actually:```
+› which elm-make 
+/usr/bin/elm-make
+```
+
+U0CLDU8UB : I've installed it via npm quite a while ago, so it's not a new location.
+U0CLDU8UB : Though `npm i -g elm` (no sudo) also works on my machine, and:```
+› which elm-make
+~/.npm/bin/elm-make
+```
+
+U4N4DF3GW : Have you guys ever wondered why the official style guide says to use 4 spaces indentation, while Elm-core modules are written with 2 spaces indent?
+U3SJEDR96 : the core modules haven't been ran through elm-format (yet). This will likely happen once elm-format reaches a 1.0
+U3DG1D55J : Anyone have experience using the elm-tools/parser library? I have what I suspect is a pretty simple question
+U1CE9DL9H : fire away
+U3DG1D55J : So, first an example string that I’d like to parse: `**alphanumerics** (optional thing)`
+U3DG1D55J : So, I’m having the parser ignore the asterisks, keep the value inside the asterisks, and then optionally ignore the parens and keep the value inside them
+U3DG1D55J : The thing I’m having issues with is defining a parser that can have the optional component
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

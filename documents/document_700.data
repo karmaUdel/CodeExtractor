@@ -1,26 +1,125 @@
+U23SA861Y : they can be, particularly if you have a few lets in flight
+U0CLDU8UB : The difference is that in Elm, you can look at `User -&gt; Html msg` and immediately write off that this function or any helper function that it might be using *cannot* do anything but produce HTML without any event listeners.
+U0LPMPL2U : a long `update` that just proxies a lot of `Msg` values to a function are actually very readable
+U0CLDU8UB : Sure, I'm not advocating 200-line functions.
+U2LAL86AY : hey does anyone experience a slack memory leak - every time i open slack my ram goes form 500MB to 2.2Gb - just Firefox. When i close slack it goes back to normal.. is this common? Because  it doesn't sound very performant :smile: ..
+U32H3RA87 : Is there a way to see an auto generated changelog of an elm package? It seems like it would be feasible given the auto versioning.
+U32H3RA87 : just to look at api changes, not necessarily the commit message or whatever that are related
+U0LPMPL2U : `elm package diff`
+U32H3RA87 : amazing, thanks :slightly_smiling_face:
+U2D7NUGS1 : I'm thinking about automating release maintenance with a shell script. There is quite a few repetitive steps that are human error prone: 1. diff 
+2. update changelog (move items from unreleased to release section with correct version and date) 
+3. bump
+4. commit
+5. tag 
+6. push
+7. publish 
+8. celebrate
+Automating the last one is perhaps not useful, but you get my point  So first thing I've run into is how to get next version string. The only way I see is to run `elm package bump` and then terminate it without actual bumping. It displays version change and of course I could capture the output and do some `sed` or `grep` magic.
+Is there more straight forward way? IMO `elm package diff` should have an option to display it in machine friendly format, but apparently it does not.
+
+U2D7NUGS1 : ```$ elm package bump       
+Based on your new API, this should be a PATCH change (1.0.3 =&gt; 1.0.4)
+Bail out of this command and run 'elm-package diff' for a full explanation.
+
+Should I perform the update (1.0.3 =&gt; 1.0.4) in elm-package.json? [Y/n] n
+Okay, no changes were made.
 ```
-Sounds about right. Nice hack <@U0NRYQNAZ> :taco:
-Oh sorry, guess I gave them all out
-what sucks is i had to use the --process-dependency-links
-and it gives a deprecation msg.
-it's all good
-so i'll have to change things soon... but whatever.
-it works right now and that is all i care about.
-I think there is an XKCD about the future self coming back to warn the past self...
-yea, it's already bugging me ... but i need to press on.
-i'll create an issue and get going on other thangs.
-&gt; Laugh at perfection. It's boring and keeps you from being done.
-I'm on your side :slightly_smiling_face:
-I am writing a node app right now, pretty much going for get it working...
-yea i just gotta keep telling myself this stuff... haha
-:shipit: is my motto
-:thumbsup:
-same here
-i've adopted it.
-way better to ship than not have shit.
-Of course my old director when he left said "you guys don't hold yourself to a high enough software craftmanship standard"
-So... ¯\_(?)_/¯
-there is a balance you need to keep.
-you def. don't want the crappiest code ever being written... but you can also spend waaay to much time on some some stuff.
-He was really just being an ass, not to be too rude
-I think I just decided a new policy, no calling a package/module: utils, common, or shared
+
+U2D7NUGS1 : Or maybe I'm just doing it wrong?
+U1CE9DL9H : why not let it update, then read from the elm-package json?
+U2D7NUGS1 : Oh, yeah!
+U2D7NUGS1 : Silly me :slightly_smiling_face:
+U2D7NUGS1 : Thanks.
+U2D7NUGS1 : Ok, here it is: <https://github.com/lzrski/elm-polymer/blob/master/scripts/bump-and-publish>
+U2D7NUGS1 : Thanks again <@U1CE9DL9H>
+U64A0BYHH : Hey everyone! I decided to try out a white-board challenge we like to do in other languages, in Elm, and found that it hits a stack level too deep when the number gets to 10 numbers - this doesn’t happen w/ other languages if anyone can offer suggestions or explanations? The challenge is simple; write a program that outputs every combo of letters that a given phone number can produce: <https://ellie-app.com/3BGtscn55tja1/0>
+U23SA861Y : generally recursion can be avoided and replaced with a fold or map
+U0FP80EKB : Also, you would write to write your recursion so that it can be tail call optimized
+U0FP80EKB : which Elm does do
+U23SA861Y : also yes if you must use recursion it should allow for TCO
+U0FP80EKB : The way you have it written expands all the cases before finishing any of them.
+U0FP80EKB : The call tree on that code is going to get REALLY large really quickly
+U23SA861Y : well a typical phone number is only 10 digits (assuming NA) which I think is only 70k or so possibilities
+U0FP80EKB : That’s a pretty big call stack
+U23SA861Y : fair enough
+U23SA861Y : It should be possible to compose the function `Phonenumber -&gt; Int -&gt; String` and then just range over the it
+U64A0BYHH : Interesting - I would LOVE to see an iterative solution to this - I can’t wrap my head around it
+U0FP80EKB : I like the recursive solution, but you’ll want to write it in a way that can be TCO
+U23SA861Y : is there an identity type for appendable
+U23SA861Y : that works for both lists and strings say
+U64A0BYHH : Yeah <@U0FP80EKB> - I couldn’t get the TCO working since the recursion happens inside the map…
+U0FP80EKB : :slightly_smiling_face:
+U0FP80EKB : Maybe look at a way without the pipeline like that
+U0FP80EKB : Often recursion and map are tough to get working together when you want TCO. recursion often takes the place of mapping.
+U23SA861Y : interesting without recursion it still blows the stack
+U23SA861Y : <https://ellie-app.com/3FY8YRHcqvka1/0>
+U23SA861Y : <https://ellie-app.com/3FY8YRHcqvka1/1>
+U23SA861Y : not sure why that is
+U23SA861Y : <@U64A0BYHH> ^ here is an iterative solution, however it suffers from the same problem as yours which I find troublesome
+U64A0BYHH : amazing - thank you for doing that - perhaps there is a bigger issue here…?
+U0FP80EKB : I’d recommend putting in a `Debug.log` in there to see what is going on. I bet you are still building up a call stack before exiting.
+U23SA861Y : That is almost certainly the case, however I am only ever using stdlib implementation of map and foldl
+U23SA861Y : <@U0FP80EKB> how would Debug.log dump the stack?
+U0FP80EKB : I’d just put them in and watch how often it gets called before a final “done” is emitted
+U0FP80EKB : So, use it to build up a view of the call stack
+U23SA861Y : mind taking a peak at the ellie as to where that would make sense
+U23SA861Y : after all, all the range traversals are encoded as maps or folds which makes it difficult to see a growing stack in the traversals
+U0FP80EKB : sure, let me take a look
+U23SA861Y : some of this stdlib stuff is native javascript and not TCO'd although I would suspect in that case they would just use a loop to accomplish this
+U23SA861Y : as a result, I have no idea why the stack would be popping here
+U0FP80EKB : yeah, interesting. It isn’t immediately obvious. My guess is that it has to do with the pipeline
+U0FP80EKB : something, I suspect, is being eagerly evaluated.
+U23SA861Y : well it's elm so everything is eager
+U23SA861Y : I'm not sure what governs where JS puts it's data
+U0FP80EKB : yeah, so I’m thinking something is being too eager. My guess is the pipeline. Still looking
+U23SA861Y : I presume it's all on the heap
+U0FP80EKB : So, looking at the stack, I think the pipeline is currying the functions and somewhere getting caught up. Haven’t found where, though.
+U23SA861Y : currying the functions, I was under the presumption that pipe was simply `(|&gt;) a f = f a`
+U0FP80EKB : here’s something
+U0FP80EKB : If you just do 1s, it doesn’t blow the stack
+U0FP80EKB : Because there is only one item in the list
+U23SA861Y : right
+U23SA861Y : that just means its correlated with list length which is not unexpected
+U0FP80EKB : okay, not the pipeline. But, something about nesting the currying in the foldl
+U23SA861Y : really?
+U0FP80EKB : Well, the call stack is blowing on A2, which handles calling 2-parameter functions that have been curried
+U0FP80EKB : Or, rather, it could be the `index table` part
+U23SA861Y : so I'm only starting to delve into those particular methods, A2 seems to be called for any two parameter application
+U0FP80EKB : The map there
+U0FP80EKB : Yeah, my gut says collapse, although it could be the `index table` there
+U23SA861Y : collapse has some complexity to it with the arithmatic and such
+U0FP80EKB : oh, interesting
+U0FP80EKB : Just doing this doesn’t blow```
+            List.map (index table) [10]```
+
+U23SA861Y : it would be more `List.map (index table) [10000]`
+U0FP80EKB : yeah, I see now
+U0FP80EKB : ```        List.range 0 (maximum - 1)
+            |&gt; Debug.log "Current Index"
+            |&gt; List.map (index table)
+```
+I misread what maximum was
+
+U23SA861Y : but that works just fine at 10000
+U23SA861Y : 20000 also works
+U0FP80EKB : Okay, so it is the map
+U0FP80EKB : not the foldl
+U23SA861Y : the original List.map
+U0FP80EKB : yeah
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

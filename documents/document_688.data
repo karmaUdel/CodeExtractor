@@ -1,119 +1,71 @@
-Can I only to add again ```start_time = time.time()``` in this if statement ?
-yes
-cool !
-you could probably improve the code by setting that time inside the get_key function, so that you don't need it in the if statement
-yes, I thinking about that. Thank you <@U5LNXQHN3> I will test !
-If I run `python manage.py db init` on my server it works, but then I run `python manage.py db migrate` and I get `Path doesn't exist: 'migrations'. Please use the 'init' command...`. :neutral_face:
-Not sure what I'm doing wrong.
-is there a directory named migrations after init?
-`app/migrations`...
-maybe it was expected in the root directory
-But I have no idea why it's doing that since last time I used `init` this problem didn't occur and I changed literally nothing...
-no idea, but now I'm afraid to update flask-migrate
-Only difference is this is on a new server
-Oh...maybe they changed something? Hmm...
-I guess not. I tried running it locally rather than on Heroku and it worked as expected.
-Running locally it uses `/migrations/`, on Heroku it uses `/app/migrations/` :neutral_face:
-Just confirmed it
-Environment variables?
-<@U5NMSURAQ> I'm not sure, but checking on Heroku the `app` folder does indeed contain my application and there is no `migrations` folder in it even though the log up there says otherwise.
-So if I run the Python scripts while inside bash on the server it works perfectly...weird
-I suppose this is one of the reasons why I'd avoid managed PAAS if possible
-DO/AWS over Heroku
-<@U0LSCQQNR> Well, I'm using Heroku because with lower traffic it's cheaper, and because AWS would take longer to learn and I probably don't have enough time with this project
-true, AWS/DO require you to have a good amount of knowledge/time to learn beforehand
-and that's a selling point of heroku
-Ya, I mean, I will use AWS eventually, but when I have the time to learn its ins and outs. Actually I started with AWS but switched to Heroku once I realized the complexity, haha
-but don't forget they're built on top of AWS
-so you're actually using AWS services through Heroku
-I'm surprised they're allowed to make a product with AWS that competes with AWS, but I guess it's because anyone who pays for Heroku pays indirectly for AWS.
-correct
-and AWS really doesn't care about that
-since more customers for Heroku means more services Heroku pays them for
-and its a useful service
-I think things would be different if heroku were provider-agnostic
-eg, pick between Azure, AWS, DO, etc
-Ya, that's true
-So, after reading up I _think_ I kinda get _what_ a blueprint is now, except I don't really understand _why_ one should use blueprints. All the examples seem to show either very abstract things or super simple things that don't seem to benefit from a blueprint as far as I can understand.
-I have separate blueprints for standard view routes, for JSON APIs, and for admin and testing APIs. I can quickly turn off the whole admin and testing APIs by commenting out the single line that attaches that blueprint
-I can also mount all the routes in one blueprint with a different URL path with just one change
-yeah I actually have all of my blueprints feature toggleable by environment variables
-and essentially the benefit is modularity
-I see. Then, I suppose the difficulty I'm having is in understanding how I can use them in my own project. Hopefully it will become clearer after I learn more about them.
-_How_ to use them is very straightforward. The docs show that. _Why_ to use them is trickier, until you have done enough big projects that you start valuing modularity from the start.
-Yes, I do value modularity greatly but always felt that the package -&gt; class -&gt; property/method approach was comprehensive enough. Naturally I'm trying to think of something similar to blueprints in any other language but the examples I see for blueprints seem like things that - to me - in any other language could be done just as easily with classes.
-And since Python has classes and the like this confuses me.
-blueprints aren't a language feature, they're a Flask feature
-It's giving you a way to make a Flask app out of smaller sub-apps that you might want to mix and match, or change independently
-(assuming we're talking about Flask blueprints and not some other blueprints... just noticed we're not in <#C0LN2AD7T|flask>)
-I think an important point is that if you don't see the need, you don't need to use them.  It's worth exploring them to know they're there, but you'll know when you need them.
-Yes, I meant Flask. "Sub-apps"? So would you perhaps say that this is a way of building an app, but having different parts of the app actually be different apps, where each one is coded like an individual Flask app, and then everything is "plugged in" to each other?
-If everything is working fine without them for you, there's no need to over-engineer your project.
-they're not entirely 'sub-apps' but they are modular parts of a larger app, yes.
-<@U47HK8BS8> If I don't implement them now though, and my Flask API grows in complexity over time, will it be a major headache when the time comes to use blueprints though?
-I don't think so.  I refactored some things into blueprints on a previous app and it really wasn't that bad.
-To the extent it will be a pain it will likely be untangling some of the things that have grown to annoying for you
-But with a good test suite refactoring isn't so bad.  So write good tests.  :slightly_smiling_face:
-<@U47HK8BS8> Ah ok. Thanks. :slightly_smiling_face: Then, would you perhaps be able to give me an example of where blueprints would be very useful? All the examples I see are abstract or purely for example and wouldn't be very helpful in a real-world scenario.
-So one example is that as <@U5LNXQHN3> and I said, it's quite easy to “turn on” and “turn off” a blueprint - I literally do it based on the presence of environment variables.
-so for example when I launched a product we had an Invite system
-which was a blueprint, and we were able to turn on and off the need for invites via a simple environment variable change, no need to rebuild and redeploy.
-that's perhaps a pretty niche example of a concrete use though - I really think the modularity is the real benefit.
-Things just are cleaner and easier to work with, reason about, etc. when working with them, in my opinion.   But that's a bit more subjective
-Would that be very different from a simple `if os.environ['INVITE_PAGE'] == 1:` in the code for the endpoint where the page would be though?
-you'd have to add that for every single endpoint
-Oh, good point! (pun intended :wink: )
-Right, as well as any other associated stuff you've done.
-I'm using Flask-Restful which means that the various methods for endpoints (POST, GET, PATCH, etc.) are grouped into classes. However it does feel a bit messy since that means `/users/`, `/users/&lt;user_id&gt;/`, `/users/auth/`, `/users/&lt;user_id&gt;/friends/`, `/users/&lt;user_id&gt;/friends/requests/` and others all have their own classes (some with similar names...I mean how am I supposed to meaningfully differentiate the first two by name?). I'm wondering if this setup could benefit from blueprints in some way.
-Maybe.  I only briefly messed with Flask Restful so I'm not too familiar with it.
-I'm wondering if anyone even uses Flask-Restful for complex APIs, or if it's generally only used for simple ones.
-Gonna use this <https://pythonhosted.org/Flask-Testing/> and wondering if it's ok to put my testing code within my app's main script, or if it should be in its own script
-testing code should be outside the app
-So, in its own module then?
-i use flask-restplus and from what i understand it is inspired from flask-restful.
-I believe using a `class` and inheriting from Resource is a the same pattern.
-I usually have my tests in a separate directory alongside the package for the main app. But I don't use Flask-Testing or any other extension so I don't know what that recommends.
-`print(__name__)` would print the name of the current...method?...module?
-It should be the module. <https://docs.python.org/3/library/__main__.html>
-So if my primary application script is `app.py` and I have `app = Flask(__name__)` I suppose I'm setting it to `app` then? I'd test but my code is in the middle of a major change so I can't run it.
-Yes, unless you're running the app.py file directly
-It's best to explicitly replace `__name__` with a string in the Flask initializer
-Hi guys! I have launced an aws instance with SES(full access) role, Now how can i send an email to AmazonSES without smtp {username/password} credentials on server. An example in python or any relevant link would be great. Basically i dont want the creds to be on server.
-So this should not be in the production code, otherwise it'll run the Flask dev server, right?
-No that is fine, that only runs if you directly call `python file.py`
-But if you use gunicorn, `gunicorn file:app` it would not run the devserver
-Ah, ok. gunicorn runs a specific function unlike Python which runs the entire script...I should've noticed that. Thanks!
-<@U1BP42MRS> In <https://github.com/pyslackers/website-old/blob/master/pyslackers/> you have `pyslackers.__main__:app` in `Dockerfile` but in `__main__.py` there is no `app` function. Instead `app` is a variable as in `app = create_app(resolve_config(os.getenv('PY_ENV', 'dev')))`. How does that work?
-Gunicorn uses that as the WSGI gateway, it's the "callable" for the spec
-So `app` is a `Flask` instance, and that is a callable (per how wsgi works)
-Oh, wow. @.@ Every time I think I'm understanding everything there's something new to learn. I'll add WSGI to my list of things to learn more about.
-you don't have to worry too much about it fortunately - just enough
-Oh, really? Good to know. Thanks!
-Wow. Ya, I expected it to be quite a bit more complicated. Makes sense!
-By the way, you have `from pyslackers import create_app, models` in __main__.py but there is no `pyslackers` module...?
-`pyslackers` is the package the whole app is in
-`create_app` is from `pyslackers.__init__`
-models is another module
-<@U1BP42MRS> Oh ok, that's what I thought but for some reason when I run my app - Broadway - locally with Python I get "No module named broadway" from the line `from broadway import create_app`
-I'm thinking maybe this is from running __main__.py directly, and perhaps I need a script to run from the parent folder that acts as the true primary script, but I'm not sure
-yeah, you want `python -m broadway`
-the `-m` runs it as a module, executing `__main__.py`
-but it sets the PYTHONPATH to be the CWD
-Ah, ok! That worked though. Even though I didn't know better I did think that running `__init__.py` or `__main__.py` directly seemed a bit...off. Haha I'm so thankful for your help and this whole Slack. :slightly_smiling_face:
-Are Python devs just more helpful people? Seems like it.
-We're more efficient than other developers, so we have time to be helpful.  :stuck_out_tongue:
-I am at a ruby job and avoid it a lot
-Haha, while initially I wasn't crazy about Python, the more I learn about it the more I like it, and one of those reasons is that I feel it can be very efficient, to create all kinds of things rather quickly
-I use the `__main__` trick to get around some annoyances with importing, python pathing, etc. Because with that way, gunicorn can pick it up and I keep the top level directory clean
-I hate how the top level directory can get so cluttered :smile:
-Ya, the cluttered top level was something that I disliked. Before this I was making apps with Adobe Air and most of the time I'd have a single script in my top level and then have everything else in sub directories which felt really organized. Glad to know how to do this in Python.
-I think I may be slightly non-standard in that regard. But since `flask` introduced the CLI, I have been liking this approach.
-For aiohttp apps, it made it so I could just have an optional CLI to run the application
-flask introduced a CLI?  heh.  here I've been making a manage.py entry point for all these years.
-yea it uses click now.
-I suppose that makes sense.
-Oh wait...do I not need `manage.py` for my DB deployment then?
-you can still have a manage.py.
-the click cli in flask supports it.
-<http://flask.pocoo.org/docs/0.12/cli/#custom-scripts>
-it's funny because I've been meaning to go through the Flask docs again because I knew there were probably a ton of things like that which have changed over the years.
+U3R7CKQRX : Then I guess this a problem that everybody is facing right? Elm or not.
+U0CLDU8UB : That's right. I suppose googling for stackoverflow answers for workarounds might yield something.
+U2W22AHNU : <@U3R7CKQRX> not sure about your usecase of course but CSS might be able to help you positioning stuff in the right place while scrolling.
+U0CLDU8UB : Yeah, `position: sticky` also exists, even though its browser support is not that great.
+U3R7CKQRX : <@U2W22AHNU> I don't really need to position things rather update some content as you scroll.
+U3R7CKQRX : Anyway thank you for the help everyone.
+U3R7CKQRX : I am just happy this isn't caused by Elm :smile:
+U2W22AHNU : <@U3R7CKQRX> Just thought of something, what I do in an other case is to have a loop and requestAnimationFrame```
+function loop() {
+    _scrollOffset = window.pageYOffset || window.scrollTop;
+
+
+    requestAnimationFrame(loop);
+}
+loop();
+```
+
+U2W22AHNU : This works well for me in showing and hiding elements based on scroll position.
+U2W22AHNU : I develop on a Mac and I can't remember seeing the issue you mentioned
+U2W22AHNU : <@U3R7CKQRX> run this: ```var loop = function() {var s = window.pageYOffset || window.scrollTop; console.log(s); requestAnimationFrame(loop);} ``` and then call ```loop();``` in your console and start scrolling
+U1P6FFJ64 : <@U17R26VR8> what do you think we have bigger problems?
+U0FP80EKB : <@U1P6FFJ64> I’m not mordraw, but I would ask about the term “enforce” which feels like there might be communication issues amongst the 3 people. Do you mean “force” or just “check” ? On my team (also 3), when we upgrade like that, we’ll all chat and do it together.
+U0FP80EKB : Especially the first time we notice that in a PR. We’ll say “hey, did someone upgrade their elm-format” and then we’ll all do it.
+U1P6FFJ64 : Oh, sorry if that's the case. English is not my native language.
+U0FP80EKB : No worries. “enforce” can mean a lot of different things.
+U0FP80EKB : It isn’t the wrong word, but can be misunderstood. :slightly_smiling_face:
+U0FP80EKB : Is the question just how to make sure everyone is on the same version?
+U3SJEDR96 : Mafia "enforcers" come to mind :smile:
+U1P6FFJ64 : This is an issue that has happen maybe twice in all the time we have being developing. Is not a big problem, just something that I think it could be automated.
+U0FP80EKB : Perhaps a check in a git hook?
+U0FP80EKB : some custom script that validates the elm-format version?
+U1P6FFJ64 : That's what we will do, add a elm format check on the CI to block PRs that are not using the last elm-format
+U0FP80EKB : I don’t know much about the npm stuff, though, so I’m probably not the best to answer it. I don’t think there is anything about the general environment contained in the project-specific files.
+U0FP80EKB : I’d ask back whether this is worth the time to do the check and block, as opposed to just communication on the team saying “hey, I upgraded to the latest elm-format, everyone else should”
+U0FP80EKB : But, depends on how cumbersome putting the CI check in there is.
+U3U2EA14G : Hi all, anyone can help me with this bug ?```
+Uncaught TypeError: Cannot read property 'elm_handlers' of undefined
+    at applyEvents (app.js:16186)
+    at applyFacts (app.js:16149)
+    at applyPatch (app.js:17021)
+    at applyPatchesHelp (app.js:17004)
+    at applyPatches (app.js:16995)
+    at updateIfNeeded (app.js:17334)
+```
+
+U17R26VR8 : I wouldn’t bother with a check, just when you make your PR, looking at the diffs, it’ll be obvious if elm-format’s different. So the person doing the PR can ask the other two, hey, what version of elm-format should we be on.Problem solved.
+
+U1P6FFJ64 : Well, the CI check will fix this issue in my project but also in the rest of the projects of the company
+U1P6FFJ64 : <@U17R26VR8> that's what we currently do. My question was: is there a better way to do it?
+U0FP80EKB : If there is cross-team thing, then communication can definitely falter a bit due to siloing. Having a check in that case to have a company-wide standard isn’t too bad.
+U1P6FFJ64 : no, there is no cross-team. Just different teams doing entirely different projects.
+U0FP80EKB : yeah, that can cause a hangup :slightly_smiling_face:
+U17R26VR8 : <@U3U2EA14G> where are you seeing this error? i haven’t seen anything like that before… looks like you are getting a runtime issue?
+U0FP80EKB : One thing you could do is actually run the latest elm-format on your CI as part of the build step on a branch.
+U0FP80EKB : Or part of the merge task
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

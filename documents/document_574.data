@@ -1,65 +1,73 @@
+U6FFD2QG0 : yeah, basically
+U3SJEDR96 : I would suggest taking the contents of your `TimeDone` branch, putting it into a separate function, and replace that with```
+TimerDone -&gt;
+    timerDone model
+Tick newTime -&gt;
+    if .activeTime (decTimer model) &gt; 0 then (newTime, Cmd.none) else timerDone model
+````
+
+U0LPMPL2U : I'd suggest extracting the common logic to a helper function and calling that from both branches instead of trying to send a `Msg`
+U6FFD2QG0 : fair enough. Is this just not a typical way that a Cmd would be used?
+U0LPMPL2U : You almost never want to just send Msg to yourself
+U0LPMPL2U : Msg is meant to represent events from the outside world
+U3SJEDR96 : No, a `Cmd msg` represents something for the runtime to execute asynchronously, after which it can call your `update` with the resulting `Msg`
+U6FFD2QG0 : ok, that's good to know
+U6FFD2QG0 : thanks!
+U3SJEDR96 : you don't really need the runtime in order to call a function, though, so using a function to abstract the behaviour of "what should happen when your timer is done" is definitely the recommended approach
+U37HUSJ4R : If I wanted to make this more generic:```
+updatePaused : Bool -&gt; Call -&gt; Call
+updatePaused newValue ({ controls } as call) =
+    { call
+        | controls =
+            Maybe.map
+                (\controls -&gt; { controls | paused = newValue })
+                call.controls
+    }
 ```
-But you're suggesting adding a separate msg for each URL?
-Yes. Or one common msg with the url as parameter
-so then... my `changeLocation` function would presumable use case statements to construct it's own urls, and pass those the `Navigation.newUrl` command...
-I'll try some of your suggestions. I need to re-read that medium article, and look into just what url is returned when the page first loads.
-Hello everyone, I just started learning Elm, and I have been looking at parent child communication
-this is kinda troubling
-What I find is not appealing
-I have looked at <https://medium.com/@alex.lew/the-translator-pattern-a-model-for-child-to-parent-communication-in-elm-f4bfaa1d3f98> and <https://github.com/evancz/elm-sortable-table> for inspiration and I still think there's a gap
-From what I saw, I came up with this <https://gist.github.com/thedumbtechguy/b930cfe1f066e24bc266d6b9d1eac059>
-It's nested TEA but with the boilerplate reduced as much as possible
-now my question is this, is there any reason why this pattern might be bad?
-are there any caveats I don't see?
-I'd really appreciate the help of more experienced members looking at the Gist and giving me some feedback
-Nope, it's a great pattern, even. Once you feel like you're passing in too many messages, you may consider passing in a `Config msg` record that has the correct functions for mapping things, in a named record
-The "translator" pattern doesn't appeal much to me, either. I think it's very heavy-handed and I don't really buy the "one size fits all" type solutions anyway. elm-sortable-table is neat, but works mostly because it has very little internal state, and isn't applicable to quite a few situations
-<@U3SJEDR96> I saw that done in Sortable Table, but for many components, I believe it might be too much bootstrap code for little gain
-I do agree once it starts growing, to use a record as that would make it much more concise
-appreciate the input
-Yeah, that's what I mean. Depends on the number, but even if it's just 2 or 3 functions, having names for them is easy, and defining a quick `{ something : a -&gt; Msg }` is easy enough :slightly_smiling_face:
-I think I'd go with the record, if for nothing but consistency
-I can also see the self documenting benefits
-Do be careful of abstracting too early, tho. On a page-level, doing nested tea makes sense. Within pages, it quickly becomes too much encapsulation for little gain. I would recommend checking out the talks by Evan and Richard from elm-europe, they both talk about these topics
-I definitely plan to abstract only on page level for now and really big reusable commponents
-And I only have one large component that I need to currently reuse and guess what, it is a table :smile:
-Great!
-I don't see much wrong with it as it is in the single source of truth.
-In my example, `username` and `password` are used by the app, but I can easily think of situations where the component would need some encapsulated state.
-I think Sortable Table advocates using helper functions to retrieve data
-Is there any benefit to this indirection?
-It's just encapsulation. Allows you to change the internal without affecting other modules, even though the compiler generally has your back when you do that anyway
-Does this mean the json file is bad? Error: BadPayload "Given an invalid JSON: Unexpected token &lt; in JSON at position 16" { status = { code = 200, message = "" }, headers = Dict.fromList
-<https://jsonblob.com/6ecd993e-6290-11e7-ae4c-e793fe90c432>
-<@U6531GSTW> rather your json decoder failed, which might be an error in either the decoder or the json
-That's a json.parse error, so looks like it's not returning a proper Json indeed?
-`code`
-you seem to want an if statement there instead of a case
-and yes, all expressions must return a result
-Could you give an example - I thought types could only be matched using a case?
-you aren't matching types here though?
-you are testing equality
-I could replace "message -&gt;" with "Good -&gt;", which makes me think of it as a type
-umm, message is a value containing something of type Message
-what is this code attempting to do?
-ok. the code is a minimised example of the error - it should return a list if the passed node.message matches the passed message parameter
-can that example be transformed using an if?
-aah yeah
-<https://ellie-app.com/3HHVxxCW2x5a1/0>
-It would seem to be a mistake, since clearly node.message and message can be different (therefore _ -&gt; is *not* redundant)
-well the case was trying to do a type match not a value match and there was no type constraint so it always matched that case
-I believe anyway
-ok - thanks for you help. I might raise that question again in the group.
-I'm thinking of starting an Elm user group or meetup or something when I return to Columbus, Ohio in the Fall.  Any advice on this?
-<@U3LUC6SNS> I'd recommend <http://tech.noredink.com/post/142283641812/designing-meetups-to-build-better-communities>
-We do coding nights in Chicago, and it is awesome. In fact, we have one tomorrow night.
-We call them coding nights, since “hack night” is a bit annoying of a term. :slightly_smiling_face:
-<@U0FP80EKB>, nice, I agree!
-<@U13H7FNDQ> <@U0FP80EKB> there was a specific reason for this that i saw in a tweet once i'll see if i can find it
-found it: <https://twitter.com/erinrwhite/status/707956467224190976>
-Hello, I am using json over websocket and it works fine as long as packet is below around 4500 bytes. Then it gets broken into two fragments. Is it expected?
-Should I implement logic of de-fragmentation?
-Yes, I added logging:
-		});
-and see that message is fragmented on low layer
-Thanks for sharing! In the process of swapping the SF user group to <@U0FP80EKB>'s suggestion
+
+U37HUSJ4R : so for example `paused` could be any field
+U3SJEDR96 : There is no generic record-updater syntax; sadly
+U37HUSJ4R : :cry:
+U37HUSJ4R : So if I have `hold`, `pause`, `hangup` for example I need 3 functions and 24 lines of code :disappointed:
+U3SJEDR96 : Not entirely true; but there's another thing... Can a call be simultaneously on hold, paused and hung up?
+U37HUSJ4R : this is more state of the buttons
+U37HUSJ4R : so if I call is on hold then the state is
+U37HUSJ4R : ```paused : True,
+hangup : True,
+paused : False
+```
+
+U37HUSJ4R : but yes it could be all three
+U37HUSJ4R : multiple different valid states here
+U3SJEDR96 : I'd try to think of a better way to model those, though. In the meantime, you can use something like ```
+updateControls : (Controls -&gt; Controls) -&gt; Call -&gt; Call
+updateControls op call =
+    { call | controls = Maybe.map op call.controls }
+```
+
+U37HUSJ4R : I'd LOVE a better way to model these
+U37HUSJ4R : but really can't think of one :disappointed:
+U3SJEDR96 : ```updatePaused  : Bool -&gt; Call -&gt; Call
+updatePaused newValue call =
+    updateControls (\controls -&gt; { controls | paused = newValue }) call
+```
+
+U3SJEDR96 : you'd still end up with 15 lines of code, including annotations, but it would be pretty clear what they all did. And if you decided that `call.controls` should be a `Result` rather than a `Maybe`, that's only a single line to change
+U3SJEDR96 : as for your control-states.. I think having a `Status = Ongoing | Paused | OnHold | Hangup` (or something similar, depending on requirements) would make sense, with functions `canPause : Status -&gt; Bool` etc
+U3SJEDR96 : Though it might make sense for a call to be both onhold and paused, in which case that would be a fifth case
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

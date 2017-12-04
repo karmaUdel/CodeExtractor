@@ -1,0 +1,86 @@
+U07SCV14J : <@U3ZACTKTP>: <http://planet.racket-lang.org/display.ss?package=loop.plt&amp;owner=jphelps>
+U3ZACTKTP : <@U07SCV14J> Sweet, thanks a lot!
+U462H29AR : Has anyone used, from `scribble/srcdoc`, any of `parameter-doc`, `thing-doc`, or `struct-doc`? All give me `"illegal use of syntax"` errors.  Whereas `proc-doc` works great.
+U462H29AR : For instance```
+#lang at-exp racket/base
+
+(require scribble/srcdoc
+         (for-doc racket/base
+                  scribble/manual))
+
+(define current-foo (make-parameter "bar"))
+
+(parameter-doc current-foo
+               (parameter/c string?)
+               v
+               @{Hi})
+```
+
+U3NJS8H7C : <@U462H29AR> A better error message would have been "must be used within a `provide` form" (and I'm guessing that you've used `proc-doc` successfully within `provide`)
+U462H29AR : <@U3NJS8H7C> Thanks! I'd wrapped `proc-doc` in a `define/doc` macro, long enough ago, that I forgot it was nested in a `provide`. Dang.
+U462H29AR : It would be neat if <http://pkgs.racket-lang.org|pkgs.racket-lang.org> showed, in addition to direct dependencies, direct dependents ("needed by") as for example <https://melpa.org/#/helm>
+U462H29AR : Meanwhile: <https://gist.github.com/greghendershott/b20effb9d9c48211e1c11d9486257918> ¯\_(?)_/¯
+U3ZACTKTP : <@U3PUZ2Z5K> Thanks for the tip about using `Regexp` instead of `-Regexp`!I'm checking that everything runs fine now, but I have issues with `tc-err`.
+The test `[tc-err (ann (ann #px#"abc" Byte-PRegexp) PRegexp)]` fails:
+```
+actual:     (tc-results (list (tc-result PRegexp (Top | Bot) -)) #f)
+expected:   (tc-results (list (tc-result Nothing (Bot | Bot) -)) #f)
+```
+I feel like I should supply one of the `ret:err-return` or `ex:expected` arguments to `tc-err`, but their exact meaning is not documented. Any hint?
+
+U3PUZ2Z5K : I don't know there exact meaning either and wish it was documented =( that code is really clever/cute and I always struggle re-parsing what exactly it does
+U3ZACTKTP : <@U3PUZ2Z5K> Seems like this does the trick (as I understand it, `tc-err` checks that the return type is correct, even if an error is there, and `ann` is clever enough to indicate its return type, even when it fails)```
+[tc-err (ann (ann #px#"abc" Byte-PRegexp) PRegexp) #:ret (tc-ret -PRegexp)]
+```
+
+U3ZACTKTP : <@U3PUZ2Z5K> Sorry for bothering you once more: in generalize.rkt, should I do `[(? (lambda (t) (subtype t -Base-Regexp))) -Base-Regexp]` (to generalize literals which are `regexp?` to `-BaseRegexp`), or should I generalize to `-Regexp`, i.e. `[(? (lambda (t) (subtype t -Base-Regexp))) -Regexp]` ?I tried to see if it made any difference in the way the type is printed when entering a literal `#rx"abc"` at the REPL, but it makes no difference.
+I also expected `(let ([x #rx"foo"]) (set! x #px"foo"))` to fail in the second case (generalizing to `-Base-Regexp`), but it still works (so it seems something else is further generalizing `-Base-Regexp` to `-Regexp`).
+Any preference? I feel this will matter only if/when we decide to make the `Base-Regexp` type "public" (for now it seems to be used internally only).
+
+U3PUZ2Z5K : <@U3ZACTKTP> sorry for the delay -- I'm not super familiar with typing regexps... my gut is to favor the more general Regexp, but like I said I don't have much experience working with those in practice
+U3ZACTKTP : <@U3PUZ2Z5K> Okay, thanks! I'll put Regexp then (I think if we expose Basic-Regexp at some point, the user could always force it with (ann #rx"abc" Basic-Regexp).
+U3ZACTKTP : I and others expressed concern in the past about Slack's logs, which are limited to 10K messages.Seems like we could do something about it: <https://github.com/mlegy/Slack-logger-bot>
+I don't have time to look into this right now, but it could be at some point a compromise between setting up a full-blown chat server (which some of the regulars rightfully expressed concerns about, since it increases the maintenance burden for the Racket team), and having a free-to-use-but-without-logs service like Slack.
+
+U4L6H669J : isn't this slack archived in that one public logging service for slack (forget the name)?
+U4L6H669J : <https://racket.slackarchive.io/>
+U4L6H669J : I don't know if the logs are exportable
+U3ZACTKTP : <@U4L6H669J> Hm. I thought the slackarchive log was also limited, but it seems it goes back further in time (the earliest message I can get in <#C06V96CKX|general> is from march 14th, but slackarchive goes back to November 15th). That's cool :slightly_smiling_face:
+U3QF0EM0E : anyone know how to center a `tabular` in a pdf?
+U3QF0EM0E : (well, renewing the `bigtabular` environment to `tabular` for the main document --- then back to `pltstabular` for the bibliography --- works as a LaTeX-level fix)
+U3QF0EM0E : <@U0A96R8F2> <@U0G0JDQGZ>  I just tried to make a new package and am getting "Save failed."
+U3ZACTKTP : <@U3QF0EM0E> Have a look at `tex-addition`. You can use that to inject LaTeX code and renew the environment "by hand", I suppose.
+U3NJS8H7C : <@U3QF0EM0E> If I remember correctly, using `@tabular[#:style 'block]` has the same effect as switching to `tabular` at the Latex level, so `@centered` plus `@tabular[#:style 'block]` should work
+U3QF0EM0E : I think the problem was my tag `syntax/parse`
+U07SCV14J : I've somehow managed to break my DrRacket installation in a confusing way. When I start it up, or when I run any module, the following error message is produced in the interactions window:```
+racket/collects/racket/compiled/errortrace/runtime-config_rkt.zo::1: read (compiled): wrong version for compiled code
+  compiled version: 6.8.0.2
+  expected version: 6.9.0.4
+```
+I've tried removing `racket/build/` and `racket/racket/src/build/` and re-running `make base`, and I've tried running `raco setup --clean` and rebuilding everything with `raco setup`, but the problem is still there, and I'm not sure what's causing it or how to fix it.
+
+U07SCV14J : I can't seem to trigger the error at all in the REPL. Switching off debugging in the DrRacket Language menu also makes the issue go away, so it has _something_ to do with errortrace, but I don't know what.
+U07SCV14J : Maybe DrRacket's .zos don't get cleaned out by `raco setup --clean`?
+U07SCV14J : Yeah, it seems like that may have been the problem. I ran `find racket/collects -type d -name errortrace -exec rm -rf {} \;` and that seemed to fix the issue. I still wonder what caused it, though…
+U58GZUP5J : Hey folks! Our startup <http://Standuply.com|Standuply.com> has partnered with two awesome events for AI, ML and chatbot enthusiasts. One is called Chatbot Summit and will be held in BERLIN on 26th of June. Now can offer you 30% discount. Visit their website at <http://bit.ly/chatbotsummit|bit.ly/chatbotsummit> and use the promo code STANDUPLYBOTS in order to get it.
+U58GZUP5J : The other one is AL ML World 2017 - in LONDON on 13-15 of June, we offer you 20% discount. Same thing - visit their vebsite at <http://bit.ly/aimlworld2017|bit.ly/aimlworld2017> and use promocode STANDUPLY
+U58GZUP5J : Hope this information will be helpful for those who might need it :wink:
+U08JL5H89 : <@U3NJS8H7C> <@U0702F2CE> <@U3NP867S6> <@U3NGSC6AF> or someone else with admin privileges, gleb seems like a spam bot.  (If you are a real person I apologize.)
+U0702F2CE : <@U08JL5H89> I don't think we need to do anything unless someone spams multiple times
+U08JL5H89 : <@U0702F2CE> okay
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

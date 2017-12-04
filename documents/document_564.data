@@ -1,10 +1,90 @@
+U24HQ3RJ7 : <@U3SJEDR96> is that comment for me. ?no, i am not using Css.compile..
+please see <https://github.com/ashishnegi/be_autonomous/blob/master/Quadrant/View.elm>
+and <https://github.com/ashishnegi/be_autonomous/blob/master/MyCss.elm>
+
+U24HQ3RJ7 : if i use it inline.. do i need to call Css.compile ?
+U3SJEDR96 : That was indeed a comment to you :slightly_smiling_face: So you need to compile the styles in `MyCss.elm` to a stylesheet,  have a read through this part of the readme: <https://github.com/rtfeldman/elm-css/tree/9.1.0#approach-2-generating-css-files>
+U24HQ3RJ7 : but i thought inline css.. does not require generating css explicitly..Are not Approach 1 and Approach 2 in the guide different appraoches ?
+
+U24HQ3RJ7 : ok.. so creating MyCss.elm is `not` in lining ?
+U24HQ3RJ7 : <@U3SJEDR96> ^^ please see above.
+U3SJEDR96 : Yeah, though approach 1 uses `style` and `asPairs`, whereas you are setting generated classnames and id's on your DOM elements. Associating those classnames and id's is half-way there, now you just need the generated CSS to match it :wink:
+U3SJEDR96 : You _might_ be able to use approach 1, by actually doing things inline, but for example your styling of `body` won't work since that's not part of the rendered view
+U3SJEDR96 : Using `elm-css` to compile your properly-typed CSS into a file might end up being a lot easier :slightly_smiling_face:
+U24HQ3RJ7 : thanks <@U3SJEDR96> very helpful.
+U5P4FLYLE : Hi. In a package X I have (and assume cannot change it)```module X exposing (Msg(..))
+type Msg id =
+...
+| SelectItem id
 ```
-Is this something I should publish as a package?
-<@U5FU80S06> <http://package.elm-lang.org/packages/justgage/tachyons-elm/1.0.0/Tachyons#classes>
-I suppose <@U0H8PND27> may decide to pull that one function up into a separate heading :slightly_smiling_face:
-<@U0NGNUH4J>: you could, though this type of thing tends to be very nice for very specific use-cases. `NonEmpty` isn't used a lot, so I imagine `Compound` would be used even less. Nevertheless, implementing some more "basic" features on it (like `fromList : List a -&gt; Maybe (Compound a)`, `.map`, ..) would certainly be interesting!
-ok! I’ll give it a go and see where I end up :slightly_smiling_face:
-Hi :slightly_smiling_face: I've trouble searching for syntactic sugar. Hope you can healp me out.
-So I have a function with 2 arguments calling another function with the same arguments and using the result. I would like to compose `funInternal` with `(++) pre`
-yeah, there's no operator for that. You can get rid of `b`, but not both. You _could_ hack around it and do `fun = curry &gt;&gt; (uncurry funInternal) &gt;&gt; (++) "pre"` I think
-oh wait, what am I saying?
+I would like to use SelectItem in my module where I import package X via:
+```
+import X exposing (Msg(..))
+
+case msg of 
+    SelectItem id -&gt; ...
+```
+I have compilation error that X does not expose SelectItem. What am I missing?
+
+U3SJEDR96 : Are you sure it exposes `Msg(..)` and not just `Msg`?
+U5P4FLYLE : yes, X = elm-autoinput
+U3SJEDR96 : Yeah, so that exposes `Msg`, not `Msg(..)`
+U3SJEDR96 : if it shows the tags in the docs, you can use them. If shows simple `type Foo`, you cannot :slightly_smiling_face:
+U3SJEDR96 : It's an internal message type, and you're not meant to have access to it. Perhaps you can explain your use-case and someone may be able to help you out? (ping <@U0JFGGZS6>)
+U5P4FLYLE : I would like to take ID or corresponding value upon selection. In essence, SelectedItem of Msg in <https://github.com/ericgj/elm-autoinput/blob/2.0.0/src/Menu.elm>
+So when this event is generated I want to send it to another event handler and use it
+I bet I do not have event access to Menu from Autoinput....
+
+U3SJEDR96 : Correct :slightly_smiling_face: I believe you'd use the `state` function on your model after running the supplied `update` function, and pattern-matching on the resulting `State id`- <http://package.elm-lang.org/packages/ericgj/elm-autoinput/latest/Autoinput#state>
+U5P4FLYLE : right, probably this is the way, thanks <@U3SJEDR96>
+U6F0GT2MB : trying to setup elm-format on atom editor, but get the message: "Can't find elm-format binary, check your settings".  Anyone else run into this, or how to solve it?
+U2PTZFKFX : ah ok, I get it
+U6734UL1Z : did you npm install it?  i don't think it's bundled with elm
+U6734UL1Z : try running elm-format at a prompt and see if it also gives a similar message
+U24HQ3RJ7 : `npm install -g elm-format`
+U49HHJE86 : Hi guys :grinning: just another noob question here :sweat_smile: Is that true that you can access to `Record`'s value only with `.key` function? And if so, how can I retrieve all `Record`'s values, for example, into a `List`?:thinking_face:
+U0JFXEUCT : hello!  yes, every field has a corresponding `.field` function which will retrieve that value for you, but if you're looking to grab all values from every field in a record and put them into a lit, you actually probably want a `Dict` instead of a record
+U49HHJE86 : Thanks <@U0JFXEUCT> . I thought that way too :grinning:
+U6F0GT2MB : thanks ill give it a try
+U3LUC6SNS : <@U3SJEDR96>, yes, that sounds right (re bad JS interaction).  This is probably going to be hard to find and correct .. alas, it is critical part of the app.  I will keep investigating,  I do know a precise set of circumstances that produces the error, but I haven't found a way to use that info.  Briefly, I when I change from the Editor page to the Reader page and redisplay the table of contents (a list of documents), all hell breaks lose.  There is no reason for the document list to have changed, and indeed the debugger confirms this …
+U3LUC6SNS : @llias, one odd feature of this bug is that the offending code - a view function - is called twice - once by the Editor page, then by the Reader page.  This is inefficient and bad design, but that is the way it is atm.
+U3LUC6SNS : Does this info provide any clues?
+U3LUC6SNS : Yay, I created a runtime error. But of course I am using ports.
+U153UK3FA : <@U3LUC6SNS> is the error you're getting related to a missing DOM node?
+U153UK3FA : the re-render could be removing a DOM node you've already got a reference to in your JS
+U3LUC6SNS : <@U153UK3FA>, that is quite possible. The error is ```
+app.js:15249 Uncaught TypeError: Cannot read property 'childNodes' of undefined
+    at addDomNodesHelp (app.js:15249)
+    at addDomNodesHelp (app.js:15257)
+ ... same error many more times ...
+    at addDomNodesHelp (app.js:15257)
+    at addDomNodesHelp (app.js:15245)
+    at addDomNodes (app.js:15176)
+```
+Love that `undefined`!
+
+U3LUC6SNS : What is weird is that my JS has to do with rendering the content of documents, not lists of documents.
+U153UK3FA : yep, that looks like it
+U153UK3FA : You might want to use <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html-Keyed>
+U153UK3FA : Adding keys to DOM nodes allows Elm to easily match a DOM node with a virtualDOM node after a render. If Elm can match a DOM node then it will update that node instead of possibly removing it and recreating it
+U217RLH7G : hi, I have some dependency issues. Does elm not look for deps in subdirectories? It seems to work on windows but not on my archlinux
+U3SJEDR96 : You may want to verify that the casing of your module-names matches the casing of your folders. I.e. `module Foo.Bar` should live in `Foo/Bar.elm`, not `foo/bar.elm` or any variation thereof
+U217RLH7G : <@U3SJEDR96> genius, that was it
+U217RLH7G : omg thanks this was a real headscratcher for me
+U5E3DU81K : Good moaning ladies and gentlemen. Would it be a fair assumption that the majority of questions here in 'beginners' stem from people following the <https://www.elm-tutorial.org/> ?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

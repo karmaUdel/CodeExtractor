@@ -1,29 +1,174 @@
-set23 = [(102, 194, 165), (252, 141, 98), (141, 160, 203)]``` now
-<@U67HJ10TX> `if then else` or `case` are both fine here.
-oh i missed that part, how about just `case` matching on the actual `Party` type?
-that's the idiomatic Elm in this case, for sure
-Is there a way to make elm-format not ruining my comments? It treats every comment as standard ones from the elm architecture. I want my comments to sit on top of the functions I write, not with two new lines in between them.
-<@U663M2MB7> the philosophy to elm-format is that elm-format formats your code how it wants and you get used to reading code formatted as elm-format formats it.
-I get that, but having comments three lines above the actual function? Surely I cannot be the only one who feels that is pretty awkward?
-ah, that doesn't sound right.
-can you give an example of the code?
-Well, it does it pretty much when ever I put in a comment, but sure
-try using `{-` and `-}` to delimit your comments for functions
-or `{-|` and `-}` to create doc-comments
-`-- foo` at the top-level is interpreted as a "section" delimiter, or that's how I think of it anyway
-<https://github.com/avh4/elm-format/blob/master/Style%20Guide/Sections.md>
-<https://github.com/avh4/elm-format/blob/master/Style%20Guide/Declarations.md>
-<@U3SJEDR96> that has the same result though
-ah, indeed, it needs to be a doc-comment
-<@U153UK3FA> guess you don't need that code example after all
-But okay, so `--` is strictly for sections then.
-Opening a comment with `{-|` is good :slightly_smiling_face:
-note, also, that those comments are also used to generate documentation for packages
-I see. It stills feel kinda awkward though,  having two new lines inserted when ever you do simple `--` on a comment though. I guess I will just get used to it.
-Just use the doc-comments, i suppose you are documenting your functions, right?
-I need to use csv data.  I see elm-csv for parsing, but can someone point me to an example of getting the data from a server?
-<@U2D07QZN3> is it the basics of getting data from a server you're after, or specifically how to treat it as CSV?
-the parser expects a `String`, so `Http.getString` should do the job
-<http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#send>
-Thanks, that should to it (I'm very new at this_)
-hey, I'm trying to encode a Maybe Int to send to the back end. It's easy to decode a field that may be nullable, using something like Json.Decode.nullable or Json.Decode.oneOf, but I don't see any similar function on the encoding side. What's the best practice way of doing this?
+U64D26Q95 : ilias: Thank you very much for that!
+U641LDZFU : Hey, I have scanned the FAQ, but couldn't find an answer, could anyone help me with a wee problem?
+U604S603Y : woah, `case Debug.log "msg" msg of` is great!
+U41NK9BM4 : Tell us, Allan
+U641LDZFU : I want to specify that the return type of a function could be one of a few things, is it possible? i.e. functio : Alias1 -&gt; model -&gt; Maybe OneOfAFewThings
+U3SJEDR96 : you could do that by making `OneOfAFewThings` a type: `type OneOfAFewThings = AString String | OrMaybeAnInt Int | SomethingElseEntirely FooBar`
+U641LDZFU : Awesome, thanks, will give that a whirl
+U3SJEDR96 : You have to be explicit about the types, wrap them with a "tagger" and unwrap them where you use them, though
+U641LDZFU : There are some good search terms for me :smile:
+U3SJEDR96 : <https://guide.elm-lang.org/types/union_types.html> might help :slightly_smiling_face:
+U5H8JJP24 : Hi guys, I've got following problem:
+I have a port that sends a url of a picture as a String. I want to decode this string to the type Photo (Maybe String)
+Therefore I have this photo decoder:
+```
+decoder : Decoder Photo
+decoder =
+	Decode.map Photo (Decode.nullable Decode.string)
+```
+
+I am calling it like this, but decoding always fails. I guess because decodeString needs input in JSON format. My question now is, how can I decode a simple String to a custom type?
+
+```
+Ports.elm
+port getPicture : (String -&gt; msg) -&gt; Sub msg
+
+File2.elm
+onGetPicture : Sub (Msg Result String Photo)
+onGetPicture =
+	Ports.getPicture (Decode.decodeString Photo.decoder)
+```
+
+U4872964V : <@U5H8JJP24> if it's already a string, why decode it?
+U4872964V : what do you want to do with the string?
+U5H8JJP24 : I need to transform it into my custom Type Photo
+U4872964V : ok, so what's that type?
+U5H8JJP24 : type Photo = Photo (Maybe String)
+U4872964V : so, just do `Photo (Just yourStringFromYourPort)`
+U4872964V : `getPicture (Photo &lt;&lt; Just)` for short
+U5H8JJP24 : Thx <@U4872964V> I will give it a try. I think I was overcomplicating it a little bit too much
+U4872964V : sorry wrong arrow :slightly_smiling_face:
+U0J8D9M2P : what is possible in Elm that in JS is impossible?
+U4872964V : <@U0J8D9M2P> to enjoy programming? I'm not sure I understand the question, everything that's possible in Elm can be done in JS, with more pain and headache
+U0JFXEUCT : uhh, fearless refactoring :smile:
+U0JFXEUCT : to be able to add a feature to a large codebase and have a very strong degree of confidence you didn't break anything else
+U0JFXEUCT : another one would be the enforced semantic versioning on elm packages
+U0JFXEUCT : not sure that's really possible with js
+U23SA861Y : well one thing that is possible in JS that is impossible in elm: having a runtime exception
+U0J8D9M2P : Yes, that's a good points. I've mentioned all of this already. I'm trying to deliver step by step small things to my work. So everyone can get more and more exited about it like me.
+U0JFXEUCT : I'm working on bringing elm guarantees to style as well with the `style-elements` library.
+U0JFXEUCT : (just gave a talk at elm europe about it: <https://www.youtube.com/watch?v=NYb2GDWMIm0>)
+U0JFXEUCT : I believe it would be much harder to have a similar system in JS.  Though probably not 100% impossible.
+U5XC2FJ1Y : runtime exceptions in elm are not impossible, of course, just difficult
+U0LPMPL2U : null-checking is a huge feature of Elm over JS for me
+U0LPMPL2U : instead of defaulting to "everything could be null unless you've proven otherwise", Elm says "everything is guaranteed present unless it's wrapped in Maybe"
+U4872964V : <@U0JFXEUCT> just saw that talk, impressive work
+U0JFXEUCT : thanks!
+U0JFXEUCT : as a comparison to typescript, Elm is safe by default while typescript makes you work and remain diligent for your safety
+U0JFXEUCT : basically you dont get that awesome refactoring experience
+U0JFXEUCT : unless you work real hard
+U0K92QFST : I think the answer to <@U0J8D9M2P>'s question can be summed up with the word "guarantees," specifically guarantees about the primitive data you're using and the shape of your larger data structures before runtime
+U0K92QFST : In JS, no matter what you do, you *cannot* guarantee anything
+U0K92QFST : even if you use Typescript or Flowtype
+U4872964V : another _opionated_ advantage of Elm is that Elm is opionated, i.e. there is mostly only one way to do something
+U0JFXEUCT : I like to think of elm as having a "vacation guarantee".  Meaning when it compiles, I can likely take a vacation.
+U0K92QFST : aha, that's a good way of putting it
+U0J8D9M2P : Yes the most stopping thing now is that they say it's small community and Evan is the sole decision maker for the language. And that Elm has no group, board or foundation behind it. But the thing is that we use now AngularJS which has Google behind it. And what they did is that they just "killed" AngularJS with it's next version. Even migration from 1.5 to 1.6 brings us quite much of pain so we still got those exceptions from production. Even they are not really harmful.
+U0K92QFST : <@U0J8D9M2P> would you consider Ruby and Python to be mature languages?
+U0JFXEUCT : I mean, Evan is employed to work full time on Elm
+U0JFXEUCT : through NoRedInk
+U0JFXEUCT : I would really _not_ want elm to be behind a board, actually
+U0J8D9M2P : yes
+U0K92QFST : I think Elm's patronage is very similar to that of Rails, to use a familiar example
+U4872964V : Elm certainly lacks in quantity in many respects, but you only need quality to make a great app
+U0K92QFST : Rails is propped up by Basecamp, which is a small company
+U0K92QFST : which means that Rails will always be optimized for solving the needs of a small company
+U0JFXEUCT : I guess I have much more faith in the Elm community to maintain a design focus than I do with Google
+U0J8D9M2P : I told actually that small community has it's benefits as well. It's less of the mess. You can get clear answer all the time. Everyone like a family.
+U0K92QFST : If you look at AngularJS or Go, which are propped up by Google, you see that they'll always be optimized for solving the problems of a Google-like company
+U0K92QFST : the problem with that is there's precisely one Google-like company on Earth :stuck_out_tongue:
+U0J8D9M2P : The good thing is that half of the team already loves Elm. And we gonna have competition between new technologies to choose one.
+U0K92QFST : although I agree that there will inevitably be migrations pains down the road, Elm will *always* be easier to upgrade because a lot of it can be done statically, thanks to static types!
+U0K92QFST : if your teammates are afraid of upgrades across breaking versions, you should show them some of the tools that were made to ease the transition from 0.17 to 0.18
+U0K92QFST : <https://www.npmjs.com/package/elm-upgrade>
+U0K92QFST : and if they're afraid of the Elm community being too small, I would encourage you to show them how many community members responded to your question on here :smile:
+U0J8D9M2P : Yes, that's a good one. Thanks
+U0J8D9M2P : Thank you support!
+U3SJEDR96 : Just to pump up the number: I agree with most everything said. :heart:
+U0CLDU8UB : Me too. I personally upgraded a 10kLOC Elm codebase from signals to no signals. It took time, sure, but I was never afraid I will not make it though.
+U0JFXEUCT : Something to think about for patronage:  in the past year there have been 3 elm specific conferences this year.  Sponsored by large names such as google, microsoft, firefox and ableton.  As well as numerous other sponsors
+U0JFXEUCT : as far as growth, thats 3 more elm conferences than in any previous year
+U0CLDU8UB : Infinite growth!
+U0K92QFST : Also, more companies using Elm -&gt; more diverse patronage
+U0K92QFST : our local Ruby conference last month was sponsored by 6-8 medium-sized companies. No Googles needed!
+U0J8D9M2P : &gt; Let's be mainstream!
+U3SJEDR96 : I think my single biggest qualm with Elm is this: I despise working with anything _but_ Elm now.
+U62JFJWKT : Hum, I am playing with elm, currently with a calendar, since I'm not sure to have the date at first (probably I clould order command that's not the point), I set it to Maybe in model and nothing at init. When I receive CurrentDate Message I setup my calendar
+U62JFJWKT : <https://gist.github.com/wow-sweetlie/22f14f58d4c021ed7144695de09ddba2>
+U62JFJWKT : looks like this
+U62JFJWKT : the maybe thing is irritating me
+U62JFJWKT : Looks like I do something wrong
+U62JFJWKT : any advice ?
+U1AN4JRFV : <@U62JFJWKT> reimplement your function with this signature: `setupCalendar: Date -&gt; Calendar.Model -&gt; Calendar.Model` and then use it like this `Maybe.map (setupCalendar myDate) maybeCalendar` which will return a `Maybe Calendar`. that way, your helper-function doesn't have to deal with Maybe's, only your update-function does (with the Maybe.map)
+U62JFJWKT : ok sounds good
+U0LPMPL2U : Can you avoid the Maybe altogether by passing in a date as a flag when initializing the program?
+U23SA861Y : You could but thats needs some top level JS to do
+U5H8JJP24 : <@U4872964V> Thx again, your example worked like a charm. I just got another more general question.I am coming from the JS world and know the differences between &gt;&gt; and |&gt; in theory, but to me it seems that you often can accomplish the same with piping and composition.
+When is it better/looks better to use what.
+
+U62JFJWKT : yep I try to avoid js
+U4872964V : <@U5H8JJP24> `&gt;&gt;` is used to compose functions, `|&gt;` is used to pipe values
+U0LPMPL2U : <@U5H8JJP24>  `|&gt;` requires a concrete value while `&gt;&gt;` can combines functions without needing to have the argument
+U4872964V : So, when you're construction a _function_ you use `&gt;&gt;` but when you're piping a value through a function you use `|&gt;`
+U1AN4JRFV : <@U62JFJWKT> another hacky way is to use time, set it to 0 and then do `if model.time == 0 then text "loading" else div [] [ viewCalendar (Date.fromTime model.time) ]`
+U4872964V : In your case, your port wanted a function, so you use the `&gt;&gt;` operator (or `&lt;&lt;`)
+U1AN4JRFV : or smthing like that. joelq's suggestion is the preferrable one, if you want to avoid `Maybe`
+U62JFJWKT : you're right but I'm exploring :slightly_smiling_face:
+U5H8JJP24 : So &gt;&gt; is for constructing more generic functions which may be used with values later and piping is for actually piping a value?
+U4872964V : <@U5H8JJP24> basically
+U62JFJWKT : hacky way for letter
+U0LPMPL2U : ```True |&gt; not -- False
+.isSelected &gt;&gt; not -- function with signature { a | isSelected : Bool } -&gt; Bool
+```
+
+U41CTMR1S : Hi everyone, I have a n00b question, what is the recommended way to use css? It's the only thing that not clear for me after reading the wonderful intro  guide. I read about elm-css and elm-style but I don't sure what the difference is. thanks!
+U2M39B7TM : Beginner question. How I can decode something like this?```
+type Page
+    = Home Home.Model
+    | Dresses Dresses.Model
+
+
+-- in Home.Model
+
+type alias Model = {
+  title: String 
+}
+
+"""
+{"Home":{"title":"home"}}
+or 
+{"Dresses":{"other":"property"}}
+
+"""
+
+```
+
+U4872964V : <@U41CTMR1S>, elm-css is closer to plain css, elm-style is a more composable way to do css
+U4872964V : <@U2M39B7TM> you'd probably use the `oneOf` decoder, and then a list of `field` decoders with the different constructors
+U0LPMPL2U : Look into `Json.Decode.keyValuePairs`
+U3HQVHERX : You might want to use `at ["Home","title"]` to dive into the json
+U4872964V : `keyValuePairs` does not really work if the values are different types though
+U3HQVHERX : <@U41CTMR1S> if you are just starting out i would recommend sticking with plain css
+U4872964V : I'd do it like this```
+oneOf
+    [ map Home (field "Home" homeDecoder)
+    , map Dresses (field "Dresses" dressesDecoder)
+    ]
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

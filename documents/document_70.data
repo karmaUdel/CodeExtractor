@@ -1,17 +1,82 @@
-{1 2, 3 4}```
-<@U0NCTKEV8> ahh, so you need this? `(binding [*data-readers* {'foo #'user/foo}] (read-string "#foo [1 2 3 4]"))`
-haha, timing :smile:
-yes
-while on the topic of tagged literals: is there anything special you need to do to get it to work with `tools.namespace`?
-I've placed a `data_readers.clj` in my classpath root, but when I try to use it in the REPL I get something like "Can't call unbound Var"
-lemme dig up the exact exception
-you need to require the namespace before you can use the reader
-data_readers.clj sets up the tag, but doesn't actually cause the namespace where the function is defined to load
-I'm pretty sure I did that, but let me double check
-ok, so my `data_readers.clj` contains `{foo kleinheit.pg.impl/foo}`
-`(defn foo [vs] (apply hash-map vs))`
-wait a minute!
-and every place where you read something using that tag, before that does a require of that namespace execute?
-okay, I see the problem: if I use `(require 'kleinheit.pg.impl :reload)` first thing in the REPL, it works
-but if I do `clojure.tools.namespace.repl/refresh`, it doesn't
-yep, `tool.namespace` clobbers it somehow
+U050KSS8M : =&gt; (let [{:keys [x y]} 1])nil
+
+U050MP39D : blows up on my version of clojure
+U0DJC1V3R : `(let [{:keys [a b]} 0])` throws `Can't type hint a primitive local` lol
+U050KSS8M : woah… different in ClojureScript!
+U050MP39D : I (think) it's probably much more likely to blow up in 1.9 with spec too
+U050MP39D : huh, nope. interesting
+U050KSS8M : latest ClojureScript
+U050KSS8M : yes it blows up on Clojure JVM
+U050KSS8M : ok that's very interesting… good to know
+U050MP39D : yeah, blowing up is an implementation detail by the looks
+U050MP39D : ```(macroexpand '(let [{:keys [foo]} 1]))
+=&gt;
+(let*
+ [map__43828
+  1
+  map__43828
+  (if (clojure.core/seq? map__43828) (clojure.lang.PersistentHashMap/create (clojure.core/seq map__43828)) map__43828)
+  foo
+  (clojure.core/get map__43828 :foo)])
+```
+
+U050MP39D : sooooo maybe if clojure.core/get gets a spec it will start blowing up
+U050KSS8M : that is so very interesting… it's important to think about if your inputs are unpredictable/dynamic
+U050MP39D : if your inputs are unpredictable you're screwed, add a layer that makes them predictable :stuck_out_tongue:
+U050KSS8M : well yea… but if {:keys []} was NEVER throwing
+U050KSS8M : that layer could just be a (if (nil? x) …) check after
+U050KSS8M : now it's clear that you need a more "proper" check ala-spec, etc
+U050MP39D : yeah definitely, if you have uncertain input then use tools that are made for validating it as data (spec, schema, clojure data functions etc)
+U050KSS8M : yea… I was just calling some JavaScript APIs from ClojureScript, so I assume *everything* there is unpredictable :stuck_out_tongue_closed_eyes:
+U050MP39D : safe assumption
+U050KSS8M : yea…. ok this is actually more interesting than I thought …
+U050KSS8M : ((fn [x]   (let [{:keys [a b]} x]
+     a)) 1)
+
+U050KSS8M : so in this more… *ahem* realistic example
+U050KSS8M : no error!
+U050KSS8M : since we're no longer destructuring a Primitive Local!
+U050KSS8M : but
+U050KSS8M : ((fn [^long x]   (let [{:keys [a b]} x]
+     a)) 1)
+
+U050KSS8M : throws… which is logical given the previous things we just tried
+U050KSS8M : so actually… as long as: 1. the things you're passing are not literals (which I've never done in real program) 
+2. and you don't type hint an unpredictable dynamic thing (highly unlikely but possible to do)
+…  it seems that {:keys […]} is actually "safe" from throwing exceptions
+
+U050KSS8M : not saying that you *should* rely on it lol… I tried looking and I couldn't find any place where it's stated that it's safe… so I assume it can be considered an implementation detail? someone pls correct me if you know better :slightly_smiling_face:
+U050MP39D : if it's not documented otherwise then you should consider the behaviour of something when you pass it an unexpected value to be "undefined"
+U050MP39D : ie, will do any random ole shit, and will change between versions and builds and days
+U050MP39D : nature of the beast with a dynamic language
+U11BV7MTK : i'm not sure its the keys part that is throwing. I think you're just doing something Clojure doesn't allow in typehinting :```
+user&gt; (let [^long x 1]
+        x)
+CompilerException java.lang.UnsupportedOperationException: Can't type hint a local with a primitive initializer, compiling:(*cider-repl employee-resizer*:67:7) 
+```
+
+U11BV7MTK : it's not the keys, that's just not a valid place for a type hint
+U050KSS8M : <@U11BV7MTK> yes that's correct
+U050KSS8M : see my follow up
+U11BV7MTK : ah ok. i thought you were still attributing it to the `:keys` destructuring
+U11BV7MTK : my bad
+U0564EGNY : <@U3L6TFEJF> - I ended up using postwalk with core.match
+U3L6TFEJF : <@U0564EGNY> nice! mind sharing the solution?
+U0564EGNY : I suppose the map should be mapv
+U0564EGNY : hmm, not sure how this is actually working without that :wink:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

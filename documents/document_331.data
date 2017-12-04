@@ -1,83 +1,137 @@
+U60SXAF96 : Thanks.
+U60SXAF96 : I appreciate it.
+U3LUC6SNS : <@U48AEBJQ3>, I also ran into the jumping cursor bug.  I'm using workaround that is adapted from various online resources including this slack channel: <https://github.com/jxxcarlson/nanoedit>  
+I think I had an Ellie on this.  Is there a way to search Ellies?
+
+U3LUC6SNS : If you search the style-elements channel for "jumping", you will find some discussion of this.  The use of `counter` or a better substitute like a document ID is essential to make the virtual DOM comply with your wishes.
+U3KSN5MAL : <@U3SJEDR96> wait, how can i do toUpper on the strings if the decoder is being called by the test?
+U48AEBJQ3 : <@U3KSN5MAL> I would suggest writing `stringsToUpper : List String -&gt; List String` then look for a way to use that function in your decoder.
+U611WQPL4 : &gt; In the tests, there is no field-name for the first one. The value is literally _just_ `5``Literally.Literally 5`
+
+U3KSN5MAL : ok thanks
+U0JFGGZS6 : more on jumping cursor -&gt; <https://github.com/elm-lang/html/issues/105>
+U0JFGGZS6 : and <https://github.com/elm-lang/html/issues/55>
+U3KSN5MAL : ```stringsToUpper : List String -&gt; List StringstringsToUpper list =
+    let
+        up t =
+            toUpper t
+    in
+        List.map up list
+
+
+decoder : Decoder (List String)
+decoder =
+    Json.Decode.map stringsToUpper (list decodeString)```
+
+U3KSN5MAL : ok can't work out what i'm doing wrong :confused:
+U5VTA57UN : <@U3KSN5MAL> `up = (\t -&gt; toUpper t)` ?
+U3KSN5MAL : i know that
+U3KSN5MAL : i just write verbose and compress later as it's easier for me
+U0LPMPL2U : `up` and `toUpper` are the same right?
+U48AEBJQ3 : `decodeString` isn't a `Decoder`, you want just `string`
+U3KSN5MAL : doh
+U3KSN5MAL : that was it
+U3KSN5MAL : thanks
+U3KSN5MAL : and yes you are correct joel just silly mistakes
+U3KSN5MAL : thanks
+U3KSN5MAL : God i'd hate to think about how messy my code base would be for anyone else to look at -_-
+U3KSN5MAL : Might have to go through and do a big semantic compression pass once i get this update out
+U48AEBJQ3 : <@U3KSN5MAL> One nice thing about Elm is that it feels so much safer to do major refactors, so one *can* write a bunch of messy, ugly code, then go back and clean it up and have few problems.
+U3KSN5MAL : Oh yeah of course
+U3KSN5MAL : i've already refactored a lot of things before
+U3KSN5MAL : Like i did a total overhaul of the colour system which everything relies on halfway through
+U3KSN5MAL : The biggest thing that will take work to refactor is the monolithic update loop
+U48AEBJQ3 : That is something which gets easier with experience.
+U3KSN5MAL : I've gone to do that and given up 3 times so far -_-
+U3KSN5MAL : and i just keep adding features making the eventuallity worse
+U60SXAF96 : Is there a good, pure URL validation library for Elm?
+U3HQVHERX : what do you mean by url validation?
+U60SXAF96 : Just something so that I can refer to a `URL` type and have confidence that it's sane, as oppose to an arbitrary `String`.
+U3HQVHERX : take a look at the url-parser and navigation libraries
+U60SXAF96 : Equivalent to the `URL` class in Java, or `URI.js`.
+U3HQVHERX : it gives you a record from `window.location`
+U60SXAF96 : Not quite what I was looking for, but very useful for my next problem. :smile:
+U5XC2FJ1Y : does elm have support for pattern matching with conditionals?
+U300LJUAK : <@U5XC2FJ1Y> No. At least not for now.
+U23SA861Y : so, if I install via NPM i get platform version 15, anyone know whats up with that?
+U300LJUAK : Gotta admit that's a feature I would love too.
+U5XC2FJ1Y : what's the best alternative, just moving the conditional inside the matched pattern?
+U300LJUAK : Yup. Although it can lead to duplicated code in your `else` case, that's basically the only way to go right now.
+U2FP79HN3 : How do recursive types work? Say I have a cell which can be linked to other cells.. 
 ```
-I would like to avoid the duplication of the shapes definition
-There is currently no way to automatically enumerate a union type. Keeping the list of possible shapes as close to your `shape` type should help in making sure you don't get them out of sync by accident :slightly_smiling_face: (i.e. `shapes = [ Poly, Star5, Image, Ellipse, Circle, Rectangle, Unknown ]` and refer to `shapes` whenever you need that enumeration)
-is it worth to spend time on implementing that feature ? Something like
-`List.fromUnion Shape`
-?
-dont know if I can do it, but I would love to give it a try ...
-It would need support from the compiler since type-info isn't available at runtime. Additionally, it would only work for enumerations, not unions that actually hold content.. So in reality, it would be of somewhat limited use, and fairly complex to implement in the sense that it requires "magic"
-i.e. if you decide that a `Poly` shape should also have an Int that defines the number of edges, you can no longer enumerate it
-all right understood, thank you <@U3SJEDR96>
-I found this comment intriguing <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L25-L26>
-Anyone know where to read up more on plans for SPA stuff in 0.19?
-<https://github.com/elm-lang/projects/blob/master/roadmap.md>
-<@U3SJEDR96> Thanks! I've seen that but didn't quite make the connection to why there won't be anything your Main.elm anymore :stuck_out_tongue:
-If SPA in 0.19 starts to look more framework-like I will be very happy
-Ah! Interesting, and much cleaner :slightly_smiling_face:
-Thanks!
-Then I can just switch on the nodeType field for different UI behaviour!
-syntax for Dict literal?
-I see Dict.fromList in the docs - is that how it's usually done?
-Hallo everyone!  I'm back with another question about... you guessed it - Union types!
-Basically in a list of records with different types is it possible to filter by a field without using a case for each different type?
-here is the code:
-<https://ellie-app.com/3H7WyZXf2F7a1/0>
-line 88 is what I would like to do
-the rest of the function body is what works
-<@U5WS7CJLV> Dict.empty does also the job then you can add and remove elements (does this answer your question?)
-sure
-was just wondering if you could do something like list literals
-but it seems like with Dict you must be function-y
-<@U641LDZFU> I am a super noob myself, but I have an idea and will do my best to explain it
-union types can have more than one "constructor" arg
-what if you passed the common stuff, like id - as the first arg to your different union "constructors"
-type MyUnion =
-Cool Int Float
-I think I did in the list at the bottom of the file :slightly_smiling_face:
-AlsoCool Int String
-<https://ellie-app.com/3H7WyZXf2F7a1/0>
-Is that what you mean?
-or do you mean take the ID out of the record?
-yes, I think that's my idea
-but now that I'm thinking about it further, maybe it won't work.  I am new to this union stuff myself
-<@U5WS7CJLV> it seems that there is no other syntax
-taking the ID out of the record, I mean
-<@U5WS7CJLV> you _could_ have special syntax for Dicts.. and sets, and arrays, and whatever other data structures. But having more syntax wouldn't necessarily make things more legible or easier to understand :slightly_smiling_face:
-right, I just wanted to make sure there wasn't literal syntax before I started functioning everything
-for example, I've used List.singleton when [ myItem ] is simpler, I think
-<@U641LDZFU> what if StoryNode were not a union type?
-Fair enough :slightly_smiling_face: `Dict.fromList [ ( "key", value" ), ( "other", "value" ) ]` is the most succinct syntax we have for it
-what if it were a record with an ID property, and some other property that held the union-y stuff?
-I think then I couldn't have a list filled with different "StoryNodes"
-because the format of the records are all different
-ah, interesting
-I'd like to hangout and talk more Elm, but my children be calllin' - later fellas!
-<@U641LDZFU> Here is a fairly light refactor which fixes that particular problem. <https://ellie-app.com/3H8hWdzqWCCa1/0>
-The basic changes are merging the two identical record aliases and switch from using a string to represent the different node types to using a union.
-Very nice
-I think that's what you were hinting at too <@U5WS7CJLV> !
-Thanks so much
-<@U641LDZFU> I don't understand where `rawStoryNodes` comes from.. :slightly_smiling_face:
-line 89
-it's at the bottom of the file isn't it?
-it's just a list to play around with
-saw it later… why don't you pass it to the function?
-if it's just as a quick trial still this makes it error prone
-ah, that could be a good tip!
-it's basically my "database"
-you want to have pure functions (event though in Elm you cannot mutate at least)
-Ah yes
-Then would I have to pass it into the view function too?
-or would it just be worth attaching it to the initial model?
-you pass the model to the view function usually.. so yes
-and if it's 100's of nodes long
-it won't have a huge impact?
-considering the model gets passed around all over the show
-(on performance)
-Data rarely gets copied in Elm. Since it is immutable, you just pass or copy references.
-btw, Thanks <@U48AEBJQ3> here is a diff with your fixes, incase anyone else ever comes across this :slightly_smiling_face: <https://gist.github.com/allansideas/2360e065c13a48b419fce245d0485a12/revisions>
-Ah alright!
-Thanks again everyone for all your help!
-The door buzzer has geklingelt, so I am off for a bit :slightly_smiling_face:
-ciao
-Of course i could create my own but there must already be an implementation somewhere? I saw that in an earlier version this was in Http but seems to have been removed in Http 1.0.0
+type alias Cell =
+    { row : Int
+    , column : Int
+    , links : List Cell
+    }
+```
+
+doesn't work, so I tried 
+
+```
+type alias Cell =
+    { row : Int
+    , column : Int
+    , links : Links
+    }
+
+
+type Links
+    = List Cell
+```
+
+which didn't really work with: 
+
+```
+link : Cell -&gt; Cell -&gt; Cell
+link cell neighbour =
+    { cell | links = cell.links :: neighbour }
+```
+
+and then I tried 
+
+```
+type Links
+    = Links (List Cell)
+```
+
+But now I'm in type un/wrapping hell
+
+U0JFXEUCT : I believe you want something like `type Cell = Cell {}`
+U0JFXEUCT : instead of a type alias
+U0JFXEUCT : There is still some unwrapping, but remember you can unwrap in the function arguments
+U0JFXEUCT : something like `link (Cell cell) = --do stuff`
+U0CLDU8UB : The compiler suggests something like that to you when you make a recursive type alias! :slightly_smiling_face:
+U2FP79HN3 : Yeah, I've read <https://github.com/elm-lang/elm-compiler/blob/0.18.0/hints/recursive-alias.md> but still confused
+U0CLDU8UB : Okay, so reiterating what Matt said, you can do this:```
+type Cell =
+    Cell 
+    { row : Int
+    , column : Int
+    , links : List Cell
+    }
+```
+
+U0CLDU8UB : and then something like```
+link : Cell -&gt; Cell -&gt; Cell
+link (Cell cell) neighbour =
+   Cell { cell | links = cell.links :: neighbour }
+```
+
+U0LPMPL2U : If you find yourself unwrapping, doing something with the data, and re-wrapping a lot, I find it helpful to define a `map` function
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

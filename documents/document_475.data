@@ -1,45 +1,118 @@
+U4872964V : <@U3SQ42JJW> make a function like this:```
+makeRawItem : Int -&gt; PollItem -&gt; RawItem
 ```
-I meant 0 or `Nothing` dur.
-Use `next` val if present, otherwise use `num`
-looks like maybe you could use` Maybe.withDefault` <@U6D3ERLA1> ?
-<@U5P4FLYLE> <https://ellie-app.com/3VgrGzcLNJKa1/0>
-If you want 0, just pass it to `Maybe.withDefault 0`
-<@U6D3ERLA1>
-If the second paramater is nothing I want to use the first paramater
-(sorry about the var names…)
-But this creates a type mismatch
-alternatively, you can build up the number of previous occurences _while_ folding (like so: <https://ellie-app.com/3VgsQX5q9Nga1/0> )
-Hello! I am trying to figure out, what would be the easiest way to load SVG files inline from external SVG files during runtime (we use inline to apply different styles to different shapes inside the file)? We were using ng-include for that purpose before (our app is written in Angular)... I would appreciate any help on this matter
-<@U6EV3H0N7> Maybe I'm missing something - it seems like the `nextLargest` call in the  `in` section uses a number value not a maybe value, causing a type mismatch
-(working with Maybe is still breaking my brain a little bit)
-I solve this with recursion, but maybe there is another way? I found List.indexedMap, but not sure what to do with it. Example is awful.
-Hi, folks. Long time no see. But I'm trying to brush up my Elm once again.
-Can anyone share some tips on navigating through Elm code?
-I'm trying to go through <https://github.com/rtfeldman/elm-spa-example>
-<@U31FGNWCT> can you use `List.map` on the first (length - 1) elements of the list and do something special with the last one?
-[1]: <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Views/Page.elm#L58>
-ahh, <@U6D3ERLA1> missed that! So add a `Just` to convert the `Int` type to a `Maybe Int`
-oohh ok lets see
-<@U3JSGAK7B> <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html-Lazy#lazy2>
-You can tell it comes from `Html.Lazy` because of the explicit import at the top of the file: <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Views/Page.elm#L10>
-- profit
-hmmm... I see...
-<@U31FGNWCT> correct :+1:
-Okay. Seems easier than recursive way. Maybe there is less verbose one? Some function?
-is there a search bar that I can use?
-as I understand Html.Lazy is inside the `html` package
-correct
-There is <https://klaftertief.github.io/elm-search/>
-but how do I get from Html.Lazy to `html`
-hmmm... nice
-I also use a combination of Alfred + Dash (on macOs)
-thanks, <@U0LPMPL2U>! I guess <https://klaftertief.github.io/elm-search/> is exactly what I was looking for
-here is the search I want, for instance: <https://klaftertief.github.io/elm-search/?q=lazy2>
-<@U0LPMPL2U> Thank you! Found drop and take functions, they are awesome for the issue.
-I have a view in another file that has a submit button in it. When that button is clicked I need to deal with it in the parent file. I guess I need to listen to a msg from the child file somehow, right?
-Hi! Does anyone have examples on how to use elm-validate, or other validation examples (like phone number length, social security numbers, email format, etc..?
-are there any tutorials?
-each day, elm makes less sense to me
-<@U5E3DU81K> That is probably because you are coming with a lot of ideas that work for other paradigms, but don't hold up here and you are just discovering that.
-<@U45C5R6QP> You either need the function which makes that submit button take a `Msg` as a parameter or you need to wrap the data type the submit button is using via `Html.map`
-got it
+and then
+```
+List.map (makeRawItem poll.tstamp) poll.questionnaire
+```
+
+U4F64AKQV : <@U3SQ42JJW> break it up into two steps. Have one step that converts a single Poll to a list of RawItems. Then use concatMap or something like that to repeat that for all of them. 
+U3LUC6SNS : <@U0FP80EKB> I brought out the nuclear weapon: `elm-test init` in the root directory.  this fixed things (and did not nuke my test file). Go figure!
+U0FP80EKB : haha! That works.
+U3LUC6SNS : Ha ha indeed!  Like rebooting the computer to solve 99% of mysterious problems.
+U3SQ42JJW : :smile: Thanks <@U4F64AKQV> <@U4872964V> and <@U3FJSB596> … ah I am still not functional… a partial applicated function like Martin showed did solve that. … Still have to learn… :wink:
+U4F64AKQV : It takes some time to get used to, but once you start to recognize the patterns it becomes really easy (even easier than imperative in my opinion)
+U601ELFEG : anyone got a good example of a module that needs to do several round trips through a `Cmd` and a `Sub` to get something done... and then offers essentially a `Cmd` and `Sub` like interface back to other (higher up) client modules?
+U2GPAEU1L : <@U3SQ42JJW> I just made a tutorial on what it means to have a language use currying by default: <http://codetidbit.com/#view/snipbit/596930d17890d775c05191f3/introduction>
+If anyone else is *struggling with currying*, perhaps that tutorial will help you!
+
+Cheers :smile:
+
+U3SQ42JJW : amilner42: Thanks :smile:
+U3LUC6SNS : I have the following problem in the math/physics CMS that I am working on.  A snippet of a document in the editor looks like this:```
+% Test file
+\emph{Pythagoras} said: \[ a^2 + b^2 = c^2 \] % basic geometry
+Some physics: \begin{equation}
+   E = mc^2
+\end{equation}
+```
+That is, the user writes this, e.g., `\emph` and that is also what the user sees.  However, my latex parser needs this instead:
+```
+% Test file
+\\emph{Pythagoras} said: \\[ a^2 + b^2 = c^2 \\] % basic geometry
+Some physics: \\begin{equation}
+   E = mc^2
+\\end{equation}
+```
+That is, a backslash is escaped as `\\`.  How do I feed the parser what it needs from   what the user types in???
+
+U3LUC6SNS : (Ugh!)
+U236M9FH9 : <@U3LUC6SNS> My simple solution would to search &amp; replace w/ regex.
+U236M9FH9 : Are you writing the parser? If so, why require double slashes instead of singles?
+U23SA861Y : the user shouldn't have to escape their file, that should only be for the regex's and such
+U2GPAEU1L : Hey everyone, I just made _yet another tutorial_, this one focusses on parameter order, *how to order your parameters to take advantage of currying*.
+It's a short tutorial and is helpful for both beginners but also more experienced programmers.
+
+<http://codetidbit.com/#view/snipbit/59694b017890d775c05191f4/introduction>
+
+Cheers :smile:
+
+U1ZFF0E5P : I really wish that they swapped Dict.get as well in 0.18
+U1ZFF0E5P : I end up writing a flipped version in each project
+U3HQVHERX : any exercism users out there care to comment? <http://exercism.io/nqthqn> i'll return the favor :wink:
+U2GPAEU1L : I rarely partially apply `Dict.get`, but I see your point, if you're constantly accessing a dictionary, it'd save some dup code
+U2UGVS24E : Is using `toString` in real code something that should be avoided?
+U2UGVS24E : Say I have an `Int` and want to pass it into `Html.text`... how would I convert it to a string so that it can be displayed?
+U14Q8S4EM : I dont think there is anything wrong with that <@U2UGVS24E>
+U2UGVS24E : Looking at 0.19 notes, `Basics.toString` is being moved to `Debug.toString`
+U2UGVS24E : <https://groups.google.com/forum/#!topic/elm-dev/hO-2DBq_h-U>
+U14Q8S4EM : Oh really? Weird. I wonder why.
+U14Q8S4EM : "..providing String.fromInt and String.fromFloat for use in production code"
+U2UGVS24E : Ah......
+U2UGVS24E : Now that you pasted it, my brain interpreted it correctly
+U2UGVS24E : I read those as "toFloat" and "toInt" functions
+U2UGVS24E : I guess that makes sense
+U14Q8S4EM : Thats cool that they are keeping toString functions, I wonder what reasons they have for getting rid of the general purpose one.
+U14Q8S4EM : Like, from time to time, I like converting custom types to strings.
+U2UGVS24E : I suppose numbers are the only place where you should have to do this type of conversion in production code
+U2UGVS24E : I do that as well, but mainly during debugging
+U4WH8STNX : I guess separation of concerns, for now it might be that the same `toString` is being used but on another platform this implementation detail might change
+U14Q8S4EM : It doesnt always work, but Ive done a thing where if I have a custom type, and I need a css style to correspond to that custom type, I will make a class with the same name and then do `class (toString CustomType)`
+U4WH8STNX : <@U14Q8S4EM> maybe `rtfeldman/elm-css` would be a better option?
+U14Q8S4EM : Maybe. Yeah I havent used `rtfeldman/elm-css` yet.
+U14Q8S4EM : It does that kind of thing?
+U4WH8STNX : It is much better :slightly_smiling_face:
+U4WH8STNX : the basic case is that you don't wield any strings at all, you only define your union types and `Css.class` does the lifting
+U4WH8STNX : but if you only do this one `toString` that might be overkill, it's CSS though so that is not very likely to stay that clean
+U153UK3FA : `toString` is magic function, it breaks the type system
+U2UGVS24E : So outside of the new `String.fromInt` and `String.fromFloat`, there's no place where you should have to do such conversions... in theory?
+U4872964V : In <#C4F9NBLR1|style-elements> for instance, `toString` is used to make css class names based on the constructor names of a union type provided by the user
+U4872964V : but that may be something that is not the best choice anyway
+U66RFDZ8F : I just came across this in a tutorial, `on "change" (JD.succeed ImageSelected)`. I understand what it's doing, but my question is, why? 
+
+U3SJEDR96 : which part are you curious about?
+U66RFDZ8F : The JD.succeed part mostly 
+U66RFDZ8F : And also why not just a simple `change` function? 
+U3SJEDR96 : Oh, right, so all the `onSomething` events are implemented this way; and it's the decoder receives a JS Event and uses that to decode into an Elm datastructure. For example with `onInput Foo`, it will do something like `JD.map Foo (<http://JD.at|JD.at> ["target", "value"] JD.string)` to extract the current state of the field that triggered the event
+U3SJEDR96 : since `Html.Events` doesn't have an `onChange`, this is essentially how you'd write it
+U3SJEDR96 : or you could abstract it to something like:```
+onChange : msg -&gt; Attribute msg
+onChange tagger =
+  on "change" &lt;| JD.succeed tagger
+```
+
+U4872964V : you would probably want to get the target.value there too
+U3SJEDR96 : True. `JD.map tagger Html.Events.targetValue` it is :slightly_smiling_face:
+U66RFDZ8F : I see 
+U66RFDZ8F : So `succeed` was used because it didn't care about the contents of the event per sey
+U4872964V : yes
+U66RFDZ8F : Just that makes so much sense now 
+U66RFDZ8F : Thanks a bunch 
+U4872964V : on the other hand, you know the target value for the select, so maybe you don't need to parse it from the event :slightly_smiling_face:
+U66RFDZ8F : Yeah
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

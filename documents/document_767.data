@@ -1,0 +1,182 @@
+U5YDC1YUW : Is there a way to easily chunk a list in Elm? e.g. chunk by two: `[1, 2, 3, 4, 5, 6] -&gt; [[1, 2], [3, 4], [5, 6]]`
+U5YDC1YUW : ah looks like `groupsOf` from <http://package.elm-lang.org/packages/elm-community/list-extra/6.1.0/List-Extra> would do the trick ^
+U17P7CBFB : I have an update function with 13*5 cases, and it's not done growing yet. Many cases should either be unreachable, or do the same thing. How do you make something like this readable?
+U17P7CBFB : unreachable because in each state, I only add a subset of the possible message types in the view
+U0J1M0F32 : 65 cases <@U17P7CBFB> ? That is a lot. Hrmm. I've never dealt with that many, but I've had good luck breaking larger single case update function into sub update functions along domain lines.
+U14Q8S4EM : But certainly by “unreachable”, you dont mean “never used”, right <@U17P7CBFB> ?
+U14Q8S4EM : That is a lot. Maybe theres something else you could be doing architecturally to avoid having so many.
+U14Q8S4EM : In my applications, I likely will have more than 65 things that happen, but they are subdivided into several smaller parts.
+U14Q8S4EM : If you share youre code I could look at it and give you feedback, if thats welcome.
+U60SXAF96 : This is entirely a shot in the dark. Are you using `Cmd` when you should be using `Task`? Someone pointed that out to me last week, and it made a world of difference for my update function.
+U0CL7EPPG : I ended up writing a small executable so it could be run as a single command:```
+#!/usr/bin/env sh
+elm-css Stylesheets.elm
+```
+
+U153UK3FA : Is there something particular about it that makes you feel like it's not readable? 
+U24HQ3RJ7 : hi.. I have a question ..In project structure, View.elm and Update.elm will need Message.elm and Model.elm ( non-trivial cases..) :slightly_smiling_face:
+But if we need to .. should Model.elm import Message.elm Or Message.elm import Model.elm ? What is the hierarchy of files ?
+
+U24HQ3RJ7 : its like i have some subparts of Model and i would like to send them in messages..like `type alias Msg = NewActivity Name Description Quadrant`.. in `Message.elm`
+`Name, Description, Quadrant` are defined in `Model.elm`.. 
+Then i should be importing Model.elm in Message.elm..  right ?
+
+U23SA861Y : so only break it up like that if they are getting too big
+U23SA861Y : Where big has a different definition from OO.
+U23SA861Y : but generally shared types would be imported by both
+U24HQ3RJ7 : so.. i should be creating separate file.. like AllTypes.elm.. :slightly_smiling_face: if Model.elm is big..
+U14Q8S4EM : Thats sort of like what I do. I usually have a folder called `Main` that contains `Model.elm` and `Message.elm`.
+U14Q8S4EM : Then from there, Ill either have a folder called `Types` that contains all sorts of files, or I will have files called `Types.elm` in various folders.
+U23SA861Y : Just make sure the abstraction makes sense
+U23SA861Y : If you are creating a whole boat load of derived types, you probably have a bunch of functions to go with them. In which case thats the line you cut along
+U14Q8S4EM : Yeah, I know I am an outlier on this. I break files into tiny pieces. I dont know how you all manage super big files tbh.
+U23SA861Y : easy when there are no side effects
+U23SA861Y : the only context you ever need to keep in your head is the length of a function
+U23SA861Y : even shorter if you don't have any let blocks
+U23SA861Y : With stateful languages the size of the context is huge, so it gets combatted by keeping structures and files small
+U23SA861Y : with functional languages the compiler ensures that the context is declared
+U23SA861Y : <http://www.bopsecrets.org/gateway/passages/chuang-tzu.htm>
+U23SA861Y : slicing code is similar
+U23SA861Y : despite the colour scheme straight out of the 90s
+U6CAFUBM2 : Hi folks, * I am badly stuck with elm-make's slow speed in dev env, which I suspect is related to code organization.
+* I have been working on solving this puzzle since 2.5 weeks
+* I am really fustrated and am thinking of moving back to pure js. :disappointed:
+Request For Help: 
+<https://stackoverflow.com/questions/45253217/why-does-elm-make-takes-20-seconds-in-dev-env-even-when-just-adding-whitespace>
+
+U23SA861Y : I haven't found make to be slow, but I have heard that it can happen with large case statements particularly those involving pattern matching on tuples
+U6CAFUBM2 : <@U23SA861Y> Yes, I am aware. I have done my best. And have attached grep of case expressions in the questions:reposting it here.
+
+U6CAFUBM2 : Snippet From the SO Question# Steps already taken towards speeding up compilation time
+
+ * I have been working on solving this puzzle since 2.5 weeks 
+ * Initially time taken to compile was 60+ seconds, 
+
+ * Current compilation time was achieved by:
+  * reducing any direct dependency on Msg.elm, Now Msg.elm is imported only in two places Main.elm and Update.elm
+  * And by minimizing the number of direct case expressions on Msg by splitting them into Sub messages.
+  * [Output][1] of `grep -B 1 -A 22 "case " src/elm/**.elm  &gt;
+   case-expressions.elm`
+[1]: <https://github.com/jigargosar/elm-simple-gtd/blob/master/grep-case-expressions.elm> "grep-case-expressions-output"
+
+U23SA861Y : I'm reading, how big is this project total?
+U23SA861Y : that url builder case looks like it might be problematic
+U23SA861Y : in routes
+U23SA861Y : Are your functions type annotated?
+U23SA861Y : <@U6CAFUBM2> ^
+U6CAFUBM2 : Well to be frank I had to remove some function type annotations so as to remove import statements. That helped speeding up compilation time. :slightly_smiling_face:
+U6CAFUBM2 : before when code was taking 60+ secs I had most of my top level methods annotated.
+U23SA861Y : you shouldn't need to remove annotations to remove imports
+U6CAFUBM2 : Ok, would you like me to show you and example? I mean, I will create a branch, and post performance metrics.
+U23SA861Y : removing imports will undoubtedly improve compilation time, but you shouldn't have to remove type annotations to do so.
+U6CAFUBM2 : Are you suggesting I redefine type aliases rather than, import them from *.Types.elm ?
+U23SA861Y : if it's and alias you can redefine or you can use the base types
+U23SA861Y : having a .Types.elm is a bit of a code smell
+U6CAFUBM2 : <https://gist.github.com/jigargosar/30e89aee3e860e3d30abb1dac38f29e8#file-elm-simple-gtd-elm-code-size-txt>
+U6CAFUBM2 : thats the size of the project, around 10k lines of elm.
+U23SA861Y : I have it checked out
+U6CAFUBM2 : The reason I split Types and Models is because Models tend to have more imports than types.
+U6CAFUBM2 : that's how I was able to improve compile time.
+U23SA861Y : the reason it's a smell is because typically when things get big, you should be able to lop something into its own module
+U6CAFUBM2 : Fair enough, I would really appreciate if you could identify any potential solutions, and or code smells. If you have the time for a mini code review.
+U23SA861Y : how long is it taking for you
+U23SA861Y : the compile?
+U23SA861Y : I clock in at around 30 seconds on the first build but nearly instantaneous on subsequent ones
+U23SA861Y : if you're seeing a 20+ compile time that means you are probably compiling all 120 or so modules every time
+U23SA861Y : and that can only happen if you have this sort of "master import" that all your modules inherit from and you are changing it
+U23SA861Y : also most of your files are only like 100 lines or less long?
+U23SA861Y : your imports do seem tangled
+U23SA861Y : you have files in Update/Entity importing your base Model
+U23SA861Y : hmm? yeah your imports are dancing all over the place
+U23SA861Y : I suspect the issues you are encountering are a combination of small files and twisted imports.
+U24HQ3RJ7 : while writing an app in elm.. i am wondering whether to keep Model purely business-logic related Or can i insert some ui-related-info like .. to enable/disable buttons ?If i don't put those information, some logic of enabling buttons will be in view.elm and will be recomputed each time ?
+What is the opinion of community on this ?
+
+U23SA861Y : recompute it each time
+U3SJEDR96 : Don't store what you can compute :slightly_smiling_face:
+U23SA861Y : put in the model why you want the buttons to change
+U24HQ3RJ7 : I will experiment.. but it seems that some logic will get splitted between two files..But yaa.. i need to check this out.. I will also recompute.. :slightly_smiling_face:
+
+U24HQ3RJ7 : seems to be good user experience to keep unusable buttons disabled.
+U24HQ3RJ7 : Oh.. now i understood what you meant..reason should be in model..
+
+U23SA861Y : right, if you have a state machine where only certain transitions are possible.
+U23SA861Y : put the state in the model and mask the transitions in the view
+U24HQ3RJ7 : also well.. eventually.. View.elm will import Model.elm..so i can keep the logical-fns in Model.elm only.. and let the view use them.. right ?
+
+U23SA861Y : sure, until that logic accrues until it's own entity
+U24HQ3RJ7 : cool
+U23SA861Y : functions are functions, the compiler will help you and you need to import the model in both update and view eventually
+U23SA861Y : <@U3SJEDR96> funny how that same logic applies to build systems as well
+U6CAFUBM2 : <@U23SA861Y> hey did you try the SO post tests?
+U6CAFUBM2 : touch src/elm/Mat.elm &amp; touch src/elm/GroupDoc/View.elm
+U6CAFUBM2 : <https://stackoverflow.com/questions/45253217/why-does-elm-make-takes-20-seconds-in-dev-env-even-when-just-adding-whitespace>
+U6CAFUBM2 : will you please verify compile time for those two files?
+U6CAFUBM2 : <@U23SA861Y> please have a quick look at the post. It shold answer most of your questions regarding, compilation times, and modules compiled.
+U3SJEDR96 : worse - `touch src/elm/X/Function.elm`. I mean, it makes perfect sense, but ouch.
+U3SJEDR96 : or, well, I guess the absolute worst one might be `X/Function/Infix.elm`
+U3SJEDR96 : mentally parsing those files makes _my_ head hurt, too, though
+U3SJEDR96 : Anyway, I think Jon called it right - there is a some weird interconnectedness going on there. Keep in mind that when you touch a module, all modules that depend on that module will be recompiled, and all modules depending on that, and so on. I do think the compiler could be a little smarter about it - it doesn't make sense that touching one file results in something that takes _more_ time than a clean compile does - but nevertheless, there are dependencies-through-imports in that codebase that give me pause
+U6CAFUBM2 : <@U3SJEDR96> <@U23SA861Y> thanks for responding. Is it possible to do a code review and give me some specific feedback?
+U6CAFUBM2 : actually I am not worried about package X, its a utilities package, and It is not changed frequently.
+U2LAL86AY : you don't use minimaps? A few months back i changed my editor - and forgot to install minimap pacakge - my productivity droped so low - and i had this background thought in my mind all the time: `let me use smaller modules` - but after i realized that the tool is the issue- now i'm constantly using something with 800 - 1300 lines with no problem. Just my two cents - maybe you have other reasons.
+U17P7CBFB : <@U0J1M0F32> <@U14Q8S4EM> <@U60SXAF96> <@U153UK3FA> I's a drag'n'drop graph editor, where dragging to/from different positions on a node has different meaning, so there isn't a lot of separation between things. 
+By unreachable, I mean that from this model state, you should never get a msg of this type, because it's not even in the view. Sometimes you get messages out of order, so I still have to handle them all, but make sure it's not a bug for each case. 
+
+I'm not using any Cmd or Task; it's 100% event handlers and subscriptions on mouse; Mouse.moves, Mouse.ups, onClick, onMouseDown and onMouseUp. I have this update function:
+```
+update : Msg -&gt; Model -&gt; ( Model, Cmd Msg )
+update msg model =
+  ( updateHelp msg model |&gt; discardInvalid model, Cmd.none )
+```
+
+It's very hard to get a sense of what happens when it doesn't even fit on a single screen. It's just an adjacency list of a state machine with 5 states and 13 message types. I do have multiple messages that signal the same event, but to/from different states; maybe that's one fast way to decrease the size of the update function, but I don't think it'll get me far enough to make me happy. After all, it's still growing.
+
+U24HQ3RJ7 : I am taking inputs from user so, i have one input and one radio button and finally a create button..Ideally i would like only one msg with click on button and that msg comes with (Text-input+radio_button_input values)..
+Is this possible ?
+Currently what i am doing is having 3 msgs.. for input,radio and button and storing temp-values in Model.. :disappointed: and on button click, finally creating object..
+
+U2LAL86AY : I had a issue like this some months back - i wanted to create a visual ide for elm. THe project is on hold now - but because of all this messages - i've moved the DND logic in a separate module, and i added guards. 
+Have you considered making a all mighty drag and drop module with guards/conditionals - meaning you can say up front which things can be drooped into other - and keep all this logic outside - because this is where most of my dnd messages were coming from. 
+
+Maybe i don't underestand your usecase very well but 5x13 messages is usually a bad architecture flag for me.
+
+Why can't this be done in a different way? If you explain some parts of your system much better i think we can help you come up with something easier to wrap our heads around. Just a thought :simple_smile:
+
+U4872964V : <@U24HQ3RJ7> we do it with three messages because we keep the total state of the application in Elm.
+More importantly, you should _never_ have any state in your messages. The message for a clicked button should be just that - the button was clicked. This separation between messages and state makes the programming logic much cleaner, and avoids subtle bugs when, for instance, multiple messages affect the state before the next rerender.
+
+U17P7CBFB : 5 states, 13 messages, so 5*13 cases in the update function :slightly_smiling_face: I got an idea of how I could restructure it now, so I'll try that right away.
+U24HQ3RJ7 : <@U4872964V> thanks for reminding me again.. this pain is worth it.. :slightly_smiling_face:
+
+U2LAL86AY : hey and another useful idea.  one thing that i learned form evancz api design session was to try all possible combinations of data structures / apis. It's doesn't matter if is not the `best one` - just write them down - because you don't know which one is best - right form the start.. Then after going trough this with patience - you pick the one that you feel is the best.
+As opposed to this - what i was doing in the begining -- was to come up with one or two or maximum 3 api designs, compare them briefly, and start coding. 
+
+Failed so many times that now i know evancz approach - is worth the effort even if it takes time and discipline to do it. 
+
+I feel this is specially aplicable in your case. This stuff is so big that the chance you will get it right the second time is small. The change you will do a rewrite in 2-3 weeks for now is very high. 
+
+I usually try to get to a point where i'm confident and able to argument why the approach i choose is the best one - given all requirements.
+
+And later when i some new info forces a change - i first look if the arguments i have for choosing a particular api / data-structure still hold. And with a few exceptions they do.
+I'm curious how small you can make that update function after some more iterations. Please let me know :simple_smile:
+
+U17TXDBJR : Hi! I am trying to get <http://package.elm-lang.org|package.elm-lang.org> working locally to preview docs for a package. Is there any documentation for that, or has anyone undertaken this already? :slightly_smiling_face:
+U17TXDBJR : I managed to compile it and start the run-server binary. But I cannot find anything about how to generate the directory structure.
+U17TXDBJR : It appears that creating all-packages.json, new-packages.json and packages/name/package/version/documentation.json is not sufficient.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

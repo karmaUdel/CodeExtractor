@@ -1,152 +1,88 @@
+U5WS7CJLV : right
+U5WS7CJLV : asking more out of curiosity than immediate need
+U5WS7CJLV : I didn't see examples in the docs of functions getting aliased, so I wondered
+U3RDE7LDP : You can have `type alias MyFunction = A -&gt; B -&gt; C`
+U5WS7CJLV : but it makes sense that you can as functions are first-class-kinda objects in functional languages
+U5WS7CJLV : thanks, bro!
+U3RDE7LDP : At least I think you can.
+U5WS7CJLV : I shall find out using science shortly!
+U3RDE7LDP : yes, that works fine
+U5WS7CJLV : cool.  Thanks again!  It is super awesome that Elm has a Slack channel.  And that there a bunch of smart and helpful people on here.
+U5H8JJP24 : Hi, I'm stuck with a decoder that should decode an array [ 9.34958, 48.87733, 1000 ] to a Point, where index 2 (elevation) is optional.
 ```
-Just to be clear, the ellipsis are not part of the code. Just using them to show that there is more there that doesn't matter.
-so why is it used?
-if u just can simply write round i |&gt; toString
-why? \i -&gt; round i -&gt; toString
-and a quick recap
-\i is the name of the function
-round i is what has to do
-and |&gt; toString is function toString that gets aribute result of round
-the function has no name
-`i` is the name of the first parameter of the function
-ohhh
-undestood
-Sometimes it's just more simple *not* to name a function
-anonymous functions are useful when you need to pass a function to a function but the function you're passing isn't useful elsewhere
-Makes sense
-:slightly_smiling_face:
-but it's usually kept simple, If the anonymous function is too big it can usually be more clear to declare a regular function but within the function scope (the function that calls your anon func)
-Yes, move that on a let block, give it a meaningful name and your code is more clear :slightly_smiling_face:
-thank you :smile:
-what happens if there are two subscriptions to the same `port`? When the JS sends a value, do both fire?
-How would you implement this?
-I don't know how the runtime ties Subscriptions to ports - so I can't answer this.... but it is not inconcievable that it could queue the Msg objects and cycle them through....
-I grant that that raises "issues" with what happens while processing the first Msg ... vs. the second
-Saddly, it is very hard to compose low level things made of ports - like I can build ports to read/write `localStorage` - but seems impossible to use it from more than one place.
-So, sigh, I build more `ports`
-sounds like something that's easy to try :slightly_smiling_face:
-Re: localstorage, the best way to handle this is to only have one subscription port that sends all localstorage data, tagged appropriately in the value object
-<@U601ELFEG> yes both will fire
-I coded up an example: <https://ellie-app.com/3NXjZdPrxyJa1/0>
-oh - thanks!
-hey!   so i've been tinkering with elm a bit... and i wonder, what happens when the model gets huge and complica- er, sophisticated? is there advice on how to decompose a large model?
-depends on how the model is getting complex
-<@U6734UL1Z> Check out elm-spa-example. <https://github.com/rtfeldman/elm-spa-example>
-thats for when you really are making an SPA. What sometimes happens though is that people see a model with 10 fields and think "oh no this is too big" as a sort of instinctive reaction.
-How big is your model getting?
-Richard's talk <https://www.youtube.com/watch?v=DoA4Txr4GUs&amp;t=2s>
-I don't know if that is published on youtube yet, but there is a direct link in random somewhere
-Yeah, I think it's still unlisted on Elm Europe.
-<https://www.youtube.com/watch?v=2ihTgEYiKpI>
-boo yeah
-awww, I just got it.
-thanks for the resources :slightly_smiling_face: i don't yet actually have a real model to worry about.  i was just following along with someone's youtube videos... and started imaginging the possible features i might add, and wondered at how the model might grow.
-<@U6734UL1Z> the advice typically given is to not rush to compartmentalize your code. As you add more and more features, at some point it becomes apparent that you have a collection of related data and functions that interact with that data that would make sense as its own module. But the threshold for "large and unwieldy" will likely be much higher than what you're used to if you're coming from a non-functional background, because the type system makes it really easy to see what everything is doing.
-<@U6734UL1Z> number one advice, and hardest to follow, is: don't worry for now. If you run into trouble we'll help you :)
-just curious, are the folks that help create libraries and modules for Elm doing so using Elm or Haskell?
-total beginner (doing the Pragmatic Studio course btw and things are really finally starting to click!) and am wondering if you also have to learn Haskell before you can ever contribute
-People who want to contribute to the Elm *compiler* use Haskell, 0 elm involved.
-makes total sense. thank you. i see this place dies on a friday night while I'm just over here amped to be learning Elm (and vim, git, the command line, and html/css)
-Well it picks up with bad advice after everyone is nice and liquored.
-The cool kids are still here. :neutral_face:
-:beers: I can do both
-after an entire day... everything compiles.
-Ship it
-I... don't know how to run this update message...
-What is it?
-So a button in my view calls `ShuffleList` which calls `SetGame` ... Now `RunGame` is the driving logic for the robot players. So I need to get RunGame going... but Rungame also needs to call itself when it's done.
-If you want a delay, Task.sleep 
-Sry Process.sleep
-Is that command I can pass in `SetGame`? If I use commands in `SetGame`, do they take effect before or after the model is updated?
-updates when update returns
-<@U23SA861Y> I'm guessing that means the model takes effect after commands? But to be sure, in the case of `Message -&gt; ( { model | canChange = change }, DoAThing )` , the thing is done before the model is updated.
-After each msg
-No the model is updated immediate and do a thing gets queued up to happen
-Oh. Good. I need to look up this Process.sleep
-... And learn to use tasks
-I'm still not sure why there's a distinction between commands and tasks myself
-Tasks can fail and be chained
-They indicate a result as opposed to an event
-commands are the only things that can be sent to the runtime, right?
-and you need to "lift" a task into a command to actually run it?
-Yes it needs to be transformed by specifying what to do with both success and failure.
-It came up the other day in this or <#C0CJ3SBBM|general> but I didn't really follow the conversation so carefully. `Random` seems to issue commands directly rather than letting you chain them with `Task`, right?
-is there a reason for that or is the design still under consideration or something like that?
-I imagine randomness can't "fail" in any meaningful way, but my intuition says it should be something like a `Task Never`
-There seems to be some implementation details that restrict it. A task may make sense however. 
-I gotcha
-But ideally, it would be a task if those details were resolved you think?
-Likely it would be like Time.now   Task x value
-ah, yeah, `Task x Time` is a little more direct, even though `Task Never Time` even though the latter is a bit more principled
-It's more direct but it causes chaining issues
-right. It would require a bit of plumbing
-Question about elm make. I got around to actually packaging my program properly, putting the elm files in `src/` and tailoring everything nicely. And it builds and it compiles my modules and puts the elmo and elmi files in the `elm-stuff/` directory. But I can't figure out where (if anywhere) it is putting the compiled JS files
-Oh, it looks like I still need to specify the .elm file.
-I wonder. Is there a way to specify the file to build in the elm-package.json?
-Not that I know of
-No worries.
-I have a throwaway project I set up following the tutorial that works perfectly. Can't recreate it for my existing project though... I don't really mind manual but, I have to give it another try later.
-everyone seems to use a different setup though...
-hi, does anyone know how to display a string unquoted in elm-repl?
-i have a function that generates a multiline formatted string (of GLSL), and I want to see what it looks like with actual linebreaks, not interspersed \n escapes
-<@U1ZCL9GAX> Unfortunately, there's no print function in Elm. I don't think there's a way to do it --- as odd as that sounds.
-ok
-`print : String -&gt; ()` with a definition like `print = flip Debug.log ()` might work. Not sure if that escapes things, but worth a try..
-oh, I guess `Debug.log` does work in the repl... interesting
-Also, I seem to remember that `elm-make` looks for a module named `Main` if not explicitly passed a path to an entry point. That seems like it's worth a try
-Basically the same as using the `object[variablekey]` syntax in JS
-Nope; since you have no compile-time guarantees that this key exists. One option is using a Dict, another option is using a union type to represent the updatable keys, and use a `case..of` to write the appropriate update logic for each possibility
-<@U1ZCL9GAX> my suggestion actually seems to work, even if it adds some extra cruft :slightly_smiling_face:
-<@U5W5F6QGP> just wanted to point out that `object[variableKey]` is one of the reasons why Elm exists :slightly_smiling_face:
-Thanks! 
-That's a hell of an API call :aussie_revconga_parrot:, is your use case a big form that posts *all* of the data to the server?
-There is also multiple of those forms, all of which have to have data persisted to localstorage
-I picked a fun one to start converting to see what my CTO thinks of elm
-I _think_ I would attempt to describe my Form as a sort of AST, and have the view and logic be built on top of that; so you final form becomes the result of representing your actual form as that AST
-I may come to the same conclusion
-I learn through being terrible and ruining everything though, mistakes help me a lot 
-I always try not to jump too far ahead of myself
-Yeah, that's a great way to learn :slightly_smiling_face:
-No harm in discovering (the hard way) why something doesn't work out; and you may still come to different conclusions on a way to handle this that works for you
-Yup, it's still easier than jumping face-first into a complex solution that you might not have needed
-Is there an easy way to define multiple dictionary members at once upfront? Can't see anything in the docs
-I've cobbled something together that maybe worth considering <https://ellie-app.com/3PgPmqNtYRRa1/0>
-The idea is to see a mutation to your giant record as a mutation that is modelled with a union type and you just build a log of mutations and then transform this log into a server request
-That is a very interesting and left-field way of thinking about this problem
-would never have considered that, hmmm
-I've successfully used this approach in a tedious UI - I just pushed the mutations to the server as simple json and handled the gritty details there
-AND: these other 6 fields show
-I do like this approach though, and it may be very relevant to an internal tool I will be making next week
-true, if you need your current state you have to jump through some hoops. It is fun to think about, so basically what you would have is a "read-view" that holds the current state to your eventlog and that is being updated every time a mutation is registered and that you want to apply logic to... in that case the 300 explicit fields approach seems the only sane choice if you're not going to make a prototype only consisting of hacks *g*
-re defining entries in a dict up-front - `Dict.fromList [ ( "key", "val" ), ( "other", "otherVal" ) ]`
-I really appreciate you going above and beyond with that little ellie sample, thanks heaps!
-In a run-off-the-mill eventsourced system your dependency logic would be expressed as a saga, you still would have to have a way of expressing "the current state" and somehow let that knowledge flow through the types. I'll meditate on that, sounds interesting
-The fight with encoders has pretty much broken my spirit for now
-I don't think there's currently any way to create a Json encoder or decoder automatically
-It's a feature that will surely show up..... eventually....
-I need to write a little parser for Prolog terms, which parser package you suggest to use? There are too many :slightly_smiling_face:
-the encoder would be absolutely massive
-it was going so well up until now :disappointed:
-<@U2J1FUQTZ> I recommend `elm-tools/parser`
-<@U5W5F6QGP> writing encoders for records can be a little tedious, though it pays off when you represent your internal state differently from how the API needs it. Now, if you have a `Dict String String`, you could `Dict.toList |&gt; List.map (Tuple.mapSecond Encode.string) |&gt; Encode.object` :wink:
-I actually have an Array (Dict String String)
-Oh. What seems to be the problem for writing the encoder, then?
-thx <@U3SJEDR96> , it supports recursive parser?
-Sure. It's a good old parser/combinator library that works on character-chomping with delayed commits, and has the regular "forced laziness" for defining recursive values.
-Well now I'm discovering the problem may be my own incompetence here
-I have hope again now
-Ok perfect, thx again <@U3SJEDR96>
-Any ideas?
-Hm, can you show the actual code? My example up there ^ is missing the actual `yourDict |&gt; ` in front of it, so maybe that's it?
-nope, you were right, for some reason I assumed you could just assign that to a function and it would leave a pipeline waiting for an initial value
-Oh, you can, if you replace `|&gt;` with `&gt;&gt;` to compose the functions
-hello, I am new to elm and was wondering how stable to syntax is going to be moving forward?
-Things aren't set in stone, but I don't expect _huge_ changes anytime soon. Good to know: new versions of the language usually come with tooling to convert old code; both in terms of syntax as well as the core libraries changing
-I want to have html links and lists embedded in a string/text block and elm-markdown seems to be a solution. However it generates a &lt;code&gt;&lt;pre&gt; block around my text and unfortunately the marked native implementation is not understandable for me. Did anybody so something similar in the past and knows the reason? I just want to convert the text into regular html in a div or something similar.
-Your string is probably indented by 3 or more spaces
-I will check that, because for simple test string it worked as expected. Give me a sec
-that would be a really shameful outcome …
-<@U3SJEDR96> thanks that was it. Sorry, I should have considered that… However thanks for your help, I can continue now :slightly_smiling_face:
-That's really nothing to feel ashamed or sorry over - it's easy to spot once you know what to look for; but knowing what to look for is not that obvious :slightly_smiling_face:
-<@U3SJEDR96> your definition of ptint works perfectly, thanks!
-Can anyone help with this?  i have lots of widgets that contains loadingState and it seems such not as good solution to make definitions of changings loadingState for all of it
+type alias Point =
+    { elev : Maybe Float, lat : Float, lng : Float }
+
+```
+Therefore I created following decoder:
+```
+fromArrayDecoder : Decoder Point
+fromArrayDecoder =
+    map3 Point
+        (index 2 Decode.float |&gt; Decode.maybe)
+        (index 1 Decode.float)
+        (index 0 Decode.float)
+
+```
+
+My problem now is, that this decoder succeeds when index 2 is missing or is of any type like string etc. But I want it only to succeed if elev is missing, not if it has the wrong type. Is there any way of accomplishing this?
+
+U1CE9DL9H : <@U5H8JJP24> create a decoder for the two valid cases, then combine them with `Decode.oneOf`
+U5H8JJP24 : nice idea <@U1CE9DL9H> thx. I will give it a try
+U65AGCFC3 : hello hello
+U4RR7KX45 : hey everyone. I know I can use `::` to add an element to the front of the list, but to add it to the end of the list, should I just use concat?
+U48AEBJQ3 : <@U4RR7KX45> `List.append myList [newElement]`
+U4RR7KX45 : perfect, thank you <@U48AEBJQ3>
+U48AEBJQ3 : The `++` does the same thing (although it is overloaded to work with strings as well)
+U4RR7KX45 : I tried that too. oh I was actually trying it without placing the element in the list
+U4RR7KX45 : oh well
+U4RR7KX45 : #noobslife
+U1CHKCKBR : hey, any of you played with touch screens ? i have to create a kiosk app and i should recreate a virtual keyboard
+U1P6FFJ64 : Should not be a problem, <@U1CHKCKBR>. In the app we develop we support touch screens without too many problems.
+U4SM7ECAG : I saw there is even a library that helps with gesture support in Elm (unfortunately I'm working with elm 0.16 in my day job so I haven't tried it yet, and I reverted to `hammer.js` and ports)
+U1CHKCKBR : i don't know how i should orchestrate things; having a button -&gt; then capture press/touch event -&gt; then sub-circuit to ‘Z'  key press event  =&gt; output the result to input contexts
+U1CHKCKBR : is this a proper way of doing things, or i overthinking it?
+U5GCK308N : =
+U5GCK308N : oops lol
+U48AEBJQ3 : <@U1CHKCKBR> Is this what you are thinking? <https://ellie-app.com/3GKKgFsXjbga1/0>
+U0J1M0F32 : <@U1CHKCKBR> Thinking through it right now. I think I would have buttons that fire events with their corresponding key and handle it that way.
+`div [ onClick (KeyPressed "C")] [text "C"]` etc.
+
+U0J1M0F32 : Yah, what <@U48AEBJQ3> suggests.
+U1CHKCKBR : <@U48AEBJQ3> yeah, sort of
+U1CHKCKBR : thank you, it a good starting point
+U48AEBJQ3 : <@U1CHKCKBR> I got interested and tried something. It might be useful. <https://ellie-app.com/3GKKgFsXjbga1/1>
+U5ABF3BH7 : <@U48AEBJQ3> thanks for posting the example, it is pretty cool
+U5ABF3BH7 : Hi! I have a quick question, If I have```import FirstCall exposing (Model)``` but in my view, I want to rename Model FirstCallModel (because I already have something called Model in my view). Is there a straightforward way to do that?
+U5ABF3BH7 : in other words I want to rename a type a import, is that possible?
+U48AEBJQ3 : <@U5ABF3BH7> I don't think so? I think your better bet would be to not expose `Model` and instead use `FirstCall.Model` or you can `import FirstCall as FC` and then go `FC.Model`
+U5ABF3BH7 : I had done that but I am getting a dependency, and I need each one for the other one. I guess I need to re-structure differently
+U5ABF3BH7 : ```Your dependencies form a cycle:
+  ???????
+  ?    Views.Pages.FirstCall
+  ?     ?
+  ?    Views.Sections.ArrangementMeeting
+  ???????
+```
+
+U48AEBJQ3 : Yeah, dependency cycles are occasionally annoying. The easiest way is to make an extra module which doesn't depend on either. However, I find that the emergence of such a cycle is often a sign that I might want to re-think what I'm doing more fundamentally.
+U48AEBJQ3 : <@U5H8JJP24> Here is another possibility: <https://ellie-app.com/3GLHPTQgz7da1/0>
+U5H8JJP24 : <@U48AEBJQ3> Thank you so much. That looks like a really nice approach. This will take me some time for understanding it xD
+U48AEBJQ3 : <@U5H8JJP24> Well, if you have any questions about it, I'm happy to answer.
+U23SA861Y : mm yeah, that you might be slicing across the grain as opposed to with it.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

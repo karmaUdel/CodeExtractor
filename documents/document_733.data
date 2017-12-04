@@ -1,5 +1,97 @@
+U0TNXFS5D : I am trying to do a cross site posting and am having some trouble with Http.send &amp; Http.request. Http.request returns `Request ()` and Http.send says it is expecting `Request String`.  Where have I gone wrong?
+U4872964V : <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#request> seems to return `Request a` which should be fine
+U4872964V : you just have to pass the right `expect`
+U4872964V : Better to show the code instead
+U0TNXFS5D : I continue to get `Function `send` is expecting the 2nd argument to be:
+    Request String`
+
+U4872964V : because you handle its result as a `String`. If you do that, you also need to make sure the request actually expects a `String`
+U0TNXFS5D : OK, I think I get it. Thanks!
+U0TNXFS5D : <@U4872964V> - thanks again. took a couple of minutes before all was clear to me. All bright and shiney now!
+U2JFD9ALE : <@U0TNXFS5D> I normally write something like this:
 ```
-BUT, if I remove line 15 (the deallocator wrapper), it stops leaking memory.
-Does anyone have any suggestions?
-<@U3QF0EM0E> here's the bug:
-(For the record, if I remove both alloc and dealloc, and just call the `av-frame-free` function by hand everything works fine.)
+getHttp : String -&gt; (Result Http.Error String -&gt; msg) -&gt; Cmd msg
+getHttp url msg =
+    Http.getString url
+        |&gt; Http.send msg
+```
+
+and call it like this:
+```
+(model, getHttp ("<http://google.com/?q=foo>") SomeMsg)
+```
+&gt; Note: I'm using `getString`
+
+U0TNXFS5D : I got all twisted up because of cross site posting
+U2JFD9ALE : And then I handle data like this:```
+            SomeMsg result -&gt;
+                case result of
+                    Ok txt -&gt;
+                        ( model
+                        , Cmd.none
+                        )
+
+                    Err err -&gt;
+                        ( model
+                        , Cmd.none
+                        )
+```
+
+U2JFD9ALE : &gt; I got all twisted up because of cross site postingAh, Roger that :slightly_smiling_face:
+
+U236M9FH9 : Sure, but you can modify it to return `(NestedPartOfModel, Cmd NestedMessage/Msg)` or whatever works best for your situation, maybe even take &amp; return the full model if you really want
+U236M9FH9 : But if a nested update only returns Cmds of Cmd.none, I'll just remove that part of the return value to show that it's "pure" in the sense it doesn't need to talk to the outside world
+U2GTQM83A : Hey beautiful people. Has anyone used the Elm architecture (update loop) in Haskell? If yes. Do you have any links for examples?
+U4872964V : For gchjs or general haskell code?
+U4872964V : (i have used it in neither :)
+U2GTQM83A : For general haskell code. ghc
+U1EQAULH2 : Hey would anyone point me to Elm use case articles? Companies using Elm and talking about it. 
+U1EQAULH2 : I really liked this one <http://blog.testdouble.com/posts/2017-07-12-three-months-of-elm-our-experience>
+U153UK3FA : <https://www.youtube.com/watch?v=LZj_1qVURL0>
+U0EUHKVGB : checkout the Oslo Elm Day playlist, it has a few: <https://www.youtube.com/playlist?list=PLcAzxXzXQlPZsNcYycHittqeF3UG4dGli>
+U681TBBUP : Another one from kevin yank: <https://youtu.be/kuOCx0QeQ5c>
+U0EUHKVGB : In particular, the talks by David, Erlend, and Nils.
+U35100SJD : hi there!
+U35100SJD : is there some way to pattern match types in function annotations?
+U35100SJD : like we can do with type aliases this way: `func : {a | foo : String}
+U35100SJD : for instance I have this function :```
+when : Bool -&gt; msg -&gt; msg -&gt; msg
+when ok msgTrue msgFalse =
+    if ok then
+        msgTrue
+    else
+        msgFalse
+```
+
+U35100SJD : and I would like to do something like this:
+U35100SJD : ```when : Bool -&gt; (msg | NoOp) -&gt; msg
+when ok msg =
+    if ok then
+        msg
+    else
+        NoOp
+```
+
+U35100SJD : where we know `msg` has at least `NoOp` value
+U3SJEDR96 : Nope
+U35100SJD : too bad :disappointed:
+U35100SJD : that's what I thought
+U35100SJD : but we never know :slightly_smiling_face:
+U4872964V : what’s the use case?
+U4872964V : preventing messages?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

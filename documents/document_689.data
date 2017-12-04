@@ -1,14 +1,119 @@
-api.add_resource(API_Root, '/')```
-(Just one of many endpoints, but I chose the simplest one)
-Changing the port number in `app.run(host='0.0.0.0', port=port)` has no effect. The server restarts on the default port. :thinking_face:
-Hey guys, have some questions for you Django users.. Im a fairly novice web developer and have started a small project with Django. I need it to have an updated list of Netflix shows and movies at all times. Since Netflix doesn't have an open API, would the most logical thing to do would be to create a scraper that gets that information from their website? I am a bit stuck on what would be the proper way to do this. Thank you for your help!
-That's probably your only option if there's no unofficial source either. Be sure to check that you aren't breaking their terms of service with that, however. Scraping is often times okay, but some sites explicitly forbid it - especially if intending to resell the info
-this is code <https://gist.github.com/pleegor/ae8086286533ce33cc92095d7049dce5>
-it appears im missing something in `s3.Bucket(bucket_name).upload_file(file_name)`
-i think i sorted things out (please correct me if im wrong)  upload_file requires the following: `Filename, Bucket, Key, ExtraArgs=None, Callback=None, Config=None` and key was missing
-anybody know how I can use jquery to target specific elements that Django automatically brings up?
-specifically I'm trying to click on a button if the Django generic form error element is visible to the user, but targeting the element directly always brings up the modal that is triggered by the button, or doesn't trigger at all if I use the visible selector 
-Guys am having a problem deciding whether to use function or class base view with minimal angular or jquery for frontend
-or start with function base then refactor
-it all depends on what you like.
-i prefer to stay as close to a function as possible before creating a class. however, there are great times to use a class and really depends on the use case. if you offer up some examples or ideas of what you are trying to do maybe someone has a way they have done it before.
+U3R7CKQRX : It 's triggered somewhere in this function withing the compiled Elm code `function onEffects(router, cmdList, state)`
+U3R7CKQRX : I was setting up some ports when it happended but I can't really pinpoint what the cause is.
+U3R7CKQRX : Has anybody seen this before?
+U3R7CKQRX : when I debugged I saw that the `currentSubs` array looks like this `[undefined]`
+U3R7CKQRX : thus it fails on this line `currentSubs[i](value);`
+U3R7CKQRX : with you guessed it `undefined is not a function`
+U3R7CKQRX : :slightly_smiling_face:
+U3SJEDR96 : Hm, Hot module reloading + changing subscriptions or something?
+U3R7CKQRX : my subscriptions are basically static
+U3SJEDR96 : Basically it's attempting to trigger a subscription that isn't there. Do you have code to reproduce anywhere? Does it work on a "clean" compile?
+U3R7CKQRX : ```subscriptions : Model -&gt; Sub Msg
+subscriptions model =
+    Sub.batch
+        [ updateCurrentDate UpdateCurrentDate
+        , updateAppointments UpdateAppointments
+        ]
+```
+
+U3R7CKQRX : it still fails on a clean compile
+U3SJEDR96 : You don't have any custom effect modules, right?
+U2DSBB76Y : david_hernandez: Maybe installing a  version in `yarn.lock` and have the team configure their editors to use `node_modules/.bin/elm-format` could be one solution?
+U2DSBB76Y : I guess that doesn’t ‘enforce’ though.. :smile:
+U1P6FFJ64 : That could be a solution. But there is a problem if anyone is working in two different projects. But don't worry, we found a different solution: a elm format check on the CI to block PRs that don't follow the formatting of the last version of elm format
+U3R7CKQRX : <@U3SJEDR96> no I don't have any custom effects
+U3R7CKQRX : (don't even know how to do that :slightly_smiling_face: )
+U3SJEDR96 : alright. Curious. I don't suppose that code is available somewhere by any chance?
+U3R7CKQRX : not really sorry this is work stuff
+U3SJEDR96 : Right. Does it work if you comment out the subscriptions? Does it work with only one? If so, can we pinpoint which one?
+U3R7CKQRX : let me check
+U3R7CKQRX : so it's def not hot releading I commented that out
+U3R7CKQRX : and amazingly the error still occurs with a Sub.none
+U3R7CKQRX : weird
+U3R7CKQRX : but I kind of have the feeling that it's more related to a port going into JS
+U41NK9BM4 : <@U1N4KAHT6> Quick comparison between elm-visualization and elm-plot? It would help to have it, if possible.
+U41NK9BM4 : That is… Is the approach fundamentally different from Elm-plot?
+U3SJEDR96 : <@U3R7CKQRX> ah, reproduced it. It's a JS side thing, indeed - subscribing `undefined` to a port triggers that. <https://ellie-app.com/3DW84DP65tBa1/0>
+U3SJEDR96 : or even just `app.ports.foo.subscribe()`
+U3R7CKQRX : oh wow <@U3SJEDR96> thanks
+U3R7CKQRX : that fixes it
+U4PT7NG4V : Afternoon ElmiansAnyone got any suggestion on how to track whether the current browser tab is the active one? I believe checking window.blur/focus is a common way in JS land. But in Elm..? :slightly_smiling_face:
+
+U3R7CKQRX : i'll remember that for next time
+U17J54S2U : <@U4PT7NG4V> you mean something like this: <http://package.elm-lang.org/packages/elm-lang/page-visibility/latest> ?
+U4PT7NG4V : Sounds exactly like it! :slightly_smiling_face: That's super
+U17J54S2U : i’ve never used it though, but it’s maintained by `elm-lang` :smile:
+U1N4KAHT6 : <@U41NK9BM4> the approach is fairly different, although elm-plot has changed a lot recently. elm-visualization is meant to be a fairly low-level toolkit suitable for implementing fairly custom visualizations (for example something like <https://ellie-app.com/3DR8Yd6sHBQa1/0>), whereas elm-plot roughly fits the charting library bill. So in summary, if you need a pretty standard chart, elm-plot makes that pretty easy, whereas if you need some help building something new, than elm-visualization should be a good friend
+U4PT7NG4V : <http://caniuse.com/#feat=pagevisibility> That's promising too :slightly_smiling_face:
+U4PT7NG4V : Thanks, <@U17J54S2U> ! I'll give it a go
+U41NK9BM4 : <@U1N4KAHT6> Crystal clear. Thank you
+U3YDBDP4Z : How do you peeps work with CSS files in your projects?
+U3U2EA14G : <@U17R26VR8> <@U3SJEDR96> . Sorry, I've just gone out. I don't touch anything on DOM. I add material design lite css with elm and webpack. When I work on menu and I click on menu, the error appear.
+U3SJEDR96 : <@U3U2EA14G> do you have this code anywhere on github?
+U3U2EA14G : sorry,  It only have on my computer
+U3U2EA14G : let me take a picture
+U0FP80EKB : <@U3YDBDP4Z> We use a combination of css files and elm-css
+U0FP80EKB : we store the css files in our server code (we use rails)
+U3U2EA14G : <https://gist.github.com/tranhoangvuit/63e929cf3e7045a328c30c66ee2fb1dc>this is gist <@U3SJEDR96>
+
+U3SJEDR96 : what is `layout.js`?
+U3U2EA14G : ah, it's material design lite module.
+U3SJEDR96 : Does the error still appear if you comment that out from HTML for a minute?
+U3U2EA14G : wait a minute. let me try :smile:
+U3U2EA14G : wow, it work
+U3U2EA14G : so it conflict with material desgin js file.
+U3SJEDR96 : :tada:
+U3SJEDR96 : well, the material design JS seems to add/change/remove/replace DOM elements, which tends to really confuse Elm and can give very unexpected results
+U3U2EA14G : Thank you so much <@U3SJEDR96> . I think i need to change material design js file.
+U3U2EA14G : btw, if i build a website with elm and golang. So I will use golang for build html and url, elm only used for single page. Is it ok ?
+U3U2EA14G : But I don't know how to pass parameter or session via elm.
+U0CLDU8UB : I have a functional thinking problem. I have a trail, which is really just a `List (List Point)` and a list of explosions. I also have a function that can take an explosion and a trail and cut the trail with the explosion. My problem is, how do I cut the trail with several explosions?
+Here's my current implementation, which only takes the first explosion from the list and all the others are discarded:
+```
+breakIfNecessary : List Explosion -&gt; Trail -&gt; Trail
+breakIfNecessary explosions trail =
+    explosions
+        |&gt; List.head
+        |&gt; Maybe.map (breakTrail trail)
+        |&gt; Maybe.withDefault trail
+```
+
+U0CLDU8UB : I tried formulating this into a fold, but I got confused. Hmm.. maybe a recursion would serve me better.
+U0CLDU8UB : Yes, recursion it is (and flipping the arguments on breakTrail)```
+breakIfNecessary : List Explosion -&gt; Trail -&gt; Trail
+breakIfNecessary explosions trail =
+    case explosions of
+        [] -&gt;
+            trail
+
+        exp :: rest -&gt;
+            trail
+                |&gt; breakTrail exp
+                |&gt; breakIfNecessary rest
+```
+
+U0CLDU8UB : Thank you! :rubberduck:
+U0CLDU8UB : <@U3U2EA14G> Sure, it's perfectly okay to use Go on the backend.
+U3U2EA14G : But I don't know how to pass from page to page. Example I use go render two pages html is index.html can cart.html. In index.html how I call elm file ? (Elm.Main.embed(mountNode) and if I choose product from index.html  and how can it pass it in cart.html ?
+U0CLDU8UB : So usually people make Elm applications either as- a self-contained interactive part of a mostly static web page, or
+- a full "web app", also called Single Page Application (SPA), where all the navigation etc. actually happens within the index.html
+
+U0CLDU8UB : You could for example make your shopping cart in the cart.html page with Elm, and have the rest of the page be a traditional HTML page.
+U3U2EA14G : so can we use ELM build a list component. example index_component.elm, cart_component.elm ... ? And from it. we will integrate it in html file ?
+U0CLDU8UB : Yeah, that should work.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

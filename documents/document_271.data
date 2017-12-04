@@ -1,2 +1,104 @@
-```
-Could your break it into two keys?
+U5V0HVAKB : its working but maybe its better to do a function ?
+U5V0HVAKB : that return true or false?
+U23SA861Y : <@U5V0HVAKB> I would put either the result in your model or convert it to a maybe type and store that.
+U1AN4JRFV : <@U5V0HVAKB> rather one that returns `(String,String)`
+U23SA861Y : <@U5XHTBFS6> what kind of error is the browser console showing?
+U23SA861Y : <@U5V0HVAKB> err, nvm you need to set the field with the string value. Yeah you could probably refactor that code into something that returns a list of validation errors and then renders the list or shows ok if now validation errors are present
+U5XHTBFS6 : <@U23SA861Y> No errors. When I open the the network tab on the inspector, I can see that the request is sent, but my headers are missing from the "request headers section"
+U5XHTBFS6 : And I did a simple server that prints the headers received, and it prints the samething as the browser
+U5XHTBFS6 : just general accept, user-agent etc., but with my headers missing
+U23SA861Y : if your page is served from localhost then CORS is not the issue (it would return a browser error for that either way)
+U5V0HVAKB : ``` isConvertible t = \  case String.toInt t of \
+   Err msg -&gt; \
+     False \
+   Ok age -&gt; \
+     True ```
+
+U1AN4JRFV : oh, yes, for that problem, totally
+U5V0HVAKB : ok i get it
+U5V0HVAKB : i dont know all the syntaxes etc of this new lang again :disappointed:
+U23SA861Y : that's why you're here isn't it :slightly_smiling_face:
+U5V0HVAKB : is there a better way than just reading the <https://guide.elm-lang.org> ?
+U5V0HVAKB : ye ^^ it's look like awesome
+U23SA861Y : Doing, functional programming is not just a syntax shift. It requires a bit of shift in your thinking. It's going to be difficult but very worth it. Even if you don't work in another functional language, thinking in a functional style allows you to tackle problems in a new light. Which is always useful.
+U23SA861Y : <@U5XHTBFS6> I can't say I've done much work with custom headers so I wouldn't know.
+U23SA861Y : some of the core guys might have a better idea
+U23SA861Y : sigh, thanks slackbot
+U5XHTBFS6 : I agree. You can learn from functional languages and apply the concepts in other paradigms, such as composability of code, immutability of data, greek words that sound smart...
+U5XHTBFS6 : =P
+U1AN4JRFV : <@U5V0HVAKB>: your are not using the request
+U23SA861Y : dare is say...... *whispers* monads
+U1AN4JRFV : no, wrong one
+U1AN4JRFV : <@U5XHTBFS6>, in the code above, you are creating a request, but then you never use it, right?
+U5XHTBFS6 : In all seriousness though, I think the more paradigms one uses the better. Learn procedural, declarative, functional, OO, logical, reactive functional, parallel...
+U0JFGGZS6 : This might help although it's still an early draft.  <https://evancz.gitbooks.io/functional-programming-in-elm/>
+U5XHTBFS6 : <@U1AN4JRFV>  I use the response of the request on a `&lt;p&gt;` on the view. Or so I think? Maybe I'm missing somthing.
+U23SA861Y : <@U1AN4JRFV> he's sending out the command, but apparently the request does not contain the specified headers
+U5XHTBFS6 : Anyway, the request *is* being made, it's just the headers that are missing.
+U23SA861Y : how are you loading the page 127.0.0.1 or localhost
+U1AN4JRFV : well, but not the one you specify
+U1AN4JRFV : you need to `Http.send  GetResponse request`
+U5XHTBFS6 : ZOMG
+U5XHTBFS6 : so obvious
+U5XHTBFS6 : lol
+U23SA861Y : heh
+U5XHTBFS6 : thanks a lot
+U1AN4JRFV : np
+U23SA861Y : I didn't see that good catch
+U5XHTBFS6 : I'm strugling with that for a few hours now
+U5XHTBFS6 : ¬¬
+U1AN4JRFV : "it was just for testing"!
+U1AN4JRFV : yeah, i know that feeling. lets put that there for now.... and forgotten
+U5XHTBFS6 : Yeah, I changed that and it worked. Thanks! =D
+U1AN4JRFV : cool beans
+U5XHTBFS6 : a warning on unused vars would be a nice feature on elm-make. Where can I report this suggestion?
+U1AN4JRFV : elm-analyse might do that, not sure, but built in definitely would be cool too. maybe <@U0EUHKVGB> is still around to answer that precisely?
+U0EUHKVGB : Hello
+U0EUHKVGB : <@U5XHTBFS6> elm-analyse can do that for you
+U0EUHKVGB : <https://www.npmjs.com/package/elm-analyse>
+U5XHTBFS6 : This elm-analyse tool looks good, I'll check it out! Thanks <@U1AN4JRFV> <@U0EUHKVGB>
+U5V0HVAKB : ``` passwordValid : Model -&gt; BoolpasswordValid model = 
+  if String.length model.password &lt; 8 then
+   False
+  else if String.length model.passwordAgain &lt; 8 then
+   False
+  else if not (model.password == model.passwordAgain) then
+   False
+  else
+   True
+
+
+viewValidation : Model -&gt; Html msg
+viewValidation model =
+      if not (passwordValid model) then
+       div [ style [("color", "red")] ] [ text "password error" ]
+      else
+       button [ style [("color", "green")] ] [ text "Send" ] ```
+
+U5V0HVAKB : ok i get it
+U5V0HVAKB : aha looks azesome
+U1AN4JRFV : elm is not only a joy when you learn it, it's also a joy to see others learn it :slightly_smiling_face:
+U5V0HVAKB : aha ^^
+U5V0HVAKB : i didnt realise but its the same typing function as angular 2
+U5V0HVAKB : with typescript
+U5ABF3BH7 : Hi again. Would anyone be willing to take a look at this program <https://ellie-app.com/3xJW7xbNLJZa1/2> and give me suggestions on how to make the select also auto-complete?  I have a select element and an input field below, the input field auto-completes, I would like the select to also do auto-complete. In other words, I need something that opens a list with all options without typing, but that  can also filter by typing. 
+(The example is a simplified version of the example in <https://github.com/SimplyNaOH/elm-searchable-menu/blob/master/examples/src/Example.elm>) where I added the select element)
+
+U5ABF3BH7 : What I am trying to do is something like select2 in Elm <https://select2.github.io/examples.html>
+U5ABF3BH7 : My only option might be to talk to Javascript.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

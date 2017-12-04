@@ -1,10 +1,52 @@
+U0GC1C09L : just wondering if anyone here uses clojurewerkz/neocons on a semi regular basis?
+U0GC1C09L : in case someone picks this up later, i find myself writing a lot of cypher queries and executing them via tquery, but i'm constantly mapping through results to pluck the :data values and ignore all the other stuff i don't care about (incoming relationships, meta properties, etc.). i'm now resorting to spectre to stay sane. is there a better way?
+U3JURM9B6 : in a *.cljc file, I should be able to just do:
+(:require [clojure.core.match :refer [match]])
+
+and it all works right?
+
+or do I have to #?(:cljs ... :clj) separate lines ?
+
+U1C03090C : you probably need to escape the vector (`'[clojure.core.match :refer [match]]`)
+U1C03090C : not sure beyond that
+U3JURM9B6 : but it's insided the ns part
+U3JURM9B6 : ```(ns ...
+  (:require ... ))
 ```
-<https://github.com/clojure/clojurescript/wiki/Differences-from-Clojure#namespaces>
-You may get away with not including the include-macros thingy, and just :requiring normally, but it depends on how the namespace you're requiring is written.
-<http://blog.fikesfarm.com/posts/2016-03-01-clojurescript-macro-sugar.html#implicit_sugar>
-hrm, there really is no way to override hashCode for a defrecord, huh?
-I've got an issue with that, I have a defrecord that contains a derived map from potemkin, but which one of the "keys" of the derived map is null
-which causes hashCode to throw a NullPointerException
-a null in a map shouldn't cause an NPE
-so I'd say that's a bug in potemkin, but would need to see more to know for sure
-<@U1WMPA45U> what defrecord stuff are you using? i'll look at it
+
+why do i need quotes inside a ns ?
+
+U1C03090C : right, you don't. Sorry about that
+U3JURM9B6 : effort is apprecaited
+U3JURM9B6 : this latest "some stuff is magical clj/cljs is confusing me"
+U0J9LVB6G : <@U3JURM9B6> I think this should work.```
+(ns foo.bar
+  (:require
+   [clojure.core.match :refer [match] #?@(:cljs [:include-macros true])]))
+```
+
+U0J9LVB6G : <https://github.com/clojure/clojurescript/wiki/Differences-from-Clojure#namespaces>
+U0J9LVB6G : You may get away with not including the include-macros thingy, and just :requiring normally, but it depends on how the namespace you're requiring is written.
+U0J9LVB6G : <http://blog.fikesfarm.com/posts/2016-03-01-clojurescript-macro-sugar.html#implicit_sugar>
+U1WMPA45U : hrm, there really is no way to override hashCode for a defrecord, huh?
+U1WMPA45U : I've got an issue with that, I have a defrecord that contains a derived map from potemkin, but which one of the "keys" of the derived map is null
+U1WMPA45U : which causes hashCode to throw a NullPointerException
+U064X3EF3 : a null in a map shouldn't cause an NPE
+U064X3EF3 : so I'd say that's a bug in potemkin, but would need to see more to know for sure
+U11BV7MTK : <@U1WMPA45U> what defrecord stuff are you using? i'll look at it
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

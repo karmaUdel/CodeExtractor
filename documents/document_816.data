@@ -1,0 +1,121 @@
+U0EUHKVGB : My advice: if you need a function and the type is simple, stick with the simple solution rather than introducing a new data structure. Only use a new data structure when you need _that_ data structure.
+U42FYKFRN : hi - what’s the best way to turn an Encode.Value into a pretty json string?
+U3SJEDR96 : `Json.Encode.encode 2 yourValue`
+U42FYKFRN : thanks
+U63E8NR33 : <@U3SJEDR96> , <@U17MSA88M> , <@U0LL6NC1K>: regarding my previous question, I made a pull request.  <https://github.com/elm-community/list-extra/pull/79>
+U1AP08WV6 : <@U0GR62XBP> I had good results with <https://github.com/getsentry/raven-js>, which is basically subscribing to `window.onerror`. Perhaps digging in its source code could be helpful for you. BTW it has "breadcrumbs" functionality, which works really well for recording incoming messages to your `update` through a port. Thanks to this you have a stack trace and a pretty good idea what user might have been doing when something bad happened.
+U0GR62XBP : I know about window.onerror. That would indeed be a solution. That part of the code is not mine, so I was looking for an Elm specific solution. But it’s probably better to convince the folks responsible to add a general window.onerror handler.
+U1CE9DL9H : Does someone have a trick to make this snippet typecheck? The problem is that in 0.18, a `number` is not `comparable` (fixed in 0.19). Here `(+)` needs a number and `List.sortBy` needs a comparable. ```
+sortByInsideOut : (a -&gt; number) -&gt; List a -&gt; List a
+sortByInsideOut toNumber items =
+    let
+        withSum =
+            List.map (\element -&gt; ( element, toNumber element )) items
+
+        folder ( element, sum ) ( bottom, bottoms, top, tops ) =
+            if lt (top - bottom) then
+                ( bottom, bottoms, top + sum, element :: tops )
+            else
+                ( bottom + sum, element :: bottoms, top, tops )
+
+        ( _, bottom, _, top ) =
+            withSum
+                |&gt; List.sortBy Tuple.second
+                |&gt; List.foldl folder ( 0, [], 0, [] )
+    in
+        List.reverse bottom ++ top
+
+```
+
+U1CE9DL9H : <@U1N4KAHT6> I don't think we can make this work without some really nasty stuff (toString, then parse or something like that)
+U0EUHKVGB : Yeah, you would have to make `toNumber : (a -&gt; comparable)` and then use `toString` with `String.toInt`
+U1CE9DL9H : things we do for nice type signatures...```
+
+accursedUnutterableNumberToFloat : number -&gt; Float
+accursedUnutterableNumberToFloat value =
+    case toFloat (toString value) of
+        Err e -&gt;
+            Debug.crash "a number could not be parsed as a float"
+
+        Ok v -&gt;
+            v
+```
+
+U1N4KAHT6 : oh dear
+U1CE9DL9H : the thing is, if we resort to `(a -&gt; Float)`for now, then upgrading to `(a -&gt; number)` with 0.19 is a breaking change
+U1N4KAHT6 : Because of these sort of issues, I’ve been designing a lot of apis now to just use floats
+U1N4KAHT6 : If the user has Ints, they can convert them pretty easily themselves
+U1N4KAHT6 : The loss of generality kind of pains me, but avoiding `accursedUnutterableNumberToFloat` is worth it
+U1CE9DL9H : sure, we might be able to slip it in with some other breaking change once 0.19 is around
+U1N4KAHT6 : yep
+U1N4KAHT6 : Was there not an issue that essentially proposed `Basics.toFloat` to be `number -&gt; Float`?
+U1CE9DL9H : it's been mentioned, but the constraint system in 0.19 is also fixed, so number is a subset of comparable
+U1CE9DL9H : so the above will be valid then
+U1N4KAHT6 : sure but still you can’t have division, which is sometimes pretty useful
+U0CL0AS3V : hrm... perhaps we should install `fsevents` automatically?
+U1CE9DL9H : here it is <https://github.com/elm-lang/core/issues/190>
+U1CE9DL9H : sadly, it's still `Int -&gt; Float` on the dev branch <https://github.com/elm-lang/core/blob/dev/src/Basics.elm#L455>
+U0F01KLV6 : What do people use to count the number of lines in their Elm projects?
+U0EUHKVGB : `cloc`
+U2GGQ9YE7 : <https://github.com/lrosa007/cn-chkrs>
+U2GGQ9YE7 : Chinese Checkers... not done yet though
+U5XC2FJ1Y : yeah i'm annoyed that there's no `number -&gt; Float` in core, it seems like not having it really hurts your ability to write polymorphic functions using `number`. e.g. I don't think there's a way to implement `average : List number -&gt; Float` without implementing something like `accursedUnutterableNumberToFloat` first
+U4872964V : Since there is no real loss of generality just using `Float` (`Int` is a subset of `Float`) I tend to just use `Float`
+U1CE9DL9H : fun fact: Float is Int <https://github.com/elm-lang/core/blob/dev/src/Elm/Kernel/Basics.js#L60>
+U4872964V : yes, `Int` is a subset of `Float`
+U1CE9DL9H : I was surprised that the distinction is totally on the type level (a bit like phantom types)
+U4872964V : an even more fun fact: `Char` is really a `String` of length 1
+U3SJEDR96 : Some functions that return an Int cheat by using `|0` though, which truncates to 32 bits :disappointed:
+U4872964V : yeah, numbers in javascript are pretty crazy
+U4872964V : elm really should have unbounded ints by default in my opinion
+U3SJEDR96 : Yeah, I don't know how I feel about that. Better topic for <#C2QPJLU2X|elm-discuss>, tho
+U26G362G2 : i'm getting a json parsing error in ie 9 (actually 11 in 9 "document mode"), but everything's fine in 10+ and other browsers. anyone seen something like that before? 'BadPayload "Given an invalid JSON: Invalid character"'
+U26G362G2 : sorry, wrong channel, i mean to post in a different one
+U17P7CBFB : That's where persistent data structures shine :slightly_smiling_face: I'm essentially storing the diff between each state change, so I can walk back and forth in time with the undo/redo messages
+U17P7CBFB : <@U4872964V> are you sure it's always length one? Aren't strings utf-16 encoded, like in javascript? If so, isn't any emoji character stored as two code units? :slightly_smiling_face:
+U3SJEDR96 : Currently that a _little_ broken, in that `String.toList` will return single code-units, while it is possible and valid to construct a single char that exists of 2 code units. In other words, `['?'] |&gt; String.fromList |&gt; String.toList  /= ['?']`
+U3SJEDR96 : Afaik the intention (in 0.19) is a single displayable character, which may exist of multiple UTF-16 bytes.
+U17P7CBFB : <@U3SJEDR96> yep, the bug fix was made in May, but for some reason they're refusing to release a patch for core :disappointed:
+U3SJEDR96 : Eh, you can work around it, tho
+U17P7CBFB : not really, since it's for a release of elm-test, so that would require forking core, releasing a patch and forcing every elm-test user who wants to use the new feature to use our fork :slightly_smiling_face:
+U17P7CBFB : looks like we'll be waiting for 0.19 for this one
+U3SJEDR96 : What? I mean _in Elm_
+U3SJEDR96 : Perhaps I'm missing how the bug impacts you right now; could you give some context?
+U17P7CBFB : elm-test has a string fuzzer, and I want to make it generate unicode strings instead of a small subset of ascii, but I cannot do that until this bug has been patched
+U3QVAJ5QV : Is it possible to switch between conda and virtualenv? That is I want to switch the actual environment managers not just environments in them ... I typically use conda but want to try something out that requires virtual env and is not compatible with conda.  Thanks.
+U1BP42MRS : What is it that "requires virtualenv", most things I know don't require anything other than an interpreter and dependencies
+U3QVAJ5QV : <@U1BP42MRS> zappa .... at least if you don't want to mess with the zappa-conda fork.
+U0NRYQNAZ : i don't see why you couldn't use a virtualenv for virtualenv things and conda for conda things. the issue is when you try to mix them together but as long as you're pointed at the right python interpreter things should work.
+U0NRYQNAZ : what have you tried so far?
+U3QVAJ5QV : Ok. So ... I'm not sure how to ‘point' it at the right thing ... not even sure where to start.
+U3QVAJ5QV : Just switch the path/env settings?
+U0NRYQNAZ : with virtualenv you activate the environment and it does a lot of handy little things for you like setting the python python.
+U0NRYQNAZ : so you activate the virtualenv when you want to use zappa.
+U0NRYQNAZ : `source /venv-name/bin/activate` should do it
+U0NRYQNAZ : are you using python 2 or python 3?
+U5SQYT750 : Conda does the same really, so ```conda create envname``` gives you a conda environment
+U5SQYT750 : and then ```source activate envname``` sets it up
+U5SQYT750 : you can use ```which python``` to check which one you are using
+U0NRYQNAZ : but i think the issue is with the library <@U5SQYT750>, :re <https://pythondev.slack.com/archives/C07EFMZ1N/p1497625527626658>
+U3QVAJ5QV : 3 ... and (maybe this is just a dumb question) but I was worried that installing using conda to install virtual env is not what I wanted.
+U5SQYT750 : but as <@U0NRYQNAZ> said, probably best to not try and mix them up
+U5SQYT750 : Oh, hadn't seen zappa before
+U0NRYQNAZ : when you do `which python` what comes up?
+U3QVAJ5QV : Normally the conda one.
+U0NRYQNAZ : that's where we would run into our first issue. we wouldn't want to be using the conda one. we would want something like the system python, i believe.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

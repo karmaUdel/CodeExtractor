@@ -1,31 +1,91 @@
-    -&gt; Node msg```
-You’re going to have a bad time if you keep trying to think of things in terms of mutating away and doing everything to avoid boilerplate
-So that code isn’t even 0.17
-OH, sorry
-I added the signal earlier
-haha
-that's what led me here
-Ignore that part :slightly_smiling_face:
-NOT HELPING :slightly_smiling_face:
-haha, sorry
-I don't think transforming a tree is particularly naughty - it's still pure
-That type signature does not make sense to me still. By property do you mean `Attribute msg`?
-Or is it some custom type the library uses?
-<https://github.com/styled-components/elm-styled/blob/master/src/Styled.elm#L658>
-Is that helpful?
-Should take you straight to the line
-I see, so it’s a custom type they’ve invented.
-Let’s take a step back: Why are you trying to use this library?
-`import VirtualDom exposing (Node, Property)`
-It's just a `VirtualDom.Property`
-Yes
-I'm using the library because it handles hashing the contents of a stylesheet to create a namespace, which elm-css does not (yet)
-and because I think it could be wicked cool if I can get it to collect all the rules, emit one style at the end and leverage the virtualdom to no-op if no styles have changed
-No weird external build process, just pure elm
-The virtualdom will already do that for you.
-Yes, exactly :slightly_smiling_face:
-This is premature optimization for sure.
-I'm not saying I will do that - I'm saying it does that :slightly_smiling_face:
-There is no need to collect all the rules, is what I am saying.
-If I don't collect the rules, I have to emit one style per element:
-I’ve benchmarked it :wink:
+U4872964V : yes, that's what I meant by if the model actually has those fields. however, you still tie your function to your model when you do that. Refactoring the model will lead to refactoring your function. Which is ok, by the way :slightly_smiling_face:
+U4872964V : depends on what function we are talking about i suppose
+U153UK3FA : yep, it can certainly be over used. You probably don't want to do it more than a few calls down
+U2D07QZN3 : I have a list of records with a "name" field.  How do I filter get a new list, where name contain a string?
+U153UK3FA : `List.filter` is the function you want
+U153UK3FA : <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/List#filter>
+U3SJEDR96 : I think you actually want `List.map (\record -&gt; record.name) records` or - shorter yet - `List.map .name records`
+U3SJEDR96 : It's a little hard to make out what you're actually after. Perhaps you could give an example of the input and what you'd like the output to be?
+U153UK3FA : `List.filter (\record -&gt; String.contains "pizza" record.name) records` will give you a list that only contains records with names that contain the word "pizza"
+U2D07QZN3 : that's it, thanks!
+U37HUSJ4R : If I have a 
+```type Status
+    = Open Time
+    | Closed
+
+type alias Time =
+    { open : Int
+    , closed : Int
+    , message : Maybe String
+    }
+
+data : List Status
+```
+and I want to update a `Status` record on `data` I have a function that gets me the record I want to update, but how do I then update a union type? obv `{ record | closed = 1 } ` is incorrect
+
+U37HUSJ4R : where `record` is a `Status`
+U0ULRASLC : <@U37HUSJ4R> Hm your question is a bit confusing. Is it correct that you want to change your definition of the Time-record to where `closed : Int` becomes `closed : Status`, and after doing so you wonder how to update that field in the record?
+U0ULRASLC : ah nvm. I see what you mean now I think. I miss read the code a bit
+U0ULRASLC : What is the difference if a Status is Closed and when a Status is Open but has a Time-record with closed  = 1 ? If they mean the same you could remove one of them
+U0ULRASLC : if you have a function that takes a Status and only updates the field closed if the Status is open you could write it like this```
+updateClosedFieldIfOpen : Status -&gt; Int -&gt; Status
+updateClosedFieldIfOpen status newClosed =
+  case status of
+    Open time -&gt;
+      Open { time | closed = newClosed }
+    Closed -&gt;
+      Closed
+```
+But then again I'm not sure I understand what you want to do :stuck_out_tongue:
+
+U31FGNWCT : Hi everyone! When you send JSON array of objects to elm does it convert it to something? I've got a runtime error like this (cut, it's a lot longer):```
+Expecting a String but instead got: [{"id":2,"name":"Administrator","code":"admin","description":"Administrator","permissions":["
+```
+Trying to decode it with this:
+```
+type alias Row =
+    { code : String
+    , description : String
+    , id : Int
+    , name : String
+    , permissions : List String
+    }
+
+thatDecoder = Decode.map5 Row
+                (Decode.field "code" Decode.string)
+                (Decode.field "description" Decode.string)
+                (Decode.field "id" <http://Decode.int|Decode.int>)
+                (Decode.field "name" Decode.string)
+                (Decode.field "permissions" &lt;| Decode.list Decode.string)
+thatListDecoder = Decode.list thatDecoder
+
+main : Program String Model Msg
+...
+init = (\flags -&gt; (Result.withDefault [] (Decode.decodeString thatListDecoder flags), Cmd.none))
+...
+```
+
+U153UK3FA : <@U31FGNWCT> You don't actually need to decode that, Elm will do it for you
+U153UK3FA : <https://guide.elm-lang.org/interop/javascript.html>
+U31FGNWCT : So I just pass it as flags without decoding?
+U153UK3FA : yep
+U31FGNWCT : Well, that's pretty convenient!
+U31FGNWCT : Thank you, Ill try that.=)
+U31FGNWCT : Haha! Awesome! Thank you very much <@U153UK3FA>!
+U601ELFEG : Hmmm... In order to use Bootstrap tooltips, you have to do some JS initialization on the DOM elements after they are created. Does Elm have a JS hook after the DOM has been created or updated?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

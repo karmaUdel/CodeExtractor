@@ -1,24 +1,74 @@
-            } ! [ Task.attempt (always NoOp) (Dom.focus "login-username") ]```
-so essentially it's a list of servers, when you select one I display a login form and focus the username straight away
-I'm still living in Non-Elm land with my thinking: I thought Dom.focus does something instantly. But it does return a Task (never worked with those yet) which I have to "schedule" for running myself
-thanks <@U1ZFF0E5P>
-yeah it's how you do side effects in elm
-first you update your model, then you ask for a bunch of commands to be executed by the elm runtime. As part of the command to specify the `Msg` that you want to receive once the runtime has executed the command (in this case `NoOp`)
-I was sort of wondering at the "_setting focus in the `let`_" statement, glad you sorted it out :thumbsup:
-i've been comparing <@U0CL0AS3V> 's SPA example and comparing it to the Re-Frame version (in clojurescript). I'm curious why there is noticiable latency on clicks vs. the reframe version. is it a question of virtual-dom performance vs. react? or is it because of the advanced optimizations that are available to the clojurescript code?
-for reference, it's <http://rtfeldman.github.io/elm-spa-example/#/> and <https://polymeris.github.io/re-frame-realword-example-app-demo/#/>
-the spa example does a fairly non-standard-yet-neat thing where it fetches the resources the "next" page needs _before_ actually rendering that view. It shows a spinner in the top-right while doing so. This means you get a tad extra latency on fast connections, but a _much_ nicer UX on slow connections
-thanks I watched that talk by <@U0CL0AS3V> . it still seems to sum up my impression that the elm architecture mostly requires that the general tree structure of data model should line up with the view tree, otherwise passing whole model state would be common. i provided some detailed examples of this in a message to elm-discuss mail list, so after it passes moderation (my first email there) perhaps there will be some useful feedback
-it's described in more detail here: <https://dev.to/rtfeldman/tour-of-an-open-source-elm-spa>
-ok
-i talked with <@U0FP80EKB> about this here last night quite a bit, so i look forward to some good explanations of how to better separate model structure from view structure without the pressure of passing global data everywhere or injecting child data dependencies into parent components
-<@U3SJEDR96> inspecting Chrome's network console in the two apps appears to reveal the Elm version is querying for more information on clicks, so I guess that explains it
-<@U3SJEDR96> although, the total amount of data transferred during a session with each app and with the same click flow appears similar, so..
-yeah, by "resources" I mean that each page has an `init` function that returns a task to fetch all the resources like JSON's and whatnot the page needs, so the elm version tries to prevent a flash of partial content by fetching those json's before doing the initial render of the next page, which should a complete render the first time around
-i see
-so rather than rendering (and re-rendering) while data comes in, the elm version does that in two separate steps. Less snappy on fast connections, much nicer on slow connections - seeing a partial page while it's still fetching json data is not particularly nice.
-so rather than optimizing only for fast connections, it tries to give a nice experience across the board
-might not be optimal for some scenario's, but it was a design goal in this implementation :slightly_smiling_face:
-actually the re-frame version has an infinite scroll and continues to load new pages as you scroll down, so it's just a different design decision
-with different trade-offs, indeed. That's kind of the thing, though - both solutions come with trade-offs, but those come as a result of design decisions rather than being anything inherent to the languages
-right, thanks for the explanation
+U601ELFEG : I seem to have made the Elm go into an infinite loop by introducing a helper function
+U601ELFEG : anyone will to lend a second pair of eyes?
+U601ELFEG : (It's about 30 lines of example - post here? or a github gist?)
+U5AR0LDQA : <@U17PWHU4D> `fillOpacity if model.isActive then "1" else "0.5"`
+U601ELFEG : (I know, it says Haskell, but there is no Elm format for Slack snippets...)
+U601ELFEG : So if my Html sends back a Msg of  NoHover --- it works... If it sends back NoHoverCrashes --- it hangs
+U601ELFEG : and yet they look the same to me
+U0EUHKVGB : You are doing nameshadowing.
+U601ELFEG : er?
+U0EUHKVGB : Don't call that update inside update update.
+U0EUHKVGB : ```update : Msg -&gt; Model -&gt; Model
+update msg model =
+  let
+    update fp fs =
+      { model | patterns = fp model.patterns, samples = fs model.samples }
+  in
+```
+
+U601ELFEG : OH -
+U601ELFEG : Why does it compile then?
+U5AR0LDQA : Change the name
+U601ELFEG : is this a known bug in Elm?
+U0EUHKVGB : Because it correctly figures out what update you are using, but generates the wrong code.
+U0EUHKVGB : Ye.s
+U0EUHKVGB : But please don't do that anyway: it makes your code very hard to read
+U5AR0LDQA : :point_up:
+U601ELFEG : No, sure, I wouldn't do that by default - and didn't notice
+U601ELFEG : and will change it - just I was factoring out that operation (it is used in several other Msg values that I didn't list - ) and didn't realize the name conflict - I was stuck thinking it was somehow my polymorphic use of `clearHoveredSlot`
+U601ELFEG : yay - no more hangs - thanks all!
+U17PWHU4D : hossman333: thanks <@U5AR0LDQA> , is there a way to set this inside a let instead?  I realize this is still the js mindset, but:
+```
+let 
+  if model.isActive &amp;&amp; somethingElse then
+    activeVal = "1"
+  else 
+  activeVal = "0.5"
+```
+
+struggling to see how you would dynamically set a value inside let.
+
+U5AR0LDQA : Yeah so you would do something like this.
+```
+let
+   isActive = if model.isActive &amp;&amp; somethingElse then
+    "1"
+   else 
+    "0.5"
+in
+```
+
+U5AR0LDQA : `isActive` becomes the variable
+U5AR0LDQA : So then you can use it in `in` <@U17PWHU4D>
+U17PWHU4D : ooh!  nice.  thanks <@U5AR0LDQA> trying that out now!
+U5AR0LDQA : You're welcome! :smiley: <@U17PWHU4D> 
+U62P4HLCA : I'm banging my head trying to decode a nested json {"error":[],"result":{"DASH":{"aclass":"currency","altname":"DASH","decimals":10,"display_decimals":5}
+U4F64AKQV : <@U62P4HLCA> You probably want to use something like `<http://Json.Decode.at|Json.Decode.at>` (<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#at>)
+U4F64AKQV : <https://noredink.github.io/json-to-elm/> might also be helpful
+U62P4HLCA : ah thanks... I'll take a look
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

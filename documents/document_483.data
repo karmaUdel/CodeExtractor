@@ -1,7 +1,156 @@
+U6AHD8Q95 : Any idea what i'm doing wrong?
+U4872964V : <@U6AHD8Q95> just as the message says, onInput will give your function a `String` but you want it to give you an `Int`
+U4872964V : input fields, even of type "number" can contain arbitrary strings
+U6AHD8Q95 : So I defined a property of a record as an int
+U4872964V : yes, but the easiest is probably to have the message take a `String` and then convert it in your update function
+U6AHD8Q95 : `String.toInt`?
+U4872964V : yes, `toInt` and then you have to handle the error, if any
+U4872964V : I see you have validation already, so you could add it to that
+U4872964V : Or just keep the 0 if the int value is invalid in the field
+U6AHD8Q95 : Hmm… I'm proably missing something
+U6AHD8Q95 : ```    Age age -&gt;
+      { model | age = String.toInt age }
+
 ```
-ups formatting fail…
-Compiler is saying: pattern y in branch 4 is redundant.
-you can use triple backticks to format multi-line chunks of code!
-(and don't forget slack lets you edit)
-:+1:
-done :slightly_smiling_face:
+
+U6AHD8Q95 : Shouldn't that handle the problem?
+U6AHD8Q95 : <https://runelm.io/c/ohc> this is the code
+U0CLDU8UB : Nope, `String.toInt` returns a `Result String Int`, which means it is a Result that can either be a success (and contain an Int) or a failure (and contain a String)
+U4872964V : well, you need to decide what to do if the string cannot be converted to an int
+U4872964V : or just keep it as a string always
+U4872964V : it really depends on what it's used for
+U6AHD8Q95 : But the excersize say different
+U6AHD8Q95 : `Add an additional field for age and check that it is a number.`
+U6AHD8Q95 : Hmmm… Got it…
+U0CLDU8UB : Actually, in your model age is still `String`
+U6AHD8Q95 : It can be a string but need to make sure it's a number
+U4872964V : the `String.toInt` will do the checking for you
+U4872964V : but maybe there is some other meaning of "checking" here
+U4872964V : I don't know what exercise you are doing
+U6AHD8Q95 : <https://guide.elm-lang.org/architecture/user_input/forms.html> from here
+U6AHD8Q95 : at the end
+U4872964V : oh, i see
+U6AHD8Q95 : why there is no solutions in the excersises?
+U0CLDU8UB : That's a good question.
+U4872964V : <https://github.com/evancz/guide.elm-lang.org/issues/93>
+U4872964V : <https://gist.github.com/gabehollombe/45cb6f61ccb270931ded71f155ca37fe>
+U4872964V : it really is a matter of interpretation
+U6AHD8Q95 : But another question - Can I make an update function insteaf of the `onInput`?
+U6AHD8Q95 : Something like:`input [ type_ "number", placeholder "Age", customFunction Age ] [],`
+
+U4872964V : what would that mean? onInput means "when the user inputs something, send this message"
+U6AHD8Q95 : Never mind
+U6AHD8Q95 : thanks for the help
+U6AHD8Q95 : I'm off for dinner
+U4872964V : you're welcome!
+U3LUC6SNS : <@U4JT89FGB> I'd be interested if you have the time - thanks!
+U2DF486HL : Is there a way to attach the onClick to a div containing the "a" element?
+U57KYFW67 : <@U2DF486HL> You have to specify event handlers when you create the `Html` objets.
+U57KYFW67 : You can't reference a DOM node's parent in Elm programmatically. You constructed it, so you should have had the chance to make it how you like :slightly_smiling_face:
+U2DF486HL : <@U57KYFW67> ok, but I use the href to specify the next route.. div and its onClick event should take this arg to know the next route then right?
+U2DF486HL : maybe I'm confused
+U57KYFW67 : I'd need to see the code to understand the situation better.
+U3SJEDR96 : `onClick` takes a `Msg`; nothing stopping you from doing `onClick (GoTo "#/my-url)`
+U2SR9DL7Q : Can case statements be used in anonymous functions?
+U2DF486HL : <@U57KYFW67> <@U3SJEDR96> great.. I've just tried to attach onClick MyMsg to the div element and it worked.. thanks
+U57KYFW67 : <@U2SR9DL7Q> The nice thing about case statements is that they are expressions, just as anything else. You can use them anywhere you could use a value.
+U2SR9DL7Q : <@U57KYFW67> sweet. Python's lambdas are horribly gimped (the creator isn't a fan) and I got used to not having lots of flexibility with them.
+U57KYFW67 : Yeah. Guido actually made an intentional call to cripple lambdas in Python. It's really obnoxious..
+U2SR9DL7Q : It's one of the issues with having a BDFL. But he's done more good than bad. We just have to hope Evan never goes rogue....
+U3SJEDR96 : you could even do `?foo -&gt; [ case let a = [1, 2] |&gt; List.sum in a of b -&gt; b ]` and it would be legal in elm
+U57KYFW67 : yep
+U57KYFW67 : `let` statements enjoy the same flexibility as well
+U57KYFW67 : I'm a monster some nights and I write things like `div [ ] (let mkchild label = ... in [mkchild "label1", mkchild "label2", ..., ])
+U3SJEDR96 : (where `?` is alternative syntax for `\`)
+U57KYFW67 : it's often easy to just jam the `let` or `case` statement right in place, get it to work, and refactor after
+U2SR9DL7Q : Oddly enough that almost exactly what I wanted to do. I'm getting the head of a list, so now I have all these maybe values to handle. The way the code is written... there's no way they could be empty... but there's no way to tell List.head that...
+U6602MZ9Q : If they're really never empty there's a thing called a nonempty list
+U6602MZ9Q : <http://package.elm-lang.org/packages/mgold/elm-nonempty-list/3.0.0/List-Nonempty>
+U2SR9DL7Q : thats interesting
+U66RFDZ8F : Hello everyone
+U66RFDZ8F : I am facing a confusing problem
+U66RFDZ8F : So I wanted to use ports to abstract my file handling away
+U66RFDZ8F : So I have a module called `Lib.File`
+U66RFDZ8F : where I have defined 2 ports `port readFile : Value -&gt; Cmd msg`
+`port fileRead : (String -&gt; msg) -&gt; Sub msg`
+
+U66RFDZ8F : In `js` land, I am getting this error `Cannot read property 'subscribe' of undefined` when I try to do `app.ports.readImage.subscribe`
+
+U663M2MB7 : Random is considered a side effect / IO in Elm, correct?
+U5VH5PYD6 : I think you need to tell elm that the port exists, so in JavaScript, the Elm application object will have access to it:
+E.g: <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Ports.elm>
+
+U66RFDZ8F : This issue (<https://github.com/elm-lang/core/issues/822>) mentions to define it in Main
+U66RFDZ8F : but I can't import `Main` as it's a cyclical dependency
+U66RFDZ8F : <@U5VH5PYD6>, I have this `port module Lib.File exposing (fileRead, onFileSelected, readFile)`
+U57KYFW67 : <@U663M2MB7> yes. Anything that would require managing outside state. And a "random" event must keep track of the state of some random number genreator.
+U66RFDZ8F : I apologize, I changed the port names in my code
+U66RFDZ8F : But was reusing the same js from the example
+U39DE7RQ9 : I need help. Im building a SPA and copy pasting from rtfeldmans SPA example. In one of my pages I need to use ports in the init function to retrieve data from firebase. The `transition` function in main-setRoute that is calling the page init function requires a return type of Task PageLoadError HomePage.Model but my port returns a Cmd Msg. How do I handle this? I guess ports only return Cmd and not Task?
+U663M2MB7 : <@U57KYFW67> thanks. I have Haskell experience, so that makes sense. Just needed to know that quickly :slightly_smiling_face:
+U663M2MB7 : Just trying to get to know how strict Elm is, but I assume all IO is treated the same as Haskell?
+U663M2MB7 : I mean, that is after all basically just what you said :smile:
+U39DE7RQ9 : Where does the function `transition` come from and can it be made to take Cmd instead?
+U48AEBJQ3 : <@U39DE7RQ9> I'm wracking my brain to see if there is something simpler, but all I can come up with is needing to hack together a slightly different interaction.
+`transition` is defined in the `let` expression at <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L245>
+
+U57KYFW67 : <@U663M2MB7> neat. IO is a little bit different in how it's handled, since there's no IO type. Everything gets routed through `Cmd`'s.
+U57KYFW67 : <@U663M2MB7> Elm is just like Haskell, where the only points where purity is breached are either buried in native packages or in `Debug.log`
+U57KYFW67 : and everything else is side-effect-free
+U39DE7RQ9 : <@U48AEBJQ3> thanks, at least now I know where the function resides. I will try to create something using Cmd. Ports only return Cmd right?
+U48AEBJQ3 : <@U39DE7RQ9> Yes.
+U39DE7RQ9 : <@U48AEBJQ3> is there a Cmd equivalent to Task.attempt?
+U48AEBJQ3 : No. What I would do is change all of my `init` functions from something like `init : Session -&gt; Article.Slug -&gt; Task PageLoadError Model` to something like `init : (Result PageLoadError Model -&gt; msg) -&gt; Session -&gt; Article.Slug -&gt; Cmd msg`
+U48AEBJQ3 : Which would have you change `transition ArticleLoaded (Article.init model.session slug)` to `transition (Article.init ArticleLoaded model.session slug)`
+U48AEBJQ3 : And `transition` would look like:
+```
+transition cmd =
+    { model | pageState = TransitioningFrom (getPage model.pageState) }
+        =&gt; cmd
+```
+
+U39DE7RQ9 : <@U48AEBJQ3> thanks, I will try that!
+U39DE7RQ9 : <@U48AEBJQ3>, now that code seems to compile. The next problem is that in my subscriptions I need to point to messages that resides in my HomePage module. The compiler says:```
+23:08:12 client.1   |  The type annotation for `subscriptions` says it always returns:
+23:08:12 client.1   |      Sub Msg
+23:08:12 client.1   |  But the returned value (shown above) is a:
+23:08:12 client.1   |      Sub HomePage.Msg
+```
+
+U39DE7RQ9 : I know it is possible to map messages some how but I cant find how.
+U48AEBJQ3 : <@U39DE7RQ9> <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Platform-Sub#map>
+U48AEBJQ3 : You need something of `HomePage.Msg -&gt; Msg`
+U48AEBJQ3 : Usually a constructor of `Msg`
+U39DE7RQ9 : <@U48AEBJQ3> a function that encapsulates HomePage.Msg in a Msg?
+U48AEBJQ3 : Right, usually a tag of `Msg`
+```
+type Msg
+   ...
+   | SubscriptionEvent HomePage.Msg
+```
+
+U39DE7RQ9 : Im sorry <@U48AEBJQ3> but I cannot seem to puzzle this out by my self. I have added `SubscriptionEvent HomePage.Msg` message but my subscriptions look like this tight now and it does not compile.```
+subscriptions : Model -&gt; Sub Msg
+subscriptions model =
+    Sub.batch
+        [ gotAllPublicForms (SubscriptionEvent (HomePage.GotAllPublicFormsMsg &lt;&lt; decodeValue jsonFormListDecoder))
+        , gotForm (SubscriptionEvent (HomePage.GotFormMsg &lt;&lt; decodeValue jsonFormDecoder))
+        ]
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

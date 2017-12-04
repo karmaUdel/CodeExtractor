@@ -1,1 +1,59 @@
-Conda does the same really, so ```conda create envname``` gives you a conda environment
+U2MLC3R4G : <@U0LPMPL2U> I could do that. But the laid down logic for the rest program have to change. I think I have to avoid your recommended function signature.Workaround could be I could create another function and send it the route to get an id.
+But as it's a functional language you should everything should return some value. It's not a good code to use Debug.crash to handle the never happen case.
+
+U5ABF3BH7 : @ericgi, it is Types.UpdateLocation, it is a msg in my Types model (it is the upper model)
+U2MLC3R4G : @joeql I think. I could use the Never type. but after look into that. I didn't understand it well.  I think it's use with some Html Never. Html that doesn't has a message
+U0LPMPL2U : <@U2MLC3R4G> right. I think the problem comes from the way your code is probably structured
+U0LPMPL2U : you probably want a top-level `case` that handles all possible routes
+U0LPMPL2U : now any sub functions can be passed the necessary strings or integers extracted from the current route
+U0LPMPL2U : and the routes don't get passed around to other functions
+U2MLC3R4G : Do you have anything friendlier than Debug.crash for this case. @joeql
+U5ABF3BH7 : <@U0JFGGZS6> I ended up creating a function that updates everything at once
+U5AEH3L05 : If there's a question I have about a package that isn't necessarily a bug, what's the right place to do so? In the github issues?
+U0LPMPL2U : <@U2MLC3R4G> I'm saying you don't want to write that function at all. Instead you should handle all routes in a single place and eliminate the problem altogether. Something like:
+```
+setRoute : Route -&gt; Model -&gt; (Model, Cmd Msg)
+setRoute route model =
+  case route of
+    Companies -&gt; (model, Cmd.none)
+    EditCompany id -&gt; doSomethingWithId id
+```
+
+U0LPMPL2U : you can use this approach both for changing state on the model when changing routes or to display different views
+U0LPMPL2U : See the `setRoute` and `viewPage` functions in this example app: <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm>
+U5ZKYURNY : <@U0LPMPL2U> thanks, I guess I will simply define an Ignore message and use it for all kinds of Task/Cmd whose result I don’t care, like ``` Task.attempt (always Ignore) (Dom.focus elementId) ```
+U2MLC3R4G : @joeql, My logic for the route is like thatBut In my case I am doing something different here. 
+I am updating the model that can allow update there primary key. 
+This is the part where the user click the update button (all routing logic has been done') and sending the Cmd to the api end. But since this model allow it to update the primary key also. I will have to find a way to get the primary key from the route instead of form model here.
+
+U0LPMPL2U : Can you extract the id when you're doing the routing logic and set it on the model or pass it into whatever function is building the Cmd?
+U0LPMPL2U : If you have a `viewPage` function like the one I linked, you can do something like:```
+viewPage : Route -&gt; Model -&gt; Html Msg
+viewPage route model =
+  case route of
+    Companies -&gt; viewCompaniesList
+    EditCompany companyId -&gt; viewEditForm companyId model
+```
+
+U1G51S63S : there is a pretty simple example since node can be empty or have 2 childs max :disappointed:
+U2MLC3R4G : @joeql yes that would one of alternative here.
+U1G51S63S : it will not solve problem when I  need to find node in a deeply nested list and updated it :disappointed:
+U2MLC3R4G : @joeql this would be a better way. by adding one more input to the view function will allow avoid looking at the route information when we send Cmd after the form submitted.
+U2MLC3R4G : thank you @joeql
+U0LPMPL2U : Glad to help :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

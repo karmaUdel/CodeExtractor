@@ -1,0 +1,152 @@
+U0NRYQNAZ : env.example ya
+U0NRYQNAZ : or `.env.example` my bad.
+U4BMZ90T0 : Is that in your gists?
+U0NRYQNAZ : no but i can create one.
+U0NRYQNAZ : `.env.example````
+export PY_ENV="development"
+export GITHUB_TOKEN=""
+export SOME_API_URL=""
+export SOME_API_TOKEN=""
+export DB_USER=""
+export DB_PASSWORD=""
+export DB_HOST=""
+export DB_NAME=""
+```
+
+U0NRYQNAZ : then you can run `cp .env.example .env`
+U0NRYQNAZ : and fill out the values
+U0NRYQNAZ : then run `source .env` and be good to go.
+U5S8CNULD : <@U1BP42MRS> Okay, I'm tried.. but didn't work(
+
+For example
+
+```
+return query.filter(
+                and_(
+                    Post.created_at &gt; search_by_date(),
+                    Post.created_at &lt; get_today()
+                )
+            )
+```
+
+and methods
+```
+def search_by_date(days=None):
+    if days:
+        date = datetime.utcnow() - timedelta(days=int(days))
+        return date.strftime('%Y-%m-%d')
+    else:
+        yesterday = datetime.utcnow() - timedelta(days=1)
+        return yesterday
+
+
+def get_today():
+    today = datetime.utcnow().strftime('%Y-%m-%d')
+    return today
+```
+But  for current day, it's not working.. I understand in which way I need to move..:disappointed:
+
+U1BP42MRS : I think you either want `&lt; get_today() + 1day` or to do `&lt;= get_today()`
+U5S8CNULD : ```# Query
+
+# first didn't work
+return query.filter(Post.created_at == get_today())
+
+# second 
+# return posts after 25th July
+return query.filter(Post.created_at &gt;= get_today())
+
+def get_today():
+    today = datetime.utcnow().strftime('%Y-%m-%d')
+    return today
+
+```
+
+U610F0WKC : Hello,
+I would like to test a system with several AMQP consumer/producers that are exchanging messages with each other.
+I would like to have unit-testing with those consumers. Is there a commonly used design pattern for doing so in Python? (I'm using pytest at the moment with a fixture that look like this:
+
+U610F0WKC : At the moment my set-up is this:My consumers inherit from multiprocessing.Process and when started set-up their AMQP environment.
+When the test is finished, the terminate closes the connection and cancel everything.
+The problem that I get is that even when a test completed, the Process of the consumers seems to continue running in the background even after I called terminate.
+
+How could I have a nice clean-up when the test is over? Would it change something to have BlockingConnection instead of a SelectConnection ?
+
+Here is the current version of my base class for those components: <https://gist.github.com/sieben/caf39e04a83c812550d967a22b9d8584> is an obvious flaw in it? Is there an alternative from inheriting from Thread or Process ?
+
+U4BMZ90T0 : Is there any way to run pycharm in debug with commandline arguments?
+U0LSCQQNR : yes
+U1BP42MRS : Yeah, you can use the same run menu with command line args and click the debug icon instead of play - or are you seeing something funky?
+U0LSCQQNR : go to run configuration
+U4BMZ90T0 : Is it under the script parameters
+U1BP42MRS : Yep
+U1BP42MRS : those are the args passed to it
+U4BMZ90T0 : Got it
+U4BMZ90T0 : I'm using a module called `simple_settings` and after a few times of accessing the configured settings I get
+U4BMZ90T0 : lol
+U4BMZ90T0 : But the stack trace pretty much shows all calls to the `simple_settings` module and I really don't understand why. I think I may just not use that at all to be honest. But wasn't sure if it was a mistake I made
+U4BMZ90T0 : It seems to be going between these two
+U29163YQH : well the stacktraces is pretty explicit
+U29163YQH : python as a recursion limit that you reached
+U4BMZ90T0 : Yeah, I guess maybe I didn't actually setup the module properly
+U4BMZ90T0 : But it's odd that it goes between the two over and over I'm trying to get to it in debug
+U29163YQH : well in fact the `__getattr__` func call `setup` and `setup` call `__getattr__` so it's endless
+U4BMZ90T0 : cant even debug to where it breaks
+U29163YQH : well it breaks as soon as the class is init or called
+U29163YQH : as `__getattr__` is used quite a lot
+U4BMZ90T0 : Yeah, looking at some stuff now it basically says if `__getattrb__` can access a variable which does not yet exist it will go into infinite recursion
+U4BMZ90T0 : alright got rid of the module, not sure what was happening, figured out a different way
+U24HARUCQ : Has anyone tried to get an event into the Python Weekly newsletter?
+U24HARUCQ : Can't find a point of contact
+U676NMRDK : <@U24HARUCQ> <http://www.pythonweekly.com/> ?
+U24HARUCQ : Yes but neither the site nor the email content has a contact link
+U676NMRDK : I think this is the guy <https://twitter.com/rahulgchaudhary>
+U676NMRDK : “Curated by Rahul Chaudhary — every Thursday”
+U24HARUCQ : Can try
+U1T9QQZKQ : i'm trying to actually write good tests for once in my life, and I have this argparse piece in my code, when i run `pytest -v` it passes the `-v` flag to argparse even though i'm calling `parse_args(['-f'])`
+U1UFZTD4J : Maybe just mock out the arg parse calls?
+U2Q2LMZ6D : Hi folks, i'm looking for a way to add requirement.txt better. If I install a new python package X, it have some other dependencies like Y,Z.If I add only X into requirement.txt, then I can get auto download Y,Z when installing my app in a new env. Or I use `pip freeze` to dump `X,Y,Z` into requirement.txt.
+Which way I should follow? I feel like the former make my txt look cleaner and bring the same value, is that right?
+
+U5W7MEVHR : <@U2Q2LMZ6D> In my opinion it's better to add only depends that is needed by your project and leave pip decide what else should be installed.
+U2Q2LMZ6D : so you mean we should avoid pip freeze?
+U5W7MEVHR : I mean what I say)
+U2Q2LMZ6D : haha alright
+U47HK8BS8 : what kind of project are we talking about here?  if it's a library, you'll want to avoid being so specific.  if it's the end product, you'll definitely want to be freezing your dependencies to exact versions
+U07JGLLKF : in both cases i would say to freeze all dependencies with `pip freeze` anyways and then put `pip list --outdated` as part of your continuous integration process to let you know about newer versions
+U47HK8BS8 : I think it's problematic for a library to specifically require a version of its dependencies, since unlike say npm Python dependencies are global
+U47HK8BS8 : I'm pretty sure if I have two dependencies, A and B, which both depend on C, and they specify different versions of C, there is going to be a problem, right?
+U29163YQH : yeah don't do that
+U47HK8BS8 : Also, there are some cool services like PyUp which can scan your dependencies and open a pull request automatically when there are updates
+U5JF1KD18 : Has any one here once have tried to implement a proxy server using twisted ?
+U6DUW96PP : Hi , I'm looking for way to profile a python module loaded from a pickle file with cProfile ?
+U28MDQRL2 : Is there another way to create args dynamically for a function?. I'm currently doing:```
+arg = {a_variable: 'something'}
+func(**arg)
+```
+
+U47HK8BS8 : well there's `*args`, which is based on the order (as opposed to `**kwargs`, using keywords as you did)
+U47HK8BS8 : what is it about `*args, **kwargs` that's not working for you?
+U6D8URC82 : i think kwargs is the way to go, same as you're doing
+U28MDQRL2 : It works for me. I was just thinking that there might be a better way to do it.
+U28MDQRL2 : Actually the args needs to have keywords <@U47HK8BS8>
+U47HK8BS8 : cool, just pointing out there's also *args which handles positional arguments
+U1T9QQZKQ : i think that's what i'm going to have to do. i get this gut feeling that i'm doing testing wrong. my tests always are more code and logic than the actual fucntions
+U4BMZ90T0 : Getting an odd error in a dictionary'
+U4BMZ90T0 : I basically have a dictionary with 4 main keys, and their values lead to other keys where in turn their values are integers
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

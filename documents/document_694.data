@@ -1,29 +1,56 @@
-Boat.draw calls Sailors.draw```
-So please help to find out the way how can I print the output in new console opened using subprocess.
-Hello
-<@U68Q8495W> <https://stackoverflow.com/questions/15899798/subprocess-popen-in-different-console>
-in short, you need `shell=True` in your `Popen` call
-I was hoping I could get some help with a script to parse some json files 
-And save the output. Need to iterate it 
-you should post the part where you are stuck and I'm sure someone will help you :slightly_smiling_face:
-Hi Jason, Thanks and from the link you have mentioned, it says i can use subprocess without `shell=true` by sending the command in list. Opening new console is fine for me and the problem is I cant output the stdout in that new console. Becasue I have to redirect the output to a file and console both on real time.
-:)
-Can i post my question on stack overflow?
-I mean the link to the question 
-<https://stackoverflow.com/questions/45087325/set-up-a-crawler-and-downloaded-tweets-unable-to-parse-json-file?noredirect=1#comment77166732_45087325>
-<@U69HXQZJ9> Do you have an example JSON file you're having trouble with?
-Yes I do. It's a twitter json file 
-Usually JSON files can be loaded with json.loads(f) and then used as a standard Python data structure (nested arrays and dicts etc)
-<@U69HXQZJ9> Well, attach it then?
-Let me turn on my laptop. One minute 
-<@U69HXQZJ9> Sure, no hurry.
-Thanks, I'll try to read it.
-When I tried to parse it using other scripts, it would give me (ValueError: Extra data: line 2 column 1 - line 1201 column 1 (char 13339 - 8801096)
-For starters, thats *not* a valid JSON file.
-It's more like a text file where every line seems to contain a JSON representation of an object.
-...workin....
-Ahh
-I had set up a crawler to download scripts 
-Sorry 
-Tweets I mean 
-Is there a way I can fix it?
+U41NK9BM4 : Well, let’s hope! It is an annoying asymmetry
+U3SJEDR96 : you can sort of kind of work around it with `.baz Foo.bar` but yeah, that's not great either :slightly_smiling_face:
+U2LAL86AY : <@U0U6ML22H> for each of your 3 types that you want to display in that table , can you can hold a list of "labels".  Now because this 3 types are different types - you need 3 different functions that extract thouse labels. `extractLabelsForFirstType: FirstTypeOfItemInThatTable -&gt;  List Label` - and you have 3 of this functions. all tree returning just a `List Label`
+
+and your query module/functionality will just check if this labels on this items - will match the filters selected.
+
+`genericQueryItem : List filters -&gt; List Label -&gt; Bool` what i'm tring to say is - you don't let the `query thing` know about your types of items.  You just give him some labels - and based on the filters it has already selected - it gives you back if this list of labels is mached. Maybe i didn't underestoond your usecase too well but for what i have "in my head in terms of filtering" this should work.
+
+U0U6ML22H : <@U2LAL86AY> yeah, thanks, I think that's what I ended up going with :smiley:
+U4KFY2V6V : Is there a good way (or article) how to test http requests? Not the actual execution but the content or the url without bleeding too much into the implementation
+U2LAL86AY : there is this package - maybe it does what you want - i've  not worked with it yet. <http://package.elm-lang.org/packages/rogeriochaves/elm-testable/latest>
+U2LAL86AY : ```This package allows you to write components that follow the Elm Architecture in a way that is testable. To allow this, elm-testable provides testable versions of the Html, Task, Effects, Http and Process modules, as well as Testable.TestContext to test testable components and Testable to integrate testable components with your Elm app.
+```
+
+U1CE9DL9H : you cal also parse the url back with `url-parser`
+U17R1GD96 : I don’t understand how to pass a JSON object from JS to Elm in subscription. When I send something like `ports.payload.send({message: "HI!"})` what is actually sent? The JSON string, right? How to subscribe to that?
+U17R1GD96 : I have `port payload : ({ message : String } -&gt; msg) -&gt; Sub msg`. I’m not sure how to write subscription funcion
+U17R1GD96 : This has type mismatch ```subscriptions : { message : String } -&gt; Sub Msgsubscriptions data =
+    Sub.batch
+        [ payload data
+        ]```
+
+U0CLDU8UB : ```type Msg = Payload { message : String }
+
+subscriptions : Model -&gt; Sub Msg
+subscriptions model =
+    Sub.batch
+        [ payload Payload
+        ]
+```
+
+U0CLDU8UB : This is how it should work
+U17R1GD96 : I don’t want to subscribe to Model. It contains more things. I only want to load from JS some data.
+U3LT1UTPF : Hi. I need a dropdown select. I've seen several examples, but I don't know which one to take. Do you think this one is a good example to base mine on?: <https://github.com/wintvelt/elm-dropdown/blob/master/examples/Single/Main.elm>
+U3SJEDR96 : <@U17R1GD96> you don't subscribe to model, but the `subscriptions` call that you have to `program` takes your `model` as the first argument by default, so you can decide _what_ to subscribe to based on the state of your model
+U3SJEDR96 : so basically, you could have `subscriptions _ = payload Payload`
+U3SJEDR96 : and then whenever you calll `ports.payload.send(whatever);`, your update will be called with a `Payload` message
+U17R1GD96 : OK. I understand. Thanks.
+U17R1GD96 : I have related question to that. I want to pass more complex JSON object from JS to Elm. The full init data for the Model. Do I need  to create some decoder for that? I did not need to create any decoder for passing simple JSON object  `{message:'HI!'}`.
+U3SJEDR96 : the automatic conversion can handle a decent amount of things (with a notable lack of support for union types). Also, the automatic conversion doesn't let you handle errors gracefully. As such, it _is_ generally recommended that you make your `port payload : (Json.Encode.Value -&gt; msg) -&gt; Sub msg`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

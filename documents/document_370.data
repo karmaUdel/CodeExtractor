@@ -1,20 +1,90 @@
+U3LUC6SNS : Hard to do much on the old machine since I can't type a space with the  incompatible keyboard.
+U3LUC6SNS : server.js is an express web server.  I looked in webpack.config.js and found no `api.js`
+U3LUC6SNS : Ah here it is: in `package.json`:```
+"scripts": {
+    "api": "node api.js",
+    "build": "webpack",
+    "client": "webpack-dev-server --port 3000",
+    "start": "nf start"
+  },
 ```
-this is out of curiosity, really :slightly_smiling_face: I've played around with decoders a lot, and experimented with stronger error types (<http://package.elm-lang.org/packages/zwilias/json-decode-exploration/3.0.0/Json-Decode-Exploration>) and a simpler version of that is also coming to Elm in 0.19
-That looks like you could probably make use of `Result.map`
-Oh, right. I could actually add a `failWith : Error -&gt; Decoder a` option :thinking_face:
-`Result.map` allows you to transform data contained inside a result.... if there is any.... otherwise, it keeps the error the same
-<https://github.com/ohanhi/ohanhi.com/blob/master/site.hs#L105-L110> :grimacing:
-<@U3SJEDR96>, isn't that what the null decoder does?
-(kinda)
-If you're using `null ERROR` and checking on `Ok ERROR`... Maybe? But... Ew :scream:
-considering that sends cold shivers down my spine
-well, no, I was only remarking on your type sig.
-I haven't touched Haskell in a while. I should learn the new Stackage package manager so I can hack on the elm compiler.
-null decoder `find this or if err then find this ...` if you chain it together.
-I have a feeling we're talking about completely different things, here
-<@U3SJEDR96> maybe have `ErrorType s = ... | Custom s` too :slightly_smiling_face:
-when we're going all custom on the errors
-Yeah, was considering that, too. `Decoder e a` seems like it could work, actually
-Now I'm sort of thinking about how to have extensible union types
-boo hiss at extensible union types! The goodness of having a fixed set of constructors is that our `case` statements can be complete.
-well, maybe this is not for <#C192T0Q1E|beginners> :slightly_smiling_face:
+
+U3SJEDR96 : right. So your Procfile probably has a `yarn client` in there somewhere... It's a little odd that foreman decides to stop on your current machine, but continued on your older machine. I suppose you can remove the `yarn api` part of your Procfile for now..
+U3LUC6SNS : <@U3SJEDR96> Commented out `api yarn api` in `Procfile`.  The error is now```
+172-10-18-240:koko_client2 carlson$ yarn start
+yarn start v0.27.5
+$ nf start
+[WARN] No ENV file found
+6:27:11 AM client.1 |  sh: webpack-dev-server: command not found
+6:27:11 AM client.1 |  error Command failed with exit code 127.
+```
+Could there be a problem with `PATH`?  It is now
+```
+172-10-18-240:koko_client2 carlson$ echo $PATH
+/Users/carlson/Library/Haskell/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/carlson/.rvm/bin:/Users/carlson/dev/node_modules/mathjax-node/bin
+```
+
+U3SJEDR96 : it seems to expect webpack to be installed globally
+U3LUC6SNS : OK, how would I do that?
+U0CLDU8UB : `yarn global add webpack`
+U3SJEDR96 : yarn global add webpack would probably fix that, though I do suggest trying to make sure it uses the local path
+U3LUC6SNS : I'll give these suggestions a try.  Thanks <@U3SJEDR96> and <@U0CLDU8UB> Yikes
+U3LUC6SNS : Yikes what a pain this is!!! I did `yarn global add webpack`, then `yarn start`  Error message is```
+172-10-18-240:koko_client2 carlson$ yarn start
+yarn start v0.27.5
+$ nf start
+[WARN] No ENV file found
+6:33:28 AM client.1 |  sh: webpack-dev-server: command not found
+6:33:28 AM client.1 |  error Command failed with exit code 127.
+[DONE] Killing all processes with signal  null
+internal/util.js:183
+  throw new errors.Error('ERR_UNKNOWN_SIGNAL', signal);
+```
+
+U3LUC6SNS : `$ which webpack` returns nothing
+U0CLDU8UB : ahh, `webpack-dev-server` is being used directly in the scripts, too
+U3LUC6SNS : Yes
+U3SJEDR96 : can you test `yarn client`?
+U3LUC6SNS : ```172-10-18-240:koko_client2 carlson$ yarn client
+yarn client v0.27.5
+$ webpack-dev-server --port 3000
+sh: webpack-dev-server: command not found
+error Command failed with exit code 127.
+```
+
+U3SJEDR96 : did you run `yarn` to install npm dependencies?
+U3LUC6SNS : I don't believe so.  Doing that now  Lots of activity.
+U3SJEDR96 : :thumbsup:
+U0CLDU8UB : and if that doesn't get you any further, then maybe `yarn global add webpack-dev-server`?
+U3LUC6SNS : All working!!! I had to kill some stray `webpack` processes, but then ... YAY!!  Thanks so much. Would never have been able to do this by myself.
+U3SJEDR96 : <@U4BJ8UDCP> module names in elm match the filesystem 1-1: `src/Foo/Bar.elm` corresponds to `module Foo.Bar`. Case sensitivity is also important.
+U3SJEDR96 : (the above assumes `"source-directories": ["src"]`)
+U4BJ8UDCP : Hi there - I'm having some trouble with the module system - The compiler can't find one of my modules.
+in my ```elm-package.json``` my only source-directory is written as "source".
+
+my folder hierarchy is:
+```
+/source
+    /server
+        Main.elm (named "Server.Main")
+        Request.elm (named "Server.Request")
+```
+Server.Main fails to import Server.Request :disappointed:
+
+U3SJEDR96 : Yeah, go for `/Server` instead :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

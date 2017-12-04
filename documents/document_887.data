@@ -1,0 +1,201 @@
+U07JGLLKF : that's not too bad i guess
+U07JGLLKF : if it's a junior position, try and focus on what you've learned in your months with django, try and identify what you're doing well and what you're excited to learn next
+U07JGLLKF : ensure you know how testing frameworks interact with django, ensure you know how to write some tests, maybe go over the model and filtering examples again so you're aware of filter chaining and foreign key relationships
+U5CGPBF0U : `/reports/&lt;lat&gt;/&lt;long&gt;/` vs. `/reports/?lat=x&amp;long=y`What do you guys think? :slightly_smiling_face:
+
+U690F7NJV : Got you. Thanks <@U07JGLLKF>
+U5NMSURAQ : <@U5CGPBF0U> first one
+U5NMSURAQ : there are always gonna be `lat` and `long` params, and this way it looks pretty
+U0B7W48UB : hi I have a doubt what is the difference between json.loads(b'byte_string_from_outside') and b'byte_string_from_outside'.decode(‘utf-8') because I read docs and experiment a little bit but is confusing because but seem to work, which one should  go ?
+U65CTNMTR : The former will return a `dict` representation of the JSON. The latter just returns a `str`.
+U0E44UP6G : in the first case may be returned any type that can be represented in json, not only dict
+U0E44UP6G : ```&gt;&gt;&gt; json.loads('42')
+42
+&gt;&gt;&gt; json.loads('[1,2,3]')
+[1, 2, 3]
+```
+
+U0LSCQQNR : <@U5CGPBF0U>, have to disagee with <@U5NMSURAQ>. The second would be my preference
+U0LSCQQNR : especially with a rest api resource, wince `report` is a verb, and defines a resource
+U0LSCQQNR : `lat` and `long` are attributes for that resource
+U0LSCQQNR : but I would suggest definining what the requirements for `report` is... eg `location`
+U0LSCQQNR : `/report/location?lat=&lt;lat&gt;&amp;long=&lt;long&gt;`
+U5NMSURAQ : looks awful %)
+U0LSCQQNR : so this is better? `/report/90.49283/-56.934`?
+U0LSCQQNR : that doesn't make any sense,
+U5NMSURAQ : why?
+U5NMSURAQ : it's the same thing
+U0LSCQQNR : looking at it, it has no context at all
+U5NMSURAQ : and why do you need context while looking at the URL?
+U5NMSURAQ : `?`, `=` and `&amp;` have almost no place in 2017
+U0LSCQQNR : oh bull
+U0LSCQQNR : they absolutely do
+U5NMSURAQ : As a user, it's more confusing to see `?`, `=` and `&amp;`, then just `/`
+U5NMSURAQ : why do my URLs have to look like that?
+U0LSCQQNR : so, I fail to see how the first makes more sense
+U0LSCQQNR : location with two numbers in slashes
+U0LSCQQNR : what are those numbers?
+U5NMSURAQ : Let's see how FB does it: `<https://www.facebook.com/notes/equine-calculator/how-to-claim-your-vanity-url-for-your-facebook-page/474147772600069/>`
+U5NMSURAQ : `<https://www.facebook.com/help/121237621291199>`
+U5NMSURAQ : Not `<http://facebook.com/?action=help&amp;id=1212376|facebook.com/?action=help&amp;id=1212376>...`
+U0LSCQQNR : doesnt apply here exactly
+U0LSCQQNR : because `/help` is just one resource that takes in one parameter
+U0LSCQQNR : `/report/number/number` is pretty crappy design
+U5NMSURAQ : no, that's way too technical of an explanation
+U0LSCQQNR : doesn't tell me anything abut what `report` is to take
+U0LSCQQNR : <http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#advanced-queries>
+U5NMSURAQ : once you visit literally one report page you'll know exactly how to use it
+U0LSCQQNR : and then looking through a list of URL endpoints
+U0LSCQQNR : where `report` can have multiple filters
+U5NMSURAQ : &gt; An API is the user interface for a developer
+U5NMSURAQ : you kinda forgot about the users here
+U5NMSURAQ : doing things by the book will only make other developers pat you on the back
+U0LSCQQNR : so?
+U0LSCQQNR : `/reports` is a good identifier
+U0LSCQQNR : leaving everything else after that in slashes is crappy design
+U0LSCQQNR : especially when the purpose is to _filter_
+U5NMSURAQ : so what happens if a person DOES implement it that way?
+U5NMSURAQ : what's the penalty for crappy design
+U0LSCQQNR : give someone else the project
+U5NMSURAQ : developers are angry and users are a tiny bit less confused %)
+U0LSCQQNR : with crappy URL structure
+U0LSCQQNR : then you get a high WTF count and swear plenty at the idiot who came up with the URLs :slightly_smiling_face:
+U5NMSURAQ : but no complaints from users?
+U0LSCQQNR : users don't give a shit
+U5NMSURAQ : I could theoretically recite this URL to my mum over the phone
+U5NMSURAQ : the one with `?stuff=thing&amp;other=dunno`? not so much
+U0LSCQQNR : thing about this, you can do what you want
+U0LSCQQNR : there's just convention, not hard rules
+U0LSCQQNR : your method to me, is confusing
+U0LSCQQNR : as a developer and a user
+U0LSCQQNR : because all it does is tell me this is a report link
+U0LSCQQNR : with some numbers
+U0LSCQQNR : nothing about _what_ those numbers are and do
+U5NMSURAQ : you are trying to know what an URL is before visiting it
+U5NMSURAQ : just open the page and it will be clear as day, you'll never forget those two numbers
+U0LSCQQNR : never forget two eight digit numbers?  got photographic memory? :slightly_smiling_face:
+U0LSCQQNR : so your argument is that its easier to describe over the phone
+U0LSCQQNR : where theres no copying and pasting involved
+U0LSCQQNR : and that you're willing to accept the consequences of developer confusion and bad practices for that
+U5LNXQHN3 : Just to add my $0.02; I also prefer the explicit lat/lng arguments, and dislike having things in the main URI path if they don't follow some sort of hierarchy
+U5LNXQHN3 : It does make the URIs a bit uglier but I don't think that matters in this context
+U5NMSURAQ : :cry:
+U0L8Y8ZEW : Where can I import `MatchObject` from?
+U0L8Y8ZEW : for re
+U1NSCAY6R : +1 on using query parameters. in addition to what was mentioned, doing `/lat/lon` also makes it more confusing as it makes it appear to be a parent/child relationship almost. the other form makes for sense for say, a user photo, where you end up with `/user/123456/photos/1241241`
+U5CGPBF0U : Thank you all for the input! I really appreciate it. I will be implementing lat/long as query params. On a side note, with SQLAlchemy, what would be the best data type for storing a lat or long? I was going to use a float but I'm not sure if that's overkill.
+U0LSCQQNR : float, with `asdecimal=True`
+U5CGPBF0U : <@U0LSCQQNR> Oh, I was weighing the pros and cons of float vs. decimal. With `asdecimal=True` does this mean I'm using a decimal, or is this some kind of float/decimal hybrid?
+U0LSCQQNR : <http://docs.sqlalchemy.org/en/latest/core/type_basics.html#sqlalchemy.types.Float>
+U0LSCQQNR : &gt;&gt;&gt;Type representing floating point types, such as FLOAT or REAL.
+This type returns Python float objects by default, unless the Float.asdecimal flag is set to True, in which case they are coerced to decimal.Decimal objects.
+
+U5CGPBF0U : Ah, ok, I got it. Thanks!! Is your recommendation of decimal due to its accuracy?
+U0LSCQQNR : no
+U0LSCQQNR : you're storing coordinates
+U0LSCQQNR : so you need something with that ability
+U0LSCQQNR : specifically, store decimal numbers
+U0LSCQQNR : <https://docs.python.org/2/library/stdtypes.html#typesnumeric>
+U5LNXQHN3 : Not wanting to throw an extra complication into the mix, but if you're doing a lot of geographical work, you might want to be using something like PostGIS and doing spatial queries on the DB
+U5LNXQHN3 : (Also, yes, float isn't quite high-precision enough for most lat/long values that we work with, but only just)
+U5CGPBF0U : <@U5LNXQHN3> Oh wow! I was doing all the geo stuff from scratch, not realizing there could be something like PostGIS! I was still figuring out an efficient method for finding records with locations within a certain distance of a specific lat/long, but I guess PostGIS can already do that.
+U0LSCQQNR : you need to use postgres for it, though
+U0LSCQQNR : if that's not part of your stack...
+U5LNXQHN3 : see also <https://geoalchemy-2.readthedocs.io/en/latest/>
+U5CGPBF0U : Yep, I'm currently using Postgres
+U0LSCQQNR : +1
+U5CGPBF0U : <@U5LNXQHN3> Thanks for the link! This is so much better than building my own system from scratch.
+U5LNXQHN3 : no problem
+U29163YQH : Always check what already exist ;) 
+U5CGPBF0U : <@U29163YQH> Yep, not sure why it didn't even occur to me. I gotta make that my motto. :joy:
+U0LSCQQNR : yeah, good idea
+U0LSCQQNR : "is there anything already done for this?" is a good question to ask
+U0LSCQQNR : saves _a lot_ of work
+U2AQ9D8US : <@U5CGPBF0U> you should also consider limiting the precision of your lat/lng coordinates to something like `decimal(9, 6)`.  More precision than that often leads to misrepresented accuracy.  6 decimal places is accurate to about 4 inches...
+U5CGPBF0U : <@U2AQ9D8US> Oh, good point. Thanks! :smile:
+U6944D5GU : why cant i  get the absolute value of the number i input based on this code?
+U1NSCAY6R : <@U6944D5GU> you are calling the function from inside it, but after `return`
+U1NSCAY6R : So, the function has already run
+U29163YQH : Input always returns a string I believe 
+U1BP42MRS : both <@U1NSCAY6R> and <@U29163YQH> are right, note if you are using python2 you need to use the `raw_input` function
+U6944D5GU : python 3
+U1NSCAY6R : Also, you need to have `x()` take an argument that is passed in
+U1BP42MRS : Yeah, looks like the indentation is off for that print
+U6944D5GU : like this?
+U1BP42MRS : Yep, now convert the `num` to an `int`
+U6944D5GU : <@U1BP42MRS> woah it worked. what do we need to convert it to an int
+U6944D5GU : i did this: num=int(input(‘enter a number: ‘))
+U1BP42MRS : That'll do :slightly_smiling_face: Of course, test inserting a string instead :wink:
+U6944D5GU : woahhh so cool. thanks very much!
+U1NSCAY6R : No problem!
+U6944D5GU : <@U1BP42MRS> <@U1NSCAY6R> <@U29163YQH> :taco:
+U6944D5GU : haha!
+U5U4MSHC1 : Everybody gets :taco: :smile:
+U5CGPBF0U : <@U5U4MSHC1> Fact: I have never eaten, nor even seen, a taco.
+U5CGPBF0U : I think I'm a freak!
+U5U4MSHC1 : I have never eaten a real taco but I had once prepared at my place. Do not ask me how it tasted. :smile:
+U5CGPBF0U : Oh, glad I'm not completely alone then. I must say though I'm awfully curious to try one though. I'm pretty sure there's a place within walking distance of here that sells tacos. I may just have to check them out.
+U1BP42MRS : :yum:
+U5CGPBF0U : I've seen plenty of tacos in various commercials and whatnot and to be frank they do look appetizing.
+U0LSCQQNR : interesting
+U0LSCQQNR : I prefer burritos over tacos, tbh
+U60KNBMPX : <@U5CGPBF0U> tacos are a perfect street food.
+U0LSCQQNR : especially after an afternoon on the bike
+U60KNBMPX : corn tortillas or nothing :smile:
+U0LSCQQNR : rice, beans and meat are a perfect combo to recover
+U0B7W48UB : hi anybody here use rabbitmq can give me any tips on how to make it faster ? Im using the client and server as here in the docs <https://www.rabbitmq.com/tutorials/tutorial-six-python.html>
+
+U0B7W48UB : I'm asking your help because I'm in a little rush is for tommorrow my work
+U5CGPBF0U : Imagining having a taco outdoors after a nice bike ride...ah now I'm hungry!
+U69SGRT8S : Hello, I'm in need of some help. I can't figure out why my if statement in the while loop keeps evaluating to True and not breaking out of the loop. <https://pastebin.com/5dCYKRMP>
+U1NSCAY6R : <@U0B7W48UB> what is slow about it?
+U1NSCAY6R : and what are you trying to get to in terms of speed?
+U1NSCAY6R : rabbitmq is already very fast
+U0B7W48UB : <@U1NSCAY6R> something between the answer and the response I'm getting above 2 second time
+U0B7W48UB : so yeah Im wonder what Im doing wrong
+U0B7W48UB : :disappointed:
+U1NSCAY6R : Is this specifically with the part of the tutorial?
+U0B7W48UB : I use the same code of the tutorial just change the finnocci funtion for a bot
+U0B7W48UB : that i have
+U0B7W48UB : I only want liitle tips like what is faster no_ack=True or no_ack=False
+U0B7W48UB : how to config the options
+U1NSCAY6R : it's faster without acking, and with prefetching generally
+U0E44UP6G : I'd recommend to choose no_ack not by speed but by your use case
+U1NSCAY6R : also is the function on the bot is running taking that long time? or is that from after the function is completely to sending back to the response? that should only be milliseconds
+U6944D5GU : what cant i return i
+U1BP42MRS : What does it return right now?
+U1BP42MRS : BTW, you can simplify that:  `smaller = min(x, y)` :smile:
+U6944D5GU : the specific ‘i' i wanna get in that range
+U1BP42MRS : you can return from within the `for` if you want, no reason to keep iterating (otherwise you will *always* get the last `i` value)
+U6944D5GU : mhm? can i return i ?
+U6944D5GU : want do you mean ha!
+U1BP42MRS : ```for i in range(10):
+    if i == 6:
+        return i
+```
+
+U1BP42MRS : Instead of waiting to return after the loop
+U6944D5GU : but the problem of my code is not this
+U6944D5GU : i couldnt get output with the code i pasted
+U6944D5GU : oh i got 24 but its the wrong answer.
+U6944D5GU : it should be 6
+U6944D5GU : after i changed the thing i return to this:
+U6944D5GU : then it worked and got 6
+U6944D5GU : i dont understand why
+U6944D5GU : <@U5U4MSHC1>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

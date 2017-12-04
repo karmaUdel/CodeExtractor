@@ -1,6 +1,124 @@
+U4872964V : yeah, well, Elm for native applications is not such a bad idea either
+U5WS7CJLV : here here!
+U5WS7CJLV : Elm :allthethings:
+U653NCEEA : Is there some way of getting the message and status code behind `NetworkError`?
+U4872964V : "means the user turned off their wifi, went in a cave, etc." :slightly_smiling_face:
+U4872964V : status codes you can get from `BadStatus` error
+U653NCEEA : Hehe, jupp…
+U653NCEEA : Okay, so i would be able to get, to say, a 401 from `BadStatus`?
+U4872964V : yes, the `Response` contains a `status` field with `code`and `message`:  <http://package.elm-lang.org/packages/elm-lang/http/latest/Http#Response>
+U653NCEEA : Perfect! Thanks a lot!
+U4E8RTDPF : Hey, I have two Commands that I am batching.
 ```
-sry what?
-Leftover from a previous conversation, it appears.
-And yes, that is how one would implement it if there wasn't a way to fix it before it became a problem.
-I'm looking for more advice on how to deploy an Elm app.  Fire away! :slightly_smiling_face:
-Or can I and I'm missing something?
+Cmd.batch
+  [ one
+  , two
+  ]
+```
+
+U4E8RTDPF : as I realized
+U4E8RTDPF : this is not happening sequentially
+U4E8RTDPF : how to make it sequential?
+U4872964V : well, there are several answers to that, what are the commands more exactly and why do you want them sequentially?
+U4E8RTDPF : <@U4872964V> they are http requests and one depends on another
+U4872964V : <@U4E8RTDPF>, so, if they depend on each other then maybe you should send the other one after you get the result from the first one, in your update function
+U3FJSB596 : <@U4E8RTDPF> How about Elm Core Tasks?<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Task>
+
+U3FJSB596 : Combine several task into the same task and then make it into a command
+U4872964V : Yes, if you have Tasks you can do that, but the Http module does not return Tasks
+U3FJSB596 : Am I looking at the wrong package?<http://package.elm-lang.org/packages/evancz/elm-http/3.0.1/Http>
+
+U3FJSB596 : It only return tasks
+U4872964V : yes, <http://package.elm-lang.org/packages/elm-lang/http/1.0.0> is the current
+U4E8RTDPF : <@U3FJSB596> it's old one.
+U4E8RTDPF : <@U4872964V> yes you are right
+U4E8RTDPF : I should do that in the update
+U4E8RTDPF : but I was just curious if I was able to do something like cmd1 |&gt; andThen cmd2 thing...
+U3WM55ZG8 : you can create tasks with elm-lang/http too
+U3WM55ZG8 : <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#toTask>
+U3FJSB596 : At the very bottom of the module is `toTask` that explicitly says that it can be use for chaining requests
+U4872964V : <@U3WM55ZG8> oh yes, you're right
+U4872964V : then that's another option
+U3FJSB596 : <@U4E8RTDPF> There's no chaining of Commands
+U4E8RTDPF : `toTask` nice ! thanks <@U4872964V> <@U3FJSB596> :raised_hands:
+U4872964V : i guess it depends on why one depend on the other
+U4E8RTDPF : still, it's better to go with the update way..
+U4872964V : which method is more suitable
+U3LUC6SNS : Hi all.  I've made some changes (added a package) to my project, and now `elm-test` fails to run (the app compiles).  Here is the error message:```
+jxxmbp:koko_client carlson$ elm-test
+I cannot find module 'LatexParser.Latex'.
+
+Module 'LatexParserTest' is trying to import it.
+
+Potential problems could be:
+  * Misspelled the module name
+  * Need to add a source directory or new dependency to elm-package.json
+```
+I diffed the regular `elm-package.json` with the one in `tests`.  They are identical. So I am baffled.
+
+U0FP80EKB : <@U3LUC6SNS> Do you need to have `..` in the src directories in `tests/elm-package.json`
+U3LUC6SNS : In elm-tools parse is there a way to parse (and keep) everything from `\\[` to `\\]`?  I've been using code like```
+arg =
+    succeed identity
+        |. symbol "{"
+        |= keep zeroOrMore (\c -&gt; c /= '}')
+        |. symbol "}"
+```
+but the boolean function takes a Char as argument, not a String.
+
+U3LUC6SNS : <@U0FP80EKB> I tried that, but alas, it doesn't work. (same error message)
+U0FP80EKB : Interesting. I think the src directories are relative pathed from the location of the elm-package.json, so I don't think they should be identical.
+U0FP80EKB : Can you paste the source directories part?
+U3LUC6SNS : Do you mean the elm-package.json?
+U0FP80EKB : yeah
+U3LUC6SNS : Here we go:```
+{
+    "version": "1.0.0",
+    "summary": "helpful summary of your project, less than 80 characters",
+    "repository": "<https://github.com/user/project.git>",
+    "license": "BSD3",
+    "source-directories": [
+        "../src"
+    ],
+    "exposed-modules": [],
+    "native-modules": true,
+    "dependencies": {
+        "NoRedInk/elm-decode-pipeline": "3.0.0 &lt;= v &lt; 4.0.0",
+        "elm-community/list-extra": "6.1.0 &lt;= v &lt; 7.0.0",
+        "elm-community/string-extra": "1.4.0 &lt;= v &lt; 2.0.0",
+        "elm-lang/core": "5.1.1 &lt;= v &lt; 6.0.0",
+        "elm-lang/html": "2.0.0 &lt;= v &lt; 3.0.0",
+        "elm-lang/http": "1.0.0 &lt;= v &lt; 2.0.0",
+        "elm-lang/navigation": "2.0.0 &lt;= v &lt; 3.0.0",
+        "elm-lang/websocket": "1.0.2 &lt;= v &lt; 2.0.0",
+        "elm-lang/window": "1.0.0 &lt;= v &lt; 2.0.0",
+        "elm-tools/parser": "2.0.1 &lt;= v &lt; 3.0.0",
+        "evancz/url-parser": "2.0.1 &lt;= v &lt; 3.0.0",
+        "fbonetti/elm-phoenix-socket": "2.0.0 &lt;= v &lt; 3.0.0",
+        "jystic/elm-font-awesome": "2.0.1 &lt;= v &lt; 3.0.0",
+        "krisajenkins/remotedata": "4.3.0 &lt;= v &lt; 5.0.0",
+        "lukewestby/elm-http-builder": "5.1.0 &lt;= v &lt; 6.0.0",
+        "mdgriffith/style-elements": "3.2.3 &lt;= v &lt; 4.0.0",
+        "simonh1000/elm-jwt": "5.0.0 &lt;= v &lt; 6.0.0"
+    },
+    "elm-version": "0.18.0 &lt;= v &lt; 0.19.0"
+}
+```
+
+U3LUC6SNS : It still has the ../src that I tried.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

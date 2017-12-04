@@ -1,0 +1,125 @@
+U2Q5GJNTB : I am trying to use webpack [hash] for the compiled elm bundle, but I am not sure how I would wire this up with the including html file. Any recommendations or hints?
+U5Y72K57X : Hi guys! I have the need to generate a tuple that has the current timestamp as first element, and a random integer as the second. I can solve this generating first a Time.now message, and when it succeeds a Random.generate message (code: <https://pastebin.com/v7DCp2Lc>). This solves the problem but it is annonying to have two different messages. I would like to do it in an unique message, like with this example that has two side effects (get the now timestamp and do an HTTP request): <https://pastebin.com/SuRG42J3>. The problem is that this is done with tasks, and the Random module directly generates commands instead of tasks, so I'm not sure how to do this
+U5Y72K57X : TL;DR: I need Random.generate to return a Task instead of a Cmd so I can use Task.andThen
+U5Y72K57X : Hello everyone! Thanks <@USLACKBOT>!
+U0LPMPL2U : <@U5Y72K57X> I don't think that can be done
+U0LPMPL2U : for now anyways
+U3SJEDR96 : <@U5Y72K57X> so, you have 2 options, both depending on `Random.step` rather than `Random.generate`:- pass in a seed from JS, keep it in your model, and update it whenever you generate a random number. This means you don't even need a Task for random, it's just a `step: Generator a -&gt; Seed -&gt; (a, Seed)` call away
+- Second option, use the timestamp you got to create an initial seed, and use that to create a random number
+
+U3SJEDR96 : solution you choose should depend on how many of these you need, whether there's time between those steps, etc
+U0LPMPL2U : Oh, nice thinking <@U3SJEDR96> :thumbsup:
+U0LPMPL2U : Ever since they changed `Random.generate` to return commands, I've always used that instead of dealing with seeds myself. Forgot about `Random.step` :smile:
+U3SJEDR96 : ```randomTask : Generator a -&gt; Task Never a
+randomTask generator =
+    Time.now |&gt; Task.map (round &gt;&gt; Random.initialSeed &gt;&gt; step generator &gt;&gt; Tuple.first)
+```
+
+U3SJEDR96 : something like that
+U5Y72K57X : nice idea <@U3SJEDR96> !
+U5Q2CQ42U : Hey everyone :slightly_smiling_face: I’m currently preparing a little company-internal recap of Elm Europe and I’d like to embed certain examples, from elm-webgl for instance. Do you have any suggestions which presentation tool to use (revealjs, elm-slides, …)? Embedding Elm code directly would be lovely, that’s why I considered elm-slides, though customizing update and subscriptions (like the webgl examples require) does not seem straight-forward to me.
+U5Y72K57X : i want to have the random number to ensure that the value is unique, because i think Task.now could return the same value if it is called at almost the same time, so using the timestamp as a seed could also generate duplicates
+U5Y72K57X : i also thought using a counter instead of a random number also, but i'm not sure if two messages can be proccessed at the same time (altough it would be very rare), accessing the same counter value
+U4872964V : no, messages are processed one at a time
+U4872964V : so if you update the counter in the model when processing a message that’s fine
+U4872964V : you can think of the `update` function as being called like `update Msg3 (update Msg2 (update Msg1 model)))`
+U5Y72K57X : thanks <@U4872964V>! then a counter would be an easier choice over a random number
+U4872964V : Yes, and random ints are only 32 bits right now, so the probability for collision is pretty big due to the birthday paradox
+U5Y72K57X : right, that also would be a problem
+U5Y72K57X : anyway, do you think having a toTask function in Random, like Http has would be a good idea? it could be useful in other cases, like for example generating a random timestamp that has to be close to the current time, or to perform http requests with some random data (useful to force cache invalidation)
+U4872964V : well that would certainly be useful, but I’m not sure that works technically with effects modules
+U0JFGGZS6 : <@U5Y72K57X>  see this discussion thread on that topic -&gt; <https://groups.google.com/forum/#!searchin/elm-dev/random$20cmd$20task%7Csort:relevance/elm-dev/MEBzD3f7Bq8/ojpRsjObDQAJ>
+U3L8MM10T : If I have ` type ABC = A Int | B | C` and `list = [A 3]`, how can I pattern-match for `A` with *any* number in `List.any ((==) A) list`?
+U3FJSB596 : You wouldn’t. You would create a special function to make the comparison.
+U3L8MM10T : Ok
+U5Y72K57X : <@U0JFGGZS6> that thread seems to cover my concern, thanks!
+U0M6QA0HG : Hey all, I discovered an interesting way for Elm APIs to expose optional parameters to consumers. I wrote out a long thing about it over in <#C2MFMKHDX|api-design>, or if you want to skip ahead you can play with a proof of concept here: <https://ellie-app.com/3N8yyQsKkW6a1/5>
+U0M6QA0HG : that example is a simplified version of what I'm trying to do with my GraphQL package, which is why the arguments end up as a list of key-value pairs
+U0M6QA0HG : here is another example showing how you could provide an alternate interface for the Http module: <https://ellie-app.com/3NJBz9nrcvRa1/0>
+U2Q5GJNTB : I am trying to use webpack [hash] for the compiled elm bundle, but I am not sure how I would wire this up with the including html file. Any recommendations or hints?
+U0CLDU8UB : <@U2Q5GJNTB> If the html file goes through the webpack pipeline, the script should just magically get included
+U0CL7EPPG : <https://elmlang.slack.com/archives/C0HJVT881/p1500630485964116>
+U2FMN03NZ : <@U0CL7EPPG> what do you  mean by join? Like, would `elm-live Main.elm --output=index.js --open &amp;&amp; elm-css Stylesheets.elm` count as “joined”?
+U0CL7EPPG : Hi <@U2FMN03NZ>, the bottom part of that quote got cut off. What I would like is if the CSS file was watched, recompiled and reloaded like the app code is.
+U0CL7EPPG : I think for that I might have to switch to the `Css.asPairs` style according to the docs:&gt; One advantage of inline styles is that these can be dynamically changed at runtime
+Which is too bad.
+
+U0CL7EPPG : Perhaps a more comprehensive tool then `elm-live` could manage it though?
+U0J8D9M2P : Webpack
+U0J8D9M2P : Or Brunch
+U1SF6G7PA : <@U0CL7EPPG> you can use the --before-build option of elm-live to run a script which calls elm-css
+U0X1G7NVD : Would you mind opening an issue with that so I (or anybody else) can focus on that anytime soon? If so, please, give us a little bit of background so we can understand how Indians deal with numbering — TBH I have no clue, sorry about that ; )
+U0X1G7NVD : About that:
+&gt; I am hesitant to recommend packages outside the stdlib which I have not had direct experience with.
+
+That's a very good learning strategy, cheers! Anyway you're aways welcome to jump in the source code. It's damn simple. And a friendly warning: be aware about the risk of reinventing the wheel.
+
+U3LUC6SNS : <@U4872964V> or anybody — I have a question regarding “embed js ui components” (<https://ellie-app.com/qyNKkTsrNRa1/2>).  In the app I am working on, I do the following: send some data as a string to JS-land via ports.  That data is asciiodoc markup + latex markup.  It is rendered in JS-land first by Asciidoctor and then by MathJax.  The Asciidoctor part is straightforward: the data string is an argument to `Asciidoctor.convert`.  The value of this function is used to populate the `innerHtml` of a div.  Then MathJax, another js package, magically renders the Latex in that div.  Finally, the html file (`index.html`) is positioned to be in the place that it would be if I could do all of this with Elm, i.e., as part of a view.
+Needless to say, this last step (a horrible hack) is quite awkward, and so far I can’t get  `index.html` to position itself accurately for all browsers, window sizes, machines, etc. — not horrible, but not perfect.
+
+So the question is: with the technology you mention (or any other :smile:) is it possible to display content processed in JS-land in some better way.
+
+U4872964V : <@U3LUC6SNS> not sure how much the technology affects layout etc, that's more the domain of CSS and styling. 
+U5QJW0DDE : <@U4872964V> indeed we discussed my recent post to elm-disucss here in Slack last week; that post was in moderation for maybe 10 days or so, and then we discussed here quite a bit, and so that thread can be dismissed in the mailing list. Unfortunately, I replied to that thread to say as much, but this reply is also stuck in moderation for possibly days... perhaps you can reply to that list thread to inform that this conversation doesn't need further analysis there?
+U4872964V : yes, i replied now, just for clarification
+U5QJW0DDE : yeah but i can't reply to any replies to elm-discuss since the first X emails get stuck in moderation for it seems up to 2 weeks
+U4872964V : oh
+U4872964V : lets do it in <#C2QPJLU2X|elm-discuss> then :slightly_smiling_face:
+U40QW928G : Has anyone implemented Elm into an existing javascript application?
+U40QW928G : I want to slowly integrate Elm so people can see it running in production
+U681TBBUP : <http://elm-lang.org/blog/how-to-use-elm-at-work>
+U681TBBUP : That post assumes react
+U3FJSB596 : This is for Angular 1.x<https://github.com/samcal/angular-elm-components>
+
+U23SA861Y : heh, the indians have a really strange delimitation system crore and lakh. I only mention it to say that numbering systems are annoyingly difficult.
+U23SA861Y : I have no fear of reinventing the wheel, its simply that dependencies have a cost that you need to pay. I don't think I would pull in a dependency to just separate numbers into bunches of 3, I would pull in a dependency the performed proper internationalization on the number formatting.
+U3R7CKQRX : <@U40QW928G> I have been sneaking Elm progressively into our production code
+U3R7CKQRX : we have an architecture which hosts several independent apps
+U40QW928G : I have a react application and I'm going to try adding Elm to the webpack
+U3R7CKQRX : 8 of those are already running on elm
+U40QW928G : and start writing non critical components in Elm
+U3R7CKQRX : that's a pretty good idea
+U3R7CKQRX : :+1:
+U3R7CKQRX : I did some small part in elm that's not that heavily used and needed a rewrite anyway
+U3R7CKQRX : that was the first thing
+U3R7CKQRX : then I successively ramped it up
+U3R7CKQRX : let me know how that goes, I am hapy to give some pointers since I've been doing that since the beginning of the year
+U3R7CKQRX : do you have some sticky points or things were you thing it will be hard to do with your existing code?
+U40QW928G : nah it's a pretty standard react applications, I need to look into that elm react lib some more though
+U3R7CKQRX : it's pretty straightforward, just 20 lines of code <https://github.com/evancz/react-elm-components/blob/master/index.js>
+U3R7CKQRX : the hardest parts for me were, using translations, formatting local dates, and convincing team mates :slightly_smiling_face: don't know if any of these apply to you, but if so let me know.
+U3R7CKQRX : <@U3LUC6SNS> What are you trying to do exactly. Using js ui stuff in elm? I don't know your use case exactly but I have been using web components for things like that it worked quite well so far.
+U3LUC6SNS : <@U3R7CKQRX> I have to do the following.  (1) send a string to JS-land via ports which represents a document with text with both Asciidoc (like Markdown) markup and LaTeX markup. (2) render the “document” first using Asciidoctor and then MathJax (for Asciidoc and Latex respectively).  The result of this rendering operation is HTML  text which resides in index.html, that is in DOM external to Elm.  I have a hacky way of using this rendered text, but ideally I would like to “grab it” to display in the normal elm way via the view function.
+U3LUC6SNS : If the MathJax output were the value of a function, as is the output of `Asciidoctor.convert`, this would be easy.
+U3R7CKQRX : So the input is some Latex and the output should be HTML right?
+U3SJEDR96 : I wonder if mathjax can render to a fragment?
+U3R7CKQRX : If web components are an option for you I could see something like this work quite well:```
+&lt;latex-component input="&lt;your latex input&gt;"&gt;&lt;/latex-component&gt;
+```
+The component would then take the input from it's input attribute run the mathjax or similar and the put the result into its `innerHTML`
+
+U4F64AKQV : Anyone have a real-world example of using keyed nodes that they'd be willing to share with me? I'm trying to understand how they're used in practice. 
+U1WJH1JU9 : Does anyone know how to key a table row?
+U3SJEDR96 : <@U4F64AKQV> I'm fairly sure Evan's elm-todomvc example uses keyed nodes
+U3SJEDR96 : not exactly real-world
+U3SJEDR96 : but ¯\_(?)_/¯
+U3SJEDR96 : <@U1WJH1JU9> you'd probably use `Html.Keyed.node "tbody" [] [ ( "row-foo", <http://Html.tr|Html.tr> [] [] ) ]` etc. Though most likely starting from a `List Foo` and using something like `List.map renderRow foos` where `renderRow : Foo -&gt; (String, Html msg)`
+U1WJH1JU9 : Thanks.
+U3SJEDR96 : <@U4F64AKQV> although there's also a secondary use-case for keyed nodes where it's used to first prevent a node from re-rendering, then force a node to re-render. <https://github.com/elm-lang/html/issues/105#issuecomment-309524197>
+U13H7FNDQ : Yeah, <@U4F64AKQV>, I'd say the todo one is a fine place to start
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

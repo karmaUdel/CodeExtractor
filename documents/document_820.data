@@ -1,0 +1,153 @@
+U5UKKT0EP : <@U5UQKCC06> I have done something similar by feeding the worksheet live data and cells update automatically as new data comes in. But I used excel dev tools. I dont think one can edit an open excel sheet otherwise.
+U07JGLLKF : yeah the only real live option is to write some awful VBA glue in the excel to speak to something external via python
+U07JGLLKF : it's my eternal hope that they at least put in some sort of c# or powershell automation into excel at some point but I've been hoping for like 10 years now :(
+U2Q2LMZ6D : hi folks, i got trouble while trying pandas, how to slice a dataframe using  Int64Index?I'm search an index base on value ```id = df.loc[df['time'] ==1496587067]``` Then I got an `Index` object `id`, I want to get 10 elms before that index. Which way I should go?
+
+U0LSCQQNR : <@U486CN4VD> not exactly.  xlsxwriter is only for creating and writing to excel files.  It can't open and read from existing files
+U0LSCQQNR : right there at the top of the FAQ <http://xlsxwriter.readthedocs.io/faq.html>
+U0LSCQQNR : &gt;&gt;&gt;Can XlsxWriter use an existing Excel file as a template?No.
+
+XlsxWriter is designed only as a file writer. It cannot read or modify an existing Excel file.
+
+U47ETEC02 : how do I get an elastic IP to my ec2 instance? the instance is already running and when I click on it's description. It's empty
+U5CGPBF0U : before a user account can be created in my app it checks whether someone with the same username exists, and then whether someone with the same email has already registered, as both of these are supposed to be unique. Do I really need to check these individually? I know the insert query will fail if the values aren't unique since the columns are set to `unique`, but is there a way to know _which_ one caused the error, so that for example I can tell the user whether their username is taken or whether their email address is already registered.
+U5MNY86MA : <@U5CGPBF0U> your DB will throw an Integrity error with the name of the field in the message. So you can probably parse that one to find out. It could be easier if you are using some ORM but I am not sure.
+U2TQBG484 : <@U2Q2LMZ6D> Hi. How about this snippet:```
+import pandas as pd
+
+l_num = [num for num in range(10)]
+
+df = pd.DataFrame({
+    'num': l_num
+}, columns=['num'])
+
+l_id = df.loc[df['num'] == 5]
+first_match_id = l_id.index.get_values()[0]
+print(df[first_match_id - 5:first_match_id])
+```
+
+U28MDQRL2 : <@U5U8S40V8> Just use self
+U2Q2LMZ6D : Thanks, I thought there will be a shorter way rather than get the Int index, and slice it with int type :slightly_smiling_face:
+U2TQBG484 : Base on your conditional. It may has many matches id. So i think this maybe the shortest way :slightly_smiling_face:.
+U486CN4VD : <@U0LSCQQNR> yep, agreed. I mentioned open and edit wasn't possible in my first comment (at least with the popular python excel libs).
+U5T3P82HL : hey team, soz for a really noob question, i use python 3.6 but need 3.5 in order to use one the libraries, what shall i do? :grimacing:i thought that virtualenv has to be helpful but i'm stuck somehow :(
+
+U1BP42MRS : What breaking changes keep the library from working with 3.6? I can't think of any from the changelog 
+U5T3P82HL : hey <@U1BP42MRS> thnx for your response, apparently mysql-connector doesn't work on 3.6
+U5V9MEJ67 : Follow this: <http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/>
+U5V9MEJ67 : where it says: export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python2.7
+U5V9MEJ67 : use this command: export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3.5
+U5V9MEJ67 : then activate the virtual enviroment with source my_project/bin/activate
+U1BP42MRS : Did you try it <@U5T3P82HL> or is that just what the docs say. There isn't any reason it shouldn't unless they depend on dicts being unordered or something like that.
+U5T3P82HL : yeap I've tried it
+U5V9MEJ67 : (Note that you can change the name "my_project" to anything else you want to write as the name of your virtual enviroment)
+U1BP42MRS : What's the error? In any case, <@U5V9MEJ67> 's solution should work if you have python 3.5 installed 
+U1BP42MRS : I'd probably use `which python3.5` so it grabs which is in your path (for example on osx it's probably at /usr/local/bin
+U5T3P82HL : error message: Failed to build mysql-connectorInstalling collected packages: mysql-connector
+  Running setup.py install for mysql-connector ... error
+    Complete output from command /usr/local/opt/python3/bin/python3.6 -u -c “import setuptools, tokenize;__file__=‘/private/var/folders/tb/4df8hrw97hs40qhx0jmklvzw0000gr/T/pip-build-pa9ighsx/mysql-connector/setup.py';f=getattr(tokenize, ‘open', open)(__file__);code=f.read().replace(‘\r\n', ‘\n');f.close();exec(compile(code, __file__, ‘exec'))” install --record /var/folders/tb/4df8hrw97hs40qhx0jmklvzw0000gr/T/pip-rc6qs_md-record/install-record.txt --single-version-externally-managed --compile:
+
+U0LSCQQNR : Isn't mysql-connector python 2 only?
+U5T3P82HL : doesn't seem like it
+U5T3P82HL : 3.2 3.3 3.4
+U5T3P82HL : which one are you using when you have to use MySQL?
+U0LSCQQNR : I haven't used mysql with 3.6
+U0LSCQQNR : Only postgres 
+U5T3P82HL : roger thnx <@U0LSCQQNR>
+U5VEXNQE7 : Regarding Python Classes. How do we create classes (along with inheritance) to be able to do something like, Class().Function(data).toJSON toJSON being a @property function.
+
+So really I'm looking to take the return of Class().Function(data) and pass it to the toJSON property to format the data.
+
+Anyone have an idea?
+
+U07JGLLKF : <@U5VEXNQE7> did you mean like chaining methods?
+U5VEXNQE7 : Yes.
+U5VEXNQE7 : I've looked into @property methods @staticmethods
+U5VEXNQE7 : Just can't figure it out
+U07JGLLKF : `@staticmethod` just means a function doesn't require an instance of itself to operate on
+U07JGLLKF : the key to chaining methods is that you have to return a copy of `self` on chainable methods
+U5VEXNQE7 : What do you mean
+U07JGLLKF : ```class Foo:
+    def __init__(self):
+        self.data = [] # whatever your initial data here would be
+        return self
+    def Function(self, data):
+        self.data = do_thing_with_data(data)
+        return self
+    def toJSON(self):
+        return json.dumps(self.data)
+```
+
+U07JGLLKF : something like that would have basic chainable class init and `Function` methods
+U5VEXNQE7 : like just the fuction needs something like this?''' 
+class CLASS(object):
+    _x = None
+    def __init__(self):
+        pass
+    
+    def something_to_do(self, var1, var2):
+        x = var1 + var2
+        return x
+    
+    @property
+    def toFloat(self):
+        return float(_x)
+    '''
+
+U1BP42MRS : ```class Foo:
+    def bar(self):
+        # do work
+        return self
+
+    def baz(self):
+        # do other stuff
+        return self
+
+    @property
+    def json(self):
+        return self.__dict__
+
+Foo().bar().baz().json
+```
+
+U5VEXNQE7 : Awesome!
+U5VEXNQE7 : I didn't try that ... why didn't I try that?
+U5VEXNQE7 : Hmm this didn't work. ```class CLASS(object):
+    _x = None
+    def __init__(self):
+        pass
+    
+    def something_to_do(self, var1, var2):
+        x = var1 + var2
+        return x
+    
+    @property
+    def toFloat(self):
+        return float(_x)
+    
+    
+print(CLASS().something_to_do(1,2).toFloat)```
+
+U5VEXNQE7 : ```Traceback (most recent call last):  File "Untitled 2.py", line 15, in &lt;module&gt;
+    print(CLASS().something_to_do(1,2).toFloat)
+AttributeError: 'int' object has no attribute 'toFloat'
+```
+
+U07JGLLKF : your `return x` needs to be `return self`
+U07JGLLKF : because `return x` is just returning the result of `var1 + var2`, which is just an int
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

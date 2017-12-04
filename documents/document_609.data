@@ -1,36 +1,161 @@
+U0U6ML22H : <@U2LAL86AY> Form does not expose Option, it's exposed by the specific "inputs" apparently
+U2T2MKL58 : may be helpful for convincing our own employers that elm is something we should be using
+U0EUHKVGB : <@U2T2MKL58>, the company simply has to tell evan to be added to the list.
+U0GR6DHEK : hmm, ok - I might have to give that a try
+U0EUHKVGB : I personally know of at least ~20 other companies using Elm
+U0U6ML22H : we're one! ^^
+U3SJEDR96 : <https://github.com/lpil/elm-companies> &lt;- there's another list here
+U0EUHKVGB : Some of them sponsored osloelmday: <https://osloelmday.no/>
+U0EUHKVGB : And more of them sponsored elmeurope, with the exception of mozilla and google: <https://elmeurope.org/#sprs>
+U0EUHKVGB : (and efrei)
+U2LAL86AY : not it doesn't work:```
+validationFeedback : Validation.ValidationState -&gt; List (Bootstrap.Form.Input.Option Msg)
+validationFeedback state =
+    case state of
+        Validation.Invalid -&gt;
+            [ Form.groupDanger ]
+
+        Validation.Valid -&gt;
+            [ Form.groupSuccess ]
+
+        Validation.NotValidated -&gt;
+            []
+
 ```
-this is called "point free style" and is probably less readable in this case
-I must admit I often do the `case` even though I know about the `Maybe` helpers
-yeah, sometimes getting all fancy doesn't really help
-It's nice in pipelines
-My code is getting really messy really fast, so I must discuss this with someone who has had a similar situation, because I might be getting tunnel syndrome.
-I am going to pull my ""masterpage"" logic from `Views\Page.elm` into `Main.elm` and see if that helps
-<@U4G7CC18U> Maybe think about using <http://package.elm-lang.org/packages/justgage/tachyons-elm/latest>, which itself is of functional nature.
-or <#C4F9NBLR1|style-elements> :slightly_smiling_face:
-<@U3L8MM10T> <@U4872964V> thank you for the suggestions. :+1: :+1:
-exciting times in styling right now
-from <https://github.com/elm-lang/core/blob/master/src/Set.elm>
-&gt; Insert, remove, and query operations all take *O(log n)* time.
-not seeing benchmarks for List at <https://github.com/elm-lang/core/blob/master/src/List.elm>
-list is going to be `O(n)` for most things
-Dict has the same characteristics as Set it seems
-<https://github.com/elm-lang/core/blob/master/src/Dict.elm>
-&gt; Insert, remove, and query operations all take *O(log n)* time.
-yeah, dict and set are implemented as sorted trees
-I believe `type Set comparable = Dict comparable comparable`
-basically just a special case of it
-helpful! thanks
-just remember to benchmark, because rendering is likely going to be your bottleneck anyway
-`type Set comparable = Set (Dict comparable ())` indeed
-ahh right unit
-close enough :smile:
-I am trying to use webpack [hash] for the compiled elm bundle, but I am not sure how I would wire this up with the including html file. Any recommendations or hints?
-Hi guys! I have the need to generate a tuple that has the current timestamp as first element, and a random integer as the second. I can solve this generating first a Time.now message, and when it succeeds a Random.generate message (code: <https://pastebin.com/v7DCp2Lc>). This solves the problem but it is annonying to have two different messages. I would like to do it in an unique message, like with this example that has two side effects (get the now timestamp and do an HTTP request): <https://pastebin.com/SuRG42J3>. The problem is that this is done with tasks, and the Random module directly generates commands instead of tasks, so I'm not sure how to do this
-TL;DR: I need Random.generate to return a Task instead of a Cmd so I can use Task.andThen
-Hello everyone! Thanks <@USLACKBOT>!
-<@U5Y72K57X> I don't think that can be done
-for now anyways
-- Second option, use the timestamp you got to create an initial seed, and use that to create a random number
-solution you choose should depend on how many of these you need, whether there's time between those steps, etc
-Oh, nice thinking <@U3SJEDR96> :thumbsup:
-Ever since they changed `Random.generate` to return commands, I've always used that instead of dealing with seeds myself. Forgot about `Random.step` :smile:
+```
+Function `group` is expecting the 1st argument to be:
+
+List (Bootstrap.Form.Option msg)
+
+But it is:
+
+List (Input.Option Msg)
+54:26
+Error	Elm	
+The definition of `validationFeedback` does not match its type annotation.
+```
+
+U3SJEDR96 : and of course, everyone looking for elm devs in <#C0LUAGWRK|jobs> presumably uses or  wants to use elm in prod, too
+U2T2MKL58 : That’s Awesome!  Had no idea that many are using it.  If you know of 20 I’m sure there are many more that we don’t even know about
+U2LAL86AY : so we are not talking about the same `Option` - i think `Form` should expose `Option` as well not just the `Form.Input` - then it will work
+U0U6ML22H : <@U2LAL86AY> there seems to be a problem with the library, since the doc of Form points to "#Option" but that's nowhere to be found; maybe ask <@U0JFEBK6F>?
+U0GR6DHEK : Richard tweeted about Ford recently...
+U2LAL86AY : augustin82: that what i thought. I'm sure he seen this message because you @ him :smile: - i'll use a anonimus function then
+U41NK9BM4 : <@U2T2MKL58> Recently Ableton has done a nice web app using Elm: <https://learningmusic.ableton.com>
+U41NK9BM4 : Fortunately is becoming hard to keep a list of them :slightly_smiling_face:
+U2LAL86AY : means they figured out the audio - audio stuff was a problem in elm for a long time.
+U41NK9BM4 : I believe they used Tone.js for that
+U41NK9BM4 : Source: <https://twitter.com/AbletonDev/status/861580662620508160>
+U0JFEBK6F : Seems I forgot to expose Form.Option :sad_panda: , would you mind submitting an issue ? 
+U4F64AKQV : If I am benchmarking a function that takes a list, what is the best practice for generating that list?
+U4F64AKQV : I’m being a little vague on purpose to avoid asking a leading question.
+U23SA861Y : probably depends on the specifics of the benchmark but I believe there is some fuzzing tools in elm-test
+U4F64AKQV : Should the actual values in the list have a significant impact on the benchmarking results when the functions being compared don’t care about the particulars of the values?
+U4F64AKQV : And the same values are used for both functions for each benchmark run.
+U4F64AKQV : Basically, I was creating long lists with `List.repeat 0 N`. When I did this, one of the functions beat out the other by a decent amount. Then I changed how I was creating the lists to `List.repeat 5 N`. Now the other function is blowing the original winner out of the water (600% difference!). Clearly, there’s some kind of weird optimization going on with Lists that consist of only zero. Any clues?
+U5GSVKPJS : If you're doing exactly that, then you have the arguments the wrong way round
+U5GSVKPJS : List.repeat 0 n = the empty list
+U4F64AKQV : :facepalm:. Thanks <@U5GSVKPJS>.
+U5GSVKPJS : Been there enough times - at least you had the sense to question it. I usually just commit with "1 BILLION PERCENT PERFORMANCE INCREASE"
+U5T739RFW : somebody has to do style elements version of this :slightly_smiling_face:
+U2GPAEU1L : If you want to key just a single node in Elm (a node that doesn't even have children), do you have to put it inside a "meaningless" `div` so that it is the child? It seems that you can only add keys to children.
+Docs for reference: <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html-Keyed#node>
+
+U3SJEDR96 : correct; keys are _meant_ to disambiguate between children so they don't get mixed up (though I know there are other uses for them :stuck_out_tongue: )
+U2GPAEU1L : Ok, thanks for the confirmation <@U3SJEDR96>, much appreciated
+U2D7NUGS1 : I wonder how well Elm interops with web components. Does anybody here have any experience with that? It seems that there are quite a lot of nice UI elements.
+U0LPMPL2U : <@U2D7NUGS1> check out this talk: <https://www.youtube.com/watch?v=ar3TakwE8o0>
+U2D7NUGS1 : Checking out...
+U5VFWL5MF : I saw that Elm has union types. I thought the Elm's union types were actually Algebraic Data Types. Can someone explain the difference?
+U0LPMPL2U : <@U5VFWL5MF> see this article: <http://blog.jenkster.com/2016/06/functional-mumbo-jumbo-adts.html>
+U0LPMPL2U : There's a lot of terminology around these "things" but for the purpose of Elm, "Union Types" == "Algebraic Data Types"
+U5VFWL5MF : Ok I thought so. The article confirms my suspicion 
+U0LPMPL2U : From the guide section on types (<https://guide.elm-lang.org/types/union_types.html>):&gt; Note: Union types are sometimes called tagged unions. Some communities call them ADTs.
+
+U2D7NUGS1 : <@U0LPMPL2U> Oh, yeah. That's what actually inspired me. Unfortunately the google map example is currently broken (<https://github.com/rtfeldman/elm-google-maps/issues/1>). I believe the bug is on the component side and there is a workaround.
+U0S6BNVNY : <@U2D7NUGS1> <https://github.com/knewter/elm_web_components_playground> is a thing I made
+U2D7NUGS1 : Thanks <@U0S6BNVNY> .
+U5VFWL5MF : Sure but the generalisation that union types are called ADTs in other languages is not correct. Adt support type variables while union types should not
+U5VFWL5MF : This is according to TAPL 
+U5VFWL5MF : (Types and Programming Languages book)
+U2D7NUGS1 : My question leans toward practical experience. I'm looking for an alternative to elm-mdl and want something that "just works", so I can focus on business logic. I'd like to avoid being on a constant lookout for workarounds.
+U0S6BNVNY : <@U2D7NUGS1> I've built a production app using polymer/web components and elm. There are a few concerns that the talk mentioned above covers, I think. In general, it "Just Works" with a few caveats depending on the components you're using.
+U2D7NUGS1 : Oh, that's great!
+U2D7NUGS1 : Did you use a lot of "of the shelf" components, or created your own ones?
+U0LPMPL2U : What Elm refers to "Union Types" are allowed to have type variables
+U5VFWL5MF : Exactly. They are ADTs
+U0LPMPL2U : yes
+U2D7NUGS1 : The demo you've linked too looks like a great resource. Thanks <@U0S6BNVNY> ! I'll look deeper into it.
+U5VFWL5MF : Wouldn't it be better to call them what they are? I think it would unify a great abstraction common to many other functional languages 
+U0CL0AS3V : Yeah! Haskell and Idris should get on board with what Elm and F# call them. :wink:
+<https://fsharpforfunandprofit.com/posts/designing-with-types-single-case-dus/>
+
+U5VFWL5MF : Probably not happening. I'll see if I can convince the F# and Idris people to name them ADTs :smiling_imp:
+U2D7NUGS1 : That's a great video <@U0S6BNVNY> . I think I'm sold to at least try it. Also very good point about type safety. I guess it should be quite straight forward to make Elm wrappers for these `nodes` and `attributes`.
+U3SQ42JJW : Hi everyone. I have a problem and it look like this:```
+generateSet : List Question -&gt; Question -&gt; Clip
+generateSet catalogue current =
+    case catalogue of
+        [] -&gt;
+            Clip Nothing Nothing Nothing
+
+        x :: [] -&gt;
+            case current of
+                x -&gt;
+                    Clip Nothing (Just x) Nothing
+
+        x :: y :: [] -&gt;
+            case current of
+                x -&gt;
+                    Clip Nothing (Just x) (Just y)
+
+        x :: y :: z :: [] -&gt;
+            case current of
+                x -&gt;
+                    Clip Nothing (Just x) (Just y)
+
+                y -&gt;
+                    Clip (Just x) (Just y) (Just z)
+
+                z -&gt;
+                    Clip (Just y) (Just z) Nothing
+
+        x :: y :: z :: rest -&gt;
+            case current of
+                z -&gt;
+                    Clip Nothing Nothing Nothing
+
+                _ -&gt;
+                    generateSet rest current
+```
+
+U3SQ42JJW : ups formatting fail…
+U3SQ42JJW : Compiler is saying: pattern y in branch 4 is redundant.
+U0MDSQMUH : you can use triple backticks to format multi-line chunks of code!
+U0MDSQMUH : (and don't forget slack lets you edit)
+U0MDSQMUH : :+1:
+U3SQ42JJW : done :slightly_smiling_face:
+U0MDSQMUH : so, you can't do this:```
+case ... of
+ x -&gt; ...
+ y -&gt; ...
+```
+
+U0MDSQMUH : because it's going to treat `x` and `y` as variables to bind to
+U0MDSQMUH : you can't pattern match against the contents of a variable, I'm afraid
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

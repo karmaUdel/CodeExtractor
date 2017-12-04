@@ -12,12 +12,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import com.itextpdf.io.source.OutputStream;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.pdfa.PdfADocument;
+
 /**
  * @author Aditya
  *
  */
 public class FileReader {
 	public static final int windowOfRelevance = 10;
+	public static final String question = "\n\nin above conversation, code/s mentioned has issue/s?\n\tIf Yes:\n\t1.Bad\t2.Very bad\n\tIf No:\n\t1.Good\t2.Very good\n";
+	public static final String confidence = "\n\nHow confident are you?\n\t1.Low\n\t2.Average\n\t3.High\n";
+	public static final String optional = "\nOptional!\ncan you highlight place/word/sentence which lead to your decision\n";
+	
 	public void reader(String fileName) {
 		// open file " filename " 
 		File data = new File(fileName);
@@ -67,20 +77,41 @@ public class FileReader {
 				    read = in.readLine();
 				    
 				    while (read!=null) {
-	
+				    	//System.out.println("Reading :::" + read+"\n");
 				        String[] splited = read.split(",::");
+				        /*if (splited.length>0){
+					        for(int l=0;l<splited.length;l++) {
+					        	System.out.println("splited ::: "+l+"." +splited[l] +"\n");
+					        }
+				        }*/
+				        if(messages[i]==null) {
+				        	messages[i]="";
+				        }
 				        if(splited.length>1) {
 				        	//documentCollection.write(splited[1]);
 				        	
-				        	messages[i] = splited[1]; // new line 
+				        	messages[i] += splited[0]+ " : " +splited[1]; // new line 
+				        	/*if(splited.length>2) {
+				        		for(int k = 2;k<=splited.length;k++) {
+				        			messages[i]+= " "+splited[k];
+				        		}
+				        	}*/
+				        	//System.out.println("Read :::"+read);
+				        	//System.out.println("Message ::: "+i+". "+ messages[i]+"\n");
 				        	i++; // go for next line
 				        }else {
 				        	if(splited.length>0 || splited.length == 1) {
 					        	if(i!=0 ) {
-					        		messages[i-1] = splited[0]; // represents same line
+					        		if(splited[0]!=""|| splited[0]!=null) {
+					        			messages[i-1] += splited[0] +"\n"; // represents same line
+					        		}
 					        	}else {
-					        		messages[0] = splited[0]; // represents same line
+					        		if(splited[0]!=""|| splited[0]!=null) {
+						        		messages[0] += splited[0]+"\n"; // represents same line
+					        		}
 					        	}
+					        	//System.out.println("splited ::: "+0+"." +splited[0] +"\n");
+					        	//System.out.println("Message ::: "+i+". "+ messages[i]+"\n");
 				        	}
 				        }
 				    	read = in.readLine();
@@ -131,7 +162,7 @@ public class FileReader {
 							    	//System.out.println(codeElement);
 							    }
 
-								documentCollection.write(str + "\n");
+								documentCollection.write(str+ "\n");
 							
 							}i++;
 						}
@@ -162,16 +193,20 @@ public class FileReader {
 	}
 	
 	public void createDocuments(String [] msessages, int codeElementIndex[][], String codeElements[], int codeElementLimit) {
-		
+		int messagesLimit = msessages.length;
 		String documentString = "";
 		int startOfDoc =0;
 		int endOfDoc = 0;
 		FileWriter documentWriter;
 		for(int i = 0; i< codeElementLimit ;i++) {
-			startOfDoc = max(codeElementIndex[i][0],codeElementIndex[i][0]-windowOfRelevance);
-			endOfDoc = min(codeElementIndex[i][1],codeElementIndex[i][1]+windowOfRelevance);
+			startOfDoc = min(codeElementIndex[i][0],codeElementIndex[i][0]-windowOfRelevance);
+			endOfDoc = max(codeElementIndex[i][1],codeElementIndex[i][1]+windowOfRelevance);
+			
+			if(endOfDoc>messagesLimit) {
+				endOfDoc = messagesLimit-1;
+			}
 			documentString = "";
-			//System.out.println(i+".Start : "+startOfDoc+" End : "+endOfDoc);
+//			System.out.println(i+".Start : "+startOfDoc+" End : "+endOfDoc +" Code started at :"+codeElementIndex[i][0]+ " Ends at "+ codeElementIndex[i][1]);
 			for(int j = startOfDoc;j< endOfDoc;j++) {
 				documentString += msessages[j]+"\n"; // append all strings
 				//System.out.println(msessages[j]);
@@ -206,6 +241,7 @@ public class FileReader {
 					e1.printStackTrace();
 				}
 				try {
+					documentString = documentString+question+confidence+optional;
 					documentWriter.write(documentString);
 					documentWriter.flush();
 				} catch (IOException e) {
@@ -228,6 +264,13 @@ public class FileReader {
 	// this will create ArrayIndexOutOfBounds we can't let this happen so choose min_of 54000 and 53997 + windowOfRelevance 
 	// output will be 54000 and no exception is thrown
 	public int min(int x, int y) {
+		if(y<0) {
+			y=0;
+		}
+		if(x<0) {
+			x =0;
+		}
+		
 		if (x>y) {
 			return y;
 		}else {

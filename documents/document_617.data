@@ -1,15 +1,113 @@
+U0EUHKVGB : <@U37HUSJ4R> you have to define a static `defaultModel` or something
+U0EUHKVGB : <@U2LAL86AY> That library isn’t really very Elm-y
+U37HUSJ4R : <@U0EUHKVGB> ok, do I pass this then as 2nd param of init?
+U0EUHKVGB : <@U2LAL86AY> but it’s basically mapping the function contained inside the `Arrow`.
+U0EUHKVGB : <@U37HUSJ4R> You don’t - it’s a _static_ default
+U0EUHKVGB : e.g```
+defaultModel = { application = defaultApplication }
+
+init flags = 
+  { defaultModel | application = ... }
 ```
-at that point, each field is a valid instance of a possibly valid value
-So you'd like to do something like `Field.map2 Model field1 field2` ?
-yes, sort of, i believe
-field1 and field2 would probably be extraction functions?
-or Decoders, so to speak
-so extracting each field already gives you a `Result` right?
-at the moment, yes. you got me thinking that a `Maybe` is enough.
-Both `Result` and `Maybe` define a `map2` function
-basically, the decoding needs to only work if every field is `Valid ...`
-woa
-that may be what i'm looking for...
-I think you could do something like `Maybe.map2 Model (fetchUsername form) (fetchPassword form)`
-yes. probably better to use (fetch .username)
-:thumbsup:
+
+U37HUSJ4R : <@U0EUHKVGB> I see :slightly_smiling_face:
+U2LAL86AY : mapping functions instead of values? I'm familiar with mapping values - ex the maybe value.  this is what you mean by not Elm-y? pff - I still don't understand what mapping a function actually means :smile:
+
+U0EUHKVGB : <@U2LAL86AY> <https://github.com/Fresheyeball/elm-function-extra/blob/3.0.0/Function.elm#L68>
+U0EUHKVGB : it’s basically just saying “call this first function, then pass the output to this second function
+U0EUHKVGB : In normal Elm, it looks like this:
+```
+mapAfter : a -&gt; (a -&gt; b) -&gt; (b -&gt; c) -&gt; c
+mapAfter value firstFn secondFn =
+  secondFn (firstFn value)
+```
+
+U0EUHKVGB : that’s all.
+U2LAL86AY : didn't thought of it as `mapping` - function composition is mapping. hmm.
+U2GPAEU1L : Hey everyone, was looking for some documentation on `Html.Keyed` but couldn't find anything that answered my questions.
+So as far as I understand, if I have _different_ keys, then the VDOM will avoid doing patches (such as changing text) and realize that these nodes cannot be re-used with each other.
+
+My question is, if I have the _same_ key, does it mean "these elements are the same" or does it mean that "these elements can be reused with eachother when doing diffs, but it doesn't mean they are the same"
+
+U2GPAEU1L : I feel like it's: "these elements can be reused with eachother when doing diffs, but it doesn't mean they are the same"
+U0EUHKVGB : It means “special case the diffing algorithm” <https://github.com/elm-lang/virtual-dom/blob/master/src/Native/VirtualDom.js#L671>
+U0EUHKVGB : Or, sort of.
+U0EUHKVGB : Readthe code - it’ll give you the best idea of what’s going on, and it’s not hard to follow  it for that case.
+U0EUHKVGB : <https://github.com/elm-lang/virtual-dom/blob/master/src/Native/VirtualDom.js#L1002>
+U1CF0N0MD : More importantly it helps keeping the identity of elements, which helps with &lt;img src&gt; or CSS animation.
+U0EUHKVGB : &gt; these elements can be reused with eachother when doing diffs, but it doesn’t mean they are the samethis is close, yeah
+
+U0EUHKVGB : <@U2GPAEU1L> this is a good read of the same principle in React: <https://facebook.github.io/react/docs/reconciliation.html>
+U0K92QFST : <@U2LAL86AY> the pattern implied by "map" just means to piece of data with some typed structure, and to bypass that structure to apply a function to the data inside
+U0K92QFST : Think of a `List` -- `map` applies a function to each item in the List, but the structure remains intact.
+U0K92QFST : in the case of function composition, you're mapping a function over the structure of another function! kind of cool.
+U2LAL86AY : kind of mind bending too :smile:
+U2GPAEU1L : <@U0EUHKVGB> Ah ok, read that, makes more sense. It mentions: "The key only has to be unique among its siblings, not globally unique." Is this true for Elm as well? It seems that it allows duplicates and manually adds a postfix to the key: <https://github.com/elm-lang/virtual-dom/blob/master/src/Native/VirtualDom.js#L1040>
+U3SJEDR96 : `Decode.map` basically takes a decoder (which you can think of as a function `Decoder a : Value -&gt; Result String a`) and applies a function `a -&gt; b`, giving you a new `Decoder b : Value -&gt; Result String b`. So if you've ever used `Decode.map`, you've used a similar pattern :wink:
+U3SJEDR96 : it should be unique among siblings, but yeah, it tries to rectify the situation if it isn't, <@U2GPAEU1L>
+U0K92QFST : :point_up: exactly! The decoder is a piece of data which represents a mapping from Json to some type `a`, so you're mapping a function over the decoder to transform that mapping :stuck_out_tongue:
+U3SJEDR96 : but it certainly doesn't need to be globally unique, <@U2GPAEU1L>
+U0K92QFST : terms become conflated so quickly in category theory land
+U0K92QFST : which is why they invent nonsense terms
+U2GPAEU1L : <@U3SJEDR96> But if it's changing all your same-keys to be different, then it doesn't need to be unique, right?
+U3SJEDR96 : no, but then you're basically in the same situation as not having keys at all
+U3SJEDR96 : and stuff like css animation would get messed up if you swapped the contents of two nodes with the same key
+U2GPAEU1L : Ah I see. Ya if every key is the same then it'll make every key different, and if every key is different it's doing the overhead of checking if anything moved without success because there are no same-keys
+U2LAL86AY : i will explain what i was thinking `map` means . there was this nice picture once done on `maybe` - which maybe is a container - the mapper - is an action of opening up the container - grabbing the value - give it to a function - take the result - put it inside the container - and close the cap. :smile: - this is me a couple months ago understanding `Maybe.map`. Then you say - this exact pattern is applied to a function. Inside my mind this analogy is broken now - or at least is confusing for now. But i guess i'm learning something. Here is a similar picture - i can't find that exact one..
+U3SJEDR96 : And that's the _effect_ it has, if you consider a function as data, I like that drawing :slightly_smiling_face:
+U48AEBJQ3 : <@U2LAL86AY> That is not a bad way to think of things, but I like to think of it a bit differently. `map` is a function which transforms functions. If you have a function `a -&gt; b` lying around, `Maybe.map` will transform it for you to a function of `Maybe a -&gt; Maybe b`.
+U0K92QFST : <@U3SJEDR96> I do consider functions to be data! This is how you can tell I know a bit of Haskell :stuck_out_tongue:
+U0K92QFST : <@U2LAL86AY> I remember reading the same blog post; that's a very good way to think about it
+U23SA861Y : If you consider mapping to be "apply this function to this boxed data and return to me a box of the same shape", then you can expand this to functions where is the "data" is the algorithm and the box is the abstraction of a function. So now you apply a function to a function shaped box to get another function which just so happens to be composition.
+U0K92QFST : :point_up: great summary!
+U23SA861Y : ```type Function a b = Function (a-&gt;b) 
+
+map: (b-&gt;c) -&gt; Function a b -&gt; Function a c
+map f (Function g) = 
+  Function (\x -&gt; f (g x))
+```
+
+U23SA861Y : In this case there are two types so there is an equally valid map of```
+map_: (a-&gt;c) -&gt; Function a b -&gt; Function c b
+map_ f (Function g) = 
+  Function (\x -&gt; g (f x))
+```
+
+U23SA861Y : maybe call the first one `andThen` and the second `map`
+U3SJEDR96 : `andThen` would _probably_ be something like `andThen : (a -&gt; Function c b) -&gt; Function c a -&gt; Function c b` (i.e. `bind` in other languages)
+U3SJEDR96 : in Elm, I think your second version of `map` would be something like `mapInput`, and you first one would be just `map`
+U37HUSJ4R : If my model looks like:```
+type alias Application =
+    { id : Int
+    , term : Int
+    , amount : Int
+    }
+
+
+type alias Model =
+    { application : Application
+    }
+```
+
+and I am trying to update the `term` value, I have `onInput UpdateTerm` on an input
+
+U37HUSJ4R : inside my update case statement how do I update this value?
+U23SA861Y : sure...
+U23SA861Y : pretends to know what he's talking about
+U2GPAEU1L : btw was still reading, forgot to say thanks, thanks <@U3SJEDR96> and <@U0EUHKVGB>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

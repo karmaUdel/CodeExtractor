@@ -1,0 +1,53 @@
+U6D1E91QV : or Decoders, so to speak
+U0LPMPL2U : so extracting each field already gives you a `Result` right?
+U6D1E91QV : at the moment, yes. you got me thinking that a `Maybe` is enough.
+U0LPMPL2U : Both `Result` and `Maybe` define a `map2` function
+U6D1E91QV : basically, the decoding needs to only work if every field is `Valid ...`
+U6D1E91QV : woa
+U6D1E91QV : that may be what i'm looking for...
+U0LPMPL2U : I think you could do something like `Maybe.map2 Model (fetchUsername form) (fetchPassword form)`
+U6D1E91QV : yes. probably better to use (fetch .username)
+U0LPMPL2U : :thumbsup:
+U6D1E91QV : ```value : FieldValue raw val err -&gt; Maybe val
+value formValue =
+    case formValue of
+        Valid val -&gt;
+            Just val
+
+        _ -&gt;
+            Nothing
+```
+
+U0LPMPL2U : that works
+U6D1E91QV : almost
+U0LPMPL2U : I wrote an article comparing `map2` on `Maybe`, `List`, `Json.Decode` and `Random` that you may find useful: <https://robots.thoughtbot.com/elms-universal-pattern>
+U6D1E91QV : ```extractModel : MyForm -&gt; Maybe MyModel
+extractModel model =
+    Maybe.map2 MyModel (value &lt;| .username model) (value &lt;| .password model)
+```
+
+U6D1E91QV : i'll read the article. but the code seems to be one step away from being as smooth at the json code - i would prefer to pass model only once
+U0LPMPL2U : You mean you'd rather not have to call `value &lt;| .username model` ?
+U6D1E91QV : yes. i'd rather have a Decode.string
+U0LPMPL2U : hmmm
+U6D1E91QV : i'm not sure if that chaining tricks works that decoders do, to get more than the predefined number of items as well
+U0LPMPL2U : the tricky thing is that we're switching from the `Field` context to the `Maybe` context
+U0LPMPL2U : What you're doing is the equivalent of calling `Json.Decode.fromString` a couple times and combining the results
+U3SJEDR96 : so `Decoder` is _basically_ `type alias Decoder a = Json.Value -&gt; Result String a`, and the `Json.Value` is only passed in when you do the actual decoding, by `decodeValue`
+U0LPMPL2U : if you were doing that you _would_ have to pass the json string multiple times
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

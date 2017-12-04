@@ -1,1 +1,72 @@
+U0EUHKVGB : No, `Validator error String`
+U0EUHKVGB : It is confusing because in that library, `Validator` is a type alias for a function
+U0EUHKVGB : `type alias Validator error  = subject -&gt; List error`
+U0EUHKVGB : notice how `subject -&gt; List error` matches our `validateModel` example
+U0EUHKVGB : where the `subject` is `Model`, and the `error` is `(Field, String)`
+U0EUHKVGB : Does that make sense to you?
+U37HUSJ4R : it does
+U0EUHKVGB : So, our `validateModel` _is_ a custom validator
+U0EUHKVGB : it just doesn’t take an error message, which the other validators do
+U37HUSJ4R : so if I wanted to create my own `if..` where I could pass my model and then do a custom assertion, what would that look like?
+U0EUHKVGB : ```validateModel : Model -&gt; List (Field, String)
+validateModel model =
+    Validate.all
+        [ .name  &gt;&gt; ifBlank (Name, "Please enter a name.")
+        , .email &gt;&gt; ifBlank (Email, "Please enter an email address.")
+        , .age   &gt;&gt; ifNotInt (Age, "Age must be a whole number.")
+        ]
+       model
 ```
+
+U0EUHKVGB : This _is_ a custom assertion
+U37HUSJ4R : what if I wanted
+U37HUSJ4R : `.age   &gt;&gt; ifNumberIsGreaterThan (Age, "Age must be a whole number.")`
+U37HUSJ4R : where `ifNumberIsGreaterThan` is my own function
+U0EUHKVGB : ```ifNumberIsGreaterThanTen : error -&gt; (number -&gt; List error)
+ifNumberIsGreaterThanTen error =
+  \number -&gt; if number &gt; 10 then [] else [ error ]
+```
+
+U0EUHKVGB : which is the same as `ifNumberIsGreaterThanTen : error -&gt; Validator error number`
+U37HUSJ4R : :smile:
+U0EUHKVGB : Does that make sense to you?
+U37HUSJ4R : yeh, you’ve been a great help. thanks kind sir
+U4JT89FGB : validate’s `all` function says, regardless the number of errors, return me all of them
+U2LAL86AY : hmm this is odd:```
+test s =
+    Just s
+        |&gt; Maybe.map
+            (\s -&gt;
+                Debug.log "just clause" s
+            )
+        |&gt; Maybe.withDefault (Debug.log "nothing clause" "")
+
+```
+and when i run it:
+```
+&gt; test "bu"
+nothing clause: ""
+just clause: "bu"
+"bu" : String
+&gt;
+```
+
+U3SJEDR96 : <@U2LAL86AY> eager language :slightly_smiling_face:
+U3SJEDR96 : every expression that has all of its parameters available is executed
+U2LAL86AY : i was reling on the `Maybe.withDefault` to do a `Debug.crash`.-&gt; and every time when it run - even with a `Just value` - it was crashing my app .. good to know :smile:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

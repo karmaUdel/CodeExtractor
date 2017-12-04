@@ -1,147 +1,73 @@
+U37HUSJ4R : my thinking is certainly around impossible states
+U37HUSJ4R : for example I don't want paused to be true if user isn't on a call
+U3SJEDR96 : that imaginary `fun` above can _only_ touch `pauzed`, and is not aware of anything else in your record. So that basically creates the same guarantee as nesting it
+U37HUSJ4R : so I have something like
+U37HUSJ4R : ```type Status
+    = Available
+    | Wrap
+    | OnCall Call
 ```
-as for focus, there is <http://package.elm-lang.org/packages/elm-lang/dom/1.1.1/Dom#focus>
-which you'd call in your update something like:  `(newModel,  (Task.attempt (always NoOp) (Dom.focus "input") ) )`
-Hmmm... did `fileReader` become something else?  I want to be able to read a .json file or write a .json file
-a file on disk?
-yeah - like if the user drags it onto the page, or if the user clicks a button - and gets a download
-I'm guessing some Port into JavaScript for the actual read/write
-i'm surprised it's not a thing already
-someone put up an example of this the other day I think...
-well not sure it's exactly what you're looking for but it does make use of a FileReader : <https://ellie-app.com/3DGY7DrMpDMa1/0>
-thanks - that's perfect!  Since this is my first use of ports, that code is spot on!
-yeah, it's nicely documented too
-Is there a way to know which packages are outdated?
-I mean, I have some dependencies in my `elm-package.json`, I'd like to know if any package had an major update.
-I think `elm_deps_upgrade` from <https://github.com/NoRedInk/elm-ops-tooling> might do that
-I wonder if this is intended behaviour?
-Ok NaN : Result.Result String Int
-thanks ilias
-I would have expected Err “could not convert string ‘+’ to an Int”
-<@U2Q5GJNTB>  this is the same as `parseInt` behaviour in js
-yes. I assumed that. Just wondering that + and - are success and everything else is Err
-I guess it means "I was able to convert all characters to a number, but the resulting number is NaN"
-When reading `+` there is no "error", but the resulting number is "incomplete", so it is NaN.
-The annoying thing is that you can't check if it's `NaN` since `isNaN : Float -&gt; Bool`
-It's _probably_ tracked somewhere in here: <https://github.com/elm-lang/core/issues/721>
-At least I understand it that way.
-but if it's not, I'd definitely log it as an issue
-Ah
-<https://github.com/elm-lang/core/pull/834>
-so in 0.19, that'll be fixed
-Also, String.toInt "NaN" should return NaN and not an error
-Same with Infinity
-Don't you think?
-Definitely not for ints, perhaps for floats
-My rational is that if you used toString on a number, you should be able to pass this to the reverse function.
-Yeah, toFloat
-I meant toFloat
-Maybe. I'm not entirely convinced that they should be valid input, since they're basically bottom values. I don't really want to have a field where a user can enter a decimal and suddenly I'm dealing with NaN and Infinity.. Not that it's invalid, but it would be a little surprising, too
-I just made an app where the used could enter "Infinity", it's a scientific app.
-Although it already works for `Infinity`, actually
-Maybe not NaN
-Agreed
-Ho yeah it works, but only with toFloat
-I tried toInt
-But this NaN thing is a tought problem. It should be it's own type, but if it is it's own type,  all math function has to accept some union type "NaN|Int|Float"
-Alternatively, all functions that can result in NaN could return a `Result NaN Float`, with `NaN` essentially a bottom value. That would be pretty annoying, tho. Oh well, there's been quite a bit of discussion about this, I recommend checking some of the math related issues :slightly_smiling_face:
-Yeah I'm sure I'm not the first one to thing about it:P
-(and I don't think `NaN` should be a `number`. It is, after all, Not a Number)
-But int can produce NaN. like 0/0
-So why is it a float?
-Currently, no. `0/0` isn't integer division, and always returns a float, so that's solid. Integer division is a little harder, and currently `0 // 0 == 0`
-but then again `rem 0 0 == NaN` as an Int.
-and `0 % 0` is a runtime error
-Ok, good to know about those.
-also, `NaN` is part of the floating point spec, so it makes sense to consider it a `Float`, if it has to be a number. The thing is that JS basically _only_ has floats. This makes edge-cases a little hairy in Elm, without either an inconvenient API, worse performance, or both
-Yeah I guess from this perspective it makes sense that `NaN` is `Float`.
-hmm interesting. Bad thing about this from an app perspective is that whenever we want to read input from an input field and want to ensure it is a number we have to pattern match on Ok and we have to have a special case of + and - (and maybe other things that are not numbers but are parsed as Ok by String.toFloat and String.toInt
-I guess regex are the cleaner approach for me in this case
-user input can be hard
-for example, I write 5000 as 5'000
-and my french neighbors write 6.5 as 6,5
-and if it is money, I'll write 5 000.-
-And my wife would write ??
-yes I agree on that, but that is additional complexity based on region/country. Regular numbers should be easier than formatted values
-Yeah but if you put an input field for example "how much would you pay for that", people will enter values differently.
-I see your point. And I don’t want to complain. I just wanted to know if this is known and intended/accepted behaviour.
-In that case there are reasons and that is fine with me
-Ho, I didn't mean to lecture you.
-What I meant is that you might consider either a full parsing solution, or limit the input and use regex.
-And just parse something like `\d+` and be done with it:)
-I know. I did not get you wrong
-:slightly_smiling_face:
-However I was very negative in my sentences and wanted to make sure. that I just trying to understand. So we are all good here
-Maybe the mindset of “just ensure it is a valid number” was a little too naive and I will start with a simple int / float regex
-(no scientific notation and so on) and later will make the UX nicer with a more complete solution and proper information for the user
-(simple int/float regex solution) …
-I don't know your audience, but a fair amount of the planet uses `,` as decimal separator. Be sure to support that.
-you might want to use something like that <https://stackoverflow.com/questions/1074660/with-a-browser-how-do-i-know-which-decimal-separator-does-the-client-use>
-yes, and I am not sure what to do there either, since I am from germany and most users also (thus using , is the first approach) but I want to support non german speaking users now. so you are right
-Interesting. thanks
-In switzerland we use `.` and we speak german mostly:)
-that is amazing. did not know people from your country use .
-On german keyboard, on the numeric keypad, is it `.` or `,`?
-,
-afair. it is quiet some time ago I had one
-`.` here
-good to know. I will give this question some thoughts. Thanks
-I bumped hard into this issue in the past:)
-<@U2Q5GJNTB> as of the next version of `elm-lang/core`, `String.toInt` should match only valid integers, so `+` and `-` shouldn't give trouble there, anymore. In the current `String.toFloat`, these are already blocked. `Infinity` is accepted by `String.toFloat`, though, so perhaps that's one to be a little wary of :slightly_smiling_face:
-does anyone know how close we are to Elm 0.19? weeks, or quarters? :slightly_smiling_face:
-I guess weeks, but this is just my feeling.
-No one knows
-Not even Evan Almighty himself? :slightly_smiling_face:
-nope! Releases happen on a "when they're done" basis
-which seems tautological, I just mean like if there's something important that should be in that isn't finished just yet the release will wait till it's ready
-right &gt; fast kind of thing
-<@U3SJEDR96> thanks for the update. Great to hear
-Sure. that's fair.
-something I can share for sure though is that there will be a good month or so of alpha testing once 0.19 is nearing completeness, and that'll be announced on the elm-dev mailing list
-That's good to know. Thanks for sharing.
-Has the elm-lang project ever thought about accepting financial contributions for it's main developers? When I really like an open-source program I like to donate something as a token of appreciation for all the time that has been invested by talented developers. I would like to do the same for elm but doesn't seem to be possible.
-I suppose, if anything, the Elm Software Foundation _might_ accept donations, but I honestly don't know. Evan works as a full-time open-source developer at NoRedInk, so his costs are covered :slightly_smiling_face:
-That's really cool of NoRedInk
-but still, i think some people of this community would probably be willing to donate something to the foundation
-i certainly would
-True; though there are definitely others ways you can contribute, too: spreading the love, introducing Elm to friends, coworkers, at meetups, ... Organizing a meetup is a great way to get more people involved, and a huge learning opportunity, too!
-I accept donations toward my holidays fund if you insist.
-But if you can convince more people to use elm to make it mainstream, I guess that would be the best thing.
-I still look like an alien when I say "elm".
-But I remember people asking "some dance?" when I was introducing JavaScript.
-Whew!
-Oh, I also had to remove rtfeldman/node-test-runner from the “dependencies” in tests/elm-package.json
-I think I will like having the Main module auto-generated, but the upgrade was painful.
-<https://github.com/rtfeldman/node-test-runner/issues/151> &lt;- we've realized the same. For what it's worth, we do now have a changelog, and had a migration guide in there, too :slightly_smiling_face:
-<@U3SJEDR96> I already am spreading the love :slightly_smiling_face: I hope that my love spreading at my company will one day lead to an actual real-world elm project for a client.
-<@U4Z4NEUQG> In my company quite a few people have heard of elm or even worked with it. And with me rambling on about it even more will :wink:
-I also feel like Elm is getting name-dropped more and more often. Even when it's in a sentence saying "we didn't pick Elm because _xyz_", I still feel like it might encourage some people to play around with it and discover more about it. For example, <https://githubengineering.com/how-four-native-developers-wrote-an-electron-app/>
-Could just be the Baader-Meinhof phenomenon at work, tho
-My node.js upgrade was predicated on getting Electron to work, as a wrapper around a Lisp web server. I used Apache Cordova to wrap my Elm kakuro app for the iOS and Android app stores.
-Actually what convinced me to look closer at elm were the many talks at React-Conf that mentioned elm. After watching these I decided to have a go at it myself. No regrets :slightly_smiling_face:
-I happened across Elm last October, and quickly fell in love. And that’s saying a lot from an old Lisp weenie.
-I cannot remember how I found elm. I don't know anyone personally who used it. I think I just found a Richard talk online and thought, well... this seems like a sensible _not javascript/not-derivative-of-javascript_ thats seems neither too immature nor too bloated.
-I should note that I would think it is much easier to convince yourself to try elm if you *don't* have much  experience in front-end design, but it probably slows down learning speed because you're learning elm and web development at the same time. Then again, I don't have to _unlearn_ any bad practices either. I'll think more on this.
-Just poppin' in to say: _Thanks, Elm, for making web programming fun again!_
-Hi everyone, if anyone is trying to migrate to Elm from a React codebase this might help you. <https://github.com/ChristophP/web-react-components> It's a wrapper <@U63K0CFEK> and I made that lets you use React components as Web components with the main intention being to be able to use them in Elm. I know this is not 100% elm specific but I hope that it may help someone having a counter argument to the old "Yeah Elm is cool, but what about all of our existing React components?". Would love to hear some feedback on it btw. Also shoutout to <@U0CL7484S> and <@U0CL0AS3V> because talks with them about this topic kinda inspired the whole thing :slightly_smiling_face:.
-Lol. I found elm on /r/programmingcirclejerk because you couldn't add 2 numbers in the REPL without connecting to github to download a package.
-huh, really?
-umm, that doesn't seem to be the case. If I pop the repl i can add two numbers
-<@U23SA861Y> perhaps a very early version?
-perhaps
-I can see that happening early in a language
-back in the lawless times of pre 0.16
-the first rule of elm club is we don't talk about pre-0.16
-I feel a bit sorry for the FRP folks who got into Elm only to have it scuttled under their feet.
-<@U23SA861Y> I think on first install when you run the repl and don't have internet access it tries to download some stuff from the elm website
-<https://twitter.com/ckolderup/status/789002880246177792?lang=en>
-I didn't notice that, the elm installs are per project
-or I believe so
-how do i trigger 2 events with onclick?
-hmm, which two events
-<@U64MK7215> typically I will try to model this sort of situation with a single message that describes what the user did (FooButtonClicked) and handle the multiple things you want to happen in the update function. Don't forget you can extract/share functions between branches of your update case. 
-How are people managing live reload with Elm projects. It looks like elm-live is unmaintained? Is everyone using webpack?
-I would prefer not to use webpack if I can help it lol.
-elm-live works fine
-elm-live actually has some issues right now if you are also using elm-test to watch files
-Hey all. I have a strange conundrum. I'm trying to do some clever redirection in an SPA with the `Navigation` and `Routing` modules.
-<https://github.com/sporto/elm-navigation-pushstate/blob/master/src/Main.elm> is the guide I have been following.
+
+U3SJEDR96 : That might be extended to `Status = ... | OnCall Bool Call` though
+U3SJEDR96 : which guarantees that you only have that bool if you're actually in a call
+U3SJEDR96 : come to think of it `OnCall Bool Call` is basically `OnCall Call | Paused Call` anyway
+U37HUSJ4R : true, but this is just a simple example
+U37HUSJ4R : i also have transfer, hold etc
+U6FFD2QG0 : Hi everyone, I'm running into something that seems like it should have a simple solution, but I can't figure out what that is. I need to construct an instance of `Cmd msg` as an alternative to `Cmd.none` in an if branch. I'm not using any outside effects or anything. Here's the relevant code snippet:```
+update : Msg -&gt; Model -&gt; (Model, Cmd Msg)
+update msg model =
+  case msg of
+    Tick newTime -&gt;
+      let
+          newTime = decTimer model
+          newCmd = if newTime.activeTimer &gt; 0
+                     then Cmd.none
+                     else Cmd.Cmd TimerDone -- help!
+      in
+          (newTime, newCmd)
+```
+
+U0LPMPL2U : Is this to prevent duplication between the `Tick` and `TimerDone` branches of your `update` ?
+U6FFD2QG0 : yeah, basically
+U3SJEDR96 : I would suggest taking the contents of your `TimeDone` branch, putting it into a separate function, and replace that with```
+TimerDone -&gt;
+    timerDone model
+Tick newTime -&gt;
+    if .activeTime (decTimer model) &gt; 0 then (newTime, Cmd.none) else timerDone model
+````
+
+U0LPMPL2U : I'd suggest extracting the common logic to a helper function and calling that from both branches instead of trying to send a `Msg`
+U6FFD2QG0 : fair enough. Is this just not a typical way that a Cmd would be used?
+U0LPMPL2U : You almost never want to just send Msg to yourself
+U0LPMPL2U : Msg is meant to represent events from the outside world
+U3SJEDR96 : No, a `Cmd msg` represents something for the runtime to execute asynchronously, after which it can call your `update` with the resulting `Msg`
+U6FFD2QG0 : ok, that's good to know
+U6FFD2QG0 : thanks!
+U3SJEDR96 : you don't really need the runtime in order to call a function, though, so using a function to abstract the behaviour of "what should happen when your timer is done" is definitely the recommended approach
+U37HUSJ4R : If I wanted to make this more generic:```
+updatePaused : Bool -&gt; Call -&gt; Call
+updatePaused newValue ({ controls } as call) =
+    { call
+        | controls =
+            Maybe.map
+                (\controls -&gt; { controls | paused = newValue })
+                call.controls
+    }
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

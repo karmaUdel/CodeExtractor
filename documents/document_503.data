@@ -1,8 +1,92 @@
+U2GPAEU1L : I like `type Players = FourPlayers Player Player Player Player`, down the line if you support two players you could refactor easily
+U2SR9DL7Q : <@U0LPMPL2U> those could all work potentially.
+U23SA861Y : thats ok if you can only ever have a fixed set of numbers like 1,2,4 but if it's arbitrary then a list would be the correct structure
+U2SR9DL7Q : I have one function that essentially does `List.map2 (\x y -&gt; Player x y) X_list Y_List`
+U2SR9DL7Q : This would no longer work now... is there a similar map function for records?
+U2SR9DL7Q : <@U23SA861Y> I don't plan on supporting arbitrary amounts of players anytime soon.
+U2SR9DL7Q : Technically there's nothing wrong with the Lists... but I keep on having to deal with Nothing moments that are impossible, and that seems like code smell.
+U23SA861Y : If you have a fixed structure for the render (ie each of the 4 sides of the screen) then the ADT would be probably pretty good
+U23SA861Y : then add support for 1,2, and 3 players later
+U0LPMPL2U : You could implement your own `map2` function for the `Players` type if you really wanted
+U2GPAEU1L : ```type Players = FourPlayers Player Player Player Player
+
+playersMap : (Player -&gt; Player) -&gt; Players -&gt; Players
+playersMap playerFunc players =
+    case players of
+        FourPlayer player1 player2 player3 player4 -&gt;
+            FourPlayer (playerFunc player1) (playerFunc player2) (playerFunc player3) (playerFunc player4)
 ```
-So then I thought this, with a foldp at the end
-imagine mailbox is accumulating rules as the view runs
-:scream:
-haha :slightly_smiling_face:
-I want the output to be:
-That would not have been a good idea even in 0.15.
-Okay, hold up a sec
+
+U2GPAEU1L : Wrote that in slack, pardon syntax errors…
+U2GPAEU1L : And you could do similar for `map2` etc etc.
+U2SR9DL7Q : That could work. I also remember a package that let you say that a list was not empty
+U23SA861Y : maybe, but thats abusing lists
+U2SR9DL7Q : and things like `.head` would not return a maybe type
+U2GPAEU1L : Leave the lists alone aready, they've been through so much
+U2SR9DL7Q : They brought it on themselves.
+U2SR9DL7Q : Another situation is a List of "dominoes" I generate and then shuffle using the random library. It's always 28 dominoes, always. But there's no easy way of saying "this type is always these 28 things", and never less.
+U23SA861Y : That one probably should be a list, but there should be ways of dealing with that which doesn't pop a whole boat load of maybes
+U23SA861Y : well, list or array
+U2SR9DL7Q : I refactored something earlier to get rid of a _fake_ maybe, but that was just switching from a `Maybe Thing` to a type `Thing = On | Off`
+U2GPAEU1L : As promised yesterday, I finally got around to finishing that tutorial on tagged unions `type`. This tutorial took me a lot longer than anticipated…but I'm quite happy with the result, go over a *lot* of important concepts, especially for beginners. I highly recommend taking a look if you're still wrapping your head around `type` (and yes I am obviously super bias).
+<http://codetidbit.com/#view/snipbit/59713b757890d775c05191fa/introduction>
+
+Cheers :smile:
+
+U65B9414J : <@U2GPAEU1L> getting an error. Tried incognito and got same result. <https://monosnap.com/file/NqB44VDBlxZNPCM92u2dCMQwqLmZ70>
+U2GPAEU1L : Ya my bad, one sec
+U2GPAEU1L : fixing something…
+U2GPAEU1L : didn't mean to do that, give me a min
+U65B9414J : No worries
+U2GPAEU1L : Hey <@U65B9414J>…Sorry about that :slightly_smiling_face:
+U2GPAEU1L : Messing with things in production a bit too much…it's online now
+U65B9414J : <@U2GPAEU1L> it's working now. Thanks.
+U2GPAEU1L : Np… :sweat:
+U153UK3FA : <@U2GPAEU1L> can you make those links in to actual links? I tried to open an article in another tab and was disappointed
+U2GPAEU1L : <@U153UK3FA> Actual links?
+U153UK3FA : all your buttons and links to articles are `div` tags with onclick events instead of being `a` tags with `href` attributes
+U2GPAEU1L : Oh I thought you meant _in slack_
+U601ELFEG : If I want the value of a text `&lt;input&gt;` area only when the user clicks a `&lt;button&gt;` is there a good hack for that... or do I need to keep some state in my model for the current value of the `&lt;input&gt;` field?
+U153UK3FA : you'll need to keep the state of the input field in your model
+U601ELFEG : ah well.... Seems like there should be some fabulous way to do that... but okay
+U601ELFEG : (since I won't be reacting live to the search field)
+U153UK3FA : Elm largely tries to ignore the state of the DOM and treats it merely as a representation of the state of the model
+U601ELFEG : yup -
+U4F64AKQV : Any tricks for Json encoding Colors?
+U4872964V : <@U4F64AKQV> tricks? how do you want the result to look?
+U4F64AKQV : Good question. I'm thinking RGBA in either an object or list.
+U4F64AKQV : Maybe I'll just use Color.toRgb with Json.Encode.list
+U4872964V : So, what's the use case? I mean, somebody is going to read that json.
+U4F64AKQV : It's purely internal. I'm also writing the side that reads it, so I can choose the format.
+U4872964V : ok, then that sounds good
+U61FZV5EK : Is it best practice to pass the model down to functions and let them get the values, or just the values directly? When a function needs a couple of values, sending them individually is more verbose, but better documentation as well I guess. Any best practices?
+U4872964V : <@U61FZV5EK> yes, listing function parameters explicitly is better in my opinion. sending the whole model make the function more complex, because it needs to know the model now
+U4872964V : and with many parameters, I use a one-off record and deconstruct it in the function, like this:```
+function { param1, param2, param3 } = ...
+```
+
+U4872964V : (if the model actually has those fields, then you _can_ send the model in that case, that's pretty neat too) :slightly_smiling_face:
+U153UK3FA : another option is to use ‘extensible record' types to declare a function's specific requirements and pass the model to it.
+U153UK3FA : Richard's talk explains this more <https://www.youtube.com/watch?v=DoA4Txr4GUs>
+U4872964V : yes, that's what I meant by if the model actually has those fields. however, you still tie your function to your model when you do that. Refactoring the model will lead to refactoring your function. Which is ok, by the way :slightly_smiling_face:
+U4872964V : depends on what function we are talking about i suppose
+U153UK3FA : yep, it can certainly be over used. You probably don't want to do it more than a few calls down
+U2D07QZN3 : I have a list of records with a "name" field.  How do I filter get a new list, where name contain a string?
+U153UK3FA : `List.filter` is the function you want
+U153UK3FA : <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/List#filter>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

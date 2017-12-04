@@ -1,0 +1,91 @@
+U3JGK19NV : I've used the `--python="/Library/Frameworks/Python.framework/Versions/3.5/bin/python3"` flag when creating the environment
+U3JGK19NV : here's my terminal output from when i CD
+U486CN4VD : what do you get when you run `python -V`
+U3JGK19NV : A very long output!
+U5ZLCF2FJ : I think it's because you don't have a pip3 under `bin` folder.
+U1BP42MRS : capital `V`
+U1BP42MRS : you did lowercase, which is a verbose log of the interpreter starting
+U5ZLCF2FJ : so it's using a default `pip3` which installs libs into `/usr/local/lib`, but search path in environment is looking into `./lib/&lt;version&gt;/site-packages`?
+U3JGK19NV : whoops, sorry!
+U1BP42MRS : Looks like having a space in there is causing your problems
+U1BP42MRS : So it's falling back to the system:
+```
+zsh: /Users/yousefissa/PycharmProjects/Small Projects/HOC/ultra_monitor/bin/pip3: bad interpreter: "/Users/yousefissa/PycharmProjects/Small: no such file or directory
+```
+
+U3JGK19NV : python 3.51
+U3JGK19NV : Hmm
+U1BP42MRS : rename `Small\ Projects` to `small_projects`
+U3JGK19NV : I can move it to my desktop
+U1BP42MRS : Or create your virtualenv at `~/.virtualenvs/my_project`
+U1BP42MRS : which is pretty standard
+U3JGK19NV : Giving it a go
+U3JGK19NV : Perfect, that worked! Thank you!
+U3JGK19NV : What does adding this (`~/.virtualenvs/my_project`) at the end of the virtual environment actually do?
+U1BP42MRS : It sets the location, is that what you are asking?
+U1BP42MRS : `virtualenv -p $(which python3) ~/.virtualenvs/my_project`
+U0NRYQNAZ : it's the destination of where the virtualenv will be created.
+U1BP42MRS : So now you need to `source ~/.virtualenvs/my_project/bin/activate` when you need it
+U1BP42MRS : I add that to an `autoenv.zsh` script, so each project in my shell auto-sources.
+U1BP42MRS : If you use `virtualenvwrapper` it's even easier:  `mkproject -p $(which python3.6) my_app` and then later you can `workon my_app` and it auto put you in your source :slightly_smiling_face:
+U3JGK19NV : Thank you so much guys! I've got a lot to learn about virtualenvironments
+U0NRYQNAZ : i use `pyenv` with `pyenv-virtualenv`. both of them together allow you to use a `.python_version` file. The python_version file is kept in the root dir of your project. When you change into the project's dir it will activate the right virtualenv for you. it's quite nice although the instructions of getting it going weren't all too clear. 
+<https://github.com/pyenv/pyenv>
+<https://github.com/pyenv/pyenv-virtualenv>
+
+U3JGK19NV : :taco: <@U1BP42MRS>
+U0NRYQNAZ : if you are on a mac you can install both with brew.
+U3JGK19NV : :taco: <@U5ZLCF2FJ>
+U3JGK19NV : :taco: <@U486CN4VD>
+U3JGK19NV : okay im done!
+U0NRYQNAZ : virtualenvwrapper is nice too. i used that since the beginning. if you don't want to leave behind virtualenvwrapper there is a plugin. 
+<https://github.com/pyenv/pyenv-virtualenvwrapper>
+
+U0PKTUWKH : hi has anyone familiar with lmbda in aws?
+U0PKTUWKH : need some help troubleshooting a function
+U1BP42MRS : <@U0PKTUWKH> just ask and see if someone can help.
+U4SSUBNHY : <@U0PKTUWKH> I can try :slightly_smiling_face:
+U0PKTUWKH : ```def lambda_handler(event, context):
+    reservations = ec.describe_instances(
+        Filters=[
+            {'Name': ['Backup'], 'Values': ['jira_backup']},
+        ]
+    ).get(
+        'Reservations', []
+    )
+
+    instances = sum(
+        [
+            [i for i in r['Instances']]
+            for r in reservations
+        ], [])
+
+    print "Found %d instances that need backing up" % len(instances)
+``` 
+not sure why i get 0 instances found while testing my function
+
+U0PKTUWKH : trying to build a function that will backup ebs volumes
+U4SSUBNHY : looking
+U0PKTUWKH : i get the following error `Invalid type for parameter Filters[0].Name, value: ['Backup'], type: &lt;type 'list'&gt;, valid types: &lt;type 'basestring'&gt;: ParamValidationError`
+U4SSUBNHY : try `"Backup"`?
+U4SSUBNHY : instead of `['Backup']`
+U0PKTUWKH : `An error occurred (InvalidParameterValue) when calling the DescribeInstances operation: The filter 'Backup' is invalid: ClientError`
+U4SSUBNHY : what is `'Backup'` when it comes to your EC2 instances?
+U0PKTUWKH : its tag
+U4SSUBNHY : ok
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

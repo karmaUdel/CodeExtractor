@@ -1,12 +1,234 @@
+U0CLDU8UB : What is the exact code you used with jQuery?
+U3R7CKQRX : Basically what I am doing is 1) Attach the scroll event with elm and send the result through a port to JS, those events are only fired after the scroll
+U3R7CKQRX : 2) the jquery version is something like this `jQuery('.table-container').on('scroll', () =&gt; console.log('log me'))`
+U3SJEDR96 : did you try the pure JS version of that?
+U3R7CKQRX : no i didn't
+U3R7CKQRX : let me try
+U3R7CKQRX : ok the pure js version works just like jQuery
+U3R7CKQRX : I have also tried something a bit more heavy in computing, like recursion and manipulating the DOM in the callback but those also really worked fine.
+U3R7CKQRX : My elm code looks like this``` ...       OnScroll event -&gt;
+            let
+                _ =
+                    Debug.log "scroll" "now"
+            in
+            ( model, Cmd.none )
 ```
-Anyone up?
-Yup.
-Could you try to answer me a question please?
-Yes if it is related to python.
-<@U67NP4A0K> <https://mikeash.com/getting_answers.html>
-I'm currently learning how to use modules and call other files. It's is possible to have a file named(main.py) and call another file(ship.py). And from ship.py execute a function in main.py Sorry if I'm not explaining clear enough.
-From the function main.py I want to execute some code of the file ship.py and also I want to do it the other way, from ship.py I want to execute functions of main.py
-<@U67NP4A0K> this is called a 'circular import', and that's generally prohibited
-Oh
-`main.py` sounds like an entry point, why would you import something from it?
-I'll search about it
+
+U0CLDU8UB : so how does the elm event listener get attached?
+U3R7CKQRX : and ```onScroll : (Encode.Value -&gt; msg) -&gt; Html.Attribute msg
+onScroll tagger =
+    on "scroll" (Decode.map tagger Decode.value)
+...
+-- in the view
+        , div [ class "table-container", onScroll OnScroll ]
+
+```
+
+U0CLDU8UB : Oh, I may have an idea what's happening. Elm runtime uses requestAnimationFrame to batch some things to happen at once. Maybe the browser postpones the animation frame until the scrolling stops.
+U3R7CKQRX : i could test that theory by adding requestAnimationFrame to the page and see when it fires
+U0CLDU8UB : Ilias, what do you think of this theory?
+U3R7CKQRX : So I checked it by subscribing and logging at animationFrame
+U3R7CKQRX : the logging doesn't stop when I scroll
+U3R7CKQRX : however the scroll events only appeared after scrolling stopped
+U3SJEDR96 : I'm thinking that the the event-callback are queued by the native scheduler, and the browser is delaying that evaluation until scrolling stops
+U3R7CKQRX : the `scroll now` parts are when all the scroll events arrived after scrolling stopped
+U0CLDU8UB : So I'm pretty sure you can work around this by attaching the scroll listener on the JS side and sending the info through a port
+U3R7CKQRX : Funny thing is had it that way before and the same issue, weirdly :slightly_smiling_face:
+U3SQ42JJW : Hi everyone.. I have a Http.send that fetches from an api. the endpoint responds with a fileSend…. now I wonder how to handle this - I want to download this file… but as everything is an XHR request, this would never work in Elm, right?
+U3R7CKQRX : I did some cleanup and then opted for putting the scroll handler into Elm
+U3R7CKQRX : but that same issue was there before
+U3R7CKQRX : So basically before it was JS listens to Scroll and sends stuff to Elm. Now it's Elm listens to scroll and sends stuff to Elm.
+U3R7CKQRX : Both ways I had the issue.
+U0CLDU8UB : Oh, that's sad :confused:
+U3R7CKQRX : I will try some elli app to reproduce it
+U3SQ42JJW : according to that its not possible :disappointed: <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#Part>
+U2LAL86AY : that would be awesome. and also does this happen in multiple browsers? What browser are you using?
+U0CLDU8UB : Yeah, that doesn't sound like something you can currently do in Elm
+U3R7CKQRX : wow, aion I should have checked that earlier
+U3R7CKQRX : turns out I have the issue in Chrome
+U3R7CKQRX : but not in Firefox
+U3R7CKQRX : that basically answers the question whether Elm has anything to do with it
+U3SJEDR96 : <https://ellie-app.com/3F2TDVv33bha1/0> &lt;- this works for me on chrome, on osx :confused:
+U3R7CKQRX : whhuuuuuut?
+U0CLDU8UB : And me, Chrome on Linux
+U2VUFCK5G : <@U3U2EA14G> i have something similar, you can pass parameters by passing an object to the elm embed function
+U2VUFCK5G : or if they’re in the url parameters you can extract them in elm code
+U3SJEDR96 : <https://ellie-app.com/3F2TDVv33bha1/1> and with ports, too
+U2LAL86AY : Fedcy - a long time ago asked about something simmilar i think.His answers that i saved are:
+
+So, the HTTP streaming thing I asked about earlier today has yet another name: <https://en.wikipedia.org/wiki/Comet_(programming)>
+
+U2LAL86AY : fredcyMay 19th at 1:24 AM
+I got it to work by doing the necessary XHR in JS and sending the incremental responses into Elm via a port.
+
+U2LAL86AY : it's your decoder i guess.
+U3R7CKQRX : I can't run this example for some reason, all I see is a blank screen on  the right side
+U3R7CKQRX : tried to compile a couple of times
+U3R7CKQRX : but things don't show up for me
+U3SJEDR96 : <https://ellie-app.com/3F2TDVv33bha1/2> made it red now
+U2LAL86AY : are there any errors?
+U3SJEDR96 : (the red part is scrollable)
+U3SJEDR96 : and scroll-events should show up in the dev console, both for the `Debug.log` as for the port-stuff
+U3R7CKQRX : yeah that worked
+U3R7CKQRX : so it's likely it is something else in my code
+U3R7CKQRX : <@U2LAL86AY> what do you think it is about the decoder?
+U3R7CKQRX : I try a simple succeed call
+U3SJEDR96 : Gotta go now, if you come to a conclusion, please do highlight me so I can read it later :slightly_smiling_face:
+U2LAL86AY : does anyone have any idea how to build a pdf library/pdf document from scratch? 
+I'm wrapping the `jsPdf` library in elm here - but using ports means i can't publish it. Which is so bad. The users will need to install js and set up ports and such.. just messy.
+
+But i don't have any clue where to start at leas make a small pdf document with a small text. nothing fancy for start.
+
+I can't find any resources - seems this topic is not good for making tutorials :smile: 
+ But if anyone of you knows something about this topic please let me know.
+
+U3SQ42JJW : <@U2LAL86AY> Yes - I think I have to go this painful way, too… :grin:
+U3R7CKQRX : <@U3SJEDR96> So I modified that elli example to also use a Decoder which hands the event to the msg but that also works in terms of smooth scroll events <https://ellie-app.com/3F3m5ycmVxya1/1>
+U3R7CKQRX : Also I just found out that the delayed scroll events only happen when I scroll via the touchpad but not when I actually use the scroll bar.
+U3R7CKQRX : I will post when I know more
+U2LAL86AY : hmm yes but doesn't seem to be working with the decoders form this DOM library: <http://package.elm-lang.org/packages/MichaelCombs28/elm-dom/1.0.0/DOM#scrollTop>And i don't understand why - it's just a decoder.
+<https://ellie-app.com/3F3zszHK85Va1/1>
+
+U5S3XFEV8 : <@U2LAL86AY> my experience is that implementing a PDF library is quite an undertaking, even the basics. I have worked a little with thethe iTextSharp library to run on .NET Core a few months ago
+U40QW928G : with elm make does it compile included files or does it just build the one file you specify?
+U5S3XFEV8 : <@U2LAL86AY> I got the impression it's a large complex spec with lots to implement, quite a time investment to do from scratch
+U14Q8S4EM : Yeah it will include what that module imports. Is that what you mean <@U40QW928G>?
+U2LAL86AY : <@U40QW928G> everything is bundled - including imports of your own modules, as well as library imports.
+U2W22AHNU : <@U2LAL86AY> <https://docraptor.comb;)>
+U40QW928G : oh wonderful
+U40QW928G : then i don't need webpack
+U40QW928G : I saw webpack stuff on the elm tutorial site and said no thanks, I've dealt with it enough
+U14Q8S4EM : Haha yeah. I use browserify to bundle up everything in my Elm projects tho, and it works well.
+U14Q8S4EM : I have to bundle at all because often I have some amount of JS modules.
+U2LAL86AY : stephen.hand: i don't even underestand what pdf actually is. 
+The pdf code. i mean  - is so strange can't find much online about it. 
+
+From what you know - is possible to create a pdf document directly form elm? Forget for a second that is a lot to implement. I want to know if is possible at least.
+
+U5S3XFEV8 : Generating a PDF at the lowest level just involves writing a binary stream (it's a binary format, not text based) and all the APIs exist in browsers to generate a binary stream and present it to the user (as jsPdf shows), however, I'm not sure if these APIs are exposed anywhere in the elm runtime as of yet
+U0FP80EKB : We just do `elm make` to output to a js file and copy it over to our rails app
+U0FP80EKB : Don’t use any of the js build stuff
+U5S3XFEV8 : <https://developer.mozilla.org/en-US/docs/Web/API/Blob> <https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL> &lt;- These are the APIs you would probably use to implement PDF generation in JS, but as far as I can see they aren't exposed in Elm, so you still need to 'go native' at some point to use these browser APIs
+U40QW928G : maybe someday elm make will be powerful enough to build elm projects with styles and static files etc
+U0FP80EKB : Well, there is elm-css, so you can build with styles
+U2LAL86AY : no, you are right -  i see that until evancz releases this api to the elm runtime i can't do nothing in this direction: <https://groups.google.com/forum/#!topic/elm-discuss/spr621OlUeo>
+Thanks for the info - was useful to understand this. At this point i will wrap that library with ports and that's it.
+Hope this will be fixed soon enough - there are a lot of interesting use cases provided in that forum.
+
+U4F64AKQV : And <#C4F9NBLR1|style-elements> for those who are looking for a more innovative approach!
+U0FP80EKB : you misspelled “alternate” :slightly_smiling_face:
+U0EQCDADA : That's what I ended up doing too. Wasn't too bad.
+U2LAL86AY : In my projects i almost always need webpack. i've asked this before - still not sure if is possible - but maybe we can make a webpack version in elm. `WebpackConfig.elm` - instead of `webpack-config.js`- will just wrap the real web-pack apis in a type safe way. And generate the js version without errors.
+A lot of bugs i encounter with webpack is just my fault - i do bad configurations - and having this in elm at least will make impossible to do bad configurations - and also providing helpful compiler messages.. Is this even possible?
+
+U0EQCDADA : <https://github.com/fredcy/tezos-client/blob/master/tezos.js#L51>
+U17PWHU4D : <@U2LAL86AY> Webpack 2/3 should give you really helpful messages if your config is not semantic.  are you using those by chance?
+U0S6BNVNY : <@U0FP80EKB> the rails 5 webpacker elm stuff is nice
+U0FP80EKB : <@U0S6BNVNY> I’ve heard. We just updated to rails 5, so we have access to it. My only trepidation is that we’ve got our pipeline working now, so it is a bit of a lift for us to shift to something we don’t know. :slightly_smiling_face:
+U0S6BNVNY : play with it once, it's pretty alright. Still lots of magic. But beats the asshat pipeline by leaps and bounds already.
+U0FP80EKB : :slightly_smiling_face: One day we’ll take the time
+U0FP80EKB : Just did some awesome refactoring today. Anyone who says Elm doesn’t support polymorphism needs to see this codebase. :slightly_smiling_face:
+U0FP80EKB : We have 3 different types of embeds with 3 different sets of content, and we are getting consumer code to almost entirely just use a single abstraction.
+U1432C733 : Is anyone using Elm apps inside of HTML templates? This might be an anti-pattern, but I am mostly curious if it has any adverse effects on performance.
+U0CLDU8UB : What do you mean by HTML templates?
+U17R26VR8 : i’m guessing that <@U1432C733> has some backend framework rails/asp.net mvc/laravel that’s generating static html, and the goal is to embed a small elm ~component~ app into one of those template files to be served which’ll load the elm part after the page
+U0CLDU8UB : If that's the case, there won't be any effects on performance compared to other methods of embedding. Unless you repeat the template, of course.
+U0CLDU8UB : HTML Templates are also a part of the Web Components spec. You have very different concerns there.
+U0HBB55C0 : hi all, do you know if an elm package for case conversion exist somewhere ?
+U0HBB55C0 : mainly interested in snake_case &lt;-&gt; camelCase
+U1ZFF0E5P : the "extra" packages are typically a good start
+U1ZFF0E5P : <http://package.elm-lang.org/packages/elm-community/string-extra/1.4.0/String-Extra>
+U0HBB55C0 : perfect
+U1ZFF0E5P : you have them for most core modules, like List.Extra etc etc
+U0HBB55C0 : yep I know those, just forgot to look inside, didn't  match in package search
+U0HBB55C0 : thanks
+U3R7CKQRX : <@U0CLDU8UB> <@U3SJEDR96> My colleague <@U5XTFSTFV> found out what the scroll issue we talked about yesterday. After a while we found out that the issue only occurs on Chrome AND scrolling with the touchpad AND using Elm. We profiled some of it and got a performance issue from a chrome that read something like this `Vialoation: setTimeout took more than 100ms `. We then looked deeper into this file <https://github.com/elm-lang/core/blob/master/src/Native/Scheduler.js#L244> at the `work()` function and played around with the `MAX_STEPS` constant. When we set the constant to 10. The behaviour went back to smooth scrolling.
+U3R7CKQRX : Seems like elm delays work of too many event arrive between steps of work.
+U3R7CKQRX : We will try to work around the issue with requestAnimationFrame
+U3SJEDR96 : Cool. I wonder if speeding up domdiffing for your view would help. (i.e. using lazy and/or keyed)
+U4872964V : throttling handling of scroll events with requestAnimationFrame could work too, in javascript
+U0GPGFQQY : I've been thinking about getting a `componentDidMount` events in Elm. We're using this in our current React project to fetch the data. It works very well with `RemoteData` type, where in `componentDidMount` you can check if the data hasn't been asked from the server, then initiate the fetch.
+U0GPGFQQY : My original thoughts are rendering an `img` tag with a wrong url in `src` and `onerror` event to initiate the fetch.
+U2JFD9ALE : Is it possibly to do this in _*pure*_ :elm:  without having to rely on a _*port*_? (change color of an .SVG image) <https://stackoverflow.com/a/9873285>
+U2LAL86AY : if that image is created by you using the elm svg library - i think you can just switch the color attribute or something like any other attribute but if that image is already there - and you want to navigate to that particular element using selectors, or ids - and switch the color somewhere nested - then i think only with ports works.
+
+U2D7NUGS1 : On Thursdy together with <@U0ZESPUAX> I'll give a short talk about Elm and web components at a meetup in Den Bosch (NL): <https://www.meetup.com/Frontend-Developers-Javascript-Noord-Brabant/events/240756426/>
+U3SJEDR96 : <https://ellie-app.com/3FgCNqW2RWLa1/0> <@U2JFD9ALE>
+U41NK9BM4 : unsoundscapes: How the API would look like? Perhaps it’s too early for asking that? :slightly_smiling_face:
+U0GPGFQQY : which api?
+U41NK9BM4 : The equivalent of “componentDidMount” in Elm
+U41NK9BM4 : Or maybe you were thinking to use ports to “wire” those events in Elm.
+U2JFD9ALE : <@U3SJEDR96> many thank yous good sir :slightly_smiling_face:
+U2JFD9ALE : So I just need to convert my .svg file into :elm: code right? Otherwise, I can't update the color right?
+U0CLDU8UB : Yes
+U0GPGFQQY : I was wondering about hacking it in using some existing events in DOM
+U41NK9BM4 : So intercepting React `componentDidMount` in Elm app?
+U0GPGFQQY : No. I wanted to have something like `componentDidMount` but in Elm
+U0UGR7JTB : hi everyone, I found a problem with `Html.map` and was able to reproduce it on this link: <https://ellie-app.com/3FhDZs3q9f9a1/2>
+U0UGR7JTB : is anyone aware of this problem? am I doing something wrong?
+U0UGR7JTB : the context in which we are seeing this problem is when a user is focusing an input field, and the session times out, triggering the blur event
+U3SJEDR96 : this is essentially <https://github.com/elm-lang/virtual-dom/issues/35>
+U3SJEDR96 : but then in pure-elm
+U3SJEDR96 : I would definitely log that as an issue on the virtual-dom repo, and suggest working around it using `Html.keyed` so prevent those nodes from being reused without their tagger-structure being properly replaced
+U4872964V : <@U0UGR7JTB> <@U3SJEDR96> I get that effect in chrome, but not in safari.
+U3SJEDR96 : <https://ellie-app.com/3FhTzbSZDxTa1/0> for workaround
+U3SJEDR96 : and heh, that's interesting. Stepping through the vdom diffing/patching in both browsers would probably reveal why, but I don't really have time for that right now
+U4872964V : to me it seems like this is the opposite of <https://github.com/elm-lang/virtual-dom/issues/35> as here it reuses the node when it shouldn’t
+U3SJEDR96 : oh, you're right. #73 seems similar but involves `lazy` :thinking_face:
+U4872964V : it’s like the event happens while elm is rebuilding the dom
+U3SJEDR96 : yeah, blur seems to be triggered while the element is being removed
+U4872964V : because clearly Elm won’t reuse the input element that has the event handler
+U3SJEDR96 : true, but it recursively walks up the tree for taggers
+U4872964V : yeah
+U3SJEDR96 : it's a pretty interesting edge-case!
+U4872964V : a fix could be to have the tagger check that the element that emitted the event still exists
+U4872964V : if that information is available to it
+U3SJEDR96 : <https://github.com/elm-lang/virtual-dom/issues/73#issuecomment-307545057> "And here is an SSCCE of the onBlur case described above; it fails in Chrome, as Chrome fires a blur event when a focused element is removed from the DOM."
+U4872964V : yeah, that looks like the same bug
+U4872964V : or? Elm wouldn’t reuse an `input` node to make a `button` node, surely?
+U4872964V : or, the tagger is attached to the `div`, right
+U3SJEDR96 : (can confirm that `Html.map identity` fixes it, so that's an even simpler, if more brittle workaround)
+U4872964V : another fix would be to remove event handlers before removing the node
+U3SJEDR96 : but then that blur wouldn't be sent at all anymore, not sure if that would be correct behavior either? :confused:
+U3SJEDR96 : then again, it doesn't appear to happen (in the same order) in other browsers
+U2JFD9ALE : Just noticed, <https://ellie-app.com> is not pink anymore (colorblind) :smile:
+U4872964V : yeah, should deleting a node send a blur event? not sure :slightly_smiling_face:
+U3SJEDR96 : <@U2JFD9ALE> yeah, hasn't been for quite some time, actually :slightly_smiling_face:
+U3LUC6SNS : Right now I have a working ```
+port render : String -&gt; Cmd msg
+```
+which I use to send a document's content into JS-land.  I would like instead to send the JSON object 
+```
+{content: document.content, docType: document.docType}
+```
+which can to by converting this object to a string, sending to JS-land, and then decoding it. BUT -- is it possible to write a function
+```
+port render : Document -&gt; Cmd msg
+```
+that does this?  Then I would just have to change the definition, not all the usages of `render`.
+
+U4872964V : but in Elm’s perspective, no events should be sent for nodes that are being removed anyway, as that would break in this way always
+U3SJEDR96 : <@U4872964V> true. I wonder if "element with focus is removed" is specced anywhere
+U4872964V : <@U3LUC6SNS> you can send a `Value`
+U3LUC6SNS : re the above .. yes I would have to change usages, but when I forget one, the compiler would remind me
+U3SJEDR96 : <@U3LUC6SNS> this should work if it's a simple record, though writing a `Document -&gt; Json.Encode.Value` function and making your port take js values like that seems even simpler
+U3LUC6SNS : So it should be `port render : Value -&gt; Cmd msg`?
+U3SJEDR96 : assuming you'd essentially have `encode { content, docType } = [ ("content", Encode.string content), ("docType", Encode.string docType) ] |&gt; Encode.object` you would just get a record-like object on the JS side
+U3SJEDR96 : yeah, indeed
+U3LUC6SNS : OK, I'll try that   Thanks!
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

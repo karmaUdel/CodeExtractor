@@ -1,41 +1,72 @@
+U3KSN5MAL : What am i doing wrong here :confused:?
+U3KSN5MAL : can't work out how to feed the information correctly into arrayAsTuple
+U3SJEDR96 : You can just use `arrayAsTuple3 (index 0 int) (...) (..)` there.
+U3KSN5MAL : ah
+U3KSN5MAL : perfect
+U3SJEDR96 : Of you can change the tupledecoder so that it will do the indexing by itself (by "wrapping" the decoders with the relevant `index x`), so you could just call `arrastup3 int int string` or whatever :)
+U3KSN5MAL : ah ok
+U3KSN5MAL : thank you!
+U3SJEDR96 : (on mobile so being a little terse, sorry ;))
+U3KSN5MAL : dude, hero, no sweat
+U3KSN5MAL : ok hopefully last bit of trouble shooting then i should be good. 
+```		var storedState = localStorage.getItem('LumaPanel');
+	var startingState = storedState ? JSON.parse(storedState) : null;
+
+
+	var node = document.getElementById('main');
+	var app = Elm.Main.fullscreen(startingState);```
+
+U3KSN5MAL : so this is how i pass in the pre parsed json currently, but now i need to pass it in as a Json.value right? Do i pass it in as a maybe or do i try and check if it's a maybe inside the decoder?
+U61JQ4F4J : Another question, is <https://github.com/TheSeamau5/elm-router> still the way to go for routing?
+U61JQ4F4J : I don't think so since it has more than 2 years without updates :confused:
+U61JQ4F4J : seems like it should be this one right? <http://package.elm-lang.org/packages/elm-lang/navigation/2.1.0>
+U5GJ5FEAU : <@U61JQ4F4J> yes! `elm-lang/navigation` should be the way to go
+U3KSN5MAL : Ok, got that working, but now having a lil trouble parsing this data. 
 ```
-as far as I know, the functions exposed by the `Html` module are the only ones which construct the type `Program`
-So you need to use these functions in order to produce a valid value for your `main` function
-I *think* `main` can also be of type `Html msg` if you just want static Html though.
-Does that make sense?
-ok, but as far as parsing the main type annotation itself, what does Program actually refer to here, what kind of type, i.e. is it a union or.. ?
-It's an opaque type from the `Html` library, so its implementation details are hidden from view.
-Take a look at this: <http://package.elm-lang.org/help/design-guidelines#keep-tags-and-record-constructors-secret>
-ok
-a little confusing. I assume "List" is similar. For example, List number. What does that mean? Well, it means a list of numbers, of course. But what is the actual List type, is it a record, a union, etc ? I assume that is also just like a language primitive, in a sense
-Kind of. Any library can create an opaque type. You won't know under the hood if it's a union type, a sum type with many constructors, or a native type (a language primitive)
-since its constructors aren't exposed, you can't pattern match on it or anything like that. You can only use values of that type in other functions that consume it. Library creators use opaque types to make their APIs clear and intentful and to avoid constant breaking changes whenever the underlying implementation changes.
-For the really interested i guess <https://github.com/elm-lang/core> may be worth a look?
-In this case, Program Never Model Msg is a single type, Program, with the 3 other types associated with the Program type, rightr?
-kinda like List Float -- the type is a List, with Float as the "kind" of List. main then is just a Program, with those others expressing the kind of Program. is this about right?
-<@U5QJW0DDE> that's about right. Think about `Dict` where you can say something like `Dict String Int` that specifies the two types (key/value). So, in general, you can create a type `Foo a` where `a` is a type variable and can be replaced by a more specific type when used.
-Yeah, they define the type of flags, model and message you program will handle
-at a repl, you cannot really do a type annotation before a definition, it seems. so I guess there is no way to express a function definition that restricts the type of Maybe you can accept with the function, yeah?
-Yeah, that's right! `Program` is kind of annotating those other 3 types. It's a "tagged union." Sorry, I think I misunderstood what you were asking before :sweat_smile:
-<@U5QJW0DDE> correct, although you can import files (and they'll be recompiled for each expression)
-<@U0K92QFST> well technically all ADT types (like Elm's union) are tagged unions
-as opposed to languages like C where unions cannot reflect on what they contain
-Yep!
-next, i'm curious about this syntax for the main definition. main = program. there is no mention of "program" before this, so it's unclear to me what it represents.
-actually never mind, i see program is exposed by Html
-it's a function
-<@U5QJW0DDE> that's right, I think it exposes 3 functions that return the `Program` type. You can choose the one you need depending on your use case.
-what is the most elegant way to flip the value of a Bool?
-since it's a union, i can only think of an if or case
-`bool = not aBool`
-Is there a cross-module index for Elm packages? For example, it would be interesting to see which packages export a program or a subscription.
-ah so there is a not function specifically written to hand Bools
-<@U1ANV9FML> that would be an interesting graph.
-I believe it exists. I recall I've seen something like that
-if i have type Msg = Bool and I want to match on msg, are the cases branches not True -&gt; and False -&gt; ? the compiler is complaining
-oh, Msg needs to be a union
-<@U5QJW0DDE> you would need `type alias Msg = Bool` if you want that
-`type` defines a new type, whereas `type alias` let's you set a new name (Msg) for existing type (Bool)
-If you used `type alias Msg = Bool` then the compiler won't complain, and you should be able to go fine
-from what I can understand about the Architecture, all messages that could change application state (for purposes of view rendering) are grouped together into a single type, right? If so, that must mean that for some large applications, you'd have something like a union with maybe dozens or hundreds of options
-if essentially every single action a user can take on a page is an option of the same type
+parsing failed: "Expecting an object with a field named `pickerHeight` but instead got: \"{
+\\\"pickerMode\\\":3,
+\\\"activeColor\\\":[1,1,1],
+\\\"sliderOptions\\\":{
+				\\\"rgbo\\\":true,
+				\\\"rgbl\\\":false,
+				\\\"hsvo\\\":false,
+				\\\"hsvl\\\":true},
+\\\"colorMode\\\":1,
+\\\"lights\\\":[{
+	\\\"color\\\":[1,1,1],
+	\\\"isOn\\\":true,
+	\\\"bitMask\\\":0,
+	\\\"editMode\\\":false,
+	\\\"editText\\\":false,
+	\\\"name\\\":\\\"default\\\",
+	\\\"id\\\":0}],
+\\\"uid\\\":0,
+\\\"lid\\\":1,
+\\\"lightPacks\\\":[],
+\\\"pickerHeight\\\":0.3702000000000001}\""```
+
+U3KSN5MAL : The field it's saying is missing is present, so i'm sure the error is something else
+U3KSN5MAL : any ideas for what i can look at to find the problem?
+U153UK3FA : <@U3KSN5MAL> what's with all the slashes?
+U3SJEDR96 : <@U3KSN5MAL> the code you have on the JS side was fine, only the elm side had to change :slightly_smiling_face:
+U3SJEDR96 : I'm guessing you removed the `JSON.parse`?
+U3SJEDR96 : I'd go for: `JSON.parse` on the JS side, and passing the resulting object in through flags. On the Elm side, that means you'd take `Json.Encode.Value` as your flags type, and use `Json.Decode.decodeValue` on it to get a `Result String something`
+U3KSN5MAL : yeah i got that part working
+U3KSN5MAL : sorry should have posted
+U3SJEDR96 : yeah, the slashes seem to indicate you're trying to run `decodeValue` on a JS string, basically
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

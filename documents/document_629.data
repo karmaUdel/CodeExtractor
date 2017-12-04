@@ -1,15 +1,60 @@
+U0GPGFQQY : `type alias Model = { confirmation : Maybe Msg }`
+U0GPGFQQY : cause it can be infinitely nested
+U0GPGFQQY : maybe I used a wrong word to describe this :slightly_smiling_face:
+U0GR6DHEK : thanks <@U0EUHKVGB>
+U0EUHKVGB : <@U0GPGFQQY> Why does it need to be nested - what is it trying to represent?
+U0GPGFQQY : So instead of having an command that sends `Something1` I would send `Confirm Something1`, and then put it into the confirmation submodel
+U0K92QFST : Thank you for the compliment! I actually consider it very basic still :smile: There’s a lot more functionality I’d like to include and definitely a few API design passes
+U0GPGFQQY : Then I would render a confirmation box, that would take this msg out and put it onto `onClick` on the Confirm button
+U0K92QFST : By inlining the includes, you mean allowing the user to access the `included` array rather than abstracting the relationships away from them?
+U0EUHKVGB : So, that already sounds a bit fishy to me
+U0EUHKVGB : ```module Confirm exposing (view)
+
+view : msg -&gt; String -&gt; Html msg
+view onConfirm str = ...
 ```
-Hmm.. I don't see how to use it.
-There is another point also. At the time of the Http, I probably don't have a value of type `Book a`. I'm not trying to decode the value itself. I need a constraint on the type. Like a Decoder.
-`{ a | owner : User () } -&gt; String` accepts a `ProjectStructure (User ()) company contact`
-because `ProjectStructure (User ()) company contact` is a record which has a field called `owner` of type `User ()`
-I want to make sure that if I am making an Http request to my `book` endpoint requesting a `Book Author`, this http request must ask for the author to be embedded.
-I don't think it's (even theoretically) possible to be confident of that without tests :thinking_face:
-in any language
-like "the author is embedded" is business logic, which can be incorrect
-I'm not even sure how you'd use a theorem prover to check that
-This is what I mean by author is embedded: the endpoint looks like this: `/books?embed=author`
-(I'm hardly an Agda/Coq/Idris expert though, so maybe it's possible and I don't know how to do it)
-I have a function that translates a record with fields like `embeded` into a url.
-`embeded` takes a list of strings.
-I would like a function that given a `CustomDecoder a` could produce a list of strings.
+
+U0EUHKVGB : How does your view look?
+U0EUHKVGB : in terms of types of the generic thingy
+U0GPGFQQY : I have no idea yet, could be just an overlay on top of everything if there is something to confirm.
+U0GPGFQQY : I would check if there is smth to confirm, then show the overlay on top of the content with Yes and No buttons
+U0EUHKVGB : Why do you want to store the message in the model?
+U0EUHKVGB : Why not just trigger it when the confirm button is clicked?
+U0GPGFQQY : Because then I could reuse this for any confirmation, and I would just have to change `onClick Whatever` to `onClick (Confirm Whatever)`.
+U0EUHKVGB : ```module Confirm exposing (view)
+
+
+view : msg -&gt; msg -&gt; String -&gt; Html msg
+view onConfirm onCancel str = ...
+  Html.div
+    []
+    [ Html.button [ onClick onConfirm ] [ text "Confirm" ]
+    , Html.button [ onClick onCancel ] [ text "Cancel" ]
+    ]
+```
+
+U0EUHKVGB : this is reusable for any confirmation and does not require storing any message in the model, nor creating a recursive constructor
+U0GPGFQQY : hm, but how do I trigger this? e.g. I have a delete button, and I want to show this confirmation when this button is clicked, and then re-trigger the actual delete msg
+U0EUHKVGB : So then you just have a field in your model which is like `showConfirm : Bool`
+U0EUHKVGB : One for each confirm case (start here - you might find a nicer representation later)
+U0GPGFQQY : I've got a list of items with delete buttons, but I also have a delete button on the item's page
+U0EUHKVGB : And then the same for opening the confirm, you’ll have `type Msg = OpenConfirm String | CloseConfirm String | Confirm String`
+U0EUHKVGB : then use `OpenConfirm buttonId` or something to pass to this view
+U0EUHKVGB : e.g `Confirm.view (Confirm button.id) (CloseConfirm button.id) button.text`
+U0GPGFQQY : I'm not sure what you mean, what is a `buttonId`?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

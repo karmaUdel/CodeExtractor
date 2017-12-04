@@ -1,4 +1,60 @@
+U0LPMPL2U : yeah, looks like it didn't define `decodeComplexType`
+U0LPMPL2U : I could have sworn there was a tuple decoder
+U0EUHKVGB : There is
+U0EUHKVGB : Or, sort of
+U0EUHKVGB : You'll need to combine other decoders to decode a tuple
+U23SA861Y : tuples don't exist in json, so you would use map2 with a tuple constructor
+U0EUHKVGB : <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#index>
+U1L4GLFJ6 : at least your app decodes my file-part way... is there any way to see that intermediate result and keep doing from there?
+U1L4GLFJ6 : it sounds like I may have to from the smallest parts first
+U1L4GLFJ6 : and play in the terminal
+U0LPMPL2U : So something like:```
+tupleDecoder : Decoder (Int, Int)
+tupleDecoder =
+  JD.map2 (,) (JD.index 0 <http://JD.int|JD.int>) (JD.index 1 <http://JD.int|JD.int>)
 ```
-Okay, I'm getting an error that's not shown anywhere
-Expecting an object with a field named `value` at _.target but instead got: {"0":{},"1":{},"elm_handlers":{}}
-when Elm is creating the event handler
+
+U0EUHKVGB : Indeed
+U0LPMPL2U : Cool. TIL `Json.Decode.index` :thumbsup:
+U3SJEDR96 : <@U0LPMPL2U> you've had that exact reaction before :smile: (although that was with `Json.Decode.keyValuePairs`)
+U0LPMPL2U : Hahah never stop learning :smile:
+U5YK35TAM : Hello, third day of learning Elm :slightly_smiling_face:
+I'm doing the HTTP section of the Elm guide (<https://guide.elm-lang.org/architecture/effects/http.html>), and was wondering what's the best way of fetching the gif when the program starts? I've got something working, but feels a bit hacky...
+
+<https://ellie-app.com/3zXdzhY6nxza1/0>
+
+U23SA861Y : you should prepare a message that you pass into init
+U5YK35TAM : jonf: thanks, but I see that `init` takes a `Cmd Msg`
+U5YK35TAM : ```init : ( Model, Cmd Msg )
+init =
+    ( initialModel, Cmd.none)
+```
+
+U5YK35TAM : How to create a Cmd that will end up in the Msg I want?
+U153UK3FA : <@U5YK35TAM> you don't need to call `update` you can just have `init` return `(initialModel, getRandomGif model)` directly
+U5YK35TAM : jessta: perfect! that works, thanks :slightly_smiling_face:I guess what I was fixated on was trying to invoke the `MorePlease` Msg, so the call to `getRandomGif` is not duplicated (in case the behaviour is changed later)
+
+U5AR0LDQA : Im using <http://package.elm-lang.org/packages/lukewestby/elm-http-builder/5.1.0/HttpBuilder>
+What is the best way to handle an empty body response? Im doing a `POST`
+
+U5AR0LDQA : Or any ideas in general? :smiley: Thanks friends
+U153UK3FA : You can avoid the duplication by putting it in a function and calling that function from both `init` and ` update`
+U153UK3FA : <@U5AR0LDQA> <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#expectStringResponse>
+U153UK3FA : <http://package.elm-lang.org/packages/lukewestby/elm-http-builder/5.1.0/HttpBuilder#withExpect>
+U5AR0LDQA : Perfect thank you <@U153UK3FA> :heart:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

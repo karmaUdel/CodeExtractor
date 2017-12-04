@@ -1,0 +1,74 @@
+U23SA861Y : `User` if a function of the type `(Int -&gt; Maybe String -&gt; String -&gt; Float -&gt; User)`
+U23SA861Y : each stage of the pipeline is applying one of the parameters until you get your final user
+U23SA861Y : in your case `SomeCompositeType` is a function of the form `String -&gt; String -&gt; SomeCompositeType`
+U17R26VR8 : so really, should i have a intemediate type alias:
+U23SA861Y : did you try what I typed before
+U17R26VR8 : ```type alias Intermediate = { String, String }
+
+decode ( Intermediate -&gt; SomeCompositeType )
+|&gt; ...
+|&gt; JD.map intermediateToSomeCompositeType
+```
+
+U23SA861Y : you don't need that function, you have it already. It's called `SomeCompositeType`
+U23SA861Y : when you declare a type like `type Foo = Foo Int` you create both a type called `Foo` and a function `Foo: Int -&gt; Foo`
+U23SA861Y : it's more clear if you do something like `type IntOrString = SomeInt Int | SomeString String`
+U23SA861Y : which defines the type `IntOrString` as well as the functions `SomeInt : Int -&gt; IntOrString` and `SomeString: String -&gt; IntOrString`
+U17R26VR8 : so if my user is ```
+(Int -&gt; SomeCompositeType -&gt; String -&gt; User)
+```
+
+how should my decoder look?
+
+U23SA861Y : what does the underlying json look like
+U17R26VR8 : { id, type, otherfield }, the composite type is made of id and type, wrapped in a record with otherfield
+U17R26VR8 : it currently decodes into a three field record, but i'm trying to combine two of them
+U23SA861Y : in that case, yes you could use the custom type or create a lambda to capture the full construction
+U23SA861Y : lambda / regular function
+U17R26VR8 : ok, i'll give that a go, thanks
+U17R26VR8 : so i ended up doing this:```
+type alias User = {
+  id : UserId,
+  address: String
+}
+
+type UserId = UserId String String -- firstname lastname
+
+decodeUser: JD.Decoder User
+decodeUser = 
+  JDP.decode toUser
+  |&gt; JDP.required "firstname" JD.string
+  |&gt; JDP.required "lastname" JD.string
+  |&gt; JDP.required "address" JD.string
+
+toUser: String -&gt; String -&gt; String -&gt; User
+toUser first last addr = { id = UserID first last, address = addr }
+```
+
+<@U23SA861Y> fyi, seems to work ok, too many other things broken to be sure atm but your reminder of the tag constructor and how the pipeline takes each field *in order* helped alot
+
+U23SA861Y : looks good
+U1D5GU32R : So I was watching Douglas Crockford’s talk “The better parts” (<https://goo.gl/X7oe27>) and he was talking about the next great language. Obviously my first thought when he said it should be error free was, “Hey that could be Elm!”
+U1D5GU32R : The problem is, Elm compiles to Javascript so it will never really replace JavaScript
+U1D5GU32R : Is there any talk about creating pure Elm applications like an Elm browser or an Elm Electron-type-thing?
+U1D5GU32R : ^ <@U13H7FNDQ>
+U153UK3FA : <@U1D5GU32R> <https://www.destroyallsoftware.com/talks/the-birth-and-death-of-javascript>
+U1D5GU32R : <@U153UK3FA> I watched that awesome video, thanks! Was that supposed to somehow answer my question?
+U1D5GU32R : Are you saying that Elm will somehow run on asm.js?
+U1D5GU32R : That it won’t compile to JS?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

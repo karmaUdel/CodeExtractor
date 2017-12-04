@@ -1,7 +1,89 @@
+U28L0BHN1 : since there was a discussion about selects and dropdowns, what would you use for an autocomplete select :smile:?
+U1CE9DL9H : <@U28L0BHN1> <http://package.elm-lang.org/packages/thebritican/elm-autocomplete/latest>
+U1CE9DL9H : demo at <http://gregziegan.com/elm-autocomplete/>
+U1KES8JGK : his criticism (in that article at least) doesn't seem to apply to `select`s on mobile though. the whole element is clickable and there is no scrollbar.
+U61S7G7G8 : fenn: depending on the project, i would see how far the datalist element would get me…
+<https://developer.mozilla.org/en-US/docs/Web/HTML/Element/datalist>
+
+U28L0BHN1 : thanks, the promise of having a simpler API sound cool though, no news about it? (talking about <https://github.com/thebritican/elm-autocomplete/issues/37>)
+U28L0BHN1 : would be interesting but I need wider browser support for this project :confused:
+U41NK9BM4 : Perhaps because the article is from 2000! Anyway &lt;select&gt;‘s on the iPhone/Android are not that bad. Sometimes is annoying to scroll-thru long lists, but then UI must be redesigned to cope with that.
+U41NK9BM4 : In the end the culprit is often the designer, or the management :slightly_smiling_face:
+U5FU80S06 : @justage Regarding `classes` in <http://package.elm-lang.org/packages/justgage/tachyons-elm/1.0.0/Tachyons>, where is the non-useless doc for this, and is this the only helper function in the package?  (Also perhaps it's an idea to have a dedicated Slack channel for _Tachyons_.)
+U0NGNUH4J : I realised that what I needed was a list with at least two elements in it and ended up creating this `Compound` module.```
+module Compound exposing (..)
+
+
+type Compound a
+    = Compound a a (List a)
+
+
+first : Compound a -&gt; a
+first (Compound first _ _) =
+    first
+
+
+second : Compound a -&gt; a
+second (Compound _ second _) =
+    second
+
+
+rest : Compound a -&gt; List a
+rest (Compound _ _ rest) =
+    rest
+
+
+length : Compound a -&gt; Int
+length =
+    List.length &lt;&lt; toList
+
+
+toList : Compound a -&gt; List a
+toList (Compound first second rest) =
+    first :: second :: rest
 ```
-I know you can use a `with` block in some other test packages, but to be honest this seems like a weird thing to be testing for
-You could probably use `self.assertIn("donation", item.__dict__)` or some similar abomination if you really want a one-liner
-<@U5LNXQHN3> Yeah it sounds weird, but actually the object under test is some kind of container giving both attribute and keyed lookup access to a set of properties, and I need to test whether the right exceptions are thrown during lookup of a nonexistent property.
-Sounds like a bad idea to me. But if I had to write tests for it, I'd just use the __dict__ check directly. Or `hasattr`.
-<@U5LNXQHN3> Bad idea? You have a better idea? Thanks for the `hasattr` tip! This is what it's all about, the `Bunch` object: <https://github.com/motoom/bunch>
-I think that is unnecessarily blurring the lines between a container and a type. If you don't know what attributes a type has, then you don't really know what interface it provides, which makes it a very awkward object to work with
+
+U0NGNUH4J : Is this something I should publish as a package?
+U3SJEDR96 : <@U5FU80S06> <http://package.elm-lang.org/packages/justgage/tachyons-elm/1.0.0/Tachyons#classes>
+U3SJEDR96 : I suppose <@U0H8PND27> may decide to pull that one function up into a separate heading :slightly_smiling_face:
+U3SJEDR96 : <@U0NGNUH4J>: you could, though this type of thing tends to be very nice for very specific use-cases. `NonEmpty` isn't used a lot, so I imagine `Compound` would be used even less. Nevertheless, implementing some more "basic" features on it (like `fromList : List a -&gt; Maybe (Compound a)`, `.map`, ..) would certainly be interesting!
+U0NGNUH4J : ok! I’ll give it a go and see where I end up :slightly_smiling_face:
+U4KFY2V6V : Hi :slightly_smiling_face: I've trouble searching for syntactic sugar. Hope you can healp me out.
+U4KFY2V6V : So I have a function with 2 arguments calling another function with the same arguments and using the result. I would like to compose `funInternal` with `(++) pre`
+U3SJEDR96 : yeah, there's no operator for that. You can get rid of `b`, but not both. You _could_ hack around it and do `fun = curry &gt;&gt; (uncurry funInternal) &gt;&gt; (++) "pre"` I think
+U3SJEDR96 : oh wait, what am I saying?
+U0LPMPL2U : Since `funInternal` is constant, could you define:```
+fun =
+  funInternal () ()
+    |&gt; (++) "pre"
+```
+
+U0LPMPL2U : oh wait, you just want composition but with two args
+U4KFY2V6V : <@U0LPMPL2U> Jop, it was only a simplified example
+U4KFY2V6V : Exactly: function composition with more than one argument :slightly_smiling_face:
+U4KFY2V6V : Could change the API to a large tuple of arguments but that would be a workaround
+U3SJEDR96 : I suppose you could make an operator for that, but it doesn't come up in reality often enough to warrant that, imho
+U3SJEDR96 : ```(&gt;&gt;&gt;) : (a -&gt; b -&gt; c) -&gt; (c -&gt; d) -&gt; a -&gt; b -&gt; d
+(&gt;&gt;&gt;) f g a b =
+    f a b |&gt; g
+```
+
+U4KFY2V6V : Awesome!
+U4KFY2V6V : But there has to be 1 operator definition per artity, right?
+U4KFY2V6V : *arity
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

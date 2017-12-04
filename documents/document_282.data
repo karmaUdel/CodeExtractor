@@ -1,53 +1,106 @@
-```
-<@U5FC7BE0G> There is `model.something |&gt; Maybe.map (\_ -&gt; someCmd) |&gt; Maybe.withDefault Cmd.none`. If you really want to shrink things down in a particular place, though, make a function.
-thanks <@U48AEBJQ3> ! I thought maybe there's already something built in for this, but i'll create my own shortcut then
-Wanting to unit test my `update` function, but I don't know where the `ChangeLocation` and `OnLocationChange` messages come from?
-Need to import them in my tests
-I'm not familiar with those constructors, are they from a package you are using, or something you defined yourself?
-I'm not sure where they come from.
-I would have assumed the Navigation package but it doesn't mention them
-And the only other package I have is url-parser, which doesn't have them either
-Which is confusing, since I use them in Update.elm but they are not imported from anything
-If you are using them somewhere, they are either defined there or they are imported. This is a reason to not import `exposing (..)`, since it makes it more difficult to know where things come from. The navigation package doesn't define any constructors by those names.
-Haha, you are absolutely correct
-I was having a brain fart
-<@U5FC7BE0G> `if model.something == Nothing then Cmd.none else someCmd` perhaps. If you're not interested in the actual contents of the `Just`
-... which works like a charm :slightly_smiling_face:
-great
-Why does it says `number1`?
-IIRC it is a way to say: could be a different type than the other `number`
-(Int vs. float  - for example)
-i'm doing the intro guide and it had me clone over the code examples. however, i want to write these programs myself while I go along. Can I just open up an example.elm file in my text editor, write the code with the tutorial and then...what. Run elm-make to make an html file? and then I can just throw that in the browser to see if it worked?
-you can do it with elm-reactor as well
-which will compile elm files and serve them for you
-i see. i guess the examples in the tutorial also happen to be in the directory i installed so I can just open up those exact files with my text editor
-<@U635238TG> i typically use elm reactor for every meaningful change to quickly test functionality in localhost. elm-make I save for when I'm pushing to remote repo. But I know a lot of folks use automated build tools that run elm-make on every save sometimes.
-You can use `elm-reactor` when you working only with Elm files. If you working with custom setup, e.g. you integrate Elm into html page, then e.g. `webpack` can help with automated compilation.
-<@U0J8D9M2P> elm-reactor wont work with js interop right?
-I cannot install elm on redhat:
-npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
-Any idea ? If I create the /usr../elm directory manually it will be deleted during installation.
-<@U2SR9DL7Q> It can serve files but it will not automatically compile elm files into specific output file for you (which you can specify with elm-make command). So with `webpack` can handle this work.
-<@U60ERSLUQ> it says `permission denied` are you sure you have correct rights to write into that directory?
-I have run it as root. Permissions of /..../node_modules are 755, owner root:root.
-I could run 'node install bower'
-It's not recommended but have you tried to run that with `sudo` ?
-<@U0J8D9M2P> : Same behaviour with sudo
-<https://www.npmjs.com/package/elm> It has Troubleshooting section
-How about not running as root?
-<@U0J8D9M2P>: I check the troubleshooting section: npm has the latest version, npm cache is ok.
-Anyway, here's a troubleshooting page for npm permission issues: <https://docs.npmjs.com/getting-started/fixing-npm-permissions>
-<@U0CLDU8UB> <@U0J8D9M2P> setting npm config prefix (It was /usr) to a local non-root directory as described in <https://docs.npmjs.com/getting-started/fixing-npm-permissions> finally worked. Many thanks for your help.
-I got it working for one "Foo" {x:5}, but not for many.
-<@U604S603Y>: Json.Decode.list does that
-`Json.Decode.list decodeItem`
-<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#list>
-ah okay, I tried to call succeed (Json.Decode.list decodeItem)
-thank you <@U1AN4JRFV>
-<@U2SR9DL7Q> <@U0J8D9M2P> <https://blog.ilias.xyz/elm-reactor-and-custom-html-9e7143553807> fyi :slightly_smiling_face:
-<@U3SJEDR96> knowledge is power :+1:
-Is equality for records value equality or entity identity?
-`{ item: "wheel", size: 3.5 } == { item: "wheel", size: 3.5 }`
-tested it (with the correct syntax) - value equality!
-<@U601ELFEG> everything is or should be, with a few exceptions where it's not really defined
-Can somebody share link to some example how to properly do SPA routing with elm-bootstrap, please?
+U14Q8S4EM : Like "I can make this scrabble video game so much easier if I had such and such typeclass"
+U5XHTBFS6 : to use in dicts and sets, for instance
+U5XHTBFS6 : when I want to to use a set i have to "serialize" my type to numbers, use them as numbers and then serialize them back to my type
+U5XHTBFS6 : which doesn't really work when some of the type constructors have parameters themselves
+U4872964V : maybe this is not the best channel for this though
+U5J0H2NS2 : <@U14Q8S4EM> We just started to create a proof-of-concept of redesigning our business model in F#. We have just started learning FP in general, but already faced some limitations with F#-s type system.
+U5XHTBFS6 : It's  annoying, but workaroundable.
+U5XHTBFS6 : norpan: Agreed. will stop =D &lt;/rant&gt;
+U4872964V : but see <https://github.com/elm-lang/elm-compiler/issues/1039>
+U5XHTBFS6 : hmmmm
+U5HM74BD0 : What does it mean when I try to compile and get a type mismatch error:```Function `programWithFlags` is expecting the argument to be:
+
+    elm-make: Type applications without concrete names should not get here.```
+?
+
+U4872964V : It means that there is a bug in the compiler somewhere. Does your code look anything like this? <https://github.com/elm-lang/elm-compiler/issues/1390>
+U5ABF3BH7 : Hi! I am trying to decode a Json object:  it an array looking like this: ```[
+		?{
+		category: "catering_company",
+		list: ?[
+		?{
+		id: 307,
+		name: "Special Touch Catering"
+		},
+		?{
+		id: 308,
+		name: "Sunset Memorial Park "
+		}
+		]
+		},
+		?{
+		category: "florist",
+		list: [ ]
+		},
+		
+		?{
+		category: "insurance_provider",
+		list: ?[
+		?{
+		id: 60969,
+		name: "Homesteaders"
+		},
+		?{
+		id: 62411,
+		name: "Homesteaders2"
+		}
+		
+          ]     
+    }  
+ ]
+```		
+		
+		
+		
+I created the following object
+		
+		
+		type alias RolodexList =
+		    { category : String
+		    , list : List RolodexEntry}
+		
+		type alias RolodexEntry =
+		      { id : Int
+		      , name : String}
+		    
+		My issue is that I have trouble building the decoders. I know how to build one that is straight forward, but not nested.
+		
+		
+getRolodexEntries : Cmd Types.Msg
+getRolodexEntries =
+  Json.Decode.list rolodex2Decoder
+      |&gt; Http.get "case/all_rolodex"
+      |&gt; Http.send Types.LoadRolodex
+
+rolodex2Decoder : Decoder Types.Rolodex2
+rolodex2Decoder =
+   decode Types.Rolodex2
+     |&gt; Json.Decode.Pipeline.required "id" int
+     |&gt; Json.Decode.Pipeline.required "name" string
+How can I build a decoder that gets nested values?
+
+U23SA861Y : ok, seems straight forward enough
+U23SA861Y : well I don't know about the pipeline but using the base decoder package
+U23SA861Y : `EntryDecoder = JD.map2 RolodexEntry (JD.field "id" <http://JD.int|JD.int>) (JD.field "name" JD.string) `
+U23SA861Y : `CategoryDecoder = JD.map2 RolodexList (JD.field "category" JD.string) (JD.field "list" (JD.list EntryDecoder))`
+U23SA861Y : `ListDecoder = JD.list CategoryDecoder`
+U23SA861Y : where JD is `import Json.Decode as JD`
+U5ABF3BH7 : <@U23SA861Y> Thanks a lot!
+U5HM74BD0 : I asked a variant of this question a couple days ago. But it's a little more complicated than what I asked.  I have a `List` of records like this: `[{ab = 3, hits=2}, {ab=2, hits=1}]`.  I'd like to transform that list into a tuple of records: `({ab=3, hits=2}, {ab=2, hits=1})`. How can I write a function to do that? If the list is longer than 2 records, I can default it out to a dummy tuple: `({ab=0, hits=0}, {ab=0, hits=0})`.
+U4872964V : and if the list is shorter?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

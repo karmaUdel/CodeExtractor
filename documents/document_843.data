@@ -1,0 +1,121 @@
+U5U4MSHC1 : have a dictionary mapping which would pretty much do the trick
+U5CRANMFV : it's complicated. the standard library won't help me?
+U5S8CNULD : `data = {01: 'Jan'}`
+U5U4MSHC1 : you can use `datetime` though
+U5S8CNULD : our use `datetime`
+U5CRANMFV : `calendar.month_abbr`
+U5U4MSHC1 : yeah, i was looking at the same <@U5CRANMFV>
+U5U4MSHC1 : <@U5CRANMFV> but it starts with empty item
+U5CRANMFV : can't understand how to pass a number to return the month
+U5CRANMFV : ```In [99]: calendar.month_abbr[3]Out[99]: 'Mar'```
+
+U5U4MSHC1 : ```In[14]: calendar.month_abbr[int("03")]Out[14]: 'Mar'```
+
+U582KCWUB : eh I have a stupid issue with imports, what I am trying to do: <https://www.dropbox.com/s/oajyhncno1xz5p4/Screenshot%202017-06-29%2012.17.07.png?dl=0>
+what I get: `ModuleNotFoundError: No module named 'exercises'`
+the `playground` dir in the project root is a virtualenv dir, all worked fine until I added extra directory structure (the `python-mega-course-udemy` dir) any help please?
+
+U5NMSURAQ : `.exercises`?
+U582KCWUB : <@U5NMSURAQ> hmm doesnt seem to work
+U61FDK1EE : import pygame
+pygame.init()
+screen = pygame.display.set_mode((600,480))
+
+done = False
+
+font = pygame.font.SysFont("comicsansms", 72)
+
+text = font.render("Hello, World", True, (0, 40, 0))
+
+while not done:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            done = True
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            done = True
+
+    screen.fill((255, 255, 255))
+    screen.blit(text,
+                (320 - text.get_width() // 2, 240 - text.get_height() // 2))
+
+    pygame.display.flip()
+
+U61FDK1EE : I WANT ONLY THE TEXT AND NOT THE CONTAINING PYGAME WINDOW
+U5LNXQHN3 : No all-capitals please... if you're hoping to just draw the text on top of your desktop background, then unfortunately that's not (practically) possible
+U5LNXQHN3 : That would require that you create a transparent window, which is beyond the scope of what pygame is for
+U61FDK1EE : so is there a way to add text which can be moved anywhere on screen
+U5LNXQHN3 : yes, but probably not with Pygame, and implementation depends on the platform
+U61FDK1EE : python 2.7
+U5LNXQHN3 : no, the actual operating system platform
+U61FDK1EE : ubuntu
+U5LNXQHN3 : because transparent windows depend on the underlying window manager
+U61FDK1EE : pygame is not necessary
+U5LNXQHN3 : unfortunately I can't help you
+U61FDK1EE : ?
+U13L8J76J : <@U61FDK1EE> have you tried to google before asking here?
+U13L8J76J : <https://www.pygame.org/docs/ref/display.html#pygame.display.set_mode>
+U61FDK1EE : i google  but can't find anything good
+U5LNXQHN3 : Pygame is a wrapper for SDL, and SDL doesn't support this natively. There are per-platform ways to do transparent windows, but I don't know what they are, so I can't recommend anything
+U5LNXQHN3 : You will probably want to find some platform-level documentation for this task, and then look for a Python library or package that encapsulates that
+U13L8J76J : Oh, you _actually_ want a fully transparent window
+U5VGKQ2SY : <@U582KCWUB> did you get it figured out?
+U582KCWUB : <@U5VGKQ2SY> I just did, I added an init file into the wrapping dir and renamed it to have underscores not hyphens, I had no idea python would ignore hyphenated dir names
+U29163YQH : dir names must follow the same rules as variables :slightly_smiling_face:
+U5VGKQ2SY : nice
+U1BP42MRS : Give the man a :taco:!
+U5VGKQ2SY : better yet:burrito::coffee: <@U582KCWUB>
+
+U582KCWUB : hehe, the :taco: should go to PyCharm, the hint this would be the issue was a tiny wheel in the project file explorer that appeared with the correct dir name :smile:
+U1BP42MRS : Haha, woot jetbrains!
+U5NMSURAQ : more like JetBros!
+U4BMZ90T0 : I've got a dockerfile I'm creating for initializing a test database. I have the `.sql` and everything for it. Should I use a shell script to run the `.sql`?
+U1BP42MRS : With python typehinting, what's the right way to show a generator return value?
+U1BP42MRS : :facepalm: `typing.Generator`
+U5NT83K1C : I'm using python. I have a column of time series in formate of ( ```pattern = '%Y-%m-%d %H:%M:%S' ``` The datatype is Series and I need to convert it to string. I searched and I found out I need to use ```Data .astype(str) ``` to convert it to String. I used it but still that column is Series and not string. .astype() didn't convert. What's the solution. How may I do it?
+U60KNBMPX : for example. You can find innumerable examples if you search "stringify python" on google
+U1BP42MRS : Knit pick, you should probably consider `from __future__ import print_function` to be writing code that's compatible with the future of the language if you're writing python2
+U0PKTUWKH : can somebody help me to understand where is the problem in the following statement```
+        ec.create_tags(
+            Resources=to_tag[retention_days],
+              Tags=[
+                {'Key': 'DeleteOn', 'Value': del_snap },
+                {'Key': 'Created', 'Value': today },
+            ]
+        )
+```
+
+U0PKTUWKH : this is the error I am getting```
+{
+  "stackTrace": [
+    [
+      "/var/task/lambda_function.py",
+      76,
+      "lambda_handler",
+      "{'Key': 'Created', 'Value': today },"
+    ],
+    [
+      "/var/runtime/botocore/client.py",
+      253,
+```
+
+U0PKTUWKH : i have a variable `today = datetime.date.today()`
+U1BP42MRS : I would presume it needs to be a string
+U5VGKQ2SY : comma after `today }`
+U5VGKQ2SY : ?
+U1BP42MRS : That's valid
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

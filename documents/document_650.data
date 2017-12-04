@@ -1,7 +1,82 @@
-I'm search an index base on value ```id = df.loc[df['time'] ==1496587067]``` Then I got an `Index` object `id`, I want to get 10 elms before that index. Which way I should go?
-<@U486CN4VD> not exactly.  xlsxwriter is only for creating and writing to excel files.  It can't open and read from existing files
-right there at the top of the FAQ <http://xlsxwriter.readthedocs.io/faq.html>
-XlsxWriter is designed only as a file writer. It cannot read or modify an existing Excel file.
-how do I get an elastic IP to my ec2 instance? the instance is already running and when I click on it's description. It's empty
-before a user account can be created in my app it checks whether someone with the same username exists, and then whether someone with the same email has already registered, as both of these are supposed to be unique. Do I really need to check these individually? I know the insert query will fail if the values aren't unique since the columns are set to `unique`, but is there a way to know _which_ one caused the error, so that for example I can tell the user whether their username is taken or whether their email address is already registered.
-<@U5CGPBF0U> your DB will throw an Integrity error with the name of the field in the message. So you can probably parse that one to find out. It could be easier if you are using some ORM but I am not sure.
+U5GCK308N : Anyone tried composing? <https://www.elm-tutorial.org/en-v01/02-elm-arch/06-composing.html>
+U40QW928G : Hey everyone I'm having an issue importing modules in my project, in my source tree I have a `src` folder with my Main.elm, but I have a `src/Players/Model.elm` does seem to work when I import it with `import Player.Model exposing(..)`
+U23SA861Y : does or does not seem to work with 'import Player.Model'?
+U23SA861Y : is the folder in your elm-projectfile
+U40QW928G : no it doesn't work
+U23SA861Y : in elm-package.json
+U0LPMPL2U : <@U5ABF3BH7> here's a super simple example built from scratch <https://ellie-app.com/3zTWfXHQpDwa1/0>
+U40QW928G : I set my source directories to `"./src"`
+U5GCK308N : What error message you get?
+U40QW928G : <@U23SA861Y> <https://gist.github.com/JosephShering/5bf2ad4ffaab16ac26c3438359ad6cb6>
+U40QW928G : ```I cannot find module 'Players.Models'.
+Module 'Main' is trying to import it.
+```
+
+U2UGVS24E : <@U5ABF3BH7> : <https://ellie-app.com/3zTXMKzwTq7a1/1>
+U5GCK308N : The last S
+U2UGVS24E : hah.  basically the same thing <@U0LPMPL2U> made
+U40QW928G : sorry `Players.Model`
+U5GCK308N : Oh mmh
+U5ABF3BH7 : Thanks
+U5GCK308N : `Players.Model` but you are importing `Player.Model`
+U0JFGGZS6 : sylviecottrell: haven't gotten that far in documenting it, but basically this library -- not your own code-- handles rendering the input box. But, you can specify a list of custom attributes for the input box. The idea of `Never` is to prevent any event handlers from being passed in that might interfere with the autocomplete behavior. I got the idea from the original autocomplete library, <http://package.elm-lang.org/packages/thebritican/elm-autocomplete/latest>
+U40QW928G : no I'm importing `Players.Model`
+U5ABF3BH7 : I see, thanks for the explanation
+U40QW928G : do I have to add source directories for every folder I have with elm code in it?
+U40QW928G : Looks like there is a `exposed-modules` keyword as well
+U40QW928G : seems relevant
+U0EUHKVGB : exposed-modules only applies if you are publishing a package.
+U0FP80EKB : `Players.Model` is a module that lives in `Players/Model.elm`
+U40QW928G : yes
+U0FP80EKB : There is a 1-1 mapping between namespaces and directories
+U0FP80EKB : If you don’t want to have that, you can just put `Model.elm` in the `src`
+U0EUHKVGB : What OS are you on?
+U0FP80EKB : You don’t have to add it to `src` in the package, though
+U0FP80EKB : It should look up fine
+U40QW928G : Do I need the line `module Players.Model exposing (..)` then in that Model file?
+U0EUHKVGB : Yep
+U40QW928G : ok
+U40QW928G : does elm-reactor look at the elm-package.json?
+U0EUHKVGB : yes
+U40QW928G : hmmm
+U40QW928G : When I run elm-reactor I have to click on `src` and then `Main.elm` is that correct?
+U0EUHKVGB : Sure
+U40QW928G : Or should I have it setup to auto run Main.elm
+U0EUHKVGB : either way
+U0EUHKVGB : In your terminal, in the same folder as your `elm-package.json`, run `elm-make src/Main.elm` and see what happens
+U40QW928G : same error
+U0EUHKVGB : Okay, do this:
+U0EUHKVGB : `ls -la src/`
+U40QW928G : ```drwxr-xr-x  6 joseph  staff  204 Jun 26 15:29 .
+drwxr-xr-x  6 joseph  staff  204 Jun 26 15:29 ..
+-rw-r--r--  1 joseph  staff  747 Jun 26 15:52 Main.elm
+-rw-r--r--  1 joseph  staff  130 Jun 22 12:19 Messages.elm
+drwxr-xr-x  5 joseph  staff  170 Jun 26 15:36 Players
+-rw-r--r--  1 joseph  staff  481 Jun 26 15:48 elm-package.json
+```
+
+U40QW928G : oh wait
+U40QW928G : that elm-package should not be there
+U0EUHKVGB : there’s your problem
+U0EUHKVGB : elm-reactor uses the elm-package.json closest to the source file you use
+U0EUHKVGB : delete that and you should be good to go :slightly_smiling_face:
+U40QW928G : WOOO
+U40QW928G : it worked
+U40QW928G : i probably ran it inside src at one point and it generated that
+U0EUHKVGB : Yeah, easy mistake to make
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

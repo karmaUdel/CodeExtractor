@@ -1,0 +1,82 @@
+U37HUSJ4R : really nice :smile:
+U37HUSJ4R : I guess I am going to need helper functions to update, this is ok though
+U6EAT2Z37 : Why pull controls out if you're not going to use them?
+U6EAT2Z37 : oh... you missed out `{ controls | ...`
+U6EAT2Z37 : ```updatePaused: Bool -&gt; Call -&gt; Call
+updatePaused newValue ({controls} as call) =
+  { call | controls = { controls | paused = newValue } }
+```
+
+U6EAT2Z37 : What a mouthful!
+U37HUSJ4R : I much prefer the union type way
+U6EAT2Z37 : Just FYI, the "meaning" of a record is the same "meaning" as a union type, it's just the fields are named.
+U1ZCL9GAX : new dreambuggy demo, 100% elm (+ glsl shaders): <https://www.youtube.com/watch?v=RDFuTzPQ3Sc>
+U23SA861Y : schweet
+U1ZFF0E5P : any pointers on how to implement this? I can't get it to work ```everyDictDecoder : Decoder k -&gt; Decoder v -&gt; Decoder (EveryDict k v)everyDictDecoder keyDecoder valueDecoder =
+```
+
+U153UK3FA : <@U1ZFF0E5P> <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#map2>
+U23SA861Y : so that will give you a dict with 1 value, but what you perhaps want is to create a decoder of `Decoder List (k,v)` in which case you can map over it with `EveryDict.fromList`
+U6E03KDPE : Just curious, has anyone used elm as a stepping stone to learning Haskell? And if so, how big of a transition was it?
+U6EAT2Z37 : I know both, if that helps.
+U6EAT2Z37 : I think Elm hides most of the complexities of pure functional programming, so the biggest stumbling blocks will probably be the same ones as all beginner Haskell people have. Things like needing to know how effects work "under the hood" if you like, but you've definitely got a leg up because you'd know the syntax and if you understand types quite well you know the basics, so that's good :slightly_smiling_face:
+U6EAT2Z37 : <@U6E03KDPE> here's a book that might be helpful on the way... I helped write it: <http://happylearnhaskelltutorial.com|happylearnhaskelltutorial.com> though it's really aimed at people who are total programming beginners
+U6E03KDPE : I'll give that book a look! I ask because so far this past summer I've been working through the haskell book. It's been kind of hard to get going though, because it seems like the barrier to being able to write programs that aren't just example problems is a little high, and it been kind of demoralizing. I came across elm, however, and it looked like it would be a good way to learn some of the stuff of haskell, while being able to quickly get some applications off the ground
+U6EAT2Z37 : Yeah, the book is organised that way a bit. Most haskell books are. That's one of the troubles with Haskell, I guess. You have to pay a large cost upfront. Contrast that with Elm or purescript, and well you can get going straight away almost. Possibly that's because they're focussed on web dev, but in the case of Elm it's probably mostly because that's its focus.
+U6EAT2Z37 : My book's designed to get you understanding code as quickly as possible. That has the obvious downside that you won't understand it in entirety... which is why I try to get people to not try to write any code on their own until the very end, and only then is it quite basic stuff, because I don't want people to burn themselves, or get frustrated. So, it ends up being quite "guided" in that sense.
+U153UK3FA : I found getting the basics of the Haskell language was pretty straight forward but dealing with the ecosystem of libraries was a big pain. Elm and even haskell tutorials won’t prepare you for every library having their own set of custom operators
+U6EAT2Z37 : Sure, but operators are "just functions", right? :slightly_smiling_face: (functions that "take" two arguments, albeit in a weird way)
+U153UK3FA : yep, nameless functions with custom precedence
+U6EAT2Z37 : Elm has some, too.... like `(==)` for example. (or `(&gt;&gt;)` `(&lt;&lt;)` `(&lt;|)` etc)
+U6E03KDPE : Yeah, just learning the std library has been a bit of an exercise in patience lol
+U153UK3FA : Elm core does, but most libraries don’t
+U6EAT2Z37 : For me, as soon as I realised operators are "just functions", they weren't a problem anymore.
+U153UK3FA : It’s rare to find operators in Elm libraries
+U6EAT2Z37 : There are hardly any operators in the GHC prelude.
+U6EAT2Z37 : About 14 I think?
+U6EAT2Z37 : Granted they *are* named pretty weirdly, some of them :slightly_smiling_face: (Like `($)` which is `(&lt;|)` in elm, or `(&lt;$&gt;)` which is a general version of `map` in elm, etc)
+U153UK3FA : As someone that struggles to recall the predecence of the arithmetic operators, having new operators in every library is insurmountable
+U6EAT2Z37 : interesting
+U6EAT2Z37 : I've never had a trouble with that, and I always have to look up operator precedence in JS all the time.
+U6EAT2Z37 : I guess it might be my development style - I make very tiny little changes, and recompile at every step.
+U153UK3FA : I just wrap operator application in parentheses
+U6EAT2Z37 : cool :slightly_smiling_face:
+U14Q8S4EM : Also theres the infix package in Haskell
+U14Q8S4EM : Which reveals `&lt;&lt;`, `&lt;|` and the like
+U6EAT2Z37 : reveals? We already have `&lt;&lt;` and `&lt;|` but they're named different things.
+U23SA861Y : &lt;$&gt; and map literally have the same number of key strokes
+U17R26VR8 : i've got a string "abc:123" and a type `type ID = ID String Int` and i'd like to decode the former into the latter
+U17R26VR8 : using the pipeline, ```
+JDP.optional "id" idDecoder (ID "" 0)
+```
+
+U17R26VR8 : what should idDecoder be
+U17R26VR8 : i'm thinking:```
+JDP.optional "id" (JD.string &gt;&gt; idDecoder) (ID "" 0)
+
+idDecoder: String -&gt; JD.Decode ID
+```
+
+U153UK3FA : <@U17R26VR8> it’s a <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#string> mapped to become a `Decoder ID`
+U153UK3FA : <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#map>
+U17R26VR8 : ah... map, yes ok :+2:
+U17R26VR8 : :two_thumbs_up:
+U17R26VR8 : :emote_fail:
+U17R26VR8 : but thank you
+U6EAT2Z37 : @fonf `&lt;$&gt;` is `fmap`. One is an infix operator, the other a prefix function, but they're literally the same function. They're good for different things, and they're both more general than `map` from `List`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,22 +1,67 @@
+U2SR9DL7Q : <@U2U94G0QG> i just wanted to know if anyone had tried it, and if they were successful. I've done desktop apps before using python but since moving into web dev with elm, I thought would make sense to just be consistent about my UI design across platforms. I'd heard some folk poo-poo-ing electron for app size and performance, so I wanted to hear from someone who actually used it.
+U2U94G0QG : Well, my projects with Elm/Electron aren't production scale/quality and I never made a prod build of any of them - but we just released a React/Redux/Electron app and I feel pretty good about it
+U2SR9DL7Q : sounds good
+U2U94G0QG : I found this to be useful <https://github.com/johnomarkid/elm-electron-webpack>
+U2U94G0QG : for getting started
+U2U94G0QG : It's not a boilerplate
+U2SR9DL7Q : this is awesome
+U2SR9DL7Q : <@U2U94G0QG> thanks!
+U2U94G0QG : yvw
+U5ABF3BH7 : Hi!  I am writing a Json.Encode function to create an object in the back end, in my database.  I have a Kase. ```type alias kase =  { name : String, organization : Maybe Organization.Model, ...} ```. The field organization is a Maybe.  If there is no organization entered, I don't want that field passed in my Json object.  as it will give me some validation errors. How can I do that?  I can only think of doing List.append. This is how the code looks like if an organization exists
+U5ABF3BH7 : ```Json.object   [ ("name" , Json.string model.name)
+   , ( "organization_attributes", Json.string model.organization)
+]```
+
+U5ABF3BH7 : any advice
+U5ABF3BH7 : ?
+U5ABF3BH7 : but if there is not organization, I only want
+U5ABF3BH7 : ```Json.object   [ ("name" , Json.string model.name)]```
+
+U5ABF3BH7 : (this is a simplified version)
+U3DQT3ZGC : Hi All! Is there a way to detect if an image is loaded in Elm like this? ```const tempImage = new Image(500, 500);tempImage.addEventListener('load', doSomething);
+
+tempImage.src = url;
 ```
-no worky
-unable to get js values into my elm app
-So, you can do basically that but using `Random.generate`, without using ports
-as for the ports syntax, it's `app.ports.fromElm.subscribe(function (arg) { * do something with arg. There is no callback, tho, but you can app.ports.toElm.send(..) it back in * }`
-ports are always async and always "decoupled". It's not two way traffic. It's basically a remote API that you send stuff to, and that may send stuff to you
-<@U3SJEDR96> How do I read the sent value `app.ports.toElm.send(..)`
-quicky using `Random.generate` <https://ellie-app.com/3SYQyLhXzmha1/0>
-you'd have a `port toElm : (String -&gt; msg) -&gt; Sub msg` for example, which would allow sending in a  string. You also have to hook that up to your `main` program using `subscriptions`. I'd advice going through the guide (<https://guide.elm-lang.org/>), especially the section on JS interop
-and adapted for manual seed management, with the initial seed provided on startup through flags: <https://ellie-app.com/3SYQyLhXzmha1/1>
-Note that random generators can be combined using `map`, `andThen` and related functionality to create pretty powerful generators, that make "now give me a random battleship board" completely feasible and calling that would be no more complex than getting a single random number.
-If I could get a single random number I'd be good
-`Random.step (<http://Random.int|Random.int> 0 100) (Random.initialSeed 0)`
-It will be random, but it will be the same sequence every time you run your application.
-Well, actually, if you don't save the resulting seed anywhere, you'll just get the same value every time
-Yes
-So that might as well just say `25`
-yes
-Another question...
-why does this not work in repl?
-$ list = (1,2,3,4)
-$ (a,b) = list
+
+U0K92QFST : <@U3DQT3ZGC> Elm allows you to define custom event handlers for any HTML tag: <http://package.elm-lang.org/packages/evancz/elm-html/4.0.0/Html-Events#on>
+U48AEBJQ3 : <@U5ABF3BH7> There are a few ways of doing it. One might be:```
+Json.object (List.filterMap identity [Just ("name", Json.String model.name), Maybe.map (\org -&gt; ("organization_attributes", Json.String org))])
+```
+
+U0K92QFST : <@U5ABF3BH7> <@U48AEBJQ3> here's what I came up with:```
+let 
+  nameField = ("name", Json.string model.name)
+in
+  case model.organization of
+    Just org -&gt;
+      nameField :: [("organization_attributes", Json.string org)]
+    Nothing -&gt;
+      [nameField]
+```
+
+U48AEBJQ3 : And there is another :simple_smile:.
+U0FP80EKB : This```
+ nameField :: [("organization_attributes", Json.string org)]```
+can just be
+```
+ [nameField, ("organization_attributes", Json.string org)]
+```
+
+U3DQT3ZGC : So this this should work ? `Html.img [ on "load" (Json.succeed message), src "image.jpg" ] []`
+U5ABF3BH7 : <@U48AEBJQ3> <@U0K92QFST>  <@U0FP80EKB>  Thanks a lot!
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

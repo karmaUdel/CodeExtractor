@@ -1,30 +1,72 @@
+U0LPMPL2U : If you have a `fold` defined it becomes pretty easy. Just return the current node if it isn't the one you want to update, otherwise update the node
+U4F64AKQV : <@U1G51S63S> What are you using the tree for? This seems like an XY problem to me.
+U1G51S63S : I thought to have a fold for reducing a list of values into another list and separated recursive function for updating values in accumulator
+U1G51S63S : <@U4F64AKQV>
+U1G51S63S : I want to display thing like this
+U0LPMPL2U : `List.foldl` is recursion over a list. You could also implement a `Tree.fold`
+U1G51S63S : but from API I got plain list of records with LTREE keys (postgresql thing) like `Mahnattan.Bedford-St.Ocean_hill`
+U0LPMPL2U : In your case, what your probably want a tree map function. Something like:```
+Tree.map (\node -&gt; if node.key == "some.key" then Tree.addChild child node else node)
 ```
-these are two python packages. requests has been cloned down from github but i would like to edit it separately and see the changes in `my_awesome_app`
-i would go into the `my_awesome_app` dir and activate the virtualenv.
-then type `pip install -e "../requests"`
-virtualenv?
-uuuh let me see if I can figure something out by cloning the repo
-yes, a virtualenv is short for “virtual environment” it basically makes a copy of your python binaries and places them in a separate location (again using symlinks). This separate location acts as an isolated environment in which you install dependencies/packages. What you gain from this is the ability to only have the packages and package versions you need for that particular project.
-if you are using python3 it comes with virtualenv capabillity
-does `pip install` look for any particular file?
-pip install will be looking for a `setup.py` file in the root of the package.
-great
-I think I got this
-:thumbsup:
-it takes a bit to get used to. virtualenvs, pip, and so forth but once you get the process down it will be second nature.
-and once you start working with multiple projects with different requirements/dependencies and even python versions you'll see why this extra stuff exists.
-hey it worked!
-the important thing is to try and start using these practices early on so that they become habit as they are typically used by python developers.
-it actually really works!
-this is going to be my first pull request
-thank you so much <@U0NRYQNAZ>
-that's fantastic. i'm glad i could help.
-Does anyone have a pro tip for freeing up disk space on a SSD?
-links
-`rm -rf /`
-BleachBit
-and ZFS
-(compression is freeing space, right?)
-Depends on what OS, but on mac there is a diskutility thing that is used to erase free space, I have seen that reclaim a bit. Also cleaning up a docker cache, if you use docker
-I want to use setattr inside a class's init method. Should I use it on `self` or `self.__dict__` ?
-but it WAS JUST WORKING. I didn't change any code just came home from school. I found that the interpreter was no longer set to python 3.6, it wasn't set to anything so I'm wondering if other things may have changed? Thanks for any help! I'm hoping it is a commonly known problem if something is just working and then starts to give you this error if you come one and off wifi or something. Another one of my projects happens to be having the same problem. I also tried typing /admin or /queue_system after the web address too. Neither worked.
+
+U0LPMPL2U : none of these functions exist though :stuck_out_tongue:
+U4F64AKQV : So the issue is parsing the strings to create a tree structure?
+U1G51S63S : <@U4F64AKQV> creating a tree structure yeah. this is Elixir code which doing what I need but with dicts and not lists ```      |&gt; Enum.reduce(%{}, fn (area, acc) -&gt;      {name, path} =
+        area.path
+        |&gt; String.split(".")
+        |&gt; List.pop_at(-1)
+
+      node = %{children: %{},
+               id: area.id,
+               name: area.name}
+
+      case path do
+        [] -&gt;
+          Map.put_new(acc, name, node)
+        path -&gt;
+          full_path =
+            Enum.intersperse(path, :children) ++ [:children, name]
+          put_in(acc, full_path, node)
+      end
+```
+
+U1G51S63S : <@U0LPMPL2U> I thought reducing is a `n - 1` op, where recursion is here?
+U1G51S63S : so basically it's iterating over all items while keeping acc, no?
+U1G51S63S : or you mean under hood with head/tail?
+U4F64AKQV : So why not use an Elm `Dict` then?
+U1G51S63S : btw I can't get you idea with Tree.map :disappointed:
+U0LPMPL2U : `List` is a recursive structure, therefore "iterating" is done recursively (although the compiler may turn that back into iteration)
+U1G51S63S : <@U4F64AKQV> a I am figured out how to do it with Dict already, just want to try with List :slightly_smiling_face:
+U4F64AKQV : The current impl of `foldr` happens to use a for loop. It converts the list to a JS array and iterates over it.
+U0LPMPL2U : So if you wanted to update a value in a list, you could do something like this right?
+```
+updateList : a -&gt; a -&gt; List a -&gt; List a
+updateList oldValue newValue list =
+  List.map (\val -&gt; if val ==  oldValue then newValue else n) list
+```
+
+U1G51S63S : yep, correct. but problem is with nested update
+U1G51S63S : so as I thought it should be recursion like a -&gt; b -&gt; insert c to b.children -&gt; b -&gt; a
+U0LPMPL2U : Imagine that `Tree.map` visits all children recursively, just like `List.map` can do for a list
+U1G51S63S : ok, done :smile:
+U0LPMPL2U : This discusses `Tree.map` and an implementation for a binary tree <https://evancz.gitbooks.io/functional-programming-in-elm/recursion/binary-trees.html>
+U1G51S63S : &gt; A binary tree is either empty or it is a node with a value and *two subtrees*
+U23SA861Y : yes, either one of which could be empty
+U0LPMPL2U : Notice that node 9 has two children: 7 and "empty"
+U1G51S63S : hmm, yeah. just read again Insert section and got idea. will try to implement it now for my case :thumbsup:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

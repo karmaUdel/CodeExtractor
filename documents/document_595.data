@@ -1,12 +1,75 @@
+U1RJZ6SEL : Hi, is there a good tutorial floating around about how to write an autocomplete that queries a remote JSON API? I saw <http://package.elm-lang.org/packages/thebritican/elm-autocomplete> but it doesn't have any examples of using it with remote data, and besides, project is looking kinda abandoned. Google isn't turning up much for me either. Would appreciate any pointers!
+U3VCFFH1S : Hi Happy Elm Friends:koala:, has anyone tried highlight a matched portion of text? eg to transform *"foo 123 bar #$%"* to this *"`foo` 123 `bar` #$%"*.Probably something like ```highlight : String -&gt; Html -&gt; Html```
+In JS it could be
 ```
-<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Basics#isInfinite>
-so `digitCount (1000 ^ 1000) |&gt; isInfinite |&gt; Expect.true "that should really be Infinite."`
-unless digitCount returns an `Int` :sweat_smile:
-hi, can someone explain further about Routing or Navigations?   i.e do i create different div containers to load data into ti when a next page is switched? i. e Home, About us etc??? or a different views with it's own page. I m still confused in that part.
-mean, do i use Rest API to fetch data into containers or I need to create different html page linking then as normal html ?
-This is a good source but as the article states it's not a smooth introduction :slightly_smiling_face: <https://dev.to/rtfeldman/tour-of-an-open-source-elm-spa>
-thanks
-A look into these files should suffice to get how you could do routing, as always there is no *one* solution. <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm> <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Route.elm>
-I have another JSON decoder question :stuck_out_tongue:
-this json `{"custom":{"20170414":[900, 1300],"20170415":[],"20170417":[]}`
-I want to try and decode into these types
+"foo 123 bar #$%".replace(/([a-z]+)/g, '&lt;span class="red"&gt;$1&lt;/span&gt;') # "&lt;span class="red"&gt;foo&lt;/span&gt; 123 &lt;span class="red"&gt;bar&lt;/span&gt; #$%"
+```
+Working on a solution but thought I'd ask if anyone's done it.
+
+U153UK3FA : <@U3VCFFH1S> do a String.split and List.map the strings to Html
+U1SF6G7PA : <@U1RJZ6SEL> what is your use case? i guess you could use elm-autocomplete with a textfield for the queries, and each time the user changes the query you send an api request. when you handle the response you then build up the list of items you feed into the view and update functions of autocomplete
+U67JLCNUV : What is considered the "Elm" way for handling file uploads?
+U3SJEDR96 : Depends a little on what you need exactly. If you're handling images, for example, it's super easy to use ports to get your the base64 encoded image: <https://ellie-app.com/3qpgdbQFFfqa1/1>
+U3SJEDR96 : which is, in the end, just a string you can embed in whatever JSON you send to your server
+U3SJEDR96 : handling arbitrary uploads is a little more complicated, as there is not `Blob` type in Elm
+U67JLCNUV : I need to upload wav files.
+U0JBSEGHY : Hey I remembered your question when I was watching this video. Perhaps contact this guy if you have not figured out how to use the one runtime. <https://www.youtube.com/watch?v=U_5XKPe4fZM&amp;list=PL-cYi7I913S8cGyZWdN6YVZ028iS9BfpM&amp;index=13>
+U3VCFFH1S : I went a different approach ```model = {highlight : String}
+
+highlight : String -&gt; String -&gt; String
+highlight str text = if String.contains (String.toLower str) (toLower text) then "&lt;mark&gt;" ++ text ++ "&lt;/mark&gt;" else text
+
+view model =
+    let
+        text : String -&gt; Html Msg
+        text str = if model.highlight == "" then Html.text str else toHtml [] (highlight model.highlight str)
+    in   …
+```
+This lets me keep using `text` in my view and the highlighting automagically works. downside is the parts I want to do this to have to actually be in the view's scope.
+
+U5P4FLYLE : hi, quick question about pattern matching. I have a number of cases that have the same output expression, can I merge them ("A", "B", "C") in one branch somehow? ```case result of
+        "A" -&gt; expr1
+        "B" -&gt; expr1
+        "C" -&gt; expr1
+        _ -&gt; expr2```
+
+U3SJEDR96 : Nope, though you can resort to `if List.member result ["A", "B", "C"] then expr1 else expr2`. Certainly not always the best solution, but occasionally it makes sense.
+U5P4FLYLE : unfortunately I have `case (result, item, stack) of ` pattern to handle..
+U4872964V : you can do something like `case (List.member result ["A", "B", "C"], item, stack) of` though
+U5P4FLYLE : yes, for the example above it would do the trick, but in reality I have at least 7 groups of result to handle, and in the future some more could join the pack. <@U3SJEDR96>  <@U4872964V> thanks, anyway:-)
+U4872964V : Well, then you could have a "grouping type" that you convert to
+U4872964V : would be great for readability too
+U5P4FLYLE : ok, so how you define types that restrict "A", "B", "C" belonging to Group1, and "D" and "E" belonging to Group2?
+U4872964V : something like this:```
+type Group
+    = ABCGroup
+    | DEGroup
+
+
+getGroup : String -&gt; Group
+getGroup result =
+    case result of
+        "A" -&gt; ABCGroup
+        "B" -&gt; ABCGroup
+        "C" -&gt; ABCGroup
+        "D" -&gt; DEGroup
+        "E" -&gt; DEGroup
+```
+
+U5P4FLYLE : <@U4872964V> thanks, I go this direction definitely!
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

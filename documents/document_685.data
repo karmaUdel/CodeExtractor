@@ -1,37 +1,104 @@
+U1CE9DL9H : I assume a record with 5 fields of the correct type?
+U17PWHU4D : close, i was going to tuple with the string, then list int.
+U17PWHU4D : but the result will be the same either way.
+U48AEBJQ3 : You should avoid using a `List` when you want things to be a specific length.
+U17PWHU4D : ok, `Array` better?
+U1CE9DL9H : anyway, you should be able to define something like ```
+f : List Value -&gt; Decoder MyTypeAlias
+f list = 
+    case list of 
+        [ a,b,c,d,e ] -&gt; 
+            Decode.map5 MyTypeAlias 
+                (<http://Decode.int|Decode.int> a)
+                (<http://Decode.int|Decode.int> b)
+                (<http://Decode.int|Decode.int> c)
+                (Decode.string d)
+                (<http://Decode.int|Decode.int> e)
+        _ -&gt; Decode.fail "shape of the list is invalid"
 ```
-<@U2BS4M1RV> yeah that is consistent with what I'm seeing after some further reading, but why would that happen when following the Windows instructions?
-<@U4EEBC4SJ> can you link the instructions you are following?
-<https://docs.pytest.org/en/latest/getting-started.html>
-Hmm. But pip was happy when you ran the install?
-Hey, I've been working with python lately, and I think I have most of the basic stuff down, but I'm kinda lost as to where to go moving forward, and so I wanted to ask if there was any advice for going 'beyond the basics', and really getting confident with python and everything it has to offer. Thanks!
-Build something with it!
-doesn't sirbot have a command for what's next?
-nice <@U66HHFPT2> :point_up:
-It's `/file &lt;name&gt;`
-ah ok
-Is the interpreter set up right? 
-yeah. I'm restarting the IDE
-pycharm can't handle my code :100:
-too good for it.
-Haha, woot
-:dagger_knife: 
-ha. Missed the `{}` around the json response. It wasn't that wrong
-Haha, yep. I was looking at general structure vs details 
-Hi guys! Anyone who knows how to set up queued or delayed mails in django? Kind of like how you do in Laravel
-<@U68BS678X> have you looked at something like django-celery?
-<@U47HK8BS8> No - I will have a look at it. Thanks!
-So far, I have just placed an env.py file in the root of the project, and imported it into my settings.py.
-yeah I actually wrote a little tool to simplify doing that in my python projects: <https://github.com/jimjkelly/yaep>
-but the basics if you don't want anything fancy is just `os.getenv(KEY, default)`
-oh, and loading the `.env` file I suppose
-Okay, thanks <@U47HK8BS8>
-Yeah, pip was happy, confirmed that all of my dependencies are there too. I am puzzled
-I'm using Flask and have fallen victim to the surprisingly common circular dependency issue. Do I pretty much have to use an app factory pattern to get around this?
-<@U5CGPBF0U> pretty much, if you have source to look at we may be able to suggest something else, but my guess is the factory is the simplest way
-I also found that it helped to avoid various flask extensions, because they would usually mean dragging in a further dependency on the `app` object to implement whatever behavior the extension added
-<@U5CGPBF0U> Here is a sample app we deprecated from <#C2FMLUBEU|community_projects> - <https://github.com/pyslackers/website-old>
-<@U1BP42MRS> Well, my current code works, _but_ I'm making use of `from models import *` and using any other method of import fails. I heard that importing like that should generally always be avoided though. I'm not entirely sure why that is (yet) so I'm not sure if it's worth fussing over or if I might as well continue with it as is.
-<@U5LNXQHN3> I'm using several Flask extensions, but I suppose the issue in this case comes from Flask-SQLAlchemy specifically. I'm wondering why the extensions exist if they're so prone to these problems though? Is the user just expected to use an app factory pattern? I'm surprised that even the most basic Flask tutorials seem to have this issue. The first tutorial I ever did wouldn't run due to a circular import error, even though the tutorial didn't mention any error and seemed to produce the correct results of the app running as if there was no error.
-It's discouraged because it pollutes the namespace with everything from `models`
-Including its imports
-All I can say is that I stripped Flask-SQLAlchemy out for exactly this reason. Other people managed to coerce it into working. :slightly_smiling_face:
+
+U48AEBJQ3 : It sorta depends? If the Ints are all interchangeable, a list would be... alright, I guess?
+U1CE9DL9H : then the full decoder becomes `Decode.list Decode.value |&gt; Decode.andThen f`
+U3SQ42JJW : Anyone any experience with using Chris Jenkins RemoteData with a custom post request? I can’t figure it out … :disappointed:
+U48AEBJQ3 : That might be simpler as```
+f list =
+    Decode.map5 MyTypeAlias
+        (Decode.index 0 <http://Decode.int|Decode.int>)
+        (Decode.index 1 <http://Decode.int|Decode.int>)
+        (Decode.index 2 <http://Decode.int|Decode.int>)
+        (Decode.index 3 Decode.string)
+        (Decode.index 4 <http://Decode.int|Decode.int>)
+```
+
+U3SQ42JJW : There is this example in the docs ````
+
+getNews : Cmd Msg
+getNews =
+    Http.get "/news" decodeNews
+        |&gt; RemoteData.sendRequest
+        |&gt; Cmd.map NewsResponse
+````
+
+U17PWHU4D : ok, i think i get what you're both saying here.  this is a ton of good stuff for me to look through and figure out.  didn't realize about value, or mapping through.
+U17PWHU4D : Thanks so much <@U48AEBJQ3> and <@U1CE9DL9H> !!
+U3SQ42JJW : So I need something that responds with an Http Request msgAnd just use RemoteData.sendRequest with it…. 
+But what makes this Cmd.map and where do I put my msg ?
+
+U48AEBJQ3 : <@U3SQ42JJW> Ignoring remoteData for a moment, are you able to make your `Http.Request a`?
+U3SQ42JJW : yes - thats my function```
+requestToken : String -&gt; String -&gt; Http.Request State.ValidationResponseType
+requestToken password endpoint =
+    let
+        decoder : JD.Decoder State.ValidationResponseType
+        decoder =
+            JD.map State.ValidationResponseType
+                (JD.field "token" JD.string)
+
+        json =
+            JE.object
+                [ ( "password", JE.string password ) ]
+                |&gt; JE.encode 0
+                |&gt; Http.stringBody "application/json"
+    in
+        Core.Helpers.Utils.customPostRequest
+            (endpoint ++ "/api/getPollToken")
+            []
+            json
+            decoder
+```
+
+U3SQ42JJW : Works fine when using it with Http.send
+U48AEBJQ3 : So, you pass that to `RemoteData.sendRequest` which gives you a `Cmd (WebData State.ValidationResponseType)`
+U3SQ42JJW : yes, like this ```
+RD.sendRequest &lt;| (requestToken string apiEndpoint)
+```
+
+U48AEBJQ3 : Then you need a```
+type Msg
+    = &lt;your existing messages...&gt;
+    | ReceiveResponse (WebData State.ValidationResponseType)
+```
+
+so you can go `Cmd.map ReceiveResponse _____`
+
+U48AEBJQ3 : The name of that constructor can be anything. Naming things is difficult.
+U3SQ42JJW : <@U48AEBJQ3> Wooohoooo :smile: Thank. Works now. I had defined my response message as ReceiveResponse (RemoteData State.ValidateionResponseType) instead of WebData … uh… what a bad mistake :wink:
+U3SQ42JJW : If you hadnt written down the msg type, i would have overseen this totally :slightly_smiling_face:
+U3SQ42JJW : (But  I still did not get why I use Cmd.map here…. hmmm)
+U5MEJDV34 : Just created a new Atom package that lets you run Elm Tests on Save and show the result in the Linter window. Might still be unstable so feedback is very welcome: <https://atom.io/packages/atom-elm-test>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

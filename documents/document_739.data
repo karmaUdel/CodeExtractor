@@ -1,72 +1,155 @@
+U153UK3FA : I think I've seen one elm tutorial for complete beginners to programming, but I can't remember where
+U2SR9DL7Q : <@U1NEXBG1K> I believe there is _learn me an elm_ that is recommended for folks with experience in imperative, but could also be approachable for those with little programming history.
+U2SR9DL7Q : Honestly, the main thing I look for in beginner tutorials is whether they adequately explain setup and configuration, which was always what frustrated me when I just started out. A lot of resources handwave over proper installation, but half the time people stop advancing it's because they can't get something to work, not that they can't understand material.
+U2D7NUGS1 : Hello! Mine and <@U0ZESPUAX> talk about Elm + Polymer web components is on-line. <https://youtu.be/A3hUjC-evlE>
+U2D7NUGS1 : Thanks to all the folks here who helped me prepare.
+U30UHDER3 : tschuchort: Maybe have a look at <https://github.com/iosphere/elm-toast>
+U30UHDER3 : It provides a generic approach to toast and leaves it up to you how to present them. It also allows you to customize the content and data model behind toasts.
+U44CPUA82 : It's hard to find resources which would not assume _any_ prior programming knowledge, but maybe you can try <http://elmprogramming.com/>
+U44CPUA82 : and then if you get stuck following along, you can always ask people around here - there are always folks here willing to help :slightly_smiling_face:
+U44CPUA82 : ok, not that I've read further I see it's not you needing help, but just want to point other people to good beginner resources. still, the point remains!
+U2JFD9ALE : I sometimes get the following `GET` request with the status code `404`:```
+127.0.0.1 - - [15/Jul/2017 22:38:37] code 404, message File not found
+127.0.0.1 - - [15/Jul/2017 22:38:37] "GET /favicon.ico HTTP/1.1" 404 -
 ```
-When `new-lambda` is used as `lambda` in some importing module, the expressions written inside that `lambda` will also be from the importing module – and so an open parentheses there will see `myapp` instead of `#%app` from `racket/base`. You may be thinking that the body of a`new-lambda` use is treated as being from the `new-lambda` place, but it's not; the body is treated as being from wherever it is written (i.e., lexical scope).
-thank you Matthew! that really helps
-ok, now  i need to think a bit harder about what I'm trying to do here
-fwiw I'm just amazed at how much introspection macro-debugger/stepper offers. Like I'm no longer blind
-<@U3NJS8H7C> Just a sanity check, environment variables that are set using `putenv` are also going to be set in FFI calls, correct?
-Oh wait, no, it uses current-environment-variables, never mind.
-If `(current-environment-variables)` returns its original value, then `putenv` affects OS-level environment variables
-That makes sense. Thanks.
-So basically don't change the parameter and it works. Thanks. :slightly_smiling_face:
-<@U3VGR2S7Q> <@U3QF0EM0E> do either of you have more comments on <https://github.com/racket/rackunit/pull/59> ?
-Does anyone know how to be more specific when requesting an opengl context than just core/compatibility?
-Namely, I want core3.3
-If I can get it anyway.
-<http://docs.racket-lang.org/draw/gl-config_.html?q=gl-config>
-<@U0G0JDQGZ> You might now?
-hmm…looks like not. At least not yet. :slightly_smiling_face:
-It looks like when you request core, it starts at 4.x and goes down to 3.0
-WAIT!!! No. Grr….despite asking for a core context, its still giving me a legacy one. That absolutely should be in the docs.
-That, and you should absolutely be able to find out what kind of context you got after the fact.
-Hmm…I guess in get-legacy? it says that it is only supported on mac 10.7+ and _some_ linux variants.
-But there still doesn't seem to be a way to check which version you ended up getting once you go it.
-<@U08JL5H89> I'm no GL expert, but I thought there were GL-level functions that will tell you
-There are some.
-Namely, glGetString
-<@U3NJS8H7C> Btw, its the line `(force lazy-GLX_ARB_create_context?)` that is causing it to create a compatibility context.
-When I comment out that line a compatibility context gets created. (Version 3.3)
-You get a *non-*compatibility context when it's commented out? Neil wrote that code, and I don't know the right answer in this case, but I'm happy to accept patches from people who do.
-leif: it is not common for OpenGL apis to give you the ability to ask for a specific version, because drivers typically don't support multiple options anyways. OpenGL versions never change the meaning of old stuff (i.e. it is forward compatible) and when you write GLSL you have to specify the version always... so what exactly is the problem that yo
-u are trying to solve?
-I mean, newer versions _do_ remove deprecated stuff. Although the only instance I can think of this happening in a major way was 3.0 to 3.1
-I have a GLSL shader, it is not doing anything fancy, just drawing a quad to the screen, and drawing a texture to that quad.
-(aka, its a media player)
-The shader is written in GLSL 330
-On my mac, I get 3.3 when I ask for the core profile.
-But on linux, despite asking for core, I got compatibility. Which corresponded to version OpenGL 3.0, so GLSL 130.
-<@U0G0JDQGZ> ^
-Oh, also, glx (which is what the linux opengl bindings use), does let you request a specific version. Of course you are limited to what your hardware can support. :slightly_smiling_face:
-<@U3NJS8H7C> Kind of. When you request a core profile, Racket's opengl library tries a few tests to see if its compatible. If it is, and you requested a core profile, it gives you a context using the core profile. However, if it can't, it ignores what you requested and silently gives you  a compatibility context.
-The only real way to test after the fact (as far as I can tell), which one you got is using the glGetString function and checking your opengl version.
-Anyway, I commented out one of the checks that was failing, to see what would happen, and the opengl context worked just fine. Which makes me think we are potentially checking more stuff than we need to.
-(Obviously I haven't tested that thoroughly yet.)
-Anyway, thanks.
-leif: 3.0 to later is basically a totally new API, which what the whole core vs compatibility thing is about
-it sounds like either something wrong with Racket checking of the version (which you said) or your driver doesn't really support new stuff, which is common on Linux software implementations
-<@U0G0JDQGZ> yup. Or at least thats when they dropped the fixed pipeline in favor of the shaders from opengl 2. But how would I test if it doesn't ‘really' support newer stuff?
-Like, I'm able to open up a window, and build and run a GLSL 330 program.
-Apropos OpenGL and shaders: Is it possible to get GLSL version 130 version on mac? If not, how do I get a newer version?
-(I can't get Ruckus to run mac)
-To see which versions of GLSL that were supported I tried different values for the version in: <https://github.com/cbiffle/ruckus/blob/master/viz/preamble.glsl>
-Version 120 seems to exist - but the preamble uses more recent features.
-yo
-hey!
-morning
-<@U044GA9BR>: you're a full day ahead of me almost haha
-morning... i am going to bed and he says morning... its so frustrating
-had the same thought <@U044HMK7S>
-<@U044G404Z>: i know its crazy
-some atom users here?
-#vim4lyfe
-Has anyone used `react-router` with ES6 classes in 0.13
-<@U044JU5CA>: not yet
-i like vim but not as my full time editor
-I really need to write a newsletter. It's up to 450 subscribers and I haven't sent anything in a while.
-<@U044JU5CA>: <https://github.com/pheuter/essential-react/tree/master/src/routers>
-a react starter kit, very minimal and they use react-router with es6 classes
-Nice. My main problem with it is that I think putting the router object on `this.context` feels strange and awkward
-and you need to define `Foo.contextTypes` everywhere as well
-<@U044JU5CA>: I use a flux implementation that passes a flux object through the context and I'm actually really liking it
-do you need to use contextTypes with that?
-yeah, for anything with context you do, that's the only annoying part
-and in ES6 classes it seems you can only write them after you've defined your class
+when hosting my :elm: `SPA` locally with Python: `python -m SimpleHTTPServer`
+
+But when I search for `favicon.ico` with `grep -R "favicon.ico"` is no where to be found. My question is, why is this? Anybody knows?
+
+U2JFD9ALE : Is it a Python or :elm: issue?
+U3SJEDR96 : it's your browser that fetches this by default
+U3SJEDR96 : nothing to do with either Elm or python :slightly_smiling_face:
+U4872964V : yes, the browser tries to get that file to show you an icon for the page
+U2JFD9ALE : OK roger that. Thx :slightly_smiling_face:
+U4RR7KX45 : is anyone using Elm with laravel?
+U4RR7KX45 : just wondering
+U2D7NUGS1 : Very nice article about Elm + GraphQL: <https://alpacaaa.net/blog/post/elm-graphql-client/> Thanks <@U1G66P401> !
+U1P6FFJ64 : <@U4RR7KX45> we use Elm with PHP, but not with Laravel. We use Drupal instead
+U0U6ML22H : <@U4RR7KX45> we serve our Elm apps through a Symfony 3 backend
+U4RR7KX45 : nice!
+U4RR7KX45 : I might try it too
+U3SJEDR96 : It's generally a pretty good idea to make your front-end and back-end loosely coupled through an API, tho, so the actual choice of backend or frontend doesn't matter too much
+U4RR7KX45 : the reason why I asked is that Laravel uses laravel-mix and just wanted to get an idea how well does it work with it. Laravel mix is just a pre-configured webpack essentially, with the ability to extend it further. it’s not an issue adding elm-loaders and stuff but you never know what problems one might have there..
+U3SJEDR96 : ah, alright, that makes sense :slightly_smiling_face:
+U4RR7KX45 : I have this complex admin panel written in react at the moment. I wanted to rewrite it in cycle.js, but now that Elm got my attention, I’m thinking about using Elm instead :smile:
+U4RR7KX45 : there are things I can’t wrap my head around yet but..
+U0U6ML22H : if we were to do it now, we most likely wouldn't use our backend to serve our app, and instead do what <@U3SJEDR96> says; however, the one advantage (that we fail to leverage efficiently ourselves) is that you could do something like PWA more easily, reducing the number of HTTP requests by using flags, etc.
+U69N2J6AY : Is there a way to make my Elm app crash on numeric exceptions (e.g. division by zero, sqrt(-1), etc.) ?
+U3SJEDR96 : `1 % 0` should blow up
+U3SJEDR96 : but for the most part, you'll just get nonsensical output for nonsensical input
+U3SJEDR96 : most of it due to JS and its weird corner-cases
+U69N2J6AY : ah I see. That is unfortunate :disappointed:
+U69N2J6AY : thx
+U69N2J6AY : Is the fact that 1%0 blows up a feature or a liability? From the docs I get the picture that Elm does not acknowledge the usefulness of exceptions for certain cases...
+U4872964V : <@U69N2J6AY> look here <https://github.com/elm-lang/core/issues/721>
+U69N2J6AY : thx for the link :slightly_smiling_face:
+U4872964V : so, it’s being categorized at least
+U69N2J6AY : The topic of numerical exceptions brings me to another question: How does one normally does sanity checks in Elm during runtime ("assert" statements in other languages)? Is it idiomatic to use Debug.crash? The documentation could be understood as "only use Debug.crash for TODO-cases".
+U4872964V : what kind of sanity checks?
+U4872964V : give an example
+U69N2J6AY : In a numeric computation, I know that something will end up &gt; 0.0 because I have designed the code that way. But during a future refactoring/change this property might get lost so I want to check it's present. In C++ I would simply write "assert(foo &gt;= 0.0);" and be done
+U3SJEDR96 : In Elm, you'd probably write a test for catching logic errors
+U4872964V : yes but what would you do with that assertion?
+U69N2J6AY : ok, my previous example could be easily solved by a unit test. This one couldn't, I think: "given a Maybe interface i know that the result is never Nothing. If it IS nothing, my program is broken".
+U4872964V : Well, if it’s never `Nothing` you shouldn’t use a `Maybe` type
+U69N2J6AY : There are more than one kind of "Never". I think your answer applies only to the one which can be enforced via the type system
+U69N2J6AY : another kind of "Never" is the one in my first example: let's assume that I can mathematically prove that the result foo is always &gt; 0. But the Elm compiler cannot check my code, so it cannot enforce that this remains valid
+U3SJEDR96 : If you want your program to crash if `foo &lt;= 0`, then crash. It's just generally nicer to return a  `Result` in that case, and show the error to the user
+U69N2J6AY : ok but is it idiomatic to crash? :slightly_smiling_face:
+U4872964V : I’m not sure, I’ve never had that situation occur actually, is this a real case?
+U69N2J6AY : I think yes. In my optinion it's nicer if you have a routine which returns a simple Float for the relevant 99,9% of cases and crashes for that 0,1% corner cases instead of one which always returns a Maybe
+U4872964V : well, if you have one that returns Maybe you can make a helper to crash, but the opposite is not true
+U4872964V : well, you could make a helper to check the condition first, that’s true
+U69N2J6AY : That's true. But if there is not a realistic chance that I or somebody else will ever use the bare Maybe-returning function instead of the helper...why bother?
+U4872964V : Well, we’ll see what the summed-up conclusion will be
+U4872964V : it should also work for non-javascript implementations
+U4872964V : (even though js is the only target language currently)
+U4872964V : It may even make sense to have different behaviour for float and int, because float operations are standardized
+U4872964V : IEEE 754
+U4872964V : division by 0 is `Infinite` there
+U69N2J6AY : yes, but in my experience you virtually never want to continue computation with a value of Infinite. That's why the fpu flags this and many programming languages consider this to be a runtime error
+U4872964V : yes, but we don’t have/want runtime errors in Elm
+U4872964V : and i don’t know if javascript gives you access to the fpu flag
+U69N2J6AY : I know about the "no runtime exceptions" mantra. But I think there's a qualitative difference between being able to _avoid_ runtime exceptions and simply ignoring them, when they occur. Nullptr exceptions can certainly be avoided by the Elm static type system. But I don't think it's realistic that runtime exceptions like "division by zero" can be avoided by a type system. Until then you can either acknowledge or ignore them. In my experience it's toxic to ignore them. So Elm is practically putting this burden on the shoulder of the programmer...
+U4872964V : I agree, I think division should return a `Maybe` by default. Then you could make a helper to crash if you like or you could handle the result.
+U681TBBUP : Writing any kind of complicated expression with operators returning `Maybe`s doesn't sound to ideal
+U4872964V : Well, then you’d make that helper
+U4872964V : Normally you don’t write that complicated expressions
+U69N2J6AY : Depends on your application domain, I think
+U4872964V : The application domain I’m thinking about is user interfaces.
+U4872964V : Then you’d make division with the length of a list perhaps to make an average or whatever. Pretty great that you’d have to handle the error case then.
+U681TBBUP : It's possible that complicated visualization setups involving graphing could have some pretty heavy math
+U681TBBUP : e.g. elm-visualization implemented force-directed graphs
+U69N2J6AY : But Elm explicitely discourages the use of native libs. Therefore it's implictely encouraged that you write all sorts of numeric computations in Elm itself?!?
+U4872964V : not at all, you’d probably use a port if you have that kind of library
+U4872964V : Elm does not discourage the use of ports
+U69N2J6AY : within a library?
+U4872964V : Within a library you should not crash I don’t think. That would be a very bad user experience for the library user.
+U69N2J6AY : Fighting through many layers of Maybes can end up in a bad user experience as well I think
+U4872964V : I think it’s easier to solve the issue if there is an actual example. Otherwise I really can’t see the big problem.
+U69N2J6AY : I think your approach is too radical. Shouldn't we put ANYTHING into a Maybe because allocation could fail everytime? :slightly_smiling_face:
+U4872964V : Allocation failure is something else. That’s outside the application domain.
+U4872964V : division by zero is inside the application
+U69N2J6AY : Why? If I blow up my data structures the application is responsible
+U4872964V : Well, I’m not arguing for not crashing if allocation fails (what else could you do?). I’m arguing for not crashing when dividing by zero, which is something different.
+U4872964V : I’ve given a normal use case, divide by the length of a list to display the average. If the list is 0 you need to handle that case. Having the division operator return a Maybe forces you to handle that case.
+U4872964V : this is the kind of use cases I expect to see in Elm
+U4872964V : and we should build our libraries and language to handle these practical use cases, if possible
+U69N2J6AY : It's alright for me if the division operator would return Maybe, but I don't think you can just ignore the requirement to be able to write down numerical expressions in a readable way. So either the other numerical operators and functions have to be able to handle Maybe themselves oder you need some other tool.
+U4872964V : well, if that is a big pain point maybe it can be adressed too
+U69N2J6AY : Maybe you could introduce another Number type which does not allow for Nan or Infinite. That way you at least can define clean contracts in your interfaces ("i don't accept Inf/NaN")
+U4872964V : i don’t really see it being that big a pain though
+U4872964V : now, I don’t write big numerical expressions in any of my code as far as I can recall, but it would be interesting to see examples of it
+U4872964V : then we can see what can be done about it
+U69N2J6AY : Look at "OpenSolid" or "elm plot"
+U4872964V : any specific file?
+U69N2J6AY : <https://github.com/terezka/elm-plot/blob/5.1.0/src/Internal/Draw.elm>
+U69N2J6AY : line 373
+U69N2J6AY : or 370
+U4872964V : yes, so what if h0 and h1 are both 0
+U4872964V : then you get isNan
+U4872964V : so it needs to be handles
+U4872964V : d
+U69N2J6AY : yes but do you really want to start using case of or Maybe.map or stuff like that in expressions like this?
+U4872964V : well, if the alternative is crashing, yes
+U4872964V : you said before it’s toxic to ignore then, so NaN should not happen then?
+U69N2J6AY : yes
+U4872964V : So what would be your solution there?
+U69N2J6AY : let the programmer check for the necessary conditions (like if the denominator is 0) and crash the programm if a numerical exceptions occurs. Because in that case the division by zero indicates that the programmer failed to handle the necessary corner case
+U4872964V : But that is what we have types for! Is checking for 0 really harder than checking for Nothing?
+U4872964V : the type system is supposed to force you to handle the corner cases
+U69N2J6AY : Maybe could very well handle this. But i don't think it's the most programmer-friendly approach of handling it
+U4872964V : it may well be that we can make `Maybe Float` a `number` too to make that easier (if the need is great)
+U4872964V : not sure if that’s the best solution though
+U69N2J6AY : At least as long as you do not any syntactic help...like Haskell's do notation (don't know if this would be applicable here)
+U4872964V : this example, I would do something like```
+case (s0, s1, p) of
+    (Just s0, Just s1, Just p) -&gt; (sign s0 + sign s1) * (min (min (abs s0) (abs s1)) (0.5 * abs p))
+   _ -&gt; 0
+```
+
+U4872964V : not so hard to handle
+U69N2J6AY : I don't think the inconvenience would arise for the cases where you actually want to handle the corner case but the ones where you know that the corner cases cannot happen, because you have prepared the input data yourself. Like "ok, i need the square root of 2 here. But instead of just writing sqrt(2) i have to do a pattern matching because in principle sqrt can return Nothing"
+U2D7NUGS1 : Allow me to drop into your ongoing conversation. It's very interesting indeed. On a formal note, I think `Result` would be a better candidate than `Maybe`. Then encapsulating any arithmetic expression in it wouldn't sound so crazy - after all it is a result.
+U2D7NUGS1 : Coming from that, perhaps it would be possible to make number literals be a sugar for `Ok number`.
+U4872964V : <@U69N2J6AY>, well, type safety is sometimes a bit inconvenient, for sure
+U2D7NUGS1 : And then user would have to map the `Result` only once, when she want's to use the ehem... result of the computation.
+U4872964V : making every number boxed seems a bit over the top though
+U2D7NUGS1 : Ok, actually I came here with a different question and got carried away by your discussion.
+U69N2J6AY : ^^
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

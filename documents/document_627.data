@@ -1,3 +1,57 @@
+U4872964V : it can change the type of the fields, but not add fields
+U4872964V : it’s a pretty arbitrary restriction though, but one that exists
+U0EUHKVGB : That is a flaw rather than a feature
+U2HFK584C : Right. that is an inconvenience.
+U4872964V : I think this was restricted to avoid typos, like if you spell a field name wrong it would be an error
+U0EUHKVGB : See this: <http://elm-lang.org/blog/compilers-as-assistants#simplified-records>
+U5LFUHH19 : I see there is `List.unzip`, but where is `zip`?
+U5LFUHH19 : That is, I have two Lists and I want to create `List Tuple`
+U5LFUHH19 : Oh, is that `map2`?
+U5LFUHH19 : Sorry, it's right there in the examples.
+U2LAL86AY : i'm having a big update function - 11 constructors on Msg - - there are no pattern matches on tuple - but i do a lot of dict update and nested update.  
+I have visible lag when compiling - my atom editor is freezing and i can't even scroll at times. I have compile on save turned on. And i hit ctrl-s a lot - it's like instinct.
+
+Right now all the logic lives inside the update.  Will it help if i have small functions doing their specific thing? Like 
+
 ```
-In this case, position team and contact may be strings or something else.
-I know that I can map from a JS string to my type. Now I need to map from my type to a specific Elm value.
+case msg of 
+      SomeMsg -&gt; 
+          smallUpdateFunction model
+               =&gt; []
+```
+Making everything one liner.?! Will this help? Or i'll end up making all this functions for nothing. I don't understand enough about how the compiler works to say..
+Any insights into this?
+
+U2LAL86AY : could it be that the compiler will cash all this `smallUpdate` functions - and only compiles the ones i changed? making this compilation a lot more faster?
+U5LFUHH19 : Best way to unique a list `uniq = Set.fromList [4,1,2,3,1] |&gt; Set.toList`?
+U2LAL86AY : <http://package.elm-lang.org/packages/elm-community/list-extra/6.1.0/List-Extra#unique>
+U2LAL86AY : ```unique : List comparable -&gt; List comparable
+unique list =
+    uniqueHelp identity Set.empty list
+```
+
+U5LFUHH19 : Nice, thanks.
+U2LAL86AY : <https://github.com/elm-community/list-extra/blob/6.1.0/src/List/Extra.elm#L315>
+U1SQLHY1G : with evan saying 0.19 was going to be all about SPA, what happens to elm-ui and elm-mdl
+U0F7JPK36 : <@U1SQLHY1G> can you say more about how those are related
+U4F64AKQV : What does a high std dev mean in terms of elm-benchmark? What would make a function perform so inconsistently?
+U4F64AKQV : kyclark: There’s also `List.Extra.zip`, which is implemented as `map2 (,)` iirc.
+U4F64AKQV : Also note that the implementation I am comparing it against has a very small std dev.
+U1TMAG4FK : <@U4F64AKQV> just a wild guess but maybe the one function causes more memory allocation/deallocation and is therefore more likely to trigger garbage collection while it's running? If sometimes the GC ran and other times it didn't that could explain it...
+U4F64AKQV : <@U1TMAG4FK> that sounds reasonable. The function with high std dev is creating more intermediate data structures.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

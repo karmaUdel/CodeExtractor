@@ -1,36 +1,80 @@
-```
-is that an elm signature?
-no, that's just `elm` as short for `element`
-ha, ooops
-yeah, their website is mostly react
-hey elmos
-from the Html package
-where does `Node` comes from?
-from the `VirtualDom` package
-similarly, `type alias Svg msg = Node msg`. That is to say; they both use virtual-dom nodes under the hood :slightly_smiling_face:
-Oh I see
-but the documentation don't link Node with VirtualDom.Node
-yeah, it's a little annoying that it doesn't do cross-package links
-I think there's a bug for it
-thanks so much
-now, `type Node msg = Node`
-what is `msg` ?
-That's because it uses Native. So basically, it's a combination of phantom types and native magic; through which you can save information in structures in an "non-type-safe" manner
-`msg` in this case is a type variable for the message type that can be "emitted" from your dom-nodes through events
-so you can do `onClick MyMsg` which is an `Attribute Msg` (because `MyMsg` is of type `Msg`). A dom node can have multiple attributes, and all of its children can have attributes, but they have to match types, so your final structure can only emit *one* type of events
-<@U3SJEDR96> thanks !!
-hi can someone advise on List mapping?
-this is my code:
-        List.map updateVideo model.captions
-and the error is
-    an upper case name
-Hi, there is something that I quite yet don't understand with elm: how `&lt;textarea&gt;` or `&lt;input&gt;` are handled. In the examples, the `&lt;input&gt;` are left blank in the view, without using the model: `input [ onInput Change ] []` while I'd think something like `input [ value model.something, onInput Change ] []` would be more appropriate.
-Why does the compiler want an uppercase name?
-<@U5QPUBDQR> I think you're missing a `let ... in` around that first part
-<@U3SJEDR96> that code is already nested in a let … in
-can i nest again?
-<@U59AF21LJ> the DOM (in your browser) keeps it own state. _Usually_ we'll make sure that the dom reflects our model by using `value model.something` in the view, but this in't always required (and actually, not always what you want)
-        ({ model | captions = newCaptions, debug = b }, Cmd.none)
-hm, but where do you expect the result of that `List.map` to go?
-<@U3SJEDR96> i have a list and i want to update one element of that list
-i need a specific element with a certain ident
+U4FSUJLLU : i don't know how to do that
+U4FSUJLLU : <@U4PHRM50D> any hints ?
+U4PHRM50D : google it :simple_smile: we are using postgres as a DB but you could use whatever DB you want
+U4PHRM50D : assuming you're using node botkit, google 'node &lt;insert the DB you want to use&gt; tutorial'
+U4PHRM50D : i haven't the default json file storage that comes with the botkit but you could probably use that too. i couldn't help since i haven't used it
+U4SFSAMAS : Hi guys, I'm following <https://www.fullstackpython.com/blog/build-first-slack-bot-python.html> to build my first bot. It uses the official python slack client. Basically I'm getting the following error: 
+(starterbot) krangaraju-15mbpr:slack-starterbot krangaraju$ python print_bot_id.py 
+Traceback (most recent call last):
+  File "print_bot_id.py", line 11, in &lt;module&gt;
+    api_call = slack_client.api_call("users.list")
+  File "/Users/krangaraju/Projects/slack-starterbot/starterbot/lib/python2.7/site-packages/slackclient/_client.py", line 80, in api_call
+    result = json.loads(self.server.api_call(method, timeout=timeout, **kwargs))
+  File "/Users/krangaraju/Projects/slack-starterbot/starterbot/lib/python2.7/site-packages/slackclient/_server.py", line 206, in api_call
+    return <http://self.api_requester.do|self.api_requester.do>(self.token, method, kwargs, timeout=timeout).text
+  File "/Users/krangaraju/Projects/slack-starterbot/starterbot/lib/python2.7/site-packages/slackclient/_slackrequest.py", line 79, in do
+    return <http://requests.post|requests.post>(url, headers=headers, data=post_data, files=files, timeout=timeout)
+  File "/Users/krangaraju/Projects/slack-starterbot/starterbot/lib/python2.7/site-packages/requests/api.py", line 110, in post
+    return request('post', url, data=data, json=json, **kwargs)
+  File "/Users/krangaraju/Projects/slack-starterbot/starterbot/lib/python2.7/site-packages/requests/api.py", line 56, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/Users/krangaraju/Projects/slack-starterbot/starterbot/lib/python2.7/site-packages/requests/sessions.py", line 488, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/Users/krangaraju/Projects/slack-starterbot/starterbot/lib/python2.7/site-packages/requests/sessions.py", line 609, in send
+    r = adapter.send(request, **kwargs)
+  File "/Users/krangaraju/Projects/slack-starterbot/starterbot/lib/python2.7/site-packages/requests/adapters.py", line 497, in send
+    raise SSLError(e, request=request)
+requests.exceptions.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:661)
+
+U4SFSAMAS : Any pointers on how to solve this?
+U2QGELSTS : <@U4SFSAMAS>: it might make more sense to ask in <#C1HJWSCL8|sdk-python-slackclien>
+U2QGELSTS : but off the top of my head, it seems like your system isn't set up quite right, because <http://slack.com|slack.com> has a valid SSL cert AFAIK.
+U4SFSAMAS : will post there thanks buddy
+U3C1KGJDD : guys, seems I can't reset the menu in messenger. Been trying ```controller.api.thread_settings.delete_menu();``` am i doing it right?
+U4QKKHSFK : <@U4SFSAMAS> I used the exact tutorials for building my bot.
+U4QKKHSFK : Which platform is this running on ?
+U4QKKHSFK : I had similar ssl issues on an osx machine. Hence i switched to ubuntu and everything worked ust fine.
+U37C5V3HT : How can i tell my slackbot to ask questions on different time let's say once in a week or after 8 hours... :thinking_face: 
+U37C5V3HT : Automatically
+U4R8U1QKX : u could use a cron-like scheduler
+U4R8U1QKX : <https://github.com/node-schedule/node-schedule>
+U04SM6T2H : you can get timezone info from Slack user profiles
+U37C5V3HT : Thanks <@U04SM6T2H> and <@U4R8U1QKX>
+U4KTWEHQC : Hey bot lovers! Could you recommend me your favourite blogs/writers about bots, pls? :slightly_smiling_face:
+
+U04SM6T2H : our blog is filled with good stuff <http://blog.howdy.ai|blog.howdy.ai>
+U4KTWEHQC : <@U04SM6T2H> thanks Ben!
+U3ES7AM6X : <@U04S3JCH2> <@U04SM6T2H> can I just confide in some comrades? If you are using machine learning for intent detection for your bot, training it can get tedious as :poop:
+U3ES7AM6X : also stemming and trimming! I use spaCy so it does some of it but, unnng.
+U4T6FF4CA : Hi, I am trying to use "typing indicator" with the python SlackClient. Anyone know how to do that?
+U4T6FF4CA : I see you are supposed to send something like ```            {                "id": 1,
+                "type": "typing",
+                "channel": channel
+            }
+```, but I am not sure what method to pass that too, or what the "raw send" method is in sc
+
+U4TPM36MU : any sweet tools to map out conversation trees? Looks like others are using mind mapping tools
+U4KVBQMU0 : <https://chatbotslife.com/botxperts-asked-with-veronica-belmont-of-growbot-io-5cba22ae6027>
+U37C5V3HT : Anyone has a detailed process how to deploy a botkit slack app i can host on beepboop? Thanks
+U4TPM36MU : why not just use heroku <@U37C5V3HT>
+U4T9L1AF4 : Hi everyone !
+U4TPM36MU : <@U4T9L1AF4> what up
+U0Y7H2F3M : abinash_mohanty: you can use Heroku or AWS free tier for the deployment. Let me know if you need any help in this. :+1:
+U3S76QAMQ : <https://dev4slack.slack.com/archives/C11Q41CR3/p1491212366740332>
+U3236DR4Z : Hi All! i have a response time issue ( takes more that 3 sec to respond) can anyone help me how to handdle time issue?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,0 +1,90 @@
+U0NRYQNAZ : that's fantastic. i'm glad i could help.
+U486CN4VD : Does anyone have a pro tip for freeing up disk space on a SSD?
+U29163YQH : links
+U1BP42MRS : `rm -rf /`
+U5NMSURAQ : BleachBit
+U5NMSURAQ : and ZFS
+U5NMSURAQ : (compression is freeing space, right?)
+U1BP42MRS : Depends on what OS, but on mac there is a diskutility thing that is used to erase free space, I have seen that reclaim a bit. Also cleaning up a docker cache, if you use docker
+U5U8S40V8 : I want to use setattr inside a class's init method. Should I use it on `self` or `self.__dict__` ?
+U5V95ALKC : Hey guys for my django web app I'm trying to figure out why my page went from working to a page not found error. It's saying:Page not found (404) Request Method: GET Request URL: .... Using the URLconf defined in EMC_site.urls, Django tried these URL patterns, in this order: $queue_system/ $admin/ The empty path didn't match any of these. You're seeing this error because you have DEBUG = True in your Django settings file. Change that to False, and Django will display a standard 404 page.
+but it WAS JUST WORKING. I didn't change any code just came home from school. I found that the interpreter was no longer set to python 3.6, it wasn't set to anything so I'm wondering if other things may have changed? Thanks for any help! I'm hoping it is a commonly known problem if something is just working and then starts to give you this error if you come one and off wifi or something. Another one of my projects happens to be having the same problem. I also tried typing /admin or /queue_system after the web address too. Neither worked.
+
+U5NMSURAQ : <@U5U8S40V8> ```
+&gt;&gt;&gt; class A:
+...   def __init__(self):
+...     setattr(self, 'a', 5)
+... 
+&gt;&gt;&gt; a = A()
+&gt;&gt;&gt; vars(a)
+{'a': 5}
+&gt;&gt;&gt; ```
+
+U5UKKT0EP : <@U5V95ALKC> are you running it in a virtual env?
+U5UQKCC06 : Can you edit an active/open excel doc in python?
+U0LSCQQNR : whats the use case?
+U0LSCQQNR : you could, but changes wouldn't be replicated
+U0LSCQQNR : and trying to keep changes in sync between the excel program and the python program would be a headache
+U0LSCQQNR : so, I'd say this is something that you could do in theory, but I'd not bother
+U5UQKCC06 : Yea, I have a client who wants to add rows to a work sheet as he makes selections and I assume he'd like the worksheet open to see the changes. I told him I could just do it in vba but he'd rather have a separate:face_with_rolling_eyes: program apparently.
+U5UQKCC06 : How would I go about it, if he insists?
+U5UQKCC06 : I thought you'd run into the same issue as having a workbook open by two different people at the same time
+U486CN4VD : <@U5UQKCC06>, I think it's possible with A LOT of work. I don't know if there are libraries in Python that actually allow you to open and edit without saving a new version. You can copy an existing workbook, make changes and save that one over the old one.
+U0LSCQQNR : google docs :slightly_smiling_face:
+U486CN4VD : <@U0LSCQQNR>, my thoughts exactly
+U0LSCQQNR : or office 365
+U0LSCQQNR : those already have collaboration built into them
+U0LSCQQNR : why re-invent the wheel
+U0LSCQQNR : and end up handing the client a 10K bill for development time
+U486CN4VD : haha
+U486CN4VD : <@U5UQKCC06>, if you're still keen ~to~ on trying, the best library i've seen so far for pretty formatting/excel writing is <http://xlsxwriter.readthedocs.io/>
+U5NMSURAQ : Actually, I remember pywin32 can do stuff with Excel documents.
+U5NMSURAQ : And bonus: you *can* access already opened documents
+U5NMSURAQ : But that's crazy of course.
+U5UQKCC06 : Yea, I've worked with excel before, but never on an open document.
+U5UKKT0EP : <@U5UQKCC06> I have done something similar by feeding the worksheet live data and cells update automatically as new data comes in. But I used excel dev tools. I dont think one can edit an open excel sheet otherwise.
+U07JGLLKF : yeah the only real live option is to write some awful VBA glue in the excel to speak to something external via python
+U07JGLLKF : it's my eternal hope that they at least put in some sort of c# or powershell automation into excel at some point but I've been hoping for like 10 years now :(
+U2Q2LMZ6D : hi folks, i got trouble while trying pandas, how to slice a dataframe using  Int64Index?I'm search an index base on value ```id = df.loc[df['time'] ==1496587067]``` Then I got an `Index` object `id`, I want to get 10 elms before that index. Which way I should go?
+
+U0LSCQQNR : <@U486CN4VD> not exactly.  xlsxwriter is only for creating and writing to excel files.  It can't open and read from existing files
+U0LSCQQNR : right there at the top of the FAQ <http://xlsxwriter.readthedocs.io/faq.html>
+U0LSCQQNR : &gt;&gt;&gt;Can XlsxWriter use an existing Excel file as a template?No.
+
+XlsxWriter is designed only as a file writer. It cannot read or modify an existing Excel file.
+
+U47ETEC02 : how do I get an elastic IP to my ec2 instance? the instance is already running and when I click on it's description. It's empty
+U5CGPBF0U : before a user account can be created in my app it checks whether someone with the same username exists, and then whether someone with the same email has already registered, as both of these are supposed to be unique. Do I really need to check these individually? I know the insert query will fail if the values aren't unique since the columns are set to `unique`, but is there a way to know _which_ one caused the error, so that for example I can tell the user whether their username is taken or whether their email address is already registered.
+U5MNY86MA : <@U5CGPBF0U> your DB will throw an Integrity error with the name of the field in the message. So you can probably parse that one to find out. It could be easier if you are using some ORM but I am not sure.
+U2TQBG484 : <@U2Q2LMZ6D> Hi. How about this snippet:```
+import pandas as pd
+
+l_num = [num for num in range(10)]
+
+df = pd.DataFrame({
+    'num': l_num
+}, columns=['num'])
+
+l_id = df.loc[df['num'] == 5]
+first_match_id = l_id.index.get_values()[0]
+print(df[first_match_id - 5:first_match_id])
+```
+
+U28MDQRL2 : <@U5U8S40V8> Just use self
+U2Q2LMZ6D : Thanks, I thought there will be a shorter way rather than get the Int index, and slice it with int type :slightly_smiling_face:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,26 +1,72 @@
+U5AR0LDQA : So then you can use it in `in` <@U17PWHU4D>
+U17PWHU4D : ooh!  nice.  thanks <@U5AR0LDQA> trying that out now!
+U5AR0LDQA : You're welcome! :smiley: <@U17PWHU4D> 
+U62P4HLCA : I'm banging my head trying to decode a nested json {"error":[],"result":{"DASH":{"aclass":"currency","altname":"DASH","decimals":10,"display_decimals":5}
+U4F64AKQV : <@U62P4HLCA> You probably want to use something like `<http://Json.Decode.at|Json.Decode.at>` (<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#at>)
+U4F64AKQV : <https://noredink.github.io/json-to-elm/> might also be helpful
+U62P4HLCA : ah thanks... I'll take a look
+U62P4HLCA : perfect thanks
+U5GJ5FEAU : after number of encounters, i think i have figured out json encoding and decoding now :smile:
+U5D4VHEN7 : I can't for the life of me get `Debug.log` to work. It doesn't do absolutely anything. I'm calling it like so (to just make sure it is being called):```
+main =
+    let _ =
+        Debug.log "Hello"
+    in
+    program
+        { init = init
+        , update = update
+        , subscriptions = always Sub.none
+        , view = view
+        }
 ```
-Oh that's great thanks!
-<@U681TBBUP> yes, it's not like when Angular became The Thing and the whole world would go nuts about it and I just didn't get it, same thing with your state of the art react/redux/immutablejs/reselect/webpack/... stack - I get almost all of that in Elm without the hassle and the brittle modelling and JS
-well mostly without JS
-I'm particularly intrigued by how it fits together in real time application with something like phoenix on the back end. Since both techs are based on message passing (to some level), combining it with channels seems very powerful
-<@U4WH8STNX> would a pr adding the appropriate links to the projects repo be accepted?
-That I can not vouch for :slightly_smiling_face:. Maybe have a quick PM with Evan about it. Seems like an instant win-win scenario to me
-or just put it on the elm-dev group and see what the response is? <https://groups.google.com/forum/#!forum/elm-dev>
-<@U681TBBUP> <#C0H8V5YM7|elm-with-elixir> Is a room you could join and chat about elixir and elm together if you haven't already :smile:
-Hi, trying to get npm run watch working as per this post <https://maximilianhoffmann.com/posts/how-to-compile-elm-files-on-save> but it keeps complaining it can't find elm (''elm' is not recognized as an internal or external command, operable program or batch file.)  If I just do the command (elm make game3.elm --output elm.compiled.js) from the command line it works fine.  Any help?
-Are you on Windows?
-I am looking at elm-decode-pipeline and the documentation includes an example that uses Json.Decode 3.0.0 wherein there exists a ":=" operator.  Or something.
-has := gone away?
-and what did it do exactly?
-I have tried using := in the repl and the repl doesn't like it
-it's an old version
-yeah, 5.1.1 seems to be the current.  So := is no more?
-no more
-with elm 0.18 the direction is to not use custom operators (such as :=)
-for the best it seems
-hard to keep track of all the operators
-they are hard to google for help, confusing, not descriptive...
-yeah I'm with you!
-:fire: :allthethings:
-all the operator things anyways :smile:
-I guess the math operators can live...
+I am using Webpack with `elm-hot-loader` and `elm-webpack-loader` and the options:
+```
+{
+  verbose: true,
+  debug: true,
+  warn: true,
+}
+```
+Is there some voodoo I need to do to get this to work? Everything else in my application runs absolutely fine.
+
+U5D4VHEN7 : also:```
+    "elm-hot-loader": "^0.5.4",
+    "elm-webpack-loader": "^4.3.0",
+```
+
+U5D4VHEN7 : Oh goodness, not a Webpack issue at all. Solution was the first response here: <https://www.reddit.com/r/elm/comments/4pzrwd/using_debuglog/>
+
+U5D4VHEN7 : Instead of:```
+Debug.log "Whatever, this is just like console.log right?"
+```
+Do:
+```
+Debug.log "Some Label:" "Of course not! This is Elm!"
+```
+Basically, needs two arguments, label and value
+
+U5D4VHEN7 : Confused as to why that doesn't throw a compiler error...
+U48AEBJQ3 : Elm has partial application and first-class functions. `Debug.log "Foo"` produces a function of type (a -&gt; a) which you assign to `_` so it gets promptly ignored.
+U5D4VHEN7 : Ah, that definitely makes sense. Thanks for the insight <@U48AEBJQ3> :slightly_smiling_face:
+U48AEBJQ3 : It could be something that produces a warning, though. You might add an issue on <https://github.com/elm-lang/error-message-catalog>
+U5D4VHEN7 : Sweet :slightly_smiling_face: Will do. Given that I spent about an hour smashing my head against that, seems like it could be valuable warnings for beginners
+U3LT1UTPF : <@U5XHTBFS6> I'm writing an app with leaflet as the main character. I tried using ports, but after watching richard feldman's talk, I opted for writing a custom element. Not sure if that's convinient for all cases, though.
+U3LT1UTPF : <https://m.youtube.com/watch?v=ar3TakwE8o0>
+U3LT1UTPF : I pass the layers I want as a property
+U3LT1UTPF : I plan to extract an example from my code some time in the following weeks.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,18 +1,68 @@
+U3SJEDR96 : I'm a little unsure what you're really after, tbh
+U3CUFAX4H : will test, thanks <@U3SJEDR96>
+U3CUFAX4H : I'll give it a test and get back to you
+U3SJEDR96 : `toCode` gives the UTF-16 code unit as a decimal
+U3CUFAX4H : I need a replicatable key in elm and in rails so that I don't have top pass keys around
+U3CUFAX4H : perfect
+U3SJEDR96 : `elm-char-codepoint` gives that as a utf-32 decimal, basically
+U3SJEDR96 : (oddly, I just implemented `utf-16 &lt;-&gt; utf-8` which involves a side-step through utf-32. In elm. It was painful.)
+U3CUFAX4H : your pointer is perfect for my use, thank you. I wasn't aware the keyCodes were exactly the same operation that I was looking for.
+U3LUC6SNS : <@U3SJEDR96>, Yes, `delayedCommit` works quite nicely!  Thanks again.
+U5P4FLYLE : Hi, I have two components: innerCard and outerCard. In outerCard I have:```
+type Msg = InnerCardMsg InnerCard.Msg
+| SomeMsg```
+And I call in outerCard :
+``` somefunctionToHtml outerCard
+      |&gt; Html.map InnerCardMsg```
+The problem: innerCard has of course its own events, but outerCard has one represented by SomeMsg. If I delegate through `somefunctionToHtml` I have compile error that I am expecting Html InnerCard.Msg but received Html Msg (from outerCard). How to solve this kind of problem?
+Ie. Allow within innerCard not only eject its own InnerCard.Msg messages but also the ones from outerCard?
+
+U3LUC6SNS : re Parsing again.  I currently have```
+type alias ARG =
+    { value : String }
+
+
+arg : Parser ARG
+arg =
+    succeed ARG
+        |. symbol "{"
+        |= keep zeroOrMore (\c -&gt; c /= '}')
+        |. symbol "}"
 ```
-hey, <@U2ABT6UKF>, check out <https://github.com/isRuslan/awesome-elm> for a lot of resources. I think the <http://courses.knowthen.com/> free Elm intor course might be a good place to start.
-Will do thank you.
-<http://package.elm-lang.org/packages/elm-lang/core/latest/Basics>
-<@U3LUC6SNS> i am not familiar enough with what you are trying to accomplish here, but my best guess is trying to set a breakpoint using developer tools and follow the stack trace to find why `domNode` is undefined. Seems like this method doesn't have access to the variables you are expecting. Is this code you are showing inside your project or an ELM library? If ELM library, what is the name of it? I think I'd need more context to help properly.
-If I need to use version .17 of elm would I just edit the package file or is there an nvm like tool for elm?
-<@U2ABT6UKF> <https://www.npmjs.com/package/elm-version-manager>
-Where do I put files so elm-reactor's web-server will serve them?
-do you mean just like the normal Elm files and such? You just want to be in the directory containing your files before you run elm-reactor. for things like external css and such I don't think elm-reactor can actually handle that and you would want to use elm-make. i could easily be wrong on that though
-Can't find anything on this topic online except this, which sidesteps the question: <https://stackoverflow.com/q/39392469/1862046> Here's this same question on Stack Overflow <https://stackoverflow.com/questions/45395712/how-to-merge-multiple-effects-in-elm>
-I have compilation error that X does not expose SelectItem
-Hello, anyone sucessfully implemented bulk actions using ELM?
-<@U2PTZFKFX> what do you mean by bulk actions? Sounds similar to what I'm asking about. I found a sequential solution using `Task.sequence` and am working on a parallel solution using `Cmd.batch`…
-<@U3VCFFH1S> Bulk actions, i.e in a table, we can have the sorting functionalities, or in an external table, we can Apply functions to selected rows, i.e delete, update, or anything else,
-I don't quite follow, but there's this sortable table by the BDFL himself <https://github.com/evancz/elm-sortable-table>
-well, aside the sortable, i m looking for additional functionality, i.e i m loading list of items in a table. i want to bulk update existing cells,
-`
-so action update column, supposed to add a bulk action and send the updated result to the server
+I'd prefer to have 
+```
+type alias ARG = String
+```
+However, this gives an error:
+```
+-- NAMING ERROR ------------------------------------ ./src/LatexParser/Latex.elm
+Cannot find variable `ARG`
+87|     succeed ARG
+```
+Is there a way to have `String`?
+
+U3SJEDR96 : You lose the constructor function when not using a record
+U3SJEDR96 : however, you sure can
+U3SJEDR96 : `succeed identity`
+U3SJEDR96 : i.e. `Arg` is a `String -&gt; Arg` function, and you'd rather have a `String -&gt; String` function so you end up with a `String`
+U3SJEDR96 : `identity` fits the bill :wink:
+U663M2MB7 : is there any syntax for { model | x = y } with nested models? I guess the Focus library is one, but is there anything I am missing here?
+U0JL9RPC4 : I'm afraid not
+U0FP80EKB : I've generally found that when I need to update nested models, I'm looking at some sort of abstraction that wants to come out with some helper functions around it. Not always, but a good indication. In a way, you can look at updating nested records as a good time to think about how the law of demeter applies in your case.
+U3LUC6SNS : <@U3SJEDR96>, thanks again!  Got it working like I want with `identity`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

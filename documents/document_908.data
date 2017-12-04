@@ -1,0 +1,251 @@
+U6CDYTP5W : You're right.  I shouldve just asked how to do it, at first. I still want to learn how to use regex tho :stuck_out_tongue:
+U6CDYTP5W : Oh well, hopefully another time. Thanks, again!
+U1BP42MRS : If you want to do the regex way you'd do something similar, you'd use a "capture group", convert them to floats, then compare. Much more involved and harder to maintain :smile:
+U1BP42MRS : it probably still requires listing the dir too
+U4ANSK0N9 : Hi All, I am trying to get apache running on webserver for django application. When trying to query it i am getting 301 and 405 response
+U4ANSK0N9 : anything that i am missing?
+U1BP42MRS : What's the location header of the `301`?
+U1BP42MRS : You can check with `curl -i &lt;path&gt;` if you are unfamiliar
+U4ANSK0N9 : <@U1BP42MRS> i am very new to this. what is value to use in &lt;path&gt;
+U1BP42MRS : The path is the url:  `curl -i localhost:8000/admin`, for example
+U1BP42MRS : As an example, see this request:
+```
+$ curl -i <https://google.com>
+HTTP/1.1 301 Moved Permanently
+Location: <https://www.google.com/>
+Content-Type: text/html; charset=UTF-8
+Date: Tue, 25 Jul 2017 03:49:15 GMT
+Expires: Thu, 24 Aug 2017 03:49:15 GMT
+Cache-Control: public, max-age=2592000
+Server: gws
+Content-Length: 220
+X-XSS-Protection: 1; mode=block
+X-Frame-Options: SAMEORIGIN
+Alt-Svc: quic=":443"; ma=2592000; v="39,38,37,36,35"
+```
+
+The `Location` one may tell you the issue, my guess is you are not including a trailing slash
+
+U4ANSK0N9 : let me check
+U1BP42MRS : Sorry, I am also assuming you have `curl` installed, if your OS doesn't have it you can test in a browser and use the inspector to see
+U4ANSK0N9 : spot on. I was able to get rid of that issue. Now i have 500 error which i will try to figure out. 
+Thank you very much. :+1:
+
+U4ANSK0N9 : will keep you posted on my progress :slightly_smiling_face:
+U1BP42MRS : :thumbsup::skin-tone-4:
+U5CGPBF0U : `UPDATE stores SET geom = ST_SetSRID(ST_MakePoint(longitude, latitude), 4326);`vs.
+`UPDATE yourtable SET geom = ST_MakePoint(longitude, latitude);`
+What's le difference?
+
+U4ANSK0N9 : It worked fine. I ran into some permission issue but it is now resolved. Thank you for all the nelp
+U2AQ9D8US : <@U5CGPBF0U> the first example sets an SRID of 4386 (WGS84).  the second example doesn't set an SRID and should get the default for geometry which is 0
+U5CGPBF0U : <@U2AQ9D8US> Will that cause a big difference in the resulting values?
+U2AQ9D8US : Depends what your doing.  When SRID is 0, the data gets treated like it's on a Cartesian plane (flat).  Using 4326 allows for a round earth.  If you're trying to do things like get the distance between two points, it can make a difference.
+U5CGPBF0U : <@U2AQ9D8US> That was the best explanation I could have hoped for. I'd looked it up before but none of the explanations made as much sense as what you said right now. Haha
+U5CGPBF0U : I'm trying to find all points inside a square
+U5CGPBF0U : I also see that PostGIS says on the site `DO NOT INSTALL it in the database called postgres.`... That's exactly what I did though... No idea why they say not to do it
+U0LSCQQNR : You have to install it to your database 
+U0LSCQQNR : Eg, the one you created for the project 
+U0LSCQQNR : If you're familiar with mysql, the postgres db name is similar to the mysql db name
+U5CGPBF0U : <@U0LSCQQNR> Ah ok. Got it.
+U5CGPBF0U : People keep telling me that `43.6532, 79.3832` leads to somewhere in Kazakhstan. I don't understand. They're the coordinates of TORONTO. Put them into Google Maps and it drops a pin in the center of Toronto.
+U29163YQH : it drop me in kazakhstan
+U29163YQH : `43.6532, -79.3832` is Toronto
+U5CGPBF0U : <https://www.google.ca/search?q=toronto+lat+long&amp;gws_rd=cr&amp;ei=awZ3WbaYOYTHjwSQlIuwCw>
+U5CGPBF0U : I don't get it.
+U5CGPBF0U : These "coordinates" Google is serving me aren't actually lat/lon
+U5CGPBF0U : ?
+U29163YQH : 79.3832° *W*
+U29163YQH : without direction it's EAST by default
+U5CGPBF0U : :facepalm:
+U5CGPBF0U : Wow. Two days of development time spent on trying to figure that out.
+U5CGPBF0U : Thank you <@U29163YQH>. May the force be with you.
+U5CGPBF0U : Will be fun to explain to my boss. : o )
+U29163YQH : good luck :smile:
+U29163YQH : try with a compas that point south maybe it will help
+U5CGPBF0U : So, rather than using the default `postgres` database I made a new one for testing and ran `CREATE EXTENSION postgis;` in it. However when running a query with a spatial function I get `ERROR:  function st_dwithin(geography, geography) does not exist`. This doesn't happen in the `postgres` database. :thinking_face:
+U5CGPBF0U : Read that `SET search_path TO public, sml;` should fix it, but no luck
+U5CGPBF0U : postgis is definitely in the `public` schema
+U5LNXQHN3 : <@U5CGPBF0U> Might be a question for <#C3X4T24LB|databases>
+U0N6ZV5AN : Hello Pythonistas,anyone would know why `mimetypes.guess_type('my_file.csv')` returns `('application/vns.ms-excel', None)` instead of `('text/csv', None)` like Linux does? The file does not even exist.
+
+U29163YQH : Maybe because the default software for it is `excel` and windows do some tricks
+U29163YQH : is it doing the same with an existing file ?
+U5LNXQHN3 : Looks like it uses registry settings, and doesn't examine actual files, just filenames
+U0N6ZV5AN : Yeah, with an existing file the result is the same.
+U0N6ZV5AN : Looks indeed as registry settings. I thought that `mimetypes` was supposed to be os-independent... I guess I am wrong? I just assumed it that way.
+U13L8J76J : <https://github.com/python/cpython/blob/master/Lib/mimetypes.py#L350-L351>
+U13L8J76J : It's os-dependent :slightly_smiling_face: Like anything that windows touches
+U5LNXQHN3 : What type a file 'is' can always be open to interpretation, unfortunately
+U0LSCQQNR : <@U5CGPBF0U> with alot of these postgis questions yo have, there should be answers on <https://gis.stackexchange.com/>
+U5CGPBF0U : <@U0LSCQQNR> Oh, yes, I check there and other places, but the supposed solution to the problem doesn't work for me. :disappointed:
+U0LSCQQNR : oh, interesting
+U0LSCQQNR : are you using 9.6 postgres?
+U0LSCQQNR : and the latest postgis?
+U0LSCQQNR : I've never encountered your issue
+U5CGPBF0U : Yes, and yes. :slightly_smiling_face:
+U5CGPBF0U : I run `SET search_path TO public, sml;` which is generally the solution presented but I still receive the same error.
+U5CGPBF0U : I don't, however, receive this error when running queries on the default `postgres` database. Only on this new one.
+U5CGPBF0U : And I've confirmed that postgis is on the public schema as well
+U0LSCQQNR : so, if you use something like pgadmin
+U0LSCQQNR : and open up the tree down to your new database
+U0LSCQQNR : so postgis is in your db extensions?
+U0LSCQQNR : also, what is your query you're running
+U0LSCQQNR : usually when you get this issue with postgis, it means you're inputing invalid types in the function
+U5CGPBF0U : Yes, it's listed in the extensions for the new database.
+U5CGPBF0U : Um...
+U5CGPBF0U : So I rebooted my PC for unrelated reasons and now it works.
+U5CGPBF0U : Interesting
+U29163YQH : postgres might need a restart when you install postgis
+U0LSCQQNR : especially on windows
+U0LSCQQNR : because you can't update certain files when the system is running
+U0LSCQQNR : so you ether need to restart the service or reboot
+U5LNXQHN3 : Yep - on Windows open up Task Manager, pick Services, find postgres whatever, right click, Restart
+U5CGPBF0U : Wow. Seems like one of those "did you try turning it off and back on again?" moments. :facepalm:
+U5CGPBF0U : Haha, thanks for clarifying that though!
+U5JF1KD18 : Hello guys I'm trying to implement a proxy server in the form of a python script it presents itself like this
+U5JF1KD18 : I want to operate 4 basic steps
+U5JF1KD18 : 1- Listen from the web browser
+U5JF1KD18 : 2- Forward the request to the web server
+U5JF1KD18 : 3- Get the response from the web server
+U5JF1KD18 : 4- Send back the server response to the browser
+U5JF1KD18 : My main problem is first at step 2. This is because at a certain point, i want to rewrite the URL from the browser and I don't know how to do that and I'm just a beginner
+U5LNXQHN3 : There are existing proxies that can rewrite URLs. You don't need to write any software to do it.
+U5JF1KD18 : Oh... I didn't knew that. Can you please give me an example of one ?
+U5LNXQHN3 : <http://httpd.apache.org/docs/current/mod/mod_rewrite.html>
+U0LSCQQNR : and if you're using nginx
+U0LSCQQNR : <http://nginx.org/en/docs/http/ngx_http_rewrite_module.html>
+U5JF1KD18 : OK i'll try it thanks guys
+U5NMSURAQ : <@U5LNXQHN3> Apache in 2017?
+U5LNXQHN3 : Sure, go old school 
+U5LNXQHN3 : Nobody ever got fired for choosing IBM
+U5LNXQHN3 : ... etc
+U5NMSURAQ : don't forget mod_perl
+U5LNXQHN3 : nah, straight to CGI, none of this crazy new tech
+U5LNXQHN3 : I would start by moving it all into one function, which gets called once. Then I'd move parts of it into various individual functions based on grouping lumps of shared functionality together. For example, each block of logic in a for loop is a candidate for a function because it's related code that gets called on a succession of data
+U5LNXQHN3 : I'd also consider ditching things like `range(len(target_column_G))` which is usually the wrong way to iterate over something in Python
+U4A56U70C : <@U5LNXQHN3> Thank you, I read about functions except I never really implemented one, any dummy proof example on this snippet how can I have them in a function?
+U5LNXQHN3 : I think it's perhaps too fundamental a concept to explain in chat. Maybe a tutorial will help, e.g. <https://www.tutorialspoint.com/python/python_functions.htm>
+U4A56U70C : Thank you, reading it
+U4A56U70C : What would you suggest, to continue working on getting new features and bigger code, or to prioritize implementing functions to clean it up?
+U0LSCQQNR : I'd priotize learning good design and structure
+U0LSCQQNR : because once you are able to structure a program effectively, adding new features and maintaining older code is much easier
+U4A56U70C : Thank you
+U4A56U70C : <@U0LSCQQNR> Do you have any other notes other tha what <@U5LNXQHN3>  mentioned?
+U0LSCQQNR : he covered everything, I think
+U0LSCQQNR : and i'd use some blank lines for separation
+U0LSCQQNR : for bits that really don't belong in a different function
+U0LSCQQNR : group variables together by general area of responsibility
+U5LNXQHN3 : The problem with learning the right way to write programs is that a lot of it doesn't make much sense until you've gone through the process a few times
+U5LNXQHN3 : I'd say just start small, clean things up, write functions, then maybe write classes, and read through the Python tutorial to understand all the tools available to you
+U4A56U70C : So <@U5LNXQHN3> I should continue developing this and learning other simple functions then when confident enough I release another version with functions?
+U5LNXQHN3 : I don't know - what is your end goal here?
+U4BMZ90T0 : Having an issue with instantiation of a new object within another one as an attribute. I have two classes as such `class a` and `class b`
+U4BMZ90T0 : in class a under `__init__` I do `self.obj = b()`
+U4BMZ90T0 : and I attempt to run a function from `class b` via the `obj` variable through `self.obj.run_func()` within `class a`
+U4BMZ90T0 : I think a line got deleted that I typed, can't quite tell...
+U4BMZ90T0 : But either way, `class b` isn't really a child as much as it's just an attribute of the `class a` but attempting to run a function within `class a` on the `obj` variable gives a reference error
+U5LNXQHN3 : show the actual error
+U4BMZ90T0 : `Unresolved attribute reference to run_func in object b`
+U4BMZ90T0 : But the function is in the class
+U5NMSURAQ : but is it?
+U5LNXQHN3 : Does it _actually_ say "in object b"
+U4BMZ90T0 : `in class b` the edits I am making keep deleting the whole lines
+U5LNXQHN3 : classes aren't objects, so these details are critical
+U5LNXQHN3 : In your definition of `class b`, is there a method `run_func`?
+U4BMZ90T0 : yes
+U4BMZ90T0 : But I'm also getting scope errors for self
+U5LNXQHN3 : "scope errors"
+U4BMZ90T0 : shadow name self
+U5NMSURAQ : &gt; classes aren't objectssay what
+
+U5LNXQHN3 : <@U5NMSURAQ> You'll confuse things...
+U5NMSURAQ : &gt; shadow name selfhere you go :slightly_smiling_face:
+
+U4BMZ90T0 : yeah, but I don't understand exactly where it's coming from?
+U4BMZ90T0 : Is it the import into the other module?
+U4A56U70C : <@U5LNXQHN3> I am writing a software which is used by few customers now, it does the job now, but I am looking to both better myself and my code that's all, so seeking advice if in your opinion I should let it stay the same for now till I learn more or continue working on adding more then later enhance.
+U5LNXQHN3 : errors typically tell you exactly where they come from, with a line number
+U4BMZ90T0 : Ah shiet
+U4BMZ90T0 : Got it, bad indent into init
+U5LNXQHN3 : <@U4A56U70C> For your personal development you should read more about the language and practice with it, improving your code as you go
+U4A56U70C : Got it thank you
+U0LSCQQNR : <https://www.amazon.com/Effective-Python-Specific-Software-Development/dp/0134034287/ref=sr_1_1?ie=UTF8&amp;qid=1500992243&amp;sr=8-1&amp;keywords=effective+python>
+U0LSCQQNR : is a great resource
+U4A56U70C : <@U0LSCQQNR> Thank you, I get bored from intros though, because as you saw I can write some code that works but not happy with the quality.
+U4A56U70C : But I see it doesn't have intros and it's spot on to functions
+U0LSCQQNR : correct
+U0LSCQQNR : it gives you an item of specific consideration
+U0LSCQQNR : and does a good evaluation throughout
+U5LNXQHN3 : There's not really any good way to get good at programming without starting at the beginning and making sure you understand the fundamental building blocks: control flow statements, functions, variables and objects, types, structures and classes, etc
+U0LSCQQNR : I'm assuming <@U4A56U70C> has some experience with that
+U5LNXQHN3 : Above: _" I read about functions except I never really implemented one"_
+U0LSCQQNR : oh
+U4A56U70C : Yes true, I read and I know the fundamentals but to add two numbers and such
+U0LSCQQNR : missed that, been in and out
+U5LNXQHN3 : writing a function (along with creating your own classes) are part of the fundamentals
+U0LSCQQNR : fluent python might be better
+U0LSCQQNR : <https://www.amazon.com/Fluent-Python-Concise-Effective-Programming/dp/1491946008/ref=sr_1_1?ie=UTF8&amp;qid=1500992603&amp;sr=8-1&amp;keywords=fluent+python>
+U4A56U70C : So I think back to the code I should implement a `re.finder` Function and pass the patterns later on
+U5LNXQHN3 : No... you wouldn't be adding a `finder` function to `re`
+U5LNXQHN3 : But you could write a function that does contain all the 'finding', if you liked
+U4A56U70C : Ah huh
+U4A56U70C : One function that has all the finding with all the patterns
+U4A56U70C : And when writing I call the right one?
+U5LNXQHN3 : I don't know what you mean by that. The alternative would be to call the wrong one...
+U4A56U70C : The function would have the `re.findall` with all the patterns, and when writing to the csv I call one from what I define at the top
+U4A56U70C : Best to shut up and go read, thank you both
+U4BMZ90T0 : Good for getting date input?
+U5LNXQHN3 : It looks like it would work
+U4BMZ90T0 : Is `ConfigParser` a pretty good tool for setting up constants
+U4BMZ90T0 : About to get started with it
+U5LNXQHN3 : You don't really need it if you're not distributing or deploying your software, but for managing configuration constants, sure, it works
+U4BMZ90T0 : I've just got a global constant `.py` file with values, but I also need to be able to set global constants based on user input. They're being set in a class so I suppose I could always just pass the class object around and grab values that way, but I'm sort of looking for something a bit nicer
+U5LNXQHN3 : if it's user input then configparser is the wrong tool
+U47HK8BS8 : generally what I do these days is a combination of environment variables and Click for the CLI
+U0NRYQNAZ : :thumbsup: for click.
+U47HK8BS8 : loading from a .env file as well if people want to have stuff in there
+U0NRYQNAZ : i like having a .env.example file
+U3EEX4N78 : ^ Always helps clear up so many questions for most people
+U47HK8BS8 : and if it's something like a flask app, I'll usually tie it all together in a `config.py`
+U5S8CNULD : Hey guys,  using `sqlalchemy`I have field `created_at = db.Column(db.DateTime, nullable=True)`
+and I confused, How I can get data by datetime. For example, I need get data for current day.
+and I did something like this.
+```
+ db.session.query(Post).join(User). \
+            filter(Post.user_id == user_id). \
+            filter(Post.user_type == 'eng').\
+            filter(Post.created_at == get_today())
+```
+
+```
+def get_today():
+    return datetime.now()
+```
+But the example didn't work(
+
+U0LSCQQNR : are you getting None or something?
+U5S8CNULD : just empty array
+U1BP42MRS : Right now you are filtering based on this exact moment
+U1BP42MRS : so that understandably won't work
+U5S8CNULD : but in the database I have record with current day.
+U0LSCQQNR : day, yes
+U0LSCQQNR : but not the current minute, second, hour of the request
+U1BP42MRS : `datetime.now()` against a timefield will be date/time
+U1BP42MRS : `date.now()` may work
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

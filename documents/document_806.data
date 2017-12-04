@@ -1,0 +1,107 @@
+U1CE9DL9H : general awesome document on recursive decoders and using lazy <https://github.com/zwilias/elm-demystify-decoders/blob/66dcc279b6d74b41fd84b68e8028f94cb95ffc6c/recursive-help.md>
+U2LC0U8JY : yeah i know that. just dont know how to write the decoder so that it returns the correct record
+U1CE9DL9H : you currently decode a `Maybe (List Element)`, and have a constructor `Element : Maybe (List Element) -&gt; Element`
+U1CE9DL9H : so you have to apply the constructor to the decoder, which you can do with `Decode.map`
+U2L33RRR8 : <@U4872964V> I want to use one binary for dev machine (mac) and ci (redhat). Also, I am using `elm-format` with 2 tabs so I have to build it my own.
+U4872964V : <@U2L33RRR8>, one binary for two different architectures? I don’t think that’s possible.
+U4872964V : I’d just build one binary on each machine. Why cross-compile when you can do that?
+U2L33RRR8 : because I didn’t want to setup build tools for haskell in the ci
+U2L33RRR8 : but maybe that is easier, or do it in another machine
+U4872964V : yes, that’s definitely easier than building a cross compiler (you’d have to build ghc yourself, and make all sorts of configuration stuff)
+U2LC0U8JY : I could not figure out how to decode ```
+type Element
+    = Element
+        { uuid : Int
+        , elements : Maybe (List Element)
+        }
+```
+
+U2LC0U8JY : :disappointed:
+U2LC0U8JY : also, this makes it much harder to work with
+U2LC0U8JY : right?
+U2LC0U8JY : using a record would be easier, but is not possible in a recursive way
+U4872964V : what could you not figure out? It would be exactly the same using a record (though you can’t define recursive records of course)
+U4872964V : <@U2LC0U8JY> first, what is the difference between `elements = Just []` and `elements = Nothing`?
+U2LC0U8JY : with a record i would write it like this:```
+elDecoder : Decode.Decoder Element
+elDecoder =
+    Decode.map2 Element
+        (Decode.field "uuid" <http://Decode.int|Decode.int>)
+        (Decode.field "elements" (Decode.list (Decode.lazy (\_ -&gt; elDecoder))))
+```
+
+U3SJEDR96 : `Decode.map2 (\uuid elements -&gt; Element { uuid = uuid, elements = elements } )` would be the "opaque" translation of that
+U2LC0U8JY : thx <@U3SJEDR96>
+U1G7E1P9S : hello
+U1G7E1P9S : I need some help with this error. ```The 3rd argument to function `foldr` is causing a mismatch.
+166|                     List.foldr insertPermit [] fimps
+                                                    ^^^^^
+Function `foldr` is expecting the 3rd argument to be:
+
+    List
+        { building : String
+        , elevation : String
+        , location : String
+        , permitNumber : String
+        , room : String
+        , roomDescription : String
+        }
+
+But it is:
+
+    List FIMP```
+
+U1G7E1P9S : ```type alias FIMP =    { permitNumber : String
+    , watchType : String
+    , room : String
+    , roomDescription : String
+    , building : String
+    , elevation : String
+    , routeChanges : String
+    , permitStatus : String
+    , location : String
+    }```
+
+U1G7E1P9S : insertPermit should work on two types of permits having some common fields, but I get this error and I don't understand why.
+U6EV3H0N7 : what’s the type signature of insertPermit?
+U1G7E1P9S : ```insertPermit :    { permitNumber : String
+    , room : String
+    , roomDescription : String
+    , building : String
+    , elevation : String
+    , location : String
+    }
+    -&gt;
+        List
+            { room : String
+            , building : String
+            , roomDescription : String
+            , elevation : String
+            , permits : List String
+            }
+    -&gt;
+        List
+            { room : String
+            , building : String
+            , roomDescription : String
+            , elevation : String
+            , permits : List String
+            }```
+
+U6EV3H0N7 : ah, so that doesn’t let the first argument have any extra fields in it
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

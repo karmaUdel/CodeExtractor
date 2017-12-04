@@ -1,4 +1,88 @@
+U060FKQPN : you can see how that gets transformed by quoting a syntax-quoted expression
+U060FKQPN : ```user=&gt; '`(~a)(clojure.core/seq (clojure.core/concat (clojure.core/list a)))
 ```
-^ that's it
-I missed the quote
-you don't need to quote inside an edn file
+
+U5ZAJ15P0 : so the reader would transform `(clojure.core/unquote 'foo)` into `foo`?
+U060FKQPN : it's more complex than that
+U5ZAJ15P0 : oh
+U060FKQPN : because of splicing
+U5ZAJ15P0 : if there was no splicing then it would be this simple?
+U060FKQPN : more or less, yes
+U060FKQPN : but because of splicing, it has to wrap every subform that is unquoted in a list &amp; concat them all
+U060FKQPN : so splicing becomes just like unquote w/o the wrapping list
+U060FKQPN : ```user=&gt; '`(~@a)(clojure.core/seq (clojure.core/concat a))
+user=&gt; 
+```
+
+U060FKQPN : because the list is already in `a` (so to speak)
+U060FKQPN : the impl is quite more complex because it has to deal with maps/vectors/sets other than just lists
+U060FKQPN : but that's the basic idea
+U5ZAJ15P0 : thanks! that clarifies things
+U050TNB9F : has anyone written about how to organize specs when they don't perfectly map to namespaces etc?
+U1KK3BW3W : When I use `(:require [acme.spec-ns :as spec-ns]) ... (clojure.spec.alpha/validate ::spec-ns/spec-name) ...)`, this is the context I have using a namespaced spec in
+U051SS2EU : I'd be interested to see a well reasoned pitch justifying the practice
+U051SS2EU : your data domain doesn't match your namespace organization?
+U37NPE2H0 : organizational/insitutional inertia?
+U37NPE2H0 : because that's why _my_ namespaces don't match my data domain.
+U37NPE2H0 : Professional software dev is hard, man.  Companies are hard.
+U0NCTKEV8 : it seems like people are really tied to namespaces on keywords matching the namespaces code is organized in to
+U0NCTKEV8 : there is no reason for that
+U0NCTKEV8 : code should change and reorganize way more often than your data formats
+U0NCTKEV8 : The only time I ever use a code namespace name on a keyword is when I am sure it is temporary and will change
+U050TNB9F : well lets say I have some type of domain object. Most functions operating on that are in some namespace that might contain multiple spec'd domain objects. To define specs for these objects I'd have to do something like `(s/def ::my-object-name string?)`
+U050TNB9F : does that make sense?
+U0NCTKEV8 : no
+U0NCTKEV8 : never use `::` and instead of tying to the namespace the code is currently in, use a namespace like :my-org.project/whatever
+U050TNB9F : ok yeah, that seems like a sensible argument
+U0E0XL064 : right... I'm also more and more inclined to _not_ use `::`, but using data domain logic.
+U0NCTKEV8 : your specs are like a database schema, imagine if in tables you named columns after the code that is currently accessing it, terrible
+U5ZAJ15P0 : Yeah, I am not sure why they use `::` everywhere in spec's doc
+U0NCTKEV8 : it makes for shorter docs
+U066U8JQJ : <@U0NCTKEV8> another option is to have namespaces dedicated to your specs, I've being doing that and I quite like it, you can have a namespace like `your-org.specs` and inside of that you create the namespaces with your data definitions, by doing that the `::` gets very convenient, also you ensure very long namespaces so you have a more strong uniqueness sense
+U0E0XL064 : Yeah, but putting all specs in there isn't much fun either...
+U0E0XL064 : I've been splitting the specs and where to put them and how to name them depending on the purpose.
+U3JURM9B6 : here's something easy to do with state monad but non-obvious to me how to do with reduce: I have a expression tree. I want to compile it to Three-Address-Code, i.e. a list of statements where each statement is (set! a (op b c)).
+U06GS6P1N : I'm writing a blog post on REPLs, can anyone recommend a short video demonstrating the Clojure REPL?
+U5ZAJ15P0 : Out of curiosity, what exactly will be the focus of your blog post?
+U064X3EF3 : <https://vimeo.com/223309989>
+U3QUAHZJ6 : is anyone aware of an *async* ring (compojure) middleware to log requests and responses?
+U61HA86AG : <https://www.youtube.com/watch?v=2AvoH6XNAWY>
+U0NCTKEV8 : <@U3JURM9B6> clojure's reduce isn't really for folding over trees. it only folds over  seqs. so you'll need to write your own fold over a tree or flatten the tree first
+U0NCTKEV8 : <https://gist.github.com/hiredman/2b2707d74ad2ff0b2f941b965f7dd97f#file-ref-clj-L3-L13> is an example of a custom reduce implementation over a tree using cps
+U0NCTKEV8 : I don't know what  your expression tree is like, but if you can transform it in to something like anf generating three address code will be much easier
+U6DJH8TCL : Hi all, I´m just starting with clojure, currently I am reading "The joy of clojure", and while trying to implement an example from the book, I am getting the following error on REPL:```
+
+user=&gt; (def frame (java.awt.Frame.))
+
+CompilerException java.lang.reflect.InvocationTargetException, compiling:(form-init6212165196188451204.clj:1:1) 
+
+user=&gt; frame
+#object[clojure.lang.Var$Unbound 0x4aabdabc "Unbound: #'user/frame"]
+```
+I was wondering if someone could point me in the right direction?
+
+U0NCTKEV8 : *e will show you the whole stacktrace
+U051SS2EU : also, the most likely cause of that error for that code is using a headless JVM
+U051SS2EU : which won't include awt
+U051SS2EU : <@U6DJH8TCL> what does `(resolve 'java.awt.Frame)` say?
+U0NCTKEV8 : (<http://matt.might.net/articles/a-normalization/> is a good write up on anf)
+U6DJH8TCL : hey <@U051SS2EU>  I think you got it right, I´m in another environment right now. But I recall a message mentioning something about "Headless", if that is the case, do you know how can I solve it?
+U051SS2EU : by installing a jvm that's meant for doing desktop /gui stuff
+U051SS2EU : but that shouldn't be urgent for learning clojure (though playing with windows and widgets can be nifty)
+U051SS2EU : typically on eg. a debian system, you can pick different jvms and decide which is default, and the one they pick for you if you aren't too bothered to customize doesn't come with the desktop and graphics stuff just to keep default installs smaller
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

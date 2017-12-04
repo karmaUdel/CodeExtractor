@@ -1,2 +1,85 @@
+U5JEJN1CP : I'm getting a bizarre repl error that occurs only when reloading a file:```
+2. Unhandled clojure.lang.Compiler$CompilerException
+   Error compiling *cider-repl webtools* at (1:1)
+
+1. Caused by java.lang.RuntimeException
+   No such var: user/reset
+```  
+The project compiles fine.  The repl starts fine.  The problem only happens if I use `C-c C-x` to recompile.  If I restart the whole repl, it compiles fine.  It seems like it's trying to compile the repl buffer, but I can't for the life of me fathom WHY.  Wondering if anyone has any ideas what would cause this.  The only hit on stack overflow suggests that I must be requiring something `:as user`, but I'm definitely not.
+
+U3JURM9B6 : <@U1ALMRBLL> : thanks for the eager map; it seems surprising that 1. core has no eager-map 2. many are probaly using (doall (map ...)) to simulate it, but 3. this revolves around assumptions that map doesn't really guarantee
+U5JEJN1CP : Tried a `lein clean` but that didn't make any difference.
+U3JURM9B6 : <@U5JEJN1CP> : what is user/reset ? is it part your lein config, part of cider, part of some reload package that you are using? [I use boot]
+U5JEJN1CP : <@U3JURM9B6> User is the init-ns for a repl in my project.clj (lein config).
+U5JEJN1CP : <@U3JURM9B6> so It seems that it expects a symbol `user/reset` that suddenly doesn't exist.  But looking over my changes from the past day I don't see anything that I would expect to affect that.
+U5JEJN1CP : <@U3JURM9B6> Well, restarting emacs finally seems to have fixed it.
+U3JURM9B6 : yeah, emacs can be quirky like that
+U0666D1EK : How to avoid reflection warning in gen-class state. Specifically I looking for answer for this question <https://stackoverflow.com/questions/6625104/adding-a-type-hint-to-a-clojure-gen-class-state-access>
+U69HWBFB3 : Hello fellow clojurians. I am eager to refactor part of my function that use destructuring but having some problem.
+Here is a code snippet that has sequence of files that are grouped based on hash, uploaded and flattened back.
+
 ```
-<@U0BKWMG5B> oh, so in that case you wouldn't swap any implementation, you would simply instruct the system to use a different implementation based on the config (different derived key)
+(-&gt;&gt;        
+      items
+      (group-by :hash)
+      (pmap #(let
+               [[hash [{file :file}] :as group] %]
+               (if (upload hash file)
+                 (second group))))
+      (flatten))))
+```
+
+Is there a better way to destructure *group* into key and values to avoid performing `(second group)`?
+
+U69HWBFB3 : Ok, so the only thing I came up with is:
+```
+(-&gt;&gt;        
+      items
+      (group-by :hash)
+      (pmap #(let
+               [[hash values] %
+                 [{file :file}] values]
+               (if (upload hash file)
+                 values)))
+      (flatten))))
+```
+
+Is it any good?
+
+U071CG4QY : values is a vector
+U69HWBFB3 : <@U485ZRA58>, <@U071CG4QY> is correct - *values* is vector. It may work if we update it:
+```
+(-&gt;&gt;        
+      items
+      (group-by :hash)
+      (pmap (fn [[hash values]]
+			(when (upload hash (:file (first values)))
+                  values)))
+      flatten)))
+```
+
+U485ZRA58 : Oops, my bad. Missed that
+U485ZRA58 : That should work
+U071CG4QY : Though I don't know if there is any point to removal of `(second group)`
+U071CG4QY : You may as well do this `[[hash [{file :file} second] :as group] %]`
+U69HWBFB3 : <@U071CG4QY> Correct. That is my initial version. But don't you think destructured version is more readable?
+U071CG4QY : <@U69HWBFB3> Nope, imo — you need to parse destructuring and for that structure it is not very easy.
+U66G3SGP5 : when using datomic, if I can freely choose between an SQL backed datomic or Cassandra backed datomic, which one is better?
+U0BB79MMJ : <@U63RTB1KR> It's because of the way transducers work. They *are* applied from right to left, but to the reducer fn.
+U0BB79MMJ : You can think of each wrapping the earlier transducers
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

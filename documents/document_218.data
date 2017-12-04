@@ -1,3 +1,87 @@
+U04SM6T2H : yeah
+U3KHRQLTX : <@U07CW6N3A> <@U1HK4CCRM> Happen to know if it's possible for a bot to reject an invite to a channel, or not join a channel, or leave a channel? I want to limit my bot to being in 1 channel. I can set it up so my bot is only active in the last channel it was invited to if needed, but I wanted to check with you guys first. Thanks
+U07CW6N3A : <@U3KHRQLTX> -- from a pure bot perspective, no -- you'd need to just choose to ignore (or respond with a rote message) messages/events associated with "other" channels -- that's probably not an awesome experience though.          I don't recall there being a "kick" method even from a user perspective, so there's no sidebar way to do that through the vehicle of the installing user's access token and an associated scope...
+U07CW6N3A : Ultimately, I'd think hard about how you may want someone to install it in only one channel, but a user might want another thing and the platform -- at least at this time -- doesn't provide you an easy means to enforce that. So it may be best to just go with the flow here and allow being in multiple channels, even if you consider only one "primary". But if a user has a good reason to install you in channel XYZ while you're also installed in channel ABC (maybe this user isn't a member of _that_ channel), then maybe your app has a good reason to support both use cases.
+U3KHRQLTX : <@U07CW6N3A> Thank you for the thoughtful answer – I appreciate it. I'll rethink this process a bit, I can allow for flexibility. :slightly_smiling_face:
+U3MP9RS4Q : hello all! just wanted to say hi to this community :slightly_smiling_face:
+U36797FQ9 : Hey all - need a hand on something. I'm following this tutorial [1] (thanks <@U272P5K71>!) to get an onboarding bot up and running. I'm confused on how to best test it without making new users with other emails. Postmate is recommended, but the next step is one I'm lost on when trying. Any help is appreciated! 
+1: <https://github.com/slackapi/Slack-Ruby-Onboarding-Tutorial>
+
+U3EFK8UES : Anybody have any ideas if the user_change event is triggered when a user joins the team? 
+U3EFK8UES : Wow, I found team_join lol 
+U3EFK8UES : On a side note, is there any example expected output of the team_join event? All I see is:
+U3EFK8UES : ```{    "type": "team_join",
+    "user": {
+        …
+    }
+}```
+
+U36797FQ9 : <@U3EFK8UES> you'll get a `user` object, like this one from the docs: <https://api.slack.com/types/user>
+U3EFK8UES : Oh awesome! Thx
+U36797FQ9 : Np! Happy coding :ok_hand:
+U36797FQ9 : RE my post above :point_up_2:, I keep getting `Invalid Slack verification token received:` when trying to use Postman, which shows up when the app doesn't receive the required token - <https://github.com/slackapi/Slack-Ruby-Onboarding-Tutorial/blob/master/bot.rb#L50>
+I've tried setting it up in Postman as a parameter, inside the JSON object passed and as a header k/v. All error is different ways. I bet it's a simple thing but I'm not sure what it is. :slightly_smiling_face:
+
+U36797FQ9 : I got in touch with the author of the tutorial who's planning to respond here: <http://stackoverflow.com/questions/41527043/test-slack-team-join-event-with-postman>
+U3EFK8UES : Ok! I have another question sorry haha, so i'm working on a bot, but i'm writing functionality that runs on the user join event and what not, is there a way to emulate slack event responses?
+U3EFK8UES : I have a test server, but can't emulate all events
+U3EFK8UES : Wow, is that what postman is...
+U3EFK8UES : What a coincadence if so
+U3FGRUSLT : sure, u can make a simple program to return the json u want
+U3FGRUSLT : u can simulate any json in the world just place it in a text file and serve via a local web server
+U3EFK8UES : ah ok
+U3EFK8UES : I'll definately take a look
+U0E9LFL3F : hi. the slack timestamp is something like this: "event_ts": "1358878755.000002" what kind of format is that?
+U3FGRUSLT : unix epoch down to the mili second
+U3FGRUSLT : not just seconds
+U3FGRUSLT : the part before the . is seconds 1358878755
+U3EFK8UES : <@U0E9LFL3F> its also apparently unique or something according to <@U07CW6N3A> 
+U3FGRUSLT : well `unique` in that it's very unlikely two messages happen at the same time down to the mili second
+U3FGRUSLT : ```~ $ irbirb(main):001:0&gt; Time.now.to_f
+=&gt; 1483865562.30614
+irb(main):002:0&gt; Time.now.to_f
+=&gt; 1483865563.194669
+irb(main):003:0&gt; 
 ```
-<http://faq.elm-community.org/#how-can-i-change-the-value-of-a-nested-field> ?
-or, yeah, that :smile:
+
+U3FGRUSLT : ```irb(main):003:0&gt; <http://Time.at|Time.at>(1483865563)=&gt; 2017-01-08 08:52:43 +0000```
+
+U3C1KGJDD : Hi. I need to wrap my storage function into a promise for use with a middleware. I'm using the cool botkit-storage-mongo module. Have very limited understanding of promises, if anyone could help with that? this is my simplified storage function
+U3C1KGJDD : module.exports = {// with Callback
+toDatabase: function(key, value, response) {
+    controller.storage.users.get(response.user, function(err, user) {
+        if (!user) {
+            user = {
+                id: response.user,
+            };
+        }
+        user[key] = value;
+        controller.storage.users.save(user, function(err, id) {
+        });
+    });
+}
+};
+
+U0E9LFL3F : <@U3FGRUSLT> <@U3EFK8UES> strange cause new Date().getTime() now returns 1483891366599 which has 3 chars more. Anyway I just think my issue is that new Date(1483891366599) returns an invalid date, I am not really familiar with JS date. Maybe I'll switch to moment
+U3MG94ZJP : Just created my first bot with Botkit , my problem is that near the bot user i have the word “BOT” twice , i am working with the EVENTS_API and not opening any RTM connection.. can anyone help understand why this problem can happen?
+U3FGRUSLT : yeah / 1000 to get back to seconds
+U3FGRUSLT : js is giving time in different units
+U3FGRUSLT : ```irb(main):003:0&gt; 1483894941440/1000=&gt; 1483894941```
+
+U3FGRUSLT : or multiple the full value slack gives by 1000
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

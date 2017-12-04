@@ -1,11 +1,125 @@
-            }```
-ah, so that doesn’t let the first argument have any extra fields in it
-you want `{ a | permitNumber : String, ... }` to allow “any record including these fields”
-(rather than “this exact record”)
-ah.
-it’s a super useful feature I didn’t discover for ages
-This is how you make a function work on similar types?
-It's how you say a function works on "any record with at least these fields", while also restricting that function so it can _only_ access those fields and no others
-Thanks much!
-Does this work on return types? or should I give the exact field names for returns?
-you’ll want the same in the return types
+U1CE9DL9H : so, <https://github.com/elm-lang/html/blob/2.0.0/src/Html/Attributes.elm#L177> has a `boolProperty` function
+U1CE9DL9H : I think that is what you want to replicate that using <http://package.elm-lang.org/packages/elm-lang/virtual-dom/2.0.4/VirtualDom#property>
+U2D7NUGS1 : Mhm... it's not exposed and looks like an internal helper. How would I use it?
+U1CE9DL9H : replicate it
+U2D7NUGS1 : But I think it will still output quoted value, wouldn't it?
+U1CE9DL9H : I think it wouldn't
+U2D7NUGS1 : Ok, let me try.
+U1CE9DL9H : wait, this is for something else, like things that are present or not
+U1CE9DL9H : like `hidden` or `selected`, that's not what you want right?
+U2D7NUGS1 : Actually this would work too.
+U2D7NUGS1 : Yeah, this does the job: ```opened : Bool -&gt; Html.Attribute msg
+opened value =
+    property "opened" (Json.Encode.bool value)
+```
+
+U2D7NUGS1 : Thanks <@U1CE9DL9H>
+U1CE9DL9H : cool
+U2D7NUGS1 : Now I just need to figure out how to decode custom event `opened-changed` from `app-drawer`. Is there a way to print raw event data to console? I guess `Debug.log` but how?
+U1CE9DL9H : yes, you'll need to use <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html-Events#on>
+U1CE9DL9H : then use the <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Json-Decode#value> like `Decode.map (Debug.log "event data") Decode.value`
+U1CE9DL9H : and that will print the complete object
+U2D7NUGS1 : Lost connectivity for a while.
+U2D7NUGS1 : I assume I have to pass the `Decode.Value` to my `Msg`, and then `Debug.log` in the `update`. Right?
+U2D7NUGS1 : Or is there a better way?
+U1CE9DL9H : do you have some NoOp in your `Msg`?
+U2D7NUGS1 : Oh, not yet. Good idea!
+U2D7NUGS1 : Then where should I put the call to `Debug.log`?
+U2D7NUGS1 : In the `view`? I feel these are silly questions, but I'm still wrapping my head around Elm (and FP).
+U1CE9DL9H : before turning to NoOp
+U1CE9DL9H : so `Decode.map ((\_ -&gt; NoOp) &lt;&lt; Debug.log "event data") Decode.value`
+U2D7NUGS1 : Like that: `on "opened-changed" (Decode.map ((\_ -&gt; NoOp) &lt;&lt; Debug.log "event data") Decode.value)`?
+U1CE9DL9H : yup
+U2D7NUGS1 : :shit: I must have broke something else. I'm getting `Maximum call stack size exceeded`. Let me figure this out first and I'll get back with the results.
+U2D7NUGS1 : Thanks for your help so far.
+U57KYFW67 : Elm doesn't try to emulate tail recursion, does it?
+U57KYFW67 : I came across that the other day
+U1CE9DL9H : it does
+U57KYFW67 : maybe my issue was something else then.
+U0GPGFQQY : tactics40: <https://evancz.gitbooks.io/functional-programming-in-elm/recursion/tail-call-elimination.html>
+U57KYFW67 : thanks.
+U0JFGGZS6 : lazurski I've gotten that too, I think because the event object contains circular references... there may be a way with `Decode.lazy`
+U1CE9DL9H : isn't there just some documentation for the event you want to decode?
+U0JFGGZS6 : :point_up:
+U2D7NUGS1 : <@U0JFGGZS6> that's likely. <@U1CE9DL9H> doesn't look that way, unless you call this a documentation: <https://www.webcomponents.org/element/PolymerElements/app-layout/app-drawer#event-opened-changed>
+U2D7NUGS1 : I've briefly googled it and figured I can just try to see for myself.
+U2D7NUGS1 : I guess I just `console.log` it in javascript land.
+U1CE9DL9H : so, what do you actually want to do with that event?
+U2D7NUGS1 : I need to know what the change was (opened or closed) to update my model accordingly.
+U2D7NUGS1 : Maybe I can just assume that it's in sync and do `{ model | drawerOpened = not model.drawerOpened }` but it doesn't seem safe.
+U2D7NUGS1 : I'd prefer to extract it from the event.
+U1CE9DL9H : yea that makes sense
+U1CE9DL9H : guess  a quick trip to the js console is the quickest option
+U2D7NUGS1 : Yeah, got it. Thanks again <@U1CE9DL9H> and <@U0JFGGZS6>. Now off to learn about `Json.Decode` :smile:
+U1CE9DL9H : the source code for events might be helpful <https://github.com/elm-lang/html/blob/2.0.0/src/Html/Events.elm>
+U2D7NUGS1 : Yeah, good tip.
+U2D7NUGS1 : If I know the exact path do I still need to worry about circular references in the object I am decoding ?
+U1CE9DL9H : I don't think so
+U1CE9DL9H : but only one way to find out :slightly_smiling_face:
+U2D7NUGS1 : :construction_worker:
+U2D7NUGS1 : My drawer works like a charm :thumbsup: You were right about Events module source code <@U1CE9DL9H>.
+U5XHTBFS6 : Hi yall, any easy way to *encode* a data structure given its *decoder*?
+U0JFGGZS6 : haven't used it at all but this came around a while back.  <http://package.elm-lang.org/packages/prozacchiwawa/elm-json-codec/latest>
+U5XHTBFS6 : Hmmm looks interesting. thanks <@U0JFGGZS6>
+U0EUHKVGB : json-to-elm can do that for you
+U5XHTBFS6 : wow that's very handy
+U5XHTBFS6 : But I do feel that having to create separate encoders and decoders could be better abstracted, such as that elm-json-codec project above
+U5XHTBFS6 : How to use the browser's local storage from elm? I can't find any packages on elm-package for that. I did find this repo, but it doesn't seem to be elm-package installable: <https://github.com/gdotdesign/elm-storage>
+U0JFGGZS6 : ports, at the moment
+U0JFGGZS6 : rfeldman's SPA example I found extremely useful to look at.  <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm>
+<https://github.com/rtfeldman/elm-spa-example/blob/master/src/Ports.elm>
+<https://github.com/rtfeldman/elm-spa-example/blob/master/index.html>
+
+U5XHTBFS6 : thanks <@U0JFGGZS6>
+U2D7NUGS1 : Hello! I want to fork and hack on an Elm library simultaneously with building my application and eventually PR the upstream repo. How would I set this up locally? In NPM land I would use `npm link`. Are there any established practices for Elm?
+U3SJEDR96 : you could use `elm_self_publish.py` found here: <https://github.com/NoRedInk/elm-ops-tooling>
+U3SJEDR96 : which allows you to locally install a package into another package
+U2D7NUGS1 : Thanks <@U3SJEDR96>. Let me take a look.
+U2D7NUGS1 : Related question: is there a way to install forked Elm pacakge from git repo, like NPM can do?
+U2D7NUGS1 : I see this <https://github.com/gdotdesign/elm-github-install>
+U2D7NUGS1 : Can I do it with standard Elm tools?
+U3SJEDR96 : Nope, standard elm package can't do that - since then all limitations like "no packages with native" are essentially out of the window...
+U2D7NUGS1 : Hmm. Ok. I'll try simply link forked library's `src/` into my app's `src/` and see how it flies. I'm using `elm-live` for my app development and would like to preserve the rebuild on save for the library as well.
+U3SJEDR96 : Then you could add a `vendor` library, clone the project in there, and add `vendor/somelib/src` to the `source-directories` of your `elm-package.json`
+U3SJEDR96 : though, take care, because that allows using the non-exposed modules from that library, too :slightly_smiling_face:
+U2LAL86AY : rcook: check this out -  very nice intro : <https://elmseeds.thaterikperson.com/elm-benchmark>
+U2LAL86AY : hmm it is possible to use decoder pipeline - with NO TYPE ALIAS for a record? do I have to build all this type aliases if i have objects inside objects??
+U3SJEDR96 : <@U2LAL86AY> `decode (\name age occupation -&gt; { name = name, age = age, occupation = occupation })`
+U3SJEDR96 : the type alias just gives you this constructor for free
+U2LAL86AY : ah! Yes lambda :purple_heart:
+U2LAL86AY : if i have a record with a filed that contains a union type - what can i do to it to send it to js / what is the best way to store union types in json ?!Say i need them for firebase or something.
+`{ field = IsRootNode 1 } ` =&gt; Where `IsRootNode` is the union type constructor.
+
+U1CE9DL9H : one option is to do it the same way elm objects are represented in js: construct an json object that looks like `{ constructor : "IsRootNode", value : 1 } `
+U2LAL86AY : aha, that makes sense.  And for decoding them back?
+```
+case constructor of 
+   "IsRootNode" -&gt; IsRootNode  -- But the constructor will generate different function types depending on how many arguments it has,
+```
+Will this play nice with the generic value? The arguments have different types - and there can be any number of arguments.
+
+U2LAL86AY : `{ field : IsRootNode 1 "someString" True }`
+U2LAL86AY : using a ~~list of values can work for encoding~~ - Edit: Only if they are the same type of value i guess.. But is not so clear to me how i use this list of values in the decoding step.
+U1CE9DL9H : you'll need to use `andThen` a lot, but it's possible
+U2LAL86AY : hmm ok, `possible` -&gt;  that's the important part.  :smile: thanks. Guess this is not very recommended.?! - given that is harder to decode.
+U1CE9DL9H : it's the only way really
+U2LAL86AY : no, i mean is not recommended to store stuff inside union constructors?
+U2LAL86AY : seems to be better to keep them in normal records fields if possible.
+U3SJEDR96 : I don't see the difference?
+U3SJEDR96 : In a record, the fields are labeled, in a union tag, they're positional. When decoding, they're positional anyway... Anyway, you could do something like this: <https://ellie-app.com/3zkrBCHtz39a1/0>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

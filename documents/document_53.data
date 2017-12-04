@@ -1,52 +1,135 @@
+U4X9H6JUA : that I still don't understand
+U0NCTKEV8 : in this case, the processes reading from the sub channels aren't able to get time on the threadpool to run
+U0NCTKEV8 : are you sure they are lost? or are they just waiting to run in a completely backed up system
+U4X9H6JUA : you see the thing is, my publishers are bursty, there are short periods of busy activity and long periods of relative calm,
+U4X9H6JUA : given that the system never locks up, all events should eventually be handled in the calm period, but that isn't what is happening.
+U4X9H6JUA : aggh, I'm gonna have head home soon, thanks for being a sounding board on this pub/sub stuff
+U0NCTKEV8 : you might want to look at one of the pipeline variants, it may simplify things a lot
+U4X9H6JUA : I didn't even know about pipelines, something new to learn tomorrow I guess
+U4X9H6JUA : cool, thanks, have a good evening (or what ever timezone appropriate part of day is appropriate)
+U1ALMRBLL : <@U3JURM9B6> if you didn't already look at the source a few hours ago, yes, `identical?` is just:```static public boolean identical(Object k1, Object k2){
+	return k1 == k2;
+}```
+
+U0E0XL064 : Trying to flatten a nested map to a 'referenced nested map':```
+{:a1 {:b1 "val1" :c1 2}
+ :a2 {:b1 "val2" :c2 {:d1 3}}}
+``` 
+to
 ```
-of an input stream? that's kind of impossible by definition
-<https://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html>
-<@U4SKJCP3K> count a byte-array
-U4SKJCP3K change your name
-<@U4SKJCP3K> I guess this works (if you have memory) `(-&gt; stream slurp .getBytes alength)`
-otherwise use `<http://clojure.java.io/reader|clojure.java.io/reader>`
-aaah sorry, I got a slack bug, your guy's name was for a moment some hash haha
-3. Need to know the size of this payload
-hcarvalhoaves: Nice, I will try this. Thanks :+1:
-<@U0CAUAKCG> i think you're running into the limitation that you can only have 20 arguments to a function
-hlolli: Interesting, I will give it a shot. Thank you.
-and i 've heard someone talk about "trivial" functions through the repl are not invoked in the same way as normal functions
-<@U4SKJCP3K> are you're trying to determine the file size to send on the response?
-any hacks to bypass it? It's a bug in `overtone`, changeing the implementation where this is defined would be pain
-<@U1LCB75M2> Precisely. I'm trying to do all these steps without performing IO.
-i'm way out of my depth on that one. I think <@U0NCTKEV8> or <@U051SS2EU> would know way more than me
-<@U4SKJCP3K> you would have to hold all response in memory, use a buffered reader + this instead -&gt; <http://greenbytes.de/tech/webdav/rfc2616.html#rfc.section.3.6.1>
-hcarvalhoaves: Oh God, this looks crazy :slightly_smiling_face:
-yeah, proxy doesn't rest args like that
-doesn't support
-*facepalm*
-otherwise you have to make sure you don't OOM :wink:
-I surprised the first thing works at all
-I am sending this payload to S3 and one of the requirements is to pass in the content length alongside the payload
-I guess temp files are the simple solution to this here
-maybe proxy does sort of support that, I am not sure, depends on how you read the docstring, but I have never read it has supporting that
-here when the range is changed I bump into the same error as I posted above.
-the proxy is defined on line 100.
-I  was going to say, that is defrecord which is a different beast entirely from proxy
-I think this hack could have been done better when this was written way back.
-a macro that takes all arguments and puts them into a map or vector.
-it is also likely really old code, given that it uses proxy instead of reify there
-Yes, reify a protocol would maybe be a better solutin?
-no, I mean, those are all interfaces it is proxying so reify is likely a better choice
-ah
-`(~invoke_fn this# ~@args)`. does this have to many arguments with `(range 21)`?
-I am not familiar with the codebase, but from scratch I might prefer to pass around a map with a key that maps to a function
-the issue is, the last arity of invoke needs to call applyTo, or something like that, you should check out AFn.java
-the limit is 10 arguments because in overtone they come in pairs.
-this limit has been there for long time, nobody has taken the time to fix this
-if it is going to use proxy, it shouldn't proxy IFn, it should proxy AFn
-there are invoke arities from 0 to 21, the 21st arity takes 20 args + an array as the 21st
-I see what you mean, but I can't see how that would be implemented. It's macroexpanding to a argument pyramid of invoke.
-Or just somehow collect all the arguments as one parameter.
-ah ok, read better, last arity invokeing applyTo, I see
-you can't do it with proxy
-or anything really
-this macro `defrecord-ifn` has always some function or macro wrapped around it, there an &amp;rest sequence could be used.
-no, sorry, forget what I wrote, it's the defrecord that gets called in the end
-macros, brainfuck
-does anyone have experience with clojure.walk/postwalk? it says it walks on each form but sometimes there's strange vectors showing up where there should be maps.. not really sure how to write what I'm trying to write
+[{&lt;0&gt; {:a1 &lt;1&gt; :a2 &lt;2&gt;}
+  &lt;1&gt; {:b1 "val1" :c1 2}
+  &lt;2&gt; {:b1 "val2" :c2 &lt;3&gt;}
+  &lt;3&gt; {:d1 3}]
+```
+`&lt;n&gt;` being some value, doesn't really matter a lot - just a number would certainly do.
+
+U2MPUENUC : <@U5JEJN1CP> did you get an answer ? is this useful <https://github.com/r0man/oauth-clj/blob/master/src/oauth/google.clj>
+U287C9JRE : I am somewhat bewildered by core-async terminology. `pipeline` is for computation (non-blocking all the way), `pipeline-async` is for "async" operations which seems to be operations which may park the statemachine and `pipeline-blocking` is used for straight up blocking ops.
+I am mostly confused about  ´pipeline-async`.
+
+Am I right in assuming:
+  * (#A1) some operations, say `(a/&lt;! (a/timeout 3000))` - would park for approximately 3 seconds - so operations like it (take from a channel) are OK inside of `pipeline-async`.
+  * (#A2) the reason the `af` fn in `pipeline-async` receives a channel onto which the result should be delivered is because I can then easily wrap a typical callback-style async operation by letting the callback put a message onto this result channel ?
+
+U2MPUENUC : <@U5JEJN1CP> this might be better .. I think you need OAuth2 for google and this repo has a google example <https://github.com/craygo/clj-oauth2/blob/master/src/clj_oauth2/google.clj>
+U287C9JRE : No one has some thoughts / can confirm/deny my assumptions mentioned above ?
+U051SS2EU : <@U287C9JRE> the purpose of the chan passed to af is to allow N results (0 or more) onto to from each call too af
+U051SS2EU : Otherwise it would have to build and return a collection.
+U3JURM9B6 : <@U1ALMRBLL>: (re identical? being pointer equality check) -- nope, haven't read source yet; thanks for checking for me :slightly_smiling_face:
+U4SKJCP3K : Is there a `exports.default` equivalent (from Node.js) for Clojure? Use case, I have a file called `config` that loads an EDN file, parse it and store it to a variable called `config`. Whenever importing it I have to `config/config` which looks... Weird.
+U5ZAJ15P0 : <@U4SKJCP3K> what about refer? `(require 'my-app.config :refer [config])`
+U4SKJCP3K : <@U5ZAJ15P0> Thanks, that could work. However, I am also exposing two other variables on this file that I later want to reference too. As far as I understand, with your solution, I would only be able to refer to the `config` variable and nothing else.
+U5ZAJ15P0 : <@U4SKJCP3K> you can add any number of variables/function in the vector after :refer
+U4SKJCP3K : <@U5ZAJ15P0> Oh I see, let me try that.
+U5ZAJ15P0 : <@U4SKJCP3K> actually I got the syntax a bit wrong. It's`(require '[my-app.config :refer [config]])`
+
+U051SS2EU : <@U4SKJCP3K> another thing to consider is that since good clojure style is to use the namespace prefix, you can use a name that isn't redundant with the prefix
+U051SS2EU : for example if the ns were environment so it was `environment/config` and the other things in the ns were environment related but not the config data itself, or if the var were settings, so it's `config/settings` and the rest of the ns is about things that are about config but not the specific settings
+U5ZAJ15P0 : <@U051SS2EU> is using :refer bad clojure style? I am new to clojure so I don't really know
+U051SS2EU : <@U5ZAJ15P0> it's OK in moderation - but there's a reason nobody writes ns forms with `:use` any more
+U4SKJCP3K : Thanks both <@U5ZAJ15P0> and <@U051SS2EU>.
+U4SKJCP3K : Since it only exposes 3 public vars for now, I'm going with `:refer`
+U051SS2EU : that's the most I'd want in a client ns period
+U051SS2EU : not just from one ns - from all combined
+U5ZAJ15P0 : <@U051SS2EU> :use is an order of magnitude worse though, right? it just refers everything
+U051SS2EU : right, but it's a matter of degree not kind
+U5ZAJ15P0 : yep, true
+U4SKJCP3K : <@U051SS2EU> What if I have a library that exposes a bunch of stuff but I just need a few of them. Still the best practice is to go with namespaces instead of using `:refer` and `:only`?
+U051SS2EU : use :as
+U051SS2EU : unless you are using the function extremely frequently
+U4SKJCP3K : But `:as` would still load everything from that file into memory no?
+U051SS2EU : that has nothing to do with it
+U051SS2EU : all :as does is create an alias in your ns
+U050MP39D : the whole file is compiled and loaded into permgen regardless of how you refer to it
+U051SS2EU : not using :refer is not about memory usage, it's about poluting a namespace with bindings that are irrelevant
+U4SKJCP3K : Gotcha, that's nice to know. Thanks.
+U051SS2EU : it's about code readaiblity
+U4SKJCP3K : So I don't really see a use case for anything other than `:as` (perhaps only `:use` because can be handy on the REPL)
+U051SS2EU : yup - that's almost always the right way to do it
+U050MP39D : yeah tht's the general consensus that's emerged
+U051SS2EU : but there are exceptions eg. if every function in your ns is using &gt;! from core.async
+U051SS2EU : that makes sense to refer
+U11BV7MTK : notable exceptions `deftest` and `is`
+U051SS2EU : <@U11BV7MTK> yeah, to me that's the same exception  - every form in my test ns uses deftest once and is multiple times
+U051SS2EU : so it's ubiquitous enough to drop the prefix
+U11BV7MTK : for sure. i'm a big fan of the namespaced functions. common lisp gets difficult to read because of that. also emacs-lisp...
+U051SS2EU : it's another flavor of the same problem overuse of inheritance causes - "where the hell is this name defined?"
+U051SS2EU : but inheritance tends to get into a worse state because it's so common to rebind the same names
+U61HA86AG : <https://stuartsierra.com/2016/clojure-how-to-ns.html>
+U61HA86AG : i quite like these principles
+U0HM5MJ5V : i actually alias clojure.test, mostly to get completion and automatic require in cursive
+U050MP39D : yeah cursive actually makes :use/:refer even less appealing
+U11BV7MTK : oh can it not suggest things that aren't in the current namespace if they don't have an alias?
+U2J4FRT2T : I'm writting a macro that transform a keyword into a symbolThis symbol will be used on a `(def ~symbol ...)`
+There is a "default" way to normalize `:foo.bar/quoo` to a valid symbol?
+
+U1WMPA45U : `(symbol (namespace kw) (name kw))`?
+U051SS2EU : def can't take namespaced symbols though
+U1WMPA45U : yeah, probably just munge the ns &amp; name into a string, separated by some other string, if the namespace is important
+U2J4FRT2T : <@U1WMPA45U> I need a local symbol. Some like `foo_bar__quoo`
+U051SS2EU : if it needs to be "local" why is it going in a def?
+U051SS2EU : perhaps I misunderstand what you mean by local here, but by the standard clojure definition, def doesn't and can't be used to create locals
+U2J4FRT2T : `(my-cool-macro :about.this/keyword [some cool dsl])` ~macro-magic~&gt; `(def about_this_keyword :result-of-my-macro)`
+U051SS2EU : That addresses the question, that doesn't do anything with locals as clojure defines them. But given that in order for the macro to work :about.this/keyword needs to be a literal, why not just provide the symbol directly?
+U050MP39D : <@U11BV7MTK> no it suggests them fine, it just feels more useful when it narrows it down to a specific alias
+U11BV7MTK : ah yeah. easier to browse
+U11BV7MTK : CIDER has a browse namespace feature which is really nice
+U2J4FRT2T : noisesmith: because I'm talking about a a keyword. I will generate a rule for clara.Dynamic symbols will cause difficulties on debug
+
+U051SS2EU : what I am saying is that the macro won't work unless the keyword is a literal in the form
+U051SS2EU : a symbol as a literal in a macro that becomes a binding does not cause any debug difficulties
+U051SS2EU : do you mean the keyword literal is the same as a keyword that gets used elsewhere?
+U0JLGECPK : hello, i'm trying to take a sqlvec like ```["SELECT * FROM ? WHERE (? = ? AND ? = ?)" "Aliens"
+ "WritesPoetry"
+ "True"
+ "TheirPoetryIsGood"
+ "False"]``` and convert it into a sql string
+
+usually, i would be content with this as clojure.java.jdbc accepts this. but in my current situation i am communicating with AWS Athena which accepts a string representing a sql query.
+
+U050MP39D : replace ? with '%s' and [...] with (format ...)?
+U0JLGECPK : that would certainly do the trick
+U0JLGECPK : but sufficient to prevent against malicious input?
+U050MP39D : definitely not :slightly_smiling_face:
+U0JLGECPK : therein lies the rub
+U050MP39D : if athena doesn't have prepared statements then you'll need a function that escapes sql in a manner that's safe for athena
+U0NCTKEV8 : the ? after FROM isn't actually valid jdbc if I recall either
+U0NCTKEV8 : jdbc, or all the jdbc drivers I have used, don't let you parameterize the table name
+U0NCTKEV8 : apparently the .toString method on a prepared statement for some jdbc drivers will give you the sql string
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

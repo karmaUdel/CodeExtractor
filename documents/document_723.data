@@ -1,79 +1,126 @@
+U681TBBUP : The only notion needed for bounding something is comparability, maybe it doesn't make sense in some contexts but there isn't a reason to unnecessarily restrict it
+U3ZNWN526 : Hmm... There's a strange thing happening (or maybe I'm just missing something obvious): I have an extensible record type `WithUserFields` and an extended record `UserFields`, which doesn't add any additional fields:```
+type alias WithUserFields a = { a | ... }
+type alias UserFields = WithUserFields {}
 ```
-but I dont have scripts on my function Im using that function to call functions
-but in raelity main is kinda of a useless function tbh
-would you suggest getting rid of hte main functino?
-no
-find a way to make it work, not just w/ the `main()` function, but through it.
-yea its not working ill just stick to calling the main function normally
-I really do not how you're running it and its working? lol
-careful. Keep it civil. This IS 'calling the main function normally'
-I literally just copied and pasted your most recent code and ran it.
-You're close. And having it all segmented into various functions is will make it very easy for you to make the small tweaks that it needs.
-Stare at it... fight with it. It'll click.
-Are you sure you are using the code I just posted on here?
-30 mins ago?
-cuz idk man it aint clicking
-And I only did it to see if it would run, and if not... see what errors it produced. &lt;-- in fact, when you run it, what errors do you get?
-It doesnt even run I get nothing
-I run and then it stops
-yeah, well I was asked a username and password and all
-I wasn't at all
-had to type that in then type it in again before it produced that main menu
-maybe <http://repl.it|repl.it> doesn't run if __name statement
-hahaha maybe. I can't confirm or deny. But if it doesn't work, then so be it... change 158 and 159 to just call main(). And ask someone why it doesn't work the way we're talking about here. Now, back to your original question... It's obvious that lines 50 and 51 are not the correct spots to declare the lists. Did you look into passing lists to functions?
-No I haven't
-Well I believe i have been this entire time
-Where would you recommend calling the lists?
-where do you think it should go? step through what you have, carefully. Did you write this out on paper first?
-No I didn't 
-I was thinking about putting it after menu but before the books function and then returning those values
-That's pretty much the one problem I've been having this whole time lol
-no. that's the only thing you asked about. There are multiple probs :joy:
-like, line 129, type 'one' instead of '1'
-lines 12 and 13 in register() don't make sense.
-and much more. but one thing at a time.
-Well 129 is just a print statement
-So I can make it a little more clear if anything
-109*
-Again it's still a print statement
-I'm deleting the list item by the index
-Line 109 says: `num = int(input("Which book would you like to find?"))`
-Line 129 says `num = int(input("Which book would you like to sell?"))`
-that's user input, not a print statement.
-Oh my bad
-Well that would work
-but `i` should be more describptive, like `movie_title` or whatever.
-anyway... let's look at where you said you'd post the list
-What would that look like?
-Since you mention 'returning values', how does register and login work? In your own words.
-It would allow me to use this values into another function when I call a specific using the return values as parameters
-how do you see that code happening? can you type it up here?
-okay.. so I asked about this b/c that's not how `return` works
-I'm guessing the first step is that the user has to register, right?
-yea
-they create a username and a password
-so we'll start w/
-the password has to be 6 characters or more
-we'll move this into comments under that code snipet
-I need a register and login
-Ok and I'm assuming we'll use it in a little bit, right?
-ok
-Im just trying to figure out which extensions to download for sublime
-<@U5VGKQ2SY> You wanna move this over to the dm?
-<#C080T8XT2|job_board>
-how would one who is used to MVC based web frameworks organize controllers in `aiohttp`. The closes thing seems like class based views but they cannot contain a RESTful resource. Or am I missing something?
-<@U63VCB8AH> what makes you think they can't "contain a restful resource"? Aiohttp is lower level framework, but you can design it any way you please 
-how to do you access the key of a specific dictionary?
-how do you*
-<@U6EN2E1LG> Can you show what you're trying to get data out of? Normally it's just `dictionary['key_to_get']` to get the value out
-There's also the view method if you want to see the available keys: `dictionary.keys()`
-Is it line 5 and you are trying to check if the input value is in the books dictionary?
-First, be sure to not override built-ins (`while str not in`, `str` is a built in). I also believe that you want `i` instead of `str` there
-But you can just check `if key in dict: print('Yay, it exists!')`
-but i isn't going to print out
-I ran the for loop but when I go to select I, I get ‘dict_items' object cannot be interpreted as an integer
-Oh, yeah you can't use integers in a dict - you are asking the user to give you an int and then looking that up in the dict
-If you want to do that, you need to keep track of what keys the integers correlate with
-Thats im trying to do by converting it into a tuple
-but i guess that doesnt work
-Dictionaries don't keep order until python 3.6, just an FYI - so that could work if you save it to a variable first, then ask for input
+But when I try to use `UserFields`, the compiler spits out "cannot find variable `UserFields`"
+
+U2LAL86AY : how do you try to use `UserFields` can you show that particular example?
+U2LAL86AY : and you can't have `WithUserFields`  and `WithUserFields ` twice in the same module i think - ups i thougth is a `type` - delete that :smile:
+U5QJW0DDE : Incidentally this is only true if your data model is structured the same as your UI. Rarely does a UI page equate to an exact segment of your data model. 
+U3ZNWN526 : Sure! The first case for example, is:```
+userFieldsFrom : User -&gt; UserFields
+userFieldsFrom u =
+  UserFields u.userRole u.username u.name u.email u.password u.passwordConfirmation
+```
+
+U3ZNWN526 : Well for `WithUserFields` the first time is defining it, and the second time I'm using it (to define `UserFields`)
+U5QJW0DDE : I look forward to watching that. 
+U2LAL86AY : there is a small article about extensible records here. I can't find the other one i saved once - was much better at explaining how to compose extensible records. <https://dennisreimann.de/articles/elm-data-structures-record-tuple.html>
+U2LAL86AY : ok let check it out
+U2LAL86AY : i simplified a bit:```
+type alias WithUserFields a =
+    { a | name : String }
+
+
+type alias UserFields =
+    WithUserFields {}
+
+
+userFieldsFrom : String -&gt; UserFields
+userFieldsFrom string =
+    WithUserFields string
+
+```
+error: 
+```
+Cannot find variable `WithUserFields`
+```
+
+U2LAL86AY : so it seems like you can't have parametric types act as constructors
+U3ZNWN526 : Oh, no, I have `UserFields` as the constructor within that last function, not `WithUserFields`
+U2LAL86AY : Maybe is the same thing - since  it gives the same error.
+if you have `type alias Thing = String `
+you get back a function named `Thing : String -&gt; Thing`.
+
+But if you have `type alias Thing a  = String `
+Seems you don't have this `Thing: String -&gt; Thing` anymore. It's how elm works.
+ Let me try a few more things first
+
+U3ZNWN526 : Ooh, so you think even with `type alias Thing = MetaThing {}` maybe wouldn't give you the constructor?  I suppose that's possible... very unexpected though, and doesn't seem to be documented anywhere
+U3ZNWN526 : I would think with a `type alias Thing = ` I could put anything after the `=` and it would give me a constructor.
+U5J0H2NS2 : I think this```
+WithUserFields a = { a | ... }
+```
+means only, that the type has several known fields.
+You did not specify their order. So you can not construct one just like you wanted.
+
+U2LAL86AY : hmm yes, you don't get alias constructors for aliases with parametric values:```
+
+type alias FirstAlias =
+    { name : String }
+
+
+type alias SecondAlias a =
+    { a | name : String }
+
+
+constructAValueOfFirstAlias : String -&gt; FirstAlias
+constructAValueOfFirstAlias string =
+    FirstAlias string 
+         --- works as expected because you have in the global scope a (function/variable) named: FirstAlias : String -&gt; FirstAlias 
+
+
+constructAValueOfSecondAlias : String -&gt; SecondAlias {}
+constructAValueOfSecondAlias string =
+    SecondAlias string 
+         -- error "Cannot find variable `SecondAlias`"
+
+```
+
+U3ZNWN526 : Oh well yes, that does make sense, because SecondAlias is not a type, you would only be able to construct other types using SecondAlias.  But what I'm trying to do is define a second type and then use it!
+U0J1M0F32 : ```
+type SecondAlias a =
+    SecondAlias { a | name : String }
+
+constructAValueOfSecondAlias : String -&gt; SecondAlias {}
+constructAValueOfSecondAlias string =
+    SecondAlias { name = string } 
+```
+
+U5J0H2NS2 : But this works```
+type alias WithUserFields a = { a | name : String, email : String }
+type alias UserFields = WithUserFields {}
+
+change_name : String -&gt; UserFields -&gt; UserFields
+change_name new_name user_fields = { user_fields | name = new_name }
+
+get_user_fields : String -&gt; String -&gt; UserFields
+get_user_fields name email =
+    { name = name, email = email }
+```
+
+U3ZNWN526 : Yeah.  That seems right.  The problem I'm having is that for some reason... there's no `UserFields` constructor? (even though `UserFields` is just a plain old type alias)
+U0CL0AS3V : &gt; all the structural problem i've been discussing started to surface in my company's app after it hit about 8000 lines of clojurescript (which have since doubled). I think none of the issues I present would be that apparent in smaller apps&gt; really the problems i'm talking grow exponentially with the size of your data model
+
+we're at 150,000 lines of Elm code in production and these problems don't exist for us. I don't worry about the Elm Architecture scaling because my experience with it is that it's scaled better than any other front-end system I've ever worked on. :slightly_smiling_face:
+
+U5QJW0DDE : Currently it is 15k lines. Do you find that either a) your data model lines up with your view tree much of the time or b) you pass the whole model state around often?
+U0CL0AS3V : <@U5QJW0DDE> I get why you'd be worried about this, based on your experiences elsewhere, but the people saying "this is not a problem in Elm" are not making it up :wink:
+U5QJW0DDE : <@U0CL0AS3V>  I still haven't seen any examples that demonstrate an Elm solution to, for example, the distant descendant drop down list I mentioned earlier
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

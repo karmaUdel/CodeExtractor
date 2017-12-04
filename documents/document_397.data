@@ -1,122 +1,93 @@
+U4SM7ECAG : Hi there! I need some help with some 0.16 elm... 
+I've got some signal that 's not being handled properly... 
+in the main view I've a "escape catcher" that allows me to dismiss modals 
+
+
 ```
-so for your case - you can leave your `type UnionType = A String | B | C` alone -&gt; he will be like the `DatePickerMsg `
-but you need to build another tag for it
-thank you.
-type Msg = A | B | UnionType
-but I needed A | B | UnionType UnionType
-I guess I'm not as comfortable with the idea of tagging as I hoped
-it's not possible to do it without this.yes but just a trick that i use -&gt; i always use `MsgFor_` and whatever follows -&gt; this way i know this i need to delegate
-oh, that's a nice little convention
-tyvm
-:bananadance:
-I think one of the hardest parts has been scaling elm
-a lot of the tutorials have great little toy examples
-but I've spent a lot of time researching &amp; trying different methods scaling out the codebase
-the truth is - is hard to scale elm if you don't underestand very well a lot of stuff - the basic stuff first - what's possible what not - but more than that. A holistic underestanding i mean. Once you got that it makes much more sense and is easy actually. Watch this:
-<https://www.youtube.com/watch?v=DoA4Txr4GUs>
-<https://www.youtube.com/watch?v=2ihTgEYiKpI>
-`but I've spent a lot of time researching &amp; trying different methods scaling out the codebase` i think the best way to get confortable with this is to just write a lot of elm code / the more projects the better. Then you find form experience what works and what not. Or else you can't judge  which article makes sense and which doesn't  :simple_smile:
-<@U2LAL86AY> Thanks for the tutoring. The learning curve has been a bit steep, but I am enjoying it &amp; becoming more productive every day
-<@U64FYS317> Out of curiosity, what about Elm have you found the most difficult to grok?
-Patterns for scaling and... anything else?
-<@U57KYFW67> Mind if I chime in?
-sure
-The *other* main thing at this point that happens is, I frequently run into syntax questions that exist beyond the scope of online resources like the elm tutorial. I keep asking myself _"Can I write that?"_ once my situation becomes more complex than simple lists or flat data structures.
-Because I'm not certain how I can express myself, my code feels  bit clunkier, although that just comes with being new. I'm hoping eventually to do some write ups on deep dives into the elm syntax. Like _"everything you can do with let's"_ or _"updating complex models"_
-"Can I write that?" in what sense? :slightly_smiling_face:
-I've give a more concrete example. Yesterday, I had a question about my `Type Thing = Thing Int Int`. I'd made it earlier on... I'd read that I should say `Thing Int Int` vs `Int Int` so the constructor would held avoid ambiguity, but I realized afterwards I didn't know how to get the two `Ints` back out of the type
-but you knew how to get one int back?
-Somehow here kindly explained that pattern matching would do the trick, which _immediately_ makes sense as you hear it
-heh, indeed!
-yes :slightly_smiling_face:
-But somehow during every explanation about Defining a data type like that, I'm not sure that I saw an example of someone pulling the values _back_
-the `case` statement might as well be called the "destructor" because it is the opposite of a constructor. Constructors build data and `case` rips it apart.
-I can't find my best cheat sheets. I rely need to do some order in my bookmarks :simple_smile:
-An even more concrete problem right now is I need to update a value nested pretty deeply within my model... if I hadn't seen this conversation I would've asked about it. My model is (as per usual) a record, which itself has another record, which has a List of values. How would update a value in that list?
-so this one is more a flow problem, does it actually make sense to nest so deep
-<@U2LAL86AY> bookmaking that gist.
-<@U23SA861Y> honestly... I don't know. My model contains a record called `game` which has `players` which is a list of players. It seemed like sensible nesting at the time.
-the game stuff alone is as much code and as complex as the rest of the SPA combined. So I didn't want to scatter everything it needed through the rest of the model, because it made it hard to keep track of what data was for what.
-Forgive my ignorance, but what does SPA stand for?
-single-page-application
-it refers to the fact that your browser only needs to do one round trip to get what it needs (minus the api calls it's doing)
-ahh
-as opposed to page refreshes
-right?
-correct
-gotcha. tyty.
-so there are a couple ways to handle this game stuff. If it really does make sense that a list of players part of the game it would make sense for you to have some functions for adding and removing players from a game
-Yeah, I realized I'd never seen a model update of nested records. So I did wonder if that just means I shouldn't do it, but then I wondered what the alternative was.
-in which case updating the model is more like {model | game = addplayer AIPlayer game}
-or something like that
-it might also make sense to pull the players out, if they are somehow distinct from the game
-and _addplayer_ is another update Msg?
-no, it's just a regular function in this case
-wait, no, nevermind.
-it's a function that returns a new game with the changed player value
-if it makes sense to bundle a bunch of stuff up into a record, it probably also makes sense that you'll have some common operations you want to take on that record
-such as adding and removing players
-or taking turns
-Yup. I have one file that deals specifically with functions pertaining to the game.
-or must they all be independent of each other?
-yes, you can use it in following statement
-you just can't reassign it
-but would it work if I reversed the order of definiion of x and y?
-Yeah
-None of them have any order, just like the functions you declare in the highest scope.
-<https://ellie-app.com/3MMQc5fy8bca1/0>
-cool. I spend a lot of time testing stuff like this in the repl, but every day there's always a new "Can I do this?" moment.
-<https://ellie-app.com/3MMQc5fy8bca1/1> this also works
-<@U23SA861Y> I just did the same thing to the first one you sent :slightly_smiling_face:
-a let is basically like, there is an entirely new file that now exists between let and in with is imported just for what follows
-well with regards to declaring things anyway
-That makes a lot of sense.
-well, tonight has been an education, as per usual. <@U23SA861Y> <@U2LAL86AY> <@U57KYFW67> <@U3QF7RFK9>  cheers. :pray:
-And are a ton of other concepts. But focus on the few - and start building from there.
-<@U2SR9DL7Q> check out this long message when you have time, can be useful. <@U64FYS317> i think you too can benefit from reading it.
-These are very good words, and very helpful. I shall take them to heart.
-Yup, makes me very happy
-I think it really is hard to write to a general audience. And especially how Elm is being marketed, you're likely to see people at both ends of the FP spectrum. A lot of Haskell users (like me) come in knowing all the basics. But there's just as many Javascript users who knows more about the web development side than I ever will, but don't know a lot of FP.
-I can also see Elm marketing itself towards newbies to web dev as well. It will end up being very easy to get something started (especially with things like Ellie around), and that will be yet another group to address.
-I'm fairly new to the strictly typed FP world. I've some experience with a few lisps, but the easiest transition was knowing some rust.
-It's very cool to see all of the intersections of patterns and ideas in different languages
-really makes you appreciate the history of languages, evolving &amp; taking from others as they do
-I wonder how easy haskell would be to pick up after spending a few more weeks with elm...
-Yeah. Dynamically-typed functional languages are very different.
-Haskell is a rabbit hole. If you know the basics of Elm, the basics of Haskell aren't so bad.
-I'm not that new to FP, but I never got really into it (Haskelling). But I sincerely don't think it's hard. No harder than OOP. It's not a way of thinking you're exposed to before you encounter it. I would say FP could be as hard as initially learning about programming constructs was _but no harder_.
-But there's a lot of features. It's the C++ of functional languages.
-But programming is a clicky thing. You can feel mental models snap into place when the mind adapts to a new concept. Good languages and good teachers know how to get those clicky snaps.
-Haskell's community is also kind of idiosyncratic. They are very helpful on IRC. But their priorities are all over the place sometimes. You end up with a lot of experimental packages in the ecosystem where people wanted to implement some weird math-y idea, but then that gets throw into a production-level package, and now you suddenly have to know the Data.Semigroups library....
-(Semigroups isn't actually a bad one, although I feel it's the wrong abstraction for reasons. Lenses are the S-tier example of "Wait, why do I care what a costate comonad is?")
-I have no clue what you're saying, but I'm sure you're right.
-It's definitely worth toying around in. And definitely watch any talks you can find on YouTube by the former curator of GHC, Seymon Peyton Jones. He is an excellent educator.
-and a lot of what he says relates to Elm (or anyone doing things contrary to the established norms)
-I know you meant to thank <@U14Q8S4EM> instead of me, but I'll steal the glory anyway. You're welcome.
-<https://media2.giphy.com/media/AxVvk3UlCVPiPxtGLK/giphy.gif>
-I guess this is as good a time as any to get back into reading that stuff. Is there a newsletter relating to FP but not necessarily to a specific language?
-That gif was magnificent.
-I don't know of any.
-Helloouuu. I finally managed to get some time for reading the elm-lang guide. In a couple of the first code examples, some kind of shorthand for setting record values is used: <https://github.com/evancz/elm-architecture-tutorial/blob/master/examples/03-form.elm#L27> and <https://github.com/evancz/elm-architecture-tutorial/blob/master/examples/04-random.elm#L27> . What is this and where can I read more about it?
-<@U4K9J3NUC> <http://elm-lang.org/docs/records#updating-records>
-Oh, that's actually just a function
-Declaring a type alias for a record type also defines a function to construct values of that type with the same name as the type alias
-And is the order of arguments same as in which those were declared? And is this documented somewhere?
-It's the same order, indeed. I don't know if that is actually clearly stated somewhere, to be honest
-<https://guide.elm-lang.org/types/type_aliases.html> there's an example there, but it doesn't specify that this is positional
-oh, wait, it does
-"The arguments are in the order they appear in the type alias declaration"
-OK, cool, it was there in the docs just waiting for me to reach that page :slightly_smiling_face: Thanx everyone
-happy reading! :wink:
-interestingly, that syntax has been around since 0.9 (<http://elm-lang.org/blog/announce/0.9#record-constructors>)
-~So far embedding elm-make in the existing build process is painful, unproductive and very expensive. Just wanted to share my overall frustration with open source.~
-Forgot to mention: paths.project.elmWebpack == ../js/elm/entry.js
-How do I decode a single string in Elm. All the examples use a full model as the structure for decoding. Completely stumped. :confused:
-What does your HTTP response look like?
-{"token":"XX_SECRET_TOKEN_XX"}
-You just want the token then?
-Yea I am literally just exposing some Json with the token. I'm still super new so trying to build up slowly
-I'm running a Phoenix server and trying to connect to an API point to get the token. Then will try and figure out the rest as I go along :slightly_smiling_face:
-I feel like I have gotten really close. I'll show the error that was tripping me up.
-`field "token" string` is all you need
-which decodes that JSON into simply the string `XX_SECRET_TOKEN_XX`
+ onWithOptions "keyup"
+                { stopPropagation = False, preventDefault = False }
+                keyCode
+                (\keyCode -&gt;
+                    Signal.message address &lt;|
+                        if keyCode == 27 then
+                            App.Action.EscPressed
+                        else
+                            Debug.log "asdasdasd" App.Action.NoOp
+                )
+```
+
+the issue is: I'm listening on the `change` event on some inputs which are being "ignored". 
+(i.e. the `App.Action.NoOp` gets triggered on any non-`esc` key press and so my view is re-rendered and my inputs reset. 
+
+Any idea of how I could listen to onkey on a single touch? or have something better than `App.Action.NoOp` for the case that doesn't interest me and that would not interfere with the user inputs?
+
+U0LPMPL2U : Could you filter the signal in the part of the code that handles signals rather than having a conditional in the event handler?
+U0LPMPL2U : Alternatively, write a custom decoder instead of using `keyCode` and make sure it returns `Json.Decode.fail` for non-ESC characters
+U0LPMPL2U : For reference, see how the `onEnter` handler is implemented here: <https://github.com/elm-community/html-extra/blob/2.2.0/src/Html/Events/Extra.elm#L267>
+U4SM7ECAG : oh that's a neat idea!
+U3SJEDR96 : `escDecoder tagger = keyCode |&gt; andThen (\k -&gt; if k == 27 then succeed tagger else  fail "not esc")`
+U3SJEDR96 : or, indeed, go all the way and make it a custom `onEsc` :slightly_smiling_face:
+U4SM7ECAG : I'll try that :slightly_smiling_face:
+U4SM7ECAG : Awesome that works !
+U4SM7ECAG : Thanks a lot <@U3SJEDR96> and <@U0LPMPL2U>
+U641LDZFU : Hey all, just wondering if it's possible to have union types that look like ``` type Node = ChatNode {id : Int, chatMessage: ChatMessage } | NewsNode {id: int, newsItem: NewsItem} ```
+U3SJEDR96 : Yeah, that's actually exactly how you can define them
+U3SJEDR96 : well, you'd have `Int` for the second `id`, too
+U3SJEDR96 : but other than that, that's a perfectly valid union type :slightly_smiling_face:
+U641LDZFU : and so checking an item in a case with ChatNode item -&gt;
+U3SJEDR96 : yep. I think you can even do `ChatNode {id, chatMessage}`
+U641LDZFU : should theoretically match if the item is { id = 1, chatMessage = {some - "ChatMessage"}
+U3SJEDR96 : if It's `ChatNode { id = 1, chatMessage = ... }`
+U641LDZFU : yeah, sorry always muddling my = and : :slightly_smiling_face:
+U641LDZFU : ok thanks! I am not insane :slightly_smiling_face:
+U3SJEDR96 : nah, those were fine! :slightly_smiling_face:
+U641LDZFU : So if it's not matching I need to look into the "item" to make sure it has the correct fields
+U3SJEDR96 : well right now a Node can only be either of those two things, no extra or missing fields allowed. You can't construct wrong values, so you also can't encounter them :slightly_smiling_face:
+U641LDZFU : yeah, I am loving that about elm!
+U3BTVEFQU : hello Elm community .. i'm kinda stuck right now: Is there a way to debounce/delay a cmd for a certain timeperiod? I read all the stuff about Task and Process.sleep, but know I'm more confused than ever :disappointed:
+U0LPMPL2U : why do you need to delay commands?
+U3BTVEFQU : I'm using a form which uses RemoteData to submit something to my server. My server needs a little bit time (talking to a 3rd party server) to validate the input. My idea was to wait for RemoteData response and when the data is not validated yet, issue another request to the server. The response in my model would than be overridden with the new response, and so on, until the data is validated.
+U3BTVEFQU : To keep it simple and clean I wanted to skip a `Time.every` subscription and introducing another msg for my `update` function.
+U3BTVEFQU : So I basically need it for polling … I'm able to poll already, however because of no timeout/delay the performance is horrible and I make 100 requests per second
+U2JA29EKF : <https://github.com/Bernardoow/elm-alert-timer-message/blob/1.0.0/src/AlertTimerMessage.elm> is a good example of sleeping
+U3BTVEFQU : <@U2JA29EKF> yep found something similar, however how would I do another http request with this delay function?
+U3SJEDR96 : So you can do `Time.sleep (100 * millisecond) |&gt; Task.andThen (makeNewRequest)`
+U0LPMPL2U : You could have something like:```
+subscriptions : Model -&gt; Sub Msg
+subscriptions model =
+  case model.state of
+    Polling -&gt; Time.every second (always Poll)
+    _ -&gt; Sub.none
+```
+
+U3BTVEFQU : <@U0LPMPL2U> yep, just wanted to avoid this :wink:
+U0K92QFST : ilias: is it Time.sleep, or Process.sleep?
+U3SJEDR96 : somewhat more complete example: `Process.sleep (100 * Time.millisecond) |&gt; Task.andThen (\_ -&gt; buildRequest |&gt; Http.toTask) |&gt; Task.attempt GotResponse`
+U3SJEDR96 : Process, my bad :slightly_smiling_face:
+U0K92QFST : Cool! Just making sure
+U641LDZFU : So I can't still can't get unions working...
+U641LDZFU : <https://gist.github.com/allansideas/60658d50f4f6b5ab9738c05f419324a8>
+U641LDZFU : ```Function `unionFn` is expecting the argument to be:
+MyThing
+
+But it is:
+
+String```
+
+U641LDZFU : Am I missing something super obvious
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

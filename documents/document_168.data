@@ -1,30 +1,68 @@
+U1C03090C : <@U050MP39D> `oss-world-example.core` looks like this:
+U1B0DFD25 : <@U1C03090C> You might have an extra quote character somewhere?
+U050MP39D : fwiw, I can load that ns from that jar fine```
+11326-storage:look bfabry$ java -cp ~/.m2/repository/org/clojure/clojure/1.8.0/clojure-1.8.0.jar:project.jar clojure.main
+Clojure 1.8.0
+user=&gt; (<http://clojure.java.io/resource|clojure.java.io/resource> "oss_world_example/core__init.class")
+#object[java.net.URL 0x2ca26d77 "jar:file:/private/tmp/look/project.jar!/oss_world_example/core__init.class"]
+user=&gt; (require '[oss-world-example.core])
+nil
+user=&gt; oss-world-example.core/entry
+#object[oss_world_example.core$entry 0x24c22fe "oss_world_example.core$entry@24c22fe"]
+user=&gt;
 ```
-<@U0K43G63U>: cool concept. what, if any, were the biggest snags you hit using botkit for facebook messenger? in regards to tracking sentiment and mood, are you using watson for that? are there any other good api's you'd recommend looking at in regards to pulling out mood from free text?
-I actually didn't use botkit (sorry <@U04SM6T2H> :grin:)
-<@U1T67F478>: I am using a few different APIs and some of my own logic to determine mood/emotion
-There are a ton of sentiment analysis APIs that can be leveraged
-DM me if you want more details!
-I would highly reccomend botkit though. It was mostly due to timing and my own situation that I didn't choose botkit for this project. I've used it in the past and love it!
-I think I'm confused about how botkit storage works, shouldn't it insert the teams automatically?
-<@U1SSQQ02U>: that's not possible 
-Thanks!
-<@U1T9WRFUH>: You'll have to create your own storage provider. There is an example linked in the README. It needs to implement all the methods that that the other storage providers use (and make sure the tests pass)
-<@U0K43G63U>: I dig it. Was thinking of writing myself a little CBT bot at some point.
-cbt?
-Continuously Botted Transmission?
-You got it!!
-Or maybe it's cognitive behavioral therapy, I always get those two confused.
-Heh
-<@U126KEXN2>: thanks! Would love to hear your thoughts. DM me!
-Lemme play with it a bit. Do you have plans to bring it to Slack? I try to keep Facebook Messenger closed because FB makes my time go :hourglass_flowing_sand:
-Yeah. Still exploring the best route for Slack, might make it more workplace focused but tbd
-Versus just a direct port over
-Makes sense, although I could totally see myself installing it on my primary Slack team just as-is
-<@U1T9WRFUH>: maybe this one can help you a bit <https://github.com/FoundersAS/botkit-storage-elasticsearch>
-I've an issue with displaying links when I'm using the `chat.postMessage`. It works fine when I use the webhook url but not using the api.
-the messages come like this: `Question ID: &lt;https://www.abc.com/question/10803|10803&gt;.`
-whereas, I want them to appear like a label which has an associated link but not displayed.
-any clues, anyone?
-<@U1KH878SJ>: using botkit?
-no sir, I am using HTTParty directly to call the `chat.postMessage` in rails framework
-<@U1KH878SJ>: in botkit you'll have to wrap your message in at least `{text: ‘my message'}` for it to work, maybe it's the same for you sorta? Worth a shot I guess :slightly_smiling_face:
+
+U050MP39D : ```user=&gt; (oss-world-example.core/entry)
+Entered the example plugin.
+nil
+```
+
+U1B0DFD25 : Perhaps in the edn file.
+U050MP39D : so my bet is you don't actually have the jar on the cp
+U050MP39D : the edn file is using underscores for the namespace, which is incorrect
+U050MP39D : I'd have to see your loader code to know whether you compensate for that
+U050MP39D : but, while that's a problem, it's not a problem that should yield the error you got. the error you got very specifically says the file does not exist in the cp
+U050MP39D : (it could be finding the edn file because it's accessible by some other cp entry like .)
+U1B0DFD25 : I think the names in `could not locate` error message should not start with a quote, so check for single quote in the edn file such as:```
+{:description "Markdown parser"
+ :init 'cryogen-markdown.core/init}
+```
+
+U050MP39D : ^ that's it
+U050MP39D : I missed the quote
+U050MP39D : you don't need to quote inside an edn file
+U050MP39D : ```(edn/read-string "{:foo bar}")
+=&gt; {:foo bar}
+(class (first (vals *1)))
+=&gt; clojure.lang.Symbol
+```
+
+U050MP39D : and in fact it's not part of edn I don't think (' etc are part of the clojure reader)
+U050MP39D : yeah ```
+(edn/read-string "{:foo 'bar}")
+=&gt; {:foo 'bar}
+```
+
+U1B0DFD25 : It's surprising in my opinion actually. Maybe it's a bug in the lib, not wrapping with `(name symbol)` where it should.
+U1B0DFD25 : Nope, I'm wrong
+U050MP39D : it's surprising but I dunno about bug... the language reader and the data format reader can't be exactly the same
+U1C03090C : That's probably it. I'll check when I get back to my computer. 
+U1C03090C : Yep removing the quote fixed it. Thanks for your help!
+U1C03090C : So I have some code in my -main function `(extend-classpath (filter #(.contains (.getName %) ".jar") (file-seq plugin-dir)))`. If I run this directly in the repl, it changes my classpath as I want it to. If I run the -main function in the repl, it doesn't work. What causes this difference (boot repl if it matters)?
+U0BKWMG5B : Oh, thanks! But I'm afraid I already have an invite. Thank you anyway.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

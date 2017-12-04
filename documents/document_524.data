@@ -1,21 +1,79 @@
+U1UGYHGCA : I think you're wrong
+U1UGYHGCA : The raw type is `Html a` where `a` can be anything at first. You will then say that, in your particular use case, it will be a `String` becoming a `Html String`
+U1UGYHGCA : For example, you have `Maybe a` using the same pattern where `a` will be the type of the value inside the `Maybe`
+U1UGYHGCA : If you have an `Int` inside it, it will be a `Maybe Int`
+U1UGYHGCA : For `Html`, the generic type `a` is the type of msg that the html can trigger
+U68RLL9FF : Thanks <@U1UGYHGCA> this makes much more sense than my initial though
+U6CCW4KV1 : I already posted this in general, but I guess it's actually a newbie question :sweat_smile:
+U6CCW4KV1 : Can somebody help me? :confused:
+U6CGPE80L : Hi everybody. What is the easiest way in elm to change dynamically style of some element?. I have button with Id and how can I choose and change its color? Should I try to use jQuery or actually exist some elm mechanism to do that?
+U14Q8S4EM : Yeah, you can do an inline style
+U14Q8S4EM : Like ```
+div
+    [ class "cool-div" 
+    , style
+        [ ("color", model.coolDivsColor) ]
+    ]
+    []
 ```
-the Composed tag causes the compiler to drain my resources, couple of minutes to compile / elm-make takes as much RAM that is left
-over 4 GB of RAM
-Hey all, is there any way to do a “cleanup” before an Elm application is destroyed?
-I’m using ports to do some stateful stuff.
-<@U17J54S2U> no
-You’ll need to send a message out of the port to say that the elm app is going away.
-<@U3AAB7A4C> try changing the name of `Type` to something else
-Got it
-<@U0EUHKVGB> okay thanks I’ll try that
-That’s just a guess. But I actually doubt that is the issue
-<@U3AAB7A4C> you probably have a large case..of statement or something?
-I've seen that issue a few times. What's considered a "large" `case .. of`?
-according to the tag Composed it is and will be large yeah
-<@U3AAB7A4C> I don’t understand what you mean by that
-it was kind of larger already, the compiler now says there are missing some branches after minutes of compile time
-if I remove the last type of the constructor label it’s fast as alwazs
-<@U4PT7NG4V> I would say more than 16 branches is worth investigating
-always
-<@U3AAB7A4C> Yes, you have too many branches in your case..of
-Split your pattern matching up.
+
+U14Q8S4EM : Style takes a `List (String, String)` where the first `String` is the key and the second `String` is the value for whatever style. So I do `("top", (toString model.position.y) ++ "px")` a lot, to control where something shows up, when I need highly dynamic positioning stuff going on.
+U3F8KG1DE : Hello, I would like to implement <https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_accordion_animate> in ELM
+U3F8KG1DE : What is missing is how to find out the size of the div to animate i.e. panel.scrollHeight
+U3F8KG1DE : Should I use port for this?
+U3LUC6SNS : <@U6CGPE80L> You should devise a function whose value is the color you want.  No jQuery needed!
+U6C09T8HX : I've got a question: In the Http library the first definition is: "type alias Request a = Request a".  I thought type alias was used to give a name to an existing type so does this mean that "Request" is already defined?  If so where?...and why define it again?
+U6C09T8HX : ...with the same name?
+U0JFGGZS6 : <@U3F8KG1DE>  you may find this helpful for getting to the next sibling and its scrollHeight:  <http://package.elm-lang.org/packages/debois/elm-dom/1.2.3/DOM>
+U0JFGGZS6 : without resorting to ports
+U48AEBJQ3 : <@U6C09T8HX> It is an alias for a type defined in another module. In this case, a module which is not exported from the package.
+U6C09T8HX : hmmm
+U6C09T8HX : Forgive my ignorance gilbert, but are you saying that the http package contains a module somewhere within it which defines the Request type but since it is not exported by that module we see this: "type alias Request a = Request a"?  So all I need to take away from that like is that something can be tagged as a request?
+U48AEBJQ3 : It seems that there are two issues in your question. First is that there is no special way to reexport types and functions from a module and sometimes you end up having something in a module you don't want to export. Using this type alias is effectively exporting just this type from the other module.
+Also, it is very common to *not* export the constructors of a data type. By leaving them hidden, the maintainer can change implementation details without changing the exposed API. It also helps to prevent people from creating bad states by forcing them to use controlled functions to get an instance of a type.
+
+U3LUC6SNS : Hello, I have two functions that I would like to run in sequence in the `update` function:
+First is 
+```
+login2 : Model -&gt; (Model, Cmd Msg)
+login2 model =
+  ( login model,  Request.User.loginUserCmd model Request.Api.loginUrl)
+```
+and second is
+```
+search : SearchDomain -&gt; String -&gt; Page -&gt; Model -&gt; ( Model, Cmd Msg )
+search searchDomain query page model = ...
+```
+How would I go about doing this?
+
+U6C09T8HX : oThank you very much for taking the time to answer my question Gilbert!  It's very much appreciated.  How can I repay you?
+U6C09T8HX : ...and what motiates you to hang out here and answer questions?
+U153UK3FA : <@U3LUC6SNS> ```let
+  (model1, cmds1) = login2 model
+  (model2, cmds2) = search searchdomain something somepage model1
+in 
+  (model2, Cmd.batch [cmds1, cmds2])
+```
+
+U153UK3FA : <http://package.elm-lang.org/packages/Fresheyeball/elm-return/latest> is a package that can remove some of the boilerplate
+U3LUC6SNS : Thankyou <@U153UK3FA>!!
+U153UK3FA : <@U3LUC6SNS> I wasn't sure if you wanted to sequence the Cmds (which you can't do)
+U3LUC6SNS : <@U153UK3FA>, that works fine - actually, it works beautifully!
+U153UK3FA : just to be clear, there is no guarantee that your login will complete before your search request.
+U153UK3FA : if they depend that ordering (implicitly passing state through the model) then they'll likely fail under different network conditions
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

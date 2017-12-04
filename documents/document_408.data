@@ -1,4 +1,180 @@
-    { b | metas : List a } -&gt; Int```
-Ooh, right, I completely forgot that `Dict.map` takes the key, too :smile:
-Try `Dict.map (\key val -&gt; val.metas |&gt; List.length)` instead
-Yea I did that earlier but was still being tripped up somewhere. I'll add those in.
+U5FC7BE0G : <@U3SJEDR96> Awesome! That's exactly the solution I was lookign for! String in the error case is fine. Thanks!
+U641LDZFU : oh wow, so if I am getting errors on the "big array" like ```The 5th entry has this type:
+{ ..., nodeContent : { ..., chatId : ..., userId : ... } }
+
+But the 6th is:
+
+{ ..., nodeContent : { ... } }
+
+Hint: Problem in the `nodeContent` field. Looks like a record is missing these
+fields: chatId and userId```
+
+U641LDZFU : although the nodeContent have different type aliases
+U641LDZFU : there is an error with my type aliases?
+U641LDZFU : or I have to construct them in the list?
+U2LAL86AY : <@U641LDZFU> in elm lists, arrays, dicts and trees and other data that resembles collections of elements - need to have the same type.
+you need `chatId`  and `userId` on the 6-th element - which i guess is of different type.
+Can you please give your type aliases you use in that list?
+
+U641LDZFU : Thanks, I think my problem is I need to use another union type... ```type alias ChatMessage =    { id : Int
+    , chatId : Int
+    , userId : Int
+    , content : List (Html Msg)
+    }
+
+
+type alias Transition =
+    { transitionType : String, toStoryNode : Int, text : Maybe String }
+
+
+type alias ChatNodeContent =
+    { id : Int, nodeType : String, nodeContent : ChatMessage, state : Maybe String, transitions : List Transition }
+
+
+type alias NewsItem =
+    { id : Int
+    , content : List (Html Msg)
+    , userId : 1
+    , chatId : 2
+    }
+
+
+type alias NewsItemNodeContent =
+    { id : Int, nodeType : String, nodeContent : NewsItem, state : Maybe String, transitions : List Transition }
+
+
+type StoryNode
+    = ChatNode ChatNodeContent
+    | NewsItemNode NewsItemNodeContent```
+
+U641LDZFU : I think I should probably rename,  ChatNodeContent, and NewsItemContent, then create a new union type for the nodeContent which can be one of NewsItem or ChatMessage
+U2LAL86AY : hmm.. processing .. :smile:
+U2LAL86AY : if you have an image will help.
+U2LAL86AY : ```type alias NewsItem =    { id : Int    , content : List (Html Msg)    , userId : 1    , chatId : 2    }
+```
+This should not compile
+
+U2LAL86AY : you have values mixed with types.
+U2LAL86AY : also is not so good to have `content : List (Html Msg) ` is better to just keep the data on your model , not html + data.
+U641LDZFU : Ah, that was causing me trouble :slightly_smiling_face:
+U2LAL86AY : i will do a rewrite here.
+U641LDZFU : Ah sorry, that was an progress update to: ``` type alias ChatMessage =
+    { id : Int
+    , chatId : Int
+    , userId : Int
+    , content : List (Html Msg)
+    }
+
+
+type alias Transition =
+    { transitionType : String, toStoryNode : Int, text : Maybe String }
+
+
+type alias ChatNodeItem =
+    { id : Int, nodeType : String, nodeContent : StoryNodeContent, state : Maybe String, transitions : List Transition }
+
+
+type alias NewsItem =
+    { id : Int
+    , content : List (Html Msg)
+    }
+
+
+type alias NewsNodeItem =
+    { id : Int, nodeType : String, nodeContent : StoryNodeContent, state : Maybe String, transitions : List Transition }
+
+
+type StoryNode
+    = ChatNode ChatNodeItem
+    | NewsNode NewsNodeItem
+
+
+type StoryNodeContent
+    = NewsItemContent NewsItem
+    | ChatMessageContent ChatMessage
+
+
+
+
+type alias Player =
+    { visitedStoryNodes : List StoryNode
+    , currentStoryNode : Maybe StoryNode
+    }
+
+
+type alias Model =
+    { player : Player
+    }
+
+```
+
+U2LAL86AY : i understand what you are going after.
+U2LAL86AY : why do you need to have `content : List (Html Msg)`
+U2LAL86AY : auch ! :smile:
+U641LDZFU : Vielen Dank!
+U2LAL86AY : ```type Msg
+    = NoOp
+
+
+type alias Model =
+    { player : Player }
+
+
+type alias Player =
+    { visitedStoryNodes : List StoryNode, currentStoryNode : Maybe StoryNode }
+
+
+type StoryNode
+    = ChatNode ChatNodeItem
+    | NewsNode NewsNodeItem
+
+
+type StoryNodeContent
+    = NewsItemContent NewsItem
+    | ChatMessageContent ChatMessage
+
+
+type alias ChatNodeItem =
+    { id : Int, nodeType : String, nodeContent : StoryNodeContent, state : Maybe String, transitions : List Transition }
+
+
+type alias NewsNodeItem =
+    { id : Int, nodeType : String, nodeContent : StoryNodeContent, state : Maybe String, transitions : List Transition }
+
+
+type alias ChatMessage =
+    { id : Int, content : List (Html Msg), chatId : Int, userId : Int }
+
+
+type alias NewsItem =
+    { id : Int, content : List (Html Msg) }
+
+
+type alias Transition =
+    { transitionType : String, toStoryNode : Int, text : Maybe String }
+
+```
+
+U2LAL86AY : i need that function causing the problem
+U641LDZFU : The problem is it's many :slightly_smiling_face:
+U641LDZFU : I think I will have another hack at it tomorrow
+U2LAL86AY : ```Hint: Problem in the `nodeContent` field. Looks like a record is missing these fields: chatId and userId
+```
+THis error has a line number
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

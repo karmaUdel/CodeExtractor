@@ -1,4 +1,125 @@
+U23SA861Y : use the operators as the library recommends that
+U23SA861Y : the function isn't "called" until the last value is specified
+U23SA861Y : However, when it is called you can then provide a message indicating which value is out of place
+U23SA861Y : there is also some stuff you might want to read in regards to delayed commits
+U23SA861Y : yeah, there looks like there is something in there that may be useful to you
+U6D0EGB4K : ok, thanks :slightly_smiling_face:
+U2SR9DL7Q : Can anyone help me understand this stack overflow answer? <https://stackoverflow.com/questions/12405555/css-extend-div-to-fit-the-whole-page> I'm trying to get a div to expand to the full height of my page and it absolutely refuses.
+U0ZRNV5M3 : <@U2SR9DL7Q> do you have an example?
+U0ZRNV5M3 : it's usually the case that the div's parent does not have a height
+U2SR9DL7Q : <@U0ZRNV5M3> yeah... I'm using mdl, so the whole view is nestled in this Layout object. Let me see if I can cut out a snippet that makes sense.
+U2SR9DL7Q : ```viewGameBoard : Model -&gt; Players -&gt; Html Msg
+viewGameBoard model players =
+    let
+        player4 =
+            Zipper.current &lt;| Zipper.last players
+
+        playerlist =
+            Zipper.toList players
+    in
+    Options.div [ css "height" "100%" ]
+        [ grid
+            [ css "text-align" "center"
+            ]
+          &lt;|
+            List.map (\x -&gt; playerCell x) playerlist
+        , grid
+            [ css "text-align" "center"
+            , maxWidth "768px"
+            , css "height" "100%"
+            ]
+          &lt;|
+            boardToHtml model.board
+        , player4div player4 model
+        ]
 ```
-we have JS to thank for that ¯\_(?)_/¯
-And IEEE
-be thankful it is IEEE754 compliant, because JSON is not
+The second grid element is what I need stretched to fill the space in the page.
+
+U5W5F6QGP : so you want things to be the height of the page at minimum?
+U5W5F6QGP : min-height: '100vh' or something along those lines will work
+U5W5F6QGP : vh &amp; vw are very useful units
+U2SR9DL7Q : <@U5W5F6QGP> I'll give that a try.
+U2SR9DL7Q : What I really need is just that little footer bound the bottom of the page, and the middle page to scroll as it's content increases. I managed the footer part. But the middle div behaves very strangely when there's too many dominoes (really only a problem for mobile)
+U2SR9DL7Q : Rather than just resize itself as the new elements come in, the domino chips spill into the player data space... 
+U5W5F6QGP : It is a bit of upfront learning, but flexbox is a huge help with stuff like thisit feels a lot more sane
+
+U2SR9DL7Q : Thats the thing. Elm mdl grid components use flex box . But I'll have to look through the source code to see how they manage it. 
+U5W5F6QGP : ahhh right, sorry, I'm not super familiar with the mdl package
+U2SR9DL7Q : It's a great package. Very comprehensive. But it thwarts me sometimes in these types of situations. 
+U6907LQ6S : Hey all, I'm getting the following crash when running elm-test. I think I'm not doing the recursion correctly across a list and blowing up the memory. Does anyone have any tips on where I should look?
+U6907LQ6S : --- Last few GCs ---&gt;
+   16812 ms: Mark-sweep 1326.9 (1434.9) -&gt; 1326.9 (1434.9) MB, 835.4 / 0.0 ms [allocation failure] [GC in old space requested].
+   17654 ms: Mark-sweep 1326.9 (1434.9) -&gt; 1326.9 (1434.9) MB, 841.3 / 0.0 ms [allocation failure] [GC in old space requested].
+   18483 ms: Mark-sweep 1326.9 (1434.9) -&gt; 1331.7 (1409.9) MB, 829.2 / 0.0 ms [last resort gc].
+   19350 ms: Mark-sweep 1331.7 (1409.9) -&gt; 1336.6 (1409.9) MB, 866.8 / 0.0 ms [last resort gc].
+
+
+&lt;--- JS stacktrace ---&gt;
+
+==== JS stack trace =========================================
+
+Security context: 000003E75BFCFB49 &lt;JS Object&gt;
+    1: func [000003E75BF04381 &lt;undefined&gt;:2327] [pc=000002337953E0E5] (this=000001BC0B7A86A1 &lt;JS Function wrapper (SharedFunctionInfo 0000014D2F0D5871)&gt;,x=00000356060D17B1 &lt;an Object with map 00000
+2B50F240AB1&gt;,y=00000356060D6811 &lt;an Object with map 000002B50F258161&gt;)
+    2: func(aka foldr) [000003E75BF04381 &lt;undefined&gt;:~1965] [pc=00000233799C7338] (this=000001C22BECFCE1 &lt;JS Function wrapper (...
+
+FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
+
+U0GGQSHUZ : Do you have any example code? In general, commenting out bits of code at a time can help debug. There are probably better ways
+U0GGQSHUZ : are you doing list recursion yourself or using fold or map?
+U0GGQSHUZ : <@U6907LQ6S>
+U6907LQ6S : Thanks - I'm using List.map as part of a recursive method. I'll simplify the code to its essentials and paste it in
+U0GGQSHUZ : <@U6907LQ6S> what is your goal? Are you trying to create a generator for GroupValue?
+U0GGQSHUZ : you may want something like:```
+groupValGen : Fuzzer GroupValue
+groupValGen =
+    Fuzz.map2 (\s1 s2 -&gt; GroupValue s1 s2) Fuzz.string Fuzz.string
+```
+
+U0GGQSHUZ : what does your test file look like?
+U0GGQSHUZ : Here's an example test file:```
+module Example exposing (..)
+
+import Expect exposing (Expectation)
+import Fuzz exposing (Fuzzer, int, list, string)
+import GroupVal exposing (..)
+import Test exposing (..)
+
+
+suite : Test
+suite =
+    describe "The GroupValue module"
+        [ fuzz groupValGen "testing the GroupValue" &lt;|
+            \groupVal -&gt;
+                -- Do something with randomly generated group value here
+                Expect.equal groupVal groupVal
+        ]
+
+
+groupValGen =
+    Fuzz.map2 (\s1 s2 -&gt; GroupValue s1 s2) Fuzz.string Fuzz.string
+```
+
+U6907LQ6S : My goal is to use fuzz testing against the combination generator, but it falls over
+U6907LQ6S : I'll paste in my tests
+U48AEBJQ3 : <@U6907LQ6S> Are you sure you aren't just making a list that is too large?
+U6907LQ6S : The list should be at most 50^5 which isn't all that big
+U6907LQ6S : 312 million
+U6907LQ6S : maybe it is :slightly_smiling_face:
+U6907LQ6S : I'm in the middle of converting from js to Elm and I've got no idea how to debug memory problems in Elm
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

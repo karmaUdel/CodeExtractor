@@ -1,1 +1,69 @@
-registerServiceWorker();```
+U0LPMPL2U : So apparently `logBase : Float -&gt; Float -&gt; Float`
+U0LPMPL2U : that would be why
+U23SA861Y : that would make some sense
+U0LPMPL2U : ```&gt; length i = abs i |&gt; logBase 10 |&gt; floor |&gt; (+) 1
+&lt;function&gt; : Float -&gt; Int
+```
+
+U0LPMPL2U : this function doesn't work for decimals though:
+U0LPMPL2U : ```length 3.14
+1 : Int
+```
+
+U0LPMPL2U : so you may want to constrain it to only use integers
+U3L8MM10T : Perhaps someone can help with the test. Do I need to import `Infinity`for `Expect.equal Infinity  (digitCount (1000^1000))` ? _Cannot find symbol "Infinity"_
+U0LPMPL2U : Not sure how you can access `Infinity` directly :confused:
+U0LPMPL2U : A hacky way would be to say: `Expect.equal (1000 ^ 1000)  (digitCount (1000^1000))`
+U0LPMPL2U : or you could create a function:```
+infinity : number
+infinity =
+  1000 ^ 1000
+```
+
+U3SJEDR96 : <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Basics#isInfinite>
+U3SJEDR96 : so `digitCount (1000 ^ 1000) |&gt; isInfinite |&gt; Expect.true "that should really be Infinite."`
+U3SJEDR96 : unless digitCount returns an `Int` :sweat_smile:
+U2PTZFKFX : hi, can someone explain further about Routing or Navigations?   i.e do i create different div containers to load data into ti when a next page is switched? i. e Home, About us etc??? or a different views with it's own page. I m still confused in that part.
+U2PTZFKFX : mean, do i use Rest API to fetch data into containers or I need to create different html page linking then as normal html ?
+U4WH8STNX : This is a good source but as the article states it's not a smooth introduction :slightly_smiling_face: <https://dev.to/rtfeldman/tour-of-an-open-source-elm-spa>
+U2PTZFKFX : thanks
+U4WH8STNX : A look into these files should suffice to get how you could do routing, as always there is no *one* solution. <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm> <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Route.elm>
+U37HUSJ4R : I have another JSON decoder question :stuck_out_tongue:
+U37HUSJ4R : this json `{"custom":{"20170414":[900, 1300],"20170415":[],"20170417":[]}`
+U37HUSJ4R : I want to try and decode into these types
+U37HUSJ4R : ```type alias Custom = {
+    data: List Date
+}
+
+type alias Date =
+    { date : String, extra : Maybe Time }
+
+
+type alias Time = { start: Int, end: Int}
+```
+
+U37HUSJ4R : I can’t use `keyValuePairs`
+U37HUSJ4R : any ideas
+U23SA861Y : why can't you use keyValue Pairs?
+U37HUSJ4R : because `keyValuePairs` wants the pairs to be same type (this could be wrong?)
+U23SA861Y : the pairs are the same type (String, List Int)
+U23SA861Y : or at least that's what you have written
+U23SA861Y : you then need to appropriately decode the date and times
+U0LPMPL2U : If you said `keyValuePairs timeDecoder` you would have a `Decoder (List (String, Time))`
+U0LPMPL2U : assuming you've already created a `timeDecoder`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

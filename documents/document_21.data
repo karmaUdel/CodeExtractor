@@ -1,6 +1,109 @@
+U051SS2EU : yes
+U051SS2EU : ```+user=&gt; (take 10 (for [x (range) y (range) :while (&gt; x y)] [x y]))([1 0] [2 0] [2 1] [3 0] [3 1] [3 2] [4 0] [4 1] [4 2] [4 3])
 ```
-I prefer not to mix side-effects with pure stuff
-Someone Please suggest real-time-messaging clojure library. I might also need Screen Sharing and video chat.
-jgeraert: `doseq` works great for this, but there's also `run!` which like this usage of map takes a function and a collection as args, but is run for side effects eagerly.
-<@U28947274> meant to tag you above
-<@U051SS2EU> Ah I see, thanks for the tip :slightly_smiling_face:
+
+U0B4ZBBKM : Ah, a misplaced `)` is responsible for the confusion. Thanks for the backup!
+U064X3EF3 : what's the question?
+U064X3EF3 : a profiler dump isn't too helpful w/o the code
+U064X3EF3 : I've been using Java since before LinkedList existed. back then, the JDK was a lot smaller and no one anticipated how Java would grow. at the time, it seemed fine!
+U04V70XH6 : <@U0ARSC79A>'s question was posted at 4:08am Pacific: "Hi, I'm optimizing my clojure app. Here are results from jvisualmvm. Could you tell me, when clojure.lang.util.hash is invoking? Maybe it should be cached?" /cc <@U064X3EF3>
+U064X3EF3 : Hash is called when using a hashed data structure (either hash map or hash set). In some cases it is cached, depends on what is being hashed.
+U064X3EF3 : Both keys and vals are hashed, so consider what types end up in keys and vals of hash maps
+U04V70XH6 : (thanks Alex — hopefully they'll see that tomorrow when they come back online!)
+U1LJAM1U7 : Hi,How to understand `*` notation from <https://clojure.org/reference/java_interop>, specifically `(. Classname-symbol (method-symbol args))* or (. Classname-symbol method-symbol args)*`
+vs:
+```
+user=&gt; (. clojure.lang.RT contains #{1} 1)
+true
+user=&gt; (. clojure.lang.RT (contains #{1} 1))
+true
+```
+
+U1LJAM1U7 : I am not sure about placement of `*` , it would seam that `(. Classname-symbol (method-symbol args*)) or (. Classname-symbol method-symbol args*)` is more natural ...
+U06BE1L6T : charlieroth: ClojureScript Unraveled is also good, especially for getting started with ClojureScript if you are an experienced programmer: <https://funcool.github.io/clojurescript-unraveled/>
+U04V70XH6 : <@U1LJAM1U7> Looks like typos -- The section above has the `*` in the correct place.
+U1YTUBH53 : timeline rumors about 1.9 anyone? :sweat_smile: can't wait :slightly_smiling_face:
+U2J4FRT2T : Feel like a Debian release 
+U3JURM9B6 : given the keys are 0-n, is transient-vector significantly fastedr than transient-hash-map ?
+U1LJAM1U7 : seancorfield: ty for confirmation. Should I send a pull request?
+U1YTUBH53 : lol
+U1ALMRBLL : I think this would qualify as a "small change" so see the relevant section here: <https://clojure.org/community/contributing_site> <@U1LJAM1U7>
+U1ALMRBLL : <@U3JURM9B6> significantly faster at what, specifically?
+U051SS2EU : one would assume conj!, since that's what transients are for
+U051SS2EU : seems like an easy thing to test with criterium
+U051SS2EU : ```+user=&gt; (crit/bench (let [v (transient [])] (reduce conj! v (range 1000))))Evaluation count : 3435960 in 60 samples of 57266 calls.
+             Execution time mean : 17.803731 µs
+    Execution time std-deviation : 319.760540 ns
+   Execution time lower quantile : 17.305732 µs ( 2.5%)
+   Execution time upper quantile : 18.382921 µs (97.5%)
+                   Overhead used : 1.572942 ns
+
+Found 1 outliers in 60 samples (1.6667 %)
+        low-severe       1 (1.6667 %)
+ Variance from outliers : 7.7727 % Variance is slightly inflated by outliers
+nil
++user=&gt; (crit/bench (let [m (transient {})] (reduce #(conj! % [%2 %2]) m (range 1000))))
+Evaluation count : 292260 in 60 samples of 4871 calls.
+             Execution time mean : 204.650986 µs
+    Execution time std-deviation : 11.916923 µs
+   Execution time lower quantile : 197.407687 µs ( 2.5%)
+   Execution time upper quantile : 223.127690 µs (97.5%)
+                   Overhead used : 1.572942 ns
+
+Found 3 outliers in 60 samples (5.0000 %)
+        low-severe       1 (1.6667 %)
+        low-mild         2 (3.3333 %)
+ Variance from outliers : 43.4448 % Variance is moderately inflated by outliers
+nil
+```
+
+U051SS2EU : so the map with number keys version is ~ 10x slower
+U050SC7SV : for a size 1000 &lt;thing&gt;
+U051SS2EU : right
+U051SS2EU : perhaps a smaller input would better represent real use cases
+U050SC7SV : my guess is that for vectors it will be O(1) no matter the size
+U050SC7SV : well it's a bit of a generalisation, but you get what I mean
+U1ALMRBLL : "real use cases" depends on the use case. that's why when someone asks "which is faster, x or y?" it's important to understand the use case
+U050SC7SV : indeed
+U1ALMRBLL : also <@U051SS2EU> , you are creating a persistent vector in your `conj!` for maps, and it's faster for your test scenario to use `assoc!` instead```(c/bench (let [m (transient {})] (reduce #(conj! % [%2 %2]) m (range 1000))))
+Evaluation count : 385800 in 60 samples of 6430 calls.
+             Execution time mean : 157.793112 µs
+    Execution time std-deviation : 3.521488 µs
+   Execution time lower quantile : 154.508093 µs ( 2.5%)
+   Execution time upper quantile : 165.003217 µs (97.5%)
+                   Overhead used : 1.312303 ns
+
+Found 3 outliers in 60 samples (5.0000 %)
+	low-severe	 2 (3.3333 %)
+	low-mild	 1 (1.6667 %)
+ Variance from outliers : 10.9550 % Variance is moderately inflated by outliers
+=&gt; nil
+(c/bench (let [m (transient {})] (reduce #(assoc! % %2 %2) m (range 1000))))
+Evaluation count : 515160 in 60 samples of 8586 calls.
+             Execution time mean : 118.954362 µs
+    Execution time std-deviation : 4.101911 µs
+   Execution time lower quantile : 115.324719 µs ( 2.5%)
+   Execution time upper quantile : 130.422397 µs (97.5%)
+                   Overhead used : 1.312303 ns
+
+Found 4 outliers in 60 samples (6.6667 %)
+	low-severe	 4 (6.6667 %)
+ Variance from outliers : 20.6386 % Variance is moderately inflated by outliers
+=&gt; nil```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

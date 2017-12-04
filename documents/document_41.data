@@ -1,12 +1,65 @@
- :program-1 #{:framebuffer-1 :framebuffer-2}}```
-<@U3JURM9B6> I'd think accidentally calling an accessor and constructor would be a lot less likely than accidentally calling assoc on the wrong object
-<@U051SS2EU> : I can make the constructor private, then have a function (which calls the constructor) do checks beforehand
-<@U3JURM9B6> For accessing object properties (as opposed to array elements), consider `goog.object/get` instead of `aget`.
-<@U3JURM9B6> creating custom types that have their own field accessors completely negates the value of generic data access from the clojure std library
-your code will essentially be a non-reusable DSL
-I firmly believe you are going down the wrong path, and that the advice you're getting about specific implementation is misguided
-you should test against invalid / incorrect data (even from your own code).  Have you considered writing generative tests for your datastructures?  (either from test.check or from spec)
-test against bad data while allowing bad data to exist
-Lots of things that are common in other languages (e.g. privileged data) are the exact wrong approach in Clojure.
-when I say 'generic data access' here is an example of what I mean:
-If you make a custom type, you'll need to do:
+U050R7ECY : trying that gives "var #'private-macro is not public"
+U056QFNM5 : I think you need to quote the to-be-expanded form.
+U056QFNM5 : `(macroexpand '(private-macro foo))`
+U050R7ECY : that was slack formatting fail on my part
+U050R7ECY : I know the standard way to use macroexpand, but it fails w/ private macros
+U056QFNM5 : Interesting. :thinking_face:
+U056QFNM5 : Have you tried `ns-resolve`ing the private macro? Not sure whether that would work, but maybe.
+U050R7ECY : ah, looks like `tools.analyzer` will do it
+U050R7ECY : but AFAICT, it's not possible in the built-in implementation
+U056QFNM5 : Wasn't aware of that limitation. Interesting.
+U051SS2EU : <@U056QFNM5> the problem with resolve or ns-resolve is that the clojure compiler uses metadata on vars to decide if something is a macro, so using the var means it gets treated as a function - but! the fascinating thing is that this is a valid way to expand a macro, as long as you provide placeholders for &amp;form and &amp;env (nil here because I'm lazy and it doesn't change the output) ```=&gt; ((resolve 'when) nil nil true :OK)(if true (do :OK))```
+
+U051SS2EU : <@U050R7ECY> so yeah, see above, just give workable &amp;env and &amp;form, and call the var instead of macroexpand the macro call and it works
+U050R7ECY : interesting
+U050R7ECY : thanks!
+U051SS2EU : of course with macros that don't access &amp;env or &amp;form (which is most…) two nils suffice
+U056QFNM5 : Very cool! Thanks for the info <@U051SS2EU>. :simple_smile:
+U4TGNN19D : hi all -- I'm using tools.cli and it's not clear how to pass multiple arguments to an option -- eg if I want an option to become a vector of numbers
+U4TGNN19D : nevermind -- ended up taking it as a string and doing this - `:parse-fn (fn [input ](into [] (map #(Integer/parseInt (str %)) input)))]`
+U2TCUSM2R : This is rather odd, but has anyone experienced an issue where dereferencing agents of collections truncates some of the elements?
+U051SS2EU : remember that send and send-off can return before their action finishes - or even before it starts sometimes
+U051SS2EU : ```+user=&gt; (let [a (agent []) f #(send a conj nil) g (fn [] (count @a))] (dotimes [_ 10000] (f)) (repeatedly 10 g))(6622 6687 6716 6735 6757 6776 6794 6825 6851 6880)
+```
+
+U2TCUSM2R : <@U051SS2EU> that's got to be it. I think I just got confused because I'm creating and returning the agent from inside a macro. That's where I see the trouble. If I create a `def` for the return value and then `deref` that it waits just long enough for the last results
+U051SS2EU : there's the function `await`
+U2TCUSM2R : Thanks, Justin! :slightly_smiling_face:
+U2TCUSM2R : Oh...actually I didn't realize `await` depends on the `:done` key. I'm using an `int-map` so no keywords...
+U051SS2EU : what?
+U051SS2EU : there's no magic :done key, await just lines up a lock that won't unlock until every pending action is done, then waits on it ```(defn await  "Blocks the current thread (indefinitely!) until all actions
+  dispatched thus far, from this thread or agent, to the agent(s) have
+  occurred.  Will block on failed agents.  Will never return if
+  a failed agent is restarted with :clear-actions true."
+  {:added "1.0"
+   :static true}
+  [&amp; agents]
+  (io! "await in transaction"
+    (when *agent*
+      (throw (new Exception "Can't await in agent action")))
+    (let [latch (new java.util.concurrent.CountDownLatch (count agents))
+          count-down (fn [agent] (. latch (countDown)) agent)]
+      (doseq [agent agents]
+        (send agent count-down))
+      (. latch (await)))))
+```
+
+U2TCUSM2R : Oh, ok. I was confused by Clojure Docs: <https://clojuredocs.org/clojure.core/await>
+U2TCUSM2R : I'll have to see why it's not still working
+U051SS2EU : one possibility is that something is calling send after you call await?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

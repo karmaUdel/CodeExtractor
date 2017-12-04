@@ -1,3 +1,75 @@
-it could be written like ```(or (somefn x) y)```, but inside somefn there definitely would be repetitions of x or % argument
-you have three values you care about, `x,` `y`, and `(some-pred? x)`, so you will need those three elements. if x is truthy, you could write the pred to return x or false and use `(or (some-pred? x) y)`, though that means custom predicates.
-Doesn't work if you need pred to succeed on x being false / nil though
+U098UL4QP : <@U050ECB92> which heap profilers do you recommend?
+U08E3BBST : <@U5ZAJ15P0> looks pretty stable to me: <https://github.com/clojure/clojure/graphs/contributors?from=2017-01-01&amp;to=2017-07-01&amp;type=c>
+U5ZAJ15P0 : Is it ok to have side-effects in clojure specs? e.g. a database call. The application I am thinking of is checking that an email hasn't already been used on a "signup" API payload
+U0NCTKEV8 : seems gross
+U2MPUENUC : <@U5ZAJ15P0> only if idempotent
+U0NCTKEV8 : and implies effectively global scoping of the database connection, which is also gross
+U064X3EF3 : It's ok to validate things outside of spec too 
+U04V70XH6 : <@U5ZAJ15P0> Clojure 1.9 is stable enough for production use as far as I'm concerned — my company has Clojure 1.9 Alpha 17 in heavy production usage right now.
+U1164QHNY : does anyone have recommendations on a good job scheduling library for Clojure? checked out Quartzite earlier, but had some difficulty getting it to play nicely with my loading of env vars from mount
+U06BE1L6T : Should I follow kibit's recommendations?```
+Consider using:
+  (vec costs)
+instead of:
+  (into [] costs)
+```
+Is there any real difference between `vec` and `into []`? 
+`vec` is a bit shorter and maybe more explicit but I've also seen `into []` being used a lot.
+I've found following question on SO: <https://stackoverflow.com/questions/12044181/into-or-vec-converting-sequence-back-to-vector-in-clojure> but I don't think  the different behavior for small arrays mentioned in answer is true
+
+U06BE1L6T : I did following experiment:```
+(def my-a (int-array [1 2 3]))
+
+(def my-v (vec my-a))
+my-v
+;=&gt; [1 2 3]
+
+(aset my-a 1 10))
+(java.util.Arrays/toString my-a)
+;=&gt; "[1, 10, 3]"
+
+;=&gt; my-v
+[1 2 3]
+```
+
+U051SS2EU : <@U06BE1L6T> it can't alias an int-array
+U051SS2EU : ```+user=&gt; (def a (into-array [1 2 3]))#'user/a
++user=&gt; (def v (vec a))
+#'user/v
++user=&gt; a
+#object["[Ljava.lang.Long;" 0x5c089b2f "[Ljava.lang.Long;@5c089b2f"]
++user=&gt; (seq a)
+(1 2 3)
++user=&gt; v
+[1 2 3]
++user=&gt; (aset a 1 42)
+42
++user=&gt; v
+[1 42 3]
+```
+
+U051SS2EU : as you see, it can alias a Long array
+U06BE1L6T : I see, any thoughts on my original question? :wink:
+U051SS2EU : if the collection might in some cases already be a vector, or it's an array that won't be aliased, use vec
+U051SS2EU : if you already have a vector and need to add to it, or if you need to do some transformation like mapping or filtering as you add things, use into
+U051SS2EU : if none of those conditions apply, it doesn't matter which you use
+U051SS2EU : when I mention transforms here, I'm talking about using the transducing arg to into btw
+U06BE1L6T : Wonderful, thank you very much for this piece of advice.
+U624VJ533 : Hello,I am new here and to Clojure too,Is it okay if I post some code here to resolve an issue?
+U1ALMRBLL : yes <@U624VJ533>, you can ask it here -- there is also a <#C053AK3F9|beginners> channel that you may find helpful if your issue is not resolved here
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

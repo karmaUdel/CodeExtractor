@@ -1,33 +1,102 @@
+U17R26VR8 : the suggestion for Process.sleep should work, it isn’t based on the system time but rather a unit of time
+U5YDC1YUW : <@U17R26VR8> I'll have a look into it, may do the job
+U17R26VR8 : hey… whadya know, i have done this already… <https://github.com/mordrax/cotwelm/blob/b72efbb428a6d190ff8a8a9ba61638efa2b8e89e/src/Arena/PlayerArena.elm#L80>
+U17R26VR8 : ~hits it every~ waits for 150ms
+U5YDC1YUW : sweet, I'll have a dig into it. I've only been using Elm for a week or two, so still getting my head around it
+U17R26VR8 : ah yeah, wouldn’t suggest you look too deep into that code… i don’t know what i was on when writing that, just how it’s called and threaded back into the Cmd.ianmackenzie is on the ball with `Process.sleep 10000`
+
+U5YDC1YUW : yeah I can't say I quite fully understand what that one line is doing exactly
+U5YDC1YUW : is it basically sleeping the update function for 150ms?
+U17R26VR8 : haha, ok so you’ve got: <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Process#sleep>that takes in a `Time` and gives out a `Task`
+
+then you’ve got to perform that task
+<http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Task#perform>
+
+which performs a task, and gives you back a msg ( you provide the `a -&gt; msg` function
+
+U5YDC1YUW : ah right yeah, I see what's happening, you're then passing the message `Sleep (asyncCmd match matches resetCounter) resetCounter`
+U17R26VR8 : so all i’m doing here:```
+ Task.perform (\_ -&gt; Sleep (asyncCmd match matches resetCounter) resetCounter) (Process.sleep 150)
+
+-- summarises to
+Task.perform (\unused_ -&gt; msg) (Process.sleep 150)
 ```
-true, whats the correct elm way to solve this then?
-surely this is common place?
-updated my code :point_up: , typically in elm, i try not to reach too far into a model to update things but you can by destructuring and then returning a new version with the updated fields
-interesting, thanks
-how would you model this data then to keep it simple?
-I don't think it's that complicated is it?
-well from a logic pov it’s confusing
-as if you are toggle pause lets say
-how he has it is almost right
-you wouldn’t be Available you’d always be on a call
-so feels strange to have the case statement
-it's not a statement
-(this is important)
-so maybe I am modelling this wrong
-it's an expression.
-I'm not trying to correct you, I'm trying to explain it's important to think about it differently
-do you have any other controls? or just paused as in the operator has put you on hold is that what it means?
-There are many
-paused is paused recording really
-there will be hold
-possible more
-<@U6EAT2Z37> I understand :slightly_smiling_face:
-Okay, well it's a case because you need to take every possible value into account.
-yeh I get that
-but its not correct for my domain
-so I must be modelling it wrong
-I don't see why not
-because you can’t TogglePaused if someone is not on a call
-so i'd make CallState a union type `type CallState = Call | Paused | Hold` etc
-doesn’t make sense
-oh I see... CallState contains a Bool. Yeah that's not probably what you want.
-then i'd change your TogglePaused to be `TogglePaused Bool Call` so you have the call to change so you don't need to worry about if you're not on a call, because you can only toggle a state if you are in a call
+
+U5YDC1YUW : which is then caught `Sleep cmd resetCounter -&gt;`
+U17R26VR8 : exactly, the `msg -&gt; Sleep ...`
+U17R26VR8 : so chuck whatever you want to do into that first function `(\unused_ -&gt; msg)`, then thread the output of the Task.peform which is a cmd into your update’s output (<https://github.com/mordrax/cotwelm/blob/b72efbb428a6d190ff8a8a9ba61638efa2b8e89e/src/Arena/PlayerArena.elm#L103>), then you’ve got your msg
+U17R26VR8 : There is a purpose to all this madness! See Elm is declarative. Process.sleep doesn’t actually sleep, Task.perform doesn’t actually perform anything. They are all just declaring that, they will do something. You’ll find this with Generators, Decoders, pretty much everything!!!
+U17R26VR8 : All these functions are pure, meaning they have no side effects, meaning they don’t do anything. O_O! So unlike in imperative languages where you go sleep 150 and expect it to sleep, here, Process.sleep 150 just gives back a Task that *will* sleep. Then it’s up to you when you call it.
+U17R26VR8 : It’s only when you hook up all your declarative functions to the program’s subscription that then allows elm to drive effects through your app
+U5YDC1YUW : it's definitely something to wrap your head around! but I'm honestly enjoying it
+U5YDC1YUW : just having a look at how I would hook this up in my code, does something like this make sense?
+U5YDC1YUW : ```StartGame -&gt;
+            ( { model | status = Playing }, Task.perform (\_ -&gt; Tick) (Process.sleep 1000) )
+```
+
+U17R26VR8 : that should trigger your Tick process ~1000ms after a StartGame msg comes through
+U5YDC1YUW : I know in this situation I'm expecting that Tick will only be called once after 1000ms
+U5YDC1YUW : alright, the compiler is having a fit haha.
+U17R26VR8 : I say roughly because js has a error margin with setTimeout of &lt; 8ms i think…
+U17R26VR8 : if you can’t work it out, chuck the msg here and the community will help, according to some we’re ‘excessively’ helpful
+U17R26VR8 : actually that is true, last time, i needed a foldl which reduced a Result, and got 3 answers in just as many minutes
+U5YDC1YUW : sure, incoming...
+U5YDC1YUW : ```The 1st and 2nd branches of this `case` produce different types of values.
+
+12|     case msg of
+13|         Clicked -&gt;
+14|             if model.status == Playing then
+15|                 processClick model
+16|             else
+17|                 ( model, Cmd.none )
+18| 
+19|         StartGame -&gt;
+20|&gt;            ( { model | status = Playing }, Task.perform (\_ -&gt; Tick) (Process.sleep 1000) )
+21| 
+22|         Tick _ -&gt;
+23|             updateTime model
+
+The 1st branch has this type:
+
+    ( { click_count : Int
+    , click_limit : Int
+    , points : Int
+    , status : Status
+    , targets : List Target
+    , time_elapsed : Int
+    , time_limit : Int
+    }
+    , Cmd (Msg)
+    )
+
+But the 2nd is:
+
+    ( { click_count : Int
+    , click_limit : Int
+    , points : Int
+    , status : Status
+    , targets : List Target
+    , time_elapsed : Int
+    , time_limit : Int
+    }
+    , Cmd (Time.Time -&gt; Msg)
+    )
+```
+
+U17R26VR8 : Your Tick tag doens’t have a value, but your update function is expecting one
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

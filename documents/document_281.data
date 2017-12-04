@@ -1,33 +1,58 @@
+U5SJJD85B : I tried onChange
+U5SJJD85B : (coming from React)
+U5SJJD85B : actually
+U5SJJD85B : thats the answer i guess
+U5SJJD85B : React provides the value attribute as a convenience
+U5SJJD85B : but i guess here id have to do it on the option
+U0LPMPL2U : If you were hard coding HTML, you'd writ something like:```
+&lt;select&gt;
+  &lt;option value="1"&gt;1&lt;/option&gt;
+  &lt;option value="2", selected="selected"&gt;2&lt;/option&gt;
+&lt;/select&gt;
 ```
-I understand why it's wrong, but don't know how to fix it.
-Basically I would like the error case to log and do not trigger a message.
-that's not possible
-because both cases need to produce the same type
-but, you can use `Decode.fail`
-Ok?
-What't the recommended way to write a cookie or write to localstorage with Elm? I need to somehow persist the access token after the user logged in. Do I have to create a port for this or is there a better/simpler way?
-`, Json.Decode.fail (Debug.log "Wrong event" "")` should work I think
-<@U5FC7BE0G> ports are the way to go
-k, thanks!
-<@U1CE9DL9H> yes it does. Thank you.
-Any way to access the reason for failure?
-It would be nice to print it as well.
-The reason for failure is the string you give to Decode.fail
-When you as a developer are telling the Decoder that this case should fail, you should know why. :)
-Silly question but how do you define an incoming port with no arguments?
-`port flyoutResetLights : (Bool -&gt; msg) -&gt; Sub msg`
-`port flyoutResetLights :  Sub msg`
-but of course that doesn't work
-`port name : () -&gt; Cmd msg`
-I am trying out a custom defined infix operator but it does not seem to be working :slightly_smiling_face:
-<@U3KSN5MAL>, you'd do `(() -&gt; msg) -&gt; Sub msg` i suppose
-syntax help please.  I have a function.
-asJsonValue model =
-Json.Encode.object
-[ ("theJunk" (Json.Encode.string "junk")) ]
-compiler tells me there is no Json.Encode.string
-<@U62PAUTV3> you can only use certain symbol characters as operators
-<@U4872964V>  bizarre but seems to work!
-thanks
-I see, thank you. Didn't seem to find a lot of documentation on that one.
-wait no
+
+U5SJJD85B : Thanks for the direction!
+U0LPMPL2U : adding `selected="selected"` to an HTML option makes it the pre-selected option in a `&lt;select&gt;`
+U0LPMPL2U : You'd do the same thing in Elm
+U5SJJD85B : ```import Html exposing (..)
+import Html.Attributes exposing (..)
+main =
+  select [value "4"]
+    (List.range 1 100
+    |&gt; List.map (\n -&gt; option [value &lt;| toString &lt;| n, selected (n == 4)] [text &lt;| toString &lt;| n]))
+```
+
+U5SJJD85B : thanks!
+U0JL9RPC4 : Is it possible somehow to define a "set" of union types? For instance:
+```Haskell
+type Foo = Val1 | Val2 | Val3
+type alias SetOfFoo = ??
+```
+
+U0JL9RPC4 : `Set` only accepts comparable values
+U0LPMPL2U : yes, unfortunately union types aren't comparable (for now) and can't be put into a set or used as keys in `Dict`s
+U0JL9RPC4 : well, `Dict` are fine, thanks!
+U5J0H2NS2 : same thing happens when you use elm-mdl and Layout...
+U4872964V : there is <http://package.elm-lang.org/packages/truqu/elm-dictset/latest> and <http://package.elm-lang.org/packages/eeue56/elm-all-dict/latest> (which you can turn into a set by storing `()` or something
+U4872964V : (Elms `Set` is basically a `Dict comparable ()` I think)
+U0K7EBT3J : does anybody know an easy way or a lib to strip away html markup from a string in elm?
+`"click &lt;a href='foo'&gt;here&lt;/a&gt;" -&gt; "click here"`
+
+U23SA861Y : strip away or escape?
+U0K7EBT3J : remove
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

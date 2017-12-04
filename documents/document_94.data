@@ -1,30 +1,66 @@
+U0CHY4VNW : <@U11BV7MTK> Thanks I'll take a look at that
+U11BV7MTK : if in CIDER, apropos, grimoire, browse ns and eldoc are quite nice
+U11BV7MTK : i've been using grimoire quite a bit
+U11BV7MTK : That's awesome. It's just so handy. Much appreciated
+U61KCTX8S : can anyone explain me what a java.lang.IllegalArgumentException: array element type mismatchmeans?
+
+U0NCTKEV8 : it means the array type you are calling a java method with doesn't match
+U61KCTX8S : so fi it expects an array of ints and i am using an array of strings
+U61KCTX8S : thanks
+U0CMVHBL2 : Yes, there is.  You can verify yourself whether this is so using identical? on the pieces you hope are being shared, as shown below
+U0CMVHBL2 : user=&gt; (def mymap {:mykey [{:A 1, :B 2} {:A 2, :B 2} {:A 3, :B 2}]})#'user/mymap
+user=&gt; (def m2 (assoc mymap :mykey (map #(assoc % :A (inc (:A %))) (:mykey mymap))))
+#'user/m2
+user=&gt; (identical? (-&gt; mymap :mykey (nth 0) :B) (-&gt; m2 :mykey (nth 0) :B))
+true
+
+U0DATSMH6 : Hmm, my gut tells me that's not a good example because: ```user=&gt; (identical? 2 2)
+true
 ```
-<https://github.com/employeerepublic/deferst>
-Yes that is what I am missing from Mount :slightly_smiling_face:
-Your `example-system` is a Composition Root
-<http://blog.ploeh.dk/2011/07/28/CompositionRoot/>
-<@U0BKWMG5B> Out of curiosity, why did you make the choice of using multimethods for Integrant?
-It seems to me (as a clojure beginner) that it introduces a form of global that makes stubbing a bit harder
-e.g. wouldn't it be nicer to pass a second argument to `ig/init`: a map from keys to implementations?
-I am sure you had a good reason for using multimethods and not the approach I'm suggesting, but I would like to understand it
-<@U0BKWMG5B> is it related to hot-reloading?
-do clojure files have to have a namespace?
-and if so, should tooling not assume that there will be a namespace form at the top?
-they don't
-and you can put other things before the namespace
-(the ns form)
-ok
-never really know where to go to find the hard requirements on these things so thanks for the info
-it is super common to have the ns form be the first thing, so some tooling does assume it
-ok. i was not positive if it was convention or spec
-so some tooling requires it, but clojure does not
-well, if possible, i'd like to conform to clojure requirements and not some subset
-there were some namespace cache changes in CIDER that seems to affect files without a ns form so wanted to see what the requirements were. thanks a bunch
-@puredanger Are your deps slides available anywhere, until the talk is online?
-I mean <@U064X3EF3> ^^
-hi all, good morning
-how do I check wether a process is alive?
-i mean i launched a subprocess
-whether with sh or conch
-and i'd like to know whether it's finished or not
-I'll put some stuff out early next week - slides, code, and some more info
+
+U0DATSMH6 : This would be a better test:```
+user=&gt; (identical? {:test 1} {:test 1})
+false
+user=&gt; (def mymap {:mykey [{:A 1, :B {:test 1}} {:A 2, :B {:test 1}} {:A 3, :B {:test 1}}]})
+#'user/mymap
+user=&gt; (def m2 (assoc mymap :mykey (map #(assoc % :A (inc (:A %))) (:mykey mymap))))
+#'user/m2
+user=&gt; (identical? (-&gt; mymap :mykey (nth 0) :B) (-&gt; m2 :mykey (nth 0) :B))
+true
+```
+
+U0CMVHBL2 : The better test works, too, as I expected it would.  Thanks.
+U0DATSMH6 : Also, for clarity, there isn't any structural sharing going on _within_ the vectors themselves - only at the same key "paths" between `mymap` and `m2`:```
+user=&gt; (identical? (-&gt; mymap :mykey first :B) (-&gt; mymap :mykey last :B))
+false
+user=&gt; (identical? (-&gt; m2 :mykey first :B) (-&gt; m2 :mykey last :B))
+false
+user=&gt; (-&gt; mymap :mykey first :B)
+{:test 1}
+user=&gt; (-&gt; mymap :mykey last :B)
+{:test 1}
+```
+
+U0DATSMH6 : Yeah - this is a cool approach to discover the structural sharing. I hadn't thought of using `identical?` for this.
+U3JURM9B6 : keep, for, map -- they want pure functions and return a lazy list
+U3JURM9B6 : I want something which is okay to pass an unpure function to ... and returns a strict list
+U3JURM9B6 : in good clojure style, do people do (map impure-function ...) or do we do something else when we have to run an impure function and also get its return value ?
+U051KLSJF : <@U3JURM9B6> usually you'll use `doall`
+U051KLSJF : if you care about the return value
+U1ALMRBLL : <@U3JURM9B6> it is fine, as far as I know, to pass a function with side-effects to `keep`, `filter`, etc -- the gotcha is that you should not *expect* that your code will necessarily execute. So, your side effect may happen, and if you don't mind, great -- but, your side effect might *not* happen, and that's why it says to avoid impure functions (or in some cases, may get called *more than once*).
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

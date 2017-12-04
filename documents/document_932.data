@@ -1,0 +1,77 @@
+U5KU1HNKY : yeah. I'm not entirely thrilled with that myself. IMHO any time you need to do anything more than just require something to run your tests you've failed.
+U5KU1HNKY : I'm not sure how to fix that in a way that would make "normal” racket devs happy tho. I know how to do it to make *me* happy but that's different. :slightly_smiling_face:
+U0702F2CE : something that makes one person happy is better than making 0 people happy
+U07SCV14J : In my opinion, the things I find the most frustrating about rackunit is that test failures are often remarkably useless and "checks” don't compose at all.
+U07SCV14J : I have spent more time than I would like trying to understand why two things rackunit claims aren't equal actually aren't equal.
+U07SCV14J : And writing custom checks that produce decent error messages is a huge chore, mostly because you can't really implement a new check in terms of an existing one and still produce good check failure messages.
+U07SCV14J : My understanding is that rackunit was just schemeunit, rolled into the main distribution, but I am not sure it's really the same quality and adheres to the same principles as other libraries that get distributed with racket. :/
+U07SJGB4H : <@U07SCV14J> I'm working on a library to improve rackunit error messages, especially when two data structures are "almost" the same: <http://docs.racket-lang.org/expect/index.html?q=expect>
+U07SJGB4H : It's not ready for a 0.1 release yet though (mainly due to needing some rackunit features implemented so the check info doesn't look awful)
+U5KU1HNKY : <@U07SCV14J> I published check-sexp-equal for that reason… but since I can't define any formatting it is still kinda hard to read
+U07SJGB4H : here's an example:```
+&gt; (expect! '(10 12) (expect-list (expect-pred number?) (expect-pred string?)))
+
+expected a different kind of value
+  subject: '(10 12)
+  in: item at position 1
+  expected: value satisfying string?
+  actual: 12
+```
+
+U5KU1HNKY : minitest (in ruby) does diffing on `assert_equal` failures and provides `make_my_diffs_pretty` to ensure that big things get printed structurally. makes finding the problems a breeze in comparison
+U5KU1HNKY : It does it that way specifically to find inequalities deep in a nested sexp and it is really really quick to hone in on where the problem is. `check-sexp-equal?` has to embed `#:new` and `#:old` tags to show you where the differences are but the whole sexp is printed flat
+U5KU1HNKY : just doing a pretty-print of the output would make it much better
+U07SJGB4H : <@U5KU1HNKY> check-sexp-equal is very nice and was part of the inspiration for `expect` :)
+U5KU1HNKY : <@U07SJGB4H> I'm not a fan of expectations (at least from the BDD perspective). I imagine that your RHS blows up really quickly on anything non-trivial
+U5KU1HNKY : thanks! if you have any insight on how to improve its output I'm all ears
+U07SJGB4H : there's "expectation conversion" so that you can write something like `(hash 'foo (list 1 2 (vector 'a 'b (expect-pred? number?))))` and it will convert it to an expectation that structurally matches things and reports errors in contexts
+U07SJGB4H : the above example I had didn't do that because `expect!` does not yet convert its expectation argument automatically
+U07SJGB4H : `(expect-equal? some-complex-data-with-hashes-and-lists-and-stuff)` will do it though
+U07SJGB4H : They're more like junit/hamcrest "matchers" than anything else, but I wanted a more noun-y name
+U5GQ7TC3H : I'm currently working on a test filtering feature for chk and rackunit. The idea is to be able to call `raco test my/module -- args to forward` and the test lib interprets `args to forward` as filters for test names, files, lines to run. I'm looking for feedback/feature requests based on the WIP documentation: <https://cfinegan.github.io/chk-docs/chk.html#(part._.Filtering_.Tests_with_.Command-line_.Arguments)>
+U5GQ7TC3H : Please let me know what you think. Rackunit docs are coming after I figure out what features are the most popular.
+U07SJGB4H : <@U5GQ7TC3H> instead of relying on command line arguments, would it be cleaner for `raco test` to define some sort of "filters" concept and pass it along to test submodules? module-level filtering could work with a config submod in the test module
+U462H29AR : There's always `getenv` plus the ability to define an env var on the command-line ¯\_(?)_/¯
+U462H29AR : ```$ cat example.rkt 
+#lang racket/base
+
+(module test racket/base
+  (if (getenv "BIG_TEST")
+      (println "Running big tests")
+      (println "Skipping big tests")))
+
+$ raco test example.rkt 
+raco test: (submod "example.rkt" test)
+"Skipping big tests"
+
+$ BIG_TEST=1 raco test example.rkt 
+raco test: (submod "example.rkt" test)
+"Running big tests"
+```
+
+U462H29AR : Just from the POV of "simplest thing that could possibly work".
+U462H29AR : Could still use some macros the sweeten the raw `getenv` stuff I suppose.
+U07SJGB4H : I always imagined doing that kind of thing with a separate submodule
+U07SJGB4H : `(module+ integration-test ...)`
+U462H29AR : Actually yes I think I've done that way, too.
+U07SJGB4H : I'm not sure how to write the "run these submods by default unless you're in the CI environment" logic though
+U07SJGB4H : <@U3QF0EM0E> progress is a new info type <https://github.com/racket/rackunit/pull/40>
+U5GQ7TC3H : <@U07SJGB4H> `raco test` already allows you specify command-line arguments to forward in `info.rkt` so we could implement a better interface for specifying these filters (i.e. using data structures instead of raw strings) and allow users to do it either way, if that makes sense. What kind of interface would you like to see for something like this? I'm thinking along the lines of `(struct test-filters (names-to-run k/v-filters files-to-run lines-to-run))`.<@U462H29AR> Part of the idea is that users can drill down to pretty much any individual test without altering the test file itself, so you could do things like `raco test my/module -- file=foo.rkt line=20` and get just that one test result. I'm not sure that environment variables can offer the same flexibility.
+
+U07SJGB4H : <@U5GQ7TC3H> the interface I'd ideally like is two part, where there's a way to filter "kinds" of tests (each test has exactly 1 kind) and there's a way to filter specific named tests
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

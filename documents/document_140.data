@@ -1,516 +1,107 @@
+U3JURM9B6 : sample randomly from [0, 1]
+U3JURM9B6 : index into the cumulative probability
+U0524T275 : yeah I thought about that, so I guess there is no easier way?
+U61HA86AG : wouldnt repeating each choice depending on the probability and then using `rand-nth` do the trick?
+U0524T275 : that would work in a simple case like this one
+U0524T275 : but in the general case I would need to find the LCD of all the fractions
+U0524T275 : and generate a massive vector with all the repeated stuff
+U61HA86AG : right, i see
+U3JURM9B6 : suppose an item has probability .3957 , do you repeat it 3957 times? :slightly_smiling_face:
+U61HA86AG : fair point
+U0524T275 : Something like this gives me the ranges I can then check```
+user&gt; (def probs {0 1/2 1 1/4 2 1/4})
+#'user/probs
+user&gt; (into {} (map-indexed
+                (fn [idx [el prob]]
+                  [el
+                   [(apply + (take idx (vals probs)))
+                   (apply + (take (inc idx) (vals probs)))]])
+                probs))
+{0 [0 1/2], 1 [1/2 3/4], 2 [3/4 1N]}
 ```
-If somebody is ever interested in using ULID:s I ported library for Clojure <https://github.com/theikkila/clj-ulid>
-How can I check if something is not equal to one of a few things.
-Like `(not (= % 1) (= % 2))`
-(not (#{a few things} thing))
-Ah, sets, I knew there would be a simple thing I wasn't thinking of.
-Thanks <@U050MP39D>
-np
-you can use contains? with the set if you need to check for nil / false
-(along with other non-nill non-false values)
-:thumbsup:
-Party time!
-<@U04SM6T2H|benbrown> set the channel topic: What are you building?
-¯\_(?)_/¯
-There was a slack -&gt; classic Infocom game bridge I saw a few weeks ago. Or maybe it was just for Zork. Regardless, I'd love to hack a Moo/Mud-&gt;slack interface… but that won't happen any time soon.
-I have a set of RPG commands built
-Like create take drop look give
-wow
-It doesn't have a persistent backend yet
-I'm just imagining a REST interface, except extended to support those and more RPG commands
-Totes
-The verb list isn't that long to do crazy things: <http://www.emuparadise.me/fup/up/6714-Maniac_Mansion-1.png>
-Alas right now that would involve like 10 custom /commands
-Which is why I had in mind a proposal for some autodiscovery schema that would allow developers like us to provide a one click add to slack button that would add multiple commands or behaviors
-Bots.json
-This is a forum to talk with other developers, designers and people interested in building tools that connect to Slack! Our hope it to provide a place where we can share our passion and help each other build great stuff.
-woo!
-Woo!
-I'm interesting in notifications
-Hi <@U04S1QCPC>!
-Like, both slack's own notifications, which are boss, and also leveraging the connected "apps" and services to use slack as a notification hub. It already does a lot, but to make better! more useful!
-hello! i actually work at slack so feel free to yell at me for anything that doesn't work properly. :grin:
-Awesome!
-<@U04S1QCPC> what part of the company?
-platform / integrations
-Rad!
-I really want to talk to you about somethign then!
-but not just this ssecond because my PM just returned from a 6 week rock and roll tour of Europe
-and I have to catch him up! :simple_smile:
-np! i am just a DM away now
-<@U04S1Q4V0> I'm finding that a lot lately
-So many products require some sort of notification system
-has anyone written a Slack protip guide or something? I feel like I'm missing out on some features
-It's just a lot easier to pipe it into slack for various things
-<@U04S09GLN>: thanks! yeah notification overload is really the problem with our crazy modern world
-but even that, my boss like never replies to anything because even with Slack, he gets overloaded with notifications
-<@U04S1Q4V0> he should turn some of them ofF!
-I don't find that I have that problem
-this is mostly a problem with no one bothering to hone/customize their settings
-<@U04SM6T2H>:  I know!
-but I only get push notifications if someone specifically @mes
-right!
-but there's a disconnect to that UI, on slack and on other apps
-for most users
-what features do you think you are missing out on?
-using the bot more to automate some things
-like /slash commands?
-right
-<http://xoxco.com/slack/bot/|xoxco.com/slack/bot/>
-Like I want reminders of stuff and I hear you can do that
-yay!
-they are actually really easy to build and set up
-but it does require a bunch of steps
-that are not really clear
-oh yeah well, /remind is a built in command dude!
-just type /remind!
-ok, I'll experiment
-but if you want to build your own, i can hook ya up with our node wrapper
-that makes it almost trivial to make custom slash commands
-… though it does require knowing how to run node apps, etc
-sure, but that sounds like a fun project
-it is!!
-i know of many other OSS things if you're looking for non-node as well
-a lot of stuff here: <https://api.slack.com/community>
-ok so here's an idea... like I want to be able take say a JIRA ticket (message sent to slack), and then on that, have it do something referencing that JIRA ticket
-True! True, there are TONS of ways to write bots easily
-in any language
-like, "remind me about this ticket in 5 days"
-I've tried to do this with some email apps like Mailbox from dropbox, but it was so, so, SO, buggy and broken
-you'd have to code that logic into some external script
-so for example you'd do like
-I think we wrote a JIRA lookup integration
-rad, ok but that's cool that I could figure something like that out.
-*/jira [ticket url] 10days
-nice
-Lemme see if we actually did that
-<@U04S1QCPC>: ok wow, yes thanks
-<@U04S09GLN>: oooooooh!
-So what we have just provides context, if other services are writing automatically about JIRA tickets
-we can say “hey, what's that ticket about?"
-but that's all we've done
-I mean JIRA.. man I have ideas, just no time. Total aside, but I want to build like a requirements doc in say google docs... and then have an app parse it into JIRA and create tickets
-I'm a WILDMAN I know.
-<@U04S1Q4V0>: sounds like a good use of doctop: <https://github.com/times/doctop>
-rad!
-<@U04S09GLN>: whoa that is rad
-yeah
-I mean, we've released a few tabletop things in the past few months
-and they got on the bandwagon as well after we did a show and tell
-<@U04SM6T2H>: <https://github.com/times/angular-tabletop> is good too
-whelp, there goes my weekend
-:wink:
-Glad to help / scope creep
-ok, kids, deploying, and then lunch, talk atchu later
-Goddammit, Ben, this is now my 12th Slack team.
-<@U04S2TZMU>: Muahahaha!!!
-<@U04SQ538K>: howdy!
-What are you dudes building?
-<@U04S2TZMU>: Please tell me that 10 of those are client teams.
-hey!
-Happy to see your tweet. I have this idea for a web app, and thought Slack might be useful for it. So the idea is to allow users to talk to each other. I don't want to write chat functionality myself, why not let Slack handle that, right?
-The users won't have to know that it's Slack performing the chat services, and won't have Slack accounts themselves. I'd be building UI elements and using the Slack API to handle the messaging.
-interesting!
-though I think you' d have to at some level tie it to slack users
-but the RTM API
-is where I'd look for that.
-k great, thanks Ben
-I haven't actually played with that much
-But basically, every single message and event that happens in a channel
-is sent to the bot
-in real time
-and it can respond or do stuff
-Different than having an outgoing webhook
-which listens for a specific keyword and triggers a hit to your script
-<https://api.slack.com/rtm>
-howdy <@U04SR77Q1>!
-hey!
-Tell us about your Slack!
-i joined because i want to help bring the slack wiki extension to life!
-!!
-The one I tweeted about?
-yup
-:simple_smile:
-It rules!
-that would be SOO useful at the company i work at
-Oh I should set up an instance for this slack :wink:
-Yeah? Big company? little company?
-medium sized, dev shop, about 15 people
-based out of New Orleans
-Just like us!
-yup
-cool.
-It's something we're really interested in sharing too
-… but we're trying to figure out the best way to do that.
-with a price tag
-^ right
-sustainably
-is how I would put it
-without getting ourselves in trouble by open sourcing it
-my 2 cents on that would be to have it open source, but have the default tied to a wiki system that you host and charge for
-Yeah, definitely possible.
-i find the github wiki system to be a bit lackluster, and anyone who wants to get serious about documentation will probably be willing to pay for a better wiki
-Alas, the pain of setting up all the SAAS infrastructure is really .. daunting
-Hi!
-I made <https://github.com/sillygwailo/Slack-Twitter>
-and if there's a service with an API (esp. real-time), I want to hook it up to Slack in a zany way.
-cheers <@U04S4763Y> - that rules!
-that's awesome!
-it suffers from a couple of heisenbugs though, grumble grumble, so proceed with caution
-that and Heroku's new pricing structure makes it less appealing to host it there
-Hey <@U04SS2NBF>!!
-Hey, Ben!
-I was just wishing something like this existed.
-FWIW I think <@U04S4763Y>'s thing there highlights one of the biggest issues now facing us slack plugin builders
-which is that even if we built it, give it away for free, and host it for you
-its like a 12 step process to get it turned on in Slack
-NOW THAT YOU HAVE ARRIVED
-yeah.
-the <http://dev.twitter.com|dev.twitter.com> steps are arcane
-I want to propose something like
-bot.json
-one mo
-i have to switch slack's
-to get this
-toootally
-A way to describe a plugin or set of plugins
-that could be “one click” installed
-the same way that Heroku provides this app.json system
-<https://blog.heroku.com/archives/2014/5/22/introducing_the_app_json_application_manifest>
-This would make it so that a developer like me who wants to provide a bot or a  set of slash commands or a plugin app
-could offer a “Add to Slack” button
-if I started Slack-Twitter over, I would build it as a plugin for <http://superscriptjs.com>
-which would set up the slash commands and incoming webhooks
-all at once
-Interesting edge cases: what happens when one of your bots.json definitions overlaps with one that already exists?
-<@U04S09GLN>: I think it would allow you to toggle them on and off
-Is it on slack then to offer a “do you want to overwrite this command or rename it?” dialog?
-Perhaps?
-or maybe it just disables anythign that overlaps
-But my point is:
-This would open up a whole world of like,
-Slack Plugin Marketplace
-that doesn't involve any technical know-how
-And IMHO, a “Built for Slack” type program
-where if you conform to a few protocols, your app works seamlessly with slackbot
-called it: <https://twitter.com/sillygwailo/status/562334512915292160>
-so you could install a bots.json on every slack client? (i.e. <http://blah.slack.com|blah.slack.com>)
-Yeah, one-click installs are so necessary.
-<@U04SR77Q1> the idea is something like
-my bot
-serves up a bot.json file
-Then I could do like
-<http://slack.com/integrations/new?manifest=http://xoxco.com/bot.json|slack.com/integrations/new?manifest=http://xoxco.com/bot.json>
-and it would just lead to a screen that's like
-well.. here's what heroku's looks like:
-oooh, that makes more sense
-whoa, is this the <@U04S4763Y> I met in VC 14 years ago?
-that second screen is inside Heroku
-preconfigured and ready to launch
-^^ +100
-I'd implement that in a heartbeat.
-yeah
-Skip over the slash command / webhook  stuff and just say “here's what I want to add to your slack"
-and the outgoing webhook ping can include the token to respond
-the difference between how a slash command works and an outgoing webhook works is annoying and confusing and unnecessary imho
-Added my /go integration. Try “/go list” for examples.
-<@U04SS2NBF> did you add that just noW??
-rad
-I made it a few weeks ago
-I'm addicted to a tool at Twitter that works a bit like that, it saves me so much time trying to get places on the web.
-Wow, it's like launchbar and/or quicksilver, but as a part of slack.
-<@U04SM6T2H>: we're working on a way to basically add any type of integration to a slack team through an oauth flow
-should help a lot with the “one-click” install problem
-:heart_eyes_cat:
-yeah!!
-<@U04S1QCPC> that's awesome news
-it's in early phases but you can effectively think of it as a similar process to how you would add individual oauth scopes in any other oauth flow
-Is the end result that my new integration (slash command, outgoing hook) is present and configured?
-Are there any other public slack bots that we should know about?
-<http://sscaas.eu|sscaas.eu> offers dictionary lookup, reddit, site availability and urban dictionary looup
-<http://xoxco.com/slack/bot|xoxco.com/slack/bot> offers soundcloud, tableflipper and awards
-<http://marvin.rocks/documentation/>
-<http://www.monsoonco.com/creating-bots-at-monsoons-slackathon/>
-<@U04S09GLN>: Three work teams, five social teams, one side-project team, one personal team for experiments, one where I was invited for an interview and never left and then here.
-<@U04SM6T2H>: yes, that's what will happen (specific details still in the works)
-<@U04S1QCPC> sweet that sounds exciting!!
-OMG FOLKS, my apple watch just got delivered so now I have to go stare at my wrist for a few hours!!!
-<@U04SM6T2H>: The RT API is _terrific_.  I set up a server that echoed a Slack channel to a Web-socket based client for public view, and it went together completely painlessly.
-:watch: :eyes:
-<@U04S2TZMU>: it looks easy enough, but you know
-the code on github is in coffeescript
-and I don't know how to compile it!!
-I want a plain JS version
-Am I the only one weirded out by CoffeeScript?
-but I'd love for all my bots to be a real @bot user
-no!
-I am VERY weirded out by it!
-I… don't get it.
-we're too old greg
-the kids these days want preprocessors for everythign :simple_smile:
-In my day, we preprocessed our C++ to C and _we liked it_.
-But the RT API is really worth taking an afternoon to play with. It feels like magic.
-Yeah i will probably port all of our bots over to it soon
-Because I really like being able to treat it like a user
-Our outgoing hook is @marvin
-Nerd.
-duh
-Every slack should have a Marvin 
-And a self destruct mode
-i know of another solid node sdk if you don't like coffeescript
-Post it!
-<https://www.npmjs.com/package/slackey>
-Also, meta-topic: I love that this team exists, but I also think there needs to be a publicly accessible place for Slack development.  Maybe I'm just not plugged in — see previous comment about the original C++-preprocessor — but Slack development feels scattered and one-shot right now.  There's no community that I'm aware of.  People are doing great stuff, but there's no gathering place for de facto standards and consensus best-practices to emerge.  Maybe it's too early for that, but I think Slack development is going to be huge and I'd love to see good people stake a claim to the core of it.
-This is public
-But I agree!
-I agree too!
-By “public,” I mean Googlable.
-Totes
-there are the Google groups dedicated to the API
-I think 
-But not that active?
-That's my point.
-A) Google Groups.  B) Inactive?  C) Nobody knows about them.
-I'd love to see a Stack Exchange for Slack development.
-Or a Discourse installation.
-Some place that is ballsy enough to say, “We're going to build a community here.  Come on in!"
-:heart:
-Maybe we can do something like that at XOXCO 
-We are pretty committed to our path of slack advocacy and development!
-i love discourse
-and Discourse
-I wrote Ben an e-mail this morning about what my plans were before my current non-Slack project got off the ground, and I still think it's a good idea:
-Your email inspired me to set up this team btw
-1) Slackbot host as a service.  For companies that love Slack, but don't have the time, interest or skills to go to Github, grab the source, compile it and start a Heroku intance.
-For a company already paying for Slack, $20/month for hosting bots would be an easy decision.
-And via the Hubot integration, there are _hundreds_ of bots.
-I even wrote some code to run multiple Hubot integrations with per-team configs.
-:thumbsup::skin-tone-3::thumbsup::skin-tone-3::thumbsup::skin-tone-3:
-2) Slack consultancy, not only doing custom integrations with internal systems, but best-practices (including stuff for the lawyers with company IP going off-site, SEC-compliance and auditing, etc.).
-IMHO should use the same pricing model as slack - per user 
-If Slack goes mainstream, there are going to be a lot of companies that will need it supported.  Not just the base product, but adding everything that they'll suddenly become capable of doing with it.
-They will have _no_ idea.
-Yup
-And anyone who can show them just a little glimpse of what's possible is going to be drowning in the work of implementing it.
-We already are seeing this in our consultancy as I'd
-As is
-Every project we've done this year had a slack component 
-And is better because of it
-And required less UI to be built 
-And was better because of that too!
-The biggest obstacle I see between Slack and domination of — God forgive me — “the enterprise” is off-site storage and hierarchical corporate culture.
-Years ago, I was at a mutual fund company and we wanted to use Basecamp and Legal threw a fit.
-<@U04S09GLN> can maybe speak to that a bit?
-“The Cloud” has changed some of that as people have gotten more used to it, but old-school companies are still leery of anything going outside the VPN.
-At that same company, I built an intranet that was specifically designed for cross-departmental and cross-organizational sharing, and… Well, the managers hated it.
-_Hated_ it.
-Slack allows the same thing, and I see that as a cultural barrier.
-But so many non-tech companies are small enough or forward-thinking enough to want Slack and want it badly, that I think it's going to spread like crazy.
-Even without the older, larger organizations.
-And every one of them could have their already terrific experience improved by a handful of well-chosen bots.
-<@U04S6E9EW>: welcome 
-Oh jeez.  I can't get away from you guys.
-Hi Ben!
-[Climbs down off soapbox.  Notices time.]  Oh, crap, I've got work to do today...
-Haha
-Great ideas greg and well considered
-agreed!
-Hi <@U04SS2NBF>!
-I still owe you $20.
-definitely a fan of bots-as-a-service... my company used to have a hubot until someone unplugged the raspberry pi
-hello <@U04S6E9EW>! fancy seeing you here. and yes, you do! i forget what it was about… something to do with the :apple: :watch: ?
-Yep.
-<@U04SM6T2H>: How did you automate the invite sender?
-I used an OTS tool called slackin
-Super easy to set up
-It's an NPM module 
-Neato.
-<https://github.com/rauchg/slackin>
-Gracias.  Snagged node-slack today.
-Cool 
-I'm trying to keep that up to date and active
-Thanks Ben.
-I have another few revisions to push based on  some new bots I built  the other day 
-We need to get Darius K. up in here.
-Then you won't be able to tell who's human &amp; who's machine.
-Invite away!!
-<http://Dev4slack.xoxco.com|Dev4slack.xoxco.com>
-Hello everyone. Like <@U04S1QCPC> I work at Slack on APIs and Integrations.
-You look nice today, <@U04SUJB99>.
-You too! I like what you've done with your hair!
-<@U04S1QCPC>, <@U04SUJB99>: Thank you.  The Slack API is a joy to use.
-I swear to God, I do something as a one-off for a Slack bot, then have to go back to my own code and it's like… _Dammit_.
-thanks Greg! And I'm sorry I never replied to your email! it's on a backlog of stuff I need to do!
-Oh, God, no worries at all.
-Hey <@U04SUJB99>!
-Woo woo
-True story: my son's goldfish died three months ago, and we flushed it, but the tank is still sitting in his room, the water slowly evaporating. I'm past the point of being disgusted with myself and am now leaving it as a monument to everything that I need to get around to.
-There's the above-the-fishtank line and below-the-fishtank line.
-Random e-mailed requests are waaaaaaay below the fishtank line.
-Yeah, I still feel bad about it
-Phooey.  Seriously.  Don't waste a second's thought on it.
-Sorry, catching up
-give me a sec, re: enterprise
-Ok, I'm caught up.
-You guys and your “west coast” timezone / late work hours.
-Yeah, we have almost 800 users in our Dow Jones slack. Definitely not 100% penetration in the company yet, but my team is working on that every day.
-That's really impressive.  I worked for Dimensional Fund Advisors, and in the seven years I was there, the company went from very casual, very cross-discipline, very get-the-job-done to much more formalized and hierarchical.  It also went from $50B AUM to $300B AUM, so that might have had something to do with it.  But the culture got… tight.  I managed to get IM in — after an exhausting fight — and one department head said he didn't want people from outside his department to be able to contact his workers.  Maybe that's biasing my take, but Slack tears down walls and Dimensional was busy putting them up.
-And every tool we're building these days, at least in my team, all involve slack.
-A new photo workflow tool for the photo department now allows you to share selected photos
-the Share dialog creates a private slack channel to discuss those photos, invites people you ask in the same dialog, sets the description, and posts a link back to the tool's unique url for that collection
-Next step is photo approval from the private slack channel
-<@U04S2TZMU> we had built our own internal chat product before, DJChat, so everyone was already in on the idea of how chat fit into a workflow, and helped break down walls.
-I think part of the reason it's been successful is that my team and another collaborated on systematically onboarding everyone into slack with a reason to be there, for the first 100 people
-where, every time a new project would start, we'd set up the appropriate channels and invite everyone to them.
-They'd arrive, and find a whole open community of internal channels already in existence, and never leave. Then they'd do the same thing for subsequent projects.
-So coooool
-And now, we've hooked up <http://slackline.io|slackline.io> to get a public dev channel across the senior tech leadership of the corporation, which is the first time a) that we've ever had a way of sharing information efficiently across different company units, and b) the first public discussion forum for the whole corporation.
-Careful or you are going to end up a case study 
-This is all super interesting! Thanks for sharing, <@U04S09GLN>.
-I haven't witnessed the magic of slackline yet...
-<@U04SS2NBF> It's so good. I asked them very nicely to implement annual billing so that it's easier for corps like us.
-wow, yeah that's fascinating. <@U04S09GLN> have you moved any other workflows to slack? how are the slack workflows different from the old ones?
-I just _really_ want private shared channels.
-Also, in some ways I feel concerned for their long-term stability. I can't imagine that Slack isn't already building something to solve this problem. <@U04S1QCPC> just buy them and use it as a starting point, please :simple_smile:
-<@U04SR77Q1> well, for photo approval etc, our old tool was garbage
-So there's no real comparison
-Sorry, garbage is harsh. It did its job, but was basically the combination of a tool built 6 years ago, and a tool built 15 years ago.
-So… you can imagine how it worked.
-So we said “What does an ideal wire service photo workflow look like” and built that. But we knew we'd need notifications and the like, so immediately de-scoped that in favor of a slack integration.
-Hello :simple_smile:
-everyone is asleep now :simple_smile:
-I'm in Australia :wink:
-i saw!
-some cool stuff happened ^^
-Oh?
-if you scroll back :simple_smile:
-Herro <@U04SX1L23> !
-Quite a bit of cool stuff going on!
-I've just started work on a slack API integration for the thing I'm working on: <https://99designs.com/tasks/> .. it's a service for getting small graphic design jobs done.
-How good is slackin and the one-click-deploy heroku button by the way? I've used it a couple of times for other projects. :simple_smile:
-I didn't end up using the one click install because I am moving away from heroku
-but slackin is pretty rad
-Ah right, yeah I was pretty impressed.
-<@U04SX1L23>: so you work for 99designs?
-Yup!
-what will the slack integration do?
-Hoping to be able to get image edits done from slack. Maybe a slash command or maybe a bot that you can talk to / invite to channels. Not quite sure just yet.
-cool, everyplace was talking about the image editorial control tool they built
-I'll be able to post these tools publicly eventually.
-Which combo of integrations do you all end up doing over and over again? I'm finding slash command + incoming webhook covers 80% of use cases, but curious if others find that too. 
-Same.
-Yup
-Wish they were one thing in fact!
-Good morning. I'm Larry Halff from Bright/Contrast in SF.
-Howdy, Larry!
-Yo!
-welcome
-Me and Denim &amp; Steel, a crew up in Vancouver, have been working on a decision making and tracking tool.
-Thank you!
-that sounds interesting
-tell us more!
-I don't know if any of them have joined yet, but they found this project.
-It's called Caslo, and right now it's in the invented state “pre-alpha."
-Which to us means, testing the basic user interactions while building the product.
-does it live inside slack
-It's an integration-based tool (it will use other services as it's primary UI), and Slack is our first roll out.
-gotcha
-what does “decision making” entail, if you can say
-Looking at GitHub as a next integration point.
-It's a way to record, verify, and act upon decisions or inflection points in a team.
-Ah! interesting.
-Could be anything from where we have lunch to should we deploy the latest build.
-The integration is a combo of slash command and bot.
-Seems like a common pattern
-we were talking yesterday about hte need for a combined version of that
-so that users don't have to set up multiple integrations
-according to <@U04S1QCPC> its coming!
-I was just reading more history, and the photo approval above would certainly be a use case.
-so its gonna be something like
-HEY CHANNEL, WHAT TO DO ABOUT THIS??
-and people reply and then some action occurs?
-That's good to hear. One of those little point, in terms of consistency, it would be nice to have the whisper from your bot rather than Slack bot.
-??
-You can set the user name of the responses
-Yes. You can define different scopes, rules, etc ...
-Hrm… I thought the invisible replies to slash commands could only come from slackbot?
-Oh oh
-yeah, if you just respond to the slash command with text
-it appears only to the user
-Those.
-right
-huh
-It's not a deal-breaker for the ux, but it helps set the context for who is running the show behind the command.
-I thought that slash commands just reported back like
-below the command
-I don't have any enabled right now
-oh yeah no i see
-its from slackbot
-Yeah.
-Hey, Larry! That sounds really useful. 
-I'm about to start experimenting with this:
-<https://github.com/rmcdaniel/node-slackbot>
-Can you give an example of the interaction between slash command and responses? How does it help make decisions?
-Thanks, buster!
-We use the slash command to set up a decision.
-Right now it would be something like “/caslo Should we put a picture of a cat on the front page?"
-Slackbot whispers back to you “Click here <https://decidewithcaslo.com/xyz123/> to finish setting up your decision."
-The details are completed in a web browser, and from then on the caslo bot interacts with the channel.
-Ah, got it. Seems like a common pattern to have a quick setup and then use incoming webhooks to post updates back. After setup, can you continue to interact with the decision through slack? For example, can you vote on xyz123? 
-Not currently.
-We've had some feedback requesting that, but we're debating the overall experience.
-<@U04T5MEBZ> I love the designation of “pre-alpha"
-Mainly, the loss of context and a user having to keep track of decisions by id or some other token.
-I think we're going to experiment with unfurled html links within slack first.
-Thanks, everyplace!
-<@U04T5MEBZ> it sounds like a generic, slack-driven Doodle.com-esque thing
-which is a pretty cool idea
-It is certainly akin to <http://doodle.com|doodle.com> with some intersting twists.
-OMG guys the RTM is so easy to use
-<@U04SJBP5Q> AM I RITE
-I hear ya.
-nice
-<@U04SM6T2H>: that's with node-slackbot?
-:ok_hand:
-yes
-This is the code, currently running on my laptop:
-bot.connect();
-Welcome to the channel, <@U04SM6T2H>
-haha
-it gets events for *everything*
-like, type ahead warning
-  team: 'T04SM6T1Z' }
-super cool.
-Yeah, so cool. Basically every event the Slack app needs. What kind of weird things can you do with those events other than build another client?
-You could do so much
-I mean, anything that you could do with outgoing or slash commands
-But you could also like, create custom archives
-Automatically blog ever link
-Automatically tweet things that are starred
-        is_starred: true } },
-whoa wtf
-I'm gonna have to build a bot that tweets starred messages now!
-But also things like rules enforcers
-bot hears “fuck” and says “Hey now, we're at work"
-Or like, the bot could listen for questions and try to find answers in an internal KB
-what is our vacation policy?
-HERE IS A LINK TO THE WIKI
-That's freaking awesome.
-It could also capture immediate responses to non-bot-answered questions.
-And then use that as the new answer.
-yeah, pretty much anything. in my Twitter client, if you star a tweet from Slack, it faves it for you on Twitter
-<@U04SM6T2H>: with that logo, wouldn't Computron be better named as Teletran-1?
-haha
-teletraan1 is our deployment box
-computron is a combiner transformer who happens to be smarter than the average combiner, most of whom get stupid when they get big (like devastator)
-Got it
-I think that another thing to keep in mind about bots that use the RTM api
-Is that it would be easier to have persistent state
-the stream is open, its one ongoing process
-so it can like, ask a question, wait for the response, and then respond back
-instead of trying to connect 2 inbound webhooks or slash commands
-yeah
-makes a lot of sense
-Also, every time you say RTM api, I keep imagining what an RTFM api would be
-haha
-me too
+
+U0524T275 : quite sure it can be improved a lot though
+U071CG4QY : <https://stackoverflow.com/questions/14464011/idiomatic-clojure-for-picking-between-random-weighted-choices>
+U0524T275 : nice thanks
+U5ZAJ15P0 : I am pondering about how I would implement a simple compiler and/or interpreter in Clojure. In particular, I am wondering what would be the best way to model the abstract syntax tree.
+The first (and most obvious) option would need to represent AST nodes as maps, tagged with their type/label (e.g. :type key). I would then define the various functions that operate on the AST as multimethods using the node's types as dispatch keys.
+
+Another option would be to represent each type of node as a record, and to then have them all implement a protocol (e.g. IExpr) which would contain have implementations for all the functions operation on AST nodes. This comes wth the added benefits that AST nodes could implement existing protocols too.
+
+Which of these options would be most idiomatic in Clojure? Or do you have another one to suggest?
+
+U5XMV6DQT : Take a look at Instaparse
+U050SC7SV : clj-antlr isn't bad either
+U5ZAJ15P0 : Which parts in particular? I am not looking to write a parser, just to understand what the best way to model an AST in clojure would be
+U5XMV6DQT : multimethods are nice, I think
+U5XMV6DQT : I made a notice about instaparse because if you use it — you don't have to think about AST representation yourself
+U060FKQPN : <@U5ZAJ15P0> take a look at tools.analyzer
+U060FKQPN : <https://github.com/clojure/tools.analyzer>  <https://github.com/clojure/tools.analyzer.jvm>
+U5ZAJ15P0 : thanks! so from that I gather that raw maps with a :type field seems to be the way to go?
+U5ZAJ15P0 : ok thanks, I'll take a look
+U5ZAJ15P0 : Another, completely unrelated question… Does anyone have advice/examples on how to structure application business logic? This is a fairly general question (not specific to Clojure), but there might be Clojure-specific idioms coming into play. Roughly speaking I am wondering if I should take a CQRS-y road and try to have a clear distinction between functions that modify the app's state and functions that read that state. The application I am currently working on is a fairly simple, CRUD-y Clojure+Datomic web app, but I would like to use it as a learning ground for good practices
+U5ZAJ15P0 : A link to an open-source application that you consider well-structured would be helpful, or advice / link to blog posts / resources
+U06CM8C3V : <@U5ZAJ15P0> have you seen the docs for re-frame? He talks extensively about CQRS-y architecture (even though it's cljs not clj) <https://github.com/Day8/re-frame>
+U06CM8C3V : There's a pretty detailed readme doc right up front, but don't be fooled, the real meat is in the docs/ folder
+U5ZAJ15P0 : <@U06CM8C3V> ah, let me check it now, thanks! By the way, something I should have specified: I am looking for a way to structure my code while keeping it fairly straightforward. E.g. no crazy async at the moment; ideally I would like to keep everything synchronous
+U5ZAJ15P0 : Oh wow, indeed
+U060FKQPN : it's the most common way at least
+U068SUJNT : When I do some calculation with pmap and want to use another pmap on the result. How I can I wait until the first pmap is done?
+U5JUDH2UE : Does anyone know of a clean way to assoc in a field only if the field isn't null; otherwise return the map unmodified?
+U11BV7MTK : <@U5JUDH2UE> merge
+U5JUDH2UE : :facepalm:
+U11BV7MTK : :+1:
+U5JUDH2UE : Thanks, <@U11BV7MTK>
+U0E0XL064 : merge will overwrite existing keys in the original map... this may (or may not) be the expected behaviour.
+U11BV7MTK : change the order
+U5JUDH2UE : I'm aware. That is what I want. It's just an optional field that should be tacked on only if it's not nil. (An authorization http header)
+U11BV7MTK : `(merge {:field "value if not present"} my-map)`
+U11BV7MTK : yeah exactly
+U0E0XL064 : right :slightly_smiling_face:
+U5JUDH2UE : I don't suppose there's a merge that would do `(merge {:a 1} {:b nil})` and return `{:a 1}`?
+U11BV7MTK : that sounds orthogonal to merge. you want to prune your map after the merge?
+U11BV7MTK : if it's just top level keys you could `(into {} (map (fn [[k v]] (when v [k v])) my-map)` would probably work
+U11BV7MTK : there's probably an even better sort with filter
+U11BV7MTK : `(into {} (filter (fn [[k v]] v) my-map)`
+U214G9RAP : To clarify your intention is to load the entirety of output of the first pmap into memory, then consume it once its realised?
+U11BV7MTK : and if you have possibility of false change the body of the `fn` to (some v)
+U5JUDH2UE : All great ideas.I've gone with `(merge xs (when a {:a a}))`.
+
+U11BV7MTK : that will clobber your original value i thought
+U11BV7MTK : you need your original map second
+U051SA920 : <@U5JUDH2UE> In that case you could do: `(cond-&gt; xs a (assoc :a a))`
+U5JUDH2UE : Sorry, I'm mixing names. `xs` doesn't have a `:a` yet. There's no possibility of clobbering.
+U11BV7MTK : :+1:
+U5JUDH2UE : <@U051SA920> I quite like that one. :thumbsup:
+U214G9RAP : If that's the case simply wrap the first pmap in a `doall`
+```
+(pmap #(println "b" %)
+  (doall (pmap (fn [x] (println "a" x) x)
+(range 1000))))
+```
+
+U5JUDH2UE : Is there a better way to do `(symbol *ns* 'symbol)`?
+U5JUDH2UE : Huh, nevermind. Apparently I can do syntax quoting for the dispatch value of a multimethod. Not sure why I thought I couldn't earlier.
+U0E0XL064 : <@U5JUDH2UE> Not sure if it would help, but <https://github.com/nathanmarz/specter> has some really 'navigators' to do all kinds of transformations on data structures. (Maybe not worth the effort for easy navigation, although I think it may be if you have at least 2 steps to navigate, including predicates :slightly_smiling_face: )
+U5JUDH2UE : <@U0E0XL064> Huh, that's cool. Definitely overkill for this though. :slightly_smiling_face:
+U173SEFUN : <@U5JUDH2UE> for associng a value if not null, with specter it's `(setval [:a some?] my-value amap)`
+U5ZAJ15P0 : <@U0E0XL064> are those basically lenses?
+U173SEFUN : for associng only if field exists, it would be `(setval (must :a) my-val amap)`
+U173SEFUN : will be way more performant than merge as well
+U0E0XL064 : I didn't use specter much yet - only found about it about a month ago - but it's definitely cool. Also for small cases.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

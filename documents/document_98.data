@@ -1,86 +1,91 @@
+U485ZRA58 : Oops, my bad. Missed that
+U485ZRA58 : That should work
+U071CG4QY : Though I don't know if there is any point to removal of `(second group)`
+U071CG4QY : You may as well do this `[[hash [{file :file} second] :as group] %]`
+U69HWBFB3 : <@U071CG4QY> Correct. That is my initial version. But don't you think destructured version is more readable?
+U071CG4QY : <@U69HWBFB3> Nope, imo — you need to parse destructuring and for that structure it is not very easy.
+U66G3SGP5 : when using datomic, if I can freely choose between an SQL backed datomic or Cassandra backed datomic, which one is better?
+U0BB79MMJ : <@U63RTB1KR> It's because of the way transducers work. They *are* applied from right to left, but to the reducer fn.
+U0BB79MMJ : You can think of each wrapping the earlier transducers
+U3GJHS5DY : <@U63RTB1KR> <https://clojure.org/reference/transducers> checkout "defining Transformations with transducers"
+U46LFMYTD : I'm trying to do some Java interop using a Java library called Gurobi. I'm following their documentation which reads```
+import gurobi.*;
+...creates outer class...
+GRBEnv env = new GRBEnv("mip1.log");
+GRBModel model = new GRBModel(env);
+GRBVar x = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, "x");
 ```
-From what I gather the answer to this would be "you only have one implementation per keyword; you just use a different config"
-Right. Just take the base config and alter it with `assoc`. Or use `duct.core/merge-configs` to merge in new options.
-It effectively amounts to the same thing.
-You *could* also use `with-redefs` to redefine the `init-key` multimethod, but since that's not thread-safe I'd advise avoiding that route.
-Thanks for the explanation! So the gist is that I was finding it annoying to swap implementation due to multimethods, but that's intentional because under your design you *should not* swap implementations
-Right. I mean, in theory it might be good for testing, but in practice I think it makes more sense to substitute keys in the configuration, rather than make the config-&gt;implementation bridge dynamic in some fashion
-It also makes it explicit where you're stubbing/mocking.
-<@U0BKWMG5B> thanks for taking the time to explain this out. Once I understand Integrant/Duct better I'll try to give back by writing some doc :slightly_smiling_face:
-Thanks! But if you like, just some feedback once you've gotten to use it a little would be  useful. The more use-cases I know about, the more useful I can make the library.
-Certainly
-Hi! What is the preferred way to do input payload validation for a json api in Clojure? If possible a solution that offers both input validation and machine-readable errors to be consumed by the client. Hopefully I won't start a 40min heated debate like yesterday :smile:
-Just adding stuff from this conversation to the readme / wiki would be helpful, because as far as I could see the questions are not addressed on Github at the moment
-sort of "Best practices" for stubbing / mocking with Integrant
-<@U3L6TFEJF> yep that would be great
-I'd read one, though :opieop: 
-Point taken, I'll put together something for the Duct docs.
-<@U0BKWMG5B> are you using Duct in production?
-The Integrant version? Not yet, or at least it's not *running* in production. I am working on an app that will be running in production in a couple of months, though.
-<@U0BKWMG5B> Another question… What would be the preferred way to reference some environment variables in the config? It seems to be like an EDN tag would be neat, e.g. `#ig/env "DATABASE_PASSWORD"`. Do you have an existing option? I guess I could merge in the relevant config from env vars
-An edn tag would be neat, and in Duct it's called `#duct/env`.
-If you put that in your main `config.edn`, then you can always override them in `dev.edn` or `local.edn`.
-Oh I hadn't even realised Duct had this functionality; I am focussing on Integrant's doc atm. Brilliant
-Certain modules also have defaults, e.g. `:duct.module/sql` uses `JDBC_DATABASE_URL` and `DATABASE_URL` automatically, and `:duct.module/web` uses `PORT` for the port number.
-<@U5ZAJ15P0> There are a few solutions. Compojure-API can use Schema or Spec. My own Ataraxy has spec validation in the latest version. There are also various validation and coercion libraries, but I think the most common approaches are Schema or Spec.
-Spec isn't designed around coercion so much, so I'm not sure how well it could handle that.
-<@U0BKWMG5B> on the topic of loading env vars, maybe it would be neat if one was allowed to extended integrant with custom readers?
-oh hang on; I just looked at Integrant's code and it's already the case
-Take a look at read-config
-Yep :slightly_smiling_face:
-<https://github.com/weavejester/integrant/blob/master/src/integrant/core.cljc#L85>
-Though in duct someone pointed out that the readers don't persist though includes, so that needs to be fixed.
-<@U0BKWMG5B> what do you mean by that?
-Duct adds a :duct.core/include key that allows a config to pull in other configs from the classpath in the "prep" stage
-But prep doesn't know about the custom readers.
-I'm also considering better ways of performing an include.
-<@U5ZAJ15P0> wrote a post about the coercion &amp; error messages some time ago: <http://www.metosin.fi/blog/clojure-spec-with-ring-and-swagger/>.
-thanks!
-<@U0BKWMG5B> another question… Is there a way to "inherit" from a config? For example, let's say I have a "database" config, and I want to create two services whose configs are slight twist over the general "database" config
-a bit like your `:adapter/jetty` example on the Integrant readme
-except that you replicate the config (port and handle) under both keys, whereas I would like to share a config block and override some bits
-if that makes any sense
-(theoretical question anyway, I don't have a specific usecase)
-Not currently, unless you modify the config with either a module or directly after it's loaded.
-So I would need a module that knows about those keys and performs a merge?
-I'm using integrant-repl and reading config from `resources` folder in my preparer function (`(read-config (io/resource "config.edn"))`) and yet it won't pick up new values for mongodb host when I change them, forcing me to stop and start the REPL. Does this ring a bell to anyone? Any common gotchas?
-<@U0BKWMG5B> ^
-Quick question: how can I pass a static function around? E.g. if I try to pass `System/getenv` around I get `Unable to find static field: getenv in class java.lang.System`
-(but `(System/getenv "foobar")` works)
-I could pass `#(System/getenv %)` around, but I assume there is a simpler way
-that's a static method, methods unlike functions are not first class objects supported by the vm
-you can't pass something as an argument that can't be put on the stack
-that's why you need to create a function, which is an object (with a static method that gets called if you apply it)
-so tl;dr there isn't a simpler way, that's the way you do it
-<@U5ZAJ15P0> you could check `memfn` as well <https://clojuredocs.org/clojure.core/memfn>
-<@U053XQP4S> that doesn't work with static methods
-and it's not any more succinct or efficient than creating a lambda in most cases
-(that's what it actually does, it creates a function)
-oh right, my bad
-<@U051SS2EU> ah I see; I thought there might be something like that going on
-i don't understand why this returns what it does. can someone break down what `reduce` is doing here?
-<@U6DBQRAHM> head to <#C053AK3F9|beginners> and I'll walk you through it
-<@U11BV7MTK> ok thanks!
-I'd need to see more of your setup. If you're performing a reset, your prep function will be hit
-Yes, though depending on your use case, it may or may not be a good idea
-<@U0BKWMG5B> yet another question on Integrant… Why is `ig/suspend!` necessary? Couldn't you do all the logic in `ig/resume`? (naming it `ig/swap` or similar). It seems to only be used when hot-swapping for dev
-There are two steps: suspending the system then resuming it with a different config
-To do essentially one thing: hot-swap some parts of the running system
-(at least that's the only use of suspend!/resume I have seen yet)
-Consider the case of a web server. Suspend can tell the server to buffer connections until resume is called. After suspend we reload namespaces which can take several seconds.
-Suspend and resume are only used for dev
-ah right, so you wouldn't be able to hot-swap in one go because reloading namespaces while requests are being processed would lead to issues I assume
-Ring will buffer requests by default if the handler is a promise?
-well, the ring jetty adapter
-Yes, because a promise blocks
-Ah, so if the passed handler is a promise it will try to deref, which will block. ok.
-thanks!
-Right
-Suspend and resume are useful for keeping connections open and avoiding restart time during development.
-Web sockets for example
-(similar to what the debugger in IntelliJ allows you to do)
-`bean`
-wouldn't work on non-beans
-I tried to make sense of `clojure.reflect` but before I spent my time on that - shall we say - sparsely documented lib, I was wondering if someone had a neat `java-to-map` fn
-I think clojure.reflect/reflect basically does that iirc
-if I recall, bean used to be more general and didn't look for JavaBean specific stuff... let me see if I can find it
+I am trying to work with this library in clojure. It seems I cannot wildcard import in clojure so I have 
+```
+(import '(gurobi GRB GRBCObj GRBCallback GRBColumn GRBConstr GRBEnv GRBExpr GRBException GRBGenConstr GRBLinExpr GRBQuadExpr GRBModel GRBSOS GRBVar GRBQConstr GurobiJni))
+(def env (new GRBEnv "mip1.log"))
+(def model (new GRBModel env))
+(.addVar model 0 1 0 GRB.BINARY "x")
+```
+however I get the error on the final line "java.lang.ClassNotFoundException" caused by GRB.BINARY. I believe I have imported everything using the extensive import above.
+
+U0BB79MMJ : <@U46LFMYTD> Might be a static member, so it could be `GRB/BINARY`
+U0BB79MMJ : Or, an inner class, in which case you need to import `GRB$BINARY`, but from the upper case spelling, I'd assume the former
+U46LFMYTD : bingo
+U63RTB1KR : <@U0BB79MMJ> <@U3GJHS5DY>  Thx. I'll check it again.
+U46LFMYTD : it was `GRB/BINARY`, thank you
+U46LFMYTD : How would I convert `x.get(GRB.DoubleAttr.X)` to clojure
+U46LFMYTD : cider in emacs isnt giving me much help &gt;&lt;
+U46LFMYTD : can someone please help me convert `x.get(GRB.DoubleAttr.X)` to clojure code
+U46LFMYTD : so turned out I needed this
+U46LFMYTD : `(.get x gurobi.GRB$DoubleAttr/X)`
+But I'm confused as to why I needed gurobi.GRB$DoubleAttr instead of GRB$DoubleAttr as I already imported gurobi.GRB in my import statement
+
+U46LFMYTD : and when I begin to type `gurobi.GRB$Dou....` cider doesn't autocomplete it
+U46LFMYTD : so this worked `(.get x gurobi.GRB$DoubleAttr/X)` but i feel like im in the dark
+U46LFMYTD : cider isn't giving me any autocompletion help so its hard to find the proper structure
+U46LFMYTD : cidre doesn't autocomplete `gurobi.GRB$...` at all
+U0BB79MMJ : <@U46LFMYTD> Yeah, nested classes are confusing to work with... You can probably directly import GRB$DoubleAttr as well, that should fix it
+U051SS2EU : <@U3JURM9B6> <@U1ALMRBLL> clojure has eager-map built in, it's called mapv, and it will perform better than that reduce example, even if you need to call seq on the result to get a list instead of vector
+U0G75ARHC : what's the best and most elegant way when using `environ/env` to ensure that values that can be coerced end up being so. Right now everything it reads as strings. I'd like values like "true"/"false" and numbers to be converted to be of the right type
+U0G75ARHC : Tried simply using edn/read-string, but it turned out to be not so straightforward.
+U0G75ARHC : some edge-cases when the exceptions thrown, I end up with code that doesn't look elegant. Clojure has spoiled me: If code doesn't look elegant - I feel it's not worth adding it.
+U051SS2EU : I wonder if `plumatic/schema` coercers would help here…
+U051SS2EU : <https://github.com/plumatic/schema#transformations-and-coercion>
+U051SS2EU : &gt; Coercion is like validation, except a schema-dependent transformation can be applied to the input data before validation.
+U051SS2EU : <@U0G75ARHC> consider that you'll read this at startup, and IMHO startup is the perfect time in the run of an app to reject input outright and exit with an error
+U051SS2EU : so I'd say, don't try/catch, even explicitly throw AssertionErrors if the data isn't "perfect" - then whoever set up the run environment can use your clear descriptive error message to fix the input and try again
+U0G75ARHC : <@U051SS2EU> I'm not using schema in this particular project. Seems to be an overkill to have to use it to solve this particular problem
+U051SS2EU : OK - but my point about asserting / throwing / bailing out still stands
+U09A6U6GJ : RFC, all contributors to and users of nREPL: <https://groups.google.com/forum/#!topic/clojure/6SX7q39lK90>
+U051TMSBY : <@U0G75ARHC> you can check out <https://github.com/amperity/envoy> too
+U2J7JRTDX : ag: Use `aero`: <https://github.com/juxt/aero>
+U0W0JDY4C : is there a way to change the signature of a defmulti after you decide on which arguments to dispatch?```
+(defmulti foo (fn [a b] [a b]))
+(defmethod foo [:foo :bar] [just-foo?] (do ...))
+```
+or does every defmethod have to have the signature `[a b]`?
+
+U0NCTKEV8 : the defmethod only needs to be able to be invoked on the args given to it
+U0NCTKEV8 : so if you have a mutlimethod that can be invoked with differing numbers of arguments, and those differing  numbers of arguments are dispatched differently, each method only needs to handle the arity it would be invoked with
+U0NCTKEV8 : if you invoke a multimethod with N arguments, whichever method it dispatches to will be invoked with N arguments, you can't change that
+U0W0JDY4C : okay, that makes sense. I just didnt want to have to change my signature across a couple files that implement the defmethod *if at all possible
+U0K0TFQLW : <@U0G75ARHC> <@U051SS2EU> I did exactly that using the json coercer that ships with schema
+U051SS2EU : yeah- that's what I was thinking of
+U0K0TFQLW : I have a file in each of my projects that looks like ```(def settings {:debug {:schema s/Bool :default false}   :db-uri {:schema sc/URI :default "<postgres://postgres@localhost:5432/foo>"}
+   :redis-uri {:schema sc/URI :default "<redis://localhost:6379/0>"}})
+```
+
+U0K0TFQLW : and then I have a component that takes a settings map in and can realize those at component/start time to be injected around to whomever needs them
+U0K0TFQLW : although I have a vendoring of environ.core/env's underlying functions to allow me to invoke it in my start() and thus allow me to stop a system, change java properties, and then start the system again
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

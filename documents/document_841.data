@@ -1,0 +1,58 @@
+U0PKTUWKH : trying to build a function that will backup ebs volumes
+U4SSUBNHY : looking
+U0PKTUWKH : i get the following error `Invalid type for parameter Filters[0].Name, value: ['Backup'], type: &lt;type 'list'&gt;, valid types: &lt;type 'basestring'&gt;: ParamValidationError`
+U4SSUBNHY : try `"Backup"`?
+U4SSUBNHY : instead of `['Backup']`
+U0PKTUWKH : `An error occurred (InvalidParameterValue) when calling the DescribeInstances operation: The filter 'Backup' is invalid: ClientError`
+U4SSUBNHY : what is `'Backup'` when it comes to your EC2 instances?
+U0PKTUWKH : its tag
+U4SSUBNHY : ok
+U0PKTUWKH : key and `jira_backup` its value
+U0PKTUWKH : this is example syntax i c ```
+response = client.describe_instances(
+    Filters=[
+        {
+            'Name': 'string',
+            'Values': [
+                'string',
+            ]
+        },
+    ],
+```
+
+U4SSUBNHY : Are you able to display this tag in your AWS console?
+U0PKTUWKH : yes
+U4SSUBNHY : hmm
+U0PKTUWKH : ```aws ec2 describe-instances --filters "Name=tag:Backup,Values=jira_backup"
+
+ "Tags": [
+                        {
+                            "Value": "jira_backup",
+                            "Key": "Backup"
+```
+
+U5VGKQ2SY : in `reservations = ec.describe_instances`, Where is ec defined?
+U0PKTUWKH : <@U5VGKQ2SY> `ec = boto3.client('ec2')`
+U5VGKQ2SY : nevermind
+U5VGKQ2SY : <https://gist.github.com/ryansb/c5807c6785f326e9510d> &lt;-- no brackets around tag-key
+U0PKTUWKH : <@U5VGKQ2SY> THANKS! ur example helped me to realize i was useing `'tag-key'` instead of `'tag-value'`
+U0PKTUWKH : and this is why things were failing
+U5VGKQ2SY : full disclosure, NOT MY EXAMPLE hahaha
+U0PKTUWKH : well not ur example but whatever u provided as an example
+U0PKTUWKH : :stuck_out_tongue_winking_eye:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

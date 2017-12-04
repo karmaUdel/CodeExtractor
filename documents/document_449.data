@@ -1,1 +1,65 @@
+U5ABF3BH7 : Hi!  I am writing a Json.Encode function to create an object in the back end, in my database.  I have a Kase. ```type alias kase =  { name : String, organization : Maybe Organization.Model, ...} ```. The field organization is a Maybe.  If there is no organization entered, I don't want that field passed in my Json object.  as it will give me some validation errors. How can I do that?  I can only think of doing List.append. This is how the code looks like if an organization exists
+U5ABF3BH7 : ```Json.object   [ ("name" , Json.string model.name)
+   , ( "organization_attributes", Json.string model.organization)
+]```
+
+U5ABF3BH7 : any advice
+U5ABF3BH7 : ?
+U5ABF3BH7 : but if there is not organization, I only want
+U5ABF3BH7 : ```Json.object   [ ("name" , Json.string model.name)]```
+
+U5ABF3BH7 : (this is a simplified version)
+U3DQT3ZGC : Hi All! Is there a way to detect if an image is loaded in Elm like this? ```const tempImage = new Image(500, 500);tempImage.addEventListener('load', doSomething);
+
+tempImage.src = url;
 ```
+
+U0K92QFST : <@U3DQT3ZGC> Elm allows you to define custom event handlers for any HTML tag: <http://package.elm-lang.org/packages/evancz/elm-html/4.0.0/Html-Events#on>
+U48AEBJQ3 : <@U5ABF3BH7> There are a few ways of doing it. One might be:```
+Json.object (List.filterMap identity [Just ("name", Json.String model.name), Maybe.map (\org -&gt; ("organization_attributes", Json.String org))])
+```
+
+U0K92QFST : <@U5ABF3BH7> <@U48AEBJQ3> here's what I came up with:```
+let 
+  nameField = ("name", Json.string model.name)
+in
+  case model.organization of
+    Just org -&gt;
+      nameField :: [("organization_attributes", Json.string org)]
+    Nothing -&gt;
+      [nameField]
+```
+
+U48AEBJQ3 : And there is another :simple_smile:.
+U0FP80EKB : This```
+ nameField :: [("organization_attributes", Json.string org)]```
+can just be
+```
+ [nameField, ("organization_attributes", Json.string org)]
+```
+
+U3DQT3ZGC : So this this should work ? `Html.img [ on "load" (Json.succeed message), src "image.jpg" ] []`
+U5ABF3BH7 : <@U48AEBJQ3> <@U0K92QFST>  <@U0FP80EKB>  Thanks a lot!
+U0K92QFST : <@U3DQT3ZGC> if the load event listener works as I suspect, then yes, it should work.
+U3DQT3ZGC : Ok, I'll try it, thanks!
+U3DQT3ZGC : It's interesting, I want to load 25 images and know when they're all loaded. And in JS I did this by the use of Promises. Any idea on how to do this in Elm without counting the times I get the `load` event?
+U3DQT3ZGC : I guess if the code above works, thats probably the way to keep track..
+U3DQT3ZGC : But feels a bit hacky
+U0K92QFST : <@U3DQT3ZGC> if each image has some sort of unique identifier, you could add it as a tag to the message that represents an image being loaded
+U0K92QFST : then in your model you can track which images have been loaded
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

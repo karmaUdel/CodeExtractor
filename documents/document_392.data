@@ -1,57 +1,66 @@
-    update (UrlChange location) initialModel```
-init flags location =
-But I think I'm not using in the right way the Location param then.
-where exactly are you hitting an issue? it compiles but doesnt behave as expected?
-what is the body of your init function?
-<@U3LUC6SNS> <https://gist.github.com/zgohr/265123ae03c909f466d1a8960958b890> it's very paired back to the essentials. let me know if you have any q's!
-<@U1ZFF0E5P> yes, it compiles, but let me check because the initialModel always is taking the same page
-<@U4JT89FGB> Thanks very much.  It looks quite clear - I will see if I can integrate this into my app this week.
-I just tried to make my first port which takes 3 arguments, this gives me a compile error but if I instead remove 2 of the parameters so there is only one it seems to compile. It also works making everything to a record, what am I missing?
-You're not really missing anything; ports can only take a single parameter
-<@U3SJEDR96> So basicly the solution if I want to send more parameters is that I send a record?
-Yep. Or you encode your data using `Json.Encode` functions to create a JS object, and make your port accept a `Json.Encode.Value`
-btw, tuple should also work (and translates to an array on the JS side of things)
-you can find an overview here: <https://guide.elm-lang.org/interop/javascript.html#customs-and-border-protection>
-<@U3SJEDR96> my hero! Thank you :happypanda:
-Do you guys recommend ELM native UI for a production app?
-What a greeting ^^;;
-<@U69JKF6EN> It depends on the details, I'd say.
-A lite clone of Uber.
-Other people would know better, but it's robust enough to get the job done. But the language is not stable yet, so you might have to keep closer track of the changes to the language as it develops
-<https://robots.thoughtbot.com/elm-native-ui-in-production>
-they did it, might be interesting to read their opinion :slightly_smiling_face:
-<@U3SJEDR96> I read that post. the elm-native-ui github page says it's not production ready. That's why I asked the question here.
-I don't think anyone here is going to recommend using it in production, in the <#C192T0Q1E|beginners> channel, while the project itself states it is not ready for production :slightly_smiling_face:
-Thank You <@U3SJEDR96> , <@U57KYFW67> and everyone!
-I would probably use react native still
-but it's interesting to experiment
-I am building a sudoku resolver
-And I have a 4 functions that handle an Array Cell of 9 cells
-isValid : Array Cell -&gt; Bool
-getColumn : Int -&gt; Sudoku -&gt; Array Cell
-getSquare : Int -&gt; Sudoku -&gt; Array Cell
-getLine : Int -&gt; Sudoku -&gt; Array Cell
-How can I be more precise about the types
-And explcitely say that ArrayCell is a 9 cells array ?
-<@U5R6L5MT4>, you can create your own custom type that limits the amount of items of the array to 9. You will also have to reimplement some of the functions of the array module
-<@U5R6L5MT4> There's no good way to enforce the size of an array or list in Elm.
-`Array (Array Int)` is probably the best way to do it.
-hah, I also made a sudoku solver in Elm; it's fun.
-Solving a sudoku puzzle requires a backtracking algorithm, right?
-<https://github.com/zwilias/sudoku-solver> if you want to compare how I went about it
-The naive algos do, not sure if there is a way to do it without backtracking at all. I suppose you do be smart about it, and check for cells that can only have one possible input, and work your way through it that way.
-I remember I gave it a try once and it could solve simple puzzles only.
-It would explain my frustration whenever I try to do one :slightly_smiling_face:
-I want to use a javascript lib for rendering a graph. My thought was to create the div that the library needs to render itself within and then simple load the javascript library with data provided from elm, through a port. However, since the div changes and the content within changes elm obviously doesn't recognise this when I swap page back and forth. This results in me rendering another graph, and another graph and so on every time I swap page. What is the way to go here?
-how can I `elm-format` automatically in `vim`?
-You can use `Html.Keyed` to ensure the vdom-diffing doesn't attempt to re-use that div. That would only work if that div stays at a similar place in the tree, though
-is there such thing at all?
-<@U4RR7KX45> I use elm-format in vim. You've followed the install instructions already, I take it?
-<https://github.com/avh4/elm-format/#elm-vim-installation> there is :slightly_smiling_face:
-yes I have
-Is it not working? Or are you trying to configure it differently than the default?
-does it have to be neovim or smth similar? I'm using vim8 at the moment
-Is vim8 the "default" vim?
-yeah
-Yeah. I just use whatever ubuntu gave me
-ok thanks, I'll try to uninstall plugins and re-install them
+U623QK78C : Turns out they can be curried.
+U153UK3FA : <@U623QK78C> like all functions in Elm, constructors are curried. You can use the fact that they are curried to easily partially apply arguments to them.
+U623QK78C : Thanks, that was exactly the use-case I was thinking of.
+U5WD40ZA9 : Could someone please explain why the following doesn't returns true :
+Regex.contains (Regex.regex "^([1-9][0-9]*)$") "123"
+
+U5WD40ZA9 : Trying to create a regex pattern that only matches string that only contains numbers
+U1RK41R0T : It returns `True` for me
+U41NK9BM4 : BTW That won't match 0, i believe - is it indented?
+U5WD40ZA9 : <@U41NK9BM4> it's intended
+U41NK9BM4 : OK :slightly_smiling_face:
+U1RK41R0T : <https://ellie-app.com/3G9qn8d5JRWa1/0>
+U41NK9BM4 : ```&gt; Regex.contains (Regex.regex "^([1-9][0-9]*)$") "123"True : Bool```
+
+U41NK9BM4 : From the 0.18 repl :point_up_2:
+U1RK41R0T : can somebody explain me in simple words how Fuzzer Shrinkers work and how to write them? I get that their role is to determine the closest value that makes test fail but do you know some more sophisticated examples of their definition? :slightly_smiling_face:
+U3SJEDR96 : <@U1RK41R0T> generally, they're built using `elm-shrink`, might want to have a look at the code of that project (it's not overly complicated)
+U3SJEDR96 : and generally, they work by defining a "lower" value, given a certain value. So for a list, this would be a shorter list. For an integer, this would be an integer closer to zero. For a `Just x`, this could be the `Just (shrink x)` or `Nothing`
+U1RK41R0T : thanks! I didn't hit upon an idea of checking `elm-shrink` package itself :slightly_smiling_face:
+U64M3DF1B : hi - being noob to Elm - I have (totally c/p'ed) this
+```
+module Main exposing (..)
+```
+and a ports.js saying `Elm.Main.embed(container)` - only it doesn't :cry: - all it does is complain about Elm.Main.embed not being a function
+
+I've searched for ‘embed' on <http://github.com/elm-lang|github.com/elm-lang> - and to my surprise it's not there? Even so, a number of posts says it can be done like that - even <http://elm-lang.org|elm-lang.org> has it front and center in a piece of code? I am going crazy over this!
+
+U41NK9BM4 : Usually that `Elm.Main.embed(...)` is defined in the generated file by `elm-make`.
+U41NK9BM4 : So, how do you have compiled the Elm file?
+U64M3DF1B : <@U41NK9BM4> that would be the elm.js - 
+I did elm make Main.elm --output=elm.js
+
+U41NK9BM4 : Good.
+U1RK41R0T : perhaps the problem is a `require` statement that must be translated/bundled into ES5 code runnable on the browser?
+U64M3DF1B : :$
+U41NK9BM4 : And you added that elm.js to you HTML file, right?
+U64M3DF1B : this is the ports.js - all of it
+```
+‘use strict'
+const Elm = require(‘./elm.js')
+console.log(Elm);
+// get a reference to the div where we will show our UI
+let container = document.getElementById(‘container')
+
+// start the elm app in the container
+// and keep a reference for communicating with the app
+let mandarinClient = Elm.Main.embed(container)
+```
+
+U41NK9BM4 : Yes, could be you need a more exotic way to include that JS in our app like vviktor said
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

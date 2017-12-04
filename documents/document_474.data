@@ -1,38 +1,92 @@
+U3LUC6SNS : It still has the ../src that I tried.
+U0FP80EKB : This is the one in `tests` ?
+U0FP80EKB : I'm assuming that the modules are in `../src`
+U0FP80EKB : Can you paste the package json from the root? non-tests?
+U3LUC6SNS : Yes.  Normally it says ```
+"source-directories": [
+        "src"
+    ],
 ```
-<@U4872964V> thanks, I go this direction definitely!
-<@U4872964V> it might be a stupid question but is there a better way to match the rest of the cases in that structure than `_ -&gt;` ?
-<@U4SM7ECAG> I'm not sure what you  mean
-define "better"
-I generally avoid using `_ -&gt;` because it can lead to me missing cases
-well I don't want to use `_` as much as possible
-but then pattern matching strings I don't know how else to deal with it.
-well, what would you expect? A string can be any string
-So you have to have a `_` case when matching string
-That's one reason not to use strings when you can use a union type instead
-context is important - sometimes you want to have a default value, sometimes you want to return an `Err "something went wrong"`, sometimes you want to `fail` a decoder or a parser, etc
-but what if then I add a new group then this piece of code is a point where I could potentially not get some error
-yes perhaps typing `Result Group` the return instead of `Maybe Group` would be easier to track once then code grow
-Yes, well, you would keep the `getGroup` function close to the type. But the best solution is to not use strings at all, if possible
-I mean, I would like to get ["test name", "test descrip"]
-yes I agree :slightly_smiling_face:
-you could instead have a `List (Piece -&gt; String)`, like `[.name, .descrip]`, and then do: `List.map (\fn -&gt; fn piece) [.name, .descrip]`
-what're you wanting this for?
-<@U6EV3H0N7> no need to hide your response in a thread; keeping it in the channel is easier to access for onlookers :slightly_smiling_face:
-sorry, never sure whether to go for threads or not!
-But I have the list of fields (withou ".").. I have to look the issue in a different way I think
-can I convert this Piece type alias into something like a list of tuples, where each tuple is something like ("fieldName", "value")
-you can do that with a Dict
-<@U2DF486HL> maybe you can explain your use-case? Right now, we might be helping you with an issue with your attempted solution, rather than the actual problem... :slightly_smiling_face:
-<@U3SJEDR96> I agree. I will rethink my use case and get back.. thanks
-Hey everyone! Excited to start learning Elm, expect lots of questions :grin:
-I'm using getString in a div and it complains that there is a type mismatch. It says div expects List (Html Msg) but it is List (Http.Request String). Is there any way of hammering the latter into shape?
-Your views shouldn't (and can't) be making http requests; as your view is _just_ presentation of your state
-issuing requests can only happen from `init` and `update` - the only two functions that return a`Cmd msg` :slightly_smiling_face:
-what does that mean?
-ah I see, put the div into update
-No, put the request in update. When the request receives a response, that will trigger your update, too. At that point, you save the response-data in your model, and that will then be rendered in your view
-the div stays where it is?
-Maybe you can show some code to illustrate what you are attempting?
-this may be a lot clearer to illustrate rather than explain :slightly_smiling_face:
-How to enrich folding like above?
-<@U5P4FLYLE> I'm not really following. You have a list of items and you want a count and a list of positions of the item?
+All of my Elm files except tests are in `src`
+
+U3LUC6SNS : And the app compiles, which is one check
+U0FP80EKB : Hmm…. And you are running `elm-test` from within `tests` (sorry for the basic questions)
+U0FP80EKB : (just going over some of the things I've accidentally done)
+U3LUC6SNS : Just to be sure: `jxxmbp:koko_client carlson$ diff elm-package.json tests/elm-package.json `
+No problem about the questions.  I've always run tests from the root directory.  If I do so from `tests`, I get this:
+```
+jxxmbp:tests carlson$ elm-test
+No tests found in the test/ (or tests/) directory.
+
+NOTE: Make sure you're running elm-test from your project's root directory, where its elm-package.json lives.
+```
+
+U0FP80EKB : oh, interesting. I wonder if I do, as well.
+U3SQ42JJW : Hey everyone. I try to figure out a way to achieve the following:I have a List of Poll. And I want to convert it to a List of RawItem where every RawItem contains the elements of PollItem plus the tstamp of the parent Poll
+
+```
+type alias Poll =
+    { tstamp : Int
+    , questionnaire : List PollItem
+    }
+
+
+type alias PollItem =
+    { questionType : String
+    , question : String
+    , answer : String
+    }
+```
+
+
+into this:
+```
+type alias RawItem =
+    { tstamp : Int
+    , questionType : String
+    , question : String
+    , answer : String
+    }
+```
+
+U3SQ42JJW : any ideas ?
+U0FP80EKB : <@U3LUC6SNS> Hmm… I'm out of ideas. Sorry.
+U3SQ42JJW : I tried to achieve that with nested List.map … but couldnt find a way how to transfer the tstamp into the deeper List.map
+U3LUC6SNS : No problem -- I appreciate the effort.  Will sort it out tomorrow
+U4872964V : <@U3SQ42JJW> make a function like this:```
+makeRawItem : Int -&gt; PollItem -&gt; RawItem
+```
+and then
+```
+List.map (makeRawItem poll.tstamp) poll.questionnaire
+```
+
+U4F64AKQV : <@U3SQ42JJW> break it up into two steps. Have one step that converts a single Poll to a list of RawItems. Then use concatMap or something like that to repeat that for all of them. 
+U3LUC6SNS : <@U0FP80EKB> I brought out the nuclear weapon: `elm-test init` in the root directory.  this fixed things (and did not nuke my test file). Go figure!
+U0FP80EKB : haha! That works.
+U3LUC6SNS : Ha ha indeed!  Like rebooting the computer to solve 99% of mysterious problems.
+U3SQ42JJW : :smile: Thanks <@U4F64AKQV> <@U4872964V> and <@U3FJSB596> … ah I am still not functional… a partial applicated function like Martin showed did solve that. … Still have to learn… :wink:
+U4F64AKQV : It takes some time to get used to, but once you start to recognize the patterns it becomes really easy (even easier than imperative in my opinion)
+U601ELFEG : anyone got a good example of a module that needs to do several round trips through a `Cmd` and a `Sub` to get something done... and then offers essentially a `Cmd` and `Sub` like interface back to other (higher up) client modules?
+U2GPAEU1L : <@U3SQ42JJW> I just made a tutorial on what it means to have a language use currying by default: <http://codetidbit.com/#view/snipbit/596930d17890d775c05191f3/introduction>
+If anyone else is *struggling with currying*, perhaps that tutorial will help you!
+
+Cheers :smile:
+
+U3SQ42JJW : amilner42: Thanks :smile:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

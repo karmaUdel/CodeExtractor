@@ -1,27 +1,82 @@
-```
-<https://www.producthunt.com/posts/kllect-tech-videos-curated-for-you>
-Congrats and thank you for this nice feature :+1:
-<https://blog.memo.ai/10x-your-slack-apps-ux-with-message-menus-98a5a09b3a7a>
-We're also on <http://ProductHunt.com|ProductHunt.com> today, we'd love to get your feedback on Memo! (and maybe an up-vote :grin:)
-Is distributing the app and submitting to directory, the same thing?
-<@U4RLKTQ3W> no - distributing means you're going to implement the OAuth flow rather than the single team app token generation
-App directory submission is in the same panel, but not required
-Does anyone have advice for where I should start? What editor I should use, if any?
-<@U272P5K71> Thanks. Does that mean I can activate the distribution but it wont be publicly available, right?
-yep
-I'm blanking on the name of a Slack app that lets you overlord a Bot that is say, talking to customers (from within Slack), hand select responses from a tree and even butt-in and take over if you want. Anyone know the one I'm talking about? It's on the tip of my brain-tongue.
-<@U3QHKHJNQ> I think you mean <http://dashbot.io|dashbot.io> <@U0DSTH2HL>
-<https://www.dashbot.io/tour#liveperson>
-Yup! That's us, lmk if you have any questions! 
-hmm.. that seems close, but I recall seeing the option to see what the bot was "thinking" in terms of potential answers/bot decision tree
-maybe I'm confusing two different apps though
-Am I missing something or taking the wrong approach in building a bot that can listen to and respond to multiple teams? Thanks in advance.
-Hi folks. I'm subbmitting my app to the app-directory but I can't figure out what this question is about
-Ho I have to provide a slack team domain and a USER CREDENTIALS (?!?) with the app already installed? it sounds very wired ( and not very secure)
-<@U3XEF6WBZ> "for a *new* Slack team". You can just create a special team dedicated for the App Directory submission.
-Obviously don't give them credentials for your own team(s) :wink:
-thanks <@U0GT29N3A> still it sounds wired
-Hi guys, quick question on botkit - perhaps any of you have solved this. I'm trying to find a way to be configure custom path in the Slack app so that instead of /oauth and /login I can use /my/custom/path/oauth and /my/custom/path/login. But I can't find the options to do this in botkit. Hope there is a stupidly obvious way I'm not considering :slightly_smiling_face:
-west: Have you seen the tutorials on Github?
-I use the Python client and the tutorials are great to get started.
-<https://github.com/slackapi/Slack-Python-Onboarding-Tutorial>
+U19J7PF7T : Got it thanks!
+U04SM6T2H : IF you use markdown in one of those fields
+U04SM6T2H : you have to tell slack to expect it
+U04SM6T2H : there is a mrkdown_in parameter
+U19J7PF7T : ```{    "text": "*bold* `code` _italic_ ~strike~",
+    "username": "markdownbot",
+    "mrkdwn": true
+}```
+
+U19J7PF7T : that one? or its another???
+U19J7PF7T : :confused:
+U04SM6T2H : another one!
+U19J7PF7T : ooops
+U19J7PF7T : got it
+U19J7PF7T : ```"mrkdwn_in": ["text", "pretext"]```
+U04SM6T2H : "mrkdwn_in": ["text", "pretext"]
+U19J7PF7T : that one?
+U04SM6T2H : yup
+U04SM6T2H : :slightly_smiling_face:
+U19J7PF7T : so i can do bold, italic, etc
+U19J7PF7T : but no color
+U04SM6T2H : no color
+U04SM6T2H : the only color in a slack attachment is the side of the box
+U19J7PF7T : great
+U19J7PF7T : thanks!
+U0HUTFBHS : yeah that's lame.
+U0HUTFBHS : IRC has had color since the '90's.  :slightly_smiling_face:
+U0GPSB7V1 : on outgoing webhooks from private groups, the name of the group is always “privategroup” ?
+U0GPSB7V1 : this seems strange but i guess it sends the group id.
+U0GPSB7V1 : meh.
+U1F6XAH08 : added an integration to this channel: <https://dev4slack.slack.com/services/B1F79735W|outgoing-webhook>
+U1F6XAH08 : testing
+U1F6XAH08 : test
+U1F6XAH08 : test
+U1F6XAH08 : test
+U0HUTFBHS : You may want to take that to a testing channel.
+U19J7PF7T : i have a question how can i get the id of the team where the bots has been added? so i can send like an onboarding msg?
+U19J7PF7T : im trying this
+U1F6XAH08 : good idea, sorry about the spam!
+U0HUTFBHS : No worries!
+U19J7PF7T : ``controller.on('channel_joined',function(bot,message) {        console.log(message);
+        //Onboarding Message Here
+        //bot.api.chat.postMessage({
+        //    text:"hello",
+        //    channel: 'aaaand here im lost.'
+        //});
+    });`
+
+U1F6XAH08 : removed an integration from this channel: <https://dev4slack.slack.com/services/B1F79735W|outgoing-webhook>
+U19J7PF7T : ```controller.on('channel_joined',function(bot,message) {       console.log(message);
+       //Onboarding Message Here
+       //bot.api.chat.postMessage({
+       //    text:"hello",
+       //    channel: 'aaaand here im lost.'
+       //});
+   });```
+
+U04S0AG48 : `message.channel.id`
+U1F77D0NS : Hey guys, I was just testing my bot and noticed that there's only one URL to post to for slash commands - what has everyone been doing in terms of testing?
+U1F77D0NS : I guess I could have it pointed to a server to redirect traffic, and have it go to the server based on channel name/team name. That seems awkward
+U19J7PF7T : <@U04S0AG48>:  thanks!
+U0HUTFBHS : I test my service in isolation.
+U1F77D0NS : <@U0HUTFBHS>: do you mean to setup a second app?
+U0HUTFBHS : Well, a slash command sends a request to a service- so I test that service code with a fixture of what I expect from slack.
+U1F77D0NS : I see.. what I understand is that there's a single URL to post to, which means that I can't switch from production to a private fixture (like local tunnel) without breaking production
+U0HUTFBHS : Oh I see what you're saying.  Yes, that's true.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

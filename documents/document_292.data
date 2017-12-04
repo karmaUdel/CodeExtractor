@@ -1,9 +1,115 @@
+U3HQVHERX : integrating elm into django, csrf_token is a flag, any gotchyas? currently passing it along with POST requests as `csrfmiddlewaretoken` but still getting `{"detail":"CSRF Failed: CSRF token missing or incorrect."}`
+U3YDBDP4Z : I'm trying to debug but I'm not getting anything to consoleFor instance, `let _ = Debug.log "OnLocationChange " location`
+
+U3YDBDP4Z : Is that the correct way?
+U3HQVHERX : that's correct
+U3HQVHERX : <@U3YDBDP4Z> could you post the surrounding code? are you sure `OnLocationChange` is happening?
+U3YDBDP4Z : I'm pretty sure since I can change the url and get a different view.But it's not the view I want, so that's what I'm trying to debug
+
+U3YDBDP4Z : ```userRequired : Model -&gt; Navigation.Location -&gt; Models.Route
+userRequired model location =
+    case model.user of
+        Nothing -&gt;
+            let
+                _ =
+                    Debug.log "Nothing: " toString model.user
+            in
+                Models.SignInRoute
+
+        Just user -&gt;
+            let
+                _ =
+                    Debug.log "User " model.user
+            in
+                parseLocation location
+
+
+update : Msg -&gt; Model -&gt; ( Model, Cmd a )
+update msg model =
+    case msg of
+        ChangeLocation path -&gt;
+            ( model, Navigation.newUrl path )
+
+        OnLocationChange location -&gt;
+            let
+                _ =
+                    Debug.log "OnLocationChange " location
+            in
+                ( { model | route = userRequired model location }, Cmd.none )
 ```
-<@U1L4GLFJ6> <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Time#now>
-But keep in mind that `now` gives you a `Task`, meaning getting the time is asynchronous.
-<@U62V8HFJR> how does that Task turn into a string?
-is there `succeed` ?
-I'm sorry, but I don't get it. I try this on the repl but I get a type mismatch error:
-<@U451CRP62> That's because `x` and `error` have different types
-Elm is strongly typed, so you can't have variables that switch between `Float` or `String` willy-nilly like in Javascript or Python
-so the result of `Ok x -&gt; &lt;VALUE&gt;` and `Err error -&gt; &lt;OTHER VALUE&gt;` will need to match
+
+U3HQVHERX : Can you show me the code that that sends the `OnLocationChange` message?
+U3YDBDP4Z : ```
+init : Location -&gt; ( Model, Cmd Msg )
+init location =
+    let
+        currentRoute =
+            Routing.parseLocation location
+    in
+        ( Models.initialModel currentRoute, Cmd.none )
+
+
+main : Program Never Model Msg
+main =
+    Navigation.program Msgs.OnLocationChange
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
+
+```
+?
+
+U3HQVHERX : so, i've got something like this in my code (I'm using that same navigation package)
+U3HQVHERX : ```onLinkClick : msg -&gt; Attribute msg
+onLinkClick message =
+    let
+        options =
+            { stopPropagation = False
+            , preventDefault = True
+            }
+    in
+        onWithOptions "click" options (Decode.succeed message)
+```
+
+U3YDBDP4Z : Right.
+U3HQVHERX : ```linkAttrs : String -&gt; List (Attribute Msg)
+linkAttrs path =
+    [ href &lt;| path, R.onLinkClick &lt;| UpdateLocation path ]
+```
+
+U3YDBDP4Z : I'm not clicking any links. This is on page load
+U3YDBDP4Z : I get the "correct" views if I change the url, as if it doesn't even care about the `userRequired` function
+U3YDBDP4Z : But none of the debug logs are being logged :confused:
+U3YDBDP4Z : So I don't know what's going on!? :smile:
+U3HQVHERX : oh, none of them are being logged??
+U3YDBDP4Z : No
+U3HQVHERX : Try putting one in your init
+U3HQVHERX : just for a sanity check
+U3HQVHERX : ```init : Location -&gt; ( Model, Cmd Msg )
+init location =
+    let
+        currentRoute =
+            Routing.parseLocation location
+        _ = Debug.log "loc" location
+    in
+        ( Models.initialModel currentRoute, Cmd.none )
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

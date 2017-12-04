@@ -1,4 +1,75 @@
+U2SR9DL7Q : anyone else encounter an issue with fontawesome when setting up webpack in the elm tutorial?
+U663M2MB7 : Are records immutable in Elm? I have been doing `(Model x y z)` for now, when updating the model. `{ model | x = y }` just feels so wrong to me. What am I missing? :confused:
+U2GPAEU1L : <@U663M2MB7>
+Good question, yes everything is immutable in Elm. When you do `{ model | x = y }` that's just a helpful **syntax** for creating a new record which is _like_ the old record but with a slight change.
+
+To be clear, your `model` is left untouched after `{ model | x = y }`
+
+U663M2MB7 : Right, so it is basically `(Model x y z)` with Elm taking care of the values that did not change, while I handle the changes?
+U2GPAEU1L : Absolutely :slightly_smiling_face: You could never use `{ | }` syntax your code would just be more verbose and less readable
+U663M2MB7 : Nice, good to know, because manually creating a new model was becoming... tedious at best!
+U663M2MB7 : Thank you for clearing that up, <@U2GPAEU1L> :slightly_smiling_face:
+U2GPAEU1L : No problem
+U2GPAEU1L : Hey everyone, *if you're struggling with encoders/decoders* I just created a series of tutorials that will go through *everything* you need to know about encoding/decoding in Elm. I'm not quite done the series but I already have a few tutorials covering the decode pipeline, decoding/encoding maybe types, decoding/encoding unions, and soon it'll have a few more things such as working with recursive data types: <http://codetidbit.com/#view/story/58f7ac012bdce7111285c2ea>
+I'll be making *a lot* of Elm tutorials this next little while, so if you ever are confused with something and want a full tutorial to explain it, please ping me, I'd happily make a custom tutorial just for you, especially because a lot of things you struggle with a lot of other people likely struggle with as well! Don't be shy to ping me and ask for help or ask me to make a tutorial for you :slightly_smiling_face:
+
+U2GPAEU1L : Elm really is simple :slightly_smiling_face: And I'm happy to convince you of that by explaining _anything and everything_ you find not simple
+U3LUC6SNS : Hi all, I am trying to construct a parser using elm-tools/parser that will parse, among other things, text like```
+\begin{ENV} BODY \end{ENV}
 ```
-I guess this still has \s in it
-<@U14Q8S4EM> thanks. I'll do a rebuild and see if it helps
-idk - converting `number &gt; String &gt; Float` just feels icky - maybe it's not so bad in reality?
+where ENV and BODY are strings.  Here is my attempt so far.  It should be viewed as psedocode -- and is far from working.
+```
+type alias Environment =
+    { env : String
+    , body : String
+    }
+
+
+environment : Parser Environment
+environment =
+    succeed Environment
+        |. symbol "\\"
+        |. (keyword "begin")
+        |. symbol "{"
+        |= string
+        |. symbol "}"
+        |= string
+        |. symbol "\\"
+        |. (keyword "end")
+        |. symbol "{"
+        |= (keyword env)
+        |. symbol "}
+```
+I'd be grateful for any tips/help/whatever, as I am just starting out.
+
+U3LUC6SNS : Of course there isn't  `string` parser, and here `env` as in `(keyword env)` means that we recognize the same string that was recognized in ```
+|. symbol "{"
+|= string
+|. symbol "}"
+```
+
+U3LUC6SNS : By `string` parser, I mean that I want to recognize, for example, everything up to `symbol "}"`.
+U3LUC6SNS : In the second case, I want to recognize everything between `\begin{ENV}` and `\end{ENV}`
+U153UK3FA : <@U3LUC6SNS> so you want `string` to mean, ‘one or more characters that aren't a "}"'
+U153UK3FA : is there any other limitation on what those characters can be?
+U153UK3FA : can they be white space?
+U153UK3FA : You're looking for <http://package.elm-lang.org/packages/elm-tools/parser/2.0.1/Parser#keep>
+U3LUC6SNS : <@U153UK3FA> -- yes one or more characters that are not "}" with whitespace allowed.
+U1X5ZRJUX : Hi there, I'm updating my app to 0.18 and I'm having issues with the new `Http.send` way of doing things without `Tasks`
+U1X5ZRJUX : I have the following update function with the `Msg` and a function passed to a `Http.send`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

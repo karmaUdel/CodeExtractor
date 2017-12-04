@@ -1,99 +1,101 @@
+U051SS2EU : I'd say make your own function over transact that adds the data, probably parameterized with a hash map so you can generalize and introspect
+U5ZAJ15P0 : so that I don't have to do this manually everywhere I call `datomic/transact` in my application
+U5ZAJ15P0 : ok; thanks!
+U051SS2EU : one thing to avoid is opaque wrappers (whether partial or an Object with hidden state - which btw is what a partial or closure is) - use a record implementing datomic's own protocol if possible, but parameterized by keys you can introspect on the record and access in context
+U5ZAJ15P0 : <@U051SS2EU> is there a repl command to get the list of all protocols implemented by an object?
+U5ZAJ15P0 : well, the record of which an object is an instance
+U051SS2EU : supers
+U5ZAJ15P0 : ah right because protocols are just interfaces
+U051SS2EU : oh, supers needs the class, but that's easy enough
+U051SS2EU : ```=&gt; (supers (class {}))#{clojure.lang.IKVReduce clojure.lang.IFn clojure.lang.IMapIterable java.io.Serializable java.lang.Object clojure.lang.IObj clojure.lang.IMeta java.lang.Runnable clojure.lang.MapEquivalence clojure.lang.IHashEq clojure.lang.ILookup clojure.lang.IPersistentMap clojure.lang.Counted clojure.lang.IEditableCollection clojure.lang.Associative java.lang.Iterable clojure.lang.IPersistentCollection clojure.lang.AFn java.util.Map java.util.concurrent.Callable clojure.lang.Seqable clojure.lang.APersistentMap}```
+
+U5ZAJ15P0 : ```wef-backend.core=&gt; (supers (type (get-conn)))
+#{#&lt;Class@35fc6dc4 java.lang.Object&gt;
+  #&lt;Class@e7b265e clojure.lang.IType&gt;
+  #&lt;Class@6b337969 datomic.Connection&gt;}
 ```
-<https://medium.com/@MVaragnat/how-to-build-a-slack-app-5b83d71e083a#.l6dgzclv7>
-If the interaction is limited, then go for a command app, it's simpler, available in all channels, does not require scary permissions
-<@U0JPS3SHX>: Just upvoted!
-<@U0JPS3SHX>: Trying it in my teams slack
-wasn't there recently posted a bot that would post to a channel if it found a hashtag in a PR or issue on Github or did I miss something? :open_mouth:
-<https://dev4slack.slack.com/archives/general/p1454651702000694>
-Yah, I think lack of interactivity is the key differentiator.  Kind of obvious in retrospect :simple_smile:
-<@U0H0S3E69>: I just clicked on the name. Give me a few and I'll make a quick Jing video.
-it became editable once I clicked
-Hi there, I've just joined and right away I have a question. I have played around with various integrations _command_ and _bot user_ and all things are working great so far. An answer I could not find is, how to maintain or even create a good setup, servers etc for a bot app. I mean what are you experiences in a large scale setup with many bot users around?
-I'd seperate the bot and your app into seperate services.
-I have my bot purely doing conversation. It then sends any requests to a seperate service
-It's not yet tested in a large scale environment however
-<@U0HNAA1GU>: ok, if you have 100 clients, with 100 bots, then they need to run all the time.
-Yes. I am basically sending all incoming messages towards a seperate service that I can scale up if need be
-I'm curious to know other approaches though
-do you use a bot or slash command?
-I am asking cause a slash command is _kind of simple_ cause it is like building an API. I only receives a request. But bots are connected all the time to slack and have to listen.
-A bot
-<@U0LCT5LAY>: best practices would basically depend on what you need
-as you mention, it's not as easy as just adding more processes, since you'll have to maintain all the connections up and running
-simplest option is to use consistent hashing to split connections across different processes, but depending on your requirements that would be just enough or you'll need some extra work :simple_smile:
-<@U0LCT5LAY>: I'd caution against slash command because they can be hard to discover. But this is also understanding your audience. If we're talking general audience that's not experienced with scripts, start with @ mentions, then teach /'s through conversation
-If you use howdy, try it's “build a meeting” conversational experience. Does a great job of teaching proper syntax
-<@U0J27NX0X>: `/commands` which reply in public are not too bad with discoverability
-see giphy as an example, I believe was (is?) the most used integration, and it's a slash command
-oh totally. I guess I see giphy a bit different because it doesn't feel so narrow? Which is weird since it just does gifs. In some ways, it feels bot like since there really isn't much of a syntax.
-I'm thinking more of commands like `/remind` which have a mildly complicated syntax, are not used that often, and require a bit more knowledge of a platform's capabilities
-yep, that's no luck with discoverability
-but the same happens with bots that are primarily used via DMs
-in that sense, the help with discoverability comes from using the bots in public
-or being checked in on?
-anyways, yes, you're totally right. Very public /'s could totally work.  Hopefully slack and Peach will educate the world. People figured out #'s somehow, right?
-bots can help with self-discoverability by interjecting in conversations when something relevant happens, but many users are very wary about bots monitoring everything that is being said
-and just interjecting
-it can feel nosy *and* noisy
-&gt; it can feel nosy and noisy
-LOVE that phrase
-:simple_smile:
-I'm sure we'll start seeing more rude bots as time passes, same it happened with spammy apps in facebook
-as a rule of thumb, we try to be the least intrusive possible
-cool, Chatlio made it into the Slack App Spotlight, great app idea  <#C0JV0QA4E>
-I tend to (for small-scale, at least) like keeping things restricted to "Slash command beaming out, Incoming Webhook beaming back in", but that's definitely more limited in deployment scale &amp; number-of-integrations-required.
-Would anyone be interested in a Meetup in NYC
-<@U0H9CA2MS>: Did you see <http://www.meetup.com/New-York-Slack-Meetup/events/227552998/> ?
-I did not! But I have now...
-<@U0CS6NSF5>, <@U0J27NX0X> I have got a response from Ben Brown at howdy and he says to add a message queue layer on top. Doing my research about it right now. Slash commands are for sure more simple, cause easy load balancing will work like a charm.
-<@U0LCT5LAY>: that only helps with delivering messages, though
-you still need to manage all the RTM connections :simple_smile:
-<@U0CS6NSF5>: yes, but as I understand it, the queue handles the connection and distributes them. I wonder how all the existing bots are doing it right now.
-<@U0LCT5LAY>: a queue might work to start a bot, but will have issues managing those connections, starting connections when a process goes down, etc :simple_smile:
-we have hundreds of WS connections with Slack running 24/7 :simple_smile:
-<@U0CS6NSF5>: ok, so what would be a starting point for a basic setup which I can scale up?
-as I said, it depends on what you are building :simple_smile:
-we had a talk about this in <#C04SPC24T> today
-and there were a few approaches mentioned there :simple_smile:
-<@U0CS6NSF5>: ok thanks, I will read that
-speaking of meetups, we are doing another one in SF next week
-<http://www.meetup.com/SlackDevs/>
-we have ~15 mins at the end for people to do elevator pitches
-if you're in SF and have something to announce, looking for collaborators, beta testers… please come along and let us know!
-space is limited but a few slots are left
-also join us in <#C0LDY2E2X>
-during the meetup event we'll be posting live about who's working on what, and Ben has said we can throw in new integrations and generally test stuff out and make a mess. so, knock yerselves out :simple_smile:
-Hey <@U0LEQM36U>! Glad you joined!
-<@U0HUZ214H>: thanks for the invite
-hi everyone :simple_smile: just discovered this channel via <http://howdy.ai|howdy.ai> - kinda getting into bot development for our agency team. looking forward to communicate with all y'all :simple_smile:
-Hi All, great to see Dev channel for slack bots. Not sure if I can ask a question here , but my bot eventually stops after giving "Write failed: Broken pipe" this message and again I had to restart it. Any solution is appreciated.
-<@U0LGCMV16> depending on the framework or language you're using, there might be a channel that is tailored to the question you're asking. If you don't hear anything in here, you might try perusing the channel list for something more specific.
-Thank you <@U0CSBGTKM> . I am using botkit.
-Ok yea join <#C0AV5N8NA> for questions. Lots of enthusiastic folks in there.
-Thank you very much <@U0CSBGTKM> , I just joined. Appreciate your quick help.
-Np. Enjoy your botting!
-This is a pretty cool feature for bot makers:
-<https://ifttt.com/maker>
-as simple as sending a webhook to trigger IFTTT rules
-can also receive webhooks
-so your bot can get connected to TONS of services and devices
-:clap:
-I can't believe how aligned the thoughts in this community are! Thanks <@U04SM6T2H> for opening the door to this excitement. When these announcements came out last week, I thought, of course bots should tie into the rest of the automation. I blink and you people have already prototyped it. It's almost teaching/forcing me to think quicker, just being around these chats. Like in chess where I know I need to be at least 2 more steps ahead of where I thought I was. It's quite humbling, but feels like an honor at the same time. Being around these Kung Fu Masters.
-:heavy_plus_sign: :one:
-Hmmm… why do bot accounts and channels share a namespace?
-<@U0K7M8JHM>: bot accounts, user accounts, public channels and private channels all share the same namespace
-that's why you can do <https://my.slack.com/messages/general>
-and go to the general channel or the general user
-for simplicity so everything can be referenced the same way, I guess?
-right
-k, thanks
-np
-anyone have a certain place they get their icons for bots for?
-or recommendations
-:wave:
-I use creative commons licensed icons <http://www.flaticon.com/>
-Is anybody from rightgif on this slack?
-hello
-Is it possible to have a bot do show "is typing" as it's processing something?
-<@U0LL6RZPS>: haven't tried it, but I'm guessing sending the `typing` event should work
-<@U0CS6NSF5>: thanks :simple_smile:
+
+U051SS2EU : cool - so you can make a defrecord that implements Connection - the others come free with defrecord
+U5ZAJ15P0 : is Connection a protocol there?
+U051SS2EU : this is the point where I end up reading source code usually, heh
+U051SS2EU : I bet it's documented … somewhere
+U5ZAJ15P0 : I'll look into it. Thanks :slightly_smiling_face:
+U5ZAJ15P0 : <https://gist.github.com/robert-stuttaford/39d43c011e498542bcf8>
+U5ZAJ15P0 : I'll ask <@U0509NKGK> , I am sure he has insights on this
+U051SS2EU : cool - thanks for asking about this, I learned a couple of things in trying to find your answer
+U5ZAJ15P0 : <@U051SS2EU> Glad to hear that! I was afraid I wasted a bit too much of your time
+U5ZAJ15P0 : <https://blog.clubhouse.io/auditing-with-reified-transactions-in-datomic-f1ea30610285>
+U5ZAJ15P0 : In this article they wrap d/transact, as you were suggesting
+U051SS2EU : well - they do it slightly differently than I suggested, because the user-id org-id and tx-data are totally hidden once you call defn
+U051SS2EU : err, I mean once you call transact-wrapper
+U051SS2EU : the return value of that function doesn't expose any of those things as data
+U5ZAJ15P0 : <@U051SS2EU> do you think that's an issue? it seems to simplify the life of the caller, especially if he doesn't care about those
+U5ZAJ15P0 : cluttering every function that calls transact with auth data that it doesn't care about sounds problematic
+U051SS2EU : <@U5ZAJ15P0> until you are trying to debug code using the wrapper (in my experience) - it's not always neccessary to use the alternative of using a record to store the data instead of a closure, but what this gains is quick access to what the thing actually encompases
+U051SS2EU : you don't clutter - the record itself is something you can call if you implement IFn - or you just expect people to use a protocol method with it as the first arg (also fairly reasonable but less fancy)
+U5ZAJ15P0 : <@U051SS2EU> sorry, I think I am missing something. Can you give me a code example of what you mean?
+U051SS2EU : hmm
+U5ZAJ15P0 : Just a quick snippet here on Slack
+U051SS2EU : OK - I was just looking at this right now, sorry about the distracting details, but the big picture structure should be illustrative of what I am saying ```(defrecord Transmitter [transmit from user-data creator to journey routing]  IFn
+  (call [this] (.invoke this [nil this]))
+  (run [this] (.invoke this [nil this]))
+  (applyTo [this coll] (.invoke this (first coll)))
+  (invoke [this [routing-override message]]
+    (let [updated (into this message)
+          routing (or routing-override routing (first journey))]
+      (.invoke this routing updated)))
+  (invoke [_ routing-override message]
+    (let [{:keys [transmit generic]} message
+          message (dissoc message :transmit :generic :routing :from :to)
+          {:keys [journey routing message]}
+          (if generic
+            {:journey [routing-override]
+             :routing :generic/reply
+             :message (assoc message :generic-raw [routing-override message])}
+            {:journey (rest journey)
+             :routing routing-override
+             :message message})
+          {:keys [request-id birth-time]} user-data
+          final-message (assoc message :journey journey :mediary to)]
+      (when-let [schema-error (check-schema from routing final-message)]
+        (log/error ::Transmitter
+                   "for routing"
+                   (pr-str routing)
+                   (pr-str {:journey journey})
+                   (pr-str schema-error)))
+      (log/trace ::simple-kafka-transmit routing "to" request-id "from"
+                 birth-time "-" (pull-transmit-info message))
+      (transmit from routing final-message))))```
+
+U051SS2EU : the transmitter has all this incidental data - who is sending? who is the target? what data did the initiator of the request expect to get back with any responses? what is the path the overall task should take through the system?
+U5ZAJ15P0 : But that's basically the approach I was suggesting with a "DatomicWriter" protocol, no?
+U051SS2EU : v1 wrapped this in calls to partial
+U5ZAJ15P0 : that "wraps' transact
+U051SS2EU : the difference is that this returns an object that acts like a function
+U051SS2EU : maybe I misunderstaood what `@(d/transact ...)` is in the transact-wrapper function
+U5ZAJ15P0 : right, but so instead of doing something like```
+(transact transmitter conn tx-data)
+```
+you would do
+```
+(transmitter conn tx-data)
+```
+
+U051SS2EU : right
+U5ZAJ15P0 : <@U051SS2EU> (d/transact returns a promise I think, and @ dereferences it
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

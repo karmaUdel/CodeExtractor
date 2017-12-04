@@ -1,4 +1,87 @@
-a slightly better version would be e.g. ``` (defmacro a-macro [name] `(defn ~name [] (a-fn*)))``` but still, this doesn't look like a very useful macro
-they have their uses, probably finding out what is the goal is a step to take before judging something as not idiomatic
-why would you intern a var in a namespace that just delegates to a var in another? just refer that one directly
-coming off as judgmental was not my intention, if that's how it came across
+U5ZAJ15P0 : c.f. <https://groups.google.com/forum/#!topic/datomic/P69c3q__5gw>
+U5ZAJ15P0 : datomic free does not include the peer server
+U5MVBAJUU : Ah! I see. What's the point of "datomic free", I wonder?
+U5MVBAJUU : Thanks for posting the solution!
+U5ZAJ15P0 : <@U5MVBAJUU> I have expanded on the topic in <#C03RZMDSH|datomic>
+U5ZAJ15P0 : quoting this google group:
+U5ZAJ15P0 : &gt; The primary use case for Free is not new users, but rather people who need a license that includes redistribution rights.
+U0F27GHT7 : I think `(-&gt; 100 inc dec set-50 ...)` is the most idiomatic way to do this.
+U1CTH1TUY : `(fn [value fn-list] ((apply comp (reverse fn-list)) value))`
+U11BV7MTK : ^ that's the one we settled on. i always forget the order of comp so i left off the reverse earlier
+U2J7JRTDX : dpsutton: Order is same as in math: 
+```
+((comp h g f)x)    ; =&gt; h(g(f(x)))
+```
+
+U051SS2EU : <@U0F27GHT7> the problem with `-&gt;` is it isn't a function composition, it's a syntax. You can't pass it a list of functions.
+U0F27GHT7 : Valid. I hadn't inferred that the list part was important. My bad!
+U0BKWMG5B : Does anyone happen to know of any decent OAuth2 client libraries? There's a lot around, but all the ones I've found are weirdly designed :confused:
+U0S3YK6HK : weavejester: The best I could find was clj-oauth
+U3JURM9B6 : in clojure/match, can I do
+[x &amp; ys] // x matches first elem of vector, ys matches rest
+
+or do I have to do
+
+([x &amp; ys] :seq) ?
+
+U5JPZFFR6 : Hey friends
+U5JPZFFR6 : Anyone have a good way to split a vector (of CLI args in my case) into pairs?
+U5JPZFFR6 : I have e.g. `-m 4 -y 2016` and want to end up with `[["-m" 4] ["-y" 2016]]` or maybe a map
+U5Z4ECHCM : I believe you may be looking for `zip`
+U5Z4ECHCM : Alternatively, `(partition 2 ["-m" "4" "-y" "2016"]) =&gt; (("-m" "4") ("-y" "2016"))`
+U5JPZFFR6 : hm tbh I don't get what zippers do from reading the docs lol
+U5JPZFFR6 : *feels dumb*
+U5Z4ECHCM : I've not used zip in Clojure at this point, but in my experience zip functions pair 2 values together
+U5JPZFFR6 : ah like zipmap?
+U5Z4ECHCM : But I think it's more often something like `'(1 2 3) '(4 5 6) =&gt; (1 4) (2 5) (3 6)`
+U5JPZFFR6 : oh yea I remember that one. I think that's the reverse operation. let me try the partition.
+U5JPZFFR6 : your partition example does exactly what I want
+U5JPZFFR6 : thanks :slightly_smiling_face:
+U051SS2EU : clojure has "zippers" which are an abstraction for navigating complex nested structures, and zipmap which creates a hash-map out of a collection of keys and a collection of values
+U0HG4EHMH : zippers are for driving a turtle around a nested structure, optionally editing it along the way. so for example xml-zip gives you a zipper that can walk through the data structure returned by clojure.xml/parse.  you can go next-next-next, or at any node you can ask what are all the parent/ancestor nodes, etc.
+U5JPZFFR6 : I see. That sounds way more complex than my program :slightly_smiling_face:
+U5JPZFFR6 : One day :wink:
+U0HG4EHMH : ok. don't forget clojure.tools.cli.
+U5JPZFFR6 : Thanks, I'll check it out. This is more to teach myself a few things anyway, and it seems like partitioning a vector sounds like a useful thing to know.
+U0J9LVB6G : The `zip` function found in other langs isn't in clojure. You just use `map`.
+U064X3EF3 : Use zipmap
+U5Z3EPTPW : Is this a good place for a total noob to learn or should i check elsewhere?
+U051SS2EU : <@U5Z3EPTPW> there's a <#C053AK3F9|beginners> channel
+U5WAJK60M : Hey guys, trying to setup a connection pool with c3p0. It seems to have trouble connecting to the production database using ssl (heroku, needs sslmode=require). I've tried```
+(.setJdbcUrl my-datasource (format "jdbc:%s:%s?sslmode=require" (:subprotocol dbspec) (:subname dbspec)))
+```
+and
+```
+(.setProperties my-datasource
+                (doto (java.util.Properties.)
+                  [...]
+                  (.setProperty "sslmode" "require")))
+```
+
+C3p0 doesn't seem to pick this up, I keep getting `SQLException: Connections could not be acquired from the underlying database!`. Getting a connection for the db-url string with the sslmode query-params does indeed work. Has anyone else experienced this?
+
+U5WAJK60M : where `my-datasource` an instance is of `om.mchange.v2.c3p0.ComboPooledDataSource`
+U5WAJK60M : Update: just tried with apache's `DBCP2`, and that seems to pick the sslmode just fine. Is there an issue with c3p0 I'm not aware of?
+U0524F6MV : You might also try HikariCP for pooling, it's rock solid. <https://github.com/brettwooldridge/HikariCP>
+U5WAJK60M : Thanks <@U0524F6MV>. Already looked at it, looks great indeed :slightly_smiling_face:
+U28TJ0DDZ : does any one knows how should i use fast-resource or even resource to server some static files on pedestal  ? how should the route be like ?
+U06MTLC5R : Hey fellow Clojurians, I'm looking for a lein plugin that can deploy binaries directly to github releases (similar to <https://github.com/aktau/github-release>) any ideas?
+U06MTLC5R : Done see any at <https://github.com/technomancy/leiningen/wiki/Plugins>
+U06MTLC5R : Dont*
+U051SS2EU : seems like something you could do with `lein shell` if it doesn't need to be cross platform <https://github.com/hyPiRion/lein-shell>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

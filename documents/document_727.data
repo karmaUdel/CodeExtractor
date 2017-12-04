@@ -1,38 +1,72 @@
-SIGSEGV SEGV_ACCERR SI_CODE 2 fault on 0x7fdb09ea16c0```
-Why does racket not just abort when the unmap/mprotect fail? (As an aside, when I run without JIT, I don't get the segfault, but it appears to run forever.)
-If I increase the number of mmaps, with: "sysctl -w vm.max_map_count=131060", then I run out of memory (as I would otherwise expect). [Reading the manual suggest that when you unmap in the middle of a region, then it has to make two, so munmap consumes resources.]
-<@U0G0JDQGZ> It would make sense to abort if `munmap` or `mprotect` fails; I guess the current behavior is misguided optimism
-mflatt: k, i'll submit a pull request. I think the mprotect can be particular bad because it can cause the write barrier to not install.
-<@U3NJS8H7C>, <@U0702F2CE>, <@U3NGSC6AF>: Is there a recommended way to include a piece of syntax in the expansion of a macro for the purposes of letting DrRacket pick up origin and disappeared-use/binding properties without actually impacting the program in any other way?
-Right now I am producing a bunch of pieces of syntax that are basically nested invocations of `void`, so I end up with something silly like `(let () (void (void) (void (void) (void)))) my-real-expression)`.
-But I am not sure if Racket guarantees that those will get optimized away or not.
-I think they'll be gone. You can use raco decompile to check. 
-<@U07SCV14J> usually I use `(quote blah)` but I'm confident `void` works too
-ok, thanks. checking with decompile is a good idea.
-<@U07SCV14J> racket subscribes to the macro writers bill of rights iiuc, so you can consider not eliminating things like that to be bugs, I believe.
-<@U3NGSC6AF> what do you mean "macro writers bill of rights"? are you using that phrase as a metaphor or is there some document somewhere that says what macro writers can expect racket to handle gracefully when it comes to macro expansion?
-It is by Kent Dybvig
-there's a talk somewhere on youtube about it IIRC
-though tbh I remember finding that talk a little vague
-Somewhat specific starting at 13:00 <https://youtu.be/LIEX3tUliHw?t=13m>
-I'm doing a lot of really weird things with syntax, and I have run into a `quote-syntax: cannot use identifier tainted by macro transformation` error, which unfortunately lists `racket/private/stxcase` as its source location. Is there any good way to debug these sorts of errors?
-I remember running into them a while back, and I had no idea how to figure out where they were coming from in a large program.
-Okay, now I'm even more confused. The error goes away if I replace a use of `syntax` with `quote-syntax`. Does `syntax` do something special I don't know about related to taints/dye packs/other cute names?
-<@U3NJS8H7C> user mrm on IRC asked yesterday if there were any explanation of how linklets work. Do you have something within hyperlink's reach ? I had a quick look at your racket7 repo, but didn't see any obvious pointers.
-<@U3ZACTKTP> I guess this is as close as it gets to web-accessible: <https://github.com/racket/racket7/blob/master/pkgs/racket-doc/scribblings/reference/linklet.scrbl>
-<@U3NJS8H7C> Thanks! I had explicitly searched for files containing "linklet" in the repo, and somehow managed to miss that one :slightly_smiling_face:
-Does anyone know how to ‘collapse' the padding in two cstructs in the FFI?
-Like, I have a struct with a lot of fields, and in the middle, I have for a list size, followed by a pointer to that list.
-I want to make a ctype that will give me a safe list given those two values.
-And I can do that in another cstruct, but because the padding is now larger, it messes up the offsets for the rest of the struct.
-So, is there any way I can insert a cstruct into another cstruct such that it takes the paddings of the element in the inner cstruct?
-Either way, thank you.
-<@U08JL5H89> You be able to achieve the effect you want by declaring `#:alignment`
-Okay cool. In which cstruct?
-Like, it seems like I'd need to set it in the outer one, and then manually calculate the allignment for the rest of the struct, is tht correct <@U3NJS8H7C> ?
-I was thinking that you'd set it for the inner one
-Oh, okay. In that case the docs kind of confused me what it does. As I thought you attached it to specific fields?
-(I mean, I know you can attach it to the whole struct, but in this case, I only want one field to be alligned differently.)
-Oh, I see what you mean, `#:alignment 1` worked, thank you <@U3NJS8H7C>
-<@U3NJS8H7C> Actually, after thinking about it a bit more, I don't think `#:alignment 1` would work, or any ‘alignment' on the inside struct would be good enough.
-Because this is going to be context sensitive on the placement of the outside struct and its alignment.
+U4872964V : exactly, but the selection of data you do to put in a page does not get bigger just because your model gets bigger
+U2LAL86AY : ah yes, because my users will have to do: `set (toFloat someInt ) ...` instead of `set someInt ...` - `number` will eliminate that conversion each time you call `set` function and you have an int somewhere.. is less overhead - to not bother if is an int or a float - since form a functionality perspective doesn't matter.
+U4Z4NEUQG : Is there any reference for the JS API of elm?
+U4Z4NEUQG : Like the `fullscreen()` method of modules.
+U4872964V : but there are no ints between 0 and 1 :slightly_smiling_face:
+U4872964V : i would go with Float anyway, calling toFloat is hardly a problem for the user
+U2LAL86AY : 0 and 1 is included in that interval - maybe is not that bad but i would like to not have all this toFLoats everywere if they don't add anything useful..
+U3SJEDR96 : <@U2LAL86AY> you can do `set 0.1` and even `set 1` for a `Bounded Float`
+U3ZNWN526 : Or, if you really want users to be able to pass in `Int` variables, then you can accept a `number` and immediately convert it to a Float by multiplying it by 1.0 :slightly_smiling_face:
+U3SJEDR96 : since `1 : number`, not `1 : Int`
+U2LAL86AY : hmm you mean like this:`(1.0 * value)`
+```
+The right side of (*) is causing a type mismatch.
+
+(*) is expecting the right side to be a:
+
+Float
+
+But the right side is:
+
+number
+
+```
+pff this creates a lot of trouble than i need right now  - i will go with the float for now as <@U4872964V> mentioned - unthil that `number is not comparable` bug is fixed.
+
+U3LUC6SNS : Does elm-tools/parser have a way of displaying the unparsed portion of the input of successful parse?
+U4872964V : <@U3LUC6SNS> no, but you can perhaps trick it by pipelineing it with a fail parser to get the position
+U3LUC6SNS : <@U4872964V>, thanks!
+U1WJH1JU9 : I am trying to do some JSON decoding for a complex type that sometimes comes back null. When I get the types to match up, I only get back a Nothing type even when there is something there. Does anyone know what I am doing wrong?
+U1WJH1JU9 : This is the code: ```|&gt; Json.Decode.Pipeline.optional "Feature" (Json.Decode.maybe decodeFeature) Nothing```
+U4872964V : and the json is?
+U1WJH1JU9 : ``` { rallyAPIMajor : String    , rallyAPIMinor : String
+    , ref : String
+    , refObjectUUID : String
+    , objectVersion : String
+    , refObjectName : String
+    , createdAt : String
+    , severity : String
+    , changesets : ResultChangesets
+    , description : String
+    , formattedID : String
+    , name : String
+    , owner : ResultOwner
+    , project : ResultProject
+    , rtype : String
+    , c_DefectSource : String
+    , feature : Maybe ResultFeature
+    }```
+
+U4872964V : so, you have “Feature” instead of “feature”
+U1WJH1JU9 : That is for the record. But the actual JSON has it with the capital.
+U4872964V : well, if the decodeFeature fails, you’d get Nothing
+U1WJH1JU9 : I agree. But even when it succeeds I get Nothing. That is the issue that I am having.
+U4872964V : How do you know that it succeeds?
+U1WJH1JU9 : Because I am logging the JSON that is coming back and can see that it has the appropriate field.
+U4872964V : ok, so how does it look, and how does the decoder look?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,80 +1,70 @@
-The REPL doesn't like this: ```[first, rest] = split "__" "foo__bar_baz"```
-<@U3SJEDR96>  umm why would you need that. If functions aren't comparable, they aren't comparable. Just don't define (==) for function types
-nvm, I got what your saying
-Variations with `()` and nothing fail, too.
-but comparable is a thing?
-yep
-or is comparable considered to have an ordering
-comparable is if something is greater than or less than something else
-`first :: rest = split "__" "foo__bar_baz"`
-`comparable`, `number` and `appendable`, but they're explained in the faq better than I can do so here :slightly_smiling_face:
-hmm, so the Dict requirement of comparable is overkill infact
-no, it's required because the keys need to be compared to get a balanced tree
-which is how you get the fast lookups sorted out :slightly_smiling_face:
-That's why you can't use union types as Dict keys because they aren't comparable (for now)
-well I know they don't implement comparable
-<@U5LFUHH19> All the compiler knows is split returns a List, it doesn't know it can't be empty, so you have to handle the empty case as well
-OK, I'm seeing that.
-I would have been tempted to try `Regex` but now I know not to. :slightly_smiling_face:
-so dicts are an ordered map then, because a general dict implementation it would need to simply be hashable
-<@U23SA861Y> they're all compiler-supported _special_ type variables, though, more than actual typeclasses. I.e. you can use them as a prefix in a typesignature to say sometihng about the types you expect - `mapKeys : (comparable1 -&gt; comparable2) -&gt; Dict comparable1 v -&gt; Dict comparable2 v`
-I'm more or less familiar with them (have used them).
-Just a curiousity because a balanced tree has logN look ups as opposed to a hash tables constant time
-Nothing I've dealt with is big enough for that to be really relavent, and if it was it probably shouldn't be in a browser so...
-Yeah, Array's are a little closer to what you mean (hash array mapped tries with buckets of 32 elements, or at least that's what they'll become soon enough). 
-Which is the best Elm-UI framework to use? Bootstrap, MDL, Polymer...?
-elm-bootstrap and elm-mdl are pretty solid. no idea about polymer
-from what I hear, <#C3U2E3JRX|elm-bootstrap> is more actively maintained right now
-Also, less state to be passed around in elm-bootstrap
-what ecmascript version does elm compile to and what does that imply in real-life for IE?
-If it works and is useful, it probably doesn't support IE
-:stuck_out_tongue:
-looks like 3?
-it generally compiles to ~3, but uses `requestAnimationFrame` (with a built-in polyfill) and some other stuff...we used Elm 0.15 in production supporting IE9, and I don't know of any ES5 features other than `requestAnimationFrame` that have been added since
-very cool, ty.
-are the elm europe videos up yet?
-<@U2QQ92V09> <https://elmlang.slack.com/archives/C0MU81TEC/p1497729071419410>
-The ones from the OsloElmDay conference are up, if you haven't seen those yet: <https://www.youtube.com/playlist?list=PLcAzxXzXQlPZsNcYycHittqeF3UG4dGli>
-cool, thanks <@U0EUHKVGB>
-just as a side to my question above, a quote from the internets from 1.5 years ago: "Internet Explorer versions 8, 9, and 10 will no longer be supported on Windows 7, Windows 8.1 and Windows 10 desktop operating systems." (by MS) (so, why worry?)
-Microsoft tried to help you by forcefully thrusting windows 10 onto unsuspecting computers
-welcome <@U5XJY26Q4>
-thank you <@U23SA861Y>
-hmm for checking if an element is in a list i use `List.member` But in this case i needed to work with arrays. i can't find an equivalent `Array.member` to check if an element is inside the array. I think this should be a core function.
-<@U0F01KLV6> ^
-That is a very good point
-how did that never come up before?
-this comes up empty too: <http://klaftertief.github.io/elm-search/?q=a+-%3E+Array+a+-%3E+Bool>
-I made a point of not extending the Array API. Bur really, one should use Set for that purpose.
-*but
-I think .find would be better for Array.
-But it's also best not to convert a datastructure like that just to use `member`
-True that.
-What is the type of the `find` you think would be better?
-Find : (a -&gt; Bool) -&gt; Array a -&gt; Maybe a
-More flexible than .member
-Ah, right
-I could hear if Evan is open to adding such a fn to core.
-set instead of array? I thought that in sets is not allowed to have duplicate elements - and in array one can have duplicate elements. Is this actually false?
-No, you're right
-What robin means is that sets can implement `member` in like O(log(n))ish
-whereas in an array, it's O(N)
-So if you're finding yourself looking up if something is a member a lot, a set will be overall faster for that operation.
-Hello peeps, is there a simplistic way to create a timer in Elm? Literally something as simple as, start at 10, and every second decrement by 1 till you get to zero.
-i’d prolly start with something like this: <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Time#every>
-I have, my first attempt was using a subscription and running `Time.every second Tick`
-however, the event that starts the timer may fall on a sub-second mark, so that first decrement from 10 to 9 doesn't always happen over 1 full second
-There's also <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Process#sleep>
-iirc, there are not many good ways around that (sub second issue), you may want to wait until the first tick and then start counting down.
-<@U0J1M0F32> hmm yeah I was heading towards that solution, was just hoping for something more elegant
-there is this... <http://package.elm-lang.org/packages/simonewebdesign/elm-timer/latest>
-the suggestion for Process.sleep should work, it isn’t based on the system time but rather a unit of time
-<@U17R26VR8> I'll have a look into it, may do the job
-hey… whadya know, i have done this already… <https://github.com/mordrax/cotwelm/blob/b72efbb428a6d190ff8a8a9ba61638efa2b8e89e/src/Arena/PlayerArena.elm#L80>
-~hits it every~ waits for 150ms
-sweet, I'll have a dig into it. I've only been using Elm for a week or two, so still getting my head around it
-ianmackenzie is on the ball with `Process.sleep 10000`
-yeah I can't say I quite fully understand what that one line is doing exactly
-is it basically sleeping the update function for 150ms?
-which performs a task, and gives you back a msg ( you provide the `a -&gt; msg` function
-ah right yeah, I see what's happening, you're then passing the message `Sleep (asyncCmd match matches resetCounter) resetCounter`
+U601ELFEG : but if it is more complex (a dialog with lots of controls and state) - then I don't want to put that at "top"... but nor does it really seem to belong to sub-model...
+U601ELFEG : Wondering how people approach this kind of structure
+U601ELFEG : Do I just need to make the dialog module's `update` function  `: Msg -&gt; Model -&gt; (Model, Cmd Msg, Maybe FinalThingToDo)`   ??
+U601ELFEG : er - `Result` was a bad choice, edited...
+U3SJEDR96 : yeah. Or a `{ model : Model, effects : Cmd Msg, someOtherTing : Foo }`
+U0J1M0F32 : I've found the sub module structure to not scale very well, leading to some cumbersome update functions. I try to not nest the Model/Update/View triplet more than once or maybe twice, if I can work around it.
+U3SJEDR96 : that `update` is just a function that doesn't need to conform to any particular convention or signature
+U601ELFEG : I have a few  `Task.process SomeExportedMsgType &lt;| Task.succeed resultOfTheDialog`  --- but that has a pretty bad code smell
+U3SJEDR96 : But yeah, keeping things flat is generally nice. Passing in functions for giving reusable views a proper way to interact with your code is also a pretty neat "pattern"
+U3SJEDR96 : and yeah, using tasks to force a round-trip through the runtime is a pretty smelly thing indeed; generally splitting of whatever functionality you need and just calling that function tends to work out much more nicely :slightly_smiling_face:
+U64FYS317 : I'm looking for a syntax to get around this problem: ```
+update : Msg -&gt; Model
+update msg =
+    case msg of
+        FirstType -&gt; msg
+        -- throws: subUpdate is expecting `UnionType`, but it is `Msg`
+        UnionType -&gt; subUpdate msg
+
+```
+
+U64FYS317 : where UnionType would be something like `type UnionType = A String | B | C`
+U2LAL86AY : <@U64FYS317> is very strange to name your constructors UnionType  - because a union Type by definition contains one or more constructors. But anyway - that will not work because you pass in `msg` to `subUpdate` and msg is of type `Msg` not of type `UnionType`
+U2LAL86AY : ah i see.
+U64FYS317 : <@U2LAL86AY> It's just been adapted to a short example. Is there a way to hint at the compiler type that it IS necessarily a UnionType, considering it's already in that branch of the case statement?
+U2LAL86AY : yes but you need to do something like this
+U2LAL86AY : ```type Msg = 
+   Click
+   | OnEnter
+   | MsgFor_DatePicker   DatePickerMsg  -- or whatever you have
+```
+then your datepicker is that union type you want.
+```
+type DatePickerMsg = 
+      Select  
+      | Hover 
+      | DoStuff 
+```
+
+U2LAL86AY : and in your  main update case statement you hace
+U2LAL86AY : ```case msg of 
+  Click -&gt; -- do stuff. 
+  OnEnter -&gt;  --do stuff 
+  MsgFor_DatePicker  datePickerMsg -&gt; 
+           subUpdate datePickerMsg 
+```
+
+U2LAL86AY : so for your case - you can leave your `type UnionType = A String | B | C` alone -&gt; he will be like the `DatePickerMsg `
+U2LAL86AY : but you need to build another tag for it
+U64FYS317 : thank you.
+U64FYS317 : exactly what i was looking for. I had my types like:type Msg = A | B | UnionType
+
+U64FYS317 : but I needed A | B | UnionType UnionType
+U64FYS317 : I guess I'm not as comfortable with the idea of tagging as I hoped
+U2LAL86AY : it's not possible to do it without this.yes but just a trick that i use -&gt; i always use `MsgFor_` and whatever follows -&gt; this way i know this i need to delegate
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

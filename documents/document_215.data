@@ -1,29 +1,39 @@
-```
-if your Cmd needs data from a `State` value, then pass that in too
-<@U153UK3FA> elm-sortable-table does away with the table.update and Table.Msg . You configure  a function to transform State -&gt; Msg right? That gets called in the table view… the role of table.update seems to be baked in to the table.view
-`view : Config data msg -&gt; State -&gt; List data -&gt; Html msg` view is a function that takes a `Config` and a `State` and some data and returns some Html to display
-elm-sortable-table exposes functions to operate on the `Config` and `State` values instead of hiding those functions behind `Table.Msg` values being passed to a single `Table.update` function
-<@U153UK3FA> yes. I see that. However, I don't really see how you extend the pattern to account for the desire to produce a Cmd from the table. IE Lets say i am creating random-sortable-table which i want to handle from within the table… I don't see where as the author of random-sortable-table i would orchestrate this….
-<@U153UK3FA> and i know that i am being sloppy with my terminology. because i understand that the table isnt actually producing the random value….
-in response to a user action?
-<@U153UK3FA> in response to an event defined in the table's view and without having to define another Msg on the part of the consumer (other than the single Msg handling table state )
-a user action produces a `Msg` which the Elm runtime passes on to your `update` function, from there you can call any function you want to.
-but I ( the author of random-sortable-table ) don't have an update function if i am following elm-sortable-table pattern. I have a view function. thats it.
-The consumer of my api has an update function….
-<@U153UK3FA> i guess a more general question is why is nested TEA considered an anti pattern, and what is the alternative given the desire to hide implementation details from a consumer of an api?
-it's considered an anti-pattern because it creates a lot of boilerplate which tends to lead to confusion
-I have read this but i have not seen a clear alternative which allows for the same flexibility
-<@U153UK3FA> I have seen a lot of admonitions against using it, but the examples which An Introduction To Elm inserted in .18 in place of Nested TEA don't apply to a package author…
-<@U1XL8FMAA> if you wanted to allow a column to be sorted randomly, you'd create a function that takes a random seed value and returns a `Table.Sorter` for that column
-<@U153UK3FA> that was an off the cuff example. I am looking for a general strategy to adapt the pattern provided in elm-sortable-table to handle Cmds from the point of view of the api/package author.
-I think the realization we've had was that there is no "one size fits all" solution - different requirements need different levels of abstraction, and defaulting to TEA as the abstraction boundary for everything does not simplify life for the consumer of packages. The abstraction boundary should be `function` which _sometimes_ means you need a view, update and state, and sometimes doesn't mean that.
-the general strategy is to write a function that returns the `Cmd` you want and put that function in your module.
-<@U3SJEDR96> that seems completely reasonable to me.
-<@U153UK3FA> i believe that i am not articulating the question sufficiently. I understand how to write a general function which returns a command. I don't however see in the specific case of the pattern in elm-sortable-table how to extend the pattern to handle commands. Perhaps it is just staring me in the face and i don't see it….
-<@U3SJEDR96> - I would have hoped that the literature teaching elm would have avoided scrubbing the pattern, as opposed to simply providing a number of different patterns… a la GOF
-that's it, you just add a function that the caller can call. You might want to have the caller pass in the `Config` and `State` to help construct the `Cmd`
-that's all a `Table.update` would be doing anyway
-As a personal example of learning these things the hard way, here's a PR that turned the state inside out for one of my packages, making it much more flexible for the users: <https://github.com/ohanhi/keyboard-extra/pull/20>
-<@U0CLDU8UB> Ah, now I see it. I'm using an older version of your package and I was wondering why you were using a internal `State` for that :slightly_smiling_face:
-Now it turns out that app `Model` is responsible to hold the keyboard state
-<@U3LGUAF54> Thanks for all the info, I'd be really interested to look at what you've build. I use F# for most of my work now, but not a huge fan of WPF/MVVM. So looking for something nicer for the front end dev, and I prefer the OS Javascript  widget ecosystem.
+U0HT1NBLH : The nice people in <#C0AV5N8NA|botkit> might be able to help you
+U07CW6N3A : <@U3KHRQLTX> can definitely agree that it'd be a little more intuitive with that error, though looking at it from another angle, it's because a bot doesn't technically have `channels:write` as part of it's semi-compound `bot` scope... there are some methods that a bot *does* have scope for but can't actually run due to being a bot, and that error is generally reserved for that scenario instead.
+U3KHRQLTX : <@U07CW6N3A> Aha! Thank you, that makes sense
+U07CW6N3A : <@U3KHRQLTX> another thing to note in a collected quirks section :wink:
+U3KHRQLTX : <@U07CW6N3A> :slightly_smiling_face:
+U2ZDLHVQD : has anyone run into good platforms that do Sentiment Analysis?
+U3LDUPV2A : the microsoft one is pretty easy to use...
+U3LDUPV2A : you can play with a smple version online.  here.  I threw a bunch of tripadvisor reviews at it, and it did a pretty good job at returning accurate results <https://www.microsoft.com/cognitive-services/en-us/text-analytics-api>
+U3EFK8UES : Kinda iffy
+U3EFK8UES : I took the default of:
+U3EFK8UES : ```I had a wonderful experience! The rooms were wonderful and the staff were helpful.```
+U3EFK8UES : It returend a 98
+U3EFK8UES : Changed it to
+U3EFK8UES : ```I had a wonderful experience! The rooms were *somewhat* wonderful and the staff were helpful.```
+U3EFK8UES : and
+U3EFK8UES : ```I had a wonderful experience! The rooms were wonderful and the staff were *somewhat* helpful.```
+U3EFK8UES : Same percentage on all 3
+U3LDUPV2A : interesting… did it pickup on somewhat as a key phrase?
+U3EFK8UES : Nope
+U3EFK8UES : Hrm, it picks up on Kind of
+U3EFK8UES : but doesn't reduce the percent
+U3LDUPV2A : i see… in many contexts *somewhat* would probably be a useless word… in this context, it's definitely adding something.
+U3EFK8UES : ```I had a wonderful experience! The rooms were wonderful and the staff were kind of helpful.```
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

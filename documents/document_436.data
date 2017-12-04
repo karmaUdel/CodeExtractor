@@ -1,4 +1,138 @@
+U3LUC6SNS : Of course there isn't  `string` parser, and here `env` as in `(keyword env)` means that we recognize the same string that was recognized in ```
+|. symbol "{"
+|= string
+|. symbol "}"
 ```
-Might work
-oh! you wouldn't - I was supposing that `average` should be defined as `List Float -&gt; Float`, putting the burden on the part of the program that generates the list, rather than on the function. but your solution is exactly the way to satisfy his original question
-With this version, you do not need to add a new value `Other` to your `LocationType`.
+
+U3LUC6SNS : By `string` parser, I mean that I want to recognize, for example, everything up to `symbol "}"`.
+U3LUC6SNS : In the second case, I want to recognize everything between `\begin{ENV}` and `\end{ENV}`
+U153UK3FA : <@U3LUC6SNS> so you want `string` to mean, ‘one or more characters that aren't a "}"'
+U153UK3FA : is there any other limitation on what those characters can be?
+U153UK3FA : can they be white space?
+U153UK3FA : You're looking for <http://package.elm-lang.org/packages/elm-tools/parser/2.0.1/Parser#keep>
+U3LUC6SNS : <@U153UK3FA> -- yes one or more characters that are not "}" with whitespace allowed.
+U1X5ZRJUX : Hi there, I'm updating my app to 0.18 and I'm having issues with the new `Http.send` way of doing things without `Tasks`
+U1X5ZRJUX : I have the following update function with the `Msg` and a function passed to a `Http.send`
+U1X5ZRJUX : ```type Msg
+    = FetchSucceed Model
+    | FetchFail Http.Error
+
+
+update : Msg -&gt; Model -&gt; ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        FetchSucceed bookmarks -&gt;
+            ( bookmarks, Cmd.none )
+
+        FetchFail error -&gt;
+            ( model, Cmd.none )
+
+
+processFetch : Result Http.Error Model -&gt; Msg
+processFetch result =
+    case result of
+        Ok bookmarks -&gt;
+            FetchSucceed bookmarks
+
+        Err error -&gt;
+            FetchFail error
+```
+
+U1X5ZRJUX : I understand I can now do without the `FetchFail` Msg but I'm not sure how
+U153UK3FA : <@U3LUC6SNS> `|= keep oneOrMore \x -&gt; x != '}'` should work
+U1X5ZRJUX : if I want to handle errors in my `processFetch` function I would have to have access to `model` in the function
+U153UK3FA : <@U1X5ZRJUX> Look at the type definition for Http.send, `send : (Result Error a -&gt; msg) -&gt; Request a -&gt; Cmd msg`
+U153UK3FA : `(Result Error a -&gt; msg)` can be any function that produces any `Msg`
+U153UK3FA : the simplest way to do that is `type Msg = FeedResponse (Result Error String)`
+U153UK3FA : and just pass `FeedResponse` to http.send
+U3LUC6SNS : <@U153UK3FA>, I think I am almost there.   I have this now:```
+type alias Environment =
+    { env : String
+    , body : String
+    }
+
+
+environment : Parser Environment
+environment =
+    succeed Environment
+        |. symbol "\\"
+        |. (keyword "begin")
+        |. symbol "{"
+        |= keep zeroOrMore (\c -&gt; c /= '}')
+        |. symbol "}"
+        |= keep zeroOrMore (\c -&gt; c /= '\\')
+        |. symbol "\\"
+        |. (keyword "end")
+        |. symbol "{"
+        |. keep zeroOrMore (\c -&gt; c /= '}')
+        |. symbol "}"
+```
+and I run
+```
+run XP.environment "\begin{foo}blah, blah\end{foo}"
+```
+but get the error 
+```
+-- SYNTAX PROBLEM -------------------------------------------- repl-temp-000.elm
+
+(line 1, column 24): unexpected "e" expecting space, "&amp;" or escape code
+
+4|   run XP.environment "\begin{foo}blah, blah\end{foo}"
+```
+Do you see what I am doing wrong?
+
+U601ELFEG : is there a way to build the HTML doc for the modules that my project imports - and say have them somewhere inside `./elm-stuff` --- I'm going to be offline for a vacation, and want the library docs at hand
+U1X5ZRJUX : Thanks! <@U153UK3FA>  I'll give that a think
+U601ELFEG : in general, I'm wondering where documentation on how to use elm-make and elm-project live... the web site doesn't really point to anything
+U153UK3FA : <@U3LUC6SNS> the ‘\' character in strings is used to escape the characters after it, eg "\"" is the way to make a string that has a `"` character, you'll need to do "\\begin{foo}blah, blah\\end{foo}"
+U3LUC6SNS : <@U153UK3FA> Thanks - got it!  Works now.
+U23SA861Y : oh god, you're not trying to parse latex are you?
+U1X5ZRJUX : Stupid question now, just for the sake of trying, I have the following update function```
+type Msg
+    = FeedResponse (Result Http.Error Model)
+
+
+update : Msg -&gt; Model -&gt; ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        FeedResponse result -&gt;
+            processFetch(result)
+
+
+processFetch : Model -&gt; Result Http.Error Model -&gt; ( Model, Cmd Msg )
+processFetch model result =
+    case result of
+        Ok bookmarks -&gt;
+            ( bookmarks, Cmd.none )
+
+        Err error -&gt;
+            ( model, Cmd.none )
+
+```
+
+U1X5ZRJUX : the compiler doesn't like the `processFetch(result)`
+U1X5ZRJUX : ```The type annotation for `update` says it always returns:
+
+    ( Model, Cmd Msg )
+
+But the returned value (shown above) is a:
+
+    Result Http.Error Model -&gt; ( Model, Cmd Msg )
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

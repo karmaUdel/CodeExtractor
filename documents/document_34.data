@@ -1,1 +1,70 @@
+U06GS6P1N : <@U0B4ZBBKM> maybe look at cond-&gt; ?
+U0B4ZBBKM : <@U06GS6P1N> You'd have to repeat `x` just the same
+U06C1JGHX : hey all. I'm use data.zip.xml/xml-&gt; to parse some XML
+U06C1JGHX : deep breath… ok:
+U06C1JGHX : I'm trying to navigate a blob of XML and parse out a map of information
+U06C1JGHX : this gives me a list of the names of all the interesting nodes in my XML:```
+(xml-&gt; zipped :parameters :parameter (attr :name))
 ```
+
+U06C1JGHX : this works for me since I know how many `:parameter` nodes I have and I know they all have `:name`
+U06C1JGHX : these work similarily: ```(xml-&gt; zipped :parameters :parameter :description text)
+(xml-&gt; zipped :parameters :parameter :default text)
+(xml-&gt; zipped :parameters :parameter :options :option text)
+```
+
+U06C1JGHX : I get a list of descriptions, default values or options…
+however!  not all my paramater nodes have a :`description`, `:default` or `:options` sub tag.
+
+So the lists don't have the same ordering as the `:name attr` we pulled out earlier…
+
+U06C1JGHX : Is there a simple way to pull out these values for each parameter? with say `nil` returned if it's not present?
+U0BKWMG5B : <@U06C1JGHX> Perhaps something like:```
+(for [p (xml-&gt; (z/xml-zip xml) :parameters :parameter), :let [z (z/xml-zip p)]]
+  {:description (xml-&gt; z :description text)
+   :default     (xml-&gt; z :default text)
+   :options     (xml-&gt; z :options :option text)})
+```
+
+U0BKWMG5B : Or alternatively:```
+(defn parse-parameter [z]
+  [{:description (xml-&gt; z :description text)
+    :default     (xml-&gt; z :default text)
+    :options     (xml-&gt; z :options :option text)}])
+
+(xml-&gt; zipped :parameters :parameter parse-parameter)
+```
+
+U08UTJ5PB : <@U5YHX0TQV> It's actually a docker container I use for my dev environment. I have set that environment variable to no avail. Have you had this issue?
+U051SS2EU : <@U08UTJ5PB> is it something that happens to leiningen regardless of the project code? is it a specific network operation in the code that is getting that error?
+U08UTJ5PB : <@U051SS2EU> It seems to only happen when running on my docker-container. The repl is being started with this function:
+```(defn start-repl-server []
+  (loop [port (get-repl-server-port)]
+    (if-let [server  (try (nrepl-server/start-server :port port
+                                                     :handler cider-nrepl/cider-nrepl-handler)
+                          (catch java.net.BindException _ nil))]
+      (reset! repl-server server)
+        (recur (inc port)))))```
+
+U08UTJ5PB : If I start it using `lein repl` it starts fine just fine (please excuse the indentation, slack appears to have messed it up)
+U051SS2EU : what I'm asking is that if it's only with your project in the container that lein gets the error, or if other projects give a similar error
+U051SS2EU : there's two likely failure points here, one internal to leiningen, the other specific to your project...
+U051SS2EU : another thing you could test is whether an uberjar of your project, run without leiningen gets this error
+U08UTJ5PB : <@U051SS2EU> it is the only project I've experienced with this error. But I don't usually do things this way. (with starting the repl in that way)
+U08UTJ5PB : That's a good idea
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

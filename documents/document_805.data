@@ -1,0 +1,174 @@
+U5W50TZ6C : The best thing I've come up with so far is that each page has to serialize its model to a string, so they can be kept in a Dict or List...
+U5W50TZ6C : Not ideal
+U6EAT2Z37 : <@U5W50TZ6C> not entirely sure what you mean by programmatically register pages. What are you building? Some kind of content management system?
+U6EAT2Z37 : I'm not entirely sure Elm is suited to such abstract things, necessarily. But give it a shot :slightly_smiling_face: Might be great! :slightly_smiling_face:
+U5W50TZ6C : rtfeldman's SPA example is really cool! But there's a lot of boilerplate. Like [here](<https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L31>) is one union type for each page. That kind of thing appears accross a few modules. I'd like to store the pages in a Dict, instead of as a bunch of union types.
+U5W50TZ6C : Hopefully I'm being clear :wink:
+U6EAT2Z37 : Well, it's *getting there*. There's a lot of boilerplate. It's on the way to being a kind of framework. The architecture could be cleaned up some, but that makes the types a little more complex seeming. I've done that in the refactor of a project I've been working on at work, but it essentially quarantines most of the page boilerplate to a single file I'm calling a controller, and reduces it by wrapping another parameterized type around most of the type boilerplate. Anyway...
+U5W50TZ6C : Hm, that gives me an idea... I'll see if I can work with it :slightly_smiling_face:
+U5W50TZ6C : Thanks again!
+U0JBSEGHY : Is there a `paste` and `cut` event?
+U2LAL86AY : <@U0JBSEGHY> not a built in one -&gt; but you can transform this:`elem.addEventListener ("paste", handler, false);`
+into this:
+```
+type Msg = DoStuff | AnotherMsg
+on "paste" (Json.succeed DoStuff)
+```
+
+U2LAL86AY : <http://package.elm-lang.org/packages/elm-lang/html/2.0.0/Html-Events#on>
+U0JBSEGHY : Cool thanks. I will keep this in mind. I ended up reducing what I was doing in elm and moved it over to JS
+U2LAL86AY : every time i can, i try to keep things in elm :simple_smile:
+U0JBSEGHY : <@U2LAL86AY> that was my logic but things got pretty out of hand.
+U18UD6T3J : Worst thing about Elm: once you go back to working with JS, it's even more painful.Damn you. :slightly_smiling_face:
+
+U6EAT2Z37 : <@U18UD6T3J> ah, they're just languages :slightly_smiling_face: use the bits that are good, and try to put up with the bits that are bad :slightly_smiling_face:
+U18UD6T3J : <@U6EAT2Z37>  sure, they all have their pros and cons.but JS is for small scripts, not big apps. Elm showed me how to do things properly and safely. Going back to JS is a painful experience now. 
+
+Hopefully the jobs channel will get chattier over time :slightly_smiling_face:
+
+U0HUBVDD2 : Hi, I noticed Date will be removed from 0.19, my question is how will we get the date.now after that?
+U3SJEDR96 : I would suggest reading the commit message for that commit. It's pretty informative.
+U0HUBVDD2 : <https://github.com/elm-lang/core/commit/a892fdf705f83523752c5469384e9880fbdfe3b1>
+U0HUBVDD2 : `elm-community/elm-time` doesnt get the date now
+U3SJEDR96 : "Unclear if we should stick with this choice, but I would like toexplore alternatives first."
+
+U3SJEDR96 : The point being - Elm 0.19 isn't ready for release; don't read into things too much, but do understand they are actively being worked on, and thought about
+U3SJEDR96 : in particular, there is still `Time.now`, and `elm-time` has a `DateTime.fromTimeStamp : Time -&gt; DateTime` function
+U6EAT2Z37 : <@U18UD6T3J> we use Ember at work . Works out ok. It's written in JS. I understand that you like Elm. There are pros and cons to all technology choices, though. I feel like maybe "golden spoon"ing isn't such a productive thing to do, if you know what I mean :slightly_smiling_face:
+U18UD6T3J : yeah, on the other hand saying "oh well, it works ok for me, all languages have pros and cons, so they are equal" is not accurate as well.I'm seeing a huge difference, and that's what I said, in a dramatic maybe way. :slightly_smiling_face: 
+Whether I like it or not is irrelevant. That's a personal preference.
+
+U6EAT2Z37 : <@U18UD6T3J> glad the tool's working out for you, then :slightly_smiling_face:
+U0JFGGZS6 : <@U0HUBVDD2> <@U3SJEDR96>  I agree about not reading into things too much re active changes to core, but just to note `DateTime.fromTimestamp` from `elm-time` is not what you want to use to represent an actual point in time, since `DateTime` is abstracted from timezone.
+U4872964V : So, the question is, what do you need the Date for
+U2GTQM83A : Hi, what do you honourable people use for pie charts in Elm?
+U0JFGGZS6 : example of why it's not good to use elm-time DateTime this way  -&gt;  <https://ellie-app.com/3TQDS9MWKh5a1/0>
+U0JFGGZS6 : the hour is in UTC
+U4872964V : yes, so when you want to show a time in the user’s local time, what would you use
+U4872964V : you’d have to pass getTimezoneOffset() through a flag or something
+U0JFGGZS6 : Yeah. `elm-time` is designed to be completely independent of javascript
+U4872964V : the issue that right now, converting to a `Date` is not a pure function is not satisfying though
+U3SJEDR96 : there is a <http://package.elm-lang.org/packages/elm-community/elm-time/1.0.7/Time-ZonedDateTime#fromTimestamp> too, tho..
+U3SJEDR96 : But yeah, I see your point
+U0JFGGZS6 : yes. and then you need to know the zone
+U4872964V : there should be a method to create a `TimeZone` from an offset, though
+U0JFGGZS6 : unfortunately time zones are messy beasts
+U4872964V : I think having the user explicitly specify these things is not really a bad thing
+U0JFGGZS6 : indeed. but it makes it a lot more complicated than just taking in what the browser says is local time
+U5X2ZRFDF : I've been using the `Bogdanp/elm-time` package rather than the `core/Date` library, because it provides 1) an easy `date` constructor that builds a Date from a year, month and day, and 2) functions to add to the date, such as `addYears`, `addMonths` and `addDays`. Unfortunately, it does not provide a function to tell you the number of days between two dates, so I wrote my own `daysBetween` function, that just converts both Dates to Times, subtracts, and divides by ms per day.
+U4872964V : yes, but at the very least it should be a `Cmd`
+U3SJEDR96 : That is, I suppose one of the larger issues with the current `Date`, indeed. `Date.fromString` being locale-dependent, that is
+U0JFGGZS6 : <@U5X2ZRFDF> yeah, and for my needs I typically just need the current date, not date-time from the browser, so I usually end up sending `(year, month, day)` in through flags and ports, and use `elm-time`'s Date type
+U5X2ZRFDF : Nice. Yeah, I am rendering a timeline, so I do a lot of date math.
+U0JFGGZS6 : <@U2GTQM83A>   `elm-visualization` has pie charts,  `elm-plot` may or may be planned, not sure.
+U5X2ZRFDF : Fortunately I don't have UTC issues since I'm only working with dates.
+U0JFGGZS6 : I think there's `delta` that would give you `daysBetween` ?  <https://github.com/elm-community/elm-time/blob/1.0.7/src/Time/Date.elm#L246>
+U0HUBVDD2 : still need the date of today though, only `Date` can give me that
+U5X2ZRFDF : Hmm. I had been thinking `delta` would give you years first, then months from what is left over, then days from what is left. But it looks like I misunderstood, and the years, months, and day difference values are independent.
+U5X2ZRFDF : In other words, I had assumed that a `delta` between 5 Jan 2017 and 6 Jan 2018 would give you a result of 1 year, 0 months, 1 day. Which doesn't do me a lot of good, if I don't know how many days are in the year. But reading the source, it looks like it will actually tell you 1 year, 12 months, 366 days. I hadn't even tried it.
+U4872964V : <@U5X2ZRFDF>, yeah, that’s a strange api
+U5X2ZRFDF : Still it seems like a lot of calculations it's doing to come up with the number of days. I think converting both to times and subtracting and dividing is more efficient.
+U3SJEDR96 : Might be accounting for leapseconds and whatnot
+U3SJEDR96 : correctness &lt;-&gt; efficiency
+U4872964V : leap seconds are not in the time though
+U3SJEDR96 : eh, good point
+U3SJEDR96 : I have time :disappointed:
+U3SJEDR96 : hate*
+U4872964V : yes, time is complicated
+U5X2ZRFDF : Agreed that correctness is important here, but... 1) Leap seconds don't matter when you're only doing date math. If you convert to a time, you use midnight, then when you convert back to dates, use `round`. 2) The library accounts for leap years but the code says nothing about leap seconds.
+U4872964V : no, leap seconds are not part of time, really, the clock is just adjusted to match
+U5X2ZRFDF : They can affect date calculations if you use time as an intermediary. If there is no leap second this year, then midnight of 1 Jan next year is a whole multiple of 86400 seconds later than midnight of 1 Jan this year. But if there's a leap second, then there will be an extra second between them. So if you divide by 86400, you have to round down to the nearest number of days.
+U4872964V : no there won’t, unix time does not have leap seconds
+U3SJEDR96 : Yeah, that's what caught me off-guard, too. It's strictly incremental, +1 every second of passing time
+U5X2ZRFDF : <https://en.wikipedia.org/wiki/Unix_time>&gt; Unix time (also known as POSIX time or epoch time)[citation needed] is a system for describing instants in time, defined as the number of seconds that have elapsed since 00:00:00 Coordinated Universal Time (UTC), Thursday, 1 January 1970,[1][note 1] minus the number of leap seconds that have taken place since then.
+
+U4872964V : UTC has leap seconds, but the unix time is simply synchronized to the UTC, meaning that when a leap second is introduces, the clock is just off and will be adjusted
+U4872964V : <@U5X2ZRFDF>, yes, exactly
+U4872964V : so leap seconds are just ignored
+U5X2ZRFDF : Ah I see
+U5X2ZRFDF : But... what about JavaScript? Does it follow Unix time? Or might it have leap seconds, say, on Windows?
+U4872964V : it uses the unix epoch
+U5X2ZRFDF : OK. So JS time could be off by several seconds from UTC.
+U5X2ZRFDF : Oh, but it's adjusted to match, as you said
+U4872964V : yes
+U4872964V : UTC seconds and unix seconds do not match, but the dates _do_ match :slightly_smiling_face:
+U5X2ZRFDF : By "do not match", do you mean, at most given points in time, they don't match? Or do you mean, measuring differences over large periods of time, they don't match?
+U4872964V : UTC seconds since 1970 is not the same number as unix seconds since 1970
+U5X2ZRFDF : Right
+U5X2ZRFDF : So, the latter
+U5X2ZRFDF : But _current_ UTC time and _current_ Unix time should match. Unless we're in the middle of a leap second.
+U4872964V : yes, if you display the time as a date
+U4872964V : date+time
+U4872964V : but not if you display it as a second offset
+U5X2ZRFDF : Right... which is what it's actually stored as.
+U5X2ZRFDF : Makes sense.
+U4872964V : yes, so you need to know which one is which, fortunately, we do know that
+U5X2ZRFDF : So just don't use Unix time if you're trying to do astronomical calculations
+U4872964V : or measure seconds over a leap second addition
+U4872964V : the clock will stop for one second, basically
+U4872964V : It’s hard to imagine how to incorporate leap seconds, actually, because you want to be able to represent _future_ dates too, and you don’t know in advance if there will be a leap second.
+U5X2ZRFDF : Yep
+U5X2ZRFDF : There have been 27 leap seconds added in the past 45 years!
+U3LUC6SNS : I’ve managed to deploy the Elixir/Phoenix backend to Heroku for the project I am working on, and would now like to do the same with the Elm frontend.  The frontend is running locally using webpack.  What do you recommend?
+(Cross-posted from <#C192T0Q1E|beginners>)
+
+U5AR0LDQA : Anybody know if its possible to remove the elm embed / instance ?
+U0LPMPL2U : <@U5AR0LDQA> what do you mean? Do you want to run a headless Elm program?
+U5AR0LDQA : I’m running `elm` in a safari extension and it appears that the global keyboard keys are being fired from multiple elm instances. So I’d like to on opening the extension initialize elm and then on closing the popup possibly remove the instance.
+U5AR0LDQA : <@U0LPMPL2U>
+U0LPMPL2U : hmmm I'm not sure
+U0LPMPL2U : in the javascript, if you set the `app = undefined`, does the Elm app get garbage collected?
+U3SJEDR96 : Nope
+U3SJEDR96 : and no, there currently isn't a (decent) way of stopping and unmounting an elm app
+U0J1M0F32 : Especially if you don't find, `window.location.href = '/';` to be a decent way of unmounting your javascript.
+U3SJEDR96 : what you can do, however, is make the `isThePopupOpen` part of your state, so you can do `subscriptions { isItOpen } = if isItOpen then *subscribe things* else * don't* `
+U3SJEDR96 : I think the hackiest way of "stopping Elm" I've come across is this one <https://github.com/fluxxu/elm-hot-loader/blob/master/hmr.js#L55-L58> (please don't do that)
+U5AR0LDQA : Hmmm thanks everyone! I think that could solve my solution by checking to make sure its open. :smiley:
+U17R1GD96 : I need to add some microdata to the page. I found part of them in `Html.Attributes` module. It has `itemprop` but it has no `itemscope`, or `itemtype`. Is it intentional? How to inject those missing attributes?
+U3SJEDR96 : You can do this using either `property` or `attribute` - I'm not sure which one you should use for those
+U3SJEDR96 : so I think `itemScope : String -&gt; Html.Attribute msg` with a definition like `itemScope scope = Html.Attribute.property "itemScope" (Json.Encode.string scope)` should do
+U3SJEDR96 : and something similar for `itemType`
+U5AR0LDQA : Hey that worked <@U3SJEDR96>! I only subscribe to the keyboard events if the popup is open. Thanks for the help.
+U5LFUHH19 : Re: <https://ellie-app.com/3TTcht9V6Nxa1/0> How do I handle a possible null in JSON for what could be a record?  I've tried using `Maybe Project` but can't fix the types.
+U5LFUHH19 : To explain more, the `project` field, if present, becomes a `Project` -- but what if the field is null?  How can I use `Json.Decode.Pipeline.optional` to handle the optional part?
+U5LFUHH19 : OK, I got it!
+U5LFUHH19 : I hit this yesterday, thought about it overnight, boiled down the problem to the bare minimum, studied on it, then finally saw the path through the types.  Whew!
+U5LFUHH19 : Here is my solution, in case anyone else hits this: <https://ellie-app.com/3TTcht9V6Nxa1/1>
+U1G7E1P9S : Anyone use emacs and elm-mode?
+U6CB44HMF : Hey all, I don't know if it is very applicable, but I made a hidden layer neural net library with backprop training for elm <http://package.elm-lang.org/packages/cakenggt/elm-net/latest>
+U60SXAF96 : Is `elm-install` still supported?
+U60SXAF96 : I'm getting some super exciting errors:```
+/home/robert/.rbenv/versions/jruby-9.1.12.0/lib/ruby/gems/shared/gems/commander-4.4.3/lib/commander/user_interaction.rb:334: warning: constant ::JavaPackageModuleTemplate is deprecated
+error: Contract violation for return value:
+        Expected: [Solve::Constraint],
+        Actual: [#&lt;Solve::Constraint &lt; 4.0.0&gt;, #&lt;Solve::Constraint &gt;= 3.0.0&gt;]
+        Value guarded in: ElmInstall::Utils::transform_constraint
+        With Contract: String =&gt; Array
+        At: /home/robert/.rbenv/versions/jruby-9.1.12.0/lib/ruby/gems/shared/gems/elm_install-1.1.1/lib/elm_install/utils.rb:23 . Use --trace to view backtrace
+```
+
+U60SXAF96 : I just did `elm-package install "ccapndave/elm-update-extra"` on a fresh project, and then an `elm-install`, and then got that.
+U60SXAF96 : Filed an issue. <https://github.com/gdotdesign/elm-github-install/issues/32>
+U60SXAF96 : Looks like it's a jRuby issue. :disappointed:
+U6FN5S74P : I do! There's also a (pretty quiet) <#C0KAH4D5X|emacs> channel.
+U17R26VR8 : I'm doing quite alot of cleaning up of files atm, merging them together. I didn't realise that with elm-format@exp, i can just cat the whole imports lists together, save and elm-format will merge exposings and prude duplicates for you! LOVE IT!
+U2L33RRR8 : Hi, does anyone know how to cross-compile elm-format for mac and linux?
+U1CE9DL9H : <@U2L33RRR8> it's a haskell program, so you should look into how ghc cross-compiling works
+U4872964V : <@U2L33RRR8> exactly what do you want?
+U4872964V : since there are already versions of elm-format for both mac and linux
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

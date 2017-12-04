@@ -1,1 +1,54 @@
-  * Need to add a source directory or new dependency to elm-package.json```
+U4RR7KX45 : at the moment I'm just hard coding it on the api
+U4RR7KX45 : and it's just an array of strings
+U48AEBJQ3 : `Decode.list : Decoder a -&gt; Decoder (List a)` So you need to hand it a decoder for each item in the list and it will apply it across the whole list.
+U4RR7KX45 : but later on, I want to use the api that returns objects:```
+{"ID":1368,"title":"Thomas Manss","content":"&lt;p&gt;Decoration is just make-up for the wrinkles of the idea. &lt;\/p&gt;\n","link":"https:\/\/quotesondesign.com\/thomas-manss-2\/"}
+```
+
+U48AEBJQ3 : Then it is `Decode.field "myField" (list string)`
+U48AEBJQ3 : Later on you will write a decoder for a single object and go `Decode.field "myField" (list myObjectDecoder)`
+U4RR7KX45 : what does myField refer to in my case?
+U4RR7KX45 : a specific field like title?
+U48AEBJQ3 : A field in the JSON object. If your top-level is a list of strings, you *only* use `(list string)`
+U48AEBJQ3 : Right, so in the object you gave as an example, you might have `Decode.field "ID" int`
+U48AEBJQ3 : If you want to decode the entire thing:
+```
+Decode.map4 mkThing
+    (Decode.field "ID" int)
+    (Decode.field "title" string)
+    (Decode.field "content" string)
+    (Decode.field "link" string)
+```
+
+U4RR7KX45 : I think I have a mistake in the import too, as it says Cannot find variable Decode.field
+U48AEBJQ3 : You can probably just use `field`
+U4RR7KX45 : ```import Json.Decode exposing (..)```
+U48AEBJQ3 : or `import Json.Decode as Decode`
+U4RR7KX45 : ah ok
+U48AEBJQ3 : <@U3YA74FQD> I don't know about elm-bootstrap, you might ask in <#C3U2E3JRX|elm-bootstrap>. Normally, you should use `Html.Keyed` to give the virtual dom extra information about when something is the same or different from something else.
+U3YA74FQD : Yeah, I just tried it and it works
+U4RR7KX45 : <@U48AEBJQ3> what should `mkThing` do?
+U3YA74FQD : I'm writing a spa so I put a key on the problematic pages
+U48AEBJQ3 : `mkThing : Int -&gt; String -&gt; String -&gt; String -&gt; YourFancyType`
+This could be (but doesn't have to be)
+
+`type YourFancyType = MkThing Int String String String`
+
+U4RR7KX45 : ah so it should be a type I get it now :smile:
+U4RR7KX45 : damn it's so confusing
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

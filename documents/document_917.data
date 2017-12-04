@@ -1,0 +1,106 @@
+U5VGKQ2SY : so if there are existing files of `file_a`, it should create `file_a_0` and then `file_a_1`, and so on? It just keeps adding to file_a_watever-count and file_b_whatever-count, depending on the files that have already been extracted?
+U0NRYQNAZ : anytime i open a file in pycharm it says loading ... arggg. why does this happen when i have something really important to fix.
+U4WG0KTNJ : file_a_0, file_a_1or file_a, file_a_1
+or file_a, file_a_0, file_a_1
+
+are all acceptable!
+
+U5VGKQ2SY : yes... I saw that.
+U5VGKQ2SY : if f.filename in os.listdir(dir_name):                name, ext = os.path.splitext(f.filename)
+
+U5VGKQ2SY : <@U4WG0KTNJ>
+U5VGKQ2SY : line 7 counts the number of files that start the same and end the same... this assumes that file_a_1, file_a_2... is sequential. If you get file_a_1, file_a_4, file_a_7 then just play w/ this. Also, had line 11 one indentation back so it was trying to unzip/extract file from previous iteration, that were the file not found error coming from
+U4WG0KTNJ : hmm it still only opens the first 2 zipped folders and line 10 is giving me RunTimeError: Attempt to read ZIP archive that was already closed
+U5VGKQ2SY : ```import os
+import os.path
+from zipfile import ZipFile
+
+dir_name = '../data/'
+extension = ".zip"
+
+os.chdir(dir_name) 
+
+for item in os.listdir(dir_name):
+    if item.endswith(extension):
+        zip_ref = ZipFile(item)
+        for f in zip_ref.filelist:
+            if f.filename in os.listdir(dir_name):
+                name, ext = os.path.splitext(f.filename)
+                f.filename = name + '_' + str(len([elem for elem in os.listdir(dir_name) if elem.startswith(name) and elem.endswith(ext)])) + ext
+                zip_ref.extract(f)
+            else:
+                #continue
+                zip_ref.extractall(dir_name)
+            zip_ref.close()
+            os.remove(item)
+```
+
+U5VGKQ2SY : that's the whole script that I am using
+U5VGKQ2SY : <@U4WG0KTNJ>  Try with `with`:```
+        with ZipFile(item) as zip_ref:
+            for f in zip_ref.filelist:
+                if f.filename in os.listdir(dir_name):
+                    name, ext = os.path.splitext(f.filename)
+                    f.filename = name + '_' + str(len([elem for elem in os.listdir(dir_name) if elem.startswith(name) and elem.endswith(ext)])) + ext
+                    zip_ref.extract(f)
+                else:
+                    zip_ref.extractall(dir_name)
+            os.remove(item)
+```
+
+U5VGKQ2SY : that way you don't have to worry about closing
+U5NC85SCB : Hey, could I get some quick help from someone? No idea how to explain the situation
+U5NC85SCB : Essentially calling a function from another file doesn't seem to work the same when you call it from inside another function
+U5NC85SCB : Is there any reason why these two calls would act different?
+U5VGKQ2SY : line 2 vs lines 4-6?
+U5VGKQ2SY : lines 4 through 6 won't execute unless today_posts is called from somewhere.
+U5NC85SCB : Yeah, I get that :slightly_smiling_face:
+U5VGKQ2SY : ok
+U5NC85SCB : I'm calling the function, but the call on line 6 acts differently
+U5NC85SCB : Do you know much about the Telegram API wrapper telebot?
+U5VGKQ2SY : no, so I'll let it go for someone else.
+U5NC85SCB : Okay, thanks :slightly_smiling_face:
+U07JGLLKF : <@U5NC85SCB>: at a flance the only difference is that `db` and `c` are both scoped outside the context of the function so they could have different values each time it's called
+U5NC85SCB : Hmmm okay
+U5NC85SCB : Any reason the above wouldn't work?
+U5NC85SCB : <@U07JGLLKF>, sorry to tag you :slightly_smiling_face:
+U07JGLLKF : that looks legitimate, what behaviours are you seeing?
+U5NC85SCB : Essentially the sql doesn't execute, but the function is defo called, I've put print statements everywhere and they all execute
+U5NC85SCB : But if I move the sql statement out of the function and hard code args[0] then it all runs
+U5NC85SCB : The function is called when the bot recieves a command on Telegram
+U5NC85SCB : So the way the wrapper is coded is the only thing I can think of
+U07JGLLKF : is the logic that creates the cursor `c` called each time the script runs?
+U5NC85SCB : db = sqlite3.connect(‘...')c = db.cursor()
+
+U5NC85SCB : db and c are created once at the start of main.py
+U07JGLLKF : <@U5NC85SCB> try putting your `db` and `c` creation inside the `today_posts` method
+U6FNX78AJ : hi all, I am new (new to this slack and new to python) and have a question that is driving me crazy. could someone help?
+U1BP42MRS : Welcome <@U6FNX78AJ> ! Go ahead and ask, someone will be along to help as they're available (no need to ask to ask)
+U6FNX78AJ : the short story is that I'm getting `[Errno 32] Broken pipe` and I tried to use this solution I found on stack overflow ```from signal import signal, SIGPIPE, SIG_DFLsignal(SIGPIPE,SIG_DFL) ``` but just as was warned in the comments, that made the error go away, but my service just shut down instead
+
+U6FNX78AJ : what I'm doing is this...I have two services, a main service for a website and a service for an api. My api gets some data from somewhere else and sends it to my website upon request.
+U6FNX78AJ : when I hit the api directly, like through a valid route, I get the data and no error
+U6FNX78AJ : but when I go through my website, which will eventually generate the same url and send a request to my api, I get a broken pipe.
+U6FNX78AJ : both of the services are running on my computer
+U6FNX78AJ : when I use the deployed version of the website (AWS), I get no error
+U6FNX78AJ : only get broken pipe locally
+U1BP42MRS : Can you produce a minimum viable example? Say just the two services running and the web one asking from the service one and failing? Abstractly it sounds like the web process is closing the socket - but hard to know
+U6FNX78AJ : ok...give me a minute to come up with an example, its actually pretty complicated. but I'll try to strip it down the the most important partsU1E34AWBE
+
+U6FNX78AJ : I'm having a hard time distilling this into a code example. Maybe it would help me to just talk about it abstractly. If you don't mind? For one, what is a  socket, and what would cause it to close/how could I keep it open? I have a feeling that this is the problem
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

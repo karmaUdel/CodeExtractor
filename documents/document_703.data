@@ -1,37 +1,81 @@
+U0EUHKVGB : The debugger uses a bunch of customized thing for the virtual-dom in order to display things usefully
+U0EUHKVGB : If you disable the debugger, or just compile it locally, then your file works
+U0EUHKVGB : <https://github.com/elm-lang/virtual-dom/blob/master/src/VirtualDom/Expando.elm#L130>
+U0EUHKVGB : this function does not seem to be TCO'd.
+U23SA861Y : that'll do it
+U0EUHKVGB : <https://github.com/elm-lang/virtual-dom/issues/98>
+U23SA861Y : <@U64A0BYHH> ^
+U0NGNUH4J : Hello, community! :smile:
+I’m building a simple product library to experiment with “making impossible states impossible”.
+
+As the model suggests products can be simple one-off things or a group of products.
+
+*Question*: I have a problem with naming collisions and feel like I’m running out of names. Any ideas about what could be done with the types here?
+
 ```
-could the tags coming through as a python data structure as a string have somethign to do with it?
-i've been banging my head on this for hours.  and you saying strange indeed gave me some validation that is helping me to not go crazy haha
-wait, what do you mean coming through as a python data structure?
-it's getting placed in the url like this `['lol', 'dog']` but encoded
-`/%5B%27lol%27%2C%20%27dog%27%5D?`
-Works either way :confused:
-hmmmmmmm
-`J0HWW-lwQAAAF0HWW-jjgAAAFoAKAA%253D%253D` != `J0HWW-lwQAAAF0HWW-jjgAAAFoAKAA%3D%3D`. % sign in debug token got url encoded to %25
-?
-If I'm trying to parse some xml should I be using something like `beautifulsoup`?
-I've not used beautifulsoup, but if it is just xml there are other xml libraries
-why not lxml :slightly_smiling_face:
-it's got `xml` in its name
-I believe that is the one I liked.
-It can parse xml without you having to know anything about the content.
-and beautifulsoup only has `soup`...
-ah, and `beautiful`..
-be sure to use `defusedxml` if you are parsing unknown xml
-Yeah I saw there was some possibility of malicious xml with certain libraries unable to deal with it
-Why does xml seem so much more annoying than json... ugh
-because it is ? :smile:
-oh wow <@U653RFLBD> i see what you are saying.  it's not failing at the flask level, it's failing at the instagram fetch level because the token is wrong
-Yeah, I would much prefer json.
-Woo `from lxml import etree` can't find reference to etree :smile:
-`import lxml.etree as etree`
-`tree = etree.fromstring(binary_data)`
-`no module named etree`
-:open_mouth:
-gonna stick with just xml.etree lol
-pip installed and everything
-odd
-enjoy slow parsing :slightly_smiling_face:
-but yeah, pretty strange
-Slow and frustrating.
-lxml should really be in the standard library.
-well, `xml` already is and they share an interface (I think)
+type alias Model =
+    { products : List ProductType }
+
+
+type ProductType
+    = Product
+    | ProductGroup
+
+
+type alias Product =
+    { name : String
+    , price : Float
+    }
+
+
+type alias ProductGroup =
+    { name : String
+    , firstProduct : Product
+    , otherProducts : List Product
+    }
+```
+
+U5J0H2NS2 : I used to name the type aliases (constructors) like ProductConstructor
+U5J0H2NS2 : your type should be something like
+U5J0H2NS2 : ```type ProductType
+  = Product ProductConstructor
+  | ProductGroup ProductGroupConstructor
+```
+
+U3SJEDR96 : I think I'd actually go for something like
+U3SJEDR96 : ```type ProductInfo = { name : String, price : Float }
+
+type Product
+  = Product ProductInfo
+  | Group String (NonEmptyList Product)
+
+type alias Model = List Product
+```
+
+U0NGNUH4J : ahaa
+U5J0H2NS2 : your original ProductType is only an "Enum"
+U3SJEDR96 : well, `NonEmpty` actually, using mgold/elm-nonempty-list
+U0NGNUH4J : I see
+U0NGNUH4J : ```type ProductInfo = { name : String, price : Float }
+```
+
+U0NGNUH4J : supposed to be a type alias?
+U3SJEDR96 : urhm, yeah
+U0NGNUH4J : :+1:
+U3SJEDR96 : I wish slack would give me compiler errors :stuck_out_tongue:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

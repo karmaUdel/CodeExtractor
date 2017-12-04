@@ -1,12 +1,69 @@
+U46LFMYTD : ah ok, thank you
+U2FBZ33M3 : <@U5LPUJ7AP> ```#_(this s-exp will be entirely ignored)``` ?
+U5LPUJ7AP : <@U2FBZ33M3> yes, someone told me about that macro, thanks anyway
+U2FBZ33M3 : Didn't realise where my scrollbar was at the time, too early :wink:
+U1YTUBH53 : Any book (or blog) recommendation, specifically for clojure concurrency?I've spent some time today wrangling atoms, agents, `add-watch` and promises, for managing a work queue. It has been a nice drill. I'm undecided what's the best queue management technique and might suspect clojure.async or even some Java implementation might be more performant/safe.
+
+U1YTUBH53 : Maybe someone's written a book I'm not seeing about that?
+U1YTUBH53 : :slightly_smiling_face:
+U5JEJN1CP : <@U2MPUENUC> Thanks.  That second did the trick.
+U0EL66M19 : one of these two expressions looks wrong to me:```user&gt;  (* 2.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001M 1.0)
+2.0
+user&gt;  (* 2.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001M 1.0M)
+2.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010M
 ```
-it's not the keys, that's just not a valid place for a type hint
-<@U11BV7MTK> yes that's correct
-see my follow up
-ah ok. i thought you were still attributing it to the `:keys` destructuring
-my bad
-<@U3L6TFEJF> - I ended up using postwalk with core.match
-<@U0564EGNY> nice! mind sharing the solution?
-I suppose the map should be mapv
-hmm, not sure how this is actually working without that :wink:
-oh, and the outer seq needs to be there because our tree may have multiple paths, duh
-ok, I have a bug when adding another path in the tree. I'm flattening at the wrong place
+
+U0EL66M19 : are bigdecimals special in being coerced to a less precise type in `*` ?
+U0NCTKEV8 : ```user=&gt; (.doubleValue (BigDecimal. "2.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"))
+2.0
+user=&gt; 
+```
+
+U0NCTKEV8 : basically, fixed precision floating point numbers are dirty and their dirtiness will contaminate any math they are used in
+U0NCTKEV8 : 1.0 in that expression is a fixed precision float (a jvm double), and that is what causes weirdness
+U0NCTKEV8 : clojure, encoded as a big honking class file, has rules about how you convert types to do math operations, and doubles as a type dominate pretty much everything, meaning if you have doubles in your expression, internally numbers that are not doubles are going to be turned in to doubles when doing math
+U0EL66M19 : so long as it's done on purpose i guess
+U5JEJN1CP : Is there a known issue between com.datomic/clj-client, figwheel, and clojure-1.9.0 ?  I cannot get them to compile together. Trying to start a repl gives a spec error:```
+Exception in thread "main" java.lang.ExceptionInInitializerError
+	at clojure.main.&lt;clinit&gt;(main.java:20)
+Caused by: clojure.lang.ExceptionInfo: Call to clojure.core/refer-clojure did not conform to spec:
+In: [2 1] val: :as fails at: [:args :exclude :op :quoted-spec :spec] predicate: #{:exclude}
+In: [2 1] val: :as fails at: [:args :only :op :quoted-spec :spec] predicate: #{:only}
+In: [2 1] val: :as fails at: [:args :rename :op :quoted-spec :spec] predicate: #{:rename}
+In: [2] val: (quote :as) fails at: [:args :exclude :op :spec] predicate: #{:exclude}
+In: [2] val: (quote :as) fails at: [:args :only :op :spec] predicate: #{:only}
+In: [2] val: (quote :as) fails at: [:args :rename :op :spec] predicate: #{:rename}
+:clojure.spec.alpha/spec  #object[clojure.spec.alpha$regex_spec_impl$reify__1200 0x43f50bfe "clojure.spec.alpha$regex_spec_impl$reify__1200@43f50bfe"]
+:clojure.spec.alpha/value  ((quote :exclude) (quote [reduce transduce into merge map take partition partition-by bounded-count]) (quote :as) (quote core))
+:clojure.spec.alpha/args  ((quote :exclude) (quote [reduce transduce into merge map take partition partition-by bounded-count]) (quote :as) (quote core))
+ {:clojure.spec.alpha/problems ({:path [:args :exclude :op :spec], :pred #{:exclude}, :val (quote :as), :via [], :in [2]} {:path [:args :exclude :op :quoted-spec :spec], :pred #{:exclude}, :val :as, :via [], :in [2 1]} {:path [:args :only :op :spec], :pred #{:only}, :val (quote :as), :via [], :in [2]} {:path [:args :only :op :quoted-spec :spec], :pred #{:only}, :val :as, :via [], :in [2 1]} {:path [:args :rename :op :spec], :pred #{:rename}, :val (quote :as), :via [], :in [2]} {:path [:args :rename :op :quoted-spec :spec], :pred #{:rename}, :val :as, :via [], :in [2 1]}), :clojure.spec.alpha/spec #object[clojure.spec.alpha$regex_spec_impl$reify__1200 0x43f50bfe "clojure.spec.alpha$regex_spec_impl$reify__1200@43f50bfe"], :clojure.spec.alpha/value ((quote :exclude) (quote [reduce transduce into merge map take partition partition-by bounded-count]) (quote :as) (quote core)), :clojure.spec.alpha/args ((quote :exclude) (quote [reduce transduce into merge map take partition partition-by bounded-count]) (quote :as) (quote core))}, compiling:(clojure/core/async.clj:9:1)
+```
+The stack trace lists a few references to figwheel_sidecar, otherwise it's all clojure.lang and clojure.core.
+
+If I switch to clojure 1.8.0 or remove com.datomic/clj-client, then everything compiles fine.  But that combination of clj-client and clojure 1.9.0 keeps throwing this error.  Any ideas what might be causing it?
+
+U051SS2EU : 1.9 enforces things that are silently accepted by older versions
+U051SS2EU : are you using the newest figwheel?
+U5JEJN1CP : I think so, 0.5.11
+U5JEJN1CP : It's listed as the newest on clojars
+U051SS2EU : <@U5JEJN1CP> <https://github.com/bhauman/lein-figwheel/issues/540>
+U051SS2EU : there's a snapshot figwheel that eliminates the issue
+U5JEJN1CP : Nope.  Still get the error.  It does seem to be the same error though.
+U5JEJN1CP : It really seems weird that adding datomic/clj-client introduces the error (and removing it resolves it), but the stack trace mentions figwheel.
+U5JEJN1CP : It does work with clojure-1.9.0-alpha15 though, but not alpha16 or 17
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

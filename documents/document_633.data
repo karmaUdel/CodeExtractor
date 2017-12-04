@@ -1,1 +1,76 @@
+U0EUHKVGB : So, two questions:- Why do you think it would be nasty?
+- What is the type of the console function?
+
+U5YKRLXGT : Doesn't IE have a hard limit on the number of style tags you can have in a document for starters?
+U5YKRLXGT : Console looks like this:
+U5YKRLXGT : ```console =    styled Html.pre
+        [ padding (em 4)
+        , backgroundColor (hex "000")
+        , color (hex "fff")
+        , height (px 300)
+        , overflowY scroll
+        ]
 ```
+
+U2LAL86AY : is not clear why this can't be  done using just function application. console is a specialized version of some div - with styles applied. is it not?
+U0EUHKVGB : <@U5YKRLXGT>, what is the _type_ of that function?
+U5YKRLXGT : It returns a `-&gt; Html.Html msg` right?
+U5YKRLXGT : I literally started programming Elm today :slightly_smiling_face:
+U0EUHKVGB : No, I don’t think it does.
+U5YKRLXGT : In another language I might do this:
+U5YKRLXGT : ```view model =
+    stylesheet (\css -&gt;
+        div []
+            [ h1 [] [ text "Hi" ]
+            , css `console [ Html.Attributes.id consoleId ] [ text model.lines ]
+            , button [ onClick (Send "Hello") ] [ text "Append" ]
+            ]
+    )
+```
+
+U0EUHKVGB : Depends on the type of that `styled` function.
+U5YKRLXGT : and have `css` evaluate a literal and then save the rules into a list
+U5YKRLXGT : and then at the end of the stylesheet function, dump out a &lt;style&gt; tag
+U0EUHKVGB : That is not how Elm works nor will it ever be
+U5YKRLXGT : No, exactly!
+U0EUHKVGB : Great, so we’re on the same page.
+U5YKRLXGT : ```view model =    stylesheet (\mailbox -&gt;
+        div []
+            [ h1 [] [ text "Hi" ]
+            , console mailbox [ Html.Attributes.id consoleId ] [ text model.lines ]
+            , button [ onClick (Send "Hello") ] [ text "Append" ]
+            ]
+    )
+```
+
+U5YKRLXGT : So then I thought this, with a foldp at the end
+U5YKRLXGT : imagine mailbox is accumulating rules as the view runs
+U0EUHKVGB : :scream:
+U5YKRLXGT : haha :slightly_smiling_face:
+U5YKRLXGT : I want the output to be:
+U0EUHKVGB : That would not have been a good idea even in 0.15.
+U0EUHKVGB : Okay, hold up a sec
+U5YKRLXGT : ``````div []    [ h1 [] [ text "Hi" ]
+    , div [ Html.Attributes.id consoleId ] [ text model.lines ]
+    , button [ onClick (Send "Hello") ] [ text "Append" ]
+    ]
+style
+    ...rules from every styled element```
+
+U0EUHKVGB : That library has sadly led you down a bad path - in Elm, we _like_ things to be pure
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

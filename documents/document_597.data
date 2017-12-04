@@ -1,1 +1,67 @@
+U6H22BY4A : Hey everyone! Excited to start learning Elm, expect lots of questions :grin:
+U5E3DU81K : I'm using getString in a div and it complains that there is a type mismatch. It says div expects List (Html Msg) but it is List (Http.Request String). Is there any way of hammering the latter into shape?
+U3SJEDR96 : Your views shouldn't (and can't) be making http requests; as your view is _just_ presentation of your state
+U3SJEDR96 : issuing requests can only happen from `init` and `update` - the only two functions that return a`Cmd msg` :slightly_smiling_face:
+U5E3DU81K : what does that mean?
+U5E3DU81K : ah I see, put the div into update
+U3SJEDR96 : No, put the request in update. When the request receives a response, that will trigger your update, too. At that point, you save the response-data in your model, and that will then be rendered in your view
+U5E3DU81K : the div stays where it is?
+U3SJEDR96 : Maybe you can show some code to illustrate what you are attempting?
+U3SJEDR96 : this may be a lot clearer to illustrate rather than explain :slightly_smiling_face:
+U5P4FLYLE : Hi, I need an advice how to achieve following:I have input where there may be multiple occurrences of "a":
+```input = ["a", "b", "a"]
+          |         |
+          0         1       occurrence of a
+``` I need to use `foldl`:
+```input
+       |&gt; List.foldl myfolding []```
+But I need also somehow to inform myfolding about  which is the occurence of "a" (if it happens) as it proceeds.  So instead of 
+```myfolding : String -&gt; List String -&gt; List String
+myfolding item stack```
+I would like to have 
+```myfolding : Int -&gt; String -&gt; List String -&gt; List String
+myfolding occurenceNumber item stack```
+How to enrich folding like above?
+
+U48AEBJQ3 : <@U5P4FLYLE> I'm not really following. You have a list of items and you want a count and a list of positions of the item?
+U5P4FLYLE : I would like to have something that would realise:```input
+       |&gt; List.foldl (myfolding consecutiveNumberOfAOccurenceCountingFromLeft) []```
+
+U48AEBJQ3 : So, you want a count of all occurrences of the item at the provided index?
+U5P4FLYLE : yes, and my question is if I can achieve this using standard functions of List | List.extra or I should implement specialized version of foldl
+U48AEBJQ3 : If you provide an index that is out of bounds, do you want `[]` or `Nothing`?
+U5P4FLYLE : can be []
+U6D3ERLA1 : Pattern for optional paramaters?
+U6D3ERLA1 : Looking for something like:
+U6D3ERLA1 : ```nextLargest num next =
+    case next of
+        Just val -&gt;
+            if listify (val) == listify num then
+               val
+            else
+                nextLargest num (val + 1)        
+        Nothing -&gt;
+            if listify (num + 1) == listify num then
+                num + 1
+            else
+                nextLargest num (num + 1)
 ```
+
+U48AEBJQ3 : I meant 0 or `Nothing` dur.
+U6D3ERLA1 : Use `next` val if present, otherwise use `num`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

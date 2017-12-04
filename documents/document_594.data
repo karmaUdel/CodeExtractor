@@ -1,2 +1,112 @@
+U2SR9DL7Q : It's a great package. Very comprehensive. But it thwarts me sometimes in these types of situations. 
+U6907LQ6S : Hey all, I'm getting the following crash when running elm-test. I think I'm not doing the recursion correctly across a list and blowing up the memory. Does anyone have any tips on where I should look?
+U6907LQ6S : --- Last few GCs ---&gt;
+   16812 ms: Mark-sweep 1326.9 (1434.9) -&gt; 1326.9 (1434.9) MB, 835.4 / 0.0 ms [allocation failure] [GC in old space requested].
+   17654 ms: Mark-sweep 1326.9 (1434.9) -&gt; 1326.9 (1434.9) MB, 841.3 / 0.0 ms [allocation failure] [GC in old space requested].
+   18483 ms: Mark-sweep 1326.9 (1434.9) -&gt; 1331.7 (1409.9) MB, 829.2 / 0.0 ms [last resort gc].
+   19350 ms: Mark-sweep 1331.7 (1409.9) -&gt; 1336.6 (1409.9) MB, 866.8 / 0.0 ms [last resort gc].
+
+
+&lt;--- JS stacktrace ---&gt;
+
+==== JS stack trace =========================================
+
+Security context: 000003E75BFCFB49 &lt;JS Object&gt;
+    1: func [000003E75BF04381 &lt;undefined&gt;:2327] [pc=000002337953E0E5] (this=000001BC0B7A86A1 &lt;JS Function wrapper (SharedFunctionInfo 0000014D2F0D5871)&gt;,x=00000356060D17B1 &lt;an Object with map 00000
+2B50F240AB1&gt;,y=00000356060D6811 &lt;an Object with map 000002B50F258161&gt;)
+    2: func(aka foldr) [000003E75BF04381 &lt;undefined&gt;:~1965] [pc=00000233799C7338] (this=000001C22BECFCE1 &lt;JS Function wrapper (...
+
+FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
+
+U0GGQSHUZ : Do you have any example code? In general, commenting out bits of code at a time can help debug. There are probably better ways
+U0GGQSHUZ : are you doing list recursion yourself or using fold or map?
+U0GGQSHUZ : <@U6907LQ6S>
+U6907LQ6S : Thanks - I'm using List.map as part of a recursive method. I'll simplify the code to its essentials and paste it in
+U0GGQSHUZ : <@U6907LQ6S> what is your goal? Are you trying to create a generator for GroupValue?
+U0GGQSHUZ : you may want something like:```
+groupValGen : Fuzzer GroupValue
+groupValGen =
+    Fuzz.map2 (\s1 s2 -&gt; GroupValue s1 s2) Fuzz.string Fuzz.string
 ```
-this function doesn't work for decimals though:
+
+U0GGQSHUZ : what does your test file look like?
+U0GGQSHUZ : Here's an example test file:```
+module Example exposing (..)
+
+import Expect exposing (Expectation)
+import Fuzz exposing (Fuzzer, int, list, string)
+import GroupVal exposing (..)
+import Test exposing (..)
+
+
+suite : Test
+suite =
+    describe "The GroupValue module"
+        [ fuzz groupValGen "testing the GroupValue" &lt;|
+            \groupVal -&gt;
+                -- Do something with randomly generated group value here
+                Expect.equal groupVal groupVal
+        ]
+
+
+groupValGen =
+    Fuzz.map2 (\s1 s2 -&gt; GroupValue s1 s2) Fuzz.string Fuzz.string
+```
+
+U6907LQ6S : My goal is to use fuzz testing against the combination generator, but it falls over
+U6907LQ6S : I'll paste in my tests
+U48AEBJQ3 : <@U6907LQ6S> Are you sure you aren't just making a list that is too large?
+U6907LQ6S : The list should be at most 50^5 which isn't all that big
+U6907LQ6S : 312 million
+U6907LQ6S : maybe it is :slightly_smiling_face:
+U6907LQ6S : I'm in the middle of converting from js to Elm and I've got no idea how to debug memory problems in Elm
+U48AEBJQ3 : I'm not sure how to help with that, but in trying to understand your code I ended up refactoring it: <https://ellie-app.com/3V6GPCn5Zbna1/0>
+U6907LQ6S : I think I'm on the edge of memory limits, as the actual max number of groups is 5, but with the reduced record size for the example it runs fine
+U6907LQ6S : Thanks for the refactor <@U48AEBJQ3> , I'll check it out.
+U6907LQ6S : I think I have a solution though: the business requirement is to prevent generating a large number of combinations. I can check this before starting any recursion which should keep memory pressure to a minimum.
+U6907LQ6S : Thanks all for the help :slightly_smiling_face:
+U1RJZ6SEL : Hi, is there a good tutorial floating around about how to write an autocomplete that queries a remote JSON API? I saw <http://package.elm-lang.org/packages/thebritican/elm-autocomplete> but it doesn't have any examples of using it with remote data, and besides, project is looking kinda abandoned. Google isn't turning up much for me either. Would appreciate any pointers!
+U3VCFFH1S : Hi Happy Elm Friends:koala:, has anyone tried highlight a matched portion of text? eg to transform *"foo 123 bar #$%"* to this *"`foo` 123 `bar` #$%"*.Probably something like ```highlight : String -&gt; Html -&gt; Html```
+In JS it could be
+```
+"foo 123 bar #$%".replace(/([a-z]+)/g, '&lt;span class="red"&gt;$1&lt;/span&gt;') # "&lt;span class="red"&gt;foo&lt;/span&gt; 123 &lt;span class="red"&gt;bar&lt;/span&gt; #$%"
+```
+Working on a solution but thought I'd ask if anyone's done it.
+
+U153UK3FA : <@U3VCFFH1S> do a String.split and List.map the strings to Html
+U1SF6G7PA : <@U1RJZ6SEL> what is your use case? i guess you could use elm-autocomplete with a textfield for the queries, and each time the user changes the query you send an api request. when you handle the response you then build up the list of items you feed into the view and update functions of autocomplete
+U67JLCNUV : What is considered the "Elm" way for handling file uploads?
+U3SJEDR96 : Depends a little on what you need exactly. If you're handling images, for example, it's super easy to use ports to get your the base64 encoded image: <https://ellie-app.com/3qpgdbQFFfqa1/1>
+U3SJEDR96 : which is, in the end, just a string you can embed in whatever JSON you send to your server
+U3SJEDR96 : handling arbitrary uploads is a little more complicated, as there is not `Blob` type in Elm
+U67JLCNUV : I need to upload wav files.
+U0JBSEGHY : Hey I remembered your question when I was watching this video. Perhaps contact this guy if you have not figured out how to use the one runtime. <https://www.youtube.com/watch?v=U_5XKPe4fZM&amp;list=PL-cYi7I913S8cGyZWdN6YVZ028iS9BfpM&amp;index=13>
+U3VCFFH1S : I went a different approach ```model = {highlight : String}
+
+highlight : String -&gt; String -&gt; String
+highlight str text = if String.contains (String.toLower str) (toLower text) then "&lt;mark&gt;" ++ text ++ "&lt;/mark&gt;" else text
+
+view model =
+    let
+        text : String -&gt; Html Msg
+        text str = if model.highlight == "" then Html.text str else toHtml [] (highlight model.highlight str)
+    in   …
+```
+This lets me keep using `text` in my view and the highlighting automagically works. downside is the parts I want to do this to have to actually be in the view's scope.
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

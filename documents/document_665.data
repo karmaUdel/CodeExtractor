@@ -1,27 +1,85 @@
+U3SJEDR96 : And once you've done that, figure out if it really matters. If you're writing application code, it seems unlikely that this would make a perceptible difference, and will most likely be completely dwarfed by the cost of rendering..
+U17MHJ12N : Gaaa it's a fine line between consolidating modules and entering into circular reference hell
+U5GSVKPJS : ```The 1st branch has this type:
+
+    elm-make: Type applications without concrete names should not get here.
 ```
-Do that outside of my environment?
-Yeah, if you installed `virtualenv` with `python2` (or `pip` from py2) - it will use that interpreter as the default if you don't give the `--python/-p` flag
-hmm, i gave it the python3 flag and it's still giving the same error
-Silly question, I am sure, but did you `pip install -r requirements.txt` since re-creating the env?
-yup!
-pip3
-Figured so :slightly_smiling_face:
-But it seems to be using my system libraries. Is that weird?
-It looks like we have similar environments <@U3JGK19NV>. I make my venvs like so `mkvirtualenv --python="/Library/Frameworks/Python.framework/Versions/3.5/bin/python3" new virtualenv`
-not exactly the same and I use `mkvirtualenv`
-Ahh okay
-why is it not `/usr/local/bin/python3`?
-he installed via the python installer
-`/usr/local/bin/python3` is from brew
-Thanks, <@U1BP42MRS>. I actually didn't have a solid answer there :neutral_face:. These are notes I took a long time ago that became a habit.
-Hmm, i still can't get it to work
-I've used the `--python="/Library/Frameworks/Python.framework/Versions/3.5/bin/python3"` flag when creating the environment
-here's my terminal output from when i CD
-what do you get when you run `python -V`
-A very long output!
-I think it's because you don't have a pip3 under `bin` folder.
-capital `V`
-you did lowercase, which is a verbose log of the interpreter starting
-so it's using a default `pip3` which installs libs into `/usr/local/lib`, but search path in environment is looking into `./lib/&lt;version&gt;/site-packages`?
-whoops, sorry!
-Looks like having a space in there is causing your problems
+
+U5GSVKPJS : amazing.
+U0EUHKVGB : If you want help, you’re going to have to share code :wink:
+U5GSVKPJS : haha, it was more me laughing at the error message
+U0EUHKVGB : <https://github.com/elm-lang/elm-compiler/issues/1390>
+U3SJEDR96 : Feels like a result of no kind checking <https://github.com/elm-lang/elm-compiler/issues/1373>
+U3SJEDR96 : :smile:
+U5GSVKPJS : ```
+createFirmware apiContext projectId url name =
+    Http.postJson
+        (let
+            opts =
+                Http.defaultJsonArgs apiContext
+         in
+            { opts
+                | path =
+                    [ "project-firmware", toString projectId ]
+                , value =
+                    Just &lt;|
+                        EncodeJson.object []
+            }
+        )
+```
+
+Seems to do it. If I comment out the `value` assignment, all is well
+
+U5GSVKPJS : Now I've got```
+-- TYPE MISMATCH ----------------------------- ././src/Page/Project/Firmware.elm
+
+The right side of (|&gt;) is causing a type mismatch.
+
+69|               Task.sequence (createFirmwares apiContext model.projectId files)
+70|&gt;                |&gt; Task.perform (always FirmwareChanged)
+
+(|&gt;) is expecting the right side to be a:
+
+    elm-make: type applications should start with a type atom
+```
+
+U5GSVKPJS : And I'm truly stuck. I'm not sure what to do next, is there any obvious code to look at?
+U5GSVKPJS : I moved `createFirmwares` (and `createFirmware`) to a separate module, and that module now compiles just fine
+U5GSVKPJS : I'll rip out other code from this module and see if it's something else interacting badly
+U0EUHKVGB : <@U5GSVKPJS> My advice when debugging things like this: use more type annotations
+U0EUHKVGB : Put things into let bindings, and write the type signature by hand
+U5GSVKPJS : yea, I did that, and now I'm at this, which is super suspicious:
+U5GSVKPJS : ```Function `createFirmwares` is expecting the 3rd argument to be:
+
+    List { a | name : String, url : String }
+
+But it is:
+
+    List
+```
+
+U5GSVKPJS : I should be able to fix that, but gotta go grab lunch
+U5GSVKPJS : And indeed:
+U5GSVKPJS : `    | FilesUploaded List`
+U5GSVKPJS : Whoops!
+U0EUHKVGB : Yep
+U3SJEDR96 : :smile:
+U0EUHKVGB : It’s a tricky one to debug
+U5GSVKPJS : Is it worth reporting that, or is this particular instance of the bug known?
+U0EUHKVGB : It is known
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

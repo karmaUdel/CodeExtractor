@@ -1,10 +1,219 @@
+U06QSF3BK : hmm, seems that eastwood doesn't like defrecord forms produced by [org.clojure/clojure "1.9.0-alpha17"]
+U060FKQPN : what's the issue?
+U5WDMBTUJ : Hello! Can anyone help me understand the use-case of defrecord? Everytime I write a code, it is usually enough with just a function, but I'm afraid I'm missing the good parts of it!
+U2PGHFU5U : Joy of Clojure is fun, and from a practical point of view I loved Learning ClojureScript, but that's about ClojureScript
+U06QSF3BK : ```== Eastwood 0.2.4 Clojure 1.9.0-alpha17 JVM 1.8.0_131Directories scanned for source files:
+  src test
+== Linting lol.core ==
+Entering directory `/private/tmp/lol'
+src/lol/core.clj:3:1: suspicious-expression: condp called with 3 args.  (condp pred test-expr expr) always returns expr.  Perhaps there are misplaced parentheses?``` where source is ```0% cat src/lol/core.clj
+(ns lol.core)
+
+(defrecord Lol [])```
+
+U06CM8C3V : <@U5ZAJ15P0> I'm planning to learn Erlang too. Well, ok, I'll probably learn Elixir instead, but that's derived from Erlang.
+U2PGHFU5U : When running around 1000 simultaneous clj-http/get requests with `:async? true` I get this error:
+```Exception in thread "async-dispatch-6" Exception in thread "async-dispatch-5" java.lang.OutOfMemoryError: unable to create new native thread```
+
+Is there a way to circumvent this?
+
+U5ZAJ15P0 : <@U06CM8C3V> yes Elixir looks interesting!
+U3JURM9B6 : <@U04V70XH6> : is it public if your team uses GAE or AWS ?
+U06QSF3BK : hrm, having hard time trying to teach eastwood to ignore defrecord
+U06QSF3BK : ```(disable-warning {:linter :suspicious-expression
+  :for-macro 'clojure.core/defrecord
+  :reason "Clojure 1.9 defrecord output causes false warning"})``` doesn't seem to work
+
+U0GN0S72R : what's the proper spelling for a new version of `foo-bar`? `foo-bar2` or `foo-bar-2`?
+U06QSF3BK : hmm, not actually clojure 1.9 problem <https://github.com/jonase/eastwood/blob/eb58d6fb2628e1d178d4b8d2c46d4788b2a20094/cases/testcases/suspicious.clj#L8-L11>
+U06QSF3BK : so the actual use for a defrecord without fields was a `com.stuartsierra.component`
+U37NPE2H0 : gfredericks: seems like it would be the former in most cases
+U37NPE2H0 : `foo-bar-2`, I think, more strongly implies it was intended to be a distinct symbol with a similar naming scheme, while `foo-bar2` is more clearly a mutation of the original `foo-bar`
+U0CKDHF4L : is there a spec for the s/describe of a spec ?
+U0GN0S72R : and what about `foo*`? `foo*2` or `foo2*`?
+U37NPE2H0 : again, my preference would be appending the mutation to the original symbol unmodified.  so `foo*2`
+this strategy will help you out if you ever need to grep your service for any instances of that function, in any versions that exist
+
+U0JFCEH9P : `foo-bar'`
+U0JFCEH9P : that's how I've usually done it
+U0JFCEH9P : read as "foo-bar prime"
+U0JFCEH9P : and `foo-bar"` etc.
+U37NPE2H0 : for instance, if you did ctrl + f `foo-bar*` you would get instances of `foo-bar*` and `foo-bar*2`
+U051SS2EU : mahdix: atoms won't race if you use them correctly: that is, if you use `swap!` to update their value, and don't have side effects or `deref` other mutable containers in the function you pass to `swap!`.
+U37NPE2H0 : if you altered the symbol in some other way, that trick wouldnt work
+U37NPE2H0 : obviously <@U0JFCEH9P> is using the same strategy, just with prime ticks instead of numbers
+U051SS2EU : erwinrooijakkers: the correct way to deal with this is to use a queue or channel to line up requests, and then use a fixed number of threads to do the work on that queue or channel. The claypoole library makes it easy to create a pool that works this way and call it the same way you would use futures of pmap normally.
+U0GN0S72R : <@U0JFCEH9P> this is specifically re: the new guidelines from rich etc. regarding avoiding breaking changes, which explicitly recommended integers
+U051SS2EU : of course you can also increase your max memory usage parameter, but there's still always a limit beyond what your hardware can support, and then you need to control thread creation / usage
+U0JFCEH9P : I haven't seen that
+U0GN0S72R : <@U0JFCEH9P> <https://www.youtube.com/watch?v=oyLBGkS5ICk>
+U0JFCEH9P : cool, thanks!
+U0JFCEH9P : I'd love to use spec, but I'm not brave enough to jump onto an alpha version of Clojure itself
+U0GN0S72R : I guess the slides in that talk probably indicate an opinion about `foo2` vs `foo-2`
+U0GN0S72R : ah ha! the slides have `foo-2`
+U0GN0S72R : which was my preference anyhow
+U0GN0S72R : stu halloway was in town last week and made a big deal about "alpha" merely meaning "subject to change" and not "low quality" or any of the other associations
+U0CKDHF4L : yeh I've been using Spec for a couple of projects &amp; its great!
+U051SS2EU : yeah, clojure alphas tend to be quite good (as long as you are willing to rewrite code that uses the new features)
+U051H1KL1 : `real-foo` :stuck_out_tongue:
+U0GN0S72R : <@U051H1KL1> and `real-real-foo` for the next one? 
+U051H1KL1 : yes
+U051H1KL1 : only then can you go `real-real-foo-2`
+U051H1KL1 : after that its `real-foo-final` and that's all the `foo` you need
+U0GN0S72R : Okay phew
+U06B8J0AJ : Is it good practice to use `(get a-collection :a-key)` over `(:a-key a-collection)`?
+U051SS2EU : I use get only if the keyword is in a bound name and not a literal
+U051SS2EU : when it's a literal, it's always clear what the keyword is doing
+U06B8J0AJ : Whereas if it's in a bound name, it's ambiguous whether it's a function, keyword or what-have-you. Gotcha.
+U0CKDHF4L : eh I use keywords, vectors and maps as functions - because they're all functions
+U06B8J0AJ : Fair enough
+U0CKDHF4L : so what if it might seem ambiguous - if it works and you've tested it then it's clear by the fact that they're first in the list that they're supposed to be a fn
+U064X3EF3 : <@U0CKDHF4L> you should only vectors/maps as functions when they are guaranteed to be non-null (because otherwise you'll get an npe)
+U051SS2EU : <@U0CKDHF4L> my concern is readability and refactorability, I like to use constructs that reduce ambiguity when they are available and they don't impede other development goals
+U0CKDHF4L : <@U064X3EF3> naturally, but then anything could be nil and cause a NPE - that's part of testing &amp; maybe Specing
+U064X3EF3 : no, using a keyword as function (or get) will not have that behavior
+U051SS2EU : but using get directly is free, and solves the issue
+U0CKDHF4L : I don't think it affects readability at all, actually it's more clear sometimes
+U051SS2EU : I strongly disagree
+U0JFCEH9P : I only ever use keywords like `(:foo bar)` when it's exactly like that: a keyword literal and a very simple form
+U0JFCEH9P : if I want to get a default value I use `get` like `(get bar :foo :default)`
+U0JFCEH9P : never `(:foo bar :default)`
+U06B8J0AJ : It'd certainly be easier to see what `(get a-collection unknown-thing)` is doing as opposed to `(unknown-thing a-collection)`
+U0JFCEH9P : :point_up:
+U0CKDHF4L : why is your unknown-thing unknown ?
+U0CKDHF4L : just ensure it's a keyword
+U0JFCEH9P : because we aren't using Haskell
+U0CKDHF4L : no we're using a better language, with a REPL and Spec
+U0JFCEH9P : :stuck_out_tongue:
+U0JFCEH9P : Clojure lets you inspect the state of things *after* you run your code
+U0JFCEH9P : which is nice
+U0CKDHF4L : running a compiler (which is a program) to infer what your program _would_ do if run, is no more powerful than simply running your program
+U37NPE2H0 : huh, well.  how about that.  my preference differs.
+U37NPE2H0 : `real_foo_final_fixed_fixed_for_real_this_time`
+U0LJU20SJ : <@U064X3EF3> out of curiosity: is there a general convention for the naming of `clojure` repos in github? I see lots of `data`. `math` but also some more exotic names, just got me thinking :smile:
+U5NAUMCAD : Hi I have a problem with ssl in jetty, I implemented https with an issued certificate by a recognized institution however, I am receiving in firefox this message: SSL_ERROR_NO_CYPHER_OVERLAP
+U5NAUMCAD : in chrome it works well; but in firefox it does not work, it shows a yellow message
+U5NAUMCAD : any idea about how to fix that in Clojure?
+U0JFCEH9P : <@U5NAUMCAD> Jetty and Chrome do not have any ciphers in common
+U0JFCEH9P : <https://confluence.atlassian.com/fisheye/configuring-ssl-cipher-suites-for-jetty-414188522.html>
+U06BE1L6T : <@U5NAUMCAD> also look here: <https://stackoverflow.com/questions/41626616/cant-connect-to-jetty-9-server-via-ssl-with-firefox-50>
+U0JFCEH9P : but it's worth repeating: asking "how do I fix the SSL cipher suite in Jetty" is like asking "what's the best shoe to hammer a nail?"
+U0JFCEH9P : Put something that's better at SSL in front of your app.
+U0JFCEH9P : Don't do SSL in your embedded Jetty.
+U5NAUMCAD : I understand that there are better ways to do that <@U0JFCEH9P>; but in this application i cannot change or implement other things
+U5NAUMCAD : I have to adjust to jetty
+U5NAUMCAD : :disappointed:
+U064X3EF3 : carocad: there are just a handful of top level "categories" used for contrib libraries - algo, core, data, java, math, test, tools. And then there are other things as well (web sites like clojure-site and clojurescript-site), clojurescript, clojure clr and clr ports
+U5Z4ECHCM : This may sound like a strange question
+U5Z4ECHCM : But would it be possible in any way to observe Clojure as it runs
+U5Z4ECHCM : so that one could track all evaluated code
+U5Z4ECHCM : and implement a way to say
+U5Z4ECHCM : EVERYTHING UP TO THIS BIT WORKS
+U5Z4ECHCM : b/c that would fix like half of what makes clojure so broken, the dumb error messages
+U0JFCEH9P : yes, you want a debugger
+U0JFCEH9P : with breakpoints
+U0JFCEH9P : I'd recommend IntelliJ IDEA with Cursive
+U04V70XH6 : <@U3JURM9B6> we use a mixture of traditional data center and AWS at the moment. 
+U04V70XH6 : <@U0JFCEH9P> we're on alpha 17 in production. High traffic. Large codebase. Heavy use of spec. 
+U0C8489U6 : <@U5Z4ECHCM> for your use case I would go for `clojure.tools.trace` which allows you to print out everything that is going on in a namespace or for a var 
+U0C8489U6 : <https://github.com/clojure/tools.trace/blob/master/README.md#example-usage>
+U5Z4ECHCM : <@U0JFCEH9P> I don't need a debugger, I'm plenty comfy in Emacs, I'm just wondering how dead-simple it'd be possible to make troubleshooting
+U0JFCEH9P : but you described a debugger with breakpoints
+U0JFCEH9P : so
+U5Z4ECHCM : I suppose it's similar
+U5Z4ECHCM : but it's less about defining breakpoints
+U5Z4ECHCM : and more about deducing where the issue is exactly programmaticallyy
+U0JFCEH9P : stack traces get you most of the way there
+U0JFCEH9P : the trick is defining the starting point of tracing executing
+U5Z4ECHCM : It'd probably be something you defined in the code, which may be cumbersome
+U5Z4ECHCM : (trace this-ns)
+U0JFCEH9P : well as <@U0C8489U6> suggested you can trace the fns in a namespace
+U0JFCEH9P : `(trace-ns some.problematic.namespace)`
+U5Z4ECHCM : I'm gonna write the best damn debugger that ever did darn dun existed
+U0JFCEH9P : but you have to specify each namespace and/or function that you want to show up in the trace
+U0C8489U6 : Cider has trace built-in if I remember correctly so you might not even need to evaluate that at the repl
+U04V1HS2L : <@U5Z4ECHCM> did you try <https://github.com/razum2um/clj-debugger> ?
+U5Z4ECHCM : I haven't tried anything, it was just an idea I had
+U5Z4ECHCM : But this actually looks like almost exacttly what I wanted
+U5Z4ECHCM : so maybe I'm late to the party
+U0JFCEH9P : Oh? That's reassuring! Thanks.
+U0JFCEH9P : I might give it a try after all.
+U2RBC2R45 : I would appreciate if someone can guide me on reading data from AVRO file in clojure?
+U0JFCEH9P : <https://avro.apache.org/docs/1.2.0/api/java/index.html>
+U0JFCEH9P : Just use the Java libs
+U5Z4ECHCM : Well, never used hadoop, but slurp it in and go from there?
+U5XMV6DQT : <@U2RBC2R45> there are also several clojars <https://clojars.org/search?q=avro>
+U2RBC2R45 : <@U5XMV6DQT> <@U0JFCEH9P>  thanks
+U04V70XH6 : FWIW, we've been using Clojure Alphas in production since 2011 (1.3 Alpha 7 or :sunglasses:. I think we've had one "bad" build in all that time (degraded performance). We happened to skip 1.5.0 in production (the only memory leak I can recall) because our release schedule fell in such a way that we went from a solid prerelease of 1.5 directly to 1.5.1.
+U053QM94L : re: debugging / finding the source of issues, i find an approach like stu's here to be the easiest &amp; most widely applicable: <http://blog.cognitect.com/blog/2017/6/5/repl-debugging-no-stacktrace-required>
+U051SS2EU : Also - an underrated approach is to experiment in the repl, but reify those experiments into unit tests. I wrote a library that makes it easier to take data you have in your repl and inject it into tests <https://github.com/noisesmith/poirot>
+U051SS2EU : experimenting in the repl helps today, and is great if you are never going to edit or refactor your code, tests are great to have if you think your codebase might ever change
+U053S2W0V : any jdbc experts know why `(j/execute! pg ["SET LOCAL app.session_id = 'x'"])` works but `(j/execute! pg ["SET LOCAL app.session_id = ?" "x"])` yields a BatchUpdateException "was aborted" with syntax error at the column with the `?`?
+U053S2W0V : the exception message shows the interpolated query, which seems to have the right 'x' in it
+U5XMV6DQT : <@U051SS2EU> looks promising! how about publishing it on clojars?
+U051SS2EU : I thought I had
+U051SS2EU : I probably need to add the info to the readme
+U051SS2EU : <https://clojars.org/org.noisesmith/poirot>
+U5XMV6DQT : thanks!
+U051SS2EU : it's still pretty young, but good enough to be useful, in my experience at least
+U5XMV6DQT : BTW, TIL about Reader Conditionals! thanks again!
+U051SS2EU : <@U5XMV6DQT> I don't think I've pushed the cljs support to clojars yet, but you can get it via `lein install` - I haven't used the feature enough to make it feel publishable (I work on clj code a lot more)
+U0HM5MJ5V : afaik clojure 1.9 doesn't muck with many internals in a risky way, too. mostly adding features
+U612TKWEB : Hey I am new to Clojure and I was wondering if you guys could share some of your favorite resources for learning Clojure. I have already checked out Clojure For The Brave And True but I am learning Clojure for the purpose of eventually building React apps with clojurescript and reagent. Thanks!
+U0HM5MJ5V : i'm late to the using maps and vectors as functions discussion, but i don't think anyone mentioned polymorphism. e.g. can be handy to have the option of passing a map or a function depending
+U051SS2EU : sure - but the context was implying that it was always being used for lookup
+U051SS2EU : and I'd definitely pass in :foo instead of #(get % :foo)
+U0HM5MJ5V : hmm, yeah maybe not as useful when expecting a map and passing a fn vs expecting a fn and passing a map(?)
+U5ZAJ15P0 : <@U612TKWEB> check out my earlier message: <https://clojurians.slack.com/archives/C03S1KBA2/p1498559140283392>
+U11BV7MTK : i highly recommend this book by alex miller <https://pragprog.com/book/shcloj3/programming-clojure-third-edition>
+U11BV7MTK : interesting code and examples, good narrative, and pretty comprehensive. It's made for new people. It also isn't scared of java so you'll have a good introduction to the host language if you're unfamiliar
+U0LGCREMU : FOO-DAMMIT!
+U053S2W0V : heh, wow, just remembered that `::keys` is new in clojure 1.9 - feels like i've been using that forever :stuck_out_tongue:
+U0HM5MJ5V : <@U053S2W0V> i hit that with `seqable?` the other day =)
+U3GJHS5DY : <@U051SS2EU> this looks interesting. weve been having trouble with data in defs getting too large for tests (yay memory issues), wonder if this could help
+U3GJHS5DY : (referencing poirot)
+U051SS2EU : <@U3GJHS5DY> it might help - especially if you load the data locally in the test so that it gets cleaned up when that test exits...
+U3GJHS5DY : ya that would be the idea.
+U2J7JRTDX : I've always found `tools`, `util`, etc. to be problematic namespaces--everything gets shoved in there. E.g. why does `java.util.Date` belong with `java.util.LinkedList`?
+U0B4ZBBKM : Is there a difference between `(for [x l] ...)` and `(map (fn [x] ...) l)`?
+U051SS2EU : not if the binding vector looks like that, no
+U0B4ZBBKM : I.e. between `for` and `map` with one coll.
+U051SS2EU : but for has some other tricks you can do with the binding vector, even with one coll
+U0B4ZBBKM : Ok, but apart from that these expressions do the same thing
+U051SS2EU : yes
+U051SS2EU : ```+user=&gt; (take 10 (for [x (range) y (range) :while (&gt; x y)] [x y]))([1 0] [2 0] [2 1] [3 0] [3 1] [3 2] [4 0] [4 1] [4 2] [4 3])
 ```
-Great, thanks :slightly_smiling_face:
-where test.txt was one of many files within test.zip and the contents of test.txt were "Hello World!\n\n"
-returns a string in this case or nil if no entry was found
-<@U5YHX0TQV> thanks for the so link - looks more or less like what I came up with
-Awesome! Thank you!
-And be careful with slurp'ing in data, you'll have all in memory
-Hey! I was wondering if repeated subvecs would ever allow the excluded data to be garbage collected if there was no way to access it any more? Or would I need to use `(vec (rest x))` if I wanted to _actually_ drop the first item in a vector?
-I would use a persistent queue but I want in place updates too, performance of `(vec (rest x))` being O(n) is a non-issue for me too, looking for the "idiomatic" solution more than anything :slightly_smiling_face:
-damn didn't realize `for` re-evals the inner range expression
+
+U0B4ZBBKM : Ah, a misplaced `)` is responsible for the confusion. Thanks for the backup!
+U064X3EF3 : what's the question?
+U064X3EF3 : a profiler dump isn't too helpful w/o the code
+U064X3EF3 : I've been using Java since before LinkedList existed. back then, the JDK was a lot smaller and no one anticipated how Java would grow. at the time, it seemed fine!
+U04V70XH6 : <@U0ARSC79A>'s question was posted at 4:08am Pacific: "Hi, I'm optimizing my clojure app. Here are results from jvisualmvm. Could you tell me, when clojure.lang.util.hash is invoking? Maybe it should be cached?" /cc <@U064X3EF3>
+U064X3EF3 : Hash is called when using a hashed data structure (either hash map or hash set). In some cases it is cached, depends on what is being hashed.
+U064X3EF3 : Both keys and vals are hashed, so consider what types end up in keys and vals of hash maps
+U04V70XH6 : (thanks Alex — hopefully they'll see that tomorrow when they come back online!)
+U1LJAM1U7 : Hi,How to understand `*` notation from <https://clojure.org/reference/java_interop>, specifically `(. Classname-symbol (method-symbol args))* or (. Classname-symbol method-symbol args)*`
+vs:
+```
+user=&gt; (. clojure.lang.RT contains #{1} 1)
+true
+user=&gt; (. clojure.lang.RT (contains #{1} 1))
+true
+```
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

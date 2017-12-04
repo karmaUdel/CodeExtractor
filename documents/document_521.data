@@ -1,1 +1,74 @@
+U3SJEDR96 : <@U4RR7KX45> correct, it's an impure thing. Though you can also use `Random.step`, provided you have a random seed and store the new seed after use :slightly_smiling_face:
+U6CHZ5PN1 : <@U3SJEDR96> i see. thanks!
+U6BTZ2NSV : Hello. I am trying to understand Tasks. I am confused by the example for `perform` at <http://package.elm-lang.org/packages/elm-lang/core/latest/Task> `Task.perform NewTime Time.now` NewTime is a message, how does it represent `(a -&gt; msg)`? Why do you not need to use `(\_ -&gt; NewTime)`?
+U3SJEDR96 : `type Msg = NewTime Time`
+U3SJEDR96 : `NewTime` is a tag of `Msg`, and takes a single parameter, `Time`. The type of `NewTime` is `Time -&gt; Msg`
+U3SJEDR96 : It's the same as `type Msg = Input String` &lt;-&gt; `input [ onInput Input ] []`
+U6BTZ2NSV : <@U3SJEDR96> I see now. Thank you. If NewTime didn't take an extra parameter, you would need to use the lambda in order to type check, right?
+U3SJEDR96 : Yep, correct
+U3SJEDR96 : or `always : a -&gt; b -&gt; a`
+U3SJEDR96 : i.e. `always NewTime` _means_ the same as `\_ -&gt; NewTile`, though the lambda subtly different semantics - `always` evaluates its argument as soon as you pass it to `always`, whereas the lambda is only evaluated when it receives its argument
+U5ZC6V535 : Hi, I am trying to generate a list of Types with random values. I am able to do so for a single type but I am having trouble generating a list and thus combining generators. Heres what I have so far: 
 ```
+randomBoid : Float -&gt; Float -&gt; Float -&gt; Boid
+randomBoid x y angle = 
+  Boid (x, y) angle
+
+type Msg
+    = BoidsGenerated Boid
+
+
+boidGenerator : Generator Boid
+boidGenerator = 
+      (map3 randomBoid (float -250 250) (float -250 250) (float 0 360))
+
+generateBoid =
+    generate BoidsGenerated boidGenerator
+```
+
+The above works fine but I thought that in order to get a list i could have done ```generate BoidsGenerated (list 5 boidGenerator)```
+
+Any ideas ?
+
+U6BTZ2NSV : Thanks again <@U3SJEDR96>
+U3SJEDR96 : <@U5ZC6V535> `list 5 boidGenerator` should work, if `BoidsGenerated` can take a `List Boid`
+U5ZC6V535 : <@U3SJEDR96> That's what I thought but I am getting 
+```
+The 2nd argument to function `generate` is causing a mismatch.
+
+25|     generate BoidsGenerated (list 5 boidGenerator)
+                                 ^^^^^^^^^^^^^^^^^^^^
+Function `generate` is expecting the 2nd argument to be:
+
+    Generator List
+
+But it is:
+
+    Generator (List Boid)
+```
+
+U3SJEDR96 : Oh, you're probably missing parenthesis in your `Msg` declaration
+U5ZC6V535 : Oh yes!
+U3SJEDR96 : `BoidsGenerated List Boid` &lt;-&gt; `BoidsGenerated (List Boid)`
+U5ZC6V535 : I spent half an hour + on this :disappointed: :stuck_out_tongue: Heh Thanks <@U3SJEDR96>
+U5ZC6V535 : I started working on Elm a couple of days ago and i havent got used to the syntax fully yet
+U3SJEDR96 : Yeah, to be honest, it's a little surprising that `type alias Foo = List` is even valid, but we'll get there, eventually :slightly_smiling_face:
+U5ZC6V535 : Yeap :slightly_smiling_face:
+U5ZC6V535 : Is there a way to combine messages from different files? For instance I have a Seed file which includes a message ‘BoidsGenerated' and I want to include that as a case as part of my main ‘update' function in my Mail.elm file. I could of course defined it in the Main.elm file (or to a Messages.elm file).
+U3SJEDR96 : `type Msg = BoidsMessage Boids.Msg`, though it might be easier to pass the message to use to `generateBoids : (List Boid -&gt; msg) -&gt; Cmd msg`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

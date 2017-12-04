@@ -1,9 +1,127 @@
+U4872964V : <@U284ZSVSN> they look identical to me :slightly_smiling_face:
+U4872964V : <@U284ZSVSN> but I've never had the need for those abstractions, I don't have that many "sub-components"
+U284ZSVSN : Good to hear :slightly_smiling_face: I can avoid it I imagine but I've not really done much 'chaining' with the model in the update and have one situation where I've got an operation that comes up a few times that I'd like to make a function for and wondered if I should start using one of these.
+U3LT1UTPF : I want to add a dropdown select so that when the value is changed the page is updated. I thought it would be easier to do it myself, but I've found that it's necessary to keep an eye on the state of the dropdown. I've found some "components" in elm packages, like this one <http://package.elm-lang.org/packages/jschonenberg/elm-dropdown/latest> , but I don't know if I should go on that road. Any advice on how I should face the issue?
+U64D26Q95 : Hi guys,
+I am trying to replicate of my existing React/Redux application in Elm. I am struggling with the following part: I need to fetch data from few different urls (asynchronously) and as soon as I will get all responses back I need to dispatch an action (for example: LoadCompleted). As far as I understand I need to use Cmd.batch for many asynchronously requests, however how can I dispatch an action as soon as everything fetched?
+
+It is probably stupid question, but I am struggling find any information about this kind of case. Can anyone help me, please?
+
+U3LT1UTPF : <@U64D26Q95> I learned a lot from this article series: <http://codeloveandboards.com/blog/2017/02/08/phoenix-and-elm-a-real-use-case-pt-2/> I link to the second chapter because you probably don't need the Phoenix stuff (the backend that gives the json). You probably need from "The Messages" on.
+U3EPLC6A0 : <@U64D26Q95> Have you seen RemoteData? It helps you keep track of the "download-state" of your data. It even forces you to do so. So, as soon as everything is ```Success a``` you're there. <http://package.elm-lang.org/packages/krisajenkins/remotedata/latest>
+U3LT1UTPF : The info is fetched in the init:```
+init : ( Model, Cmd Msg )
+init =
+    initialModel ! [ fetch ]
 ```
-I just added a new comment in beginner channel that adds more clarity. But you're speaking in haskellian right now, and I haven't done that in _awhile_. It's honestly going to take me a few minutes to parse that statement and then I can tell you.
-I think you wnt to move that `)`: `List.map (\x -&gt; List.map (\y -&gt; Domino x y) &lt;| List.range x highest ) &lt;| List.range 0 highest`
-<https://ellie-app.com/3KQ5Rq7VdHNa1/0> ?
-That... worked? It says I've created a list of a list of dominoes. But If I can just flatten that, I should be fine.
-`concatMap` to the rescue
-<@U48AEBJQ3> your solution is probably the more clever, FP way to do it, but I'll have to sit and study it.
-or what <@U48AEBJQ3> did, which is nice :slightly_smiling_face:
-the observation that for every element in the range, you only want to make combinations of the element and everything that follows is clever :slightly_smiling_face:
+
+`fetch` lives in Commands, fetches the info and triggers `FetchResult` in `update`
+
+U3LT1UTPF : Yes, RemoteData seems a good option.
+U0FBZ4J5V : And have a look at the docs for `RemoteData.andMap` for a neat way to merge data-loads into a single result. 
+U0CLDU8UB : With RemoteData, you would have a Msg for each of the responses. 
+So in your model, you have a field for the responses
+```
+type alias Model =
+    { a : WebData Thing
+    -- ...
+    }
+```
+This means that in the update, you simply go
+```
+ResponseA webData -&gt; { model | a = webData }
+```
+
+Now, there's no need for an action when all of the responses are in: 
+
+```
+view model =
+    RemoteData.map resolvedView model.a
+        |&gt; RemoteData.andMap model.b 
+        --...
+        |&gt; RemoteData.withDefault notResolvedView
+```
+
+U62PV9CPN : Is there a way to compile elm and see the error messages in the terminal rather than opening a browser?
+U3SJEDR96 : I assume you're using elm-reactor? `elm-make` shows errors on the CLI
+U62PV9CPN : Yeah I've been using `elm-reactor`. So I just intentionally changed a functions signature to something wrong and ran `elm-make` and it says it compiled successfully
+U62PV9CPN : But running `elm-reactor` I see several errors
+U64D26Q95 : Thank you very much everyone! Really appreciate that. `RemoteData` sounds good so far. I will check all links in depth soon and hope it will work for me :slightly_smiling_face:
+U4872964V : <@U62PV9CPN>, are you passing the same file to elm-make as to elm-reactor?
+U3SJEDR96 : make it a `Maybe` in your `company` type alias, and decode it as `|&gt; optional "deleted" (map Just deletedDecoder ) Nothing`
+U5CPJRWQ6 : Aw man i was so close… Thanks a lot!
+U62PV9CPN : <@U4872964V> I'm rust running `elm-reactor` in the same director as my source files. I guess from there I click on the source file. So I should be doing stuff like `elm-make Main.elm`?
+U4872964V : yes, run it on the file you are clicking on
+U3YDBDP4Z : If writing a custom event handler, how do I write it so that the message sent includes the event object?Or, can I read the event object before sending the message?
+
+U3SJEDR96 : you mean using `on`? `on` takes a json decoder, which should decode the event object into a msg :slightly_smiling_face: (note that it's a little tricky to figure out that structure, because it contains domnodes and circular references...)
+U3YDBDP4Z : I don't understand the decoding part. `(Json.succeed message)`
+U3YDBDP4Z : This just decodes the message
+U3YDBDP4Z : ?
+U3YDBDP4Z : Not even that, right? It just says succeed with this?
+U3SJEDR96 : yeah, that completely ignores the content of the event object and just gives you a message. Which makes sense for messages that don't take content, like you'll typically have for blur, click, focus, ...
+U3SJEDR96 : `onInput` should be slightly more interesting
+U3YDBDP4Z : What's the "tagger" function?
+U3SJEDR96 : your message. Say you have `type Msg = ReceivedInput String`, then `ReceivedInput` is basically a function of type `String -&gt; Msg`. If you use `onInput ReceivedInput`, that function refers to `ReceivedInput` as the "tagger" with which to tag the data it decodes
+U3YDBDP4Z : Ah, right
+U3YDBDP4Z : Thanks <@U3SJEDR96>
+U3YDBDP4Z : Not getting it to work.```
+onFormSubmit : (String -&gt; msg) -&gt; Html.Attribute msg
+onFormSubmit tagger =
+    let
+        options =
+            { stopPropagation = False
+            , preventDefault = True
+            }
+    in
+        Events.onWithOptions "submit" options (Json.map tagger targetData)
+```
+
+Used like `onFormSubmit SignIn` on the form.
+
+Causes a page reload.
+
+U3YDBDP4Z : Switching the line `onFormSubmit SignIn` to the built in `onSubmit SignIn` works
+U3YDBDP4Z : But the implementations look identitical…
+U3SJEDR96 : what is targetData?
+U3YDBDP4Z : Json decoder
+U3YDBDP4Z : The same as the built in targetValue decoder
+U3SJEDR96 : you'll probably want to stop propagation, too, actually
+U3YDBDP4Z : `onSubmit` doesn't
+U2M39B7TM : One question. How I can decode a union type with decode.pipeline?```
+"""
+{
+ Click: Int
+ action : Action
+}
+"""
+
+type Action =
+  Increment
+  | Decrement
+
+decoder : Decoder Types.Model
+decoder =
+    decode Types.Model
+        |&gt; required "click" int
+        |&gt; ???
+
+```
+
+U3YDBDP4Z : Okay, I'm getting an error that's not shown anywhere
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

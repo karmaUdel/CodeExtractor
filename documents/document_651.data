@@ -1,3 +1,94 @@
+U40QW928G : it worked
+U40QW928G : i probably ran it inside src at one point and it generated that
+U0EUHKVGB : Yeah, easy mistake to make
+U40QW928G : how do you humans break up your Msg when you start getting a lot of them? I have almost 15 now and I feel like it's going to grow out of proportion
+U3ZNWN526 : <@U40QW928G> Mine are broken into modules.  However, I wouldn't say 20-30 is necessarily... something that needs to be broken up, unless you feel like you want to break them up (if there's a clear distinction by which you can separate them and it would make maintenance easier)
+U3ZNWN526 : Might be that you just need to break up your update function?  (i.e. into several separate functions, possibly even modules)
+U40QW928G : yeah I have actions I'd much rather limit to players
+U40QW928G : that sounds like a potential solution, how do you break up your update function?
+U3ZNWN526 : Well, step 1 would be to separate the logic into smaller functions (if it's all inline in the update function currently)
+U0LPMPL2U : I like to extract everything in my `update` to other functions so that `update` is just dispatching
+U3ZNWN526 : that is, something like:```
+case msg of
+  PlayerMessage1 -&gt; handlePlayerMessage1 -- (or whatever you want to call it)
+  PlayerMessage2 -&gt; handlePlayerMessage2
+  OtherMessage -&gt; handleOtherMessage
 ```
-something like that would have basic chainable class init and `Function` methods
-    '''
+
+U3ZNWN526 : (and obviously you wrangle your parameters there however you need to as well)
+U3ZNWN526 : Then, if you have too much to fit in a single file, you can split the player message handler functions into a `Player.Update` module
+U40QW928G : I might do that
+U40QW928G : thanks
+U3ZNWN526 : No problem! :slightly_smiling_face:
+U0LPMPL2U : <@U40QW928G> you can see what it looks like in a larger app: <https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L224>
+U0LPMPL2U : note that this means you need to use `Cmd.map` and `Html.map` to make sure your types line up
+U40QW928G : Ok I'll look more into that project
+U0LPMPL2U : There's an accompanying blog post explaining the source: <https://dev.to/rtfeldman/tour-of-an-open-source-elm-spa>
+U3ZNWN526 : Now here's another question: Does anybody have a good/recommended way of dealing with elm-package dependencies in CI/CD environments?
+U23SA861Y : the package file enforces semantic versioning so it's all good
+U0EUHKVGB : Eh, not quite.
+U0EUHKVGB : <@U3ZNWN526> You can use `3.0.0 &lt;= v &lt; 3.0.1` to lock it to a version
+U0EUHKVGB : that’s what I did at NRI.
+U3ZNWN526 : Hmm... well I have an app that currently compiles using webpack, and we have a CD script that just runs npm build and then copies the build to S3.  But I just added a new package to `elm-package.json` and it bombed, saying it couldn't find the new package (because I hadn't run elm-package install as part of the build)
+U0EUHKVGB : <@U23SA861Y> patch changes can still break site functionality, due to logic changes.
+U0EUHKVGB : <@U3ZNWN526> oh, you just need to run elm-package on your CI
+U3ZNWN526 : Okay, so you do run it during CI and CD?  So then normally it will ask me to approve a plan, and I see there is an option `-y` to auto-accept the prompt, which seems to work, but... is that safe?
+U3ZNWN526 : The only other option I can think of I guess is to check elm-stuff into the repo, which seems silly.  I was expecting there to me something analogous to Gemfile.lock (from rails)
+U3ZNWN526 : So that I could handle that prompt manually (if necessary), and then just allow CI/CD to install the same versions without asking again...
+U0EUHKVGB : Yes
+U0EUHKVGB : it is safe.
+U3ZNWN526 : But I guess I don't *really* know what that prompt is for.  (Like... it's either yes or no right?  it's not like I have other choices of what to install)
+U3ZNWN526 : Okay :slightly_smiling_face:
+U0EUHKVGB : As long as you’ve locked the deps down like I said
+U0EUHKVGB : Otherwise it will install newer packages when they get released
+U3ZNWN526 : Ah, sure, right... I guess that makes the difference.
+U1G51S63S : <@U23SA861Y> <@U0LPMPL2U> ok, I am done ellie with example code <https://ellie-app.com/3zVTgFLNprxa1/3> :slightly_smiling_face:
+U1G51S63S : so it looks like I should have some kind of recursion inside `insertItem` function, right?
+U3ZNWN526 : Doesn't the make updating a little annoying though?  Like, then for each library you have to extend the max number as far as you want, run an install, see where it ends up and constrain it to the new version manually?
+U0LPMPL2U : <@U1G51S63S> I think there are three cases: 1) the current node is not an ancestors 2) the current node is an ancestor 2) the current node is the parent
+U23SA861Y : <@U1G51S63S> datastructures in elm are immutable so thing about how you would go about constructing a new tree with one new element in it
+U0LPMPL2U : You will want to map over the list, and check the three cases
+U1LB50NAU : <@U40QW928G> I'd also consider breaking it up only when it actually /is/ a problem, rather than when it feels like one. The thing is that the big update case statement isn't that hard to parse or search, and it's super-easy to re-factor or hoist out functions if it really does get complicated. If you're feeling the urge because it feels like a really long function, think of it insted as just a bunch of separate functions, because that's actually closer to what it is..
+U1G51S63S : yep, I am imagine if it will be easier to have a fake root node so `a` will be child of this root
+U3ZNWN526 : Wait a minute...  <@U0EUHKVGB> - should I just be checking in `elm-stuff/exact-dependencies.json`?
+U23SA861Y : Is this a balanced tree or are you trying to attach nodes to a specifc location
+U0EUHKVGB : <@U3ZNWN526> No, don’t do that.
+U1G51S63S : <@U0LPMPL2U> map inside `insertItem`?
+U0EUHKVGB : That is not for you to check in, and can break things if it is checked in
+U3ZNWN526 : Oh.  Dang :slightly_smiling_face:  Okay.
+U0LPMPL2U : <@U1G51S63S> I'm thinking something like:```
+insertItem : Item -&gt; Tree -&gt; Tree
+insertItem item tree =
+    if parentOf item tree then
+      appendChild item tree
+    else if ancestorOf item tree
+      List.map (insertItem item) tree.children -- make this return a Tree, not a list
+    else
+      tree
+```
+
+U1G51S63S : so have a root node is a good idea? :slightly_smiling_face:
+U0LPMPL2U : All trees must have a root node :slightly_smiling_face:
+U1G51S63S : ok, ty. let me some time to figure out how it works :smile:
+U5LFUHH19 : Hi, I would love some feedback on a little game I made. <https://ellie-app.com/3zW9S8VjvSVa1/0>
+U3ZNWN526 : Hmm <@U5LFUHH19> - doesn't seem to compile... ?
+U5LFUHH19 : Hmm, sorry.  Try again? <https://ellie-app.com/3zW9S8VjvSVa1/2>
+U3ZNWN526 : Aha! :slightly_smiling_face:
+U5LFUHH19 : BTW, I came across this game at a science center yesterday.  I've yet to solve it (move all the frogs to the other side)
+U5LFUHH19 : But I thought it might help me to learn Elm, think about state, explore new modules, etc.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

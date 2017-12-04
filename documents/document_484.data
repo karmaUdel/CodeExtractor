@@ -1,54 +1,82 @@
+U57KYFW67 : <@U663M2MB7> neat. IO is a little bit different in how it's handled, since there's no IO type. Everything gets routed through `Cmd`'s.
+U57KYFW67 : <@U663M2MB7> Elm is just like Haskell, where the only points where purity is breached are either buried in native packages or in `Debug.log`
+U57KYFW67 : and everything else is side-effect-free
+U39DE7RQ9 : <@U48AEBJQ3> thanks, at least now I know where the function resides. I will try to create something using Cmd. Ports only return Cmd right?
+U48AEBJQ3 : <@U39DE7RQ9> Yes.
+U39DE7RQ9 : <@U48AEBJQ3> is there a Cmd equivalent to Task.attempt?
+U48AEBJQ3 : No. What I would do is change all of my `init` functions from something like `init : Session -&gt; Article.Slug -&gt; Task PageLoadError Model` to something like `init : (Result PageLoadError Model -&gt; msg) -&gt; Session -&gt; Article.Slug -&gt; Cmd msg`
+U48AEBJQ3 : Which would have you change `transition ArticleLoaded (Article.init model.session slug)` to `transition (Article.init ArticleLoaded model.session slug)`
+U48AEBJQ3 : And `transition` would look like:
 ```
-Got it. Thanks. :slightly_smiling_face:
-note, also, that <@U0JUBLV8F> is exploring what the options are for elm cli apps, and how to make it the great experience we've come to expect from Elm
-very interesting, thanks for the info!
-playing around with that type of pattern, I managed to create a proof-of-concept cli benchmark runner - <http://g.recordit.co/2tE7m7pAl0.gif> - so it's a viable approach :wink:
-and <https://github.com/zwilias/elm-benchmark-cli> for the code :slightly_smiling_face:
-Hello folks! Is anyone aware of a pure elm way to make tooltips? Something like in bootsrap.
-Pure CSS solutions exist
-Oh, thanks <@U0CLDU8UB>!
-In the elm-spa-example <@U0CL0AS3V> mentions that most of the Main.elm would go away in Elm 0.19 . I'm curious what would go away, and maybe if we could help in the process. any idea where should i be looking :smile:
-<https://github.com/rtfeldman/elm-spa-example/blob/master/src/Main.elm#L25>
-so one of the features that's being considered for 0.19 is code splitting - a separate, minimal bundle per route. To enable that, routing and the concept of "pages" will become a first-level concept in Elm, most likely to be configured through a new type of `elm-package.json`. This should take care of routing, bundling, code splitting, and handling the boilerplate that's currently involved in managing SPA's
-you can read some more of what the roadmap looks like here <https://github.com/elm-lang/projects/blob/master/roadmap.md>
-thanks <@U3SJEDR96>
-<@U0FQ4UYRK> I gave a talk about this at osloelmday, <https://www.youtube.com/watch?v=FUHlnxQJTMM>
-Ta. :slightly_smiling_face:
-Tell me please, this solution can be useful?
-is it useful for you? then yes :slightly_smiling_face:
-Of course, yes! Maybe I missed some functions and approaches in the core libs - and it all looks like crutches)
-You might consider utilizing the low level features of my keyboard-extra package to get type safe keys for your package, too :)
-Then you could have a `|&gt; with CharC` sort of generic API
-Thank you, it sounds good! I’ll take a look at your package)
-Hi everyone, we at Shore in Munich we are looking for guys that are passionate about Elm. Our Elm codebase is increasing every day and we are hiring. If you are interested please ping me or apply directly <https://www.shore.com/en/jobs?gh_jid=97893>
-<@U3R7CKQRX> check out <#C0LUAGWRK|jobs> :slightly_smiling_face:
-oh cool, thanks
-:slightly_smiling_face:
-there's a fixed format in that channel, so be sure to post it formatted correctly :slightly_smiling_face:
-How do you clean generated `tmp-[hash]/emiiter.js`?
-the elm-test stuff? it it's autoremoved, afaik
-Every time I run `webpack` new files are generated, but old ones are not removed
-oh, webpack. No idea, then :confused:
-Webpack is like regular expressions.  You known that quote: «Some people, when confronted with a problem, think “I know, I’ll use Webpack.” Now they have two problems.»  :stuck_out_tongue_winking_eye:
-<@U41NK9BM4> what do you use to run server for elm?
-christophp: sweet! some months ago and i'd have jumped to this opportunity. plus point, i was already in munich :smile:
-hey, so I've just noticed that I'm suffering badly from the Elm compiler using too many CPUs when building (<https://github.com/elm-lang/elm-make/issues/159>)
-building and using sysconfcpus (`sysconfcpus -n 1`) works, but I'm not sure how to do it with our webpack scripts
-anyone encountered (and preferably solved ;)) this issue?
-Yes
-Just call webpack with sysconfcpus
-of course
-`sysconfcpus -n 1 webpack`
-somehow, I got stuck trying to call elm make that way, but it obviously cascades...
-thanks Noah, sorry about that
-Also I am using `RemoteData` to represent data which comes from the server.
-<@U0H3A9XLN> not sure about "best" since that's a loaded term, but how would you plan to simply store the list of posts?
-That’s one of the questions. Ideally I would expect it to be something along the lines of `List (RemoteData Post)` since I’d like to be able to handle errors/loading states separately for each post.
-Have you considered a `Dict Int Post`? Those can be advantageous when we have a bag of things like posts which might be dynamically loading or disappearing and for which we want to search by an id
-Or even `Dict Int (RemoteData Post)` in your case
-I have `Dict String (RemoteData ...)` in one of my projects
-it works well
-Could you, please, write types for User and Post as you would do in your Elm code?
-That may depend on how many posts a user might have, but here is one option
-The part I am more interesting about is how to handle relations within data, since originally you get fields as id’s
-One option is to represent it very much like you wrote it before: `type alias User = { id : Int, posts : List Int }` and have a `Dict Int (RemoteData Post)` where you can look up those posts for displaying
+transition cmd =
+    { model | pageState = TransitioningFrom (getPage model.pageState) }
+        =&gt; cmd
+```
+
+U39DE7RQ9 : <@U48AEBJQ3> thanks, I will try that!
+U39DE7RQ9 : <@U48AEBJQ3>, now that code seems to compile. The next problem is that in my subscriptions I need to point to messages that resides in my HomePage module. The compiler says:```
+23:08:12 client.1   |  The type annotation for `subscriptions` says it always returns:
+23:08:12 client.1   |      Sub Msg
+23:08:12 client.1   |  But the returned value (shown above) is a:
+23:08:12 client.1   |      Sub HomePage.Msg
+```
+
+U39DE7RQ9 : I know it is possible to map messages some how but I cant find how.
+U48AEBJQ3 : <@U39DE7RQ9> <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Platform-Sub#map>
+U48AEBJQ3 : You need something of `HomePage.Msg -&gt; Msg`
+U48AEBJQ3 : Usually a constructor of `Msg`
+U39DE7RQ9 : <@U48AEBJQ3> a function that encapsulates HomePage.Msg in a Msg?
+U48AEBJQ3 : Right, usually a tag of `Msg`
+```
+type Msg
+   ...
+   | SubscriptionEvent HomePage.Msg
+```
+
+U39DE7RQ9 : Im sorry <@U48AEBJQ3> but I cannot seem to puzzle this out by my self. I have added `SubscriptionEvent HomePage.Msg` message but my subscriptions look like this tight now and it does not compile.```
+subscriptions : Model -&gt; Sub Msg
+subscriptions model =
+    Sub.batch
+        [ gotAllPublicForms (SubscriptionEvent (HomePage.GotAllPublicFormsMsg &lt;&lt; decodeValue jsonFormListDecoder))
+        , gotForm (SubscriptionEvent (HomePage.GotFormMsg &lt;&lt; decodeValue jsonFormDecoder))
+        ]
+```
+
+U39DE7RQ9 : My ports look like this:``` 
+port getAllPublicForms : () -&gt; Cmd msg
+port gotAllPublicForms : (Json.Decode.Value -&gt; msg) -&gt; Sub msg
+port getForm : FormId -&gt; Cmd msg
+port gotForm : (Json.Decode.Value -&gt; msg) -&gt; Sub msg
+```
+
+U39DE7RQ9 : The compiler says:``` 
+23:44:13 client.1   |  267|           gotAllPublicForms (SubscriptionEvent (HomePage.GotAllPublicFormsMsg &lt;&lt; decodeValue jsonFormListDecoder)
+23:44:13 client.1   |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+23:44:13 client.1   |  Function `gotAllPublicForms` is expecting the argument to be:
+23:44:13 client.1   |      Value -&gt; Msg
+23:44:13 client.1   |  But it is:
+23:44:13 client.1   |      Msg
+```
+
+U48AEBJQ3 : <@U39DE7RQ9> There are different places to tackle this from. I think from how you are doing it here, you need `gotAllPublicForms (SubscriptionEvent &lt;&lt; HomePage.GotAllPublicFormsMsg &lt;&lt; decodeValue jsonFormListDecoder)`
+U69D8R59S : Good way to call a function N times? In my specific case, I'm trying to simulate a dice roll by updating my model with random values for a few seconds.
+U153UK3FA : <@U69D8R59S> calling a function N times really depends on what you want to do with the N results
+U153UK3FA : do you want a list of these results?
+U69D8R59S : I want to replace a property on my model N times
+U153UK3FA : ah, wanting to animate a die face by having it transition between numbers?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

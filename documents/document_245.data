@@ -1,29 +1,130 @@
+U0SES5Y3T : <@U5HM74BD0> yes, since you are in the browser, you have access to localStorage
+U0SES5Y3T : <@U2CR5RDL5> I think you still need to call a Task because it's an async operation
+U0SES5Y3T : if you are calling your async operations in Elm than you will need a Task to run them, I believe, unless you are using JS interop to run your async operations
+U2CR5RDL5 : It's not to run any async ops, <@U36C7SUAX> just needs a way to start listening on a specific host. If you embed the elm application with flags, passing through the host, that can be stored on the model and then used in subscriptions to listen for websocket messages on the host without hardcoding the hostname in the elm source.
+U0SES5Y3T : makes sense
+U2CR5RDL5 : ```Elm.Main.embed(node, {hostname: window.location.host});``` after keeping hold of the hostname flag in the model (within init) this can then be used in subscriptions ```subscriptions model =
+    WebSocket.listen model.hostname Msg``` No need to create a task to get the hostname, just initialise the app with flags instead.
+
+U2CR5RDL5 : Also, if <@U36C7SUAX> is using the `Navigation.program` instead of `Html.program` then the programs init function already gets a `Navigation.Location` object which the hostname could be plucked out from.
+U5VJL4AJZ : hiya. two unrelated newbie questions here
+U5VJL4AJZ : 1. looking at <http://package.elm-lang.org/packages/elm-lang/core/5.1.1/Maybe> and it shows int he example for `andThen` an operator `|&gt;` . what is that operator supposed to do?
+U5VJL4AJZ : 2. is type annotation not available in the REPL? also, is there a way to create multiline functions on the REPL?
+U5VJL4AJZ : when i try to do type annotation, in the repl, i get the following error:```
+&gt; getFirstMonth : List Int -&gt; Maybe Int
+-- SYNTAX PROBLEM -------------------------------------------- repl-temp-000.elm
+
+A single colon is for type annotations. Maybe you want :: instead? Or maybe you
+are defining a type annotation, but there is whitespace before it?
+
+8|   getFirstMonth : List Int -&gt; Maybe Int
+                   ^
+Maybe &lt;http://elm-lang.org/docs/syntax&gt; can help you figure it out.
 ```
-<@U5H8JJP24>, you can use `toString` for that
-Or implement a function which is `Theme -&gt; String` if you don't want the default toString
-<@U0EUHKVGB> Thx I will have a try
-<@U0EUHKVGB>  Doesn't passing in the previous ID break information hiding? It is interesting that something trivial in JS is not so in Elm.
-UUID's tend to involve randomness, which means "do something else every single time". It makes sense for that to not be trivial in a language where all functions should return the same result every times they're called, though it definitely makes some things harder..
-<@U5FU80S06> it looks like you want the "ID" module to keep track of an internal state, which is impossible given Elm's design
-<@U5FU80S06> Lots of things are trivial in a language with unmanaged side-effects.
-Elm is a different language. Some things are trivial in Elm that aren't in JS
-For example, writing code that does not break :wink:
-Storing an ID is a side-effect.
-The way to solve that in Elm is to use a generator, like the package I linked.
-As an aside, the official doc which shows the similarities between JS and Elm, should also point out some major dissimilarities such as lack of side effects...
-:point_up: <https://guide.elm-lang.org/core_language.html>
-Techincally, in Elm, we have side effects - they are just managed side effects which are represented via `Task`s, `Cmd`s, and `Sub`s
-Which is how that library works :slightly_smiling_face:
-<@U353R9MA8>  If you're interested, I released this as its own package -&gt; <http://package.elm-lang.org/packages/ericgj/elm-csv-decode/latest>
-Thanks <@U0JFGGZS6> .
-What's the idiomatic way to map over 2 adjacent elements in a list? e.g., I want to get the differences between adjacent elements, so I need a function that maps: `[1,4,6,9] =&gt; [3,2,3]`
-But generically, for any fn that takes 2 values?
-I wrote my own little function for it but I've run into it enough times that I'm wondering if there's already a functional way to do this that I'm missing
-List-Extra has a lot of list helper functions that are sort of a community agreed upon idiomatic way of building out these functions. You may also find something to simplify the function you wrote. <http://package.elm-lang.org/packages/elm-community/list-extra/6.1.0/List-Extra>
-aha, looks like I wanted scanr!
-:thumbsup:
-Wait, nope. I'll keep reading. Thanks justin!
-<@U5AEH3L05> I think this is the right search, but I'm not seeing anything: <https://klaftertief.github.io/elm-search/?q=(a+-%3E+a+-%3E+b)+-%3E+List+a+-%3E+List+b>
-<@U48AEBJQ3> Yeah, I just tried that as well and didn't see anything
-You could use `foldl`. Any fancier function would probably be implemented in terms of `foldl`
-Got it. Okay, sounds like the version i have is as idiomatic as it gets!
+
+U5VJL4AJZ : i just figured out #2 , you need to terminate each line of a multiline with a `\`
+U5VJL4AJZ : i do remember reading that in the turtorial, but i forgot
+U5VJL4AJZ : so, just #1... type annotation ?
+U5VJL4AJZ : and `|&gt;`
+U18S4094L : `|&gt;` is documented here - <http://package.elm-lang.org/packages/elm-lang/core/latest/Basics#%7C&gt;> it's basically a way of sending the result of one function to another
+U5VJL4AJZ : great. so like a pipe operator
+U18S4094L : yeah exactly
+U5VJL4AJZ : makes sense. i think thats what they use in eilxir as well
+U5VJL4AJZ : thanks!
+U18S4094L : no worries :slightly_smiling_face: i'm not sure about type annotations in the repl, i don't use it much
+U5VJL4AJZ : kk, thanks for the insight!
+U0SES5Y3T : it works a little different in Elixir, just FYI
+U5VJL4AJZ : <@U18S4094L> , related question. when you say you don't use "it" much, are you saying you don't use the repl much or you don't use type annotations much (or both)?
+U0SES5Y3T : same concept though
+U0SES5Y3T : talking about the `|&gt;` operator
+U18S4094L : bkirkby: the repl; type annotations are super useful!
+U5VJL4AJZ : :thumbsup:
+U5VJL4AJZ : at my current level of ignorance,  they seem to be mostly aesthetic. which is useful, but types seems to be inferred really well. is that true?
+U18S4094L : yeah the compiler is really good at inferring, but it can sometimes get confused with nested function calls
+U18S4094L : so explicitly listing what things should be just lets it tell you the actual problem if it's ambiguous
+U5VJL4AJZ : btw, the FAQ lised at the top is super useful. thanks for putting it together. i saw a different FAQ that was anemic before and i assumed what was in the channel topic was to that one.
+U5VJL4AJZ : and for annotations in the repl: <http://faq.elm-community.org/#why-does-elm-repl-report-a-syntax-problem-for-any-type-annotation-such-as-for-fib--int---int>
+U5VJL4AJZ : guess i need to delve deeper into the tooling and `elm-reactor`
+U3SJEDR96 : as for type annotations: they help prevent bugs where the function doesn't do what you _think_ it does. By writing type annotations, you describe the actual shape of things your function is expected to work on, and what it is supposed to do with them. They also serve as a very succinct, formal type of documentation (there's even a search-engine that lets you look for functions based on their type). Furthermore, and this is fairly subjective, but I believe that writing things twice - once as a type annotation and once as an implementation - helps you mentally process things. It's sort of similar to the idea behind literate programming.
+U23SA861Y : kinda like a type unit test for the compiler :stuck_out_tongue:
+U1NME8MS8 : Hi, I'm wondering whether anyone wants to give some general feedback on my little app on <https://github.com/dawehner/mfp-elm/tree/master/src> ?
+U48AEBJQ3 : dawehner: <http://package.elm-lang.org/packages/elm-community/random-extra/2.0.0/Random-Extra#sample>
+U1NME8MS8 : <@U48AEBJQ3> oh nice, this is exactly what I need. Let me see how its actually implemented
+U48AEBJQ3 : It's still a `Maybe` because lists can be empty.
+U1NME8MS8 : Fair
+U1NME8MS8 : I guess one just skips the length checking
+U1NME8MS8 : <@U48AEBJQ3> Conceptually does it make sense to copy this single function or would you include the library via the package manager
+U48AEBJQ3 : I would just use the package. The core package is intentionally sparse. The elm-community packages are a semi-official extention.
+U48AEBJQ3 : I would move this: <https://github.com/dawehner/mfp-elm/blob/master/src/Update.elm#L15> to your model and pass it down as an argument.
+U1NME8MS8 : <@U48AEBJQ3>  good point. I started using a node based server for serving these, but then I switched to a simple static file.
+U48AEBJQ3 : Yep. Those sorts of changes are common. It's best to try and collect those together in the model so that you don't have to think about where they are when you need to change them.
+U48AEBJQ3 : Looking around at the code for handling the 'active song', you are using a `Maybe.withDefault` only to turn around and hand it to `Just`
+U1NME8MS8 : ah I see, so this is basically elm's approach to constants?
+U1NME8MS8 : Well, there is no active song when the app loads, so I thought this is the usecase for a maybe
+U23SA861Y : Thats actually fairly reasonable
+U48AEBJQ3 : re: constants: Kinda? It's more that putting things like this url data in the model is a practice that tends to lead to better code.
+U1NME8MS8 : Yeah I can totally see that. It just makes it easier to understand what might go inside the app
+U48AEBJQ3 : As for the active song, it's fine that it is a `Maybe`, I'm saying that your random song generator should return its `Maybe` without switching to a default.
+U1NME8MS8 : ah gotcha
+U1NME8MS8 : well, then the question is, should I still use the SelectSong message?
+U1NME8MS8 : At the moment it takes a Song
+U23SA861Y : Whats with the Noop message?
+U48AEBJQ3 : `| SelectSong (Maybe Song)`
+U1NME8MS8 : <@U23SA861Y> oh, right, I forgot to remove it
+U1NME8MS8 : <@U48AEBJQ3> so the click handlers should pass along (Just song) ?
+U48AEBJQ3 : Yes.
+U1NME8MS8 : great, thank you so much for all the feedback already!
+U48AEBJQ3 : <https://github.com/dawehner/mfp-elm/blob/master/src/Update.elm#L73>You should use `field` instead of `at`.
+
+U1CE9DL9H : general note - your files are really short. In elm there is generally no need for that (there is a great talk by elm's creator that is not uploaded yet from elm europe explaining why in elm long files are fine)
+U1CE9DL9H : if you're interested, the talk is here <https://www.youtube.com/watch?v=2ihTgEYiKpI>, but it is currently unlisted as the videos are re-edited
+U1NME8MS8 : <@U1CE9DL9H> <@U48AEBJQ3> I've seen that talk live indeed
+U1NME8MS8 : <@U48AEBJQ3> is field and at the same?
+U48AEBJQ3 : `at ["key"] decoder` is equivalent to `field "key" decoder`
+U1CE9DL9H : ah well, why not restructure your app into one file :slightly_smiling_face:
+U48AEBJQ3 : `at` tends to communicate that you are digging deep into the structure.
+U1NME8MS8 : fair I could do that. I am just used for my bigger experiments to grow out quickly
+U1NME8MS8 : oh yeah I like to use the field as a sign of 1level communication
+U1CE9DL9H : if you follow that talk, splitting into update/view/... should never happen anyway. I did split by update/view for my earlier projects, and later reverted it, splitting along data lines instead.
+U48AEBJQ3 : As for code organization, in contrast to other experiences you may have had, it's less important to get it 'right' from the beginning in Elm.
+The structure you end up making will often follow from your improved understanding of your application as you build it.
+
+It's also easier and safer to make changes because the compiler is picky, so moving code around is less risky.
+
+U1NME8MS8 : oh yeah that is a good point
+U1NME8MS8 : I'm wondering whether its okay to put up another app, which though is bigger
+U4F64AKQV : <@U36C7SUAX> We did something like that here <https://github.com/rubinmarty/Codenames/blob/master/src/State.elm#L21-L30>.
+U4F64AKQV : The trick is to use `Navigation.program` from elm-lang/navigation.
+U5US3G22C : I'm having trouble understand what a `Value` is exactly. (Json.Decode.Value)
+U3SJEDR96 : It's a Javascript value. Could be anything, really, which is why you need decoders to make sense of it in our strictly typed universe
+U5ABF3BH7 : Hi everyone. I wonder if I haven't discovered a bug in Elm. I have a simple select element with an options of countries. When I select a country, I need to select it twice for it to work. I don't get it. <https://screencast.com/t/GnvOvy2SMx1>. If I remove 'onInput ChgCountry', then the issue doesn't happen. If I add onInput ChgCountry, then the country I select becomes the right one in my model but I need to select it twice for the UI to reflect the choice. Did anyone have that kind of issue before? This happens just in that section on that Model. I have a similar code on another model but it doesn't happen.   If I write the exact same code, in a function that doesn't display this element conditionally, then it works as expected. In the following screencast, the first country input is in the view that appears conditionally (depending on another selection), the lower country line behaves as expected, the select is changes without needing to select twice <https://screencast.com/t/1nPCurv3NQ>.
+U5ABF3BH7 : ```div [ class "col-xs-7" ]                                                    [ select [ class "select form-control", onInput (config.toMsg Location.ChgCountry), value config.model.country ]
+                                                        Addresses.countryOptions
+                                                    ]
+                                                ]```
+
+U5US3G22C : <@U3SJEDR96> is it possible to create a `Value` in elm? Without it being passed in from outside?
+U48AEBJQ3 : <@U5US3G22C> Look at `Json.Encode`
+U5US3G22C : Thanks. Another question. I realized you can pass in arbitrary json to elm through ports and handle it as long as you have a record that represents that json. Is it possible to do the same with http request json? Or must I decode it manually?
+U48AEBJQ3 : You have to provide your own decoder to the `Http` functions.
+U5US3G22C : So I cant just pass in the `value` decoder and then later on apply that value onto a `type alias`?
+U48AEBJQ3 : Nope, you have to make your own decoder if you want to avoid hacky work-arounds.
+U48AEBJQ3 : (e.g. passing the value out of and back in via a port)
+U5US3G22C : That's interesting, but hacky as well. Thanks for the help
+U5US3G22C : One more random question. What are some tips for being productive with elm?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

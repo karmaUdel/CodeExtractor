@@ -1,32 +1,77 @@
+U0W0JDY4C : that's pretty neat. i considered macros, too, but thats a whole 'nother can of worms i havent opened yet.
+U3L6TFEJF : ooooh boy, you're in for a treat! :smile:
+U051SS2EU : this becomes more clear if you name that function eg. ```(defn to-middle  [f]
+  (fn [[a b c]]
+    [a (f b) c]))
+
+(apply comp (map to-middle functions))```
+
+U0W0JDY4C : yea that's much more clear. funny now that you point that out I realize this is expressed in a protocol, which doesn't support variadic arguments. so either enforce a seq like `(do-map v [f])` and use the fn above^, or I think something like `(-&gt; coll (do-map xform-a) (do-map xform-b)` (though more inefficient) works too
+U0W0JDY4C : so much functional-ness, so little time
+U051SS2EU : that -&gt; form will break
+U051SS2EU : that's why I mentioned using comp to avoid syntactic hoops - since `-&gt;` is a form rewriter, it will put the coll in the wrong place
+U0W0JDY4C : hmm, ill have to look deeper at that. thanks for the warning
+U0W0JDY4C : so beautiful:```
+(map (apply comp (map reshape fns)) coll)
 ```
-Hello everyone, I have an app which stores documents (edn/json files, size from 100kb up to 1000kb) and I want to save the whole change-history (changes will be small, max 30kb maybe, but frequently) without storing the whole document for each change. Is there a free document database which supports document history with delta encoding?
-<@U1Q12R4F2> Datomic comes close to doing what you want, but it's not an exact match.
-git ?
-Maybe I should give that idea a try. The documents are hold in-memory at runtime, and only written on disk if changes were made - so using git seems to be a good solution.
-there's irmin, but I am not sure there's a binding for java, it should not be impossible to do tho
-<@U050SC7SV> <https://github.com/mirage/irmin> ?
-is it possible to do local type extension?
-i.e. extend something only in a let binding?
-?
-<@U0K0TFQLW> nope.  What are you trying to achieve?
-locally I want to encode JSON differently
-was just looking through how cheshire.generate maps encoders via a protocol JSONable
-I see. Unfortunately cheshire write methods are global =(
-yeah
-Transit and Fressian do not make that mistake
-( i know that doesn't help you immediately )
-unfortunately my third party api doesn't accept either of those
-I wonder if data.json is extensible locally
-can you convert prior to sending down to cheshire?
-we should have a new json library that does write dispatch the same way transit does
-trying to do that, but this is for serializing part of an ExceptionInfo object to an exception tracker
-not global protocols but per instance maps
-so sometimes I get things like Fns
-and I don't want to completely lose the information, but I would be satisfied by an encoder that just did `pr`
-but I don't want to just `(cheshire.generate/add-encoder Object pr)` globally
-<@U053S2W0V> don't you have some sort of 'local multimethod' gist somewhere?  for non global-dispatch tables
-<@U050ECB92> I have one of those too for testing purposes
-maybe that was <@U060FKQPN> ?
-that lets me clone a multimethod
-for local modification
-in tools.analyzer I used a combination of dyn var initialized to a wrapping default fn and multimethods to allow extensibility through multimethods
+thanks a bunch !
+
+U5NAUMCAD : I am trying to rename the keys from a hashmap with rename-keysI have 
+``` (def a {a "A", b "B"} ```
+
+U5NAUMCAD : and use ``` (set/rename-keys a {:a :aa, :b :bb} ```
+U5NAUMCAD : but nothing changes
+U5NAUMCAD : Am I doing something wrong?
+U051SS2EU : nice
+U071CG4QY : Try `(def a {:a "A", :b "B"})`
+U0NCTKEV8 : well for one, `a` and `b` are both unquote symbols which evaluate to some value where `:a` and `:b` are keywords that evaluate to themselves
+U5NAUMCAD : the problem is that I receive the Json as it is
+U5NAUMCAD : I can not change the a variable
+U5NAUMCAD : it was just an example; But i need to modify the names of the keys
+U051SS2EU : sounds like your real problem is that you aren't using the return value of rename-keys
+U051SS2EU : nothing in clojure actually modifies the built in maps, vectors, lists, etc. - they return new ones you can use
+U5NAUMCAD : I did a println
+U071CG4QY : You're probably getting string keys.
+U5NAUMCAD : but it printed the same a
+U051SS2EU : don't use println to look at data, use prn
+U0AT6MBUL : If you are working with JSON, you're likely getting the map as `{"a" "A", "b" "B"}`
+U051SS2EU : I bet a is actually "a" yeah
+U051SS2EU : so you need rename-keys {"a" :aa} etc.
+U5NAUMCAD : mmm I tried but I got this error :
+U5NAUMCAD : java.lang.ClassCastException: clojure.core$map$fn__4781 cannot be cast to clojure.lang.IPersistentMap
+U051SS2EU : that means you used `(map f)` where it expected a hash-map
+U5NAUMCAD : wait, yes!!!!
+U5NAUMCAD : I was doing it to another functionality
+U5NAUMCAD : now it is working
+U5NAUMCAD : rename-keys with "a" as key
+U051SS2EU : for future reference, this is the difference between `println` and `prn` ```kingfisher.core=&gt; (println {"a" 0 "b" 1}){a 0, b 1}
+nil
+kingfisher.core=&gt; (prn {"a" 0 "b" 1})
+{"a" 0, "b" 1}
+nil```
+
+U071CG4QY : There's probably other option — you can get json with keys as keywords, just look to documentation of your json lib.
+U051SS2EU : that's sloppy though - there are valid json keys that are not valid keywords, so then you end up creating keywords that shouldn't exist
+U0NCTKEV8 : well that is a whole other thing
+U0NCTKEV8 : (are valid keywords only those keywords that can be produced by the reader?)
+U0NCTKEV8 : but generally, turning keys in to keywords all the time is something every project (I have worked on) does, and I hate it
+U0NCTKEV8 : but if you do it you are doing the same thing  that everyone does
+U050MP39D : "valid keywords" are those that follow the rules in the docs imo, but the reader will create some keywords that don't if asked
+U0NCTKEV8 : which docs?
+U050MP39D : <https://clojure.org/reference/reader#_literals>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

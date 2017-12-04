@@ -1,21 +1,57 @@
-```
-Yeah, I was just thinking, I wonder if you just set `subcriptions model = Sub.none` before you destroy it would work.
-yeah
-me too :slightly_smiling_face:
-I think it would
-for subscriptions that would help
-But for `Navigation.program` and this that would work(if my assumption is correct that is listens to urlchanges and keeps the handlers)
-I should take a look into the code for the navigation package. Having elm apps on a page and them doing stuff even when they shouldn't anymore is a little scary.
-<@U1EQAULH2> Here's an article I wrote <http://futurice.com/blog/elm-in-the-real-world>
-So, what's the more correct way to do this? Thank you.
-3. make a function `hidePopup : Model -&gt; Model` and call it from both branches
-<@U3SJEDR96> I thought about this but that's not the third option because it's just refactoring and can be done in both cases. 
-well, I say 3. too even if it’s “just refactoring” :slightly_smiling_face:
-Ok then. Just to clarify - preferred option is not to use commands?
-yes, commands are for asynchronous stuff
-potentially you will have some other message come in between
-maybe it matters, maybe it doesn’t
-Ah, now I see. Thank you for explanation))
-Using a `EmailSent` state type is not always possible, because in android your application can be terminated and restarted at any time (for example when you rotate your phone to horizontal) and re-rendering the `EmailSent` state (since the `view` function would be called with the last state) when the app is restarted would lead to showing the toast again any time you rotate your phone.
-Well, in Elm even things like toasts are part of the app state. There can't be anything like calling `Toast.make("email sent", disappearDelay);` and having the toast appear and disappear on its own in Elm. That's a profoundly imperative API, and effectively you give a piece of state outside the main program at that point. Neither of these are possible in Elm.
-However, what would be sort of similar is sending stuff out through ports. Anything that happens outside of the Elm application can be imperative, so things like toasts can also happen in the imperative manner in that situation. Maybe that would be a nice analogy?
+U0JBSEGHY : I think it would be relatively easy if there was an `oncut` event like there is in JS. But there doesn't seem to be these events in the Html.Events of Elm
+U3SJEDR96 : well you can always `on "cut" decodeTheEvent`, though I'm not sure what information you'd decode from it
+U3SJEDR96 : other than "it happened"
+U0JBSEGHY : I had tried that.. But it didn't seem to work. I will try it again
+U4872964V : are you catching the "input" or "change" events?
+U4872964V : wouldn't input be triggered if you paste?
+U3SJEDR96 : Important to know - if the decoder fails, it will simply do nothing
+U3SJEDR96 : but yeah, I'd think input and change would be triggered, though if you're basing things on keyup, it might start to get weird
+U0JBSEGHY : yea input overrides the keyup. I will have a look at change. I wasn't aware of this event
+U0JBSEGHY : for reference this is where I am at
+U0JBSEGHY : VIEW ```[ input                        [ --onInput FormatNumber
+                          onChange HandleField
+                        , value model.numberToCall
+                        , placeholder "Enter a Phone Number"
+                        , class "login-form"
+                        ]
+                        []
+                    ]```
+
+U0JBSEGHY : ```onChange : (( Int, String ) -&gt; Msg) -&gt; Attribute MsgonChange handler =
+    let
+        toTuple =
+            JD.map2 (,) keyCode targetValue
+    in
+        on "keyup" (JD.map handler toTuple)```
+
+U0JBSEGHY : UPDATE ```        HandleField ( key, digits ) -&gt;            if (List.member key [ 8, 46 ]) then
+                ( { model | inputField = digits }, reformatNumber digits )
+            else if (List.member key (List.range 48 57)) then
+                ( { model | inputField = digits }, formatNumber (String.right 1 digits) )
+            else
+                model ! []```
+
+U4872964V : why aren't you just using the input event?
+U4872964V : why keyup?
+U0JBSEGHY : Each time a number is added it is sent through a port to be formatted
+U4872964V : yes, but input will trigger each time you write a number
+U0JBSEGHY : it also triggers each time I do anything else
+U0JBSEGHY : so a backspace will trigger it to send the last character of the string through the port. This then comes back and instead of backspacing the last number I duplicate it :confused:
+U4872964V : well, you'd have to compare the input to what you have in your model i suppose
+U4872964V : so you are sending a character at a time to the port? why don't you send the whole input
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,25 +1,43 @@
+U0NBGRGD6 : what's the explain for this, what's the difference between these two?
+U04V70XH6 : (I'm a bit surprised `(def ^:const x (env :x))` works, to be honest)
+U060FKQPN : ^:const causes the value of def to be inlined at the invocation site, it doesn't care about how the value is produced
+U060FKQPN : `(env :x)` is fine if that returns an value that can be used as a constant
+U060FKQPN : const doesn't mean that the literal expression passed to `def` will be inlined, `(def ^:const x (do (println "foo") 2))` the println will only ever be runned once
+U0NBGRGD6 : and x will be 2?
+U060FKQPN : yes
+U0NBGRGD6 : and x will be 2? 
+U3JURM9B6 : I know how to write macros. Is it easy to write reader macros?
+U3JURM9B6 : I'm trying to implement a special macro (:: a t-sig) where it always evals to a, regarxless of where the :: is located at
+U3JURM9B6 : so I can write something like ```
+(defn [ (::a int) (:: b int)] .... )
 ```
-It's surprising in my opinion actually. Maybe it's a bug in the lib, not wrapping with `(name symbol)` where it should.
-Nope, I'm wrong
-it's surprising but I dunno about bug... the language reader and the data format reader can't be exactly the same
-That's probably it. I'll check when I get back to my computer. 
-Yep removing the quote fixed it. Thanks for your help!
-So I have some code in my -main function `(extend-classpath (filter #(.contains (.getName %) ".jar") (file-seq plugin-dir)))`. If I run this directly in the repl, it changes my classpath as I want it to. If I run the -main function in the repl, it doesn't work. What causes this difference (boot repl if it matters)?
-Oh, thanks! But I'm afraid I already have an invite. Thank you anyway.
-<@U1C03090C> regarding `extend-class` in repl vs -main, I'm wondering if it could be related to boot using pods to isolate classpath (<https://github.com/boot-clj/boot/wiki/Boot-for-Leiningen-Users#repl-dependencies>). Just getting started with boot myself. Would appreciate an authoritative answer too.
-There seems to be an issue with 1.9.0-alpha17 in let blocks with auto-gensymed variables in macros. Is that a known issue?
-<@U0DH86UA1> could you elaborate?
-<@U0DJC1V3R> I'm trying to find the example that exploded yesterday :slightly_smiling_face:
-<@U0DJC1V3R> looking again with fresh eyes, I found the bug. I had this:
-that fails with something completely unreadable:
-trying it in 1.8 I am getting this instead:
-that error message seems crystal clear to me /s
-so if I do the right thing and use `msg#` instead of `msg` it works
-So yeah. Not a bug, just a mistake on my part, coupled with an awful error message :confused:
-If this is a `loop/recur` – is there any intuition for how to know how many things I need to keep track of in `loop` bindings? I seem to spend much more time on these than it should take me.
-<@U0DJC1V3R> i just added this: <https://github.com/bhb/expound/blob/master/README.md>
-and got this:
-that's pretty neat...
-that's indeed pretty cool!
-<@U0DH86UA1> <https://clojurians.slack.com/archives/C1B1BB2Q3/p1501600794016449>
-Thanks <@U051HUZLD>
+
+U3JURM9B6 : and it should become```
+(defn [a b] ...)
+```
+
+U04V70XH6 : <@U3JURM9B6> Not sure I'm understanding you but Clojure does not support "reader macros"...
+U3JURM9B6 : <@U04V70XH6> : I also thoguht it might be impossible, but then I read: <https://stackoverflow.com/questions/20677055/define-my-own-reader-macro-in-clojure>
+U04V70XH6 : Tagged literals begin with `#` -- like `#inst` and `#uuid` -- but that's not "reader macros".
+U04V70XH6 : Tagged literals have `#`, a namespace-qualified symbol, and a regular Clojure expression. The regular Clojure expression is read, then passed to the function associated with that symbol.
+U04V70XH6 : <@U3JURM9B6> We use tagged literals in our configuration library at work so we can define values in "special" ways.
+U3JURM9B6 : <@U04V70XH6> : (I know nothing about tagged literals / reader macros) -- so what you're saying is that (1) what tagged literals get is after macro expansion and (2) it's basically a function call with a single argument ?
+U051SA920 : How come `tools.deps.alpha` is using a map (which is merged with the default deps)? Doesn't that mean I can't specify the order of the deps? Which, IMO is crucial on the JVM.
+U06B8J0AJ : Just tried out Compojure API (2.0). <https://github.com/metosin/compojure-api>
+U06B8J0AJ : I had no idea it was this easy to set up an API. Is this normal?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,19 +1,155 @@
+U4RR7KX45 : thank you
+U4RR7KX45 : didn’t know about Ale :smile:
+U2JFD9ALE : Why is `toString` able to print a `type` that is not exposed from my module? Example:
 ```
-it looks like it isn't loading `lexer.rkt` from a `.zo`, so it would need to load rackunit to compile `lexer.rkt`
-try precompiling the lexer?
-ah
-compiling the lexer and expander count for .6-.7s… but it's still a lot more than it feels like it should be
-nice to see just how much is loading… I'll write a post-processor for that tracer output to report the expensive bits nicely
-hey. I made a thing to make profiling load times easier to figure out: <https://gist.github.com/d31e7d54e8350370b141393f4afc24d6>
-I'll port to racket later
-is there anyway to catch a `(values x y ...)` as a whole when passing it to a function?
-<@U60J15S1Y> ? can you explain?
-for example, I have a function `f` and it takes one argument, when applying `(values ...)` to `f`, I would like to use `(values ...)` as a single variable inside of `f`
-Something like <https://docs.racket-lang.org/reference/values.html#%28def._%28%28quote._~23~25kernel%29._call-with-values%29%29> , or maybe <https://docs.racket-lang.org/sugar/index.html?q=values-%3E#(form._((lib._sugar%2Flist..rkt)._values-~3elist))> ?
-(call-with-values (thunk (values 1 2 3)) list) ; ‘(1 2 3)
-but… I don't think you can make a function that takes a variable number of values… hence the thunk
-I do found `call-with-values` but it restricts me to put values inside of lambda, I'm just looking for a more elegant way to do this
-<@U60J15S1Y> why do you want to apply `values` as an arg? can you explain what you're trying to do?
-Might want to check out mu/nu from 86
-they look interesting
-Well, I have a function that returns `values`, I would like to compare the results of two applications of that function. Probably macro could do that?
+module FooBar (Foo)
+
+type Foo a = Bar (List a)
+
+init : List a -&gt; Foo a
+init xs =
+  Bar xs
+```
+
+and
+
+```
+import FooBar as FB
+import Html exposing (text)
+
+main =
+  text &lt;| (FB.init [1,2,3,4,5])
+```
+pretty much break encapsulation :disappointed:
+
+U2JFD9ALE : I mean in :haskell: I just don't _*derive*_ `Show` and it's home safe
+U2JFD9ALE : (I know, I know, I don't want to start a :elm: TypeClasses thing)
+U4872964V : <@U2JFD9ALE> `toString` is being moved to the `Debug` module in 0.19
+U2JFD9ALE : That is just what I was asking for !!! Partey !!!
+U2JFD9ALE : :discoball:
+U2JFD9ALE : <@U4872964V> do you know as from `0.19` if you compile without the `--debug` flag, that all `Debug.` will be marked as an error?
+U3SJEDR96 : I think debug.log would rather become a no-op, actually
+U2JFD9ALE : I mean, I would like people to avoid taking a _*shortcut*_:
+<https://github.com/rundis/albums/blob/master/frontend/src/ArtistListing.elm#L47-L50>
+
+and probably go through all the cases:
+
+```
+    let
+        status s =
+            ( toString s.code, s.message )
+
+        error err =
+            case err of
+                BadUrl url -&gt;
+                    "Invalid url: " ++ url
+
+                Timeout -&gt;
+                    "Request timed-out"
+
+                NetworkError -&gt;
+                    "No Network Connection"
+
+                BadStatus response -&gt;
+                    let
+                        ( code, message ) =
+                            status response.status
+                    in
+                        "Statuscode: " ++ code ++ " and message: " ++ message
+
+                BadPayload _ response -&gt;
+                    let
+                        ( code, message ) =
+                            status response.status
+                    in
+                        "Statuscode: " ++ code ++ " and message: " ++ message
+    in
+```
+
+U1CE9DL9H : there are legitimate cases for `Debug.crash` where elm's type system isn't strong enough to convince the compiler that something holds (for example a list is not empty), but it is nonetheless guaranteed
+U2JFD9ALE : wups, I'm taking a shortcut myself :smile: (`toString s.code`)
+U3SJEDR96 : <@U2JFD9ALE> that thing you linked to; I don't see how they're taking a shortcut or how it is related to debug.*?
+U2JFD9ALE : How do I convert numbers to strings if `toString` becomes part of `Debug`
+U3SJEDR96 : In case of an error, they return the old model and no new commands
+U3SJEDR96 : there will be a `String.fromInt` and `String.fromFloat`
+U2D7NUGS1 : Hello! Good day to you all!
+U2JFD9ALE : <@U3SJEDR96> I would rather have something like this: `Console.log "text"` rather than `Debug.log`
+U2JFD9ALE : Console.log should produce a `Msg` like all the other side-effects
+U2JFD9ALE : I mean `Cmd msg`
+U3SJEDR96 : I'm not sure I see the use-case, in general, for logging to the console _except_ for debugging purposes?
+U2JFD9ALE : That way I can built-in to my SPA if I want to provide the option to `log` to the `console`
+U3SJEDR96 : but if you need that, you can sure do that - have a simple `port emit : Json.Value -&gt; Cmd msg` and `app.ports.emit.subscribe(console.log)`
+U2JFD9ALE : I'm preparing a talk: _*"Data protection by design and by default" *_, which is GDPR (General Data Protection Regulation) related <https://www.meetup.com/Elm-Copenhagen/events/241530394/> where I will show case that from 2018-05-25, languages like :elm:, :haskell:, PureScript and Idris will really shine (<http://blog.stermon.com/articles/2017/07/14/haskell-why-many-people-so-stupid-about-gdpr>) but it will require that the language actually provides strict delimiters between pure and impure code :wink:
+U2JFD9ALE : so my example gets pretty much useless due (`toString`, `Debug.`, ...) and so. Therefore it would be nice if _*all*_ side-effects would be handled in a similar manner
+U4872964V : data protection cannot be handled in the front end, surely?
+U2JFD9ALE : It can
+U2JFD9ALE : Come to my talk :slightly_smiling_face:
+U4872964V : but it’s javascript in the end anyway
+U4872964V : i’m not sure i understand
+U4872964V : on the backend - for sure the language can help
+U2JFD9ALE : Once the slides are made, I'll send you a private message and you can decide :wink:
+U3S9BH05U : <@U2JFD9ALE> I'm interested in the slides too :smiley:
+U4872964V : <@U2JFD9ALE> sure thing
+U0TNXFS5D : I am trying to do a cross site posting and am having some trouble with Http.send &amp; Http.request. Http.request returns `Request ()` and Http.send says it is expecting `Request String`.  Where have I gone wrong?
+U4872964V : <http://package.elm-lang.org/packages/elm-lang/http/1.0.0/Http#request> seems to return `Request a` which should be fine
+U4872964V : you just have to pass the right `expect`
+U4872964V : Better to show the code instead
+U0TNXFS5D : I continue to get `Function `send` is expecting the 2nd argument to be:
+    Request String`
+
+U4872964V : because you handle its result as a `String`. If you do that, you also need to make sure the request actually expects a `String`
+U0TNXFS5D : OK, I think I get it. Thanks!
+U0TNXFS5D : <@U4872964V> - thanks again. took a couple of minutes before all was clear to me. All bright and shiney now!
+U2JFD9ALE : <@U0TNXFS5D> I normally write something like this:
+```
+getHttp : String -&gt; (Result Http.Error String -&gt; msg) -&gt; Cmd msg
+getHttp url msg =
+    Http.getString url
+        |&gt; Http.send msg
+```
+
+and call it like this:
+```
+(model, getHttp ("<http://google.com/?q=foo>") SomeMsg)
+```
+&gt; Note: I'm using `getString`
+
+U0TNXFS5D : I got all twisted up because of cross site posting
+U2JFD9ALE : And then I handle data like this:```
+            SomeMsg result -&gt;
+                case result of
+                    Ok txt -&gt;
+                        ( model
+                        , Cmd.none
+                        )
+
+                    Err err -&gt;
+                        ( model
+                        , Cmd.none
+                        )
+```
+
+U2JFD9ALE : &gt; I got all twisted up because of cross site postingAh, Roger that :slightly_smiling_face:
+
+U236M9FH9 : Sure, but you can modify it to return `(NestedPartOfModel, Cmd NestedMessage/Msg)` or whatever works best for your situation, maybe even take &amp; return the full model if you really want
+U236M9FH9 : But if a nested update only returns Cmds of Cmd.none, I'll just remove that part of the return value to show that it's "pure" in the sense it doesn't need to talk to the outside world
+U2GTQM83A : Hey beautiful people. Has anyone used the Elm architecture (update loop) in Haskell? If yes. Do you have any links for examples?
+U4872964V : For gchjs or general haskell code?
+U4872964V : (i have used it in neither :)
+U2GTQM83A : For general haskell code. ghc
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,216 +1,85 @@
+U4TGNN19D : hi all -- I'm using tools.cli and it's not clear how to pass multiple arguments to an option -- eg if I want an option to become a vector of numbers
+U4TGNN19D : nevermind -- ended up taking it as a string and doing this - `:parse-fn (fn [input ](into [] (map #(Integer/parseInt (str %)) input)))]`
+U2TCUSM2R : This is rather odd, but has anyone experienced an issue where dereferencing agents of collections truncates some of the elements?
+U051SS2EU : remember that send and send-off can return before their action finishes - or even before it starts sometimes
+U051SS2EU : ```+user=&gt; (let [a (agent []) f #(send a conj nil) g (fn [] (count @a))] (dotimes [_ 10000] (f)) (repeatedly 10 g))(6622 6687 6716 6735 6757 6776 6794 6825 6851 6880)
 ```
-also works with lists
-<@U051SS2EU> Hm... now to find out which dependency has the wrong core.async version...
-you can specify your own core.async version and the deps will have to use it
-or use `lein deps :tree` to see where it comes in
-<@U173SEFUN> Isn't that O(n) on the size of the new collection though? Why not just `(into [] (filter-nth ...) input)`
-(that is, if your deps is earlier in the deps list it overrides)
-<@U07TDTQNL> yea the underlying impl is O(n), but your snippet looks like O(n) as well
-oh it is
-but the whole idea behind conj and the like is that they are not O(n) on the size of the new collection
-so I would flag both of our approaches in a code review for being a possible bottleneck
-I don't think you can do better than O(n) for that task on a vector
-that's why we suggested finger trees
-performance and just being able to do the task elegantly are two separate things
-sometimes you need to remove an element from the middle of a vector and it's not a bottleneck
-unreasonable to require every operation to be O(1)
-even then I'd be tempted to use take + drop to do the same thing
-`(apply concat ((juxt (partial take 3) (partial drop (inc 3))) [1 2 3 4 5 6]))`
-or split-at or whatever it's called
-core.rrb-vector could be used aswell to keep performance sub linear
-`nthpath` can encapsulate the optimal method
-whatever it is
-has log subvec &amp; log vector cat
-I haven't investigated the optimal implementation for this particular task, but whatever it is it can be encapsulated behind the abstraction
-specter is optimal for most of its functionality
-<@U051SS2EU> Thanks, that worked! What a relief! Nothing more annoying than debugging the dev environment when in a hurry :slightly_smiling_face:
-on that we'll agree to disagree
-what are we disagreeing on?
-I think nathan was talking about performance &amp; tim about api?
-yeah, I mean the problem is that specter in this case abstracts so much away that I really don't know what it's going to do
-you don't know what it will do semantically or performance-wise?
-performance wise, there's a underlying assumption in specter that it will do "the right thing" while maintaining the data type. Many times I don't care about the datatype, instead I care about performance.
-so our definitions of "optimal" differ
-the original questioner asked about removing an element from a vector, which sounds like he cared about maintaining the datatype
-perhaps, but sadly I've run into too much code already that falls apart because someone did (nth ...) on a seq.
-I really don't understand what you're asserting there
-And what does "the same type" mean in the face of PersistentArrayMap? (I'm actually wondering on this one)
-`MAP-VALS` or `ALL` on a `PersistentArrayMap` output another `PersistentArrayMap`
-even one that's already above the threshold
-which is surprisingly possible
-and if I do something that grows it?
-you can't grow it with those operations
-whatabout ops that you can grow with
-they'll convert to PersistentHashMap
-maintaining the literal type isn't the goal of specter, rather to maintain a type with the same expected semantics
-PersistentHashMap and PersistentArrayMap are implementation details
-that specter maintains PersistentArrayMap on `ALL` and `MAP-VALS` is because that's the most performance optimal way to do the transformation
-I've used an array map to maintain ordering for writing out columnar data, a persistenhashmap would make my site more dynamic than i like.
-yea there are isolated cases like that where it matters but not for 99% of use cases
-for sure
-i hate some of the subtleties of the clojure datatypes
-like conj being beginning of a vector and end of a seq
-or backwards sorry
-I also hate some of the side effects of these datatypes, and that's why I've backed off a bit from specter, hiding all these complexities behind a abstraction is nice, but it leaks in performance. How fast is "remove nth"? Well it depends...
-Same is true of recursive concat, conj, etc.
-what do you mean "side effects of these datatypes"?
-bad wording, sorry
-"subtleties of these datatypes"
-figured. but wanted to know what you meant
-ah yeah
-actually for most uses of specter it's extremely difficult to outperform it
-So yeah, back to the original problem, I think we should educate users of Clojure to say: "What you are trying to do isn't supported natively by the datatype, you can fake it in these ways, but it's going to have performance problems with larger collections".
-for most programmers I would say it's impossible because it requires too much internal knowledge of clojure
-<https://github.com/nathanmarz/specter/blob/master/src/clj/com/rpl/specter/navs.cljc#L253>
-that's 60% faster than next best method for transforming every value of a small map
-as for "remove nth", specter is probably not currently optimal but that's only because the work hasn't been put into it
-the abstraction can be optimal
-optimal given the input data type...that's the catch
-how is that a catch?
-it can run different code for different data types
-remove-nth will always be O(n) on a vector. No way to improve that. However, by educating users as to how the underlying collections work, maybe the'll reach for a different more optimal datatype.
-I 100% agree it's the programmer's responsibility to understand the data types they're using and the impacts of that, but that's completely orthogonal to specter
-specter lets you manipulate your data way more elegantly, especially compound or recursive data, and in many cases with far better performance
-I completely reject characterizing it like some magic library with performance "leaks"
-I don't think <@U07TDTQNL> was blaming specter for the "leaks" -- but rather, unless you already have a mental model of how the nested datatype looks, you can have a single piece of Specter code that is (1) very fast for certai nstructures and (2) very slow for other structures, because some stuff are O(log n) or O(n) depending on the underlying datastructure
-whatever the underlying types are, specter will do the operation in the fastest way
-it's the responsibility of the programmer to choose the most appropriate types for their app
-criticizing specter for a programmer choosing inappropriate types doesn't make sense
-3. I think "leaky" here just means -- as a programmer, you have to keep track of the underlying data structures, i.e. it's "leaky" in that you can't ignore the underlying details; not "leaky" as in space/time leakage.
-I think this is the standard definition of "leaky abstraction."
-I wouldn't call that leaky
-"leaky" more appropriately refers to details that you have to worry about that should be encapsulated
-[I think this 'leakiness' problem can not be solved -- i.e. any attempt to build a DSL that allows easy manip of heterogeneous datastructures will have to deal with this[]
-Just to be clear, I don't know of a way to improve Specter -- I think it's hit local optima -- and this 'leakiness' is a fundeamtanl problem due to different data structures having different runtimes.
-data structures are never a detail that should be hidden away
-we're just quibbling over terminology, I think we agree on the underlying principle
-:slightly_smiling_face:
-Let's argue over something else,
-like ... where can i get a good set of exercises for learning how to write a nanopass compiler :slightly_smiling_face:
-I'm watching the 2013 clojure conj <https://www.youtube.com/watch?v=Os7FE3J-U5Q> talk ... and I really want to try this out.
-we can agree on that :slightly_smiling_face:
-<@U3JURM9B6> records for the AST, postwalk for the passes, run till fixpoint, about all there is too it
-or hashmaps even for the ast, whatever you prefer
-or you could get creative and event source a queue of characters and fold over it to generate a projection representing your compiled code
-just kidding, don't do that
-depending on your source and target you can do it without an ast
-if you say your target is a superset of your source, it is macroexpansion
-(or pretty close)
-true, but working with order dependant types is unpleasant
-may be better with spec, but {:keys [fn-name body]}) is easier than `[_ fn-name _ body]`
-sure
-<https://github.com/hiredman/qwerty> "macroexpands" a lisp in to something like go in parens, then the emitter strips the parens so you can feed it to the go compiler
-cool!
-I dunno if it rates an exclamation point, it was fun to fiddle with it for a while, then I gave up on it
-hmm, and if I write the passes as transducers, can I easily get a monolithic compiler out o fthis?
-you can, but you'll quickly find that some passes need to be run more than once, or need to be run before/after other passes
-tools.analyzer is a nano-pass compiler imo.
-and in different traversal orders
-yeah that too.
-<@U060FKQPN> does tools.analyzer.jvm still walk the AST backwards for locals clearing? Maybe I'm mis-remembering, but I thought that was cool the first time I saw it.
-yeah
-makes the algorithm much simpler than walking forward &amp; collecting usage points
-I did it that way just because I couldn't understand the forward algorithm implemented in Compiler.java TBH :)
-I'm struggling to wrap my head around clj-oauth.  All the examples use twitter, but I can't seem to get it to work with Google.  Google and twitter's terminology doesn't seem to be the same, and it's confusing the heck out of me.  Are there any examples using  google's api I can look at?
-I'm having trouble with core.async pub/sub. It seems like there must be something I'm not understanding. I can see that my system sometimes is publishing a lot of events really close together. Say 20 within 2 seconds. There are times that all but one of my subscribe loops (event listeners) aren't doing anything during this burst of activity. Then a while later (a couple of min sometimes) during another burst of publish activity the subscribe loops come to life and grab some data and push on to the subscriber channels.
-I started out by not using any buffering on the channels. I'm not really clear when additional buffering makes sense or not
-It really seems like some of my published events are being lost
-the first thing to do is check that your topic-fn is returning values from the set of things you are subscribing to
-when just using (chan) for pub should my source threads block if the subscribers are idle?
-yea, I have lots of debug messages that all looks pretty good
-how sure are you?
-well I currently only have one topic
-like, are we talking strings you know are byte for byte the same?
-my topic is just a keyword
-the next thing to log would be the identity (pr-str prints out the identity hash if I recall) of each thing involved
-to make sure you are creating the pub/sub on the same channel you are publishing to, and you are subscribing to the same pub/sub you are publishing to
-if the channel you are publishing to isn't being consumed for some reason, your publishes with block if there is no buffer, and will block once the buffer is full
-if I recall, a pubsub will consume everything and just ignore messages it has no subscribers for
-right, that's the thing, it appears that my publishers never block
-so I would double check your topic-fn, make sure it returns what you think it does on the inputs to the channel
-when no buffer is supplied to the channel, does that mean it will block after the first put, until the first take?
-e.g. if your topic-fn is a keyword, and your messages are maps, calling a keyword on a map that doesn't contain it would just return nil
-yes, that is how my events are structured just as maps
-so invoke your topic-fn on one of the maps to see what it returns
-that's the thing it all works fine when I do it by hand, things get weird once there is lots of simulatneous activity
-based on my logging I can see all the topics that are published and those that are received by the listenr loops
-how do you know your publishers don't block?
-I say that just based on my theads that push out lots of messges saying that they're publishing.... hmm wait you might be on to something
-my log message happens right before I push not after, I might be misinterpreting whats going on
-push=publish
-ok, made some changes to logging and restarting everyting,
-so could you help clarify about when is it appropriate to specify a buffer in these sceanrios?
-If things lock up under lots of activity, and you aren't buffering, and lots is &lt; thousands, I'd double check for blocking ops in your go blocks.
-yea I'm not into thousands of events, generally should be less than 50/sec
-buffering is going to mask any problems with feedback you have
-ok, just got a big burst, it looks like I'm not blocking when I publish, the pre/postpublish log messages are all within the same millisecond
-it sounds like you are interfacing regular thread using code and core.async, and my bet is you are either using put! to publish or (async/go (&gt;! ...)), when you should be using &gt;!!
-Also, go blocks can die without visible feedback or error messages, you could just get backed up as consumers silently fail.
-yes, I'm using async/go &gt;!
-the question is how you using it
-its funny but every example of pubsub I came across did it this way
-if you create a go block from a normal thread, you should wait for its result using &lt;!!
-I mean,  I am kind of guessing here  and what are likely to be issues
-I still think it is some kind of issue with your topic-fn, but you have assured me it isn't
-is identical? guaranteed to be an O(1) time pointer comparison
-if the publishers aren't actually blocking, all the symptoms point to a disconnect between pub and sub, the likely reason is the result of topic-fn isn't what you think
-so I might do something like replace the topic fn with `(constantly 1)` make a channel subbed to 1, and verify it is getting all the traffic
-<@U0NCTKEV8> ok, but I think based on what <@U051SS2EU> was saying is that my usage of go (&gt;! ...)  could be the prob
-literally all of my topics are the same {:transformer-event :ev1 or :ev2 or ev3}
-definitely, like I said, "if publishers aren't actually blocking" if they are blocking and you just can't tell, or they are just dying, then that would be your problem
-cool, I'm gonna change my publish to use &gt;!! and see how that affects the situation
-`&gt;!!` is really blocking, not for use in go blocks, only for use on real threads
-yea I took out the go block
-doesn't seem to be making any different behavior
-your producer threads are still not blocked?
-I have a log message before the publish and another after, and they are always within a millisecond
-doesn't look blocked to me
-are you sure those aren't spurious log messages coming from threads left running from a previous attempt?
-valid question, I'll restart the whole shebang
-this is really puzzling to me.
-given that I'm not buffering what are the scenarious that would cause events to be dropped?
-well, you could think events are being published when they are not, because your producers are just blocking. the topic-fn could be returning something you are not subscribed to so messages get dropped, or your subscribers do get the messages and just don't do anything
-givent that I only have 1 publication on one channel there should be no pub log messages that are publishing into nothing
-there are however of course several sub channels and loops
-are you sure you are subscribing to the same pubsub you are publishing to?
-ok, now i'm finally seeing some blocking
-I see several pre publish logs, with no coresponding post publis logs
-right, that blocking is back pressure being communicated back from the downstream async bits, which are stuck where or going really slow
-are the down stream bits re-publishing to the same pubsub?
-no thats part of this whole business I've never been too clear on. I have no logic for re-publishing
-by downstream bits are you referring to the sub handlers?
-yes, things downstream of the pubsub
-oh, well my sub handler loops publish on to the sub channels, is that what you mean?
-the sub channels are obviously differnt than the pub channel
-that could be the source of deadlock
-whenever you have a feedback loop (a process that feeds output back in to its input) it is really easy to deadlock
-since the sub channels don't have a buffer, publishing to them blocks until someone else consumes from them
-depending on what you are doing, adding a buffer might fix it, or might not, because a buffer is fixed in size, and if you feedback more than the size of the buffer, you are deadlocked again
-ok let me get this straight, my listener loops take off of the sub channel
-the clojure publisher logic puts on to the sub channel based on the topic-fn
-all of my sub loopse run forever taking from the sub channels and then calling a handler
-I think you're saying if my sub loops get stuck then that could be causing the deadlock, like handler never returning I guess
-oh
-if you are calling a function that never returns that is another problem
-you cannot do that kind of thing from a go block
-that would all make sense if the whole thing locked up and never recovered, but that doesn't happen
-it will block the threadpool go blocks use
-no I don't thnk I'm calling a function that runs forever
-I'm not seeing anything like that
-if my handlers got stuck the whole system should eventually lock up, and that never happens
-or if they run slow,  or if they do blocking stuff on the async threadpool
-the handlers can be slow compared to the publishers, when there is lots of activity, they all run in their own go blocks
-you are ddosing the async threadpool
-too much activity for the go blocks that the handlers are in?
-I dunno about too much
-it sounds like everything is behaving as designed, feedback is slowing your publishers to a rate that matches the consuming
-well except for the lost events
-that I still don't understand
-in this case, the processes reading from the sub channels aren't able to get time on the threadpool to run
-are you sure they are lost? or are they just waiting to run in a completely backed up system
-you see the thing is, my publishers are bursty, there are short periods of busy activity and long periods of relative calm,
-given that the system never locks up, all events should eventually be handled in the calm period, but that isn't what is happening.
-aggh, I'm gonna have head home soon, thanks for being a sounding board on this pub/sub stuff
-you might want to look at one of the pipeline variants, it may simplify things a lot
-I didn't even know about pipelines, something new to learn tomorrow I guess
-cool, thanks, have a good evening (or what ever timezone appropriate part of day is appropriate)
+
+U2TCUSM2R : <@U051SS2EU> that's got to be it. I think I just got confused because I'm creating and returning the agent from inside a macro. That's where I see the trouble. If I create a `def` for the return value and then `deref` that it waits just long enough for the last results
+U051SS2EU : there's the function `await`
+U2TCUSM2R : Thanks, Justin! :slightly_smiling_face:
+U2TCUSM2R : Oh...actually I didn't realize `await` depends on the `:done` key. I'm using an `int-map` so no keywords...
+U051SS2EU : what?
+U051SS2EU : there's no magic :done key, await just lines up a lock that won't unlock until every pending action is done, then waits on it ```(defn await  "Blocks the current thread (indefinitely!) until all actions
+  dispatched thus far, from this thread or agent, to the agent(s) have
+  occurred.  Will block on failed agents.  Will never return if
+  a failed agent is restarted with :clear-actions true."
+  {:added "1.0"
+   :static true}
+  [&amp; agents]
+  (io! "await in transaction"
+    (when *agent*
+      (throw (new Exception "Can't await in agent action")))
+    (let [latch (new java.util.concurrent.CountDownLatch (count agents))
+          count-down (fn [agent] (. latch (countDown)) agent)]
+      (doseq [agent agents]
+        (send agent count-down))
+      (. latch (await)))))
+```
+
+U2TCUSM2R : Oh, ok. I was confused by Clojure Docs: <https://clojuredocs.org/clojure.core/await>
+U2TCUSM2R : I'll have to see why it's not still working
+U051SS2EU : one possibility is that something is calling send after you call await?
+U2TCUSM2R : I would assume
+U2TCUSM2R : Here's the macro:
+U2TCUSM2R : I think `await` isn't doing anything since it can't know whether `pdiff` has finished
+U051SS2EU : it does do something - it waits on all actions that have been submitted before it is called - but you need something different if you want to wait on things pdiff might initiate after the point await is called
+U051SS2EU : also calling def on the output of gensym is super weird -why not a let block?
+U2TCUSM2R : I'm confused as to what you mean in your second statement
+U051SS2EU : def always creates namespace level bindings, using def with a gensym is weird because how would you even know which thing to look for later?
+U051SS2EU : let is for locals, so I would expect let instead in a scenario like this
+U2TCUSM2R : Oh, the gensym isn't quasiquoted
+U051SS2EU : that has nothing to do with it
+U051SS2EU : def creates a new var in your namespace
+U051SS2EU : oh - I see, you create the gensym def once
+U051SS2EU : that guarantees that pdiff-once is a race condition if it's used in two threads though
+U0BKWMG5B : What's the purpose of the macro?
+U051SS2EU : that's another good question
+U2TCUSM2R : The purpose of the macro is to automate three calls in one: creating the agent, calling pdiff, and returning the contents of the agent
+U051SS2EU : if two threads use that macro, the second one will replace the data used by the first
+U051SS2EU : it's extremely unsafe
+U0BKWMG5B : Okay, but why not:```
+(defn pdiff-once [poly order]
+  (let [tape (agent (i/int-map))]
+    (pdiff poly tape order)
+    (await tape)
+    @tape))
+```
+
+U0CGFT70T : why this: ```router=&gt; (if-let [{params :params} {}] (str "params:" params ".") "NOT-defined")
+"params:."```
+
+U0BKWMG5B : <@U0CGFT70T> because {} is not falsey.
+U2TCUSM2R : weavejester: let me try that. I'm not sure it'll work, but I'm relatively new to agents.
+U0BKWMG5B : `(if-let [params (:params {})] ...)`
+U0CGFT70T : <@U0BKWMG5B> : thanks :slightly_smiling_face:
+U0BKWMG5B : With if-let, the expression on the right needs to be `nil` or `false` to fail
+U0CGFT70T : trying to hit else if params not defined
+U0CGFT70T : <@U0BKWMG5B> ok...
+U0BKWMG5B : <@U2TCUSM2R> You could also use a promise.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

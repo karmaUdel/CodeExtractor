@@ -1,0 +1,81 @@
+U4872964V : So, if you change your view so that the node is rerendered, then, if you use ports, you need to send a new message to initialize the js component, but if you use a MutationObserver, that will trigger automatically
+U37HUSJ4R : I am trying to update  a `WebData` record (<http://package.elm-lang.org/packages/krisajenkins/remotedata/4.3.0/RemoteData#WebData>)
+U37HUSJ4R : can someone explain why `RemoteData.map (List.map (\l -&gt; l)) model.data` wouldn't work
+U37HUSJ4R : where `data` is a `WebData Foo`
+U37HUSJ4R : I want to update a record but first just trying to get something to compile
+U4872964V : because Foo is not a list?
+U4872964V : what’s the error message
+U37HUSJ4R : ```Function `map` is expecting the 2nd argument to be:
+
+    RemoteData Http.Error (List a)
+
+But it is:
+
+    WebData Foo
+```
+
+U4872964V : Yes, so Foo is not a List
+U37HUSJ4R : ok so `Foo` looks like
+U37HUSJ4R : ```type alias Foo =
+    { bar : List String
+    }
+```
+
+U4872964V : Yes, and that is not a `List`, but you’re trying to use `List.map` on it.
+U37HUSJ4R : but if I try and do `model.foo.bar` I get
+U37HUSJ4R : ```The type of `model.data` is:
+
+    WebData Foo
+
+Which does not contain a field named `bar`.
+```
+
+U3SJEDR96 : `RemoteData.map (\foo -&gt; { foo | bar = List.map (\l -&gt; l) foo.bar })`
+U3SJEDR96 : or split that lambda of into a proper `Foo.mapBar : (List String -&gt; List String) -&gt; Foo -&gt; Foo`  function
+U4872964V : To sort these things out, try to make a function to update a Bar, then make a function using that to update a Foo, then make a function using that to update the whole shebang
+U6B9DCP28 : This code`
+type Msg
+    = CreatePerson Person
+    | PersonCreated (Id, Person)
+cmd : Cmd Msg
+cmd = Cmd (CreatePerson (Person “Vasya” “Pupkin”))
+`
+gives strange error message:
+```
+-- NAMING ERROR ----------
+Cannot find variable `Cmd`
+
+28|         cmd = Cmd (CreatePerson (Person "Vasya" "Pupkin"))
+                  ^^^
+Maybe you want one of the following?
+
+    cmd
+    Html.dd
+    Html.em
+    Html.img
+```
+
+But it works ok when I wride `cmd = Cmd.none`
+Any ideas?
+
+U48AEBJQ3 : <@U6B9DCP28> There is no exposed constructor for `Cmd` you can't create them like that.
+U48AEBJQ3 : If all you want is to have the runtime invoke `update` with a particular message, the simplest way is to just call `update` where you want it, but you are usually better off splitting off the shared functionality to its own function and then calling that from multiple places.
+U4872964V : <@U6B9DCP28> here is more info about `Cmd` <https://guide.elm-lang.org/architecture/effects/>
+U4872964V : Cmds are not for sending messages, cmds are for doing effects that return messages
+U37HUSJ4R : <@U4872964V> I took your advice
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

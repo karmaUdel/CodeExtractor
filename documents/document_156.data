@@ -1,20 +1,48 @@
+U08FM7RL1 : okay, this is what I'm looking for
+U08FM7RL1 : please explain
+U08FM7RL1 : if you would be so kind
+U050MP39D : I think this thread should explain it for you <https://groups.google.com/forum/#!topic/clojure/OeXZOJYydAs>
+U08FM7RL1 : very helpful, thank you <@U050MP39D> !
+U050MP39D : no worries, I remember finding that consequence  pretty interesting myself
+U050N5T47 : Anybody have tips or know of a write up or library for implementing fine grained role based permissions in a ring/compojure web app? I mean something like check that this particular user has a role with permissions to delete/modify this particular record.
+U0K0TFQLW : <@U050N5T47> friend can help with that: <https://github.com/cemerick/friend>
+U050N5T47 : Thanks <@U0K0TFQLW> I want something like the authorize macro but more focused and easier to use (with docs) to recommend to another developer.
+U050N5T47 : Also, that doesn't depend on friend specific attributes (like *identity* being bound, hierarchical keywords, etc.)
+U3QUAHZJ6 : is it possible to update 2 keys at once inside a map using clojure's `update` function? something like```
+(update {:a 20 :b 10} :a inc :b dec)
 ```
-oh, that's interesting
-I've noticed my bots not responding after I leave them overnight
-but I hadn't tried to debug it yet
-Hm, that is actually using the ws module's `ping()` which sends a WebSocket-level ping, and doesn't actually seem to expect/fail if it doesn't get a proper socket-level pong response.
-I'm going to work on adding application-level ping/pong response to Botkit, see if I can get this working.
-<@U0HKDKHD4> Orlando, as in Orlando, FL?? is there is a Slack Dev Meet up here? I am out of Orlando, my office is at the UCF's research park, been looking for a meetup here.
-heck yeah bro
-<http://www.meetup.com/Orlando-Slack-Developers-Meetup/>
-<@U0U9DQ4TH> I'd be interested to see what you discover
-damn dude, i had no idea, I will be seeing you there then :simple_smile:
-<@U0T6UC25P>: <@U0HKDKHD4>  See you guys Wednesday
-Does anyone know if the Slack RTM API endpoint's WebSocket implementation IS supposed to respond to WS-level ping (0x09) messages?
-<@U0U9DQ4TH>, according to the docs, it is supposed to
-Well, I get no PONG responses back (0x0A).
-Note, I'm talking about the WebSocket-level protocol ping/pong messages, not application layer.  I'm specifically asking if anyone here who works for Slack and can look at the WS code that's in use on their servers can tell me if this has been implemented or not.
-&gt; Not all web browsers support the WebSocket ping spec, so the RTM protocol *also* supports ping/pong messages.
-<@U0D7LHNTX> can probably check with the team whether it's actually implemented
-Have you tried using our own special PING message?
-I know that the message servers didn't used to respond to WS pings, but should do so now.
+
+U0K0TFQLW : all you really need to do is have some ring middleware that populates a session key containing a user-id in the ring request. then your controllers can take that user-id and build whatever authz (role-based, fine-grained permissions based on models, etc) that you want
+U0K0TFQLW : there are a bunch of helpers for doing things like working with encrypted+signed session cookies
+U050MP39D : <@U3QUAHZJ6> not with update afaict, reduce works though (reduce #(update %1 %2 inc) [:a :b])
+U5ZAJ15P0 : <@U3QUAHZJ6> what about this?```
+(merge-with #(%2 %1) {:a 20 :b 10} {:a inc :b dec})
+```
+
+U050MP39D : ^that's pretty bloody cool
+U051SS2EU : or `(-&gt; m (update :a inc) (update :b dec))`
+U051SS2EU : which I think tends to be the version that is easy to read and refactor
+U09FEH8GN : So how do you provide high availability? Right now in prod we just have on JVM instance that handles our web traffic, datomic peer, and background jobs. It's handling the load fine but we don't want it to be a single point of failure. Also it's been nice to reason about things by just having one process.
+I figured we could take two approaches. The Datomic transactor approach, have a backup instance that just sits idle and takes over if the main instance dies. The other is to have a pool of instances that can operate independently, possible separate web workers from background job workers. Sort of like the way Rails does it.
+
+U050ECB92 : ^ that GenericVersionScheme already proved useful
+U050ECB92 : you can't override the broken spec.alpha reference from 0.1.94 to 0.1.123 right now, because the comparator is busted
+U07TDTQNL : <@U09FEH8GN> most systems I've worked on use a load balancer and more than one web server. If one server goes down the loadbalancer stops sending requests to it
+U09FEH8GN : <@U07TDTQNL> do you see anything inherently flawed about the Datomic transactor approach for web servers? Just because we built our whole architecture assuming one instance.
+U07TDTQNL : It's really hard to implement
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,3 +1,83 @@
+U14Q8S4EM : I dont know if that helps. Hopefully you'll be good if you replicate my steps.
+U0LPMPL2U : there's a couple packages that provide one
+U6D3ERLA1 : yeah <@U0LPMPL2U> the level of complexity is fairly low and I'm brand new to Elm so I'm trying to get everything done with primitives for now
+U6D3ERLA1 : although i've heard there are issues with the Array type
+U0LPMPL2U : fair enough
+U0LPMPL2U : if you find yourself iterating through your grid a lot, it might make sense to write a single `gridMap` function
+U6D3ERLA1 : mmm that's a good idea
+U14Q8S4EM : Personally, I almost never write anonymous functions.
+U14Q8S4EM : And I always do something like what <@U0LPMPL2U> suggested
+U6D3ERLA1 : still a bit of a paradigm shift for me...
+U6D3ERLA1 : ```mapGrid func =
+    Array.indexedMap
+        (\y row -&gt;
+            Array.indexedMap
+                (\x val -&gt;
+                    func x y val
+                )
+                row
+        )
+        grid
 ```
-Works fine when using it with Http.send
-So, you pass that to `RemoteData.sendRequest` which gives you a `Cmd (WebData State.ValidationResponseType)`
+
+U6D3ERLA1 : I guess this still has \s in it
+U2SR9DL7Q : <@U14Q8S4EM> thanks. I'll do a rebuild and see if it helps
+U2U94G0QG : idk - converting `number &gt; String &gt; Float` just feels icky - maybe it's not so bad in reality?
+U5W86UED6 : <@U6D3ERLA1> it's a matter of personal preference, but maybe let over lambda?
+```
+mapGrid func grid =
+    let
+        mapRows y row =
+            Array.indexedMap (mapColumns y) row
+
+        mapColumns y x val =
+            func x y val
+    in
+        Array.indexedMap mapRows grid
+```
+
+U6D3ERLA1 : ok
+U5W86UED6 : ah, yes, that is pretty unappetizing
+U5W86UED6 : maybe the solution is an `averageFloat` and an `averageInt` function?
+U5W86UED6 : I suppose `average` could put the constraint on needing to have a list of floats, and a separate piece of your program would ensure the conversion when building a list
+U5ABF3BH7 : Hello! Does anyone have examples of decoding for union types, using Json.Decode.Pipeline? I have found examples that were outdated.  For example, I have the following type  ``` LocationType
+    = PersonResidence
+    | InTransport
+    | Hospital
+    | NursingHome
+    | Hospice
+    | CommunityBasedResidentFacility
+    | Other ```
+
+From my Json object, I have  
+```{"type_" =&gt; "Person's Residence"} or {"type_" =&gt; "In Transport"}````
+, etc….
+I want it to be changed into a Union type into my model
+
+```locationDecoder : Decoder Model
+locationDecoder =
+    decode Model
+        |&gt; Json.Decode.Pipeline.required "type_" string
+   ```
+won't work as it created a field that is a string and not a Union Type. How can I use the method locationfromString : String -&gt; LocationType in my decoder?
+
+U2U94G0QG : well the OP was asking for a function that looked like `average : List number -&gt; Float` and I just made that gross thing - how would one go about determining if a `number` was `Int` or `Float` in Elm?
+U1UGYHGCA : `Json.Decode.map` probably
+U14Q8S4EM : Here is some code I wrote up that decodes to a union type <@U5ABF3BH7>
+U14Q8S4EM : <https://github.com/Chadtech/Chadtech-Online-2-Post-Composer/blob/master/source/Types/Model.elm>
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

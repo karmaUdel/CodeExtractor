@@ -1,2 +1,406 @@
-    to = [to]```
-you should transform your string of emails ('<mailto:email1@mail.com|email1@mail.com>, <http://email2.mail.com|email2.mail.com>'), so that it becomes a list with each element being a proper email address
+U4F64AKQV : My mistake, you are right that elm-community/graph does not support multigraphs.
+U4H406NET : Can you export type alias's from modules?  If I want to use the same type alias in several modules what is the correct way to do that?
+U1CE9DL9H : yes
+U1CE9DL9H : it works just like types
+U1CE9DL9H : so `module yyy exposing (SomeTypeAlias)` and `import yyy exposing (SomeTypeAlias)`
+U4H406NET : I am doing something silly then.  My code says the type alias is not defined.
+U4H406NET : module ModelDef exposing Model(..))
+type alias Model = {
+    loggedin : Bool,
+    name : String,
+    password : String
+}
+
+U4H406NET : Sorry, this should be in beginners
+U1CE9DL9H : it should be `module ModelDef exposing (Model)`, the `(..)` exposes the constructors for types, but a type alias doesn't have any, so that doesn't work
+U4H406NET : Thank you, on to the next error.
+U17P7CBFB : How is this even possible? ```
+-- TYPE MISMATCH --------------------------------------------- .\./src\Graph.elm
+
+Tag `Graph.Node` is causing problems in this pattern match.
+
+221|     Just (Node node) -&gt;
+               ^^^^^^^^^
+The pattern matches things of type:
+
+    Node comparable data edgeData
+
+But the values it will actually be trying to match are:
+
+    Node comparable data
+
+```
+
+U0JFGGZS6 : phantom type by accident?
+U1CE9DL9H : can you share the definition of `Node`?
+U17P7CBFB : nvm, forgot to add the extra type variable in the function definitions that this function used :slightly_smiling_face:
+U17P7CBFB : it was probably in the wall of error messages somewhere
+U17P7CBFB : I just read top-down
+U17P7CBFB : Just spent about 10 minutes finding out that elm-format replaced `a _data b` with `a _ data b`, giving the function an extra argument &lt;.&lt;
+U0JFFPRHP : (elm-format does that because elm-make also parses `a _data b` as having three arguments, so it just makes the mistake more obvious :slightly_smiling_face: )
+U5W5F6QGP : oh really? That's interestingNever run into that issue, but it's definitely noted now
+Guess it's good behaviour on the part of elm-format then, that's awesome
+
+U17P7CBFB : I'd say it's bad behaviour on the part of the compiler ^^,
+U17P7CBFB : thanks for letting us know, <@U0JFFPRHP>, had no idea it did that
+U17P7CBFB : too much elixir lately, so I named it `_data` :slightly_smiling_face:
+U17P7CBFB : or maybe not too much, but a lot of
+U17P7CBFB : I guess that's a useful thing to know if you're golfing in Elm :stuck_out_tongue:
+U14Q8S4EM : I dont suppose anyone has a good estimate on when 0.19 comes out?
+U14Q8S4EM : I bet its soon.
+U14Q8S4EM : How soon I wonder.
+U5XC2FJ1Y : Mt 24:36
+U57KYFW67 : Apologies for crossposting, but I figure this is an equally appropriate place to ask. What does the Elm syntax [&lt;ident&gt;| ... |] mean? I saw it in the WebGL talk and I've never seen it before. Is it a macro construction?
+U153UK3FA : <@U57KYFW67> it’s compiler magic specifically to implement webgl shaders
+U153UK3FA : It’s not something you can define yourself and it’s not something used for anything else
+U57KYFW67 : ahhhhhhh
+U57KYFW67 : <@U153UK3FA> Ty, though.
+U5FU80S06 : How do I set an html `&lt;scroll-container&gt;` in Elm, as used in the example here: <https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior> ?
+U2LC0U8JY : how are you folks handling logging in elm apps?
+U2LC0U8JY : is there a way to send all messages e.g.?
+U2LC0U8JY : some kind of middleware concept?
+U1ZFF0E5P : well you don't have runtime errors, so anything that can fail in your code will be modelled accordingly
+U1ZFF0E5P : typically using a `Result` type
+U2LC0U8JY : so for redux i use something like <http://logrocket.com|logrocket.com>
+U2LC0U8JY : which makes it super easy to plug into and get Actions logged
+U2LC0U8JY : Is the only way in elm to add the log statements myself wherever i want them?
+U1ZFF0E5P : yes
+U2LC0U8JY : hmm the main update function should be enough right? :thinking_face:
+U1ZFF0E5P : logging something is a side effect
+U1ZFF0E5P : so yeah in the update function
+U1ZFF0E5P : it's the only place where you can ask the runtime to do side effects
+U1ZFF0E5P : out of interest, do you use redux thunk?
+U2LC0U8JY : more on the angular side
+U2LC0U8JY : ngrx
+U2LC0U8JY : store / effects
+U1ZFF0E5P : oh okay
+U1ZFF0E5P : but yeah unlike in redux, your update function also returns a list of side effects
+U2LC0U8JY : yes
+U1ZFF0E5P : are you trying to log bugs or something else?
+U2LC0U8JY : no, thought more about getting the story of a user
+U2LC0U8JY : similar to what logrocket does
+U2LC0U8JY : having the full list of actions (messages) happening tells you exactly what happened before a bug
+U2LC0U8JY : but i guess i can achieve this in the main update function
+U1ZFF0E5P : yeah
+U2LC0U8JY : that already helped, thx :thumbsup:
+U1ZFF0E5P : but honestly, you won't ever have runtime errors in elm
+U2LC0U8JY : yeah but still bugs :wink:
+U1ZFF0E5P : if you haven't already, have a look at this, it's awesome: <https://www.youtube.com/watch?v=IcgmSRJHu_8>
+U2LC0U8JY : yeah i have seen that
+U1ZFF0E5P : oh cool :slightly_smiling_face:
+U5YDC1YUW : what's the format for sending multiple things over a port? `port enableButton : String -&gt; Bool -&gt; Cmd msg` seems to be having issues
+U3SJEDR96 : You can send a tuple, a list or a record
+U5YDC1YUW : ah I see, cheers!
+U5QV0AZM3 : Anyone with a app example using Rails, GraphQL and Elm?
+U0Z9TPK7S : My assets are in `assets/` and my src is in `src/`. How do I tell elm-reactor to search assets in `assets/` rather than in `src/assets/`? So far I have to modify my code to use `../assets/` which kind of sucks.
+U41NK9BM4 : I have still to grasp what GraphQL is
+U41NK9BM4 : I’ve looked at the website but understood very little.
+U2JA29EKF : passiomatic: this may help - <https://changelog.com/podcast/255>
+U41NK9BM4 : <@U0Z9TPK7S> Ah yes, a great classic. I’m struggling with that too. I thought to use a symlink but at least on MacOS it doesn’t work
+U41NK9BM4 : I’m curious how to fix that. Actually I copy paste the folder when needed
+U3SJEDR96 : I generally have an `index.html` in my root, and embed the Elm app there; so which also lets me refer to `assets/`
+U0Z9TPK7S : Right now, I just renamed src/Main.elm as src/App.elm, which exports `main`.
+U3SJEDR96 : <https://blog.ilias.xyz/elm-reactor-and-custom-html-9e7143553807>
+U0Z9TPK7S : Then I have a Main.elm in `./` which just imports App.elm and then uses `main = App.main`
+U41NK9BM4 : Lemme see :slightly_smiling_face:
+U0Z9TPK7S : Which doesn't work
+U41NK9BM4 : I’m not sure I understand that trick. I’ll check at home if that fix my issue. :slightly_smiling_face:
+U0Z9TPK7S : I created a `Main.elm` outside of src/, so that its relative position to assets/ is the same as when the app does NOT run on elm-reactor.
+U3SJEDR96 : wouldn't you also have to change your `source-directories` for that to work?
+U41NK9BM4 : I suppose that one has to prepare another `index.html` for a `dist` release, right ?
+U41NK9BM4 : That second `dist/index.html ` would link the distribution `elm.js ` file.
+U3SJEDR96 : yep
+U0Z9TPK7S : <@U3SJEDR96> it does not seem necessary
+U3SJEDR96 : interesting
+U41NK9BM4 : OK. This is cool.
+U0Z9TPK7S : <@U41NK9BM4> <https://github.com/xarvh/smoke/blob/single-face/Main.elm>
+U41NK9BM4 : Let’s see if I can make it work *right now* — I’m curious
+U41NK9BM4 : Yes, it works. `&lt;script src="/_compile/src/Main.elm"&gt;&lt;/script&gt;`
+U41NK9BM4 : Cannot understand why, tho.
+U41NK9BM4 : URL assets loaded from compiled Elm are resolved relative to index.html?
+U3SJEDR96 : `/_compile` is like a magic prefix for `elm-reactor`. It's a marker to "take what follows and compile that path"
+U3SJEDR96 : Relative url's are relative to the url of the page where they are shown, yes
+U41NK9BM4 : Ah great. I can simplify the workflow a bit
+U0Z9TPK7S : <@U3SJEDR96> but it means that we need a dedicated index.html for react and one for the actual production
+U3SJEDR96 : <@U0Z9TPK7S> trade-offs... url's in Elm don't work any different that any other url, so it's relative to where it's loaded, unless you use an absolute path. Using `elm-reactor` and opening `src/App.elm` means you're looking at `src`. I tend to set up an `index.html` as soon as I need any extra resources, continue with `elm-reactor` and when it's time to deploy, I use that `index.html` as a basis for making it into something deployable.  So yeah. Doesn't seem that much worse than having a `Main.elm` that you use for dev but not production :stuck_out_tongue:
+U41NK9BM4 : Indeed, it’s way better to have two dumb `index.html` files — at least with my setup
+U31A7HG1E : Does anyone have any suggestions or can point me to any articles or other resources related to implementing (or avoiding) deeply nested and hierarchical models in an Elm app?  I am setting out to implement an application that allows a user to create and modify an outline for an online course.  The model is essentially a tree with a course containing units, which contain modules which contain sections.  Sections can recursively contain other sections and can also contain essentially what are HTML pages.   I haven't written a line of code yet but can already see a problem of how to represent this model in a way that will allow me to easily modify it in response to user actions. For example, a user adding a new section would have to mutate the parent module, which mutates the parent unit, and so on back up the tree.  Any pointers or suggestions are welcome.
+U0U6ML22H : look into <http://package.elm-lang.org/packages/evancz/elm-sortable-table/1.0.1> for a way to make reusable views that are "configurable" by passing them the Msgs they'll use
+U0U6ML22H : that way, you can share most of the view code, and some of the update code, while still being able to use them from multiple contexts
+U31A7HG1E : Thanks, I just watched Richard's keynote at elm europe last night. He mentioned that repo also.  I'll take a look.
+U5FU80S06 : How do I set an html `&lt;scroll-container&gt;` in Elm, as used in the example here: <https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior> ?
+U3SJEDR96 : that's not an actual html element, but rather a custom tag as an example
+U3SJEDR96 : you can use a `div` with some CSS
+U3SJEDR96 : <https://codepen.io/anon/pen/YQddbp>
+U2GPX0EKC : if one wants to do typical "enterprise" apps (paged lists + forms) - are there any must have libs to avoid inventing wheels all the time
+U0J1M0F32 : <@U2GPX0EKC> <https://github.com/elm-community> Is a good start.
+U0J1M0F32 : I do tend to find there are always a _few_ functions I wish I had that are already implemented on `list-extra` or `maybe-extra`, but other than that, I've found a lot of my projects match the domain I'm working on and the abstractions come from that. I, personally, have yet to feel like I'm reinventing the wheel.
+U2GPX0EKC : <@U0J1M0F32> but a paged-sortable table is something id hoped to avoid waste time on my own. (How many times have we implemented that?) =D
+U0J1M0F32 : <https://github.com/evancz/elm-sortable-table> :stuck_out_tongue: true.
+U2GPX0EKC : i saw that. But it lacks paging doesnt it?
+U0J1M0F32 : :thinking_face: Yah, I'm pretty sure it doesn't have paging.
+U0U6ML22H : you could develop a front-side paging lib, but it probably already exists
+U0U6ML22H : first Google result: <https://github.com/jschomay/elm-paginate>
+U2H92KKEY : Is the a BigNumber library for elm?
+U1P6FFJ64 : <@U2H92KKEY> <http://package.elm-lang.org/packages/gilbertkennen/bigint/latest> ?
+U2H92KKEY : david_hernandez: Don't know how I missed that. Last time I checked was a week ago, and the package I saw was outdated at elm version ~ 0.14
+U2H92KKEY : Time to test :slightly_smiling_face:
+U1P6FFJ64 : Good luck! :slightly_smiling_face:
+U2GPX0EKC : <@U0U6ML22H> thanks
+U2H92KKEY : Is it possible to find out what date a package was published on elm-package?
+I know you can check the repo history, but this doesn't really tell you when it was actually pushed out to the package manager.
+
+Thanks
+
+U3SJEDR96 : Currently, no; but I believe that may be possible in the future
+U2H92KKEY : excellent
+U3SJEDR96 : bigint was published ~a month ago, iirc
+U2H92KKEY : thanks!
+U62KVQVD1 : Can somebody help with bootstrap navbar, pls?
+U62KVQVD1 : I am trying to have some Navbar.items on left and some Navbar.items on right
+U62KVQVD1 : But I am not able to achieve that. I would like to have Navbar.itemLink on right (Login in or Sign up)
+U0J1M0F32 : <@U62KVQVD1> Have you also asked in <#C3U2E3JRX|elm-bootstrap> ?
+U62KVQVD1 : Nope.
+U1CSUFXTK : i keep finding it weird that in elm the text inputs are not updated until my update is called (which is cool), yet checkboxes are checked immediately, regardless of my update (not cool) - why is this?
+U14Q8S4EM : Is that state of the check box determined by your model, or is it just that theres an event listener on the checkbox?
+U14Q8S4EM : I bet that your text input _does_ change before its updated. The update process is likely so quick it sets the text input value after its already changed.
+U14Q8S4EM : To demonstrate this, set the value to some fixed value like `"Letters are cool"`, and then try editing it.
+U14Q8S4EM : I bet you will see it change momentarily, before Elm sweeps in and sets it back to the static value.
+U14Q8S4EM : (Or if you dont notice, lag things up with thousands of these inputs).
+U1CSUFXTK : Ah I see, that's quite interesting then, I'll need to bear it in mind with design decisions in future
+U1CSUFXTK : thanks for that!
+U1QDHAF61 : came across unfamiliar syntax of function  signature:
+U1QDHAF61 : failHandler : (JwtError -&gt; msg) -&gt; String -&gt; JwtError -&gt; { model | msg : String } -&gt; ( { model | msg : String }, Cmd msg )
+U1QDHAF61 : { model | msg : String } what it means here?
+U23SA861Y : it means a record which contains the field `msg` which is of type `String`
+U23SA861Y : any record which satisfies that
+U1QDHAF61 : cool
+U1QDHAF61 : did not know that
+U1QDHAF61 : almost like type class HasMsg
+U1QDHAF61 : or more precisely like Lens
+U1QDHAF61 : <@U23SA861Y> Thanks
+U23SA861Y : eeh not lens, its just a pattern match
+U1QDHAF61 : it is polymorphic and you can get/set field
+U1QDHAF61 : so it seems liberating
+U2U94G0QG : that is a Type Variable if you want to read more about them
+U23SA861Y : its not really any different that a function like:`capital: (a, String) -&gt; (a,String)`
+
+U1QDHAF61 : but 'capital' does not have notion of String is included at 'a', I think
+U23SA861Y : sry?
+U23SA861Y : maybe you implement it like`capital (foo,str) = (foo, String.toUpper str)`
+
+U23SA861Y : or something like that
+U23SA861Y : the value is passed straight through because you know nothing about it
+U1QDHAF61 : { model | msg : String }  -&gt; { model | msg : String } allows me return updated model
+U23SA861Y : correct
+U23SA861Y : where model is a type variable stand-in for all the other fields that could potentially be in a record
+U1QDHAF61 : I see, I think I got your point about similarity with modifying tuple
+U1QDHAF61 : still record syntax seems to have an additional value
+U23SA861Y : how so, records have field names so you need to specify that
+U1QDHAF61 : I think because record is more generic then tuple, so it works with all records as long as they have the msg
+U0Z9TPK7S : <@U3SJEDR96> nope. I can use the `Main.elm` both for dev AND production. Don't need to duplicate anything.
+U23SA861Y : <@U1QDHAF61> its a pattern matching thing, you are matching the shape of the type.
+U5YDC1YUW : where we have `(model, Cmd.none)` in the update function, is it possible to spawn multiple commands/tasks in place of `Cmd.none` or is it always just 1 or nothing?
+U23SA861Y : no, there is `Cmd.batch` that allows you to collect a bunch together
+U5YDC1YUW : cool, I'll look into it :thumbsup:
+U4F64AKQV : What’s the difference between Elm Self Publish and Elm GitHub Install? When should I use which?
+U0CLDU8UB : <@U4F64AKQV> elm-github-install is newer, and works almost like elm-package install. However, if you have a package in development on your machine, using self publish will be less of a hassle. 
+U2P1ZGSM6 : hi everyone
+U2P1ZGSM6 : I am using mgold/elm-animation to animate the height of a div. I would like to be able to transition between 0 and a height that fits the content of my div (the equivalent in css of height: auto;)
+U2P1ZGSM6 : I have found a Jquery solution here that uses $(this).css("height","auto").height(); to get the correct height to transition to.
+U2P1ZGSM6 : is there a way to do that in elm?
+U5W5F6QGP : I'm unsure about the library part, but there is an old CSS trick where you have `height: auto;` and you animate `max-height` between 0 and a number higher than your content will ever be
+U5W5F6QGP : once `max-height` exceeds height: 'auto', it doesn't grow beyond that point
+U5W5F6QGP : unsure of a direct elm implementation though sorry
+U3SJEDR96 : wouldn't that make it tricky/unpredictable to get the timing right? Or is there a way around that?
+U5W5F6QGP : I found this JS fiddle: <https://jsfiddle.net/leaverou/zwvNY/>
+U5W5F6QGP : it's like... okay
+U5W5F6QGP : and you can technically do it with pure CSS :hover
+U5W5F6QGP : which is always nice
+U5W5F6QGP : (if this triggers on hover of course)
+U2P1ZGSM6 : I would like to use is on elements with a title always visible and a body that is collapsed by default and unfold when the user clicks on the title
+U5W5F6QGP : you could do it by toggling a class based on an "open" boolean and the strategy above
+when it's closed, it applies a max-height: 0 class
+
+U5W5F6QGP : there is probably a better elm way though, so I'll leave that to someone else
+U2P1ZGSM6 : I tried the max height idea, but like <@U3SJEDR96> said I can't get the timing right this way.
+U5W5F6QGP : ahh bummer
+U2P1ZGSM6 : besides it's kinda hard to find a safe max-height value considering the content could get pertty long on small screens, If I set a very high value I loose the nice effects given by the easing functions available when using `elm-animation`
+U2P1ZGSM6 : I guess I could try to compute the height of my `div` in javascript, send it trough a port and then animate, but it seems like overkill. especilally seems I plan to have several of these unfoldable elements on the same page
+U2LC0U8JY : If I want to use Elm for some parts of my app. How would I setup the build process? would i have to use webpack-elm?
+U2P1ZGSM6 : I did something like that but without any animation once. the "actualités" part  on this site: <http://http://www.murol.fr/>
+U57KYFW67 : What's webpack-elm?
+U2P1ZGSM6 : <http://www.murol.fr/>
+U2LC0U8JY : elm-webpack-loader
+U2P1ZGSM6 : it works but it's a bit jarring
+U2LC0U8JY : Integrating elm is easy, but I dont really know how to keep the whole reload-on-save and stuff
+U36A5FJ3G : Hello! I am trying to build a single page application. Due to the size we want to split up the app in different apps, on the same page. If I build several elm apps, they each include the source of elm. My question is: how can I build an elm app that only includes the compiled code of  the app itself and not include the elm runtime multiple times?
+U2LC0U8JY : alright I made it work
+U2LC0U8JY : using elm-webpack-loader works just fine
+U0U6ML22H : <@U36A5FJ3G> we have the exact same use case, and when I've asked here for help, the answer was: there's no way to do that currently. There might be a way in 0.19, but it's by no means guaranteed, and 0.19 has no planned release date anyway
+U4872964V : <@U36A5FJ3G> not sure what you want to do exactly, but you can compile multiple main modules into the same js file
+U4872964V : that way you’d only get the runtime once
+U0U6ML22H : <@U4872964V> how would you then "assign" each Elm app to various mount points?
+U4872964V : `Elm.YourModule.embed(yourElement)`
+U0U6ML22H : it's strictly equivalent? we have many "small" apps that share Data structures and global "architecture" (like, they're served by the same backend, they use the same kind of files, often they share the same ports, etc.)
+U36A5FJ3G : The apps not being in the same repository is quite critical. There are  9 teams working on the same app, and we like the “micro services” architecture.
+U36A5FJ3G : Ok, I guess I should wait for 0.19 then
+U0CLDU8UB : I don't think 0.19 is going to solve your use case either, to be honest
+U36A5FJ3G : Why do you think so?
+U0CLDU8UB : Multiple repositories sounds like multiple elm-package.json files, and thus multiple versions of the "runtime environment"
+U36A5FJ3G : Am I wrong in assuming that as long as they are the same version it shouldn’t matter?
+U0U6ML22H : as long as it "could", it needs to assume it "will"
+U4872964V : Could you have a build step where you just merge the repos
+U0CLDU8UB : <@U36A5FJ3G> you would need to have a single set of dependencies
+U36A5FJ3G : <@U4872964V> Right now there are around 48 repositories each building there own artifacts. They all run inside some runtime, which declares all the dependencies, (<@U0CLDU8UB>: So differing dependencies shouldn’t be an issue)
+U36A5FJ3G : The correct artefacts are loaded when the runtime detects a route change
+U36A5FJ3G : Currently we use angularJS, but we are investigating a way to migrate with this architecture
+U4872964V : if you are sure that they use the same exact dependencies, then you could build the js, and then just cut away the runtime
+U4872964V : but you’d need one copy of it of course
+U4872964V : it’s a very specific use case you have there
+U0CLDU8UB : yep
+U0CLDU8UB : 50 repos for a single frontend app seems... unfathomable.
+U4872964V : I would probably make a solution where things are merged at build time
+U5QJW0DDE : i asked this a few days ago in elm-discuss list, but i think it's stuck in moderation for my first post, so i'll ask here: compare these two Ellie: 1) <https://ellie-app.com/3JbGH7v2v7ra1/1> and 2) <https://ellie-app.com/3JbNQk26qNRa1/0> .. in 1) on Line 22, I'm just passing a hard set 0 to the child since the parent does not get any data from the model other than it needs; the question is how to give children data without passing whole model state or without passing more to ancestors than they need. in 2) the problem is the same, though the view is built from the "bottom up", but this still requires ancestors to know the needs of distant descendants and to have access to model data that children need. I have a large SPA that I'm experimenting with porting to Elm but this coupling between the Elm Architecture's model structure and view hierarchy is hard to work around. what would be some other examples, or perhaps in a large SPA just passing whole model state throughout all views is common?
+U36A5FJ3G : <@U0CLDU8UB> it’s a big app. But the features/repos are small so the tests run quickly. But I’ve seen this approach in multiple projects. If you want to use continous deployment, splitting the app in small, separate deployable artefacts is very convenient.
+U4872964V : <@U5QJW0DDE> well, i think this is an artificial division of “parent” and “child”. The view you call the “parent” contains the child so it has to know what data the child needs.
+U36A5FJ3G : <@U4872964V> how would you “cut away” the runtime?
+U4872964V : <@U36A5FJ3G> I’d look at the generated js, the user code is at the bottom, so I’d cut the file before the user code
+U5QJW0DDE : <@U4872964V> but in reality, the children of a view parent are not necessary made up from data that is enclosed within a parent's data -- that is, model data and view hierarchy are not the same in a large app (nor should they be -- the data model should not depend on the UI structure). this example just illustrates what is a common problem in large SPAs and I'm curious how the best practice is in Elm
+U36A5FJ3G : Smart, didn’t know this detail. I will investigate some more. Thanks for the advice
+U0CLDU8UB : No, in Elm apps the "main parent" always has the entire data for the entire application.
+U0CLDU8UB : There is no other state
+U4872964V : <@U5QJW0DDE> certainly, but you’d have to know what part of the model to pass to the different parts of the view
+U5QJW0DDE : <@U0CLDU8UB> sure, the main parent, top-most-level, but I'm referring to sending data down through a tree. this example is very simple but imagine many more layers
+U4872964V : <@U5QJW0DDE> you’d have to refactor your view functions if you change the layout of the view, but refactoring is easy in Elm
+U5QJW0DDE : put another way, suppose you have a widget whose only job is to choose between showing Screen A and Screen B. It can simply receive a Bool or flag to determine what to build next. The Screen widgets then require much more data to be built. So this simple switch widget (in this contrived example) needs to get a lot more than it needs so it can pass all the required data to Screen A, or pass a big bunch of different data to Screen B
+U4872964V : <@U5QJW0DDE> but that widget would only send a Msg
+U4872964V : or?
+U5QJW0DDE : <@U4872964V> i'm not talking about the sending of the info, i'm talking about the building of the views
+U4872964V : ok, but that widget would then get a union type parameter i suppose
+U4872964V : not a bool
+U0CLDU8UB : Can you draw an illustration of what you mean? I think I get what you're really asking, but the specifics are sort of muddling it up.
+U5QJW0DDE : <@U4872964V> but that assumes that the data that Screen A needs can all be encapsulated in a single piece of model state -- what if it is a complex view that needs access to different areas of the model? my point is that your suggestion assumes your data model perfectly lines up with your views; in reality, a data model is separate from view structure
+U4872964V : <@U5QJW0DDE> no, you can build whatever data you need for your view and pass it down
+U5QJW0DDE : <@U4872964V> that is exactly my point -- "pass it down" assumes that your parents are also getting all the data the children need, which ultimately can require most views to get whole model state in order to pass down everything
+U4872964V : well, that’s the point of Elm, a single source of state
+U4872964V : so that you know exactly what data your functions depend on
+U5QJW0DDE : <@U4872964V> it's not about single source of state, it's about how to access that single source without requiring whole model state to all views
+U4872964V : well, if you need access to the whole state, you pass the whole state, if you want to make your functions easier to understand, you separate out the parts they really need and pass only them
+U5QJW0DDE : for example, you have a widget that has the sole job of displaying a dropdown list of items. all it needs are the data for the list. that widget is many layers below an ancestor. to eventually build that list, all your parents need to contain all those list items and pass them down, or, just pass whole model state through everything. but many parents will not need to know all those list items, nor even know they will eventually need to build a dropdown many layers below. likewise, many parents will not need whole model state, but they now do so they can offer dropdown list items well below
+U5QJW0DDE : it's a fundamental problem that i and many others experienced in the UI patterns of clojurescript a few years ago; it was written about here: <https://circleci.com/blog/why-we-use-om-and-why-were-excited-for-om-next/> (skip to the part "The Conundrum Of Cursors: Most Data Is Not A Tree.")
+U5QJW0DDE : the problem was eventually solved in Re-Frame which is the most popular UI pattern in clojurescript now, but the Elm Architecture seems to have not solved this issue yet
+U4872964V : So, this is more of a consequence of having pure functions, a function cannot access anything that’s not passed to it
+U4872964V : I’m not sure how the Elm architecture plays into it
+U5QJW0DDE : <@U4872964V> perhaps; clojurescript solves it with the use of "subscriptions" to model data so widgets are self-contained and isolated modules that do not inject a data dependency into their parents
+U0CLDU8UB : I feel like not a whole lot of people who have Elm in production see this as an issue that needs to be solved.
+U5QJW0DDE : <@U0CLDU8UB> the problem is the same regardless of language: it's about the design pattern that comes about from a single source of truth (which is still highly encouraged in many language frameworks)
+U4872964V : Exactly, I just write my functions, and if I have to rearrange the views, I just refactor them
+U4872964V : I think this is less of a problem in Elm, because refactoring is so easy
+U0CLDU8UB : As an example, dependency injection is way more complicated than having more arguments to a function
+U5QJW0DDE : <@U4872964V> my dropdown list example above, how would you deal with that without either passing whole model state or passing much more than individual components need
+U5QJW0DDE : <@U0CLDU8UB> but Elm requires that parents have injected into their view function data requirements the data that children will require
+U4872964V : I don’t think in terms of components, I think in terms of functions
+U4872964V : and if a function needs to call another function with a certain parameter, then that function need that parameter too
+U5QJW0DDE : <@U4872964V> i'd still like to see an example that addresses my specific example; so far, i have not found anything for this kind of typical ui complexity
+U4872964V : So, I want to add a drop-down. Then I add it, add a parameter for the data, and refactor the functions to have that parameter
+U5QJW0DDE : <@U4872964V> well that model really breaks down on large scale apps; you end up with view components that receive a tremendous amount of data that might not be needed until much further down the tree; it tightly couples model data with view hierarchy and makes it difficult to built reusable components
+U4872964V : Yes, but I don’t build reusable components
+U153UK3FA : Dependency injection via partial function application is the way to do this if you need to do it
+U5QJW0DDE : <@U4872964V> it still leads to a more complex view structure rather than views receiving or handling simple data that they only need, and none of their distant ancestors
+U4872964V : I don’t agree that it’s more complex
+U5QJW0DDE : <@U153UK3FA> how does that solve the issue though?
+U4872964V : I think it’s more simple to know exactly what data a function uses by looking at it’s type
+U0CLDU8UB : The data model hierarchy and the view hierarchy **do not** need to match.
+U5QJW0DDE : it's possible that most Elm use-cases in production are for smaller components on existing sites, or smaller apps where this problem doesn't really matter or surface
+U4872964V : I think this is a clash between “components” and “functions” thinking
+U0CLDU8UB : I do too
+U5QJW0DDE : <@U4872964V> it's just termiology; a component in this case is just a view function
+U4872964V : No
+U153UK3FA : <@U5QJW0DDE> you apply data to functions and then past the functions down
+U4872964V : A component implies more than a function does, it’s sort of self-contained
+U5QJW0DDE : <@U0CLDU8UB> i saw a discussion on the elm mailing list where it was suggested that one alternative to passing whole model state is to have an intermediate function before the views render that converts the model data into a new data structure for the whole view hierarchy; this doesn't seem elegant either
+U4872964V : A function is a one-off, I just write them when I need them
+U5QJW0DDE : <@U4872964V> that can be fine if your functions don't have a lot of descendants
+U0CLDU8UB : So what do you think _would be_ elegant?
+U4872964V : If a function has a lot of parameters, I just use a one-off record type for it
+U5QJW0DDE : <@U0CLDU8UB> well, i only have from experience how the clojurescript community solved it, and it's very elegant there via a subscription paradigm, but this isn't possible in Elm and i'd have to think about how it could be
+U0CLDU8UB : References to pieces of state from where ever in the view tree?
+U0CLDU8UB : Does that mean what I just wrote?
+U5QJW0DDE : <@U0CLDU8UB> clojurescript solved it by having pure functions that act as queries on the whole model. then individual view functions subscribe to any queries they need. that's not in the loop of the elm architecture so i'd have to think about how that could be added
+U4872964V : If you want that kind of access, just pass the state everywhere
+U5QJW0DDE : <@U4872964V> well, that is indeed my point. then all view functions have all model state
+U0CLDU8UB : so what?
+U4872964V : yes, that would be the equivalent, and that’s fine if you want to do it that way
+U0CLDU8UB : what is the issue here?
+U57KYFW67 : You can pass as much or as little as the situation calls for.
+U57KYFW67 : And you don't have to do it in a uniform way, either
+U57KYFW67 : Some view might need the whole model. Some smaller view might just need a part of the model, and you can either pass just that... or you can pass the whole model and project out the part you need.
+U0CLDU8UB : I'd like to know what the reasoning is for saying "it is bad if many view functions get the whole model as an argument".
+U5QJW0DDE : <@U0CLDU8UB> it's about re-use; if you pass whole model state to all views, then each view function is responsible to querying out the data it needs from an app-specific model structure; that would not be re-usable in other apps since the views are not getting just what they need. it's also about organizaiton; view functions are now more complicated because they receive lots of state they don't need
+U4872964V : The point of Elm is not to make it easy to access the global state everywhere, it’s to make it hard :slightly_smiling_face:
+U5QJW0DDE : <@U4872964V> and yet ironically the consequence is that global state is just passed everywhere in a lot of use cases, therefore making it easy
+U57KYFW67 : There was a video posted just the other day for Elm Europe discussing an issue similar to this
+U57KYFW67 : Which was that you should strive to only pass functions exactly what they need (rather than the whole model)
+U5QJW0DDE : <@U57KYFW67> if you are referring to the key note from <@U0CL0AS3V> i watched that
+U4872964V : so, I’ve never reused a view function in another app, that’s what i mean is the difference in thinking in “components” vs “functions”
+U0CLDU8UB : I posted Richard's talk to kfairwink a couple of days ago, yes
+U5QJW0DDE : <@U57KYFW67> my point is that you cannot avoid passing large amounts of state to view functions if they have lots of descendants
+U57KYFW67 : Yep. It was his talk.
+U4872964V : yes, if they have lots of descendants, they are inherently complex, and so that should be reflected in their type
+U5QJW0DDE : <@U0CL0AS3V> 's talk confirmed the problem i am talking about which is that model state should line up with the view tree
+U57KYFW67 : Ultimately, you only have to pass what is required.... so if you can't avoid passing large amounts of state... then doesn't that show that your application *requires* passing a large amount of state :slightly_smiling_face:
+U0CLDU8UB : I still don't get how it is a problem to pass a lot of state to functions that need a lot of state.
+U5QJW0DDE : if you can show me how to implement my example above regarding a dropdown menu in a distant descendant without either 1) passing whole model state through all your view functions or 2) making your data model line up with your view tree, i'd be very interested. but i see no way to do this in Elm
+U57KYFW67 : If you have a dropdown menu, what data is rendered in the menu?
+U57KYFW67 : Each item and its corresponding URL?
+U5QJW0DDE : the idea is that a view function should not require any more state than is necessary for its own logic
+U4872964V : <@U5QJW0DDE> so, I add the dropdown in the place it should be. Then i add the data it needs to the function type. Then I add it to the calling functions type, then I add it above, until I get to the top.
+U3SJEDR96 : Isn't a nested view part of its logic?
+U3SJEDR96 : functions are composed, so that function is just part of another function
+U5QJW0DDE : <@U4872964V> so you are saying all its ancestors will also receive all the dropdown list items and pass it down, which is what i am saying too
+U4872964V : yes, because that’s how the view looks.
+U57KYFW67 : A dropdown seems like it would be easily modeled with an annotated tree
+U57KYFW67 : and you just need to map over that tree, turning each node into an Html div
+U5QJW0DDE : <@U4872964V> therefore, the data model is lining up with the view structure, so you pass one part of your data model to a higher-up view, and that contains all the data for the whole view tree
+U57KYFW67 : it wouldn't need to know about any business logic, really
+U4872964V : <@U5QJW0DDE> the data model for the view, certainly, but that does not need to line up with the actual data model, you can pick the parts your view needs
+U5QJW0DDE : <@U4872964V> and what if the actual data for those items is in a different part of your central data that none of the parents needed? now all your parents also need to receive that part of your data model too
+U4872964V : <@U5QJW0DDE> they only need to receive the data for the drop down
+U5QJW0DDE : <@U4872964V> in addition to the data they need for themselves
+U4872964V : I’ve build some complicated views, and it’s not really a problem, you just add parameters or record fields
+U0CLDU8UB : Remember: any function that you write in Elm can use helpers or it can contain all of the code itself. You don't need to care about that. So if you say "Sidebar.view model.sidebar", you don't need to know if `Sidebar.view` is a single function that does all of its stuff, or if it is a "parent" function that calls its "children". From the point of view of the program, these two are _exactly the same_, just the functions within are organized differently.
+U5QJW0DDE : <@U0CLDU8UB> but those helpers obviously cannot receive data as arguments that the calling view didn't' also receive to pass to the helpers, no?
+U0CLDU8UB : Of course - how could they?
+U4872964V : so, the view function is not a generic function, it’s a specific function that matches exactly how your view looks. If you change how your view looks, you change the function.
+U0CLDU8UB : You can't do```
+add a b =
+    a + b + doStuff c
+```
+(unless `c` is a constant :))
+
+U3SJEDR96 : I can see the appeal of "what if they _could_"; but yeah, that would be very un-elmish
+U5QJW0DDE : i think i understand what everyone is saying, and that's fine : the paradigm of the elm architecture is that large amounts of state gets passed through a view hierarchy. that's basically what i wanted to know, is whether there was an alternative. i'm not so much trying to criticize (though sorry if it comes across that way) as to gather what the architecture requires.
+U5QJW0DDE : it's just a consequence of the Elm way of doing things. fine, i get it.
+U3SJEDR96 : I, for one, think it's an interesting perspective!
+U4872964V : what we are saying is that it’s not a problem, as long as you think of functions as not being components, but just ways to structure your view code
+U5QJW0DDE : in very large scale apps, this was proven to be a big burden on codebases in clojurescript back in 2014 - 2015 which is why they moved away from this model of ui paradigm. lots of big great industry apps were built with this paradigm, but newer techniques have emerged that solved some of these problems.
+U4872964V : functions are super-light in Elm, not at all like components in various js frameworks
+U5QJW0DDE : <@U4872964V> this has nothing to do with the "lightness" of the underlying implementation. it's a lot about the structure of an app
+U0CLDU8UB : are you talking about atoms?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

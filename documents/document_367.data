@@ -1,3 +1,123 @@
+U5D4VHEN7 : Taking a look :eyes:
+U3LUC6SNS : :slightly_smiling_face:
+U62PV9CPN : Hi folks, I was wondering what the leading dot notation was about in rtfeldman's `elm-validate` package was?
+The example given:
 ```
-<@U0CL0AS3V> thanks man, will do! :slightly_smiling_face:
-Folks posted my first blog on Elm. This was an issue for me and my team members while understanding Elm. It's very basic stuff. <https://blog.bigbinary.com/2017/07/12/difference-between-type-and-type-alias-in-elm.html> . If anyone has any feedback then let me know. Thanks everyone and keep on Elming.
+validateModel : Model -&gt; List (Field, String)
+validateModel =
+    Validate.all
+        [ .name  &gt;&gt; ifBlank (Name, "Please enter a name.")
+        , .email &gt;&gt; ifBlank (Email, "Please enter an email address.")
+        , .age   &gt;&gt; ifNotInt (Age, "Age must be a whole number.")
+        ]
+```
+
+I feel like that means to implicitly access members of the Model record without needing specify it as an actual argument, but the type of something like `.name` is kinda funny:
+
+ `{ a | name : String } -&gt; String`
+
+U62PV9CPN : I'm trying to pass `.name` into a function of my own, and I thought it would be a `String` but I think this is saying it's a function of some kind?
+U62U9DUN6 : I'm wondering if there's a simpler way to get a random int than by using the core random module?
+U3LUC6SNS : <@U62PV9CPN> `foo.bar` and `.bar foo` are equivalent
+U5D4VHEN7 : <@U3LUC6SNS> from a bit of poking around, it looks like there are some bits missing from this application? It seems to want to call `api.js`, which I think might be `server.js`, and it looks like it also is trying to talk to a Phoenix Websocket channel. I can get you part of the way there: just running `./node_modules/.bin/webpack-dev-server` will at least get the frontend to run
+U62PV9CPN : <@U3LUC6SNS> What is a `subject` and `error` in the context of this source? Are they built into elm?
+<https://github.com/rtfeldman/elm-validate/blob/1.1.3/src/Validate.elm>
+
+U62PV9CPN : oh wait, are those args for the Validator type? (args is probably the wrong word…)
+U62PV9CPN : so they're kinda arbitrary?
+U3LUC6SNS : <@U5D4VHEN7> Thanks, I tried that and got further than before.  The first error was ```
+ERROR in ./src/index.html
+Module parse failed: /Users/carlson/Documents/dev/koko_client/src/index.html Unexpected token (1:0)
+You may need an appropriate loader to handle this file type.
+```
+which seems a bit odd.  Any idea of why that is happenning?
+
+I'm rebuilding the app and my development environment on my wife's computer from a working repo .. my computer no longer recognizes the keyboard and we are far from civilization for a week. :rage:
+
+U3LUC6SNS : Yes, the app talks to a Phoenix server using both http and websockets.
+U3LUC6SNS : Did you get the app to run?
+U3LUC6SNS : My last message from webpack was `failed to compile`
+U3LUC6SNS : Of course, "working repo" means that the app was working on the other machine and the github repo represents it except for .gitignored files :angry:
+U3LUC6SNS : <@U62PV9CPN>, not sure what you are referring to.
+U62PV9CPN : Sorry, still wrestling with the `elm-validate` package, trying to use it to validate a username's length is valid, so I'm looking at the source:
+<https://github.com/rtfeldman/elm-validate/blob/1.1.3/src/Validate.elm>
+
+And I see on line 24 the type alias for `Validator` and was trying to figure out what `error` and `subject` were, but I realized now that they are types supplied by the app, not some native elm thing.
+
+U62PV9CPN : So I'm slowly grocking the dark magicks at work here
+U62PV9CPN : On line 94 I see that `ifNotInt` is the only function which does not appear to return a call to `ifInvalid` with a bool argument, and it's the only function that takes both a `subject` and an `error` as it's args, so that means the other functions are leveraging some currying since they use the `ifInvalid` function but only provide an `error` arg?
+U153UK3FA : <@U62PV9CPN> yep, other functions are ‘partially applying' the first argument of the `ifInvalid` function
+U62PV9CPN : I *think* I'm starting to get what's going on…
+If I modify the source of the package in `elm-stuff` will it be compiled when I reload the page? Or will my changes be wiped?
+
+U153UK3FA : `subject` and `error` are type parameters, they can be any type
+U62PV9CPN : Instead of messing around in my app, maybe I can contribute something when I figure this out… would be kinda neat
+U153UK3FA : any lowercase identifier in a type signature is a ‘type parameter'
+U2D7NUGS1 : Good morning! (It's morning here :)
+U2D7NUGS1 : Any hints how to implement a custom Json Decoder?
+U2D7NUGS1 : I have a `Decode.Decoder String` and want to turn it into `Decode.Decoder MyCustomType`
+U2D7NUGS1 : Let's say I have a Json.Decode.Value that holds only a string, like `"a"` or `"b"` or `"c"`. I also have a type `MyCustomType = A | B | C`.
+U2D7NUGS1 : I know I can use a `decodeValue` to get a string and then pattern match it and return `MyCustomType`, but I want to get a decoder so I can use it in decoding larger JSON structure, say: ```{
+  name: "Bob",
+  type: "a"
+}
+```
+
+U2D7NUGS1 : So I guess I still need pattern matching, but without actual decoding.
+U2D7NUGS1 : Shall I use `Decode.map`?
+U2D7NUGS1 : Ok, got it! In case someone wonders, here is a sample code for decoding `string` into `type`: ```decodeAttribute : Decode.Value -&gt; Attribute
+decodeAttribute json =
+    let
+        stringToValueType string =
+            case string of
+                "boolean" -&gt;
+                    Boolean
+
+                "string" -&gt;
+                    String
+
+                "number" -&gt;
+                    Numerical
+
+                _ -&gt;
+                    Other
+
+        typeDecoder : Decode.Decoder ValueType
+        typeDecoder =
+            Decode.map stringToValueType Decode.string
+
+        attributeDecoder =
+            Decode.map2 Attribute
+                (<http://Decode.at|Decode.at> [ "name" ] Decode.string)
+                (<http://Decode.at|Decode.at> [ "type" ] typeDecoder)
+    in
+        case Decode.decodeValue attributeDecoder json of
+            Ok attribute -&gt;
+                attribute
+
+            Err message -&gt;
+                Debug.crash message
+```
+
+U2D7NUGS1 : Still JSON decoding feels a little bit like black magic to me.
+U153UK3FA : <@U2D7NUGS1> which part feels like magic?
+U2D7NUGS1 : It's hard to pin it down. I guess that's the thing about magic :magic_wand:
+U153UK3FA : `Decode.map2 Attribute` is often something that people mention
+U153UK3FA : `(<http://Decode.at|Decode.at> [ "name" ] Decode.string)` is pretty straight forward
+U153UK3FA : `Decode.map stringToValueType Decode.string` is just a `map` and it works like most other `map` functions. eg. `Maybe.map`, `List.map` etc.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

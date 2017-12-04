@@ -1,2 +1,93 @@
+U6G82P7V1 : <@U3SJEDR96> I think I understand what you're saying, thanks for your help :slightly_smiling_face:
+U3LUC6SNS : I need to set the url for the app's backend depending on whether the app is running locally (development) or remotely (production).  How would I do that?
+U0LPMPL2U : Have you used flags before?
+U0LPMPL2U : This article shows how to use flags and webpack to pass in environment variables: <https://robots.thoughtbot.com/configuring-an-elm-app-with-environment-variables-via-webpack>
+U3SQ42JJW : <@U3LUC6SNS> I did that via javascript by getting the current URL -&gt; this sets a flag which is loaded into my model - so I can use the backend-host on every request
+U3LUC6SNS : @marscho --- Fantastic - thanks!
+U3LUC6SNS : Have you used webpack for deployment (Heroku or elsewhere).  I just deployed the backend, so this is the next step.
+U3SQ42JJW : No my deployment is done with git. I only want to decide if i am on localhost or on the prod environment
+
 ```
-with the type
+// The host is ported to elm to set the api-endpoint on startup
+var host = window.location.hostname === 'localhost'
+    ? '<http://localhost:3000>'
+    : '<https://playground.devpunx.com>'
+```
+
+U3SQ42JJW : pretty simple. So the elm-app just checks on startup (when the browser loads the elm-app) where it is. That sets the flag which is loaded into the model on my model initialization
+U3SQ42JJW : But I think this is completely independent of which deployment process you use. The decision which endpoint the api should connect to is done during runtime of the elm app… so to say…
+U3SQ42JJW : launching with flags looks in my js file like this```
+// prepare the flags-object
+var flags = {
+    token: token,
+    settings: settings,
+    apiEndpoint: host,
+    random: random
+}
+
+// Launch Elm with flags
+var node = document.getElementById("app")
+var app  = Elm.Main.embed(node, flags)
+```
+
+U3SQ42JJW : In my elm model, the apiEndpoint is just a string with localhost or the prod-server adress. In requests I then can just use `model.apiEndpoint ++ "/getStuff"`
+U3SQ42JJW : Summing things up… you dont need to respect this in the deployment or build process. Just make your app sensitive on where it is launched…
+U3LUC6SNS : Thankyou!  One more question - how do you deploy with git?
+U3SQ42JJW : Well, that is not for real prod environments - but basically for my personal experiments.I have the code on git already. On my remote server I have a clone of that git which is configured as remote on my local git. 
+
+When I want to deploy I just push my release branch to the remote git. Then a script on the remote machine checks out the release branch and boom .. release done…
+
+U3SQ42JJW : I know that's "poor mans deployment" :wink:
+U3SQ42JJW : but works fast
+U6EV3H0N7 : could use github pages (or equivalent) I think
+U6EV3H0N7 : or something like surge.sh is quite good for just hosting static files
+U3SQ42JJW : I run my backends with node.js - frontend all Elm. I have some FreeBSD machines on digitalocean. node.js process-management is done via pm2…  But you have thousands of good alternatives :slightly_smiling_face:
+U0J1M0F32 : I've hosted several Elm projects on Surge.sh and loved it.
+U3SQ42JJW : Anyone with a good hint of making a `(List ( String, Int ))`that has exactly 2 elements into a Tuple like `(Int, Int)`where the Int's are the Int's of exact those two Int's in the List?
+U0J1M0F32 : That sounds like a tongue twister.
+U3SQ42JJW : yes, sorry…
+U0J1M0F32 : You want something with a type signature of: `getInts : List (String, Int) -&gt; (Int, Int)`?
+U3SQ42JJW : It could even be a list of three which resolves then as a tripple tuple
+U3SQ42JJW : Yes
+U3SQ42JJW : I just realized that this is impossible….
+U0J1M0F32 : :thinking_face: Yah.
+U3SQ42JJW : Because  List length is undefined the resolving type must be something like … er undefined…
+U3SQ42JJW : Ok, I will have to solve this with List.head and if statements…
+U48AEBJQ3 : Why do you have a list with a fixed length to begin with?
+U3SQ42JJW : It could even be more. But it is the Json that I get from a backend.
+U3SQ42JJW : It once was a Tuple, then encoded to a json object… send to a backend… and then received as a json object again and should now turned again into this tuple
+U3SQ42JJW : I know… something is completely strange here… :thinking_face:
+U48AEBJQ3 : Well, my first reaction would be to try to solve this problem at the JSON decoding step.
+U3SQ42JJW : I use this decoder: `JD.maybe (JD.field "range" (JD.keyValuePairs <http://JD.int|JD.int>))`
+U48AEBJQ3 : I can try writing something up, you seemed to say that the list could be longer? Do we even care about the field names?
+U3SQ42JJW : range is a json-object```
+{"start":0, "stop":5}
+```
+
+U48AEBJQ3 : ```JD.maybe (JD.field "range" (JD.map2 (,) (JD.field "start" <http://JD.int|JD.int>) (JD.field "stop" <http://JD.int|JD.int>))
+```
+
+U3SQ42JJW : daFuCK :flushed:
+U3SQ42JJW : sorry… but that's by far better. Perfect !!!
+U3SQ42JJW : Thanks :smile:
+U48AEBJQ3 : NP. Just always try to make sure that the data that your decoder produces is actual data you want in your app. Cleaning it up later just leads to problems.
+U5QE9LDU4 : is JD like an alias for JSON decoder?
+U48AEBJQ3 : `import Json.Decode as JD`
+U3SQ42JJW : yes
+U5QE9LDU4 : is there a way to expand the sidebar for the history explorer?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

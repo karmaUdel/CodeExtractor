@@ -1,1 +1,105 @@
+U3DQT3ZGC : I guess if the code above works, thats probably the way to keep track..
+U3DQT3ZGC : But feels a bit hacky
+U0K92QFST : <@U3DQT3ZGC> if each image has some sort of unique identifier, you could add it as a tag to the message that represents an image being loaded
+U0K92QFST : then in your model you can track which images have been loaded
+U3SJEDR96 : note though that `load` doesn't always trigger, afaik
+U3DQT3ZGC : <@U0K92QFST> Ah that's nice as well
+U3DQT3ZGC : <@U3SJEDR96> Ah ok, is that the same in JS or specific to Elm?
+U3DQT3ZGC : Ok it does work indeed, now I wonder how reliable it is
+U6602MZ9Q : Hi there, I was trying to define a function where you can pass in the field of the record that you want to update
+U6602MZ9Q : Firstly, is that possible?
+U6602MZ9Q : Secondly, what is this type saying:```
+alterRecord : { b | b : a } -&gt; c -&gt; d -&gt; { b | b : d }
+alterRecord record b a = {record | b = a}
 ```
+
+U6602MZ9Q : It looks like an extendable record that contains itself? It's really weird whatever it is
+U3SJEDR96 : that type is saying "I take a record (let's call it `b`) which has a field named `b` (not related to what we called the record) of type `a`, a `c` and a `d` and I'll return a new record (let's call it `b`) which will still have a field `b` but now with a value of type `d`"
+U3SJEDR96 : note also that that function wouldn't actually work, since that parameter `b` (of type `c`) isn't the name of that field, as you can't actually express that in elm
+U6602MZ9Q : Ah ok
+U6602MZ9Q : So my `b` parameter is just thrown away?
+U3SJEDR96 : yes
+U6602MZ9Q : Thanks, that's pretty interesting
+U6602MZ9Q : I was suprised that it compiled then that type popped up and I was so thinking this can't be right
+U3SJEDR96 : it's not that different to `let foo = "bar" in { record | foo = foo }` which would work on a record that has a field named "foo", returning a new record with the value `"bar"` for the field `foo`
+U6602MZ9Q : Yeah that makes a lot of sense
+U5WS7CJLV : so I'm looking around at the docs - where is the documentation for the "|" in { someRecord | property = "newValue" } ?
+U0JFXEUCT : <https://guide.elm-lang.org/core_language.html>
+U0JFXEUCT : though that's the guide, not the elm-package docs
+U5WS7CJLV : yeah, I know how to use the guy.  Just curious what the more documentation-y explanation is.
+U5WS7CJLV : he's an operator, yes?
+U663M2MB7 : it's just a syntax, right? as in haskell, where it literally means *nothing*
+U3SJEDR96 : <http://elm-lang.org/docs/records#updating-records>
+U3SJEDR96 : it's not an operator, it's part of the language syntax
+U3SJEDR96 : similar to how `[ a, b ]` isn't an operator; but rather compiler-supported syntax :slightly_smiling_face:
+U5WS7CJLV : syntax - got it.
+U5WS7CJLV : it's intuitive syntax, which kinda makes it look like an operator
+U5WS7CJLV : I think of pipes as being operator-y anyways
+U5WS7CJLV : |&gt;
+U3SJEDR96 : that actually is an operator, though :slightly_smiling_face:
+U5WS7CJLV : right
+U5WS7CJLV : an operator that looks like syntax
+U5WS7CJLV : :smile:
+U3SJEDR96 : (even though it secretly also _has_ compiler support, though that's an implementation detail and only there for performance)
+U4JT89FGB : is there an equivalent to setTimeout with 0 as the amount of time? looking to draw an opaque element to fade-in and i need the virtualdom to put it on the page before i change the opacity
+U14Q8S4EM : I believe so <@U4JT89FGB>. I mean, on the face of it it seems like you might have a better option. There are lots of animation options, like <@U0JFXEUCT> ‘s animation library.
+U14Q8S4EM : But answering your question directly, I believe there is a delay function in core, and that its based on setTimeout.
+U14Q8S4EM : Ive never used it myself, but thats what I know.
+U0FP80EKB : <@U4JT89FGB> I use this technique (my ‘Animation' module) to coordinate drawing for css-based animations <https://gist.github.com/coreyhaines/963029ef49f088e41e1b3485e1c794c3>
+U0FP80EKB : It does a "draw first" then "set the class to start the animation" then "remove animation class"
+U0FP80EKB : I also gave a talk on it at a previous elm remote meetup
+U0FP80EKB : We use this for all our css-based animations
+U2SR9DL7Q : <@U0FP80EKB> Is the talk available on Youtube or somewhere public? I would like to listen to it.
+U0FP80EKB : Yeah. I think it was #4. <@U2GPAEU1L> is managing the meetups now. I think he'd know how to find it.
+U0FP80EKB : or <@U0S6BNVNY> might know.
+U0FP80EKB : Here we go
+U0FP80EKB : <https://www.bigmarker.com/remote-meetup/Elm-Remote-Meetup-5>
+U0FP80EKB : Number 5
+U0FP80EKB : <@U2SR9DL7Q> I think I come in around 1:03:00
+U0FP80EKB : or so
+U0FP80EKB : Wow, I still have long hair there. haha
+U17P7CBFB : I have `type alias T = Set Y` and I'm trying to use `Set.empty` where it expects `T`, but it doesn't type check. Is it hidden somewhere among the other errors, or did I miss something about how types work?
+U17P7CBFB : It's claiming it needed a `T`, but got a `Set a`
+U17P7CBFB : but it's empty, so there's no `a` yet, so why doesn't it just make that `a` into a `T`?
+U48AEBJQ3 : <@U17P7CBFB> There seems to be something else going on here.
+U17P7CBFB : ok, I'll try to fix the other errors first
+U68RXKS5D : Is there a way to define a subscription port that doesn't have input. I'm thinking of it more as a "command" from the JS side. Does that make sense?
+U68RXKS5D : e.g. `app.ports.doAThing.send()`
+U0J1M0F32 : Yah, that makes sense, but I'm not sure I've ever done it. :thinking_face:
+U68RXKS5D : i ended up sending along an empty string, but that feels pretty icky
+U68RXKS5D : tried things like `port doAThing : (Nothing -&gt; msg) -&gt; Sub msg` but that's not even valid
+U23SA861Y : typically no data would be a unit type
+U23SA861Y : ```port doAThingWrap : ( () -&gt; msg) -&gt; Sub msg
+doAThing : msg -&gt; Sub msg 
+doAThing msg = doAThingWrap (\_ -&gt; msg)
+```
+
+U68RXKS5D : ah hah, i'll try!
+U68RXKS5D : that made the compiler happy! still had to do something icky to make the subscriptions compile. thoughts on this?
+```
+subscriptions model = doAThing (\() -&gt; AnMessage)
+```
+
+U23SA861Y : see wrapper above
+U68RXKS5D : ah hah, funky (and sorry i missed that reply). not sure how i feel about that. are my alarm bells valid?
+U23SA861Y : it's not that ugly
+U68RXKS5D : w/ that wrapper, i'd still access it on the JS side by the wrapped name, correct? `app.ports.doAThingWrap.send()`
+U23SA861Y : yeah
+U23SA861Y : might have to work on the names
+U68RXKS5D : cool. thanks for helping clear that up for me! helps unblock my brain :smile:
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

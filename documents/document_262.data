@@ -1,6 +1,88 @@
+U37HUSJ4R : cheers everyone :smile:
+U1EEBCQM6 : Hi guys &amp; gals
+U1EEBCQM6 : lol
+U1EEBCQM6 : So slackbot needs to get smarter
+U1EEBCQM6 : hahaha
+U1EEBCQM6 : question... Is it possible to decode a deeply nested array into a flat `List` and not a nested type?
+U0LPMPL2U : yes
+U23SA861Y : need to be a bit more specific but probably yes
+U0LPMPL2U : the shape of the JSON does not need to be replicated in your Elm types
+U1EEBCQM6 : ```json : String
+json =
+    """
+    {
+        "name": "Product",
+        "attributes": {
+            "format": {
+                "id": "format",
+                "name": "Format",
+                "options": [
+                    {
+                        "id": "a4",
+                        "name": A4"
+                    },
+                    {
+                        "id": "a3",
+                        "name": A3"
+                    }
+                ]
+            },
+            "printing": {
+                "id": "printing",
+                "name": "Printing",
+                "options": [
+                    {
+                        "id": "4/4",
+                        "name": 4/4"
+                    },
+                    {
+                        "id": "4/0",
+                        "name": 4/0"
+                    }
+                ]
+            }
+        }
+    }
+    """
 ```
-That should work. Get's a lot closer to my goal than writing out a basic update and pattern matching on a NoOp msg
-assuming you have an `init` function that returns an initial model and `Cmd.none`
-would work though.
-good catch :thumbsup:
-thanks.. i guess i should of been able to figure that out if i read the types in the documentation :slightly_smiling_face:
+A flat list of the options in this case
+
+U1EEBCQM6 : I'd like to create a type:```
+type alias Option =
+    { id : String
+    , name : String
+    , attribute : String
+    }
+
+U1EEBCQM6 : ```type alias Option =
+    { id : String
+    , name : String
+    , attribute : String
+    }
+```
+
+U23SA861Y : I think you need to bounce through a dictionary for this one and then issue the map
+U1EEBCQM6 : mmm.. I was afraid of that. So I'd have to create the nested `Dict` and from that create the `List`.
+U0LPMPL2U : what does that `attribute` string map to?
+U23SA861Y : presumably the key like `printing`
+U0LPMPL2U : ah, so there would be multiple options where the `attribute` is `printing`
+U23SA861Y : <@U1EEBCQM6>  ^
+U0LPMPL2U : If I understand correctly, you want the formatting and printing options together in a flattened list?
+U1EEBCQM6 : Yes.. correct
+U0LPMPL2U : OK, that should be possible without a `Dict`
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

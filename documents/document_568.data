@@ -1,4 +1,69 @@
+U2SR9DL7Q : Elm: 1000 runtime errors: 0
+U1AN4JRFV : <@U64FYS317> you need to pass `Debug=true` to the elm-loader options.
+U64FYS317 : <@U1AN4JRFV> tyvm
+U45C5R6QP : Is there anyway to define a type as an integer between 0-10? Ie. throw compiler error if I try to set a value of 12
+U45C5R6QP : Guess I could do something like `type BetweenOneAndTen = 0 | 1 | 2 | 3...`
+U4872964V : <@U45C5R6QP>, not in any really practical way, however you can hide your type in a module and have functions that check the values when setting it.
+U4872964V : depends on what operations you want on your integer too
+U45C5R6QP : but then that's going to be a pain down the road… No, this is a rabbit hole I'm not going to jump down into. Thanks for the feedback though :slightly_smiling_face:
+U1A0BJG7J : Is it possible to pattern match on a type variable? An alternative to the following (not working) snippet:```
+type MyType 
+    = Tag1 Int
+    | Tag2 String
+
+update : msgType -&gt; modelType -&gt; ( modelType, Cmd msgType )
+update msg model =
+    case msg of 
+        msgType (Tag1 number) -&gt;
+            ...
+            ( model, Cmd.none )
+        _ -&gt;
+            ( model, Cmd.none )
 ```
-<@U5LFUHH19>  are you using `elm-community/json-extra` ?
-Ah, no.
-ok I have that
+
+U1A0BJG7J : my use case is: I have a library that has some messages, and I would rather just tell the client code to plug the update function of my library after their update function, instead of having to manually handle the tag they use to wrap the messages of the library
+U1A0BJG7J : ```update msg model
+    |&gt; Update.Extra.andThen MyLib.update msg
+```
+
+U1A0BJG7J : what I'm trying to get away from is:```
+type Msg 
+    = Msg1
+    | LibMsg MyLib.Msg
+
+update : Msg -&gt; Model -&gt; ( Model, Cmd Msg )
+update msg model =
+    case msg of 
+        LibMsg libmsg -&gt;
+            let 
+                (model2, cmd) =
+                    MyLib.update libmsg model
+            in
+                (model2, Cmd.map LibMsg cmd)
+```
+
+U60MNG7T7 : Beginner question: Is it possible to run Elm on server-side?
+U3SQ42JJW : people say so :wink:
+U60MNG7T7 : without extra tools or packages?
+U3SQ42JJW : I have no clue how the do it. Just heard that they are experimenting with this.
+U3SQ42JJW : Would be curious about this , too
+U2U94G0QG : The most common answer I see to this is "kinda, but that's not what it's for"
+U0J1M0F32 : <@U60MNG7T7> <@U3SQ42JJW> It is possible, it requires a bit of tweaking the setup, but its very doable. <https://github.com/zwilias/sudoku-solver>
+U0J1M0F32 : <@U3SJEDR96> Could speak more about it then I can.
+U0J1M0F32 : Agreed, that its not really what Elm is made for, but for playing around its a fun exercise.
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

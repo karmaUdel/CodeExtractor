@@ -1,1 +1,109 @@
+U0JBSEGHY : Hey I remembered your question when I was watching this video. Perhaps contact this guy if you have not figured out how to use the one runtime. <https://www.youtube.com/watch?v=U_5XKPe4fZM&amp;list=PL-cYi7I913S8cGyZWdN6YVZ028iS9BfpM&amp;index=13>
+U3VCFFH1S : I went a different approach ```model = {highlight : String}
+
+highlight : String -&gt; String -&gt; String
+highlight str text = if String.contains (String.toLower str) (toLower text) then "&lt;mark&gt;" ++ text ++ "&lt;/mark&gt;" else text
+
+view model =
+    let
+        text : String -&gt; Html Msg
+        text str = if model.highlight == "" then Html.text str else toHtml [] (highlight model.highlight str)
+    in   …
 ```
+This lets me keep using `text` in my view and the highlighting automagically works. downside is the parts I want to do this to have to actually be in the view's scope.
+
+U5P4FLYLE : hi, quick question about pattern matching. I have a number of cases that have the same output expression, can I merge them ("A", "B", "C") in one branch somehow? ```case result of
+        "A" -&gt; expr1
+        "B" -&gt; expr1
+        "C" -&gt; expr1
+        _ -&gt; expr2```
+
+U3SJEDR96 : Nope, though you can resort to `if List.member result ["A", "B", "C"] then expr1 else expr2`. Certainly not always the best solution, but occasionally it makes sense.
+U5P4FLYLE : unfortunately I have `case (result, item, stack) of ` pattern to handle..
+U4872964V : you can do something like `case (List.member result ["A", "B", "C"], item, stack) of` though
+U5P4FLYLE : yes, for the example above it would do the trick, but in reality I have at least 7 groups of result to handle, and in the future some more could join the pack. <@U3SJEDR96>  <@U4872964V> thanks, anyway:-)
+U4872964V : Well, then you could have a "grouping type" that you convert to
+U4872964V : would be great for readability too
+U5P4FLYLE : ok, so how you define types that restrict "A", "B", "C" belonging to Group1, and "D" and "E" belonging to Group2?
+U4872964V : something like this:```
+type Group
+    = ABCGroup
+    | DEGroup
+
+
+getGroup : String -&gt; Group
+getGroup result =
+    case result of
+        "A" -&gt; ABCGroup
+        "B" -&gt; ABCGroup
+        "C" -&gt; ABCGroup
+        "D" -&gt; DEGroup
+        "E" -&gt; DEGroup
+```
+
+U5P4FLYLE : <@U4872964V> thanks, I go this direction definitely!
+U4SM7ECAG : <@U4872964V> it might be a stupid question but is there a better way to match the rest of the cases in that structure than `_ -&gt;` ?
+U4872964V : <@U4SM7ECAG> I'm not sure what you  mean
+U3SJEDR96 : define "better"
+U4872964V : I generally avoid using `_ -&gt;` because it can lead to me missing cases
+U4SM7ECAG : well I don't want to use `_` as much as possible
+U4SM7ECAG : but then pattern matching strings I don't know how else to deal with it.
+U4872964V : well, what would you expect? A string can be any string
+U4872964V : So you have to have a `_` case when matching string
+U4872964V : That's one reason not to use strings when you can use a union type instead
+U3SJEDR96 : context is important - sometimes you want to have a default value, sometimes you want to return an `Err "something went wrong"`, sometimes you want to `fail` a decoder or a parser, etc
+U4SM7ECAG : like here I would write : ```
+type Group
+    = ABCGroup
+    | DEGroup
+
+
+getGroup : String -&gt; Maybe Group
+getGroup result =
+    case result of
+        "A" -&gt; Just ABCGroup
+        "B" -&gt; Just ABCGroup
+        "C" -&gt; Just ABCGroup
+        "D" -&gt; Just DEGroup
+        "E" -&gt; Just DEGroup
+        _ -&gt; Nothing
+```
+
+but what if then I add a new group then this piece of code is a point where I could potentially not get some error
+
+U4SM7ECAG : yes perhaps typing `Result Group` the return instead of `Maybe Group` would be easier to track once then code grow
+U4872964V : Yes, well, you would keep the `getGroup` function close to the type. But the best solution is to not use strings at all, if possible
+U2DF486HL : Hello, I have a type alias type alias Piece = { id : Int, name : String, descrip : String}
+piece = Piece 1 "test name" "test descrip"
+
+And a list of field names for example 
+fields = ["name", "descrip"]
+
+How can I get the value of a Piece, based on the fields list?
+I mean, I would like to get ["test name", "test descrip"]
+
+U4SM7ECAG : yes I agree :slightly_smiling_face:
+U6EV3H0N7 : that wouldn't always work with the types - e.g. if the list was `["id", "name"]` you'd get a list of an Int and a String, which isn't allowed.
+you could instead have a `List (Piece -&gt; String)`, like `[.name, .descrip]`, and then do: `List.map (\fn -&gt; fn piece) [.name, .descrip]`
+
+U6EV3H0N7 : what're you wanting this for?
+U3SJEDR96 : <@U6EV3H0N7> no need to hide your response in a thread; keeping it in the channel is easier to access for onlookers :slightly_smiling_face:
+U6EV3H0N7 : sorry, never sure whether to go for threads or not!
+U2DF486HL : Ok, I understand about the List and the possible different types..But I have the list of fields (withou ".").. I have to look the issue in a different way I think
+
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision

@@ -1,0 +1,107 @@
+U2SR9DL7Q : I remember looking through the haskell version. An elm version is *way* more exciting though.
+U2U94G0QG : Yeah it's great! It's really helping me with improving my Elm chops without focusing on web apps
+U4G7CC18U : This is not so much elm itself, is just my brain struggling from hours and hours of OOP at work, and then using FP at home
+U4G7CC18U : practice, practice, practice
+U2U94G0QG : I have been doing them on <http://ellie-app.com|ellie-app.com>
+U2SR9DL7Q : it's a bit like chess. 99 problems is a bit like practicing tactics, vs evan's elm architecture tutorial which focuses on strategy.
+U2GTQM83A : Hi, does anyone know of a any chart library purely in Elm?
+U6EV3H0N7 : i’ve used elm-plot - <http://package.elm-lang.org/packages/terezka/elm-plot/5.1.0>
+U2GTQM83A : Nice! That's exactly what I was looking for. Thanks.
+U0CL0AS3V : <@U2GTQM83A> there's also an <#C2W8GFQF9|elm-plot> channel on here
+U2LAL86AY : given:```
+    |&gt; Maybe.withDefault (
+        text "&lt;!error!&gt;"
+            |&gt; Debug.log "please report bug at : .."
+    )
+```
+this will always log in the console -&gt; even if the evaluation will go trough `Just` clause..
+but if i do this: 
+```
+    |&gt; (\maybe -&gt; 
+            case maybe of 
+                Just stuff -&gt; 
+                    stuff
+                Nothing -&gt; 
+                    text "&lt;!error!&gt;"
+                        |&gt; Debug.log "please report bug at : .."
+        )
+```
+it only logs in the `Nothing` case as expected.
+So why the implementation for `Maybe.withDefault` doesn't behave like this? 
+Is there any good reason for for having all this unexpected debug.log side effects ?
+ --- Edit: i just tried this and i'm perplexed about why it does not work:
+```
+properMaybeWithDefaultImplementation : a -&gt; Maybe a -&gt; a
+properMaybeWithDefaultImplementation a =
+    (\maybe -&gt;
+        case maybe of
+            Just stuff -&gt;
+                stuff
+
+            Nothing -&gt;
+                a
+    )
+```
+It doesn't work :smile: it's not proper at all :smile: I'm so confused right now..
+-- EDIT Again: 
+```
+|&gt; (\a maybe -&gt;
+       case maybe of
+            Just stuff -&gt;
+                   stuff
+
+            Nothing -&gt;
+                   a
+      )
+      (text "&lt;!!error!!&gt;"
+                            |&gt; Debug.log "error: please report bug at.."
+      )
+```
+I think it has to do with wrapping `debug.log` in `( )` - does anyone know how to build a maybe with default function that can be used with debug.log, in  pipeline style -&gt; in such a way that will not log for no reason in the `Just` case ?
+
+U0LPMPL2U : `Maybe.withDefault` is not lazy. It evaluates the "default" expression even if it doesn't return it
+U0LPMPL2U : So `Maybe.withDefault (2 + 2) (Just 1)` is always reduced to `Maybe.withDefault 4 (Just 1)`
+U0LPMPL2U : So if your default expression has side effects, they will always be executed
+U2LAL86AY : thanks, but can we build an alternative that will be lazy?
+U2LAL86AY : a custom one
+U2LAL86AY : somehow
+U0LPMPL2U : yes it can be done
+U0LPMPL2U : I think there might already be one in a third party package. Perhaps `Maybe.Extra` ?
+U2LAL86AY : aa
+U2LAL86AY : ok
+U3SJEDR96 : Essentially it's just doing `\_ -&gt; *side effect here*`, though
+U3SJEDR96 : It's that major difference between `always Debug.crash "foo"` and `\_ -&gt; Debug.crash "foo"` :smile:
+U0LPMPL2U : You could write your own though:```
+withLazyDefault : (()-&gt; a) -&gt; Maybe a -&gt; a
+withLazyDefault lazyValue maybe =
+  case maybe of
+    Nothing -&gt; lazyValue ()
+    Just val -&gt; val
+```
+
+U3SJEDR96 : You'd still write `\_ -&gt; Debug.log ""` etc, tho
+U0LPMPL2U : You'd call it like `withLazyDefault (\_ -&gt; Debug.crash "error") (Just 3)`
+U4N4DF3GW : Hello everyone.Could anyone tell me what's the difference between Cmd and Task and why is there a need for both of these types in Elm?
+
+U3SJEDR96 : `Task`s *must* result in either an error or a value, and hence, can be safely chained and sequenced, `Cmd`s don't have that limitation per se. One allows monadic IO, the other allows stream-based IO. We could get away with only Tasks, but interop and managed effects (or, more precisely, effect managers) would be harder to develop and maintain, with interop opening up the possibility of a JS function not returning something, and your elm-program hanging indefinitely.
+U3SJEDR96 : also, this: <http://faq.elm-community.org/#what-is-the-difference-between-cmd-and-task>
+U4N4DF3GW : Thank you. I wonder why I couldn't find this in google since it's exactly what I entered when searching
+U4N4DF3GW : Looks like a good read
+U3SJEDR96 : a `Task` builds up a single computation, a `Cmd` tells the runtime to actually execute something. One could think of `Task`'s as the building blocks for commands, while keeping in mind that there are some Cmd's that cannot (easily) be built using tasks; for example interop (think `port out : val -&gt; Cmd msg`) or using `Random.generate` (which manages the random seed in an effect manager, so you can't reuse seeds etc)
+U4N4DF3GW : Can you maybe elaborate on what's a relation of Cmd and Tasks in Elm to a concept of Algebraic Effects?
+
+
+in above conversation, code/s mentioned has issue/s?
+	If Yes:
+	1.Bad	2.Very bad
+	If No:
+	1.Good	2.Very good
+
+
+How confident are you?
+	1.Low
+	2.Average
+	3.High
+
+Optional!
+can you highlight place/word/sentence which lead to your decision
